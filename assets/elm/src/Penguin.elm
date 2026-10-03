@@ -10,6 +10,9 @@ The arrow keys move the penguin relative to the maze, not the screen: Up
 always means maze north. The penguin waddles one cell at a time while an
 arrow key is held down.
 
+Sounds come from changes in the game state. This module sends the sound
+names out through a port.
+
 -}
 
 import Browser
@@ -33,6 +36,11 @@ port sendMove : String -> Cmd msg
 
 
 port copyText : String -> Cmd msg
+
+
+{-| One of "step", "win", "lose", "new\_maze" or "join".
+-}
+port playPenguinSound : String -> Cmd msg
 
 
 port joined : (Decode.Value -> msg) -> Sub msg
@@ -170,16 +178,19 @@ update msg model =
 
         GotState value ->
             case ( model.connection, Decode.decodeValue gameDecoder value ) of
-                ( Joined me _, Ok game ) ->
+                ( Joined me oldGame, Ok game ) ->
                     let
                         newModel =
                             { model | connection = Joined me game }
+
+                        sounds =
+                            Cmd.batch (List.map playPenguinSound (stateSounds me oldGame game))
                     in
                     if game.winner /= Nothing then
-                        ( stopWalking newModel, Cmd.none )
+                        ( stopWalking newModel, sounds )
 
                     else
-                        ( newModel, Cmd.none )
+                        ( newModel, sounds )
 
                 _ ->
                     ( model, Cmd.none )
@@ -243,6 +254,54 @@ update msg model =
 stopWalking : Model -> Model
 stopWalking model =
     { model | held = Nothing, walkTime = 0 }
+
+
+findPlayer : String -> List Player -> Maybe Player
+findPlayer id players =
+    List.head (List.filter (\p -> p.id == id) players)
+
+
+{-| The sounds for a change from one game state to the next.
+-}
+stateSounds : String -> Game -> Game -> List String
+stateSounds me old new =
+    let
+        newRound =
+            old.winner /= Nothing && new.winner == Nothing
+
+        myPos game =
+            Maybe.map .pos (findPlayer me game.players)
+
+        someoneJoined =
+            List.any (\p -> p.id /= me && findPlayer p.id old.players == Nothing) new.players
+    in
+    List.filterMap identity
+        [ case ( old.winner, new.winner ) of
+            ( Nothing, Just winner ) ->
+                if winner == me then
+                    Just "win"
+
+                else
+                    Just "lose"
+
+            _ ->
+                Nothing
+        , if newRound then
+            Just "new_maze"
+
+          else
+            Nothing
+        , if old.winner == Nothing && new.winner == Nothing && myPos old /= myPos new then
+            Just "step"
+
+          else
+            Nothing
+        , if someoneJoined then
+            Just "join"
+
+          else
+            Nothing
+        ]
 
 
 

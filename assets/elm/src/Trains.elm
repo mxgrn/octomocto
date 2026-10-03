@@ -32,7 +32,7 @@ import Svg.Events
 
 {-| One of "switch", "depart", "correct" or "wrong".
 -}
-port playSound : String -> Cmd msg
+port playTrainSound : String -> Cmd msg
 
 
 
@@ -257,14 +257,14 @@ update msg model =
             ( newGame model.seed, Cmd.none )
 
         Toggle cell ->
-            ( { model | switches = Dict.update cell (Maybe.map (\i -> 1 - i)) model.switches }, playSound "switch" )
+            ( { model | switches = Dict.update cell (Maybe.map (\i -> 1 - i)) model.switches }, playTrainSound "switch" )
 
         Frame delta ->
             let
                 moved =
                     model |> moveTrains delta |> sendTrain delta
             in
-            ( checkOver moved, Cmd.batch (List.map playSound (frameSounds model moved)) )
+            ( checkOver moved, Cmd.batch (List.map playTrainSound (frameSounds model moved)) )
 
 
 {-| The sounds for the trains that arrived or left in one frame.

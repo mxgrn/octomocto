@@ -24,7 +24,9 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/octomocto"
 import topbar from "../vendor/topbar"
-import {playTrainSound, unlockAudio} from "./train_sounds"
+import {unlockAudio} from "./sounds"
+import {playTrainSound} from "./train_sounds"
+import {playPenguinSound} from "./penguin_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
@@ -45,9 +47,12 @@ if (elmNode) {
 }
 
 // Start the penguin maze and connect its ports to the game channel.
-// Stop the arrow keys from scrolling the page.
+// Stop the arrow keys from scrolling the page. The player can use only the
+// keys, so a key press also unlocks the audio.
 const penguinNode = document.getElementById("penguin-main")
 if (penguinNode) {
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  document.addEventListener("keydown", unlockAudio, {once: true})
   window.addEventListener("keydown", e => {
     if (e.key.startsWith("Arrow")) e.preventDefault()
   })
@@ -67,6 +72,7 @@ if (penguinNode) {
 
   penguin.ports.sendMove.subscribe(dir => channel.push("move", {dir}))
   penguin.ports.copyText.subscribe(text => navigator.clipboard.writeText(text))
+  penguin.ports.playPenguinSound.subscribe(playPenguinSound)
 }
 
 // Start the train game. It is single player, so it needs no channel.
@@ -76,7 +82,7 @@ const trainsNode = document.getElementById("trains-main")
 if (trainsNode) {
   document.addEventListener("pointerdown", unlockAudio, {once: true})
   const trains = window.Elm.Trains.init({node: trainsNode, flags: {seed: Date.now()}})
-  trains.ports.playSound.subscribe(playTrainSound)
+  trains.ports.playTrainSound.subscribe(playTrainSound)
 }
 
 // connect if there are any LiveViews on the page
