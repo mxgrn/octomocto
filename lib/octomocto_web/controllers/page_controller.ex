@@ -8,4 +8,8 @@ defmodule OctomoctoWeb.PageController do
   def elm(conn, _params) do
     render(conn, :elm)
   end
+
+  def penguin(conn, _params) do
+    render(conn, :penguin)
+  end
 end

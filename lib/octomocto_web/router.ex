@@ -19,6 +19,7 @@ defmodule OctomoctoWeb.Router do
 
     get "/", PageController, :home
     get "/elm", PageController, :elm
+    get "/penguin", PageController, :penguin
   end
 
   # Other scopes may use custom stacks.

@@ -43,6 +43,15 @@ if (elmNode) {
   window.Elm.Main.init({node: elmNode})
 }
 
+// Start the penguin maze. Stop the arrow keys from scrolling the page.
+const penguinNode = document.getElementById("penguin-main")
+if (penguinNode) {
+  window.addEventListener("keydown", e => {
+    if (e.key.startsWith("Arrow") || e.key === " ") e.preventDefault()
+  })
+  window.Elm.Penguin.init({node: penguinNode})
+}
+
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 
