@@ -5,4 +5,12 @@ defmodule OctomoctoWeb.PageControllerTest do
     conn = get(conn, ~p"/")
     assert html_response(conn, 200) =~ "Peace of mind from prototype to production"
   end
+
+  test "GET /elm renders the Elm mount node", %{conn: conn} do
+    conn = get(conn, ~p"/elm")
+
+    document = LazyHTML.from_document(html_response(conn, 200))
+
+    assert LazyHTML.query(document, "#elm-main") |> Enum.count() == 1
+  end
 end

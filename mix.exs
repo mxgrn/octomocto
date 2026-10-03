@@ -88,11 +88,21 @@ defmodule Octomocto.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["compile", "tailwind octomocto", "esbuild octomocto"],
+      "assets.setup": [
+        "tailwind.install --if-missing",
+        "esbuild.install --if-missing",
+        "cmd --cd assets npm install"
+      ],
+      "assets.build": [
+        "compile",
+        "tailwind octomocto",
+        "esbuild octomocto",
+        "cmd --cd assets npm run elm-build"
+      ],
       "assets.deploy": [
         "tailwind octomocto --minify",
         "esbuild octomocto --minify",
+        "cmd --cd assets npm run elm-build -- --optimize",
         "phx.digest"
       ],
       precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]

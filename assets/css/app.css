@@ -5,6 +5,7 @@
 @import "phoenix-colocated/octomocto/colocated.css";
 @source "../css";
 @source "../js";
+@source "../elm/src";
 @source "../../lib/octomocto_web";
 /* Required for Tailwind to automatically pick up changes in colocated CSS files in dev */
 @source "../../_build/dev/phoenix-colocated/octomocto/*/";

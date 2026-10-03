@@ -26,7 +26,8 @@ config :octomocto, OctomoctoWeb.Endpoint,
   secret_key_base: "CAmWS3i6tsxeA8zBsIVUfMYkydCN43KiUbMRQUwEnxeYgdAYNiBO24VznLp8K+mn",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:octomocto, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:octomocto, ~w(--watch)]}
+    tailwind: {Tailwind, :install_and_run, [:octomocto, ~w(--watch)]},
+    npm: ["run", "elm-watch", cd: Path.expand("../assets", __DIR__)]
   ]
 
 # ## SSL Support

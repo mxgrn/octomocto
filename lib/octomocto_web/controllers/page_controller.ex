@@ -4,4 +4,8 @@ defmodule OctomoctoWeb.PageController do
   def home(conn, _params) do
     render(conn, :home)
   end
+
+  def elm(conn, _params) do
+    render(conn, :elm)
+  end
 end

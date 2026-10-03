@@ -18,6 +18,7 @@ defmodule OctomoctoWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/elm", PageController, :elm
   end
 
   # Other scopes may use custom stacks.
