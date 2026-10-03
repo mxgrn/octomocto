@@ -24,6 +24,11 @@ defmodule OctomoctoWeb.Router do
     get "/penguin/:id", PenguinController, :show
   end
 
+  # For deploys to check that the app is up
+  scope "/", OctomoctoWeb do
+    get "/health", HealthController, :show
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", OctomoctoWeb do
   #   pipe_through :api
