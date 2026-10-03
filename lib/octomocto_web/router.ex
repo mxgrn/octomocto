@@ -22,6 +22,7 @@ defmodule OctomoctoWeb.Router do
     get "/penguin", PenguinController, :index
     post "/penguin", PenguinController, :create
     get "/penguin/:id", PenguinController, :show
+    get "/trains", TrainsController, :index
   end
 
   # For deploys to check that the app is up

@@ -68,6 +68,12 @@ if (penguinNode) {
   penguin.ports.copyText.subscribe(text => navigator.clipboard.writeText(text))
 }
 
+// Start the train game. It is single player, so it needs no channel.
+const trainsNode = document.getElementById("trains-main")
+if (trainsNode) {
+  window.Elm.Trains.init({node: trainsNode, flags: {seed: Date.now()}})
+}
+
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 
