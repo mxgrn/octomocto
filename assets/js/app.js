@@ -24,6 +24,7 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/octomocto"
 import topbar from "../vendor/topbar"
+import {playTrainSound, unlockAudio} from "./train_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
@@ -69,9 +70,13 @@ if (penguinNode) {
 }
 
 // Start the train game. It is single player, so it needs no channel.
+// Audio can start only after a click, so the first click on the page
+// (normally on Start) unlocks it.
 const trainsNode = document.getElementById("trains-main")
 if (trainsNode) {
-  window.Elm.Trains.init({node: trainsNode, flags: {seed: Date.now()}})
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  const trains = window.Elm.Trains.init({node: trainsNode, flags: {seed: Date.now()}})
+  trains.ports.playSound.subscribe(playTrainSound)
 }
 
 // connect if there are any LiveViews on the page

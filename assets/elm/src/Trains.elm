@@ -1,4 +1,4 @@
-module Trains exposing (main)
+port module Trains exposing (main)
 
 {-| Single player "Train of Thought" style game.
 
@@ -8,6 +8,8 @@ of its color. Each game has a new random track layout.
 
 The board is a grid. The tracks make a tree: the station is the root, each
 switch has two branches and each house is at the end of a branch.
+
+The game sends the names of sounds out through a port. app.js plays them.
 
 -}
 
@@ -22,6 +24,15 @@ import Set exposing (Set)
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events
+
+
+
+-- PORTS
+
+
+{-| One of "switch", "depart", "correct" or "wrong".
+-}
+port playSound : String -> Cmd msg
 
 
 
@@ -246,10 +257,38 @@ update msg model =
             ( newGame model.seed, Cmd.none )
 
         Toggle cell ->
-            ( { model | switches = Dict.update cell (Maybe.map (\i -> 1 - i)) model.switches }, Cmd.none )
+            ( { model | switches = Dict.update cell (Maybe.map (\i -> 1 - i)) model.switches }, playSound "switch" )
 
         Frame delta ->
-            ( model |> moveTrains delta |> sendTrain delta |> checkOver, Cmd.none )
+            let
+                moved =
+                    model |> moveTrains delta |> sendTrain delta
+            in
+            ( checkOver moved, Cmd.batch (List.map playSound (frameSounds model moved)) )
+
+
+{-| The sounds for the trains that arrived or left in one frame.
+-}
+frameSounds : Model -> Model -> List String
+frameSounds before after =
+    let
+        arrivals =
+            after.arrivals
+                |> List.filter (\a -> a.age == 0)
+                |> List.map
+                    (\a ->
+                        if a.correct then
+                            "correct"
+
+                        else
+                            "wrong"
+                    )
+    in
+    if after.sent > before.sent then
+        "depart" :: arrivals
+
+    else
+        arrivals
 
 
 moveTrains : Float -> Model -> Model
