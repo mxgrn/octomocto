@@ -1,22 +1,24 @@
-module Penguin exposing (main)
+port module Penguin exposing (main)
 
-{-| Draft of a "Penguin Pursuit" style maze.
+{-| Multiplayer "Penguin Pursuit" style maze.
+
+The server owns the game: the maze, the rotation and all penguins. This
+module draws the state that comes in through ports and sends the player's
+moves out. app.js connects the ports to a Phoenix channel.
 
 The arrow keys move the penguin relative to the maze, not the screen: Up
 always means maze north. The penguin waddles one cell at a time while an
-arrow key is held down. The maze turns 90 degrees at random times, so the
-on-screen direction of each key changes with it.
+arrow key is held down.
 
 -}
 
 import Browser
 import Browser.Events
-import Html exposing (Html, button, div, h1, p, span, text)
-import Html.Attributes exposing (class, id, style)
+import Html exposing (Html, button, div, h1, input, li, p, span, text, ul)
+import Html.Attributes exposing (class, id, readonly, style, value)
 import Html.Events exposing (onClick)
-import Json.Decode as Decode
+import Json.Decode as Decode exposing (Decoder)
 import Process
-import Random
 import Set exposing (Set)
 import Svg exposing (Svg)
 import Svg.Attributes as SA
@@ -24,12 +26,26 @@ import Task
 
 
 
+-- PORTS
+
+
+port sendMove : String -> Cmd msg
+
+
+port copyText : String -> Cmd msg
+
+
+port joined : (Decode.Value -> msg) -> Sub msg
+
+
+port gameState : (Decode.Value -> msg) -> Sub msg
+
+
+port joinFailed : (String -> msg) -> Sub msg
+
+
+
 -- CONSTANTS
-
-
-mazeSize : Int
-mazeSize =
-    9
 
 
 cellSize : Int
@@ -72,34 +88,56 @@ type Dir
     | West
 
 
-type alias Model =
-    { passages : Set Passage
-    , penguin : Cell
-    , fish : Cell
+type alias Player =
+    { id : String
+    , color : String
+    , colorName : String
+    , pos : Cell
     , facing : Dir
-    , held : Maybe Dir
-    , sinceStep : Float
-    , walkTime : Float
-    , quarterTurns : Int
-    , caught : Int
-    , won : Bool
+    , score : Int
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( { passages = Set.empty
-      , penguin = ( 0, 0 )
-      , fish = ( mazeSize - 1, mazeSize - 1 )
-      , facing = South
+type alias Game =
+    { size : Int
+    , passages : Set Passage
+    , fish : Cell
+    , quarterTurns : Int
+    , winner : Maybe String
+    , players : List Player
+    }
+
+
+type Connection
+    = Connecting
+    | Joined String Game
+    | Failed String
+
+
+type alias Model =
+    { gameUrl : String
+    , connection : Connection
+    , held : Maybe Dir
+    , sinceStep : Float
+    , walkTime : Float
+    , copied : Bool
+    }
+
+
+type alias Flags =
+    { gameUrl : String }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    ( { gameUrl = flags.gameUrl
+      , connection = Connecting
       , held = Nothing
       , sinceStep = 0
       , walkTime = 0
-      , quarterTurns = 0
-      , caught = 0
-      , won = False
+      , copied = False
       }
-    , Cmd.batch [ newMaze, scheduleRotation ]
+    , Cmd.none
     )
 
 
@@ -108,35 +146,58 @@ init _ =
 
 
 type Msg
-    = GotSeed Random.Seed
+    = GotJoined Decode.Value
+    | GotState Decode.Value
+    | GotJoinFailed String
     | KeyDown Dir
     | KeyUp Dir
     | ReleaseKeys
     | Frame Float
-    | NextMaze
-    | RotationScheduled ( Int, Int )
-    | Rotate Int
+    | CopyLink
+    | CopiedTimeout
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GotSeed seed ->
-            ( { model
-                | passages = generateMaze seed
-                , penguin = ( 0, 0 )
-                , facing = South
-                , won = False
-              }
-            , Cmd.none
-            )
+        GotJoined value ->
+            case Decode.decodeValue joinedDecoder value of
+                Ok ( me, game ) ->
+                    ( { model | connection = Joined me game }, Cmd.none )
+
+                Err err ->
+                    ( { model | connection = Failed (Decode.errorToString err) }, Cmd.none )
+
+        GotState value ->
+            case ( model.connection, Decode.decodeValue gameDecoder value ) of
+                ( Joined me _, Ok game ) ->
+                    let
+                        newModel =
+                            { model | connection = Joined me game }
+                    in
+                    if game.winner /= Nothing then
+                        ( stopWalking newModel, Cmd.none )
+
+                    else
+                        ( newModel, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        GotJoinFailed reason ->
+            ( { model | connection = Failed reason }, Cmd.none )
 
         KeyDown dir ->
-            if model.won then
-                ( model, Cmd.none )
+            case model.connection of
+                Joined _ game ->
+                    if game.winner == Nothing then
+                        ( { model | held = Just dir, sinceStep = 0 }, sendMove (dirToString dir) )
 
-            else
-                ( walk dir { model | held = Just dir, sinceStep = 0 }, Cmd.none )
+                    else
+                        ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         KeyUp dir ->
             if model.held == Just dir then
@@ -159,7 +220,7 @@ update msg model =
                             { model | walkTime = model.walkTime + delta }
                     in
                     if elapsed >= walkStepMs then
-                        ( walk dir { walking | sinceStep = elapsed - walkStepMs }, Cmd.none )
+                        ( { walking | sinceStep = elapsed - walkStepMs }, sendMove (dirToString dir) )
 
                     else
                         ( { walking | sinceStep = elapsed }, Cmd.none )
@@ -167,37 +228,16 @@ update msg model =
                 Nothing ->
                     ( model, Cmd.none )
 
-        NextMaze ->
-            if model.won then
-                ( model, newMaze )
+        CopyLink ->
+            ( { model | copied = True }
+            , Cmd.batch
+                [ copyText model.gameUrl
+                , Process.sleep 1500 |> Task.perform (\_ -> CopiedTimeout)
+                ]
+            )
 
-            else
-                ( model, Cmd.none )
-
-        RotationScheduled ( delayMs, turn ) ->
-            ( model, Process.sleep (toFloat delayMs) |> Task.perform (\_ -> Rotate turn) )
-
-        Rotate turn ->
-            ( { model | quarterTurns = model.quarterTurns + turn }, scheduleRotation )
-
-
-{-| Move one cell, if there is no wall. Stop at the fish.
--}
-walk : Dir -> Model -> Model
-walk dir model =
-    if canMove model.passages model.penguin dir then
-        let
-            next =
-                step dir model.penguin
-        in
-        if next == model.fish then
-            stopWalking { model | penguin = next, facing = dir, won = True, caught = model.caught + 1 }
-
-        else
-            { model | penguin = next, facing = dir }
-
-    else
-        { model | facing = dir }
+        CopiedTimeout ->
+            ( { model | copied = False }, Cmd.none )
 
 
 stopWalking : Model -> Model
@@ -205,64 +245,8 @@ stopWalking model =
     { model | held = Nothing, walkTime = 0 }
 
 
-newMaze : Cmd Msg
-newMaze =
-    Random.generate GotSeed Random.independentSeed
-
-
-{-| Wait 3-7 seconds, then turn the maze 90 degrees clockwise or
-counterclockwise.
--}
-scheduleRotation : Cmd Msg
-scheduleRotation =
-    Random.generate RotationScheduled
-        (Random.pair (Random.int 3000 7000) (Random.uniform 1 [ -1 ]))
-
-
 
 -- MAZE
-
-
-{-| Make a perfect maze with an iterative depth-first search
-("recursive backtracker").
--}
-generateMaze : Random.Seed -> Set Passage
-generateMaze seed =
-    carve [ ( 0, 0 ) ] (Set.singleton ( 0, 0 )) Set.empty seed
-
-
-carve : List Cell -> Set Cell -> Set Passage -> Random.Seed -> Set Passage
-carve stack visited passages seed =
-    case stack of
-        [] ->
-            passages
-
-        current :: rest ->
-            case List.filter (\c -> not (Set.member c visited)) (neighbors current) of
-                [] ->
-                    carve rest visited passages seed
-
-                first :: others ->
-                    let
-                        ( next, nextSeed ) =
-                            Random.step (Random.uniform first others) seed
-                    in
-                    carve (next :: stack)
-                        (Set.insert next visited)
-                        (Set.insert (passage current next) passages)
-                        nextSeed
-
-
-neighbors : Cell -> List Cell
-neighbors cell =
-    [ North, East, South, West ]
-        |> List.map (\dir -> step dir cell)
-        |> List.filter inBounds
-
-
-inBounds : Cell -> Bool
-inBounds ( x, y ) =
-    x >= 0 && y >= 0 && x < mazeSize && y < mazeSize
 
 
 passage : Cell -> Cell -> Passage
@@ -311,6 +295,97 @@ dirAngle dir =
             270
 
 
+dirToString : Dir -> String
+dirToString dir =
+    case dir of
+        North ->
+            "north"
+
+        East ->
+            "east"
+
+        South ->
+            "south"
+
+        West ->
+            "west"
+
+
+
+-- DECODERS
+
+
+joinedDecoder : Decoder ( String, Game )
+joinedDecoder =
+    Decode.map2 Tuple.pair
+        (Decode.field "player_id" Decode.string)
+        (Decode.field "state" gameDecoder)
+
+
+gameDecoder : Decoder Game
+gameDecoder =
+    Decode.map6 Game
+        (Decode.field "size" Decode.int)
+        (Decode.field "passages" (Decode.list passageDecoder) |> Decode.map Set.fromList)
+        (Decode.field "fish" cellDecoder)
+        (Decode.field "quarter_turns" Decode.int)
+        (Decode.field "winner" (Decode.nullable Decode.string))
+        (Decode.field "players" (Decode.list playerDecoder))
+
+
+passageDecoder : Decoder Passage
+passageDecoder =
+    Decode.list Decode.int
+        |> Decode.andThen
+            (\coords ->
+                case coords of
+                    [ x1, y1, x2, y2 ] ->
+                        Decode.succeed (passage ( x1, y1 ) ( x2, y2 ))
+
+                    _ ->
+                        Decode.fail "a passage must have 4 numbers"
+            )
+
+
+cellDecoder : Decoder Cell
+cellDecoder =
+    Decode.map2 Tuple.pair (Decode.index 0 Decode.int) (Decode.index 1 Decode.int)
+
+
+playerDecoder : Decoder Player
+playerDecoder =
+    Decode.map6 Player
+        (Decode.field "id" Decode.string)
+        (Decode.field "color" Decode.string)
+        (Decode.field "color_name" Decode.string)
+        (Decode.map2 Tuple.pair (Decode.field "x" Decode.int) (Decode.field "y" Decode.int))
+        (Decode.field "facing" dirDecoder)
+        (Decode.field "score" Decode.int)
+
+
+dirDecoder : Decoder Dir
+dirDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\s ->
+                case s of
+                    "north" ->
+                        Decode.succeed North
+
+                    "east" ->
+                        Decode.succeed East
+
+                    "south" ->
+                        Decode.succeed South
+
+                    "west" ->
+                        Decode.succeed West
+
+                    _ ->
+                        Decode.fail ("unknown direction " ++ s)
+            )
+
+
 
 -- SUBSCRIPTIONS
 
@@ -318,7 +393,10 @@ dirAngle dir =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Browser.Events.onKeyDown keyDownDecoder
+        [ joined GotJoined
+        , gameState GotState
+        , joinFailed GotJoinFailed
+        , Browser.Events.onKeyDown keyDownDecoder
         , Browser.Events.onKeyUp (Decode.field "key" Decode.string |> Decode.andThen (arrowDecoder KeyUp))
         , Browser.Events.onVisibilityChange (\_ -> ReleaseKeys)
         , if model.held == Nothing then
@@ -331,7 +409,7 @@ subscriptions model =
 
 {-| Ignore key repeats: the frame loop moves the penguin while the key is down.
 -}
-keyDownDecoder : Decode.Decoder Msg
+keyDownDecoder : Decoder Msg
 keyDownDecoder =
     Decode.map2 Tuple.pair (Decode.field "key" Decode.string) (Decode.field "repeat" Decode.bool)
         |> Decode.andThen
@@ -339,15 +417,12 @@ keyDownDecoder =
                 if repeat then
                     Decode.fail "repeat"
 
-                else if key == " " || key == "Enter" then
-                    Decode.succeed NextMaze
-
                 else
                     arrowDecoder KeyDown key
             )
 
 
-arrowDecoder : (Dir -> Msg) -> String -> Decode.Decoder Msg
+arrowDecoder : (Dir -> Msg) -> String -> Decoder Msg
 arrowDecoder toMsg key =
     case key of
         "ArrowUp" ->
@@ -372,61 +447,136 @@ arrowDecoder toMsg key =
 
 view : Model -> Html Msg
 view model =
+    case model.connection of
+        Connecting ->
+            p [ id "penguin-connecting", class "py-24 text-center opacity-60" ] [ text "Joining the game…" ]
+
+        Failed reason ->
+            p [ id "penguin-failed", class "py-24 text-center text-red-600" ] [ text ("Could not join the game: " ++ reason) ]
+
+        Joined me game ->
+            viewGame model me game
+
+
+viewGame : Model -> String -> Game -> Html Msg
+viewGame model me game =
     div [ id "penguin-root", class "flex flex-col items-center gap-6 select-none" ]
-        [ div [ class "flex w-full max-w-md items-end justify-between" ]
+        [ div [ class "flex w-full max-w-md flex-col gap-3" ]
             [ div []
                 [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Penguin Pursuit" ]
                 , p [ class "text-sm opacity-60" ] [ text "Arrow keys move along the maze. Up is always the maze's N." ]
                 ]
-            , div [ class "text-right" ]
-                [ p [ class "text-xs uppercase tracking-wider opacity-60" ] [ text "Fish" ]
-                , p [ id "penguin-caught", class "text-2xl font-semibold tabular-nums" ] [ text (String.fromInt model.caught) ]
-                ]
+            , viewShareLink model
+            , viewScores me game.players
             ]
         , div [ class "relative" ]
             [ div
                 [ id "penguin-board"
-                , style "transform" ("rotate(" ++ String.fromInt (model.quarterTurns * 90) ++ "deg)")
+                , style "transform" ("rotate(" ++ String.fromInt (game.quarterTurns * 90) ++ "deg)")
                 , style "transition" "transform 600ms cubic-bezier(0.65, 0, 0.35, 1)"
                 ]
-                [ viewMaze model ]
-            , if model.won then
-                viewWon
+                [ viewMaze model me game ]
+            , case game.winner of
+                Just winnerId ->
+                    viewWinner me winnerId game.players
 
-              else
-                text ""
+                Nothing ->
+                    text ""
             ]
         ]
 
 
-viewWon : Html Msg
-viewWon =
-    div
-        [ id "penguin-won"
-        , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-sky-950/60 text-white backdrop-blur-sm"
-        ]
-        [ p [ class "text-2xl font-semibold" ] [ text "Fish caught!" ]
+viewShareLink : Model -> Html Msg
+viewShareLink model =
+    div [ class "flex items-center gap-2 rounded-full bg-sky-50 p-1 pl-4 text-sm ring-1 ring-sky-200" ]
+        [ input
+            [ id "penguin-link"
+            , readonly True
+            , value model.gameUrl
+            , class "min-w-0 flex-1 truncate bg-transparent text-sky-900 outline-none"
+            ]
+            []
         , button
-            [ id "penguin-next"
-            , class "rounded-full bg-white px-5 py-2 text-sm font-medium text-sky-900 shadow transition hover:scale-105 hover:shadow-lg"
-            , onClick NextMaze
+            [ id "penguin-copy-link"
+            , class "rounded-full bg-sky-600 px-4 py-1.5 font-medium text-white transition hover:bg-sky-500 active:scale-95"
+            , onClick CopyLink
             ]
-            [ text "Next maze" ]
-        , span [ class "text-xs opacity-70" ] [ text "or press Space" ]
+            [ text
+                (if model.copied then
+                    "Copied!"
+
+                 else
+                    "Copy link"
+                )
+            ]
         ]
 
 
-viewMaze : Model -> Html Msg
-viewMaze model =
+viewScores : String -> List Player -> Html Msg
+viewScores me players =
+    ul [ id "penguin-scores", class "flex flex-wrap gap-2" ]
+        (List.map
+            (\player ->
+                li
+                    [ id ("penguin-score-" ++ player.id)
+                    , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm shadow-sm ring-1 ring-slate-200"
+                    ]
+                    [ span [ class "size-3 rounded-full", style "background" player.color ] []
+                    , span []
+                        [ text
+                            (if player.id == me then
+                                player.colorName ++ " (you)"
+
+                             else
+                                player.colorName
+                            )
+                        ]
+                    , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
+                    ]
+            )
+            players
+        )
+
+
+viewWinner : String -> String -> List Player -> Html Msg
+viewWinner me winnerId players =
+    let
+        message =
+            if winnerId == me then
+                "You got the fish!"
+
+            else
+                case List.filter (\p -> p.id == winnerId) players of
+                    winner :: _ ->
+                        "The " ++ winner.colorName ++ " penguin got the fish!"
+
+                    [] ->
+                        "Somebody got the fish!"
+    in
+    div
+        [ id "penguin-winner"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-sky-950/60 text-white backdrop-blur-sm"
+        ]
+        [ p [ class "text-2xl font-semibold" ] [ text message ]
+        , span [ class "text-sm opacity-70" ] [ text "A new maze starts soon…" ]
+        ]
+
+
+viewMaze : Model -> String -> Game -> Html Msg
+viewMaze model me game =
     let
         side =
-            mazeSize * cellSize
+            game.size * cellSize
 
         full =
             side + 2 * margin
 
         cells =
-            List.concatMap (\y -> List.map (\x -> ( x, y )) (List.range 0 (mazeSize - 1))) (List.range 0 (mazeSize - 1))
+            List.concatMap (\y -> List.map (\x -> ( x, y )) (List.range 0 (game.size - 1))) (List.range 0 (game.size - 1))
+
+        -- Draw the player's own penguin last, so it is on top.
+        ( mine, others ) =
+            List.partition (\p -> p.id == me) game.players
     in
     Svg.svg
         [ SA.viewBox (String.join " " (List.map String.fromInt [ -margin, -margin, full, full ]))
@@ -434,7 +584,7 @@ viewMaze model =
         , SA.height (String.fromInt full)
         , SA.class "max-w-full h-auto"
         ]
-        [ Svg.rect
+        ([ Svg.rect
             [ SA.x "0"
             , SA.y "0"
             , SA.width (String.fromInt side)
@@ -443,34 +593,47 @@ viewMaze model =
             , SA.fill "#e0f2fe"
             ]
             []
-        , viewNorthMarker side
-        , Svg.g [ SA.stroke "#0c4a6e", SA.strokeWidth "4", SA.strokeLinecap "round" ]
-            (List.concatMap (viewWalls model.passages) cells)
-        , Svg.g [ SA.transform (translateCell model.fish) ] [ viewFish ]
-        , Svg.g
-            [ SA.style
-                ("transform: translate("
-                    ++ String.fromInt (cellCenter (Tuple.first model.penguin))
-                    ++ "px, "
-                    ++ String.fromInt (cellCenter (Tuple.second model.penguin))
-                    ++ "px); transition: transform "
-                    ++ String.fromFloat walkStepMs
-                    ++ "ms linear"
-                )
-            ]
-            [ Svg.g [ SA.transform ("rotate(" ++ String.fromInt (dirAngle model.facing) ++ ")") ]
-                [ Svg.g [ SA.transform ("rotate(" ++ String.fromFloat (waddleAngle model) ++ ")") ] [ viewPenguin ] ]
-            ]
+         , viewNorthMarker side
+         , Svg.g [ SA.stroke "#0c4a6e", SA.strokeWidth "4", SA.strokeLinecap "round" ]
+            (List.concatMap (viewWalls game.passages) cells)
+         , Svg.g [ SA.transform (translateCell game.fish) ] [ viewFish ]
+         ]
+            ++ List.map (viewPlayer 0 False) others
+            ++ List.map (\p -> viewPlayer (waddleAngle model game p) True p) mine
+        )
+
+
+viewPlayer : Float -> Bool -> Player -> Svg msg
+viewPlayer angle isMe player =
+    Svg.g
+        [ SA.id ("penguin-" ++ player.id)
+        , SA.style
+            ("transform: translate("
+                ++ String.fromInt (cellCenter (Tuple.first player.pos))
+                ++ "px, "
+                ++ String.fromInt (cellCenter (Tuple.second player.pos))
+                ++ "px); transition: transform "
+                ++ String.fromFloat walkStepMs
+                ++ "ms linear"
+            )
+        ]
+        [ if isMe then
+            Svg.circle [ SA.r "19", SA.fill "none", SA.stroke player.color, SA.strokeWidth "2", SA.strokeDasharray "4 3" ] []
+
+          else
+            Svg.text ""
+        , Svg.g [ SA.transform ("rotate(" ++ String.fromInt (dirAngle player.facing) ++ ")") ]
+            [ Svg.g [ SA.transform ("rotate(" ++ String.fromFloat angle ++ ")") ] [ viewPenguin player.color ] ]
         ]
 
 
 {-| Rock from side to side, one side for each step. Stand still at a wall.
 -}
-waddleAngle : Model -> Float
-waddleAngle model =
+waddleAngle : Model -> Game -> Player -> Float
+waddleAngle model game player =
     case model.held of
         Just dir ->
-            if canMove model.passages model.penguin dir || model.sinceStep < walkStepMs / 2 then
+            if canMove game.passages player.pos dir || model.sinceStep < walkStepMs / 2 then
                 12 * sin (model.walkTime / walkStepMs * pi)
 
             else
@@ -542,12 +705,12 @@ translateCell ( x, y ) =
 
 {-| Top-down penguin, beak to the north. Centered on 0,0.
 -}
-viewPenguin : Svg msg
-viewPenguin =
+viewPenguin : String -> Svg msg
+viewPenguin color =
     Svg.g []
-        [ Svg.ellipse [ SA.cx "-11", SA.cy "3", SA.rx "4", SA.ry "8", SA.fill "#1e293b", SA.transform "rotate(-20 -11 3)" ] []
-        , Svg.ellipse [ SA.cx "11", SA.cy "3", SA.rx "4", SA.ry "8", SA.fill "#1e293b", SA.transform "rotate(20 11 3)" ] []
-        , Svg.ellipse [ SA.cx "0", SA.cy "3", SA.rx "11", SA.ry "13", SA.fill "#1e293b" ] []
+        [ Svg.ellipse [ SA.cx "-11", SA.cy "3", SA.rx "4", SA.ry "8", SA.fill color, SA.transform "rotate(-20 -11 3)" ] []
+        , Svg.ellipse [ SA.cx "11", SA.cy "3", SA.rx "4", SA.ry "8", SA.fill color, SA.transform "rotate(20 11 3)" ] []
+        , Svg.ellipse [ SA.cx "0", SA.cy "3", SA.rx "11", SA.ry "13", SA.fill color ] []
         , Svg.ellipse [ SA.cx "0", SA.cy "5", SA.rx "6", SA.ry "8", SA.fill "#f8fafc" ] []
         , Svg.circle [ SA.cx "0", SA.cy "-9", SA.r "7", SA.fill "#0f172a" ] []
         , Svg.circle [ SA.cx "-3", SA.cy "-11", SA.r "1.5", SA.fill "#f8fafc" ] []
@@ -569,7 +732,7 @@ viewFish =
 -- MAIN
 
 
-main : Program () Model Msg
+main : Program Flags Model Msg
 main =
     Browser.element
         { init = init

@@ -12,6 +12,8 @@ defmodule Octomocto.Application do
       Octomocto.Repo,
       {DNSCluster, query: Application.get_env(:octomocto, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Octomocto.PubSub},
+      {Registry, keys: :unique, name: Octomocto.Penguin.Registry},
+      {DynamicSupervisor, name: Octomocto.Penguin.GameSupervisor},
       # Start a worker by calling: Octomocto.Worker.start_link(arg)
       # {Octomocto.Worker, arg},
       # Start to serve requests, typically the last entry

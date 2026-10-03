@@ -13,12 +13,4 @@ defmodule OctomoctoWeb.PageControllerTest do
 
     assert LazyHTML.query(document, "#elm-main") |> Enum.count() == 1
   end
-
-  test "GET /penguin renders the penguin maze mount node", %{conn: conn} do
-    conn = get(conn, ~p"/penguin")
-
-    document = LazyHTML.from_document(html_response(conn, 200))
-
-    assert LazyHTML.query(document, "#penguin-main") |> Enum.count() == 1
-  end
 end

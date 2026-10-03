@@ -43,13 +43,29 @@ if (elmNode) {
   window.Elm.Main.init({node: elmNode})
 }
 
-// Start the penguin maze. Stop the arrow keys from scrolling the page.
+// Start the penguin maze and connect its ports to the game channel.
+// Stop the arrow keys from scrolling the page.
 const penguinNode = document.getElementById("penguin-main")
 if (penguinNode) {
   window.addEventListener("keydown", e => {
-    if (e.key.startsWith("Arrow") || e.key === " ") e.preventDefault()
+    if (e.key.startsWith("Arrow")) e.preventDefault()
   })
-  window.Elm.Penguin.init({node: penguinNode})
+
+  const penguin = window.Elm.Penguin.init({node: penguinNode, flags: {gameUrl: window.location.href}})
+  const socket = new Socket("/socket")
+  socket.connect()
+
+  const channel = socket.channel(`penguin:${penguinNode.dataset.gameId}`)
+  channel.on("state", state => penguin.ports.gameState.send(state))
+  channel.join()
+    .receive("ok", reply => penguin.ports.joined.send(reply))
+    .receive("error", ({reason}) => {
+      channel.leave()
+      penguin.ports.joinFailed.send(reason)
+    })
+
+  penguin.ports.sendMove.subscribe(dir => channel.push("move", {dir}))
+  penguin.ports.copyText.subscribe(text => navigator.clipboard.writeText(text))
 }
 
 // connect if there are any LiveViews on the page

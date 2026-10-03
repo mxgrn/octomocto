@@ -1,0 +1,22 @@
+<Layouts.app flash={@flash}>
+  <div class="mx-auto flex max-w-md flex-col items-center gap-6 py-16 text-center">
+    <div class="flex size-20 items-center justify-center rounded-3xl bg-sky-100 text-5xl shadow-inner">
+      🐧
+    </div>
+    <div class="space-y-2">
+      <h1 class="text-3xl font-semibold tracking-tight">Penguin Pursuit</h1>
+      <p class="text-base-content/70">
+        Race your friends to the fish. The maze turns while you play, and Up is always the maze's north.
+      </p>
+    </div>
+    <.link
+      id="new-game"
+      href={~p"/penguin"}
+      method="post"
+      class="rounded-full bg-sky-600 px-6 py-3 font-medium text-white shadow-lg shadow-sky-600/25 transition hover:-translate-y-0.5 hover:bg-sky-500 hover:shadow-xl active:translate-y-0"
+    >
+      New game
+    </.link>
+    <p class="text-sm text-base-content/50">You get a link to share with other players.</p>
+  </div>
+</Layouts.app>

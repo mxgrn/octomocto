@@ -19,7 +19,9 @@ defmodule OctomoctoWeb.Router do
 
     get "/", PageController, :home
     get "/elm", PageController, :elm
-    get "/penguin", PageController, :penguin
+    get "/penguin", PenguinController, :index
+    post "/penguin", PenguinController, :create
+    get "/penguin/:id", PenguinController, :show
   end
 
   # Other scopes may use custom stacks.
