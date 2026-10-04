@@ -15,6 +15,8 @@ defmodule Octomocto.Application do
       {Phoenix.PubSub, name: Octomocto.PubSub},
       {Registry, keys: :unique, name: Octomocto.Penguin.Registry},
       {DynamicSupervisor, name: Octomocto.Penguin.GameSupervisor},
+      {Registry, keys: :unique, name: Octomocto.Schulte.Registry},
+      {DynamicSupervisor, name: Octomocto.Schulte.GameSupervisor},
       # Start a worker by calling: Octomocto.Worker.start_link(arg)
       # {Octomocto.Worker, arg},
       # Start to serve requests, typically the last entry

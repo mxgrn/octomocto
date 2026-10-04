@@ -85,6 +85,27 @@ if (trainsNode) {
   trains.ports.playTrainSound.subscribe(playTrainSound)
 }
 
+// Start the Schulte race and connect its ports to the game channel
+const schulteNode = document.getElementById("schulte-main")
+if (schulteNode) {
+  const schulte = window.Elm.Schulte.init({node: schulteNode, flags: {gameUrl: window.location.href}})
+  const socket = new Socket("/socket")
+  socket.connect()
+
+  const channel = socket.channel(`schulte:${schulteNode.dataset.gameId}`)
+  channel.on("state", state => schulte.ports.schulteState.send(state))
+  channel.join()
+    .receive("ok", reply => schulte.ports.schulteJoined.send(reply))
+    .receive("error", ({reason}) => {
+      channel.leave()
+      schulte.ports.schulteJoinFailed.send(reason)
+    })
+
+  schulte.ports.schultePick.subscribe(number => channel.push("pick", {number}))
+  schulte.ports.schulteRestart.subscribe(() => channel.push("restart", {}))
+  schulte.ports.schulteCopyText.subscribe(text => navigator.clipboard.writeText(text))
+}
+
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 

@@ -104,3 +104,18 @@
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
 /* This file is for your main application CSS */
+
+/* Schulte Race. The board is an SVG, so the shake distance is in board units. */
+.schulte-cell { cursor: pointer; }
+.schulte-cell path { transition: fill 200ms, filter 150ms; }
+.schulte-cell:hover path { filter: brightness(0.94); }
+.schulte-cell.schulte-found { cursor: default; }
+.schulte-cell.schulte-found:hover path { filter: none; }
+
+@keyframes schulte-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+.schulte-shake { animation: schulte-shake 300ms ease-in-out; }

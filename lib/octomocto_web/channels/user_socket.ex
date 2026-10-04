@@ -2,6 +2,7 @@ defmodule OctomoctoWeb.UserSocket do
   use Phoenix.Socket
 
   channel "penguin:*", OctomoctoWeb.PenguinChannel
+  channel "schulte:*", OctomoctoWeb.SchulteChannel
 
   @impl true
   def connect(_params, socket, _connect_info), do: {:ok, socket}

@@ -1,0 +1,22 @@
+<Layouts.app flash={@flash}>
+  <div class="mx-auto flex max-w-md flex-col items-center gap-6 py-16 text-center">
+    <div class="flex size-20 items-center justify-center rounded-3xl bg-emerald-100 text-3xl font-bold text-emerald-700 shadow-inner tabular-nums">
+      1·2·3
+    </div>
+    <div class="space-y-2">
+      <h1 class="text-3xl font-semibold tracking-tight">Schulte Race</h1>
+      <p class="text-base-content/70">
+        Find the numbers from 1 to 90 in order. The first player to click the next number gets the point.
+      </p>
+    </div>
+    <.link
+      id="new-game"
+      href={~p"/schulte"}
+      method="post"
+      class="rounded-full bg-emerald-600 px-6 py-3 font-medium text-white shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-xl active:translate-y-0"
+    >
+      New game
+    </.link>
+    <p class="text-sm text-base-content/50">You get a link to share with other players.</p>
+  </div>
+</Layouts.app>
