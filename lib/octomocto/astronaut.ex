@@ -20,10 +20,11 @@ defmodule Octomocto.Astronaut do
   @doc """
   Adds an astronaut for the calling process. The astronaut is removed when the
   process stops. Subscribe to `Game.topic(id)` first to get all updates.
+  The `name` is the display name, or nil for a color name.
   """
-  def join(id) do
+  def join(id, name \\ nil) do
     if game_exists?(id) do
-      GenServer.call(Game.via(id), {:join, self()})
+      GenServer.call(Game.via(id), {:join, self(), name})
     else
       {:error, :not_found}
     end

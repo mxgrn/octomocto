@@ -54,13 +54,14 @@ defmodule Octomocto.Astronaut.Game do
   end
 
   @impl true
-  def handle_call({:join, pid}, _from, state) do
+  def handle_call({:join, pid, name}, _from, state) do
     Process.monitor(pid)
     player_id = Integer.to_string(System.unique_integer([:positive]))
     {color_name, color} = pick_color(state.players)
 
     player = %{
       pid: pid,
+      name: name,
       color: color,
       color_name: color_name,
       pos: @start,
@@ -177,6 +178,7 @@ defmodule Octomocto.Astronaut.Game do
 
         %{
           id: id,
+          name: p.name,
           color: p.color,
           color_name: p.color_name,
           x: x,

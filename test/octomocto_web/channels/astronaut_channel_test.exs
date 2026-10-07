@@ -18,6 +18,17 @@ defmodule OctomoctoWeb.AstronautChannelTest do
     assert %{player_id: player_id, state: %{players: [%{id: player_id}]}} = reply
   end
 
+  test "a signed-in player has the display name", %{id: id} do
+    user = Octomocto.AccountsFixtures.telegram_user_fixture(%{"first_name" => "Ada"})
+
+    {:ok, reply, _socket} =
+      OctomoctoWeb.UserSocket
+      |> socket(nil, %{user_id: user.id})
+      |> subscribe_and_join(OctomoctoWeb.AstronautChannel, "astronaut:" <> id)
+
+    assert [%{name: "Ada"}] = reply.state.players
+  end
+
   test "move pushes the new game state", %{id: id} do
     {:ok, _reply, socket} =
       OctomoctoWeb.UserSocket

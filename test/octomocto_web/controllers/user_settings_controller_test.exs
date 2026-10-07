@@ -54,6 +54,32 @@ defmodule OctomoctoWeb.UserSettingsControllerTest do
     end
   end
 
+  describe "PUT /settings (change name form)" do
+    setup :register_and_log_in_user
+
+    test "changes the display name", %{conn: conn, user: user} do
+      conn =
+        put(conn, ~p"/settings", %{
+          "action" => "update_display_name",
+          "user" => %{"display_name" => "Ada"}
+        })
+
+      assert redirected_to(conn) == ~p"/settings"
+      assert Accounts.get_user!(user.id).display_name == "Ada"
+    end
+
+    test "rejects a name longer than 30 characters", %{conn: conn} do
+      conn =
+        put(conn, ~p"/settings", %{
+          "action" => "update_display_name",
+          "user" => %{"display_name" => String.duplicate("a", 31)}
+        })
+
+      document = conn |> html_response(200) |> LazyHTML.from_document()
+      assert Enum.any?(LazyHTML.query(document, "#update_display_name p.text-error"))
+    end
+  end
+
   describe "GET /settings/confirm-email/:token" do
     test "merges into the older user with this email and signs in as it", %{conn: conn} do
       older = user_fixture()

@@ -64,6 +64,7 @@ defmodule Octomocto.Accounts.TelegramAuth do
       telegram_id: data["id"],
       telegram_username: data["username"],
       name: name,
+      first_name: data["first_name"],
       avatar_url: data["photo_url"]
     }
   end

@@ -3,6 +3,43 @@
     <h1 class="text-center text-3xl font-semibold tracking-tight">Settings</h1>
 
     <section
+      id="name-settings"
+      class="space-y-3 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-base-200 dark:ring-white/10"
+    >
+      <div>
+        <h2 class="font-semibold">Name</h2>
+        <p class="text-sm text-base-content/60">
+          Other players see this name in games. Without a name, you get a color name.
+        </p>
+      </div>
+
+      <.form
+        for={@display_name_form}
+        id="update_display_name"
+        action={~p"/settings"}
+        method="put"
+        class="space-y-3"
+      >
+        <input type="hidden" name="action" value="update_display_name" />
+        <.input
+          field={@display_name_form[:display_name]}
+          type="text"
+          placeholder="Your name"
+          maxlength="30"
+          autocomplete="nickname"
+          class="w-full rounded-xl border-0 bg-slate-50 px-4 py-3 ring-1 ring-slate-200 transition placeholder:text-base-content/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-base-300 dark:ring-white/10 dark:focus:bg-base-300"
+          error_class="ring-red-400"
+        />
+        <button
+          id="update-display-name-button"
+          class="rounded-xl bg-indigo-600 px-4 py-2.5 font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
+        >
+          Save name
+        </button>
+      </.form>
+    </section>
+
+    <section
       id="email-settings"
       class="space-y-3 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-base-200 dark:ring-white/10"
     >

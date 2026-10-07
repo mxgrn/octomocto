@@ -35,12 +35,13 @@ defmodule Octomocto.Schulte do
   @doc """
   Adds a player for the calling process. The player is removed when the
   process stops. Subscribe to `Game.topic(id)` first to get all updates.
-  The `user_id` is nil for a guest. When the game has all its players, the
-  new process only watches, and the player id is nil.
+  The `user_id` is nil for a guest. The `name` is the display name, or nil
+  for a color name. When the game has all its players, the new process only
+  watches, and the player id is nil.
   """
-  def join(id, user_id \\ nil) do
+  def join(id, user_id \\ nil, name \\ nil) do
     if game_exists?(id) do
-      GenServer.call(Game.via(id), {:join, self(), user_id})
+      GenServer.call(Game.via(id), {:join, self(), user_id, name})
     else
       {:error, :not_found}
     end

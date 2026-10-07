@@ -55,12 +55,12 @@ defmodule Octomocto.Schulte.Game do
   end
 
   @impl true
-  def handle_call({:join, _pid, _user_id}, _from, state)
+  def handle_call({:join, _pid, _user_id, _name}, _from, state)
       when map_size(state.players) >= state.needed do
     {:reply, {:ok, nil, public(state)}, state}
   end
 
-  def handle_call({:join, pid, user_id}, _from, state) do
+  def handle_call({:join, pid, user_id, name}, _from, state) do
     Process.monitor(pid)
     player_id = Integer.to_string(System.unique_integer([:positive]))
     {color_name, color} = pick_color(state.players)
@@ -68,6 +68,7 @@ defmodule Octomocto.Schulte.Game do
     player = %{
       pid: pid,
       user_id: user_id,
+      name: name,
       color: color,
       color_name: color_name,
       score: 0,
@@ -184,7 +185,7 @@ defmodule Octomocto.Schulte.Game do
       state.players
       |> Enum.sort_by(fn {_id, p} -> p.joined_at end)
       |> Enum.map(fn {id, p} ->
-        %{id: id, color: p.color, color_name: p.color_name, score: p.score}
+        %{id: id, name: p.name, color: p.color, color_name: p.color_name, score: p.score}
       end)
 
     # How narrow a number can get. The classic board has very narrow

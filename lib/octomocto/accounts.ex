@@ -130,7 +130,15 @@ defmodule Octomocto.Accounts do
     if mergeable?(a, b) do
       [older, newer] = Enum.sort_by([a, b], & &1.id)
 
-      fields = [:email, :confirmed_at, :telegram_id, :telegram_username, :name, :avatar_url]
+      fields = [
+        :email,
+        :confirmed_at,
+        :telegram_id,
+        :telegram_username,
+        :name,
+        :display_name,
+        :avatar_url
+      ]
 
       changes =
         for field <- fields,
@@ -149,6 +157,32 @@ defmodule Octomocto.Accounts do
   end
 
   ## Settings
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for changing the display name.
+  """
+  def change_user_display_name(user, attrs \\ %{}) do
+    User.display_name_changeset(user, attrs)
+  end
+
+  @doc """
+  Changes the display name, which other players see in games.
+  """
+  def update_user_display_name(user, attrs) do
+    user
+    |> User.display_name_changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Gives the display name of the user with the id, or nil for a guest or a
+  user with no display name.
+  """
+  def display_name(nil), do: nil
+
+  def display_name(user_id) do
+    Repo.one(from u in User, where: u.id == ^user_id, select: u.display_name)
+  end
 
   @doc """
   Returns an `%Ecto.Changeset{}` for changing the user email.

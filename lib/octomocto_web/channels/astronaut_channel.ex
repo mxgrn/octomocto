@@ -7,6 +7,7 @@ defmodule OctomoctoWeb.AstronautChannel do
   # Moves come in several times a second, so do not log each one.
   use Phoenix.Channel, log_handle_in: false
 
+  alias Octomocto.Accounts
   alias Octomocto.Astronaut
   alias Octomocto.Astronaut.Game
 
@@ -16,7 +17,7 @@ defmodule OctomoctoWeb.AstronautChannel do
   def join("astronaut:" <> game_id, _params, socket) do
     Phoenix.PubSub.subscribe(Octomocto.PubSub, Game.topic(game_id))
 
-    case Astronaut.join(game_id) do
+    case Astronaut.join(game_id, Accounts.display_name(socket.assigns[:user_id])) do
       {:ok, player_id, state} ->
         socket = assign(socket, game_id: game_id, player_id: player_id)
         {:ok, %{player_id: player_id, state: state}, socket}

@@ -19,6 +19,26 @@ defmodule OctomoctoWeb.SchulteChannelTest do
     assert %{player_id: player_id, state: %{players: [%{id: player_id}]}} = reply
   end
 
+  test "a signed-in player has the display name", %{id: id} do
+    user = Octomocto.AccountsFixtures.telegram_user_fixture(%{"first_name" => "Ada"})
+
+    {:ok, reply, _socket} =
+      OctomoctoWeb.UserSocket
+      |> socket(nil, %{user_id: user.id})
+      |> subscribe_and_join(OctomoctoWeb.SchulteChannel, "schulte:" <> id)
+
+    assert [%{name: "Ada"}] = reply.state.players
+  end
+
+  test "a guest has no name", %{id: id} do
+    {:ok, reply, _socket} =
+      OctomoctoWeb.UserSocket
+      |> socket()
+      |> subscribe_and_join(OctomoctoWeb.SchulteChannel, "schulte:" <> id)
+
+    assert [%{name: nil}] = reply.state.players
+  end
+
   test "pick pushes the new game state", %{id: id} do
     {:ok, _reply, socket} =
       OctomoctoWeb.UserSocket

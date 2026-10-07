@@ -59,7 +59,7 @@ if (astronautNode) {
   })
 
   const astronaut = window.Elm.Astronaut.init({node: astronautNode, flags: {gameUrl: window.location.href}})
-  const socket = new Socket("/socket")
+  const socket = new Socket("/socket", {params: {user_token: astronautNode.dataset.userToken}})
   socket.connect()
 
   const channel = socket.channel(`astronaut:${astronautNode.dataset.gameId}`)

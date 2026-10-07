@@ -7,6 +7,7 @@ defmodule OctomoctoWeb.SchulteChannel do
   """
   use Phoenix.Channel
 
+  alias Octomocto.Accounts
   alias Octomocto.Schulte
   alias Octomocto.Schulte.Game
 
@@ -14,7 +15,9 @@ defmodule OctomoctoWeb.SchulteChannel do
   def join("schulte:" <> game_id, _params, socket) do
     Phoenix.PubSub.subscribe(Octomocto.PubSub, Game.topic(game_id))
 
-    case Schulte.join(game_id, socket.assigns[:user_id]) do
+    user_id = socket.assigns[:user_id]
+
+    case Schulte.join(game_id, user_id, Accounts.display_name(user_id)) do
       {:ok, player_id, state} ->
         socket = assign(socket, game_id: game_id, player_id: player_id)
         {:ok, %{player_id: player_id, state: state}, socket}

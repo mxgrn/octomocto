@@ -309,6 +309,48 @@ defmodule Octomocto.AccountsTest do
       assert {:ok, %User{id: ^id, telegram_username: "new_ada", name: "Ada"}} =
                Accounts.sign_in_with_telegram(attrs)
     end
+
+    test "sets the display name to the first name" do
+      attrs = %{telegram_id: 42, first_name: "Ada"}
+
+      assert {:ok, %User{display_name: "Ada"}} = Accounts.sign_in_with_telegram(attrs)
+    end
+
+    test "truncates a long first name for the display name" do
+      attrs = %{telegram_id: 42, first_name: String.duplicate("a", 40)}
+
+      assert {:ok, user} = Accounts.sign_in_with_telegram(attrs)
+      assert user.display_name == String.duplicate("a", 29) <> "…"
+    end
+
+    test "keeps the display name of an existing user" do
+      user = telegram_user_fixture(%{"id" => "42", "first_name" => "Ada"})
+      {:ok, _user} = Accounts.update_user_display_name(user, %{display_name: "Countess"})
+
+      assert {:ok, %User{display_name: "Countess"}} =
+               Accounts.sign_in_with_telegram(%{telegram_id: 42, first_name: "Ada"})
+    end
+  end
+
+  describe "update_user_display_name/2" do
+    test "trims the name" do
+      assert {:ok, %User{display_name: "Ada"}} =
+               Accounts.update_user_display_name(user_fixture(), %{display_name: " Ada "})
+    end
+
+    test "stores a blank name as nil" do
+      user = telegram_user_fixture(%{"first_name" => "Ada"})
+
+      assert {:ok, %User{display_name: nil}} =
+               Accounts.update_user_display_name(user, %{display_name: " "})
+    end
+
+    test "rejects a name longer than 30 characters" do
+      attrs = %{display_name: String.duplicate("a", 31)}
+
+      assert {:error, changeset} = Accounts.update_user_display_name(user_fixture(), attrs)
+      assert "should be at most 30 character(s)" in errors_on(changeset).display_name
+    end
   end
 
   describe "connect_telegram/2" do

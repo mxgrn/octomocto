@@ -97,8 +97,12 @@ type Dir
     | West
 
 
+{-| The `name` is the display name of a signed-in player, or Nothing for a
+guest. Then the player is known by the `colorName`.
+-}
 type alias Player =
     { id : String
+    , name : Maybe String
     , color : String
     , colorName : String
     , pos : Cell
@@ -434,8 +438,9 @@ cellDecoder =
 
 playerDecoder : Decoder Player
 playerDecoder =
-    Decode.map6 Player
+    Decode.map7 Player
         (Decode.field "id" Decode.string)
+        (Decode.field "name" (Decode.nullable Decode.string))
         (Decode.field "color" Decode.string)
         (Decode.field "color_name" Decode.string)
         (Decode.map2 Tuple.pair (Decode.field "x" Decode.int) (Decode.field "y" Decode.int))
@@ -615,10 +620,10 @@ viewScores me players =
                     , span [ class "lg:flex-1" ]
                         [ text
                             (if player.id == me then
-                                player.colorName ++ " (you)"
+                                playerName player ++ " (you)"
 
                              else
-                                player.colorName
+                                playerName player
                             )
                         ]
                     , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
@@ -626,6 +631,11 @@ viewScores me players =
             )
             players
         )
+
+
+playerName : Player -> String
+playerName player =
+    Maybe.withDefault player.colorName player.name
 
 
 viewWinner : String -> String -> List Player -> Html Msg
@@ -638,7 +648,12 @@ viewWinner me winnerId players =
             else
                 case List.filter (\p -> p.id == winnerId) players of
                     winner :: _ ->
-                        "The " ++ winner.colorName ++ " astronaut reached the pod!"
+                        case winner.name of
+                            Just name ->
+                                name ++ " reached the pod!"
+
+                            Nothing ->
+                                "The " ++ winner.colorName ++ " astronaut reached the pod!"
 
                     [] ->
                         "Somebody reached the pod!"

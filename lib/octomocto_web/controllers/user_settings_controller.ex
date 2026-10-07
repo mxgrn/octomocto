@@ -8,9 +8,24 @@ defmodule OctomoctoWeb.UserSettingsController do
   import Phoenix.Component, only: [to_form: 1, to_form: 2]
 
   plug :assign_email_form
+  plug :assign_display_name_form
 
   def edit(conn, _params) do
     render(conn, :edit)
+  end
+
+  def update(conn, %{"action" => "update_display_name"} = params) do
+    %{"user" => user_params} = params
+
+    case Accounts.update_user_display_name(conn.assigns.current_scope.user, user_params) do
+      {:ok, _user} ->
+        conn
+        |> put_flash(:info, "Name changed successfully.")
+        |> redirect(to: ~p"/settings")
+
+      {:error, changeset} ->
+        render(conn, :edit, display_name_form: to_form(changeset, action: :update))
+    end
   end
 
   def update(conn, %{"action" => "update_email"} = params) do
@@ -86,6 +101,11 @@ defmodule OctomoctoWeb.UserSettingsController do
       |> put_session(:user_return_to, ~p"/settings")
       |> UserAuth.log_in_user(user)
     end
+  end
+
+  defp assign_display_name_form(conn, _opts) do
+    user = conn.assigns.current_scope.user
+    assign(conn, :display_name_form, to_form(Accounts.change_user_display_name(user)))
   end
 
   defp assign_email_form(conn, _opts) do

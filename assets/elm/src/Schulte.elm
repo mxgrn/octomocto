@@ -68,8 +68,12 @@ port schulteSaveMuted : Bool -> Cmd msg
 -- MODEL
 
 
+{-| The `name` is the display name of a signed-in player, or Nothing for a
+guest. Then the player is known by the `colorName`.
+-}
 type alias Player =
     { id : String
+    , name : Maybe String
     , color : String
     , colorName : String
     , score : Int
@@ -401,8 +405,9 @@ labelDecoder =
 
 playerDecoder : Decoder Player
 playerDecoder =
-    Decode.map4 Player
+    Decode.map5 Player
         (Decode.field "id" Decode.string)
+        (Decode.field "name" (Decode.nullable Decode.string))
         (Decode.field "color" Decode.string)
         (Decode.field "color_name" Decode.string)
         (Decode.field "score" Decode.int)
@@ -584,10 +589,10 @@ viewScores me players =
 playerName : Me -> Player -> String
 playerName me player =
     if isMe me player then
-        player.colorName ++ " (you)"
+        Maybe.withDefault player.colorName player.name ++ " (you)"
 
     else
-        player.colorName
+        Maybe.withDefault player.colorName player.name
 
 
 viewField : Model -> Game -> Html Msg
@@ -844,7 +849,12 @@ viewResult me game =
                         "You win!"
 
                     else
-                        "The " ++ winner.colorName ++ " player wins!"
+                        case winner.name of
+                            Just name ->
+                                name ++ " wins!"
+
+                            Nothing ->
+                                "The " ++ winner.colorName ++ " player wins!"
 
                 ( False, _ ) ->
                     "It's a tie!"
