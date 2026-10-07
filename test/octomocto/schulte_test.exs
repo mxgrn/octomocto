@@ -6,7 +6,7 @@ defmodule Octomocto.SchulteTest do
 
   setup do
     id = "game-#{System.unique_integer([:positive])}"
-    start_supervised!({Game, id})
+    start_supervised!({Game, {id, :random}})
     Phoenix.PubSub.subscribe(Octomocto.PubSub, Game.topic(id))
     %{id: id}
   end

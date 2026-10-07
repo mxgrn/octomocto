@@ -6,10 +6,13 @@ defmodule Octomocto.Schulte do
 
   alias Octomocto.Schulte.Game
 
-  @doc "Starts a new game and returns its id."
-  def create_game do
+  @doc "Starts a new game with a `:random` or a `:classic` layout and returns its id."
+  def create_game(layout \\ :random) do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
-    {:ok, _pid} = DynamicSupervisor.start_child(Octomocto.Schulte.GameSupervisor, {Game, id})
+
+    {:ok, _pid} =
+      DynamicSupervisor.start_child(Octomocto.Schulte.GameSupervisor, {Game, {id, layout}})
+
     id
   end
 

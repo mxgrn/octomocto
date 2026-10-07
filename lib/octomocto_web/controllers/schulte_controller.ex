@@ -7,8 +7,9 @@ defmodule OctomoctoWeb.SchulteController do
     render(conn, :index)
   end
 
-  def create(conn, _params) do
-    redirect(conn, to: ~p"/schulte/#{Schulte.create_game()}")
+  def create(conn, params) do
+    layout = if params["layout"] == "classic", do: :classic, else: :random
+    redirect(conn, to: ~p"/schulte/#{Schulte.create_game(layout)}")
   end
 
   def show(conn, %{"id" => id}) do

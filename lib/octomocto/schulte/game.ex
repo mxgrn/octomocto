@@ -1,7 +1,9 @@
 defmodule Octomocto.Schulte.Game do
   @moduledoc """
-  One multiplayer Schulte table: a random field with the numbers 1 to 90
-  (see `Octomocto.Schulte.Layout`).
+  One multiplayer Schulte table: a field with the numbers 1 to 90. The
+  layout is `:random` (a new board for each field, see
+  `Octomocto.Schulte.Layout`) or `:classic` (always the same board, see
+  `Octomocto.Schulte.Classic`). The numbers are in a random order.
   The first player to click the next number gets a point. The game owns the
   field and the players, and broadcasts each change on the
   `"schulte_game:<id>"` PubSub topic as `{:schulte_state, state}`.
@@ -12,7 +14,7 @@ defmodule Octomocto.Schulte.Game do
   """
   use GenServer, restart: :temporary
 
-  alias Octomocto.Schulte.Layout
+  alias Octomocto.Schulte.{Classic, Layout}
 
   @total 90
   @idle_timeout_ms :timer.minutes(5)
@@ -28,8 +30,8 @@ defmodule Octomocto.Schulte.Game do
     {"indigo", "#4f46e5"}
   ]
 
-  def start_link(id) do
-    GenServer.start_link(__MODULE__, id, name: via(id))
+  def start_link({id, layout}) when layout in [:random, :classic] do
+    GenServer.start_link(__MODULE__, {id, layout}, name: via(id))
   end
 
   def via(id), do: {:via, Registry, {Octomocto.Schulte.Registry, id}}
@@ -37,9 +39,9 @@ defmodule Octomocto.Schulte.Game do
   def topic(id), do: "schulte_game:" <> id
 
   @impl true
-  def init(id) do
+  def init({id, layout}) do
     schedule_idle_check()
-    {:ok, new_field(%{id: id, players: %{}})}
+    {:ok, new_field(%{id: id, layout: layout, players: %{}})}
   end
 
   @impl true
@@ -103,8 +105,8 @@ defmodule Octomocto.Schulte.Game do
   end
 
   defp new_field(state) do
-    regions =
-      Enum.zip_with(Enum.shuffle(1..@total), Layout.generate(@total), &Map.put(&2, :number, &1))
+    shapes = if state.layout == :classic, do: Classic.regions(), else: Layout.generate(@total)
+    regions = Enum.zip_with(Enum.shuffle(1..@total), shapes, &Map.put(&2, :number, &1))
 
     Map.merge(state, %{regions: regions, next: 1, found_by: %{}})
   end
@@ -136,8 +138,16 @@ defmodule Octomocto.Schulte.Game do
         %{id: id, color: p.color, color_name: p.color_name, score: p.score}
       end)
 
+    # How narrow a number can get. The classic board has very narrow
+    # shapes, where the printed puzzle squeezes the numbers a lot.
+    {size, min_stretch} =
+      if state.layout == :classic,
+        do: {Classic.size(), 0.1},
+        else: {Layout.size(), 0.3}
+
     %{
-      board: Tuple.to_list(Layout.size()),
+      board: Tuple.to_list(size),
+      min_stretch: min_stretch,
       total: @total,
       next: state.next,
       cells: Enum.map(state.regions, &Map.put(&1, :found_by, state.found_by[&1.number])),

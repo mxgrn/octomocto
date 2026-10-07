@@ -89,6 +89,9 @@ type alias Game =
     , next : Int
     , cells : List Cell
     , players : List Player
+
+    -- How narrow a number can get, as a part of its normal width
+    , minStretch : Float
     }
 
 
@@ -223,13 +226,14 @@ joinedDecoder =
 
 gameDecoder : Decoder Game
 gameDecoder =
-    Decode.map6 Game
+    Decode.map7 Game
         (Decode.field "board" (Decode.index 0 Decode.float))
         (Decode.field "board" (Decode.index 1 Decode.float))
         (Decode.field "total" Decode.int)
         (Decode.field "next" Decode.int)
         (Decode.field "cells" (Decode.list cellDecoder))
         (Decode.field "players" (Decode.list playerDecoder))
+        (Decode.field "min_stretch" Decode.float)
 
 
 cellDecoder : Decoder Cell
@@ -394,7 +398,7 @@ viewField model game =
         , SA.class "block h-auto w-full rounded-2xl bg-[#fbf5e1] shadow-sm ring-1 ring-slate-300"
         , SA.strokeLinejoin "round"
         ]
-        (List.map (viewCell model) game.cells
+        (List.map (viewCell model game.minStretch) game.cells
             ++ [ Svg.rect
                     [ SA.width (String.fromFloat game.width)
                     , SA.height (String.fromFloat game.height)
@@ -413,8 +417,8 @@ ink =
     "#474d50"
 
 
-viewCell : Model -> Cell -> Svg Msg
-viewCell model cell =
+viewCell : Model -> Float -> Cell -> Svg Msg
+viewCell model minStretch cell =
     let
         shaking =
             model.shaking == Just cell.number
@@ -452,16 +456,16 @@ viewCell model cell =
         , SE.onClick (Pick cell.number)
         ]
         [ Svg.path [ SA.d cell.d, SA.fill fill, SA.fillRule "evenodd", SA.stroke ink, SA.strokeWidth "3" ] []
-        , viewNumber found cell
+        , viewNumber minStretch found cell
         ]
 
 
 {-| Stretch the number to fill its label box, like the tall narrow and the
-wide numbers in a printed puzzle. The stretch is kept between about 0.3 and
+wide numbers in a printed puzzle. The stretch is kept between `minStretch` and
 3 times the normal width, so that the digits stay readable.
 -}
-viewNumber : Bool -> Cell -> Svg msg
-viewNumber found cell =
+viewNumber : Float -> Bool -> Cell -> Svg msg
+viewNumber minStretch found cell =
     let
         { x, y, w, h } =
             cell.label
@@ -480,7 +484,7 @@ viewNumber found cell =
             h / capHeight
 
         size =
-            min fullSize (w / (0.3 * digitWidth * digits))
+            min fullSize (w / (minStretch * digitWidth * digits))
 
         width =
             min w (3 * digitWidth * digits * size)

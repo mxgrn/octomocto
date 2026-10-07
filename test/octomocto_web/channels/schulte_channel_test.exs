@@ -5,7 +5,7 @@ defmodule OctomoctoWeb.SchulteChannelTest do
 
   setup do
     id = "game-#{System.unique_integer([:positive])}"
-    start_supervised!({Game, id})
+    start_supervised!({Game, {id, :random}})
     %{id: id}
   end
 
