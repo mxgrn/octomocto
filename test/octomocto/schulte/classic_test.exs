@@ -16,6 +16,17 @@ defmodule Octomocto.Schulte.ClassicTest do
     end
   end
 
+  test "regions/0 shuffles the colors between the shapes that are not cream" do
+    cream = "#fbf5e1"
+    colors = fn -> Enum.map(Classic.regions(), & &1.color) end
+    first = colors.()
+    second = colors.()
+
+    assert first != second
+    assert Enum.frequencies(first) == Enum.frequencies(second)
+    assert Enum.map(first, &(&1 == cream)) == Enum.map(second, &(&1 == cream))
+  end
+
   test "a classic game puts the numbers into the same shapes in a random order" do
     id = "game-#{System.unique_integer([:positive])}"
     start_supervised!({Game, {id, :classic, 1}})

@@ -1,8 +1,10 @@
 defmodule Octomocto.Schulte.Classic do
   @moduledoc """
   The classic Schulte board: a fixed drawing with 90 shapes, traced from a
-  printed puzzle. The shapes and their colors never change, but the game
-  puts the numbers into them in a random order.
+  printed puzzle. The shapes never change, but the game puts the numbers into
+  them in a random order. The cream shapes stay cream. The other colors of
+  the puzzle are shuffled between the other shapes, so each color is used the
+  same number of times as in the puzzle.
 
   The regions have the same format as in `Octomocto.Schulte.Layout`. The
   list order is the drawing order: some shapes are drawn on top of others
@@ -30,8 +32,21 @@ defmodule Octomocto.Schulte.Classic do
   """
   def info_box, do: [913 - @ox, 3 - @oy, 1187 - 913, 77 - 3]
 
-  @doc "Returns the 90 regions in the drawing order."
+  @doc "Returns the 90 regions in the drawing order, with the colors (not cream) shuffled."
   def regions do
+    regions = shapes()
+    colors = for %{color: color} <- regions, color != @cream, do: color
+
+    {regions, []} =
+      Enum.map_reduce(regions, Enum.shuffle(colors), fn
+        %{color: @cream} = region, rest -> {region, rest}
+        region, [color | rest] -> {%{region | color: color}, rest}
+      end)
+
+    regions
+  end
+
+  defp shapes do
     left_fan = fan({222, 320}, {211, 320}, 134)
     right_fan = fan({1048, 265}, {1050, 274}, 137)
 
