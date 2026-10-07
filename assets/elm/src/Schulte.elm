@@ -449,7 +449,7 @@ viewGame model me game =
             [ div [ class "relative mx-auto", style "width" (fieldWidth game) ]
                 [ viewField model game
                 , if finished game then
-                    viewResult me game.players
+                    viewResult me game
 
                   else
                     text ""
@@ -776,19 +776,28 @@ viewNumber minStretch cell =
         [ Svg.text (String.fromInt cell.number) ]
 
 
-viewResult : String -> List Player -> Html Msg
-viewResult me players =
+viewResult : String -> Game -> Html Msg
+viewResult me game =
     let
+        players =
+            game.players
+
+        solo =
+            List.length players == 1
+
         message =
-            case winners players of
-                [ winner ] ->
+            case ( solo, winners players ) of
+                ( True, _ ) ->
+                    "Done!"
+
+                ( False, [ winner ] ) ->
                     if winner.id == me then
                         "You win!"
 
                     else
                         "The " ++ winner.colorName ++ " player wins!"
 
-                _ ->
+                ( False, _ ) ->
                     "It's a tie!"
 
         ranked =
@@ -799,17 +808,23 @@ viewResult me players =
         , class "absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl bg-emerald-950/70 p-4 text-white backdrop-blur-sm"
         ]
         [ p [ class "text-3xl font-semibold" ] [ text message ]
-        , ol [ class "flex flex-col gap-1 text-sm" ]
-            (List.map
-                (\player ->
-                    li [ class "flex items-center gap-2" ]
-                        [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                        , span [ class "flex-1" ] [ text (playerName me player) ]
-                        , span [ class "pl-6 font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
-                        ]
+        , p [ id "schulte-final-time", class "text-lg tabular-nums opacity-80" ]
+            [ text ("Time " ++ formatTime game.elapsedMs) ]
+        , if solo then
+            text ""
+
+          else
+            ol [ class "flex flex-col gap-1 text-sm" ]
+                (List.map
+                    (\player ->
+                        li [ class "flex items-center gap-2" ]
+                            [ span [ class "size-3 rounded-full", style "background" player.color ] []
+                            , span [ class "flex-1" ] [ text (playerName me player) ]
+                            , span [ class "pl-6 font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
+                            ]
+                    )
+                    ranked
                 )
-                ranked
-            )
         , button
             [ id "schulte-play-again"
             , class "rounded-full bg-white px-6 py-2.5 font-medium text-emerald-800 shadow-lg transition hover:-translate-y-0.5 hover:bg-emerald-50 active:translate-y-0"
