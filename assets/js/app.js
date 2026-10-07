@@ -26,7 +26,6 @@ import {hooks as colocatedHooks} from "phoenix-colocated/octomocto"
 import topbar from "../vendor/topbar"
 import {unlockAudio} from "./sounds"
 import {playTrainSound} from "./train_sounds"
-import {playPenguinSound} from "./penguin_sounds"
 import {playAstronautSound} from "./astronaut_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
@@ -47,53 +46,33 @@ if (elmNode) {
   window.Elm.Main.init({node: elmNode})
 }
 
-// Start a maze game (penguin or astronaut) and connect its ports to the
-// game channel. Both games use the penguin channel. Port names must be unique
-// in the Elm bundle, so each game gives its own ports. Stop the arrow keys from
-// scrolling the page. The player can use only the keys, so a key press also
-// unlocks the audio.
-function startMaze(node, ports) {
+// Start the astronaut maze and connect its ports to the game channel.
+// Stop the arrow keys from scrolling the page. The player can use only the
+// keys, so a key press also unlocks the audio.
+const astronautNode = document.getElementById("astronaut-main")
+if (astronautNode) {
   document.addEventListener("pointerdown", unlockAudio, {once: true})
   document.addEventListener("keydown", unlockAudio, {once: true})
   window.addEventListener("keydown", e => {
     if (e.key.startsWith("Arrow")) e.preventDefault()
   })
 
+  const astronaut = window.Elm.Astronaut.init({node: astronautNode, flags: {gameUrl: window.location.href}})
   const socket = new Socket("/socket")
   socket.connect()
 
-  const channel = socket.channel(`penguin:${node.dataset.gameId}`)
-  channel.on("state", state => ports.gameState.send(state))
+  const channel = socket.channel(`astronaut:${astronautNode.dataset.gameId}`)
+  channel.on("state", state => astronaut.ports.astronautGameState.send(state))
   channel.join()
-    .receive("ok", reply => ports.joined.send(reply))
+    .receive("ok", reply => astronaut.ports.astronautJoined.send(reply))
     .receive("error", ({reason}) => {
       channel.leave()
-      ports.joinFailed.send(reason)
+      astronaut.ports.astronautJoinFailed.send(reason)
     })
 
-  ports.sendMove.subscribe(dir => channel.push("move", {dir}))
-  ports.copyText.subscribe(text => navigator.clipboard.writeText(text))
-  ports.playSound.subscribe(ports.play)
-}
-
-const penguinNode = document.getElementById("penguin-main")
-if (penguinNode) {
-  const {ports} = window.Elm.Penguin.init({node: penguinNode, flags: {gameUrl: window.location.href}})
-  startMaze(penguinNode, {...ports, playSound: ports.playPenguinSound, play: playPenguinSound})
-}
-
-const astronautNode = document.getElementById("astronaut-main")
-if (astronautNode) {
-  const {ports} = window.Elm.Astronaut.init({node: astronautNode, flags: {gameUrl: window.location.href}})
-  startMaze(astronautNode, {
-    gameState: ports.astronautGameState,
-    joined: ports.astronautJoined,
-    joinFailed: ports.astronautJoinFailed,
-    sendMove: ports.astronautSendMove,
-    copyText: ports.astronautCopyText,
-    playSound: ports.playAstronautSound,
-    play: playAstronautSound,
-  })
+  astronaut.ports.astronautSendMove.subscribe(dir => channel.push("move", {dir}))
+  astronaut.ports.astronautCopyText.subscribe(text => navigator.clipboard.writeText(text))
+  astronaut.ports.playAstronautSound.subscribe(playAstronautSound)
 }
 
 // Start the train game. It is single player, so it needs no channel.

@@ -1,4 +1,4 @@
-defmodule Octomocto.Penguin.Maze do
+defmodule Octomocto.Astronaut.Maze do
   @moduledoc """
   A square maze of cells `{x, y}`, with `{0, 0}` at the top left and y going
   down (south). The maze is the set of open passages between adjacent cells.

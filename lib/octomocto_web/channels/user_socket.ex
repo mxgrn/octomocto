@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.UserSocket do
   use Phoenix.Socket
 
-  channel "penguin:*", OctomoctoWeb.PenguinChannel
+  channel "astronaut:*", OctomoctoWeb.AstronautChannel
   channel "schulte:*", OctomoctoWeb.SchulteChannel
 
   @impl true

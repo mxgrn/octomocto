@@ -1,7 +1,7 @@
-defmodule OctomoctoWeb.PenguinChannelTest do
+defmodule OctomoctoWeb.AstronautChannelTest do
   use OctomoctoWeb.ChannelCase, async: true
 
-  alias Octomocto.Penguin.Game
+  alias Octomocto.Astronaut.Game
 
   setup do
     id = "game-#{System.unique_integer([:positive])}"
@@ -13,7 +13,7 @@ defmodule OctomoctoWeb.PenguinChannelTest do
     {:ok, reply, _socket} =
       OctomoctoWeb.UserSocket
       |> socket()
-      |> subscribe_and_join(OctomoctoWeb.PenguinChannel, "penguin:" <> id)
+      |> subscribe_and_join(OctomoctoWeb.AstronautChannel, "astronaut:" <> id)
 
     assert %{player_id: player_id, state: %{players: [%{id: player_id}]}} = reply
   end
@@ -22,7 +22,7 @@ defmodule OctomoctoWeb.PenguinChannelTest do
     {:ok, _reply, socket} =
       OctomoctoWeb.UserSocket
       |> socket()
-      |> subscribe_and_join(OctomoctoWeb.PenguinChannel, "penguin:" <> id)
+      |> subscribe_and_join(OctomoctoWeb.AstronautChannel, "astronaut:" <> id)
 
     push(socket, "move", %{"dir" => "north"})
 
@@ -33,6 +33,6 @@ defmodule OctomoctoWeb.PenguinChannelTest do
     assert {:error, %{reason: "not_found"}} =
              OctomoctoWeb.UserSocket
              |> socket()
-             |> subscribe_and_join(OctomoctoWeb.PenguinChannel, "penguin:unknown")
+             |> subscribe_and_join(OctomoctoWeb.AstronautChannel, "astronaut:unknown")
   end
 end

@@ -1,20 +1,20 @@
-defmodule Octomocto.Penguin.Game do
+defmodule Octomocto.Astronaut.Game do
   @moduledoc """
-  One multiplayer penguin maze. It owns the maze, the rotation timer and the
-  penguins, and broadcasts each change on the `"penguin_game:<id>"` PubSub
-  topic as `{:penguin_state, state}`.
+  One multiplayer astronaut maze. It owns the maze, the rotation timer and the
+  astronauts, and broadcasts each change on the `"astronaut_game:<id>"` PubSub
+  topic as `{:astronaut_state, state}`.
 
-  Each player is bound to the process that joined (a channel). The penguin
+  Each player is bound to the process that joined (a channel). The astronaut
   is removed when that process stops. The game stops after some time with
   no players.
   """
   use GenServer, restart: :temporary
 
-  alias Octomocto.Penguin.Maze
+  alias Octomocto.Astronaut.Maze
 
   @size 9
   @start {0, 0}
-  @fish {@size - 1, @size - 1}
+  @pod {@size - 1, @size - 1}
   @round_pause_ms 2500
   @idle_timeout_ms :timer.minutes(5)
 
@@ -33,9 +33,9 @@ defmodule Octomocto.Penguin.Game do
     GenServer.start_link(__MODULE__, id, name: via(id))
   end
 
-  def via(id), do: {:via, Registry, {Octomocto.Penguin.Registry, id}}
+  def via(id), do: {:via, Registry, {Octomocto.Astronaut.Registry, id}}
 
-  def topic(id), do: "penguin_game:" <> id
+  def topic(id), do: "astronaut_game:" <> id
 
   @impl true
   def init(id) do
@@ -134,7 +134,7 @@ defmodule Octomocto.Penguin.Game do
         player
       end
 
-    if player.pos == @fish do
+    if player.pos == @pod do
       Process.send_after(self(), :new_round, @round_pause_ms)
       player = %{player | score: player.score + 1}
       %{state | winner: player_id, players: Map.put(state.players, player_id, player)}
@@ -143,7 +143,7 @@ defmodule Octomocto.Penguin.Game do
     end
   end
 
-  # Prefer a color that no penguin has. Reuse colors when all are taken.
+  # Prefer a color that no astronaut has. Reuse colors when all are taken.
   defp pick_color(players) do
     taken = players |> Map.values() |> Enum.map(& &1.color)
 
@@ -162,12 +162,12 @@ defmodule Octomocto.Penguin.Game do
   end
 
   defp broadcast(state) do
-    Phoenix.PubSub.broadcast(Octomocto.PubSub, topic(state.id), {:penguin_state, public(state)})
+    Phoenix.PubSub.broadcast(Octomocto.PubSub, topic(state.id), {:astronaut_state, public(state)})
   end
 
   # The state that clients see, ready to encode as JSON.
   defp public(state) do
-    {fish_x, fish_y} = @fish
+    {pod_x, pod_y} = @pod
 
     players =
       state.players
@@ -189,7 +189,7 @@ defmodule Octomocto.Penguin.Game do
     %{
       size: @size,
       passages: for({{x1, y1}, {x2, y2}} <- state.passages, do: [x1, y1, x2, y2]),
-      fish: [fish_x, fish_y],
+      pod: [pod_x, pod_y],
       round: state.round,
       quarter_turns: state.quarter_turns,
       winner: state.winner,

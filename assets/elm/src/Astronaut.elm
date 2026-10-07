@@ -1,10 +1,7 @@
 port module Astronaut exposing (main)
 
-{-| "Station Escape": the penguin maze with a space theme.
-
-The astronauts race to the escape pod on a space station that spins. The
-server is the same as for the penguin maze (the penguin channel), so the
-game state still calls the goal "fish".
+{-| "Station Escape": the astronauts race to the escape pod on a space
+station that spins.
 
 The server owns the game: the maze, the rotation and all astronauts. This
 module draws the state that comes in through ports and sends the player's
@@ -410,7 +407,7 @@ gameDecoder =
     Decode.map6 Game
         (Decode.field "size" Decode.int)
         (Decode.field "passages" (Decode.list passageDecoder) |> Decode.map Set.fromList)
-        (Decode.field "fish" cellDecoder)
+        (Decode.field "pod" cellDecoder)
         (Decode.field "quarter_turns" Decode.int)
         (Decode.field "winner" (Decode.nullable Decode.string))
         (Decode.field "players" (Decode.list playerDecoder))

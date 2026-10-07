@@ -11,14 +11,6 @@ defmodule OctomoctoWeb.PageController do
       icon_class: "bg-amber-100"
     },
     %{
-      id: "penguin",
-      name: "Penguin Pursuit",
-      description: "Race your friends to the fish in a maze that turns while you play.",
-      path: "/penguin",
-      icon: "🐧",
-      icon_class: "bg-sky-100"
-    },
-    %{
       id: "astronaut",
       name: "Station Escape",
       description:

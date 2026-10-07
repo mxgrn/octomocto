@@ -1,7 +1,7 @@
-defmodule Octomocto.Penguin.MazeTest do
+defmodule Octomocto.Astronaut.MazeTest do
   use ExUnit.Case, async: true
 
-  alias Octomocto.Penguin.Maze
+  alias Octomocto.Astronaut.Maze
 
   test "generate/1 makes a perfect maze: all cells connected, no loops" do
     size = 9

@@ -13,8 +13,8 @@ defmodule Octomocto.Application do
       Application.get_env(:octomocto, :start_repo, true) && Octomocto.Repo,
       {DNSCluster, query: Application.get_env(:octomocto, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Octomocto.PubSub},
-      {Registry, keys: :unique, name: Octomocto.Penguin.Registry},
-      {DynamicSupervisor, name: Octomocto.Penguin.GameSupervisor},
+      {Registry, keys: :unique, name: Octomocto.Astronaut.Registry},
+      {DynamicSupervisor, name: Octomocto.Astronaut.GameSupervisor},
       {Registry, keys: :unique, name: Octomocto.Schulte.Registry},
       {DynamicSupervisor, name: Octomocto.Schulte.GameSupervisor},
       # Start a worker by calling: Octomocto.Worker.start_link(arg)

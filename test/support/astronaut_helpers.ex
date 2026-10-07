@@ -1,9 +1,9 @@
-defmodule Octomocto.PenguinHelpers do
+defmodule Octomocto.AstronautHelpers do
   @moduledoc """
-  Helpers to read the public penguin game state in tests.
+  Helpers to read the public astronaut game state in tests.
   """
 
-  alias Octomocto.Penguin.Maze
+  alias Octomocto.Astronaut.Maze
 
   def passages(%{passages: passages}) do
     MapSet.new(passages, fn [x1, y1, x2, y2] -> {{x1, y1}, {x2, y2}} end)
