@@ -131,6 +131,42 @@
 
 .schulte-shake { animation: schulte-shake 220ms ease-in-out; }
 
+@keyframes schulte-pop {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* The number grows from its own center, not from the corner of the board */
+.schulte-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: schulte-pop 300ms ease-out forwards;
+}
+
+/* The particles fly out to --dx and --dy (in board units) and fade out */
+@keyframes schulte-particle {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0.5); opacity: 0; }
+}
+
+.schulte-particle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: schulte-particle 450ms linear forwards;
+}
+
+/* The score row of the player who found the last number flashes in orange */
+@keyframes schulte-flash {
+  from { background-color: var(--color-octo-orange); }
+  to { background-color: white; }
+}
+
+.schulte-flash { animation: schulte-flash 1s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .schulte-pop { animation: none; opacity: 0; }
+}
+
 /* Header. The eyes in the wordmark blink one time when the pointer moves onto it.
    The blue eyes blink a little after the orange eyes. */
 @keyframes wordmark-blink {

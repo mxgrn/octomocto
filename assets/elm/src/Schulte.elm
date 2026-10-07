@@ -27,11 +27,13 @@ import Browser
 import Html exposing (Html, a, aside, button, div, h1, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (class, href, id, readonly, style, value)
 import Html.Events exposing (onClick)
+import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
 import Process
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
+import Svg.Keyed
 import Task
 import Time
 
@@ -145,6 +147,11 @@ type alias Model =
     , shaking : Maybe Int
     , shakeCount : Int
 
+    -- The player who found the last number. The count goes up on each
+    -- found number, so that the row flashes again for the same player.
+    , lastFinder : Maybe String
+    , findCount : Int
+
     -- The local time (in ms) when the field started, and the local time
     -- now. The clock ticks between the server updates.
     , clockStart : Int
@@ -166,6 +173,8 @@ init flags =
       , copied = False
       , shaking = Nothing
       , shakeCount = 0
+      , lastFinder = Nothing
+      , findCount = 0
       , clockStart = 0
       , now = 0
       , muted = flags.muted
@@ -211,7 +220,16 @@ update msg model =
         GotState value ->
             case ( model.connection, Decode.decodeValue gameDecoder value ) of
                 ( Joined me old, Ok game ) ->
-                    ( { model | connection = Joined me game }
+                    let
+                        withFinder =
+                            case List.reverse (newFinders old game) of
+                                finder :: _ ->
+                                    { model | lastFinder = Just finder, findCount = model.findCount + 1 }
+
+                                [] ->
+                                    model
+                    in
+                    ( { withFinder | connection = Joined me game }
                     , Cmd.batch [ syncClock game, playSounds model (stateSounds me old game) ]
                     )
 
@@ -298,13 +316,8 @@ number (by this player or by another one), and the end of the game.
 stateSounds : Me -> Game -> Game -> List String
 stateSounds me old new =
     let
-        wasFound number =
-            List.any (\c -> c.number == number && c.foundBy /= Nothing) old.cells
-
-        newFinders =
-            new.cells
-                |> List.filter (\c -> not (wasFound c.number))
-                |> List.filterMap .foundBy
+        finders =
+            newFinders old new
 
         endSound =
             if finished new && not (finished old) then
@@ -322,16 +335,30 @@ stateSounds me old new =
             else
                 []
     in
-    (if List.any (\id -> me == Just id) newFinders then
+    (if List.any (\id -> me == Just id) finders then
         [ "found" ]
 
-     else if newFinders /= [] then
+     else if finders /= [] then
         [ "other_found" ]
 
      else
         []
     )
         ++ endSound
+
+
+{-| The ids of the players who found numbers between the old state and the
+new one, in the order of the cells.
+-}
+newFinders : Game -> Game -> List String
+newFinders old new =
+    let
+        wasFound number =
+            List.any (\c -> c.number == number && c.foundBy /= Nothing) old.cells
+    in
+    new.cells
+        |> List.filter (\c -> not (wasFound c.number))
+        |> List.filterMap .foundBy
 
 
 isMe : Me -> Player -> Bool
@@ -474,7 +501,7 @@ viewGame model me game =
                     ]
                 ]
             , viewShareLink model
-            , viewScores me game.players
+            , viewScores model me game.players
             , if me == Nothing then
                 p [ id "schulte-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200" ]
                     [ text "This game is full, so you can only watch it." ]
@@ -568,19 +595,39 @@ viewShareLink model =
         ]
 
 
-viewScores : Me -> List Player -> Html Msg
-viewScores me players =
-    ul [ id "schulte-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
+{-| The row of the player who found the last number flashes in orange. The key changes on each found number, so that the row is made
+again and the flash starts again.
+-}
+viewScores : Model -> Me -> List Player -> Html Msg
+viewScores model me players =
+    Html.Keyed.ul [ id "schulte-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
         (List.map
             (\player ->
-                li
+                let
+                    flashing =
+                        model.lastFinder == Just player.id
+                in
+                ( if flashing then
+                    player.id ++ "-" ++ String.fromInt model.findCount
+
+                  else
+                    player.id
+                , li
                     [ id ("schulte-score-" ++ player.id)
                     , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200"
+                    , class
+                        (if flashing then
+                            "schulte-flash"
+
+                         else
+                            ""
+                        )
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
                     , span [ class "lg:flex-1" ] [ text (playerName me player) ]
                     , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
                     ]
+                )
             )
             players
         )
@@ -633,6 +680,15 @@ viewField model game =
 
                         Nothing ->
                             text ""
+
+                   -- The bursts are on top of all the cells, so that the
+                   -- next cells do not cover the particles
+                   , Svg.Keyed.node "g"
+                        [ SA.pointerEvents "none" ]
+                        (game.cells
+                            |> List.filter (\cell -> cell.foundBy /= Nothing)
+                            |> List.map (\cell -> ( String.fromInt cell.number, viewBurst cell ))
+                        )
                    ]
             )
         , boardRect 1.5
@@ -748,7 +804,8 @@ viewCell model minStretch cell =
         ]
         [ Svg.path [ SA.d cell.d, SA.fill cell.color, SA.fillRule "evenodd", SA.stroke ink, SA.strokeWidth "3" ] []
         , if found then
-            text ""
+            -- The found number grows and fades out one time
+            Svg.g [ SA.class "schulte-pop" ] [ viewNumber minStretch cell ]
 
           else
             -- Only the number shakes after a wrong click, not the cell
@@ -763,6 +820,60 @@ viewCell model minStretch cell =
                 ]
                 [ viewNumber minStretch cell ]
         ]
+
+
+{-| Dots that fly out to all sides from the center of a found number.
+The animation is in the CSS. It runs one time, when the burst is added.
+-}
+viewBurst : Cell -> Svg msg
+viewBurst cell =
+    let
+        { x, y, w, h } =
+            cell.label
+
+        count =
+            64
+
+        -- A fixed "random" number from 0 to 1 for each dot and each use,
+        -- so that the dots are scattered but do not change on each render
+        scatter i salt =
+            let
+                v =
+                    sin (toFloat cell.number * 12.9898 + toFloat i * 78.233 + salt) * 43758.5453
+            in
+            v - toFloat (floor v)
+
+        dot i =
+            let
+                -- Each dot gets a random angle inside its own part of the
+                -- circle, so that the dots go to all sides
+                angle =
+                    2 * pi * (toFloat i + scatter i 1) / count
+
+                -- In board units, the same for all cells
+                distance =
+                    60 + 90 * scatter i 2
+
+                radius =
+                    3 + 4 * scatter i 3
+            in
+            Svg.circle
+                [ SA.cx (String.fromFloat (x + w / 2))
+                , SA.cy (String.fromFloat (y + h / 2))
+                , SA.r (String.fromFloat radius)
+                , SA.fill ink
+                , SA.class "schulte-particle"
+                , SA.style
+                    ("--dx: "
+                        ++ String.fromFloat (distance * cos angle)
+                        ++ "px; --dy: "
+                        ++ String.fromFloat (distance * sin angle)
+                        ++ "px"
+                    )
+                ]
+                []
+    in
+    Svg.g [] (List.map dot (List.range 0 (count - 1)))
 
 
 {-| Stretch the number to fill its label box, like the tall narrow and the
