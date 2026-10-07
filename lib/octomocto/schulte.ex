@@ -1,10 +1,16 @@
 defmodule Octomocto.Schulte do
   @moduledoc """
   Multiplayer Schulte tables. Each game is a `Octomocto.Schulte.Game`
-  process, found by its id.
+  process, found by its id. Finished fields are saved as
+  `Octomocto.Schulte.Result` rows.
   """
 
-  alias Octomocto.Schulte.Game
+  import Ecto.Query
+
+  alias Octomocto.Repo
+  alias Octomocto.Schulte.{Game, Result}
+
+  @list_size 10
 
   @doc "Starts a new game with a `:random` or a `:classic` layout and returns its id."
   def create_game(layout \\ :random) do
@@ -23,10 +29,11 @@ defmodule Octomocto.Schulte do
   @doc """
   Adds a player for the calling process. The player is removed when the
   process stops. Subscribe to `Game.topic(id)` first to get all updates.
+  The `user_id` is nil for a guest.
   """
-  def join(id) do
+  def join(id, user_id \\ nil) do
     if game_exists?(id) do
-      GenServer.call(Game.via(id), {:join, self()})
+      GenServer.call(Game.via(id), {:join, self(), user_id})
     else
       {:error, :not_found}
     end
@@ -40,5 +47,81 @@ defmodule Octomocto.Schulte do
   @doc "Starts a new field with zero scores, after all numbers are found."
   def restart(id) do
     GenServer.cast(Game.via(id), :restart)
+  end
+
+  @doc """
+  Saves one finished field. Each player is a map with `:user_id` (nil for a
+  guest) and `:score`.
+  """
+  def save_results(game_id, settings, elapsed_ms, players) do
+    now = DateTime.utc_now()
+
+    rows =
+      Enum.map(players, fn player ->
+        %{
+          game_id: game_id,
+          settings: settings,
+          elapsed_ms: elapsed_ms,
+          user_id: player.user_id,
+          score: player.score,
+          inserted_at: now
+        }
+      end)
+
+    Repo.insert_all(Result, rows)
+  end
+
+  @doc """
+  Gives one leaderboard for each settings that have results. Each has the
+  latest games (with all players, the best score first) and the best
+  result of each signed-in user (the fastest first).
+  """
+  def leaderboards do
+    from(r in Result, distinct: true, select: r.settings)
+    |> Repo.all()
+    |> Enum.sort_by(&{&1["type"], &1["players"]})
+    |> Enum.map(&%{settings: &1, latest: latest_games(&1), best: best_results(&1)})
+  end
+
+  defp latest_games(settings) do
+    game_ids =
+      from(r in Result,
+        where: r.settings == type(^settings, :map),
+        group_by: r.game_id,
+        order_by: [desc: max(r.inserted_at)],
+        limit: @list_size,
+        select: r.game_id
+      )
+      |> Repo.all()
+
+    results =
+      from(r in Result,
+        where: r.game_id in ^game_ids,
+        order_by: [desc: r.score],
+        preload: :user
+      )
+      |> Repo.all()
+      |> Enum.group_by(& &1.game_id)
+
+    Enum.map(game_ids, fn game_id ->
+      [first | _] = players = results[game_id]
+      %{game_id: game_id, elapsed_ms: first.elapsed_ms, players: players}
+    end)
+  end
+
+  defp best_results(settings) do
+    best_of_each_user =
+      from(r in Result,
+        where: r.settings == type(^settings, :map) and not is_nil(r.user_id),
+        distinct: r.user_id,
+        order_by: [asc: r.user_id, asc: r.elapsed_ms, asc: r.inserted_at]
+      )
+
+    from(r in subquery(best_of_each_user),
+      order_by: [asc: r.elapsed_ms, asc: r.inserted_at],
+      limit: @list_size,
+      preload: :user
+    )
+    |> Repo.all()
   end
 end

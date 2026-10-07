@@ -2,6 +2,7 @@ defmodule OctomoctoWeb.SchulteChannelTest do
   use OctomoctoWeb.ChannelCase, async: true
 
   alias Octomocto.Schulte.Game
+  alias OctomoctoWeb.UserSocket
 
   setup do
     id = "game-#{System.unique_integer([:positive])}"
@@ -27,6 +28,14 @@ defmodule OctomoctoWeb.SchulteChannelTest do
     push(socket, "pick", %{"number" => 1})
 
     assert_push "state", %{next: 2}
+  end
+
+  test "connect gives the user id from a valid token, and nil for a guest" do
+    {:ok, socket} = connect(OctomoctoWeb.UserSocket, %{"user_token" => UserSocket.user_token(42)})
+    assert socket.assigns.user_id == 42
+
+    {:ok, socket} = connect(OctomoctoWeb.UserSocket, %{"user_token" => "bad"})
+    assert socket.assigns.user_id == nil
   end
 
   test "join fails for an unknown game" do

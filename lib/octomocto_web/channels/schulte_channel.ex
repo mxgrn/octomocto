@@ -1,8 +1,8 @@
 defmodule OctomoctoWeb.SchulteChannel do
   @moduledoc """
-  Connects one browser to a Schulte game. Each join adds a new player. The
-  join reply has the player id and the full game state, and each later
-  change is pushed as a `"state"` event.
+  Connects one browser to a Schulte game. Each join adds a new player (a
+  guest when the socket has no user). The join reply has the player id and
+  the full game state, and each later change is pushed as a `"state"` event.
   """
   use Phoenix.Channel
 
@@ -13,7 +13,7 @@ defmodule OctomoctoWeb.SchulteChannel do
   def join("schulte:" <> game_id, _params, socket) do
     Phoenix.PubSub.subscribe(Octomocto.PubSub, Game.topic(game_id))
 
-    case Schulte.join(game_id) do
+    case Schulte.join(game_id, socket.assigns[:user_id]) do
       {:ok, player_id, state} ->
         socket = assign(socket, game_id: game_id, player_id: player_id)
         {:ok, %{player_id: player_id, state: state}, socket}

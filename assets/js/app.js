@@ -97,7 +97,7 @@ if (schulteNode) {
   try { muted = localStorage.getItem("schulte-muted") === "true" } catch (_e) {}
 
   const schulte = window.Elm.Schulte.init({node: schulteNode, flags: {gameUrl: window.location.href, muted}})
-  const socket = new Socket("/socket")
+  const socket = new Socket("/socket", {params: {user_token: schulteNode.dataset.userToken}})
   socket.connect()
 
   const channel = socket.channel(`schulte:${schulteNode.dataset.gameId}`)

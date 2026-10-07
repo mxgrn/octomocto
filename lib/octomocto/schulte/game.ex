@@ -9,11 +9,13 @@ defmodule Octomocto.Schulte.Game do
   `"schulte_game:<id>"` PubSub topic as `{:schulte_state, state}`.
 
   Each player is bound to the process that joined (a channel). The player
-  is removed when that process stops. The game stops after some time with
+  is removed when that process stops. When all numbers are found, the game
+  saves the result of each player (see `Octomocto.Schulte.save_results/4`). The game stops after some time with
   no players.
   """
   use GenServer, restart: :temporary
 
+  alias Octomocto.Schulte
   alias Octomocto.Schulte.{Classic, Layout}
 
   @total 90
@@ -47,13 +49,14 @@ defmodule Octomocto.Schulte.Game do
   end
 
   @impl true
-  def handle_call({:join, pid}, _from, state) do
+  def handle_call({:join, pid, user_id}, _from, state) do
     Process.monitor(pid)
     player_id = Integer.to_string(System.unique_integer([:positive]))
     {color_name, color} = pick_color(state.players)
 
     player = %{
       pid: pid,
+      user_id: user_id,
       color: color,
       color_name: color_name,
       score: 0,
@@ -74,6 +77,7 @@ defmodule Octomocto.Schulte.Game do
       |> Map.update!(:found_by, &Map.put(&1, number, player_id))
       |> Map.put(:next, number + 1)
       |> stop_clock()
+      |> save_results()
 
     broadcast(state)
     {:noreply, state}
@@ -112,6 +116,8 @@ defmodule Octomocto.Schulte.Game do
     regions = Enum.zip_with(Enum.shuffle(1..@total), shapes, &Map.put(&2, :number, &1))
 
     Map.merge(state, %{
+      # Groups the saved results of this field
+      field_id: Ecto.UUID.generate(),
       regions: regions,
       next: 1,
       found_by: %{},
@@ -122,6 +128,15 @@ defmodule Octomocto.Schulte.Game do
 
   defp stop_clock(state) when state.next > @last, do: %{state | finished_at: now()}
   defp stop_clock(state), do: state
+
+  defp save_results(state) when state.next > @last do
+    settings = %{"type" => Atom.to_string(state.layout), "players" => map_size(state.players)}
+    players = Map.values(state.players)
+    Schulte.save_results(state.field_id, settings, state.finished_at - state.started_at, players)
+    state
+  end
+
+  defp save_results(state), do: state
 
   defp now, do: System.monotonic_time(:millisecond)
 
