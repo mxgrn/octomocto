@@ -118,6 +118,19 @@ if (schulteNode) {
   })
 }
 
+// Show the Telegram Login Widget. The widget script puts its iframe in the
+// place of the script tag, so we add the script into each container.
+// Telegram needs a full URL to send the user back to.
+document.querySelectorAll("[data-telegram-login]").forEach(node => {
+  const script = document.createElement("script")
+  script.async = true
+  script.src = "https://telegram.org/js/telegram-widget.js?22"
+  script.dataset.telegramLogin = node.dataset.telegramLogin
+  script.dataset.size = "large"
+  script.dataset.authUrl = new URL(node.dataset.authPath, window.location.href).href
+  node.appendChild(script)
+})
+
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 

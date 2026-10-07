@@ -1,0 +1,72 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <div class="mx-auto max-w-md space-y-6 py-10">
+    <h1 class="text-center text-3xl font-semibold tracking-tight">Settings</h1>
+
+    <section
+      id="email-settings"
+      class="space-y-3 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+    >
+      <div>
+        <h2 class="font-semibold">Email</h2>
+        <p class="text-sm text-base-content/60">
+          <%= if @current_scope.user.email do %>
+            You sign in with {@current_scope.user.email}.
+          <% else %>
+            Add an email to sign in with a link. If an account with this email exists, we combine the two accounts.
+          <% end %>
+        </p>
+      </div>
+
+      <.form
+        for={@email_form}
+        id="update_email"
+        action={~p"/settings"}
+        method="put"
+        class="space-y-3"
+      >
+        <input type="hidden" name="action" value="update_email" />
+        <.input
+          field={@email_form[:email]}
+          type="email"
+          placeholder="you@example.com"
+          autocomplete="username"
+          spellcheck="false"
+          required
+          class="w-full rounded-xl border-0 bg-slate-50 px-4 py-3 ring-1 ring-slate-200 transition placeholder:text-base-content/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          error_class="ring-red-400"
+        />
+        <button
+          id="update-email-button"
+          class="rounded-xl bg-indigo-600 px-4 py-2.5 font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
+        >
+          {if @current_scope.user.email, do: "Change email", else: "Add email"}
+        </button>
+      </.form>
+    </section>
+
+    <section
+      id="telegram-settings"
+      class="space-y-3 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+    >
+      <div>
+        <h2 class="font-semibold">Telegram</h2>
+        <p class="text-sm text-base-content/60">
+          <%= cond do %>
+            <% @current_scope.user.telegram_username -> %>
+              Connected as @{@current_scope.user.telegram_username}.
+            <% @current_scope.user.telegram_id -> %>
+              Connected.
+            <% true -> %>
+              Connect Telegram to sign in with it. If an account with this Telegram exists, we combine the two accounts.
+          <% end %>
+        </p>
+      </div>
+
+      <OctomoctoWeb.UserSessionHTML.telegram_widget
+        :if={!@current_scope.user.telegram_id}
+        id="telegram-connect"
+        auth_path={~p"/settings/telegram"}
+      />
+    </section>
+  </div>
+</Layouts.app>

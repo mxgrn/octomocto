@@ -1,6 +1,8 @@
 defmodule OctomoctoWeb.Router do
   use OctomoctoWeb, :router
 
+  import OctomoctoWeb.UserAuth
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,6 +10,7 @@ defmodule OctomoctoWeb.Router do
     plug :put_root_layout, html: {OctomoctoWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_scope_for_user
   end
 
   pipeline :api do
@@ -53,5 +56,26 @@ defmodule OctomoctoWeb.Router do
       live_dashboard "/dashboard", metrics: OctomoctoWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
+  end
+
+  ## Authentication routes
+
+  scope "/", OctomoctoWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    get "/settings", UserSettingsController, :edit
+    put "/settings", UserSettingsController, :update
+    get "/settings/confirm-email/:token", UserSettingsController, :confirm_email
+    get "/settings/telegram", UserSettingsController, :connect_telegram
+  end
+
+  scope "/", OctomoctoWeb do
+    pipe_through [:browser]
+
+    get "/signin", UserSessionController, :new
+    get "/signin/:token", UserSessionController, :confirm
+    post "/signin", UserSessionController, :create
+    get "/auth/telegram", UserSessionController, :telegram
+    delete "/signout", UserSessionController, :delete
   end
 end

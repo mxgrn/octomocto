@@ -40,27 +40,31 @@ if config_env() == :dev do
     ]
 end
 
-if config_env() == :prod do
-  # The database is off in prod for now, so DATABASE_URL is not needed.
-  # To turn it back on, remove this line and uncomment the Repo config below.
-  config :octomocto, start_repo: false
+# The bot for the Telegram Login Widget. The bot domain must be set with
+# BotFather (/setdomain), so in dev you need a tunnel to this app.
+if config_env() != :test do
+  config :octomocto, :telegram,
+    bot_token: System.get_env("TELEGRAM_BOT_TOKEN"),
+    bot_username: System.get_env("TELEGRAM_BOT_USERNAME")
+end
 
-  # database_url =
-  #   System.get_env("DATABASE_URL") ||
-  #     raise """
-  #     environment variable DATABASE_URL is missing.
-  #     For example: ecto://USER:PASS@HOST/DATABASE
-  #     """
-  #
-  # maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
-  #
-  # config :octomocto, Octomocto.Repo,
-  #   # ssl: true,
-  #   url: database_url,
-  #   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-  #   # For machines with several cores, consider starting multiple pools of `pool_size`
-  #   # pool_count: 4,
-  #   socket_options: maybe_ipv6
+if config_env() == :prod do
+  database_url =
+    System.get_env("DATABASE_URL") ||
+      raise """
+      environment variable DATABASE_URL is missing.
+      For example: ecto://USER:PASS@HOST/DATABASE
+      """
+
+  maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
+
+  config :octomocto, Octomocto.Repo,
+    # ssl: true,
+    url: database_url,
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    # For machines with several cores, consider starting multiple pools of `pool_size`
+    # pool_count: 4,
+    socket_options: maybe_ipv6
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
@@ -121,21 +125,9 @@ if config_env() == :prod do
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
 
-  # ## Configuring the mailer
-  #
-  # In production you need to configure the mailer to use a different adapter.
-  # Here is an example configuration for Mailgun:
-  #
-  #     config :octomocto, Octomocto.Mailer,
-  #       adapter: Swoosh.Adapters.Mailgun,
-  #       api_key: System.get_env("MAILGUN_API_KEY"),
-  #       domain: System.get_env("MAILGUN_DOMAIN")
-  #
-  # Most non-SMTP adapters require an API client. Swoosh supports Req, Hackney,
-  # and Finch out-of-the-box. This configuration is typically done at
-  # compile-time in your config/prod.exs:
-  #
-  #     config :swoosh, :api_client, Swoosh.ApiClient.Req
-  #
-  # See https://swoosh.hexdocs.pm/Swoosh.html#module-installation for details.
+  # Send emails (for example, sign-in links) with Resend.
+  # The API client is set in config/prod.exs.
+  config :octomocto, Octomocto.Mailer,
+    adapter: Swoosh.Adapters.Resend,
+    api_key: System.get_env("RESEND_API_KEY")
 end

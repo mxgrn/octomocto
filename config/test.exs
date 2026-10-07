@@ -1,5 +1,7 @@
 import Config
 
+config :octomocto, :telegram, bot_token: "test-bot-token", bot_username: "test_bot"
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used

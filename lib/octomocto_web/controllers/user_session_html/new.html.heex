@@ -1,0 +1,12 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <div class="mx-auto max-w-sm space-y-6 py-10">
+    <div class="space-y-2 text-center">
+      <h1 class="text-3xl font-semibold tracking-tight">Sign in</h1>
+      <p :if={@current_scope} class="text-base-content/60">
+        Please sign in again before you change your account.
+      </p>
+    </div>
+
+    <.sign_in_panel current_scope={@current_scope} />
+  </div>
+</Layouts.app>

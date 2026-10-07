@@ -43,6 +43,30 @@ defmodule OctomoctoWeb.Layouts do
       >
         Octomocto
       </.link>
+
+      <nav :if={@current_scope} id="user-menu" class="ml-auto flex items-center gap-4 text-sm">
+        <.link
+          id="settings-link"
+          href={~p"/settings"}
+          class="flex items-center gap-2 text-base-content/70 transition hover:text-base-content"
+        >
+          <img
+            :if={@current_scope.user.avatar_url}
+            src={@current_scope.user.avatar_url}
+            alt=""
+            class="size-6 rounded-full"
+          />
+          {@current_scope.user.name || @current_scope.user.email}
+        </.link>
+        <.link
+          id="sign-out-link"
+          href={~p"/signout"}
+          method="delete"
+          class="text-base-content/50 transition hover:text-base-content"
+        >
+          Sign out
+        </.link>
+      </nav>
     </header>
 
     <main class="px-4 pb-6 sm:px-6 lg:px-8">
