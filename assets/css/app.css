@@ -131,6 +131,16 @@
 
 .schulte-shake { animation: schulte-shake 220ms ease-in-out; }
 
+/* Header. The eyes in the wordmark blink one time when the pointer moves onto it.
+   The blue eyes blink a little after the orange eyes. */
+@keyframes wordmark-blink {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.1); }
+}
+.wordmark-eye { transform-box: fill-box; transform-origin: center; }
+.group:hover .wordmark-eye { animation: wordmark-blink 250ms ease-in-out; }
+.group:hover .wordmark-eye-late { animation-delay: 80ms; }
+
 /* Home page. The two octopi move apart and then come back together. */
 @keyframes octo-top {
   0%, 100% { transform: translateY(0); }

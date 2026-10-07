@@ -39,22 +39,7 @@ defmodule OctomoctoWeb.Layouts do
     ~H"""
     <header id="site-header" class="flex h-16 items-center px-4 sm:px-6 lg:px-8">
       <.link id="home-link" navigate={~p"/"} class="group block">
-        <img
-          src={~p"/images/wordmark.svg"}
-          alt="Octomocto"
-          class={[
-            "transition duration-300 group-hover:scale-105 dark:hidden",
-            if(@home, do: "h-10", else: "h-7")
-          ]}
-        />
-        <img
-          src={~p"/images/wordmark-on-dark.svg"}
-          alt="Octomocto"
-          class={[
-            "hidden transition duration-300 group-hover:scale-105 dark:block",
-            if(@home, do: "h-10", else: "h-7")
-          ]}
-        />
+        <.wordmark class={if(@home, do: "h-8", else: "h-6")} />
       </.link>
 
       <div class="ml-auto flex items-center gap-4">
@@ -108,6 +93,64 @@ defmodule OctomoctoWeb.Layouts do
     </main>
 
     <.flash_group flash={@flash} />
+    """
+  end
+
+  @doc """
+  Renders the wordmark from `wordmark.svg` inline, so that the eyes in the
+  "o" letters can blink when the pointer moves onto the parent `group`.
+  """
+  attr :class, :any, default: nil
+
+  def wordmark(assigns) do
+    ~H"""
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="-10 12 692 98"
+      role="img"
+      aria-label="Octomocto"
+      class={@class}
+    >
+      <g
+        fill="none"
+        stroke="currentColor"
+        stroke-width="16"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <g class="text-octo-orange dark:text-octo-orange-light">
+          <.octo_letters />
+        </g>
+        <g class="text-octo-navy dark:text-white">
+          <path d="M292 48V100" />
+          <path d="M292 70A22 22 0 0 1 336 70V100" />
+          <path d="M336 70A22 22 0 0 1 380 70V100" />
+        </g>
+        <g class="text-octo-indigo dark:text-octo-indigo-light" transform="translate(408 0)">
+          <.octo_letters />
+        </g>
+      </g>
+      <g class="fill-octo-navy dark:fill-white">
+        <circle :for={cx <- [33, 245]} class="wordmark-eye" cx={cx} cy="74" r="9" />
+        <circle
+          :for={cx <- [427, 639]}
+          class="wordmark-eye wordmark-eye-late"
+          cx={cx}
+          cy="74"
+          r="9"
+        />
+      </g>
+    </svg>
+    """
+  end
+
+  defp octo_letters(assigns) do
+    ~H"""
+    <circle cx="26" cy="74" r="26" />
+    <path d="M124.4 55.6A26 26 0 1 0 124.4 92.4" />
+    <path d="M166 22V84Q166 100 182 100" />
+    <path d="M152 48H184" />
+    <circle cx="238" cy="74" r="26" />
     """
   end
 
