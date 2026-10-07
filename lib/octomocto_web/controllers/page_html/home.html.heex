@@ -9,7 +9,7 @@
     </div>
   </div>
 
-  <div class="mx-auto flex max-w-xl flex-col gap-10 pt-4 pb-10">
+  <div class="mx-auto flex max-w-3xl flex-col gap-10 pt-4 pb-10">
     <section id="hero" class="flex flex-col items-center gap-6 text-center">
       <img src={~p"/images/mark.svg"} alt="" class="octo-bob h-40 drop-shadow-sm dark:hidden" />
       <img
@@ -25,9 +25,15 @@
           class="hidden w-60 sm:w-72 dark:block"
         />
       </h1>
+      <p
+        id="slogan"
+        class="-mt-2 text-lg font-medium tracking-tight text-octo-navy/70 sm:text-xl dark:text-base-content/70"
+      >
+        Use your heads
+      </p>
     </section>
 
-    <section :if={!@current_scope} id="sign-in" class="space-y-3">
+    <section :if={!@current_scope} id="sign-in" class="mx-auto w-full max-w-xl space-y-3">
       <h2 class="text-xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
         Sign in
       </h2>
@@ -39,12 +45,12 @@
         Games
       </h2>
 
-      <ul id="games" class="flex flex-col gap-3">
+      <ul id="games" class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <li :for={game <- @games}>
           <.link
             id={"game-#{game.id}"}
             navigate={game.path}
-            class="group flex items-center gap-4 rounded-2xl bg-white/80 p-4 shadow-sm shadow-octo-indigo/5 ring-1 ring-octo-indigo/10 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md hover:shadow-octo-orange/10 hover:ring-octo-orange/30 dark:bg-base-200/60 dark:shadow-black/20 dark:ring-white/10 dark:hover:bg-base-200 dark:hover:ring-octo-orange-light/40"
+            class="group flex h-full flex-col items-center gap-3 rounded-2xl bg-white/80 p-5 text-center shadow-sm shadow-octo-indigo/5 ring-1 ring-octo-indigo/10 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md hover:shadow-octo-orange/10 hover:ring-octo-orange/30 dark:bg-base-200/60 dark:shadow-black/20 dark:ring-white/10 dark:hover:bg-base-200 dark:hover:ring-octo-orange-light/40"
           >
             <div class={[
               "flex size-14 shrink-0 items-center justify-center rounded-2xl text-2xl transition group-hover:scale-105",
@@ -52,16 +58,12 @@
             ]}>
               {game.icon}
             </div>
-            <div class="min-w-0 flex-1">
+            <div class="min-w-0">
               <h3 class="font-semibold text-octo-navy dark:text-base-content">{game.name}</h3>
               <p class="text-sm text-octo-navy/60 dark:text-base-content/60">
                 {game.description}
               </p>
             </div>
-            <.icon
-              name="hero-chevron-right"
-              class="size-5 text-octo-navy/25 transition group-hover:translate-x-0.5 group-hover:text-octo-orange dark:text-base-content/25 dark:group-hover:text-octo-orange-light"
-            />
           </.link>
         </li>
       </ul>

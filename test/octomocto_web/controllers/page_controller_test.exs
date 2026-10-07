@@ -14,6 +14,14 @@ defmodule OctomoctoWeb.PageControllerTest do
     assert hrefs == ["/trains", "/astronaut", "/schulte"]
   end
 
+  test "the hero shows the slogan", %{conn: conn} do
+    conn = get(conn, ~p"/")
+
+    document = LazyHTML.from_document(html_response(conn, 200))
+
+    assert LazyHTML.query(document, "#hero #slogan") |> LazyHTML.text() =~ "Use your heads"
+  end
+
   test "the header has the theme selector", %{conn: conn} do
     conn = get(conn, ~p"/")
 
