@@ -8,11 +8,18 @@ defmodule Octomocto.Schulte.Layout do
   client stretches the number to fill the box, and a fill `color`. A path
   can have a hole for the round shape inside it, so the client draws it with
   `fill-rule="evenodd"`.
+
+  The top right corner has an empty box for the time and the next number,
+  as on the classic board (see `info_box/0`).
   """
 
   @width 1600
   @height 900
   @min_side 70
+  # The classic info box (274 × 74 on a board 1116 wide), scaled to look
+  # as large on the screen
+  @box_w 393
+  @box_h 106
 
   @colors ["#fbf5e1", "#a9dccf", "#f6aeab", "#f6bd7f"]
   @flat_weights [60, 15, 12, 13]
@@ -20,11 +27,16 @@ defmodule Octomocto.Schulte.Layout do
 
   def size, do: {@width, @height}
 
-  @doc "Returns `count` regions that together fill the board."
-  def generate(count) do
-    avg_area = @width * @height / count
+  @doc "Returns the empty box in the top right corner as `[x, y, w, h]`."
+  def info_box, do: [@width - @box_w, 0, @box_w, @box_h]
 
-    case cut([{0, 0, @width, @height}], [], count, avg_area) do
+  @doc "Returns `count` regions that together fill the board, but not the info box."
+  def generate(count) do
+    avg_area = (@width * @height - @box_w * @box_h) / count
+    left = {0, 0, @width - @box_w, @height}
+    under_box = {@width - @box_w, @box_h, @box_w, @height - @box_h}
+
+    case cut([left, under_box], [], count, avg_area) do
       {:ok, regions} -> Enum.map(regions, &finish/1)
       :stuck -> generate(count)
     end

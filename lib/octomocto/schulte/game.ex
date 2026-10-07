@@ -169,11 +169,11 @@ defmodule Octomocto.Schulte.Game do
 
     # How narrow a number can get. The classic board has very narrow
     # shapes, where the printed puzzle squeezes the numbers a lot.
-    # The classic board has an empty box for the time and the next number.
+    # Both boards have an empty box for the time and the next number.
     {size, min_stretch, info_box} =
       if state.layout == :classic,
         do: {Classic.size(), 0.1, Classic.info_box()},
-        else: {Layout.size(), 0.3, nil}
+        else: {Layout.size(), 0.3, Layout.info_box()}
 
     %{
       board: Tuple.to_list(size),

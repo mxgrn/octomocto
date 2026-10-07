@@ -443,11 +443,6 @@ viewGame model me game =
                         ]
                     , p [ class "text-sm opacity-60" ] [ text "Click the numbers in order. The first click gets the point." ]
                     ]
-                , if game.infoBox == Nothing then
-                    viewNext game
-
-                  else
-                    text ""
                 ]
             , viewShareLink model
             , viewScores me game.players
@@ -507,15 +502,6 @@ nextText game =
 
     else
         String.fromInt game.next
-
-
-viewNext : Game -> Html Msg
-viewNext game =
-    div [ id "schulte-next", class "flex shrink-0 flex-col items-center rounded-2xl bg-emerald-600 px-4 py-1.5 text-white shadow-lg shadow-emerald-600/25 lg:w-full lg:py-3" ]
-        [ span [ class "text-[10px] font-medium uppercase tracking-widest opacity-80" ] [ text "Find" ]
-        , span [ class "text-2xl font-bold leading-tight tabular-nums" ]
-            [ text (nextText game) ]
-        ]
 
 
 viewShareLink : Model -> Html Msg
