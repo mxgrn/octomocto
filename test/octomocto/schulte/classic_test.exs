@@ -18,7 +18,7 @@ defmodule Octomocto.Schulte.ClassicTest do
 
   test "a classic game puts the numbers into the same shapes in a random order" do
     id = "game-#{System.unique_integer([:positive])}"
-    start_supervised!({Game, {id, :classic}})
+    start_supervised!({Game, {id, :classic, 1}})
 
     {:ok, _player_id, state} = Schulte.join(id)
 
@@ -30,7 +30,7 @@ defmodule Octomocto.Schulte.ClassicTest do
 
   test "a classic game has a box for the time and the next number" do
     id = "game-#{System.unique_integer([:positive])}"
-    start_supervised!({Game, {id, :classic}})
+    start_supervised!({Game, {id, :classic, 1}})
 
     {:ok, _player_id, state} = Schulte.join(id)
 

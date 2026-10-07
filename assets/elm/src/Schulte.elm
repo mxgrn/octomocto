@@ -14,6 +14,10 @@ player only.
 The module compares each new state with the old one and sends the names
 of the sounds to play out through a port. The player can mute the sounds.
 
+The game is for a set number of players. Before all of them are in, the
+board is hidden and nobody can pick. A browser that joins a full game only
+watches: it has no player id.
+
 The port names start with "schulte", because Elm does not allow two ports
 with the same name in one bundle.
 
@@ -106,14 +110,24 @@ type alias Game =
     -- The time since the field started. After the end, the final time.
     , elapsedMs : Int
 
-    -- The box for the time and the next number (on the classic board only)
+    -- The box for the time and the next number
     , infoBox : Maybe Label
+
+    -- True until the game has all its players. The cells are empty then.
+    , waiting : Bool
+    , playersNeeded : Int
     }
+
+
+{-| The player id of this browser. Nothing for a watcher.
+-}
+type alias Me =
+    Maybe String
 
 
 type Connection
     = Connecting
-    | Joined String Game
+    | Joined Me Game
     | Failed String
 
 
@@ -205,8 +219,11 @@ update msg model =
 
         Pick number ->
             case model.connection of
-                Joined _ game ->
-                    if number == game.next then
+                Joined (Just _) game ->
+                    if game.waiting then
+                        ( model, Cmd.none )
+
+                    else if number == game.next then
                         ( model, schultePick number )
 
                     else if number > game.next then
@@ -274,7 +291,7 @@ playSounds model names =
 {-| The sounds for the change from the old state to the new one: a found
 number (by this player or by another one), and the end of the game.
 -}
-stateSounds : String -> Game -> Game -> List String
+stateSounds : Me -> Game -> Game -> List String
 stateSounds me old new =
     let
         wasFound number =
@@ -289,7 +306,7 @@ stateSounds me old new =
             if finished new && not (finished old) then
                 case winners new.players of
                     [ winner ] ->
-                        if winner.id == me then
+                        if isMe me winner then
                             [ "win" ]
 
                         else
@@ -301,7 +318,7 @@ stateSounds me old new =
             else
                 []
     in
-    (if List.member me newFinders then
+    (if List.any (\id -> me == Just id) newFinders then
         [ "found" ]
 
      else if newFinders /= [] then
@@ -311,6 +328,11 @@ stateSounds me old new =
         []
     )
         ++ endSound
+
+
+isMe : Me -> Player -> Bool
+isMe me player =
+    me == Just player.id
 
 
 winners : List Player -> List Player
@@ -330,10 +352,10 @@ syncClock game =
 -- DECODERS
 
 
-joinedDecoder : Decoder ( String, Game )
+joinedDecoder : Decoder ( Me, Game )
 joinedDecoder =
     Decode.map2 Tuple.pair
-        (Decode.field "player_id" Decode.string)
+        (Decode.field "player_id" (Decode.nullable Decode.string))
         (Decode.field "state" gameDecoder)
 
 
@@ -349,6 +371,8 @@ gameDecoder =
         (Decode.field "min_stretch" Decode.float)
         (Decode.field "elapsed_ms" Decode.int)
         |> andMap (Decode.field "info_box" (Decode.nullable labelDecoder))
+        |> andMap (Decode.field "waiting" Decode.bool)
+        |> andMap (Decode.field "players_needed" Decode.int)
 
 
 andMap : Decoder a -> Decoder (a -> b) -> Decoder b
@@ -396,7 +420,7 @@ subscriptions model =
         , schulteJoinFailed GotJoinFailed
         , case model.connection of
             Joined _ game ->
-                if game.infoBox /= Nothing && not (finished game) then
+                if game.infoBox /= Nothing && not game.waiting && not (finished game) then
                     Time.every 200 Tick
 
                 else
@@ -424,7 +448,7 @@ view model =
             viewGame model me game
 
 
-viewGame : Model -> String -> Game -> Html Msg
+viewGame : Model -> Me -> Game -> Html Msg
 viewGame model me game =
     div [ id "schulte-root", class "relative left-1/2 flex w-[min(96vw,1400px)] -translate-x-1/2 flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
         [ aside [ id "schulte-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
@@ -446,11 +470,20 @@ viewGame model me game =
                 ]
             , viewShareLink model
             , viewScores me game.players
+            , if me == Nothing then
+                p [ id "schulte-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200" ]
+                    [ text "This game is full, so you can only watch it." ]
+
+              else
+                text ""
             ]
         , div [ class "min-w-0 flex-1" ]
             [ div [ class "relative mx-auto", style "width" (fieldWidth game) ]
                 [ viewField model game
-                , if finished game then
+                , if game.waiting then
+                    viewWaiting game
+
+                  else if finished game then
                     viewResult me game
 
                   else
@@ -530,7 +563,7 @@ viewShareLink model =
         ]
 
 
-viewScores : String -> List Player -> Html Msg
+viewScores : Me -> List Player -> Html Msg
 viewScores me players =
     ul [ id "schulte-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
         (List.map
@@ -548,9 +581,9 @@ viewScores me players =
         )
 
 
-playerName : String -> Player -> String
+playerName : Me -> Player -> String
 playerName me player =
-    if player.id == me then
+    if isMe me player then
         player.colorName ++ " (you)"
 
     else
@@ -771,7 +804,28 @@ viewNumber minStretch cell =
         [ Svg.text (String.fromInt cell.number) ]
 
 
-viewResult : String -> Game -> Html Msg
+{-| Covers the empty board until all players are in.
+-}
+viewWaiting : Game -> Html Msg
+viewWaiting game =
+    div
+        [ id "schulte-waiting"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-emerald-950/80 p-4 text-center text-white"
+        ]
+        [ p [ class "text-3xl font-semibold" ] [ text "Waiting for players" ]
+        , p [ id "schulte-waiting-count", class "text-lg tabular-nums opacity-80" ]
+            [ text
+                (String.fromInt (List.length game.players)
+                    ++ " of "
+                    ++ String.fromInt game.playersNeeded
+                    ++ " players are in"
+                )
+            ]
+        , p [ class "text-sm opacity-60" ] [ text "Send the link to the other players. The race starts when all of them are in." ]
+        ]
+
+
+viewResult : Me -> Game -> Html Msg
 viewResult me game =
     let
         players =
@@ -786,7 +840,7 @@ viewResult me game =
                     "Done!"
 
                 ( False, [ winner ] ) ->
-                    if winner.id == me then
+                    if isMe me winner then
                         "You win!"
 
                     else
@@ -820,12 +874,16 @@ viewResult me game =
                     )
                     ranked
                 )
-        , button
-            [ id "schulte-play-again"
-            , class "rounded-full bg-white px-6 py-2.5 font-medium text-emerald-800 shadow-lg transition hover:-translate-y-0.5 hover:bg-emerald-50 active:translate-y-0"
-            , onClick Restart
-            ]
-            [ text "Play again" ]
+        , if me == Nothing then
+            text ""
+
+          else
+            button
+                [ id "schulte-play-again"
+                , class "rounded-full bg-white px-6 py-2.5 font-medium text-emerald-800 shadow-lg transition hover:-translate-y-0.5 hover:bg-emerald-50 active:translate-y-0"
+                , onClick Restart
+                ]
+                [ text "Play again" ]
         , a
             [ id "schulte-leaderboards-link"
             , href "/schulte"

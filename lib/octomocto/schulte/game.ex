@@ -8,9 +8,14 @@ defmodule Octomocto.Schulte.Game do
   field and the players, and broadcasts each change on the
   `"schulte_game:<id>"` PubSub topic as `{:schulte_state, state}`.
 
+  The game is for a set number of players (`needed`). The clock of each
+  field starts when the game has all its players, and nobody can pick a
+  number before that. A process that joins a full game only watches.
+
   Each player is bound to the process that joined (a channel). The player
-  is removed when that process stops. When all numbers are found, the game
-  saves the result of each player (see `Octomocto.Schulte.save_results/4`). The game stops after some time with
+  is removed when that process stops. When all numbers are found with all
+  players still in the game, the game saves the result of each player (see
+  `Octomocto.Schulte.save_results/4`). The game stops after some time with
   no players.
   """
   use GenServer, restart: :temporary
@@ -34,8 +39,9 @@ defmodule Octomocto.Schulte.Game do
     {"indigo", "#4f46e5"}
   ]
 
-  def start_link({id, layout}) when layout in [:random, :classic] do
-    GenServer.start_link(__MODULE__, {id, layout}, name: via(id))
+  def start_link({id, layout, needed})
+      when layout in [:random, :classic] and needed in 1..4 do
+    GenServer.start_link(__MODULE__, {id, layout, needed}, name: via(id))
   end
 
   def via(id), do: {:via, Registry, {Octomocto.Schulte.Registry, id}}
@@ -43,12 +49,17 @@ defmodule Octomocto.Schulte.Game do
   def topic(id), do: "schulte_game:" <> id
 
   @impl true
-  def init({id, layout}) do
+  def init({id, layout, needed}) do
     schedule_idle_check()
-    {:ok, new_field(%{id: id, layout: layout, players: %{}})}
+    {:ok, new_field(%{id: id, layout: layout, needed: needed, players: %{}})}
   end
 
   @impl true
+  def handle_call({:join, _pid, _user_id}, _from, state)
+      when map_size(state.players) >= state.needed do
+    {:reply, {:ok, nil, public(state)}, state}
+  end
+
   def handle_call({:join, pid, user_id}, _from, state) do
     Process.monitor(pid)
     player_id = Integer.to_string(System.unique_integer([:positive]))
@@ -63,14 +74,15 @@ defmodule Octomocto.Schulte.Game do
       joined_at: System.monotonic_time()
     }
 
-    state = put_in(state.players[player_id], player)
+    state = put_in(state.players[player_id], player) |> start_clock()
     broadcast(state)
     {:reply, {:ok, player_id, public(state)}, state}
   end
 
   @impl true
   def handle_cast({:pick, player_id, number}, %{next: number} = state)
-      when is_map_key(state.players, player_id) and number <= @last do
+      when is_map_key(state.players, player_id) and state.started_at != nil and
+             number <= @last do
     state =
       state
       |> update_in([:players, player_id, :score], &(&1 + 1))
@@ -87,7 +99,7 @@ defmodule Octomocto.Schulte.Game do
 
   def handle_cast(:restart, state) when state.next > @last do
     players = Map.new(state.players, fn {id, p} -> {id, %{p | score: 0}} end)
-    state = new_field(%{state | players: players})
+    state = %{state | players: players} |> new_field() |> start_clock()
     broadcast(state)
     {:noreply, state}
   end
@@ -121,16 +133,24 @@ defmodule Octomocto.Schulte.Game do
       regions: regions,
       next: 1,
       found_by: %{},
-      started_at: now(),
+      # Nil until the game has all its players
+      started_at: nil,
       finished_at: nil
     })
   end
 
+  defp start_clock(%{started_at: nil} = state)
+       when map_size(state.players) == state.needed,
+       do: %{state | started_at: now()}
+
+  defp start_clock(state), do: state
+
   defp stop_clock(state) when state.next > @last, do: %{state | finished_at: now()}
   defp stop_clock(state), do: state
 
-  defp save_results(state) when state.next > @last do
-    settings = %{"type" => Atom.to_string(state.layout), "players" => map_size(state.players)}
+  defp save_results(state)
+       when state.next > @last and map_size(state.players) == state.needed do
+    settings = %{"type" => Atom.to_string(state.layout), "players" => state.needed}
     players = Map.values(state.players)
     Schulte.save_results(state.field_id, settings, state.finished_at - state.started_at, players)
     state
@@ -175,15 +195,26 @@ defmodule Octomocto.Schulte.Game do
         do: {Classic.size(), 0.1, Classic.info_box()},
         else: {Layout.size(), 0.3, Layout.info_box()}
 
+    waiting? = state.started_at == nil
+
+    # Do not show the numbers before the start, so that nobody can look
+    # for them early.
+    cells =
+      if waiting?,
+        do: [],
+        else: Enum.map(state.regions, &Map.put(&1, :found_by, state.found_by[&1.number]))
+
     %{
       board: Tuple.to_list(size),
       min_stretch: min_stretch,
       info_box: info_box,
-      elapsed_ms: (state.finished_at || now()) - state.started_at,
+      waiting: waiting?,
+      elapsed_ms: if(waiting?, do: 0, else: (state.finished_at || now()) - state.started_at),
       total: @last,
       next: state.next,
-      cells: Enum.map(state.regions, &Map.put(&1, :found_by, state.found_by[&1.number])),
-      players: players
+      cells: cells,
+      players: players,
+      players_needed: state.needed
     }
   end
 end

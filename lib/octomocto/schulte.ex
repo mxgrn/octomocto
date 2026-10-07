@@ -12,12 +12,18 @@ defmodule Octomocto.Schulte do
 
   @list_size 10
 
-  @doc "Starts a new game with a `:random` or a `:classic` layout and returns its id."
-  def create_game(layout \\ :random) do
+  @doc """
+  Starts a new game with a `:random` or a `:classic` layout for the given
+  number of players, and returns its id.
+  """
+  def create_game(layout, players) do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
 
     {:ok, _pid} =
-      DynamicSupervisor.start_child(Octomocto.Schulte.GameSupervisor, {Game, {id, layout}})
+      DynamicSupervisor.start_child(
+        Octomocto.Schulte.GameSupervisor,
+        {Game, {id, layout, players}}
+      )
 
     id
   end
@@ -29,7 +35,8 @@ defmodule Octomocto.Schulte do
   @doc """
   Adds a player for the calling process. The player is removed when the
   process stops. Subscribe to `Game.topic(id)` first to get all updates.
-  The `user_id` is nil for a guest.
+  The `user_id` is nil for a guest. When the game has all its players, the
+  new process only watches, and the player id is nil.
   """
   def join(id, user_id \\ nil) do
     if game_exists?(id) do
@@ -72,15 +79,13 @@ defmodule Octomocto.Schulte do
   end
 
   @doc """
-  Gives one leaderboard for each settings that have results. Each has the
-  latest games (with all players, the best score first) and the best
-  result of each signed-in user (the fastest first).
+  Gives the leaderboard for the settings, for example
+  `%{"type" => "classic", "players" => 2}`: the latest games (with all
+  players, the best score first) and the best result of each signed-in
+  user (the fastest first).
   """
-  def leaderboards do
-    from(r in Result, distinct: true, select: r.settings)
-    |> Repo.all()
-    |> Enum.sort_by(&{&1["type"], &1["players"]})
-    |> Enum.map(&%{settings: &1, latest: latest_games(&1), best: best_results(&1)})
+  def leaderboard(settings) do
+    %{latest: latest_games(settings), best: best_results(settings)}
   end
 
   defp latest_games(settings) do

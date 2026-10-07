@@ -9,78 +9,73 @@
         Find the numbers from 1 to 90 in order. The first player to click the next number gets the point.
       </p>
     </div>
-    <.link
-      id="new-classic-game"
-      href={~p"/schulte?layout=classic"}
-      method="post"
-      class="rounded-full bg-emerald-600 px-6 py-3 font-medium text-white shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-xl active:translate-y-0"
-    >
-      New game on the classic board
-    </.link>
+
+    <div id="schulte-settings" class="flex w-full flex-col gap-4">
+      <.setting label="Board">
+        <.option
+          :for={{value, label} <- [{"classic", "Classic"}, {"random", "Random"}]}
+          id={"board-#{value}"}
+          selected={@board == value}
+          href={~p"/schulte?#{[board: value, players: @players]}"}
+        >
+          {label}
+        </.option>
+      </.setting>
+      <.setting label="Players">
+        <.option
+          :for={n <- 1..4}
+          id={"players-#{n}"}
+          selected={@players == n}
+          href={~p"/schulte?#{[board: @board, players: n]}"}
+        >
+          {n}
+        </.option>
+      </.setting>
+    </div>
+
     <.link
       id="new-game"
-      href={~p"/schulte"}
+      href={~p"/schulte?#{[board: @board, players: @players]}"}
       method="post"
-      class="-mt-2 rounded-full px-5 py-2 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200 transition hover:-translate-y-0.5 hover:bg-emerald-50 active:translate-y-0"
+      class="rounded-full bg-emerald-600 px-8 py-3 font-medium text-white shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-xl active:translate-y-0"
     >
       New game
     </.link>
     <p class="text-sm text-base-content/50">
-      You get a link to share with other players. A new game has a new random board, but the classic board is always the same.
+      You get a link to share with other players. The race starts when all players are in. The classic board is always the same, and the random board is new for each game.
     </p>
   </div>
 
-  <div
-    :if={@leaderboards != []}
-    id="schulte-leaderboards"
-    class="mx-auto max-w-3xl space-y-10 pb-16"
-  >
-    <section
-      :for={board <- @leaderboards}
-      id={"leaderboard-#{board.settings["type"]}-#{board.settings["players"]}"}
-      class="space-y-4"
+  <div id="schulte-leaderboard" class="mx-auto grid max-w-3xl gap-4 pb-16 md:grid-cols-2">
+    <.score_list
+      id="latest-games"
+      icon="hero-clock"
+      icon_class="text-emerald-600"
+      title="Latest games"
+      empty={@leaderboard.latest == []}
     >
-      <h2 class="text-center text-sm font-semibold uppercase tracking-widest text-base-content/50">
-        {settings_title(board.settings)}
-      </h2>
-      <div class="grid gap-4 md:grid-cols-2">
-        <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
-          <h3 class="mb-3 flex items-center gap-2 font-semibold">
-            <.icon name="hero-clock" class="size-4 text-emerald-600" /> Latest games
-          </h3>
-          <ol class="latest-games divide-y divide-base-content/5 text-sm">
-            <li
-              :for={game <- board.latest}
-              id={"latest-game-#{game.game_id}"}
-              class="flex items-baseline gap-3 py-2"
-            >
-              <span class="flex-1 truncate">
-                {Enum.map_join(game.players, ", ", &player_name(&1.user))}
-              </span>
-              <span class="font-medium tabular-nums">{format_time(game.elapsed_ms)}</span>
-            </li>
-          </ol>
-        </div>
-        <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
-          <h3 class="mb-3 flex items-center gap-2 font-semibold">
-            <.icon name="hero-trophy" class="size-4 text-amber-500" /> Best results
-          </h3>
-          <ol class="best-results divide-y divide-base-content/5 text-sm">
-            <li
-              :for={{result, place} <- Enum.with_index(board.best, 1)}
-              id={"best-result-#{result.id}"}
-              class="flex items-baseline gap-3 py-2"
-            >
-              <span class="w-5 text-right tabular-nums text-base-content/40">{place}</span>
-              <span class="flex-1 truncate">{player_name(result.user)}</span>
-              <span class="font-medium tabular-nums">{format_time(result.elapsed_ms)}</span>
-            </li>
-            <li :if={board.best == []} class="py-2 text-base-content/50">
-              Only signed-in players get a place here.
-            </li>
-          </ol>
-        </div>
-      </div>
-    </section>
+      <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
+        <span class="flex-1 truncate">
+          {Enum.map_join(game.players, ", ", &player_name(&1.user))}
+        </span>
+        <span class="font-medium tabular-nums">{format_time(game.elapsed_ms)}</span>
+      </li>
+    </.score_list>
+    <.score_list
+      id="best-results"
+      icon="hero-trophy"
+      icon_class="text-amber-500"
+      title="Best results"
+      empty={@leaderboard.best == []}
+    >
+      <li
+        :for={{result, place} <- Enum.with_index(@leaderboard.best, 1)}
+        class="flex items-baseline gap-3 py-2"
+      >
+        <span class="w-5 text-right tabular-nums text-base-content/40">{place}</span>
+        <span class="flex-1 truncate">{player_name(result.user)}</span>
+        <span class="font-medium tabular-nums">{format_time(result.elapsed_ms)}</span>
+      </li>
+    </.score_list>
   </div>
 </Layouts.app>

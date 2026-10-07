@@ -3,6 +3,7 @@ defmodule OctomoctoWeb.SchulteChannel do
   Connects one browser to a Schulte game. Each join adds a new player (a
   guest when the socket has no user). The join reply has the player id and
   the full game state, and each later change is pushed as a `"state"` event.
+  The player id is nil when the game is full: then the browser only watches.
   """
   use Phoenix.Channel
 
