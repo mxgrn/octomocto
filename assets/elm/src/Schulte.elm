@@ -597,9 +597,6 @@ viewCell model minStretch cell =
             if shaking then
                 "#fca5a5"
 
-            else if found then
-                "#d6d3d1"
-
             else
                 cell.color
     in
@@ -623,7 +620,11 @@ viewCell model minStretch cell =
         , SE.onClick (Pick cell.number)
         ]
         [ Svg.path [ SA.d cell.d, SA.fill fill, SA.fillRule "evenodd", SA.stroke ink, SA.strokeWidth "3" ] []
-        , viewNumber minStretch found cell
+        , if found then
+            text ""
+
+          else
+            viewNumber minStretch cell
         ]
 
 
@@ -631,8 +632,8 @@ viewCell model minStretch cell =
 wide numbers in a printed puzzle. The stretch is kept between `minStretch` and
 3 times the normal width, so that the digits stay readable.
 -}
-viewNumber : Float -> Bool -> Cell -> Svg msg
-viewNumber minStretch found cell =
+viewNumber : Float -> Cell -> Svg msg
+viewNumber minStretch cell =
     let
         { x, y, w, h } =
             cell.label
@@ -666,13 +667,6 @@ viewNumber minStretch found cell =
         , SA.fontFamily "'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue', Arial, sans-serif"
         , SA.fontWeight "700"
         , SA.fill ink
-        , SA.opacity
-            (if found then
-                "0.3"
-
-             else
-                "1"
-            )
         , SA.pointerEvents "none"
         ]
         [ Svg.text (String.fromInt cell.number) ]
