@@ -20,8 +20,8 @@ with the same name in one bundle.
 -}
 
 import Browser
-import Html exposing (Html, aside, button, div, h1, input, li, ol, p, span, text, ul)
-import Html.Attributes exposing (class, id, readonly, style, value)
+import Html exposing (Html, a, aside, button, div, h1, input, li, ol, p, span, text, ul)
+import Html.Attributes exposing (class, href, id, readonly, style, value)
 import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (Decoder)
 import Process
@@ -431,7 +431,14 @@ viewGame model me game =
             [ div [ class "flex items-end justify-between gap-4 lg:flex-col lg:items-start" ]
                 [ div []
                     [ div [ class "flex items-center gap-2" ]
-                        [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Schulte Race" ]
+                        [ h1 [ class "text-2xl font-semibold tracking-tight" ]
+                            [ a
+                                [ id "schulte-title-link"
+                                , href "/schulte"
+                                , class "transition hover:text-emerald-600"
+                                ]
+                                [ text "Schulte Race" ]
+                            ]
                         , viewMuteButton model.muted
                         ]
                     , p [ class "text-sm opacity-60" ] [ text "Click the numbers in order. The first click gets the point." ]
@@ -831,6 +838,12 @@ viewResult me game =
             , onClick Restart
             ]
             [ text "Play again" ]
+        , a
+            [ id "schulte-leaderboards-link"
+            , href "/schulte"
+            , class "text-sm font-medium text-white/80 underline-offset-4 transition hover:text-white hover:underline"
+            ]
+            [ text "Latest games and best results" ]
         ]
 
 
