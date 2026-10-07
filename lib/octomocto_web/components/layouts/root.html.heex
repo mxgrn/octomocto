@@ -16,12 +16,34 @@
     <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
     </script>
     <script>
+      // The theme mode is "system", "light" or "dark". "system" follows the OS setting.
       (() => {
         const media = matchMedia("(prefers-color-scheme: dark)");
-        const applyTheme = () =>
-          document.documentElement.setAttribute("data-theme", media.matches ? "dark" : "light");
+        const html = document.documentElement;
+        // Kept in memory too, for browsers that block localStorage
+        let mode = "system";
+        try {
+          mode = localStorage.getItem("phx:theme") || "system";
+        } catch {}
+        const applyTheme = () => {
+          const dark = mode === "dark" || (mode === "system" && media.matches);
+          html.setAttribute("data-theme", dark ? "dark" : "light");
+          html.setAttribute("data-theme-mode", mode);
+        };
         applyTheme();
         media.addEventListener("change", applyTheme);
+        window.addEventListener("storage", e => {
+          if (e.key !== "phx:theme") return;
+          mode = e.newValue || "system";
+          applyTheme();
+        });
+        window.addEventListener("phx:set-theme", e => {
+          mode = e.target.dataset.phxTheme;
+          try {
+            localStorage.setItem("phx:theme", mode);
+          } catch {}
+          applyTheme();
+        });
       })();
     </script>
   </head>

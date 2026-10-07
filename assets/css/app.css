@@ -98,6 +98,9 @@
   --color-octo-indigo: #4B4BE8;
   --color-octo-navy: #171532;
   --color-octo-mist: #EEF0FA;
+  /* Lighter versions for dark backgrounds, from the "on-dark" logos */
+  --color-octo-orange-light: #FF8A3C;
+  --color-octo-indigo-light: #8C8CFF;
 }
 
 /* Add variants based on LiveView classes */

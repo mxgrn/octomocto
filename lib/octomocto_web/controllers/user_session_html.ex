@@ -25,7 +25,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
     ~H"""
     <div
       id="sign-in-panel"
-      class="space-y-5 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+      class="space-y-5 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-base-200 dark:ring-white/10"
     >
       <.telegram_widget :if={@show_telegram?} id="telegram-sign-in" auth_path={~p"/auth/telegram"} />
 
@@ -33,8 +33,8 @@ defmodule OctomoctoWeb.UserSessionHTML do
         :if={@show_telegram? && @show_email?}
         class="flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-base-content/40"
       >
-        <span class="h-px flex-1 bg-slate-200"></span>
-        or <span class="h-px flex-1 bg-slate-200"></span>
+        <span class="h-px flex-1 bg-slate-200 dark:bg-white/10"></span>
+        or <span class="h-px flex-1 bg-slate-200 dark:bg-white/10"></span>
       </div>
 
       <.form :if={@show_email?} for={@form} id="sign-in-form" action={~p"/signin"} class="space-y-3">
@@ -47,7 +47,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
           spellcheck="false"
           readonly={!!@user}
           required
-          class="w-full rounded-xl border-0 bg-slate-50 px-4 py-3 ring-1 ring-slate-200 transition placeholder:text-base-content/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 read-only:text-base-content/60"
+          class="w-full rounded-xl border-0 bg-slate-50 px-4 py-3 ring-1 ring-slate-200 transition placeholder:text-base-content/30 focus:bg-white focus:outline-none dark:bg-base-300 dark:ring-white/10 dark:focus:bg-base-300 focus:ring-2 focus:ring-indigo-500 read-only:text-base-content/60"
         />
         <button
           id="sign-in-submit"

@@ -1,35 +1,50 @@
 <Layouts.app flash={@flash} current_scope={@current_scope}>
   <%!-- Soft brand-colored light behind the page --%>
   <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-b from-octo-mist via-white to-white"></div>
-    <div class="absolute -top-32 left-1/2 size-[28rem] -translate-x-[85%] rounded-full bg-octo-orange/10 blur-3xl">
+    <div class="absolute inset-0 bg-gradient-to-b from-octo-mist via-white to-white dark:from-base-300 dark:via-base-100 dark:to-base-100">
     </div>
-    <div class="absolute top-24 left-1/2 size-[28rem] -translate-x-[15%] rounded-full bg-octo-indigo/10 blur-3xl">
+    <div class="absolute -top-32 left-1/2 size-[28rem] -translate-x-[85%] rounded-full bg-octo-orange/10 blur-3xl dark:bg-octo-orange-light/10">
+    </div>
+    <div class="absolute top-24 left-1/2 size-[28rem] -translate-x-[15%] rounded-full bg-octo-indigo/10 blur-3xl dark:bg-octo-indigo-light/10">
     </div>
   </div>
 
   <div class="mx-auto flex max-w-xl flex-col gap-10 pt-4 pb-10">
     <section id="hero" class="flex flex-col items-center gap-6 text-center">
-      <img src={~p"/images/mark.svg"} alt="" class="octo-bob h-40 drop-shadow-sm" />
+      <img src={~p"/images/mark.svg"} alt="" class="octo-bob h-40 drop-shadow-sm dark:hidden" />
+      <img
+        src={~p"/images/mark-on-dark.svg"}
+        alt=""
+        class="octo-bob hidden h-40 drop-shadow-sm dark:block"
+      />
       <h1>
-        <img src={~p"/images/wordmark.svg"} alt="Octomocto" class="w-60 sm:w-72" />
+        <img src={~p"/images/wordmark.svg"} alt="Octomocto" class="w-60 sm:w-72 dark:hidden" />
+        <img
+          src={~p"/images/wordmark-on-dark.svg"}
+          alt="Octomocto"
+          class="hidden w-60 sm:w-72 dark:block"
+        />
       </h1>
     </section>
 
     <section :if={!@current_scope} id="sign-in" class="space-y-3">
-      <h2 class="text-xl font-semibold tracking-tight text-octo-navy">Sign in</h2>
+      <h2 class="text-xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
+        Sign in
+      </h2>
       <OctomoctoWeb.UserSessionHTML.sign_in_panel />
     </section>
 
     <section class="space-y-3">
-      <h2 class="text-xl font-semibold tracking-tight text-octo-navy">Games</h2>
+      <h2 class="text-xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
+        Games
+      </h2>
 
       <ul id="games" class="flex flex-col gap-3">
         <li :for={game <- @games}>
           <.link
             id={"game-#{game.id}"}
             navigate={game.path}
-            class="group flex items-center gap-4 rounded-2xl bg-white/80 p-4 shadow-sm shadow-octo-indigo/5 ring-1 ring-octo-indigo/10 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md hover:shadow-octo-orange/10 hover:ring-octo-orange/30"
+            class="group flex items-center gap-4 rounded-2xl bg-white/80 p-4 shadow-sm shadow-octo-indigo/5 ring-1 ring-octo-indigo/10 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md hover:shadow-octo-orange/10 hover:ring-octo-orange/30 dark:bg-base-200/60 dark:shadow-black/20 dark:ring-white/10 dark:hover:bg-base-200 dark:hover:ring-octo-orange-light/40"
           >
             <div class={[
               "flex size-14 shrink-0 items-center justify-center rounded-2xl text-2xl transition group-hover:scale-105",
@@ -38,12 +53,14 @@
               {game.icon}
             </div>
             <div class="min-w-0 flex-1">
-              <h3 class="font-semibold text-octo-navy">{game.name}</h3>
-              <p class="text-sm text-octo-navy/60">{game.description}</p>
+              <h3 class="font-semibold text-octo-navy dark:text-base-content">{game.name}</h3>
+              <p class="text-sm text-octo-navy/60 dark:text-base-content/60">
+                {game.description}
+              </p>
             </div>
             <.icon
               name="hero-chevron-right"
-              class="size-5 text-octo-navy/25 transition group-hover:translate-x-0.5 group-hover:text-octo-orange"
+              class="size-5 text-octo-navy/25 transition group-hover:translate-x-0.5 group-hover:text-octo-orange dark:text-base-content/25 dark:group-hover:text-octo-orange-light"
             />
           </.link>
         </li>

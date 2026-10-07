@@ -44,48 +44,57 @@ defmodule OctomoctoWeb.Layouts do
         <img
           src={~p"/images/mark.svg"}
           alt=""
-          class="h-7 transition duration-300 group-hover:-rotate-6 group-hover:scale-110"
+          class="h-7 transition duration-300 group-hover:-rotate-6 group-hover:scale-110 dark:hidden"
+        />
+        <img
+          src={~p"/images/mark-on-dark.svg"}
+          alt=""
+          class="hidden h-7 transition duration-300 group-hover:-rotate-6 group-hover:scale-110 dark:block"
         /> Octomocto
       </.link>
 
-      <nav :if={@current_scope} id="user-menu" class="group relative ml-auto text-sm">
-        <button
-          id="user-menu-button"
-          type="button"
-          class="flex cursor-default items-center gap-2 text-base-content/70 transition group-hover:text-base-content group-focus-within:text-base-content"
-        >
-          <img
-            :if={@current_scope.user.avatar_url}
-            src={@current_scope.user.avatar_url}
-            alt=""
-            class="size-6 rounded-full"
-          />
-          {@current_scope.user.name || @current_scope.user.email}
-        </button>
-        <%!-- pt-2 instead of a margin keeps the hover area unbroken between button and menu --%>
-        <div
-          id="user-menu-dropdown"
-          class="invisible absolute right-0 z-10 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
-        >
-          <div class="min-w-36 rounded-lg border border-base-300 bg-base-100 py-1 shadow-lg">
-            <.link
-              id="settings-link"
-              href={~p"/settings"}
-              class="block px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
-            >
-              Settings
-            </.link>
-            <.link
-              id="sign-out-link"
-              href={~p"/signout"}
-              method="delete"
-              class="block px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
-            >
-              Sign out
-            </.link>
+      <div class="ml-auto flex items-center gap-4">
+        <.theme_toggle />
+
+        <nav :if={@current_scope} id="user-menu" class="group relative text-sm">
+          <button
+            id="user-menu-button"
+            type="button"
+            class="flex cursor-default items-center gap-2 text-base-content/70 transition group-hover:text-base-content group-focus-within:text-base-content"
+          >
+            <img
+              :if={@current_scope.user.avatar_url}
+              src={@current_scope.user.avatar_url}
+              alt=""
+              class="size-6 rounded-full"
+            />
+            {@current_scope.user.name || @current_scope.user.email}
+          </button>
+          <%!-- pt-2 instead of a margin keeps the hover area unbroken between button and menu --%>
+          <div
+            id="user-menu-dropdown"
+            class="invisible absolute right-0 z-10 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+          >
+            <div class="min-w-36 rounded-lg border border-base-300 bg-base-100 py-1 shadow-lg">
+              <.link
+                id="settings-link"
+                href={~p"/settings"}
+                class="block px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+              >
+                Settings
+              </.link>
+              <.link
+                id="sign-out-link"
+                href={~p"/signout"}
+                method="delete"
+                class="block px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+              >
+                Sign out
+              </.link>
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
     </header>
 
     <main class="px-4 pb-6 sm:px-6 lg:px-8">
@@ -95,6 +104,48 @@ defmodule OctomoctoWeb.Layouts do
     </main>
 
     <.flash_group flash={@flash} />
+    """
+  end
+
+  @doc """
+  Shows a selector for the system, light and dark themes.
+
+  The script in `root.html.heex` keeps the choice and sets `data-theme-mode`
+  on the `<html>` element. The slider uses that attribute to find its position.
+  """
+  def theme_toggle(assigns) do
+    ~H"""
+    <div
+      id="theme-toggle"
+      class="relative flex items-center rounded-full bg-base-content/5 p-0.5 ring-1 ring-base-content/10"
+    >
+      <div class="absolute top-0.5 left-0.5 size-7 rounded-full bg-base-100 shadow-sm ring-1 ring-base-content/10 transition-[left] duration-200 [[data-theme-mode=light]_&]:left-7.5 [[data-theme-mode=dark]_&]:left-14.5">
+      </div>
+
+      <button
+        :for={
+          {mode, icon, label, active_class} <- [
+            {"system", "hero-computer-desktop-micro", "System theme",
+             "[[data-theme-mode=system]_&]:text-base-content"},
+            {"light", "hero-sun-micro", "Light theme",
+             "[[data-theme-mode=light]_&]:text-base-content"},
+            {"dark", "hero-moon-micro", "Dark theme", "[[data-theme-mode=dark]_&]:text-base-content"}
+          ]
+        }
+        id={"theme-#{mode}"}
+        type="button"
+        title={label}
+        aria-label={label}
+        data-phx-theme={mode}
+        phx-click={JS.dispatch("phx:set-theme")}
+        class={[
+          "relative flex size-7 cursor-pointer items-center justify-center rounded-full text-base-content/50 transition hover:text-base-content",
+          active_class
+        ]}
+      >
+        <.icon name={icon} class="size-4" />
+      </button>
+    </div>
     """
   end
 

@@ -14,6 +14,19 @@ defmodule OctomoctoWeb.PageControllerTest do
     assert hrefs == ["/trains", "/astronaut", "/schulte"]
   end
 
+  test "the header has the theme selector", %{conn: conn} do
+    conn = get(conn, ~p"/")
+
+    document = LazyHTML.from_document(html_response(conn, 200))
+
+    themes =
+      document
+      |> LazyHTML.query("#theme-toggle button")
+      |> LazyHTML.attribute("data-phx-theme")
+
+    assert themes == ["system", "light", "dark"]
+  end
+
   test "game pages link back home", %{conn: conn} do
     conn = get(conn, ~p"/trains")
 
