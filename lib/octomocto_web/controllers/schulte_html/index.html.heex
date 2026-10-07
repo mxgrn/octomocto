@@ -1,81 +1,87 @@
 <Layouts.app flash={@flash} current_scope={@current_scope}>
-  <div class="mx-auto flex max-w-md flex-col items-center gap-6 py-16 text-center">
-    <div class="flex size-20 items-center justify-center rounded-3xl bg-emerald-100 text-3xl font-bold text-emerald-700 shadow-inner tabular-nums">
-      1·2·3
-    </div>
-    <div class="space-y-2">
-      <h1 class="text-3xl font-semibold tracking-tight">Schulte Race</h1>
-      <p class="text-base-content/70">
-        Find the numbers from 1 to 90 in order. The first player to click the next number gets the point.
+  <%!-- Wider than the app container, so that the two columns have room --%>
+  <div
+    id="schulte-index"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-10 py-12 lg:grid-cols-2 lg:items-start lg:gap-12 lg:py-16"
+  >
+    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8">
+      <div class="flex size-20 items-center justify-center rounded-3xl bg-emerald-100 text-3xl font-bold text-emerald-700 shadow-inner tabular-nums">
+        1·2·3
+      </div>
+      <div class="space-y-2">
+        <h1 class="text-3xl font-semibold tracking-tight">Schulte Race</h1>
+        <p class="text-base-content/70">
+          Find the numbers from 1 to 90 in order. The first player to click the next number gets the point.
+        </p>
+      </div>
+
+      <div id="schulte-settings" class="flex w-full flex-col gap-4">
+        <.setting label="Board">
+          <.option
+            :for={{value, label} <- [{"classic", "Classic"}, {"random", "Random"}]}
+            id={"board-#{value}"}
+            selected={@board == value}
+            href={~p"/schulte?#{[board: value, players: @players]}"}
+          >
+            {label}
+          </.option>
+        </.setting>
+        <.setting label="Players">
+          <.option
+            :for={n <- 1..4}
+            id={"players-#{n}"}
+            selected={@players == n}
+            href={~p"/schulte?#{[board: @board, players: n]}"}
+          >
+            {n}
+          </.option>
+        </.setting>
+      </div>
+
+      <.link
+        id="new-game"
+        href={~p"/schulte?#{[board: @board, players: @players]}"}
+        method="post"
+        class="rounded-full bg-emerald-600 px-8 py-3 font-medium text-white shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-xl active:translate-y-0"
+      >
+        New game
+      </.link>
+      <p class="text-sm text-base-content/50">
+        You get a link to share with other players. The race starts when all players are in. The classic board is always the same, and the random board is new for each game.
       </p>
     </div>
 
-    <div id="schulte-settings" class="flex w-full flex-col gap-4">
-      <.setting label="Board">
-        <.option
-          :for={{value, label} <- [{"classic", "Classic"}, {"random", "Random"}]}
-          id={"board-#{value}"}
-          selected={@board == value}
-          href={~p"/schulte?#{[board: value, players: @players]}"}
-        >
-          {label}
-        </.option>
-      </.setting>
-      <.setting label="Players">
-        <.option
-          :for={n <- 1..4}
-          id={"players-#{n}"}
-          selected={@players == n}
-          href={~p"/schulte?#{[board: @board, players: n]}"}
-        >
-          {n}
-        </.option>
-      </.setting>
-    </div>
-
-    <.link
-      id="new-game"
-      href={~p"/schulte?#{[board: @board, players: @players]}"}
-      method="post"
-      class="rounded-full bg-emerald-600 px-8 py-3 font-medium text-white shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-xl active:translate-y-0"
-    >
-      New game
-    </.link>
-    <p class="text-sm text-base-content/50">
-      You get a link to share with other players. The race starts when all players are in. The classic board is always the same, and the random board is new for each game.
-    </p>
-  </div>
-
-  <div id="schulte-leaderboard" class="mx-auto grid max-w-3xl gap-4 pb-16 md:grid-cols-2">
-    <.score_list
-      id="latest-games"
-      icon="hero-clock"
-      icon_class="text-emerald-600"
-      title="Latest games"
-      empty={@leaderboard.latest == []}
-    >
-      <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
-        <span class="flex-1 truncate">
-          {Enum.map_join(game.players, ", ", &player_name(&1.user))}
-        </span>
-        <span class="font-medium tabular-nums">{format_time(game.elapsed_ms)}</span>
-      </li>
-    </.score_list>
-    <.score_list
-      id="best-results"
-      icon="hero-trophy"
-      icon_class="text-amber-500"
-      title="Best results"
-      empty={@leaderboard.best == []}
-    >
-      <li
-        :for={{result, place} <- Enum.with_index(@leaderboard.best, 1)}
-        class="flex items-baseline gap-3 py-2"
+    <div id="schulte-leaderboard" class="mx-auto grid w-full max-w-md gap-4">
+      <.score_list
+        id="latest-games"
+        icon="hero-clock"
+        icon_class="text-emerald-600"
+        title="Latest games"
+        empty={@leaderboard.latest == []}
       >
-        <span class="w-5 text-right tabular-nums text-base-content/40">{place}</span>
-        <span class="flex-1 truncate">{player_name(result.user)}</span>
-        <span class="font-medium tabular-nums">{format_time(result.elapsed_ms)}</span>
-      </li>
-    </.score_list>
+        <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
+          <span class="flex-1 truncate">
+            {Enum.map_join(game.players, ", ", &player_name(&1.user))}
+          </span>
+          <span class="font-medium tabular-nums">{format_time(game.elapsed_ms)}</span>
+        </li>
+      </.score_list>
+      <.score_list
+        id="best-results"
+        icon="hero-trophy"
+        icon_class="text-amber-500"
+        title="Best results"
+        empty={@leaderboard.best == []}
+      >
+        <li
+          :for={{result, place} <- Enum.with_index(@leaderboard.best, 1)}
+          class="flex items-baseline gap-3 py-2"
+        >
+          <span class="w-5 text-right tabular-nums text-base-content/40">{place}</span>
+          <span class="flex-1 truncate">{player_name(result.user)}</span>
+          <span class="font-medium tabular-nums">{format_time(result.elapsed_ms)}</span>
+        </li>
+      </.score_list>
+    </div>
   </div>
 </Layouts.app>
