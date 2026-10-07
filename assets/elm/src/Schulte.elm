@@ -634,7 +634,7 @@ ink =
 
 
 {-| The time in the left half of the box, and the next number (large, in
-a color that stands out) in the right half.
+a color that stands out, under a small "looking for" label) in the right half.
 -}
 viewInfoBox : Model -> Game -> Label -> Svg Msg
 viewInfoBox model game { x, y, w, h } =
@@ -649,11 +649,12 @@ viewInfoBox model game { x, y, w, h } =
         middle =
             x + w / 2
 
-        boxText textId cx size color weight content =
+        -- `cy` is the vertical middle of the text
+        boxText textId cx cy size color weight content =
             Svg.text_
                 [ SA.id textId
                 , SA.x (String.fromFloat cx)
-                , SA.y (String.fromFloat (y + h / 2 + 0.36 * size))
+                , SA.y (String.fromFloat (cy + 0.36 * size))
                 , SA.textAnchor "middle"
                 , SA.fontSize (String.fromFloat size)
                 , SA.fontFamily "'Helvetica Neue', Arial, sans-serif"
@@ -687,8 +688,9 @@ viewInfoBox model game { x, y, w, h } =
             , SA.strokeWidth "2"
             ]
             []
-        , boxText "schulte-time" (x + w / 4) (h * 0.45) ink "300" (formatTime elapsedMs)
-        , boxText "schulte-info-next" (x + 3 * w / 4) (h * 0.85) "#d9534f" "700" (nextText game)
+        , boxText "schulte-time" (x + w / 4) (y + h / 2) (h * 0.45) ink "300" (formatTime elapsedMs)
+        , boxText "schulte-info-label" (x + 3 * w / 4) (y + h * 0.24) (h * 0.17) ink "400" "looking for"
+        , boxText "schulte-info-next" (x + 3 * w / 4) (y + h * 0.6) (h * 0.6) "#d9534f" "700" (nextText game)
         ]
 
 
