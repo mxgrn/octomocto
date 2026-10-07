@@ -44,11 +44,11 @@ defmodule OctomoctoWeb.Layouts do
         Octomocto
       </.link>
 
-      <nav :if={@current_scope} id="user-menu" class="ml-auto flex items-center gap-4 text-sm">
-        <.link
-          id="settings-link"
-          href={~p"/settings"}
-          class="flex items-center gap-2 text-base-content/70 transition hover:text-base-content"
+      <nav :if={@current_scope} id="user-menu" class="group relative ml-auto text-sm">
+        <button
+          id="user-menu-button"
+          type="button"
+          class="flex cursor-default items-center gap-2 text-base-content/70 transition group-hover:text-base-content group-focus-within:text-base-content"
         >
           <img
             :if={@current_scope.user.avatar_url}
@@ -57,15 +57,30 @@ defmodule OctomoctoWeb.Layouts do
             class="size-6 rounded-full"
           />
           {@current_scope.user.name || @current_scope.user.email}
-        </.link>
-        <.link
-          id="sign-out-link"
-          href={~p"/signout"}
-          method="delete"
-          class="text-base-content/50 transition hover:text-base-content"
+        </button>
+        <%!-- pt-2 instead of a margin keeps the hover area unbroken between button and menu --%>
+        <div
+          id="user-menu-dropdown"
+          class="invisible absolute right-0 z-10 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
         >
-          Sign out
-        </.link>
+          <div class="min-w-36 rounded-lg border border-base-300 bg-base-100 py-1 shadow-lg">
+            <.link
+              id="settings-link"
+              href={~p"/settings"}
+              class="block px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+            >
+              Settings
+            </.link>
+            <.link
+              id="sign-out-link"
+              href={~p"/signout"}
+              method="delete"
+              class="block px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+            >
+              Sign out
+            </.link>
+          </div>
+        </div>
       </nav>
     </header>
 
