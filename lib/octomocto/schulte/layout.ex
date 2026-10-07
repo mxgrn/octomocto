@@ -21,7 +21,7 @@ defmodule Octomocto.Schulte.Layout do
   @box_w 393
   @box_h 106
 
-  @colors ["#fbf5e1", "#a9dccf", "#f6aeab", "#f6bd7f"]
+  @colors ["#fbf5e1", "#9dedc4", "#ff9c98", "#ffd06c"]
   @flat_weights [60, 15, 12, 13]
   @round_weights [30, 25, 20, 25]
 

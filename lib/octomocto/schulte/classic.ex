@@ -18,9 +18,9 @@ defmodule Octomocto.Schulte.Classic do
   @oy 3
 
   @cream "#fbf5e1"
-  @teal "#a9dccf"
-  @pink "#f6aeab"
-  @orange "#f6bd7f"
+  @teal "#9dedc4"
+  @pink "#ff9c98"
+  @orange "#ffd06c"
 
   def size, do: {1116, 834}
 
