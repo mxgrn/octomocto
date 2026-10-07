@@ -35,7 +35,17 @@ defmodule OctomoctoWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
+    <header id="site-header" class="flex h-12 items-center px-4 sm:px-6 lg:px-8">
+      <.link
+        id="home-link"
+        navigate={~p"/"}
+        class="text-sm font-semibold tracking-tight text-base-content/70 transition hover:text-base-content"
+      >
+        Octomocto
+      </.link>
+    </header>
+
+    <main class="px-4 pb-6 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-2xl space-y-4">
         {render_slot(@inner_block)}
       </div>

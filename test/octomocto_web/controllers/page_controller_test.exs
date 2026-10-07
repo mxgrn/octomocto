@@ -1,9 +1,25 @@
 defmodule OctomoctoWeb.PageControllerTest do
   use OctomoctoWeb.ConnCase
 
-  test "GET /", %{conn: conn} do
+  test "GET / links to all games", %{conn: conn} do
     conn = get(conn, ~p"/")
-    assert html_response(conn, 200) =~ "Peace of mind from prototype to production"
+
+    document = LazyHTML.from_document(html_response(conn, 200))
+
+    hrefs =
+      document
+      |> LazyHTML.query("#games a")
+      |> LazyHTML.attribute("href")
+
+    assert hrefs == ["/trains", "/penguin", "/schulte"]
+  end
+
+  test "game pages link back home", %{conn: conn} do
+    conn = get(conn, ~p"/trains")
+
+    document = LazyHTML.from_document(html_response(conn, 200))
+
+    assert LazyHTML.query(document, "#home-link") |> LazyHTML.attribute("href") == ["/"]
   end
 
   test "GET /elm renders the Elm mount node", %{conn: conn} do

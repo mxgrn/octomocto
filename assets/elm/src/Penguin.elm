@@ -17,7 +17,7 @@ names out through a port.
 
 import Browser
 import Browser.Events
-import Html exposing (Html, button, div, h1, input, li, p, span, text, ul)
+import Html exposing (Html, aside, button, div, h1, input, li, p, span, text, ul)
 import Html.Attributes exposing (class, id, readonly, style, value)
 import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (Decoder)
@@ -519,8 +519,8 @@ view model =
 
 viewGame : Model -> String -> Game -> Html Msg
 viewGame model me game =
-    div [ id "penguin-root", class "flex flex-col items-center gap-6 select-none" ]
-        [ div [ class "flex w-full max-w-md flex-col gap-3" ]
+    div [ id "penguin-root", class "relative left-1/2 flex w-[min(96vw,1400px)] -translate-x-1/2 flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
+        [ aside [ id "penguin-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
             [ div []
                 [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Penguin Pursuit" ]
                 , p [ class "text-sm opacity-60" ] [ text "Arrow keys move along the maze. Up is always the maze's N." ]
@@ -528,31 +528,41 @@ viewGame model me game =
             , viewShareLink model
             , viewScores me game.players
             ]
-        , div [ class "relative" ]
-            [ div
-                [ id "penguin-board"
-                , style "transform" ("rotate(" ++ String.fromInt (game.quarterTurns * 90) ++ "deg)")
-                , style "transition" "transform 600ms cubic-bezier(0.65, 0, 0.35, 1)"
-                ]
-                [ viewMaze model me game ]
-            , case game.winner of
-                Just winnerId ->
-                    viewWinner me winnerId game.players
+        , div [ class "min-w-0 flex-1" ]
+            [ div [ class "relative mx-auto", style "width" boardWidth ]
+                [ div
+                    [ id "penguin-board"
+                    , style "transform" ("rotate(" ++ String.fromInt (game.quarterTurns * 90) ++ "deg)")
+                    , style "transition" "transform 600ms cubic-bezier(0.65, 0, 0.35, 1)"
+                    ]
+                    [ viewMaze model me game ]
+                , case game.winner of
+                    Just winnerId ->
+                        viewWinner me winnerId game.players
 
-                Nothing ->
-                    text ""
+                    Nothing ->
+                        text ""
+                ]
             ]
         ]
 
 
+{-| The maze is square. Make it as wide as possible, but never taller than
+the screen (minus the 3rem header and the 1.5rem bottom padding of the page).
+-}
+boardWidth : String
+boardWidth =
+    "min(100%, calc(100dvh - 4.5rem))"
+
+
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-sky-50 p-1 pl-4 text-sm ring-1 ring-sky-200" ]
+    div [ class "flex items-center gap-2 rounded-full bg-sky-50 p-1 pl-4 text-sm ring-1 ring-sky-200 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
         [ input
             [ id "penguin-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-sky-900 outline-none"
+            , class "min-w-0 flex-1 truncate bg-transparent text-sky-900 outline-none lg:px-2 lg:py-1"
             ]
             []
         , button
@@ -573,7 +583,7 @@ viewShareLink model =
 
 viewScores : String -> List Player -> Html Msg
 viewScores me players =
-    ul [ id "penguin-scores", class "flex flex-wrap gap-2" ]
+    ul [ id "penguin-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
         (List.map
             (\player ->
                 li
@@ -581,7 +591,7 @@ viewScores me players =
                     , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm shadow-sm ring-1 ring-slate-200"
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span []
+                    , span [ class "lg:flex-1" ]
                         [ text
                             (if player.id == me then
                                 player.colorName ++ " (you)"
@@ -639,9 +649,7 @@ viewMaze model me game =
     in
     Svg.svg
         [ SA.viewBox (String.join " " (List.map String.fromInt [ -margin, -margin, full, full ]))
-        , SA.width (String.fromInt full)
-        , SA.height (String.fromInt full)
-        , SA.class "max-w-full h-auto"
+        , SA.class "block h-auto w-full"
         ]
         ([ Svg.rect
             [ SA.x "0"

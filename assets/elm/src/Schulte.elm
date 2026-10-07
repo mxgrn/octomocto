@@ -17,7 +17,7 @@ with the same name in one bundle.
 -}
 
 import Browser
-import Html exposing (Html, button, div, h1, input, li, ol, p, span, text, ul)
+import Html exposing (Html, aside, button, div, h1, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (class, id, readonly, style, value)
 import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (Decoder)
@@ -296,30 +296,42 @@ view model =
 
 viewGame : Model -> String -> Game -> Html Msg
 viewGame model me game =
-    div [ id "schulte-root", class "relative left-1/2 flex w-[min(96vw,1100px)] -translate-x-1/2 flex-col gap-5 select-none" ]
-        [ div [ class "flex items-end justify-between gap-4" ]
-            [ div []
-                [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Schulte Race" ]
-                , p [ class "text-sm opacity-60" ] [ text "Click the numbers in order. The first click gets the point." ]
+    div [ id "schulte-root", class "relative left-1/2 flex w-[min(96vw,1400px)] -translate-x-1/2 flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
+        [ aside [ id "schulte-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
+            [ div [ class "flex items-end justify-between gap-4 lg:flex-col lg:items-start" ]
+                [ div []
+                    [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Schulte Race" ]
+                    , p [ class "text-sm opacity-60" ] [ text "Click the numbers in order. The first click gets the point." ]
+                    ]
+                , viewNext game
                 ]
-            , viewNext game
+            , viewShareLink model
+            , viewScores me game.players
             ]
-        , viewShareLink model
-        , viewScores me game.players
-        , div [ class "relative" ]
-            [ viewField model game
-            , if finished game then
-                viewResult me game.players
+        , div [ class "min-w-0 flex-1" ]
+            [ div [ class "relative mx-auto", style "width" (fieldWidth game) ]
+                [ viewField model game
+                , if finished game then
+                    viewResult me game.players
 
-              else
-                text ""
+                  else
+                    text ""
+                ]
             ]
         ]
 
 
+{-| Make the board as wide as possible, but never taller than the screen
+(minus the 3rem header and the 1.5rem bottom padding of the page).
+-}
+fieldWidth : Game -> String
+fieldWidth game =
+    "min(100%, calc((100dvh - 4.5rem) * " ++ String.fromFloat (game.width / game.height) ++ "))"
+
+
 viewNext : Game -> Html Msg
 viewNext game =
-    div [ id "schulte-next", class "flex shrink-0 flex-col items-center rounded-2xl bg-emerald-600 px-4 py-1.5 text-white shadow-lg shadow-emerald-600/25" ]
+    div [ id "schulte-next", class "flex shrink-0 flex-col items-center rounded-2xl bg-emerald-600 px-4 py-1.5 text-white shadow-lg shadow-emerald-600/25 lg:w-full lg:py-3" ]
         [ span [ class "text-[10px] font-medium uppercase tracking-widest opacity-80" ] [ text "Find" ]
         , span [ class "text-2xl font-bold leading-tight tabular-nums" ]
             [ text
@@ -335,12 +347,12 @@ viewNext game =
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-emerald-50 p-1 pl-4 text-sm ring-1 ring-emerald-200" ]
+    div [ class "flex items-center gap-2 rounded-full bg-emerald-50 p-1 pl-4 text-sm ring-1 ring-emerald-200 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
         [ input
             [ id "schulte-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-emerald-900 outline-none"
+            , class "min-w-0 flex-1 truncate bg-transparent text-emerald-900 outline-none lg:px-2 lg:py-1"
             ]
             []
         , button
@@ -361,7 +373,7 @@ viewShareLink model =
 
 viewScores : String -> List Player -> Html Msg
 viewScores me players =
-    ul [ id "schulte-scores", class "flex flex-wrap gap-2" ]
+    ul [ id "schulte-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
         (List.map
             (\player ->
                 li
@@ -369,7 +381,7 @@ viewScores me players =
                     , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200"
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [] [ text (playerName me player) ]
+                    , span [ class "lg:flex-1" ] [ text (playerName me player) ]
                     , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
                     ]
             )

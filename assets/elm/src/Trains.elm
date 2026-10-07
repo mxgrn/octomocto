@@ -16,7 +16,7 @@ The game sends the names of sounds out through a port. app.js plays them.
 import Browser
 import Browser.Events
 import Dict exposing (Dict)
-import Html exposing (Html, button, div, h1, p, span, text)
+import Html exposing (Html, aside, button, div, h1, p, span, text)
 import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
 import Random exposing (Generator)
@@ -858,28 +858,34 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    let
-        boardWidth =
-            String.fromFloat (toFloat cols * cellSize) ++ "px"
-    in
-    div [ id "trains-root", class "flex flex-col items-center gap-6 select-none" ]
-        [ div [ class "flex w-full flex-wrap items-end justify-between gap-3", style "max-width" boardWidth ]
+    div [ id "trains-root", class "relative left-1/2 flex w-[min(96vw,1400px)] -translate-x-1/2 flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
+        [ aside [ id "trains-panel", class "flex flex-wrap items-end justify-between gap-3 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:flex-col lg:items-start lg:gap-5" ]
             [ div []
                 [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Train of Thought" ]
                 , p [ class "text-sm opacity-60" ] [ text "Click the switches to send each train to the house of its color." ]
                 ]
             , viewStats model
             ]
-        , div [ class "relative" ]
-            [ viewBoard model
-            , viewOverlay model
+        , div [ class "min-w-0 flex-1" ]
+            [ div [ class "relative mx-auto", style "width" boardWidth ]
+                [ viewBoard model
+                , viewOverlay model
+                ]
             ]
         ]
 
 
+{-| Make the board as wide as possible, but never taller than the screen
+(minus the 3rem header and the 1.5rem bottom padding of the page).
+-}
+boardWidth : String
+boardWidth =
+    "min(100%, calc((100dvh - 4.5rem) * " ++ String.fromFloat (toFloat cols / toFloat rows) ++ "))"
+
+
 viewStats : Model -> Html Msg
 viewStats model =
-    div [ class "flex gap-2 text-sm" ]
+    div [ class "flex gap-2 text-sm lg:flex-col lg:items-start" ]
         [ div [ id "trains-correct", class "rounded-full bg-emerald-50 px-3 py-1 text-emerald-900 ring-1 ring-emerald-200" ]
             [ text "Correct ", span [ class "font-semibold tabular-nums" ] [ text (String.fromInt model.correct) ] ]
         , div [ id "trains-sent", class "rounded-full bg-white px-3 py-1 text-slate-700 shadow-sm ring-1 ring-slate-200" ]
@@ -954,9 +960,7 @@ viewBoard model =
     Svg.svg
         [ SA.id "trains-board"
         , SA.viewBox ("0 0 " ++ String.fromFloat width ++ " " ++ String.fromFloat height)
-        , SA.width (String.fromFloat width)
-        , SA.height (String.fromFloat height)
-        , SA.class "max-w-full h-auto"
+        , SA.class "block h-auto w-full"
         ]
         [ Svg.rect [ SA.width (String.fromFloat width), SA.height (String.fromFloat height), SA.rx "16", SA.fill "#ecfccb" ] []
         , Svg.g [] (List.map viewSwitchPad (switchCells model.layout))
