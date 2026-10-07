@@ -29,6 +29,10 @@ defmodule OctomoctoWeb.Endpoint do
     from: :octomocto,
     gzip: not code_reloading?,
     only: OctomoctoWeb.static_paths(),
+    # In production, `~p` links the icons in the root layout to their digested
+    # names, like "favicon-<hash>.svg". `only` compares the full first path
+    # segment, so it does not match these names.
+    only_matching: ~w(favicon apple-touch-icon site),
     raise_on_missing_only: code_reloading?
 
   # Code reloading can be explicitly enabled under the
