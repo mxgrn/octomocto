@@ -11,7 +11,10 @@ defmodule OctomoctoWeb.SchulteController do
 
   def create(conn, params) do
     {board, players} = settings(params)
-    id = Schulte.create_game(String.to_existing_atom(board), players)
+    # Not String.to_existing_atom/1: in dev, the atom can be missing until
+    # the Schulte.Game module is loaded
+    layout = if board == "random", do: :random, else: :classic
+    id = Schulte.create_game(layout, players)
     redirect(conn, to: ~p"/schulte/#{id}")
   end
 
