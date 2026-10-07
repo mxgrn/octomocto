@@ -92,6 +92,14 @@
   --noise: 0;
 }
 
+/* Octomocto brand colors, from the logo. */
+@theme {
+  --color-octo-orange: #F26A1B;
+  --color-octo-indigo: #4B4BE8;
+  --color-octo-navy: #171532;
+  --color-octo-mist: #EEF0FA;
+}
+
 /* Add variants based on LiveView classes */
 @custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
 @custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
@@ -119,3 +127,13 @@
 }
 
 .schulte-shake { animation: schulte-shake 220ms ease-in-out; }
+
+/* Home page. The logo bobs slowly, like it floats in water. */
+@keyframes octo-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.octo-bob { animation: octo-bob 4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .octo-bob { animation: none; }
+}

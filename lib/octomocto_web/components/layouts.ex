@@ -39,9 +39,13 @@ defmodule OctomoctoWeb.Layouts do
       <.link
         id="home-link"
         navigate={~p"/"}
-        class="text-sm font-semibold tracking-tight text-base-content/70 transition hover:text-base-content"
+        class="group flex items-center gap-2 text-sm font-semibold tracking-tight text-base-content/70 transition hover:text-base-content"
       >
-        Octomocto
+        <img
+          src={~p"/images/mark.svg"}
+          alt=""
+          class="h-7 transition duration-300 group-hover:-rotate-6 group-hover:scale-110"
+        /> Octomocto
       </.link>
 
       <nav :if={@current_scope} id="user-menu" class="group relative ml-auto text-sm">
