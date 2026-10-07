@@ -63,6 +63,14 @@ defmodule OctomoctoWeb.PageControllerTest do
     assert LazyHTML.query(document, "#home-link") |> LazyHTML.attribute("href") == ["/"]
   end
 
+  test "the header wordmark is larger on the home page", %{conn: conn} do
+    home = LazyHTML.from_document(html_response(get(conn, ~p"/"), 200))
+    game = LazyHTML.from_document(html_response(get(conn, ~p"/trains"), 200))
+
+    assert LazyHTML.query(home, "#home-link img.h-10") |> Enum.count() == 2
+    assert LazyHTML.query(game, "#home-link img.h-7") |> Enum.count() == 2
+  end
+
   test "GET /elm renders the Elm mount node", %{conn: conn} do
     conn = get(conn, ~p"/elm")
 

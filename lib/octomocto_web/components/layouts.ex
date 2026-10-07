@@ -31,26 +31,30 @@ defmodule OctomoctoWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
+  attr :home, :boolean, default: false, doc: "shows a larger wordmark in the header"
+
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <header id="site-header" class="flex h-12 items-center px-4 sm:px-6 lg:px-8">
-      <.link
-        id="home-link"
-        navigate={~p"/"}
-        class="group flex items-center gap-2 text-sm font-semibold tracking-tight text-base-content/70 transition hover:text-base-content"
-      >
+    <header id="site-header" class="flex h-16 items-center px-4 sm:px-6 lg:px-8">
+      <.link id="home-link" navigate={~p"/"} class="group block">
         <img
-          src={~p"/images/mark.svg"}
-          alt=""
-          class="h-7 transition duration-300 group-hover:-rotate-6 group-hover:scale-110 dark:hidden"
+          src={~p"/images/wordmark.svg"}
+          alt="Octomocto"
+          class={[
+            "transition duration-300 group-hover:scale-105 dark:hidden",
+            if(@home, do: "h-10", else: "h-7")
+          ]}
         />
         <img
-          src={~p"/images/mark-on-dark.svg"}
-          alt=""
-          class="hidden h-7 transition duration-300 group-hover:-rotate-6 group-hover:scale-110 dark:block"
-        /> Octomocto
+          src={~p"/images/wordmark-on-dark.svg"}
+          alt="Octomocto"
+          class={[
+            "hidden transition duration-300 group-hover:scale-105 dark:block",
+            if(@home, do: "h-10", else: "h-7")
+          ]}
+        />
       </.link>
 
       <div class="ml-auto flex items-center gap-4">

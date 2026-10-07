@@ -131,12 +131,17 @@
 
 .schulte-shake { animation: schulte-shake 220ms ease-in-out; }
 
-/* Home page. The logo bobs slowly, like it floats in water. */
-@keyframes octo-bob {
+/* Home page. The two octopi move apart and then come back together. */
+@keyframes octo-top {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  50% { transform: translateY(-4px); }
 }
-.octo-bob { animation: octo-bob 4s ease-in-out infinite; }
+@keyframes octo-bottom {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+.octo-top { animation: octo-top 1.2s ease-in-out infinite; }
+.octo-bottom { animation: octo-bottom 1.2s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
-  .octo-bob { animation: none; }
+  .octo-top, .octo-bottom { animation: none; }
 }

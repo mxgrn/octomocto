@@ -1,4 +1,4 @@
-<Layouts.app flash={@flash} current_scope={@current_scope}>
+<Layouts.app flash={@flash} current_scope={@current_scope} home>
   <%!-- Soft brand-colored light behind the page --%>
   <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-b from-octo-mist via-white to-white dark:from-base-300 dark:via-base-100 dark:to-base-100">
@@ -11,20 +11,7 @@
 
   <div class="mx-auto flex max-w-3xl flex-col gap-10 pt-4 pb-10">
     <section id="hero" class="flex flex-col items-center gap-6 text-center">
-      <img src={~p"/images/mark.svg"} alt="" class="octo-bob h-40 drop-shadow-sm dark:hidden" />
-      <img
-        src={~p"/images/mark-on-dark.svg"}
-        alt=""
-        class="octo-bob hidden h-40 drop-shadow-sm dark:block"
-      />
-      <h1>
-        <img src={~p"/images/wordmark.svg"} alt="Octomocto" class="w-60 sm:w-72 dark:hidden" />
-        <img
-          src={~p"/images/wordmark-on-dark.svg"}
-          alt="Octomocto"
-          class="hidden w-60 sm:w-72 dark:block"
-        />
-      </h1>
+      <.octopi class="h-40 drop-shadow-sm" />
       <p
         id="slogan"
         class="-mt-2 text-lg font-medium tracking-tight text-octo-navy/70 sm:text-xl dark:text-base-content/70"
