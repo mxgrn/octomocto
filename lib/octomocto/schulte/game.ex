@@ -17,6 +17,8 @@ defmodule Octomocto.Schulte.Game do
   alias Octomocto.Schulte.{Classic, Layout}
 
   @total 90
+  # The game ends after this number. Dev config sets a small value for easier testing.
+  @last Application.compile_env(:octomocto, :schulte_last_number, @total)
   @idle_timeout_ms :timer.minutes(5)
 
   @colors [
@@ -65,7 +67,7 @@ defmodule Octomocto.Schulte.Game do
 
   @impl true
   def handle_cast({:pick, player_id, number}, %{next: number} = state)
-      when is_map_key(state.players, player_id) do
+      when is_map_key(state.players, player_id) and number <= @last do
     state =
       state
       |> update_in([:players, player_id, :score], &(&1 + 1))
@@ -79,7 +81,7 @@ defmodule Octomocto.Schulte.Game do
 
   def handle_cast({:pick, _player_id, _number}, state), do: {:noreply, state}
 
-  def handle_cast(:restart, state) when state.next > @total do
+  def handle_cast(:restart, state) when state.next > @last do
     players = Map.new(state.players, fn {id, p} -> {id, %{p | score: 0}} end)
     state = new_field(%{state | players: players})
     broadcast(state)
@@ -118,7 +120,7 @@ defmodule Octomocto.Schulte.Game do
     })
   end
 
-  defp stop_clock(state) when state.next > @total, do: %{state | finished_at: now()}
+  defp stop_clock(state) when state.next > @last, do: %{state | finished_at: now()}
   defp stop_clock(state), do: state
 
   defp now, do: System.monotonic_time(:millisecond)
@@ -163,7 +165,7 @@ defmodule Octomocto.Schulte.Game do
       min_stretch: min_stretch,
       info_box: info_box,
       elapsed_ms: (state.finished_at || now()) - state.started_at,
-      total: @total,
+      total: @last,
       next: state.next,
       cells: Enum.map(state.regions, &Map.put(&1, :found_by, state.found_by[&1.number])),
       players: players

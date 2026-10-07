@@ -1,5 +1,8 @@
 import Config
 
+# End the Schulte race after number 3 for easier testing.
+config :octomocto, schulte_last_number: 3
+
 # Configure your database
 config :octomocto, Octomocto.Repo,
   username: "postgres",
