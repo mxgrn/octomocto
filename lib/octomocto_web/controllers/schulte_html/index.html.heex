@@ -10,20 +10,20 @@
       </p>
     </div>
     <.link
-      id="new-game"
-      href={~p"/schulte"}
-      method="post"
-      class="rounded-full bg-emerald-600 px-6 py-3 font-medium text-white shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-xl active:translate-y-0"
-    >
-      New game
-    </.link>
-    <.link
       id="new-classic-game"
       href={~p"/schulte?layout=classic"}
       method="post"
-      class="-mt-2 rounded-full px-5 py-2 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200 transition hover:-translate-y-0.5 hover:bg-emerald-50 active:translate-y-0"
+      class="rounded-full bg-emerald-600 px-6 py-3 font-medium text-white shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-xl active:translate-y-0"
     >
       New game on the classic board
+    </.link>
+    <.link
+      id="new-game"
+      href={~p"/schulte"}
+      method="post"
+      class="-mt-2 rounded-full px-5 py-2 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200 transition hover:-translate-y-0.5 hover:bg-emerald-50 active:translate-y-0"
+    >
+      New game
     </.link>
     <p class="text-sm text-base-content/50">
       You get a link to share with other players. A new game has a new random board, but the classic board is always the same.
