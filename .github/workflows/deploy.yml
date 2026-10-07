@@ -61,6 +61,6 @@ jobs:
               -e PHX_SERVER=true \
               -e SECRET_KEY_BASE=${{secrets.SECRET_KEY_BASE}} \
               -e GITHUB_SHA=${{github.sha}} \
-              -e PHX_HOST=octomocto.mxgrn.com \
+              -e PHX_HOST=octomocto.com \
               ghcr.io/mxgrn/${{matrix.app}}_${{matrix.env}}
             for i in {1..60}; do curl localhost:${{matrix.port}}/health && break || { [ $i -eq 60 ] && echo "Failed after 60 attempts" && exit 1 || sleep 1; }; done
