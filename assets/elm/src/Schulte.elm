@@ -450,7 +450,7 @@ view model =
 
 viewGame : Model -> Me -> Game -> Html Msg
 viewGame model me game =
-    div [ id "schulte-root", class "relative left-1/2 flex w-[min(96vw,1400px)] -translate-x-1/2 flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
+    div [ id "schulte-root", class "flex w-full max-w-[1400px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
         [ aside [ id "schulte-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
             [ div [ class "flex items-end justify-between gap-4 lg:flex-col lg:items-start" ]
                 [ div []

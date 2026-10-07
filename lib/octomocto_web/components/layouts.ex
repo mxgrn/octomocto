@@ -33,13 +33,17 @@ defmodule OctomoctoWeb.Layouts do
 
   attr :home, :boolean, default: false, doc: "shows a larger wordmark in the header"
 
+  attr :wide, :boolean,
+    default: false,
+    doc: "uses the full page width, so that the content lines up with the header"
+
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
     <header id="site-header" class="flex h-16 items-center px-4 sm:px-6 lg:px-8">
       <.link id="home-link" navigate={~p"/"} class="group block">
-        <.wordmark class={if(@home, do: "h-8", else: "h-6")} />
+        <.wordmark class={if(@home, do: "h-8", else: "h-6 -translate-y-0.5")} />
       </.link>
 
       <div class="ml-auto flex items-center gap-4">
@@ -87,7 +91,7 @@ defmodule OctomoctoWeb.Layouts do
     </header>
 
     <main class="px-4 pb-6 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
+      <div class={["space-y-4", if(@wide, do: "w-full", else: "mx-auto max-w-2xl")]}>
         {render_slot(@inner_block)}
       </div>
     </main>

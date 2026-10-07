@@ -71,6 +71,14 @@ defmodule OctomoctoWeb.PageControllerTest do
     assert LazyHTML.query(game, "#home-link svg.h-6") |> Enum.count() == 1
   end
 
+  test "game pages use the full width", %{conn: conn} do
+    home = LazyHTML.from_document(html_response(get(conn, ~p"/"), 200))
+    game = LazyHTML.from_document(html_response(get(conn, ~p"/trains"), 200))
+
+    assert LazyHTML.query(home, "main > .max-w-2xl") |> Enum.count() == 1
+    assert LazyHTML.query(game, "main > .max-w-2xl") |> Enum.count() == 0
+  end
+
   test "GET /elm renders the Elm mount node", %{conn: conn} do
     conn = get(conn, ~p"/elm")
 

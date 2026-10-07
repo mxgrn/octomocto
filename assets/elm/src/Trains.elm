@@ -858,7 +858,7 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div [ id "trains-root", class "relative left-1/2 flex w-[min(96vw,1400px)] -translate-x-1/2 flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
+    div [ id "trains-root", class "flex w-full max-w-[1400px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
         [ aside [ id "trains-panel", class "flex flex-wrap items-end justify-between gap-3 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:flex-col lg:items-start lg:gap-5" ]
             [ div []
                 [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Train of Thought" ]

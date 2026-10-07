@@ -540,7 +540,7 @@ view model =
 
 viewGame : Model -> String -> Game -> Html Msg
 viewGame model me game =
-    div [ id "astronaut-root", class "relative left-1/2 flex w-[min(96vw,1400px)] -translate-x-1/2 flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
+    div [ id "astronaut-root", class "flex w-full max-w-[1400px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
         [ aside [ id "astronaut-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
             [ div []
                 [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Station Escape" ]
