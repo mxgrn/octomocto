@@ -41,6 +41,14 @@ topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 
+// Pick the eyes in the header wordmark that blink: the orange or the blue ones.
+// pointerenter does not bubble, so the listener is on the capture phase.
+document.addEventListener("pointerenter", e => {
+  if (e.target.id === "home-link") {
+    e.target.dataset.blink = Math.random() < 0.5 ? "orange" : "blue"
+  }
+}, true)
+
 // Start the Elm app if the page has a mount node for it
 const elmNode = document.getElementById("elm-main")
 if (elmNode) {

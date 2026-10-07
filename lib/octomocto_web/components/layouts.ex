@@ -103,6 +103,7 @@ defmodule OctomoctoWeb.Layouts do
   @doc """
   Renders the wordmark from `wordmark.svg` inline, so that the eyes in the
   "o" letters can blink when the pointer moves onto the parent `group`.
+  Only the orange or only the blue eyes blink. `app.js` picks them at random.
   """
   attr :class, :any, default: nil
 
@@ -135,14 +136,8 @@ defmodule OctomoctoWeb.Layouts do
         </g>
       </g>
       <g class="fill-octo-navy dark:fill-white">
-        <circle :for={cx <- [33, 245]} class="wordmark-eye" cx={cx} cy="74" r="9" />
-        <circle
-          :for={cx <- [427, 639]}
-          class="wordmark-eye wordmark-eye-late"
-          cx={cx}
-          cy="74"
-          r="9"
-        />
+        <circle :for={cx <- [33, 245]} class="wordmark-eye-orange" cx={cx} cy="74" r="9" />
+        <circle :for={cx <- [427, 639]} class="wordmark-eye-blue" cx={cx} cy="74" r="9" />
       </g>
     </svg>
     """
