@@ -75,15 +75,6 @@ defmodule Octomocto.AccountsFixtures do
     token
   end
 
-  def override_token_authenticated_at(token, authenticated_at) when is_binary(token) do
-    Octomocto.Repo.update_all(
-      from(t in Accounts.UserToken,
-        where: t.token == ^token
-      ),
-      set: [authenticated_at: authenticated_at]
-    )
-  end
-
   def generate_user_magic_link_token(user) do
     {encoded_token, user_token} = Accounts.UserToken.build_email_token(user, "login")
     Octomocto.Repo.insert!(user_token)

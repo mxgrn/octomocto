@@ -9,6 +9,7 @@ defmodule Octomocto.Accounts.User do
     field :telegram_username, :string
     field :name, :string
     field :avatar_url, :string
+    # Copied from the session token (see `UserToken`). Nothing reads it now.
     field :authenticated_at, :utc_datetime, virtual: true
 
     timestamps(type: :utc_datetime)

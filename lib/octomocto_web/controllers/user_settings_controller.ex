@@ -5,10 +5,8 @@ defmodule OctomoctoWeb.UserSettingsController do
   alias Octomocto.Accounts.TelegramAuth
   alias OctomoctoWeb.UserAuth
 
-  import OctomoctoWeb.UserAuth, only: [require_sudo_mode: 2]
   import Phoenix.Component, only: [to_form: 1, to_form: 2]
 
-  plug :require_sudo_mode
   plug :assign_email_form
 
   def edit(conn, _params) do

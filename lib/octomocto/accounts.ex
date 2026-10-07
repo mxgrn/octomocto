@@ -151,20 +151,6 @@ defmodule Octomocto.Accounts do
   ## Settings
 
   @doc """
-  Checks whether the user is in sudo mode.
-
-  The user is in sudo mode when the last authentication was done no further
-  than 20 minutes ago. The limit can be given as second argument in minutes.
-  """
-  def sudo_mode?(user, minutes \\ -20)
-
-  def sudo_mode?(%User{authenticated_at: ts}, minutes) when is_struct(ts, DateTime) do
-    DateTime.after?(ts, DateTime.utc_now() |> DateTime.add(minutes, :minute))
-  end
-
-  def sudo_mode?(_user, _minutes), do: false
-
-  @doc """
   Returns an `%Ecto.Changeset{}` for changing the user email.
 
   An email of a different user is accepted if the two users can be merged.

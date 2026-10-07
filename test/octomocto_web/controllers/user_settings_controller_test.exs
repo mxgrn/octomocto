@@ -23,12 +23,6 @@ defmodule OctomoctoWeb.UserSettingsControllerTest do
       conn = get(build_conn(), ~p"/settings")
       assert redirected_to(conn) == ~p"/signin"
     end
-
-    @tag token_authenticated_at: DateTime.add(DateTime.utc_now(:second), -11, :minute)
-    test "redirects if the user is not in sudo mode", %{conn: conn} do
-      conn = get(conn, ~p"/settings")
-      assert redirected_to(conn) == ~p"/signin"
-    end
   end
 
   describe "PUT /settings (change email form)" do

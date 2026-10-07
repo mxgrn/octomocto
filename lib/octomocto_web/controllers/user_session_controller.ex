@@ -85,7 +85,7 @@ defmodule OctomoctoWeb.UserSessionController do
     |> UserAuth.log_out_user()
   end
 
-  # A signed-in user is here to sign in again (see `UserAuth.require_sudo_mode/2`)
+  # A signed-in user can open /signin to sign in again
   defp return_path(conn) do
     if conn.assigns.current_scope, do: ~p"/signin", else: ~p"/"
   end

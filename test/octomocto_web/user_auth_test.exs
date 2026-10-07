@@ -8,7 +8,7 @@ defmodule OctomoctoWeb.UserAuthTest do
   import Octomocto.AccountsFixtures
 
   @remember_me_cookie "_octomocto_web_user_remember_me"
-  @remember_me_cookie_max_age 60 * 60 * 24 * 14
+  @remember_me_cookie_max_age 60 * 60 * 24 * 400
 
   setup %{conn: conn} do
     conn =
@@ -169,62 +169,22 @@ defmodule OctomoctoWeb.UserAuthTest do
       refute conn.assigns.current_scope
     end
 
-    test "reissues a new token after a few days and refreshes cookie", %{conn: conn, user: user} do
+    test "keeps an old token and refreshes the cookie", %{conn: conn, user: user} do
       logged_in_conn =
         conn |> fetch_cookies() |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
 
       token = logged_in_conn.cookies[@remember_me_cookie]
       %{value: signed_token} = logged_in_conn.resp_cookies[@remember_me_cookie]
-
-      offset_user_token(token, -10, :day)
-      {user, _} = Accounts.get_user_by_session_token(token)
+      offset_user_token(token, -1000, :day)
 
       conn =
         conn
-        |> put_session(:user_token, token)
-        |> put_session(:user_remember_me, true)
         |> put_req_cookie(@remember_me_cookie, signed_token)
         |> UserAuth.fetch_current_scope_for_user([])
 
       assert conn.assigns.current_scope.user.id == user.id
-      assert conn.assigns.current_scope.user.authenticated_at == user.authenticated_at
-      assert new_token = get_session(conn, :user_token)
-      assert new_token != token
-      assert %{value: new_signed_token, max_age: max_age} = conn.resp_cookies[@remember_me_cookie]
-      assert new_signed_token != signed_token
-      assert max_age == @remember_me_cookie_max_age
-    end
-  end
-
-  describe "require_sudo_mode/2" do
-    test "allows users that have authenticated in the last 10 minutes", %{conn: conn, user: user} do
-      conn =
-        conn
-        |> fetch_flash()
-        |> assign(:current_scope, Scope.for_user(user))
-        |> UserAuth.require_sudo_mode([])
-
-      refute conn.halted
-      refute conn.status
-    end
-
-    test "redirects when authentication is too old", %{conn: conn, user: user} do
-      eleven_minutes_ago = DateTime.utc_now(:second) |> DateTime.add(-11, :minute)
-      user = %{user | authenticated_at: eleven_minutes_ago}
-      user_token = Accounts.generate_user_session_token(user)
-      {user, token_inserted_at} = Accounts.get_user_by_session_token(user_token)
-      assert DateTime.compare(token_inserted_at, user.authenticated_at) == :gt
-
-      conn =
-        conn
-        |> fetch_flash()
-        |> assign(:current_scope, Scope.for_user(user))
-        |> UserAuth.require_sudo_mode([])
-
-      assert redirected_to(conn) == ~p"/signin"
-
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
-               "You must re-authenticate to access this page."
+      assert get_session(conn, :user_token) == token
+      assert %{max_age: @remember_me_cookie_max_age} = conn.resp_cookies[@remember_me_cookie]
     end
   end
 

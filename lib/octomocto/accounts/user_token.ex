@@ -10,12 +10,13 @@ defmodule Octomocto.Accounts.UserToken do
   # since someone with access to the email may take over the account.
   @magic_link_validity_in_minutes 15
   @change_email_validity_in_days 7
-  @session_validity_in_days 14
 
   schema "users_tokens" do
     field :token, :binary
     field :context, :string
     field :sent_to, :string
+    # The time of the sign-in that made this session token. `phx.gen.auth` used it
+    # for sudo mode, which we removed. Nothing reads it now, but we keep the column.
     field :authenticated_at, :utc_datetime
     belongs_to :user, Octomocto.Accounts.User
 
@@ -52,14 +53,13 @@ defmodule Octomocto.Accounts.UserToken do
 
   The query returns the user found by the token, if any, along with the token's creation time.
 
-  The token is valid if it matches the value in the database and it has
-  not expired (after @session_validity_in_days).
+  The token is valid if it matches the value in the database. Session tokens
+  do not expire, they are only deleted when the user signs out.
   """
   def verify_session_token_query(token) do
     query =
       from token in by_token_and_context_query(token, "session"),
         join: user in assoc(token, :user),
-        where: token.inserted_at > ago(@session_validity_in_days, "day"),
         select: {%{user | authenticated_at: token.authenticated_at}, token.inserted_at}
 
     {:ok, query}
