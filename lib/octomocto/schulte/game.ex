@@ -71,6 +71,7 @@ defmodule Octomocto.Schulte.Game do
       |> update_in([:players, player_id, :score], &(&1 + 1))
       |> Map.update!(:found_by, &Map.put(&1, number, player_id))
       |> Map.put(:next, number + 1)
+      |> stop_clock()
 
     broadcast(state)
     {:noreply, state}
@@ -108,8 +109,19 @@ defmodule Octomocto.Schulte.Game do
     shapes = if state.layout == :classic, do: Classic.regions(), else: Layout.generate(@total)
     regions = Enum.zip_with(Enum.shuffle(1..@total), shapes, &Map.put(&2, :number, &1))
 
-    Map.merge(state, %{regions: regions, next: 1, found_by: %{}})
+    Map.merge(state, %{
+      regions: regions,
+      next: 1,
+      found_by: %{},
+      started_at: now(),
+      finished_at: nil
+    })
   end
+
+  defp stop_clock(state) when state.next > @total, do: %{state | finished_at: now()}
+  defp stop_clock(state), do: state
+
+  defp now, do: System.monotonic_time(:millisecond)
 
   # Prefer a color that no player has. Reuse colors when all are taken.
   defp pick_color(players) do
@@ -140,14 +152,17 @@ defmodule Octomocto.Schulte.Game do
 
     # How narrow a number can get. The classic board has very narrow
     # shapes, where the printed puzzle squeezes the numbers a lot.
-    {size, min_stretch} =
+    # The classic board has an empty box for the time and the next number.
+    {size, min_stretch, info_box} =
       if state.layout == :classic,
-        do: {Classic.size(), 0.1},
-        else: {Layout.size(), 0.3}
+        do: {Classic.size(), 0.1, Classic.info_box()},
+        else: {Layout.size(), 0.3, nil}
 
     %{
       board: Tuple.to_list(size),
       min_stretch: min_stretch,
+      info_box: info_box,
+      elapsed_ms: (state.finished_at || now()) - state.started_at,
       total: @total,
       next: state.next,
       cells: Enum.map(state.regions, &Map.put(&1, :found_by, state.found_by[&1.number])),

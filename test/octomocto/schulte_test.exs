@@ -52,6 +52,17 @@ defmodule Octomocto.SchulteTest do
     assert_receive {:schulte_state, %{next: 3, players: [%{score: 1}, %{score: 1}]}}
   end
 
+  test "the clock stops after all numbers are found", %{id: id} do
+    {:ok, player_id, _} = Schulte.join(id)
+
+    for n <- 1..90, do: Schulte.pick(id, player_id, n)
+
+    assert_receive {:schulte_state, %{next: 91, elapsed_ms: elapsed_ms}}
+    # Let some time pass, so that a running clock would show a later time
+    Process.sleep(5)
+    assert {:ok, _, %{elapsed_ms: ^elapsed_ms}} = Schulte.join(id)
+  end
+
   test "restart/1 starts a new field with zero scores after all numbers are found", %{id: id} do
     {:ok, player_id, _} = Schulte.join(id)
 

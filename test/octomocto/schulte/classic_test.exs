@@ -27,4 +27,14 @@ defmodule Octomocto.Schulte.ClassicTest do
     assert Enum.map(state.cells, & &1.d) == Enum.map(Classic.regions(), & &1.d)
     assert state.cells |> Enum.map(& &1.number) |> Enum.sort() == Enum.to_list(1..90)
   end
+
+  test "a classic game has a box for the time and the next number" do
+    id = "game-#{System.unique_integer([:positive])}"
+    start_supervised!({Game, {id, :classic}})
+
+    {:ok, _player_id, state} = Schulte.join(id)
+
+    assert state.info_box == Classic.info_box()
+    assert state.elapsed_ms >= 0
+  end
 end

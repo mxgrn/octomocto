@@ -24,6 +24,12 @@ defmodule Octomocto.Schulte.Classic do
 
   def size, do: {1116, 834}
 
+  @doc """
+  Returns the empty box in the top right corner as `[x, y, w, h]`. The game
+  shows the time and the next number in it.
+  """
+  def info_box, do: [913 - @ox, 3 - @oy, 1187 - 913, 77 - 3]
+
   @doc "Returns the 90 regions in the drawing order."
   def regions do
     left_fan = fan({222, 320}, {211, 320}, 134)

@@ -26,6 +26,7 @@ import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
 import Task
+import Time
 
 
 
@@ -92,6 +93,12 @@ type alias Game =
 
     -- How narrow a number can get, as a part of its normal width
     , minStretch : Float
+
+    -- The time since the field started. After the end, the final time.
+    , elapsedMs : Int
+
+    -- The box for the time and the next number (on the classic board only)
+    , infoBox : Maybe Label
     }
 
 
@@ -110,6 +117,11 @@ type alias Model =
     -- that only the newest timeout stops the shake.
     , shaking : Maybe Int
     , shakeCount : Int
+
+    -- The local time (in ms) when the field started, and the local time
+    -- now. The clock ticks between the server updates.
+    , clockStart : Int
+    , now : Int
     }
 
 
@@ -124,6 +136,8 @@ init flags =
       , copied = False
       , shaking = Nothing
       , shakeCount = 0
+      , clockStart = 0
+      , now = 0
       }
     , Cmd.none
     )
@@ -147,6 +161,8 @@ type Msg
     | Restart
     | CopyLink
     | CopiedTimeout
+    | SyncClock Int Time.Posix
+    | Tick Time.Posix
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -155,7 +171,7 @@ update msg model =
         GotJoined value ->
             case Decode.decodeValue joinedDecoder value of
                 Ok ( me, game ) ->
-                    ( { model | connection = Joined me game }, Cmd.none )
+                    ( { model | connection = Joined me game }, syncClock game )
 
                 Err err ->
                     ( { model | connection = Failed (Decode.errorToString err) }, Cmd.none )
@@ -163,7 +179,7 @@ update msg model =
         GotState value ->
             case ( model.connection, Decode.decodeValue gameDecoder value ) of
                 ( Joined me _, Ok game ) ->
-                    ( { model | connection = Joined me game }, Cmd.none )
+                    ( { model | connection = Joined me game }, syncClock game )
 
                 _ ->
                     ( model, Cmd.none )
@@ -213,6 +229,21 @@ update msg model =
         CopiedTimeout ->
             ( { model | copied = False }, Cmd.none )
 
+        SyncClock elapsedMs time ->
+            let
+                ms =
+                    Time.posixToMillis time
+            in
+            ( { model | clockStart = ms - elapsedMs, now = ms }, Cmd.none )
+
+        Tick time ->
+            ( { model | now = Time.posixToMillis time }, Cmd.none )
+
+
+syncClock : Game -> Cmd Msg
+syncClock game =
+    Time.now |> Task.perform (SyncClock game.elapsedMs)
+
 
 -- DECODERS
 
@@ -226,7 +257,7 @@ joinedDecoder =
 
 gameDecoder : Decoder Game
 gameDecoder =
-    Decode.map7 Game
+    Decode.map8 Game
         (Decode.field "board" (Decode.index 0 Decode.float))
         (Decode.field "board" (Decode.index 1 Decode.float))
         (Decode.field "total" Decode.int)
@@ -234,6 +265,13 @@ gameDecoder =
         (Decode.field "cells" (Decode.list cellDecoder))
         (Decode.field "players" (Decode.list playerDecoder))
         (Decode.field "min_stretch" Decode.float)
+        (Decode.field "elapsed_ms" Decode.int)
+        |> andMap (Decode.field "info_box" (Decode.nullable labelDecoder))
+
+
+andMap : Decoder a -> Decoder (a -> b) -> Decoder b
+andMap =
+    Decode.map2 (|>)
 
 
 cellDecoder : Decoder Cell
@@ -269,11 +307,21 @@ playerDecoder =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
+subscriptions model =
     Sub.batch
         [ schulteJoined GotJoined
         , schulteState GotState
         , schulteJoinFailed GotJoinFailed
+        , case model.connection of
+            Joined _ game ->
+                if game.infoBox /= Nothing && not (finished game) then
+                    Time.every 200 Tick
+
+                else
+                    Sub.none
+
+            _ ->
+                Sub.none
         ]
 
 
@@ -303,7 +351,11 @@ viewGame model me game =
                     [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Schulte Race" ]
                     , p [ class "text-sm opacity-60" ] [ text "Click the numbers in order. The first click gets the point." ]
                     ]
-                , viewNext game
+                , if game.infoBox == Nothing then
+                    viewNext game
+
+                  else
+                    text ""
                 ]
             , viewShareLink model
             , viewScores me game.players
@@ -329,19 +381,21 @@ fieldWidth game =
     "min(100%, calc((100dvh - 4.5rem) * " ++ String.fromFloat (game.width / game.height) ++ "))"
 
 
+nextText : Game -> String
+nextText game =
+    if finished game then
+        "✓"
+
+    else
+        String.fromInt game.next
+
+
 viewNext : Game -> Html Msg
 viewNext game =
     div [ id "schulte-next", class "flex shrink-0 flex-col items-center rounded-2xl bg-emerald-600 px-4 py-1.5 text-white shadow-lg shadow-emerald-600/25 lg:w-full lg:py-3" ]
         [ span [ class "text-[10px] font-medium uppercase tracking-widest opacity-80" ] [ text "Find" ]
         , span [ class "text-2xl font-bold leading-tight tabular-nums" ]
-            [ text
-                (if finished game then
-                    "✓"
-
-                 else
-                    String.fromInt game.next
-                )
-            ]
+            [ text (nextText game) ]
         ]
 
 
@@ -403,30 +457,131 @@ viewField model game =
     let
         viewBox =
             "0 0 " ++ String.fromFloat game.width ++ " " ++ String.fromFloat game.height
+
+        -- The board has rounded corners. The cells are clipped to the
+        -- rounded shape, and the border is drawn inside its edge, so that
+        -- the border follows the corners.
+        boardRect inset radius attrs =
+            Svg.rect
+                ([ SA.x (String.fromFloat inset)
+                 , SA.y (String.fromFloat inset)
+                 , SA.width (String.fromFloat (game.width - 2 * inset))
+                 , SA.height (String.fromFloat (game.height - 2 * inset))
+                 , SA.rx (String.fromFloat radius)
+                 ]
+                    ++ attrs
+                )
+                []
     in
     Svg.svg
         [ SA.id "schulte-field"
         , SA.viewBox viewBox
-        , SA.class "block h-auto w-full rounded-2xl bg-[#fbf5e1] shadow-sm ring-1 ring-slate-300"
+        , SA.class "block h-auto w-full drop-shadow-sm"
         , SA.strokeLinejoin "round"
         ]
-        (List.map (viewCell model game.minStretch) game.cells
-            ++ [ Svg.rect
-                    [ SA.width (String.fromFloat game.width)
-                    , SA.height (String.fromFloat game.height)
-                    , SA.fill "none"
-                    , SA.stroke ink
-                    , SA.strokeWidth "6"
-                    , SA.pointerEvents "none"
-                    ]
-                    []
-               ]
-        )
+        [ Svg.defs []
+            [ Svg.clipPath [ SA.id "schulte-board-shape" ] [ boardRect 0 cornerRadius [] ] ]
+        , Svg.g [ SA.clipPath "url(#schulte-board-shape)" ]
+            (boardRect 0 cornerRadius [ SA.fill "#fbf5e1" ]
+                :: List.map (viewCell model game.minStretch) game.cells
+                ++ [ case game.infoBox of
+                        Just box ->
+                            viewInfoBox model game box
+
+                        Nothing ->
+                            text ""
+                   ]
+            )
+        , boardRect 1.5
+            (cornerRadius - 1.5)
+            [ SA.fill "none"
+            , SA.stroke ink
+            , SA.strokeWidth "3"
+            , SA.pointerEvents "none"
+            ]
+        ]
+
+
+{-| The radius of the board corners, in board units.
+-}
+cornerRadius : Float
+cornerRadius =
+    18
 
 
 ink : String
 ink =
     "#474d50"
+
+
+{-| The time in the left half of the box, and the next number (large, in
+a color that stands out) in the right half.
+-}
+viewInfoBox : Model -> Game -> Label -> Svg Msg
+viewInfoBox model game { x, y, w, h } =
+    let
+        elapsedMs =
+            if finished game then
+                game.elapsedMs
+
+            else
+                max 0 (model.now - model.clockStart)
+
+        middle =
+            x + w / 2
+
+        boxText textId cx size color content =
+            Svg.text_
+                [ SA.id textId
+                , SA.x (String.fromFloat cx)
+                , SA.y (String.fromFloat (y + h / 2 + 0.36 * size))
+                , SA.textAnchor "middle"
+                , SA.fontSize (String.fromFloat size)
+                , SA.fontFamily "'Helvetica Neue', Arial, sans-serif"
+                , SA.fontWeight "700"
+                , SA.fill color
+                , SA.style "font-variant-numeric: tabular-nums"
+                ]
+                [ Svg.text content ]
+    in
+    Svg.g [ SA.id "schulte-info", SA.pointerEvents "none" ]
+        [ -- A white fill and a thick border, so that the box does not look
+          -- like a cell. The border is inside the box, so that all four
+          -- sides are equally thick.
+          Svg.rect
+            [ SA.x (String.fromFloat (x + 1.5))
+            , SA.y (String.fromFloat (y + 1.5))
+            , SA.width (String.fromFloat (w - 3))
+            , SA.height (String.fromFloat (h - 3))
+            , SA.fill "#ffffff"
+            , SA.stroke ink
+            , SA.strokeWidth "3"
+            ]
+            []
+        , Svg.line
+            [ SA.x1 (String.fromFloat middle)
+            , SA.y1 (String.fromFloat (y + h * 0.2))
+            , SA.x2 (String.fromFloat middle)
+            , SA.y2 (String.fromFloat (y + h * 0.8))
+            , SA.stroke ink
+            , SA.strokeOpacity "0.3"
+            , SA.strokeWidth "2"
+            ]
+            []
+        , boxText "schulte-time" (x + w / 4) (h * 0.45) ink (formatTime elapsedMs)
+        , boxText "schulte-info-next" (x + 3 * w / 4) (h * 0.85) "#d9534f" (nextText game)
+        ]
+
+
+{-| Show the time as minutes and seconds, for example "1:05".
+-}
+formatTime : Int -> String
+formatTime ms =
+    let
+        seconds =
+            ms // 1000
+    in
+    String.fromInt (seconds // 60) ++ ":" ++ String.padLeft 2 '0' (String.fromInt (modBy 60 seconds))
 
 
 viewCell : Model -> Float -> Cell -> Svg Msg
