@@ -22,6 +22,26 @@ defmodule OctomoctoWeb.PageControllerTest do
     assert LazyHTML.query(document, "#hero #slogan") |> LazyHTML.text() =~ "Use your heads"
   end
 
+  test "the page title has the tagline", %{conn: conn} do
+    conn = get(conn, ~p"/")
+
+    document = LazyHTML.from_document(html_response(conn, 200))
+
+    assert LazyHTML.query(document, "title") |> LazyHTML.text() ==
+             "Octomocto · Brain Games to Play Solo or with Friends"
+  end
+
+  test "the page has the description meta tag", %{conn: conn} do
+    conn = get(conn, ~p"/")
+
+    document = LazyHTML.from_document(html_response(conn, 200))
+
+    assert LazyHTML.query(document, ~s(meta[name="description"]))
+           |> LazyHTML.attribute("content") == [
+             "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
+           ]
+  end
+
   test "the header has the theme selector", %{conn: conn} do
     conn = get(conn, ~p"/")
 

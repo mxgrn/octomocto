@@ -4,7 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <.live_title default="Octomocto" suffix=" · Phoenix Framework" phx-no-format>{assigns[:page_title]}</.live_title>
+    <meta
+      name="description"
+      content="Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
+    />
+    <.live_title
+      default="Octomocto"
+      suffix=" · Brain Games to Play Solo or with Friends"
+      phx-no-format
+    >{assigns[:page_title]}</.live_title>
     <link rel="icon" href={~p"/favicon.ico"} sizes="48x48" />
     <link rel="icon" href={~p"/favicon.svg"} type="image/svg+xml" />
     <link rel="apple-touch-icon" href={~p"/apple-touch-icon.png"} />
