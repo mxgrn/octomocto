@@ -27,6 +27,7 @@ import topbar from "../vendor/topbar"
 import {unlockAudio} from "./sounds"
 import {playTrainSound} from "./train_sounds"
 import {playAstronautSound} from "./astronaut_sounds"
+import {playSchulteSound} from "./schulte_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
@@ -85,10 +86,17 @@ if (trainsNode) {
   trains.ports.playTrainSound.subscribe(playTrainSound)
 }
 
-// Start the Schulte race and connect its ports to the game channel
+// Start the Schulte race and connect its ports to the game channel.
+// The browser remembers if the player muted the sounds. The storage can
+// be unavailable (for example, in a private window), so the sounds are
+// then on.
 const schulteNode = document.getElementById("schulte-main")
 if (schulteNode) {
-  const schulte = window.Elm.Schulte.init({node: schulteNode, flags: {gameUrl: window.location.href}})
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  let muted = false
+  try { muted = localStorage.getItem("schulte-muted") === "true" } catch (_e) {}
+
+  const schulte = window.Elm.Schulte.init({node: schulteNode, flags: {gameUrl: window.location.href, muted}})
   const socket = new Socket("/socket")
   socket.connect()
 
@@ -104,6 +112,10 @@ if (schulteNode) {
   schulte.ports.schultePick.subscribe(number => channel.push("pick", {number}))
   schulte.ports.schulteRestart.subscribe(() => channel.push("restart", {}))
   schulte.ports.schulteCopyText.subscribe(text => navigator.clipboard.writeText(text))
+  schulte.ports.schultePlaySound.subscribe(playSchulteSound)
+  schulte.ports.schulteSaveMuted.subscribe(value => {
+    try { localStorage.setItem("schulte-muted", String(value)) } catch (_e) {}
+  })
 }
 
 // connect if there are any LiveViews on the page

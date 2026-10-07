@@ -4,12 +4,15 @@ port module Schulte exposing (main)
 
 The server owns the game: the field with the numbers 1 to 90, the next
 number and the scores. The first player to click the next number gets a
-point, and the number becomes gray for all players. This module draws the
+point, and the number disappears for all players. This module draws the
 state that comes in through ports and sends the player's clicks out.
 app.js connects the ports to a Phoenix channel.
 
-A click on a wrong number does nothing, but the cell shakes for this
+A click on a wrong number does nothing, but its number shakes for this
 player only.
+
+The module compares each new state with the old one and sends the names
+of the sounds to play out through a port. The player can mute the sounds.
 
 The port names start with "schulte", because Elm does not allow two ports
 with the same name in one bundle.
@@ -49,6 +52,12 @@ port schulteState : (Decode.Value -> msg) -> Sub msg
 
 
 port schulteJoinFailed : (String -> msg) -> Sub msg
+
+
+port schultePlaySound : String -> Cmd msg
+
+
+port schulteSaveMuted : Bool -> Cmd msg
 
 
 
@@ -122,11 +131,14 @@ type alias Model =
     -- now. The clock ticks between the server updates.
     , clockStart : Int
     , now : Int
+    , muted : Bool
     }
 
 
 type alias Flags =
-    { gameUrl : String }
+    { gameUrl : String
+    , muted : Bool
+    }
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -138,6 +150,7 @@ init flags =
       , shakeCount = 0
       , clockStart = 0
       , now = 0
+      , muted = flags.muted
       }
     , Cmd.none
     )
@@ -163,6 +176,7 @@ type Msg
     | CopiedTimeout
     | SyncClock Int Time.Posix
     | Tick Time.Posix
+    | ToggleMuted
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -178,8 +192,10 @@ update msg model =
 
         GotState value ->
             case ( model.connection, Decode.decodeValue gameDecoder value ) of
-                ( Joined me _, Ok game ) ->
-                    ( { model | connection = Joined me game }, syncClock game )
+                ( Joined me old, Ok game ) ->
+                    ( { model | connection = Joined me game }
+                    , Cmd.batch [ syncClock game, playSounds model (stateSounds me old game) ]
+                    )
 
                 _ ->
                     ( model, Cmd.none )
@@ -199,7 +215,10 @@ update msg model =
                                 model.shakeCount + 1
                         in
                         ( { model | shaking = Just number, shakeCount = count }
-                        , Process.sleep 400 |> Task.perform (\_ -> ShakeDone count)
+                        , Cmd.batch
+                            [ Process.sleep 400 |> Task.perform (\_ -> ShakeDone count)
+                            , playSounds model [ "wrong" ]
+                            ]
                         )
 
                     else
@@ -238,6 +257,69 @@ update msg model =
 
         Tick time ->
             ( { model | now = Time.posixToMillis time }, Cmd.none )
+
+        ToggleMuted ->
+            ( { model | muted = not model.muted }, schulteSaveMuted (not model.muted) )
+
+
+playSounds : Model -> List String -> Cmd Msg
+playSounds model names =
+    if model.muted then
+        Cmd.none
+
+    else
+        Cmd.batch (List.map schultePlaySound names)
+
+
+{-| The sounds for the change from the old state to the new one: a found
+number (by this player or by another one), and the end of the game.
+-}
+stateSounds : String -> Game -> Game -> List String
+stateSounds me old new =
+    let
+        wasFound number =
+            List.any (\c -> c.number == number && c.foundBy /= Nothing) old.cells
+
+        newFinders =
+            new.cells
+                |> List.filter (\c -> not (wasFound c.number))
+                |> List.filterMap .foundBy
+
+        endSound =
+            if finished new && not (finished old) then
+                case winners new.players of
+                    [ winner ] ->
+                        if winner.id == me then
+                            [ "win" ]
+
+                        else
+                            [ "lose" ]
+
+                    _ ->
+                        [ "lose" ]
+
+            else
+                []
+    in
+    (if List.member me newFinders then
+        [ "found" ]
+
+     else if newFinders /= [] then
+        [ "other_found" ]
+
+     else
+        []
+    )
+        ++ endSound
+
+
+winners : List Player -> List Player
+winners players =
+    let
+        best =
+            List.maximum (List.map .score players) |> Maybe.withDefault 0
+    in
+    List.filter (\p -> p.score == best) players
 
 
 syncClock : Game -> Cmd Msg
@@ -348,7 +430,10 @@ viewGame model me game =
         [ aside [ id "schulte-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
             [ div [ class "flex items-end justify-between gap-4 lg:flex-col lg:items-start" ]
                 [ div []
-                    [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Schulte Race" ]
+                    [ div [ class "flex items-center gap-2" ]
+                        [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Schulte Race" ]
+                        , viewMuteButton model.muted
+                        ]
                     , p [ class "text-sm opacity-60" ] [ text "Click the numbers in order. The first click gets the point." ]
                     ]
                 , if game.infoBox == Nothing then
@@ -379,6 +464,33 @@ viewGame model me game =
 fieldWidth : Game -> String
 fieldWidth game =
     "min(100%, calc((100dvh - 4.5rem) * " ++ String.fromFloat (game.width / game.height) ++ "))"
+
+
+viewMuteButton : Bool -> Html Msg
+viewMuteButton muted =
+    button
+        [ id "schulte-mute"
+        , class "grid size-8 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90"
+        , onClick ToggleMuted
+        , Html.Attributes.title
+            (if muted then
+                "Turn the sounds on"
+
+             else
+                "Turn the sounds off"
+            )
+        ]
+        [ span
+            [ class
+                (if muted then
+                    "hero-speaker-x-mark size-5"
+
+                 else
+                    "hero-speaker-wave size-5"
+                )
+            ]
+            []
+        ]
 
 
 nextText : Game -> String
@@ -530,7 +642,7 @@ viewInfoBox model game { x, y, w, h } =
         middle =
             x + w / 2
 
-        boxText textId cx size color content =
+        boxText textId cx size color weight content =
             Svg.text_
                 [ SA.id textId
                 , SA.x (String.fromFloat cx)
@@ -538,7 +650,7 @@ viewInfoBox model game { x, y, w, h } =
                 , SA.textAnchor "middle"
                 , SA.fontSize (String.fromFloat size)
                 , SA.fontFamily "'Helvetica Neue', Arial, sans-serif"
-                , SA.fontWeight "700"
+                , SA.fontWeight weight
                 , SA.fill color
                 , SA.style "font-variant-numeric: tabular-nums"
                 ]
@@ -568,8 +680,8 @@ viewInfoBox model game { x, y, w, h } =
             , SA.strokeWidth "2"
             ]
             []
-        , boxText "schulte-time" (x + w / 4) (h * 0.45) ink (formatTime elapsedMs)
-        , boxText "schulte-info-next" (x + 3 * w / 4) (h * 0.85) "#d9534f" (nextText game)
+        , boxText "schulte-time" (x + w / 4) (h * 0.45) ink "300" (formatTime elapsedMs)
+        , boxText "schulte-info-next" (x + 3 * w / 4) (h * 0.85) "#d9534f" "700" (nextText game)
         ]
 
 
@@ -587,44 +699,36 @@ formatTime ms =
 viewCell : Model -> Float -> Cell -> Svg Msg
 viewCell model minStretch cell =
     let
-        shaking =
-            model.shaking == Just cell.number
-
         found =
             cell.foundBy /= Nothing
-
-        fill =
-            if shaking then
-                "#fca5a5"
-
-            else
-                cell.color
     in
     Svg.g
         [ SA.id ("schulte-cell-" ++ String.fromInt cell.number)
         , SA.class
-            (String.join " "
-                [ "schulte-cell"
-                , if found then
-                    "schulte-found"
+            (if found then
+                "schulte-cell schulte-found"
 
-                  else
-                    ""
-                , if shaking then
-                    "schulte-shake"
-
-                  else
-                    ""
-                ]
+             else
+                "schulte-cell"
             )
         , SE.onClick (Pick cell.number)
         ]
-        [ Svg.path [ SA.d cell.d, SA.fill fill, SA.fillRule "evenodd", SA.stroke ink, SA.strokeWidth "3" ] []
+        [ Svg.path [ SA.d cell.d, SA.fill cell.color, SA.fillRule "evenodd", SA.stroke ink, SA.strokeWidth "3" ] []
         , if found then
             text ""
 
           else
-            viewNumber minStretch cell
+            -- Only the number shakes after a wrong click, not the cell
+            Svg.g
+                [ SA.class
+                    (if model.shaking == Just cell.number then
+                        "schulte-shake"
+
+                     else
+                        ""
+                    )
+                ]
+                [ viewNumber minStretch cell ]
         ]
 
 
@@ -675,14 +779,8 @@ viewNumber minStretch cell =
 viewResult : String -> List Player -> Html Msg
 viewResult me players =
     let
-        best =
-            List.maximum (List.map .score players) |> Maybe.withDefault 0
-
-        winners =
-            List.filter (\p -> p.score == best) players
-
         message =
-            case winners of
+            case winners players of
                 [ winner ] ->
                     if winner.id == me then
                         "You win!"
