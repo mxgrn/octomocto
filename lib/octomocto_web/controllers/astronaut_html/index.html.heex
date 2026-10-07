@@ -1,0 +1,22 @@
+<Layouts.app flash={@flash}>
+  <div class="mx-auto flex max-w-md flex-col items-center gap-6 py-16 text-center">
+    <div class="flex size-20 items-center justify-center rounded-3xl bg-indigo-950 text-5xl shadow-inner shadow-indigo-500/40 ring-1 ring-indigo-400/30">
+      🧑‍🚀
+    </div>
+    <div class="space-y-2">
+      <h1 class="text-3xl font-semibold tracking-tight">Station Escape</h1>
+      <p class="text-base-content/70">
+        Race your friends to the escape pod. The station spins while you play, and Up is always the station's north.
+      </p>
+    </div>
+    <.link
+      id="new-game"
+      href={~p"/astronaut"}
+      method="post"
+      class="rounded-full bg-indigo-600 px-6 py-3 font-medium text-white shadow-lg shadow-indigo-600/25 transition hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-xl active:translate-y-0"
+    >
+      New game
+    </.link>
+    <p class="text-sm text-base-content/50">You get a link to share with other players.</p>
+  </div>
+</Layouts.app>

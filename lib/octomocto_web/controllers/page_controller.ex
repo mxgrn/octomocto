@@ -19,6 +19,15 @@ defmodule OctomoctoWeb.PageController do
       icon_class: "bg-sky-100"
     },
     %{
+      id: "astronaut",
+      name: "Station Escape",
+      description:
+        "Race your friends to the escape pod on a space station that spins while you play.",
+      path: "/astronaut",
+      icon: "🧑‍🚀",
+      icon_class: "bg-indigo-950"
+    },
+    %{
       id: "schulte",
       name: "Schulte Race",
       description:

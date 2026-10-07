@@ -22,6 +22,9 @@ defmodule OctomoctoWeb.Router do
     get "/penguin", PenguinController, :index
     post "/penguin", PenguinController, :create
     get "/penguin/:id", PenguinController, :show
+    get "/astronaut", AstronautController, :index
+    post "/astronaut", AstronautController, :create
+    get "/astronaut/:id", AstronautController, :show
     get "/trains", TrainsController, :index
     get "/schulte", SchulteController, :index
     post "/schulte", SchulteController, :create
