@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Start both log streams in background
+DOCKER_HOST=ssh://app1 docker logs --tail 100 -f octomocto_prod | ts '[app1 %Y-%m-%d %H:%M:%S]' &
+PID1=$!
+
+DOCKER_HOST=ssh://app2 docker logs --tail 100 -f octomocto_prod | ts '[app2 %Y-%m-%d %H:%M:%S]' &
+PID2=$!
+
+# Kill both on Ctrl+C
+trap "kill $PID1 $PID2; exit" INT
+
+# Wait for both to finish
+wait
