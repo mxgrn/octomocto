@@ -1,6 +1,6 @@
 port module Trains exposing (main)
 
-{-| Single player "Train of Thought" style game.
+{-| Single player "Right on Track" game.
 
 Trains leave the station one at a time. Each train has the color of one of
 the houses. The player clicks the switches to send each train to the house
@@ -861,7 +861,7 @@ view model =
     div [ id "trains-root", class "flex w-full max-w-[1400px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
         [ aside [ id "trains-panel", class "flex flex-wrap items-end justify-between gap-3 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:flex-col lg:items-start lg:gap-5" ]
             [ div []
-                [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Train of Thought" ]
+                [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Right on Track" ]
                 , p [ class "text-sm opacity-60" ] [ text "Click the switches to send each train to the house of its color." ]
                 ]
             , viewStats model

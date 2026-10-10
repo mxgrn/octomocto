@@ -4,7 +4,7 @@ defmodule OctomoctoWeb.PageController do
   @games [
     %{
       id: "trains",
-      name: "Train of Thought",
+      name: "Right on Track",
       description: "Click the switches to send each train to the house of its color.",
       path: "/trains",
       icon: "🚂",
