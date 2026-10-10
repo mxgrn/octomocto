@@ -6,11 +6,21 @@
     <meta name="csrf-token" content={get_csrf_token()} />
     <meta
       name="description"
-      content="Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
+      content={
+        assigns[:page_description] ||
+          "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
+      }
     />
+    <%!-- Game rooms are private links, so search engines must not show them --%>
+    <meta :if={assigns[:noindex]} name="robots" content="noindex" />
     <.live_title
       default="Octomocto"
-      suffix=" · Brain Games to Play Solo or with Friends"
+      suffix={
+        if(assigns[:page_title],
+          do: " · Octomocto",
+          else: " · Brain Games to Play Solo or with Friends"
+        )
+      }
       phx-no-format
     >{assigns[:page_title]}</.live_title>
     <link rel="icon" href={~p"/favicon.ico"} sizes="48x48" />
