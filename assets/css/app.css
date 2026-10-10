@@ -163,8 +163,17 @@
 
 .schulte-flash { animation: schulte-flash 1s ease-out; }
 
+/* The next number in the side panel pops in when it changes */
+@keyframes schulte-next-in {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.schulte-next { animation: schulte-next-in 200ms ease-out; }
+
 @media (prefers-reduced-motion: reduce) {
   .schulte-pop { animation: none; opacity: 0; }
+  .schulte-next { animation: none; }
 }
 
 /* Header. The eyes in the wordmark blink one time when the pointer moves onto it.

@@ -190,11 +190,10 @@ defmodule Octomocto.Schulte.Game do
 
     # How narrow a number can get. The classic board has very narrow
     # shapes, where the printed puzzle squeezes the numbers a lot.
-    # Both boards have an empty box for the time and the next number.
-    {size, min_stretch, info_box} =
+    {size, min_stretch} =
       if state.layout == :classic,
-        do: {Classic.size(), 0.1, Classic.info_box()},
-        else: {Layout.size(), 0.3, Layout.info_box()}
+        do: {Classic.size(), 0.1},
+        else: {Layout.size(), 0.3}
 
     waiting? = state.started_at == nil
 
@@ -208,7 +207,6 @@ defmodule Octomocto.Schulte.Game do
     %{
       board: Tuple.to_list(size),
       min_stretch: min_stretch,
-      info_box: info_box,
       waiting: waiting?,
       elapsed_ms: if(waiting?, do: 0, else: (state.finished_at || now()) - state.started_at),
       total: @last,

@@ -116,9 +116,6 @@ type alias Game =
     -- The time since the field started. After the end, the final time.
     , elapsedMs : Int
 
-    -- The box for the time and the next number
-    , infoBox : Maybe Label
-
     -- True until the game has all its players. The cells are empty then.
     , waiting : Bool
     , playersNeeded : Int
@@ -401,7 +398,6 @@ gameDecoder =
         (Decode.field "players" (Decode.list playerDecoder))
         (Decode.field "min_stretch" Decode.float)
         (Decode.field "elapsed_ms" Decode.int)
-        |> andMap (Decode.field "info_box" (Decode.nullable labelDecoder))
         |> andMap (Decode.field "waiting" Decode.bool)
         |> andMap (Decode.field "players_needed" Decode.int)
 
@@ -452,7 +448,7 @@ subscriptions model =
         , schulteJoinFailed GotJoinFailed
         , case model.connection of
             Joined _ game ->
-                if game.infoBox /= Nothing && not game.waiting && not (finished game) then
+                if not game.waiting && not (finished game) then
                     Time.every 200 Tick
 
                 else
@@ -500,6 +496,7 @@ viewGame model me game =
                     , p [ class "text-sm opacity-60" ] [ text "Click the numbers in order. The first click gets the point." ]
                     ]
                 ]
+            , viewClock model game
             , viewShareLink model
             , viewScores model me game.players
             , if me == Nothing then
@@ -674,16 +671,9 @@ viewField model game =
         , Svg.g [ SA.clipPath "url(#schulte-board-shape)" ]
             (boardRect 0 cornerRadius [ SA.fill "#fbf5e1" ]
                 :: List.map (viewCell model game.minStretch) game.cells
-                ++ [ case game.infoBox of
-                        Just box ->
-                            viewInfoBox model game box
-
-                        Nothing ->
-                            text ""
-
-                   -- The bursts are on top of all the cells, so that the
-                   -- next cells do not cover the particles
-                   , Svg.Keyed.node "g"
+                -- The bursts are on top of all the cells, so that the
+                -- next cells do not cover the particles
+                ++ [ Svg.Keyed.node "g"
                         [ SA.pointerEvents "none" ]
                         (game.cells
                             |> List.filter (\cell -> cell.foundBy /= Nothing)
@@ -713,11 +703,12 @@ ink =
     "#474d50"
 
 
-{-| The time in the left half of the box, and the next number (large, in
-a color that stands out, under a small "looking for" label) in the right half.
+{-| The time on the left, and the next number (large, in a color that
+stands out, under a small "looking for" label) on the right. The next number
+is keyed, so that it pops in again when it changes.
 -}
-viewInfoBox : Model -> Game -> Label -> Svg Msg
-viewInfoBox model game { x, y, w, h } =
+viewClock : Model -> Game -> Html Msg
+viewClock model game =
     let
         elapsedMs =
             if finished game then
@@ -725,52 +716,21 @@ viewInfoBox model game { x, y, w, h } =
 
             else
                 max 0 (model.now - model.clockStart)
-
-        middle =
-            x + w / 2
-
-        -- `cy` is the vertical middle of the text
-        boxText textId cx cy size color weight content =
-            Svg.text_
-                [ SA.id textId
-                , SA.x (String.fromFloat cx)
-                , SA.y (String.fromFloat (cy + 0.36 * size))
-                , SA.textAnchor "middle"
-                , SA.fontSize (String.fromFloat size)
-                , SA.fontFamily "'Helvetica Neue', Arial, sans-serif"
-                , SA.fontWeight weight
-                , SA.fill color
-                , SA.style "font-variant-numeric: tabular-nums"
-                ]
-                [ Svg.text content ]
     in
-    Svg.g [ SA.id "schulte-info", SA.pointerEvents "none" ]
-        [ -- A white fill and a thick border, so that the box does not look
-          -- like a cell. The border is inside the box, so that all four
-          -- sides are equally thick.
-          Svg.rect
-            [ SA.x (String.fromFloat (x + 1.5))
-            , SA.y (String.fromFloat (y + 1.5))
-            , SA.width (String.fromFloat (w - 3))
-            , SA.height (String.fromFloat (h - 3))
-            , SA.fill "#ffffff"
-            , SA.stroke ink
-            , SA.strokeWidth "3"
+    div [ id "schulte-clock", class "grid grid-cols-2 divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200" ]
+        [ div [ class "flex flex-col items-center justify-center" ]
+            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "time" ]
+            , span [ id "schulte-time", class "text-3xl font-light text-slate-700 tabular-nums" ] [ text (formatTime elapsedMs) ]
             ]
-            []
-        , Svg.line
-            [ SA.x1 (String.fromFloat middle)
-            , SA.y1 (String.fromFloat (y + h * 0.2))
-            , SA.x2 (String.fromFloat middle)
-            , SA.y2 (String.fromFloat (y + h * 0.8))
-            , SA.stroke ink
-            , SA.strokeOpacity "0.3"
-            , SA.strokeWidth "2"
+        , div [ class "flex flex-col items-center justify-center" ]
+            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "looking for" ]
+            , Html.Keyed.node "span"
+                [ class "text-4xl leading-none font-bold text-[#d9534f] tabular-nums" ]
+                [ ( nextText game
+                  , span [ id "schulte-next", class "schulte-next inline-block" ] [ text (nextText game) ]
+                  )
+                ]
             ]
-            []
-        , boxText "schulte-time" (x + w / 4) (y + h / 2) (h * 0.45) ink "300" (formatTime elapsedMs)
-        , boxText "schulte-info-label" (x + 3 * w / 4) (y + h * 0.24) (h * 0.17) ink "400" "looking for"
-        , boxText "schulte-info-next" (x + 3 * w / 4) (y + h * 0.6) (h * 0.6) "#d9534f" "700" (nextText game)
         ]
 
 

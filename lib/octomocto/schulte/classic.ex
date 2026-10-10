@@ -26,12 +26,6 @@ defmodule Octomocto.Schulte.Classic do
 
   def size, do: {1116, 834}
 
-  @doc """
-  Returns the empty box in the top right corner as `[x, y, w, h]`. The game
-  shows the time and the next number in it.
-  """
-  def info_box, do: [913 - @ox, 3 - @oy, 1187 - 913, 77 - 3]
-
   @doc "Returns the 90 regions in the drawing order, with the colors (not cream) shuffled."
   def regions do
     regions = shapes()
@@ -182,8 +176,10 @@ defmodule Octomocto.Schulte.Classic do
       ),
       region(ellipse(826, 479, 46.5, 52), {817, 445, 27, 68}, @pink),
 
-      # Right: stripes with two half ellipses, a half disk with wedges
-      region(rect(913, 77, 1187, 123), {1028, 85, 38, 30}, @teal),
+      # Right: stripes with two half ellipses, a half disk with wedges. The
+      # puzzle has an empty box above the top stripe, so the top stripe
+      # grows up to fill it.
+      region(rect(913, 3, 1187, 123), {1028, 40, 38, 45}, @teal),
       region(rect(913, 123, 1187, 170), {1028, 132, 38, 32}, @pink),
       region(rect(913, 170, 1187, 211), {1028, 175, 38, 33}, @cream),
       region(rect(913, 211, 1187, 265), {1028, 222, 38, 30}, @cream),
