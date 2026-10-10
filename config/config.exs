@@ -24,6 +24,9 @@ config :octomocto,
   ecto_repos: [Octomocto.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+# The Mnesia tables that the cluster nodes share
+config :mnesiac, stores: [Octomocto.Schulte.Store]
+
 # Configure the endpoint
 config :octomocto, OctomoctoWeb.Endpoint,
   url: [host: "localhost"],

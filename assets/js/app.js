@@ -114,11 +114,21 @@ if (schulteNode) {
   const socket = new Socket("/socket", {params: {user_token: schulteNode.dataset.userToken}})
   socket.connect()
 
-  const channel = socket.channel(`schulte:${schulteNode.dataset.gameId}`)
+  // The token gets the same player back when the channel joins again, for
+  // example after a reconnect to another server in a deploy.
+  let token = null
+  const joined = reply => {
+    token = reply.token
+    schulte.ports.schulteJoined.send(reply)
+  }
+  const channel = socket.channel(`schulte:${schulteNode.dataset.gameId}`, () => token ? {token} : {})
   channel.on("state", state => schulte.ports.schulteState.send(state))
+  channel.on("joined", joined)
   channel.join()
-    .receive("ok", reply => schulte.ports.schulteJoined.send(reply))
+    .receive("ok", joined)
     .receive("error", ({reason}) => {
+      // The server of the game stopped a moment ago. The channel tries again.
+      if (reason === "unavailable") return
       channel.leave()
       schulte.ports.schulteJoinFailed.send(reason)
     })

@@ -14,7 +14,7 @@ defmodule Octomocto.Astronaut do
   end
 
   def game_exists?(id) do
-    Registry.lookup(Octomocto.Astronaut.Registry, id) != []
+    GenServer.whereis(Game.via(id)) != nil
   end
 
   @doc """

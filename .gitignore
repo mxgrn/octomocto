@@ -36,3 +36,6 @@ npm-debug.log
 /assets/node_modules/
 /assets/elm/elm-stuff/
 
+
+# Mnesia directories of the dev and test nodes
+/Mnesia.*/

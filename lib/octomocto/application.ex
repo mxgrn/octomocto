@@ -7,14 +7,18 @@ defmodule Octomocto.Application do
 
   @impl true
   def start(_type, _args) do
+    topologies = Application.get_env(:libcluster, :topologies, [])
+    hosts = topologies[:default][:config][:hosts] || []
+
     children = [
       OctomoctoWeb.Telemetry,
       Octomocto.Repo,
-      {DNSCluster, query: Application.get_env(:octomocto, :dns_cluster_query) || :ignore},
+      {Cluster.Supervisor, [topologies, [name: Octomocto.ClusterSupervisor]]},
+      # Before the endpoint: a new node gets the Schulte games from the
+      # other node before it serves requests.
+      {Mnesiac.Supervisor, [hosts, [name: Octomocto.MnesiacSupervisor]]},
       {Phoenix.PubSub, name: Octomocto.PubSub},
-      {Registry, keys: :unique, name: Octomocto.Astronaut.Registry},
       {DynamicSupervisor, name: Octomocto.Astronaut.GameSupervisor},
-      {Registry, keys: :unique, name: Octomocto.Schulte.Registry},
       {DynamicSupervisor, name: Octomocto.Schulte.GameSupervisor},
       # Start a worker by calling: Octomocto.Worker.start_link(arg)
       # {Octomocto.Worker, arg},

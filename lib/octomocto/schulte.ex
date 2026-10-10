@@ -1,14 +1,16 @@
 defmodule Octomocto.Schulte do
   @moduledoc """
   Multiplayer Schulte tables. Each game is a `Octomocto.Schulte.Game`
-  process, found by its id. Finished fields are saved as
+  process on one node of the cluster, found by its id. A copy of its state
+  is in `Octomocto.Schulte.Store`, so the game continues on another node
+  when its node stops. Finished fields are saved as
   `Octomocto.Schulte.Result` rows.
   """
 
   import Ecto.Query
 
   alias Octomocto.Repo
-  alias Octomocto.Schulte.{Game, Result}
+  alias Octomocto.Schulte.{Game, Result, Store}
 
   @list_size 10
 
@@ -30,21 +32,41 @@ defmodule Octomocto.Schulte do
   end
 
   def game_exists?(id) do
-    Registry.lookup(Octomocto.Schulte.Registry, id) != []
+    Store.read(id) != nil
   end
 
   @doc """
-  Adds a player for the calling process. The player is removed when the
-  process stops. Subscribe to `Game.topic(id)` first to get all updates.
-  The `user_id` is nil for a guest. The `name` is the display name, or nil
-  for a color name. When the game has all its players, the new process only
-  watches, and the player id is nil.
+  Adds a player for the calling process. The player is removed some time
+  after the process stops. Subscribe to `Game.topic(id)` first to get all
+  updates. The `user_id` is nil for a guest. The `name` is the display
+  name, or nil for a color name. When the game has all its players, the
+  new process only watches, and the player id is nil.
+
+  Give the `player_id` of a player that is still in the game to bind that
+  player to the calling process again. Only give a player id that the
+  caller can trust (see `OctomoctoWeb.SchulteChannel`).
+
+  Gives `{:error, :unavailable}` when the node of the game stopped a
+  moment ago. Try again soon.
   """
-  def join(id, user_id \\ nil, name \\ nil) do
-    if game_exists?(id) do
-      GenServer.call(Game.via(id), {:join, self(), user_id, name})
-    else
-      {:error, :not_found}
+  def join(id, user_id \\ nil, name \\ nil, player_id \\ nil) do
+    case game_pid(id) do
+      nil -> {:error, :not_found}
+      pid -> GenServer.call(pid, {:join, self(), user_id, name, player_id})
+    end
+  catch
+    :exit, _reason -> {:error, :unavailable}
+  end
+
+  # When no node runs the game (for example, its node stopped in a deploy),
+  # starts the game on this node from its copy in the store.
+  defp game_pid(id) do
+    with nil <- GenServer.whereis(Game.via(id)),
+         %{} = state <- Store.read(id) do
+      case DynamicSupervisor.start_child(Octomocto.Schulte.GameSupervisor, {Game, state}) do
+        {:ok, pid} -> pid
+        {:error, {:already_started, pid}} -> pid
+      end
     end
   end
 

@@ -80,7 +80,18 @@ if config_env() == :prod do
 
   host = System.get_env("PHX_HOST") || "example.com"
 
-  config :octomocto, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+  # The two hosts run one node each. A deploy restarts one host at a time,
+  # so that the other node keeps the Schulte games (see Octomocto.Schulte.Store).
+  config :libcluster, :topologies,
+    default: [
+      strategy: Cluster.Strategy.Epmd,
+      config: [
+        hosts: [
+          :"octomocto_#{System.get_env("PROD_ENV")}@app1.local",
+          :"octomocto_#{System.get_env("PROD_ENV")}@app2.local"
+        ]
+      ]
+    ]
 
   config :octomocto, OctomoctoWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],

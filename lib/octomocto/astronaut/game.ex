@@ -6,7 +6,8 @@ defmodule Octomocto.Astronaut.Game do
 
   Each player is bound to the process that joined (a channel). The astronaut
   is removed when that process stops. The game stops after some time with
-  no players.
+  no players. The game is in the memory of one node, so a deploy of that
+  node ends it.
   """
   use GenServer, restart: :temporary
 
@@ -33,7 +34,8 @@ defmodule Octomocto.Astronaut.Game do
     GenServer.start_link(__MODULE__, id, name: via(id))
   end
 
-  def via(id), do: {:via, Registry, {Octomocto.Astronaut.Registry, id}}
+  # A name for the whole cluster, so that players on all nodes find the game
+  def via(id), do: {:via, :global, {__MODULE__, id}}
 
   def topic(id), do: "astronaut_game:" <> id
 

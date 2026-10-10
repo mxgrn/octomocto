@@ -42,5 +42,5 @@ config :phoenix_live_view,
 config :phoenix,
   sort_verified_routes_query_params: true
 
-# Start Schulte races without the countdown
-config :octomocto, schulte_countdown_ms: 0
+# Start Schulte races without the countdown, and remove players at once when they leave
+config :octomocto, schulte_countdown_ms: 0, schulte_rejoin_grace_ms: 0

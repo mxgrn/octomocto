@@ -43,14 +43,18 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Pull image on host, restart
+      # One host at a time (sync), so that the other node keeps the Schulte
+      # games. A new node gets the games from the other node before its
+      # health check passes.
+      - name: Pull image on hosts, restart
         uses: appleboy/ssh-action@v1.0.3
         with:
-          # Only 1 host: penguin games are kept in the memory of 1 node.
-          host: "49.12.187.176"
+          # "app2,app1"
+          host: "49.12.187.176,5.75.226.35"
           username: ${{matrix.username}}
           key: ${{ secrets.DEPLOYMENT_KEY }}
           script_stop: true
+          sync: true
           script: |
             echo "${{secrets.GITHUB_TOKEN}}" | docker login https://ghcr.io -u ${{github.actor}} --password-stdin
             docker pull ghcr.io/mxgrn/${{matrix.app}}_${{matrix.env}}
@@ -61,8 +65,12 @@ jobs:
               ghcr.io/mxgrn/${{matrix.app}}_${{matrix.env}} /app/bin/migrate
             docker stop ${{matrix.app}}_${{matrix.env}} || true
             docker rm ${{matrix.app}}_${{matrix.env}} || true
-            docker run --name=${{matrix.app}}_${{matrix.env}} -d -p ${{matrix.port}}:4000 \
+            docker run --name=${{matrix.app}}_${{matrix.env}} -d \
               --restart always \
+              --network host \
+              -e PORT=${{matrix.port}} \
+              -e RELEASE_COOKIE=${{secrets.RELEASE_COOKIE}} \
+              -e PROD_ENV=${{matrix.env}} \
               -e PHX_SERVER=true \
               -e SECRET_KEY_BASE=${{secrets.SECRET_KEY_BASE}} \
               -e DATABASE_URL=${{secrets.DATABASE_URL}} \
