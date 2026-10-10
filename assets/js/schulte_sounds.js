@@ -3,6 +3,17 @@
 import {audioReady, noise, tone} from "./sounds"
 
 const sounds = {
+  // A short beep on each step of the countdown. Laptop speakers are weak
+  // in low tones, so the beeps are high and a little louder than the others.
+  countdown() {
+    tone({freq: 880, duration: 0.15, gain: 0.2})
+  },
+
+  // A longer beep, one octave higher, when the race starts
+  go() {
+    tone({freq: 1760, duration: 0.5, gain: 0.2})
+  },
+
   // A short bright pop when you get the point
   found() {
     tone({freq: 880, freqEnd: 1320, duration: 0.12, gain: 0.15})

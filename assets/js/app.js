@@ -98,8 +98,14 @@ if (trainsNode) {
 // The browser remembers if the player muted the sounds. The storage can
 // be unavailable (for example, in a private window), so the sounds are
 // then on.
+//
+// The countdown starts before the player can click on this page. After a
+// click on "New game", the browser lets the page start the audio at once,
+// so that the countdown beeps. A player who opens a shared link gets the
+// audio on the first click.
 const schulteNode = document.getElementById("schulte-main")
 if (schulteNode) {
+  if (navigator.userActivation?.hasBeenActive) unlockAudio()
   document.addEventListener("pointerdown", unlockAudio, {once: true})
   let muted = false
   try { muted = localStorage.getItem("schulte-muted") === "true" } catch (_e) {}

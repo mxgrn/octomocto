@@ -15,7 +15,8 @@ The module compares each new state with the old one and sends the names
 of the sounds to play out through a port. The player can mute the sounds.
 
 The game is for a set number of players. Before all of them are in, the
-board is hidden and nobody can pick. A browser that joins a full game only
+board is hidden and nobody can pick. A countdown with beeps comes before
+each field. A browser that joins a full game only
 watches: it has no player id.
 
 The port names start with "schulte", because Elm does not allow two ports
@@ -24,6 +25,7 @@ with the same name in one bundle.
 -}
 
 import Browser
+import Browser.Events
 import Html exposing (Html, a, aside, button, div, h1, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (class, href, id, readonly, style, value)
 import Html.Events exposing (onClick)
@@ -156,6 +158,9 @@ type alias Model =
     -- now. The clock ticks between the server updates.
     , clockStart : Int
     , now : Int
+
+    -- The countdown step that last played its beep (see `countdownStep`)
+    , beepedStep : Maybe Int
     , muted : Bool
     }
 
@@ -177,6 +182,7 @@ init flags =
       , findCount = 0
       , clockStart = 0
       , now = 0
+      , beepedStep = Nothing
       , muted = flags.muted
       }
     , Cmd.none
@@ -292,13 +298,62 @@ update msg model =
                 ms =
                     Time.posixToMillis time
             in
-            ( { model | clockStart = ms - elapsedMs, now = ms }, Cmd.none )
+            beepCountdown { model | clockStart = ms - elapsedMs, now = ms }
 
         Tick time ->
-            ( { model | now = Time.posixToMillis time }, Cmd.none )
+            beepCountdown { model | now = Time.posixToMillis time }
 
         ToggleMuted ->
             ( { model | muted = not model.muted }, schulteSaveMuted (not model.muted) )
+
+
+{-| The seconds left in the countdown (3, 2, 1), 0 after it, and Nothing
+when no field runs. The step is right only after the clock is in sync.
+-}
+countdownStep : Model -> Maybe Int
+countdownStep model =
+    case model.connection of
+        Joined _ game ->
+            if game.waiting || finished game then
+                Nothing
+
+            else
+                Just (max 0 (ceiling (toFloat (model.clockStart - model.now) / 1000)))
+
+        _ ->
+            Nothing
+
+
+{-| A beep on each step of the countdown, and a higher beep at the start.
+There is no start beep without a countdown before it, for example for a
+watcher who joins later.
+-}
+beepCountdown : Model -> ( Model, Cmd Msg )
+beepCountdown model =
+    let
+        step =
+            countdownStep model
+
+        sounds =
+            if step == model.beepedStep then
+                []
+
+            else
+                case step of
+                    Just 0 ->
+                        if Maybe.withDefault 0 model.beepedStep > 0 then
+                            [ "go" ]
+
+                        else
+                            []
+
+                    Just _ ->
+                        [ "countdown" ]
+
+                    Nothing ->
+                        []
+    in
+    ( { model | beepedStep = step }, playSounds model sounds )
 
 
 playSounds : Model -> List String -> Cmd Msg
@@ -452,7 +507,13 @@ subscriptions model =
         , schulteJoinFailed GotJoinFailed
         , case model.connection of
             Joined _ game ->
-                if not game.waiting && not (finished game) then
+                -- The numbers come only after the countdown, so no cells
+                -- means a countdown. It ticks on each frame, so that the
+                -- beeps are on time.
+                if not game.waiting && not (finished game) && game.cells == [] then
+                    Browser.Events.onAnimationFrame Tick
+
+                else if not game.waiting && not (finished game) then
                     Time.every 200 Tick
 
                 else
@@ -515,6 +576,9 @@ viewGame model me game =
                 [ viewField model game
                 , if game.waiting then
                     viewWaiting game
+
+                  else if Maybe.withDefault 0 (countdownStep model) > 0 then
+                    viewCountdown (Maybe.withDefault 0 (countdownStep model))
 
                   else if finished game then
                     viewResult me game
@@ -907,6 +971,23 @@ viewWaiting game =
                 )
             ]
         , p [ class "text-sm opacity-60" ] [ text "Send the link to the other players. The race starts when all of them are in." ]
+        ]
+
+
+{-| The number is keyed, so that it pops in again on each step.
+-}
+viewCountdown : Int -> Html Msg
+viewCountdown seconds =
+    div
+        [ id "schulte-countdown"
+        , class "absolute inset-0 flex items-center justify-center rounded-2xl bg-emerald-950/80"
+        ]
+        [ Html.Keyed.node "div"
+            []
+            [ ( String.fromInt seconds
+              , p [ class "schulte-countdown text-9xl font-bold text-white tabular-nums" ] [ text (String.fromInt seconds) ]
+              )
+            ]
         ]
 
 
