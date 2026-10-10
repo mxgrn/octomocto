@@ -7,8 +7,15 @@ defmodule OctomoctoWeb.SchulteController do
 
   def index(conn, params) do
     {board, mode, players} = settings(params)
-    leaderboard = Schulte.leaderboard(%{"type" => board, "mode" => mode, "players" => players})
-    render(conn, :index, board: board, mode: mode, players: players, leaderboard: leaderboard)
+    filter = %{"type" => board, "mode" => mode, "players" => players}
+
+    render(conn, :index,
+      board: board,
+      mode: mode,
+      players: players,
+      leaderboard: Schulte.leaderboard(filter),
+      user_results: user_results(conn.assigns.current_scope, filter)
+    )
   end
 
   def create(conn, params) do
@@ -57,6 +64,10 @@ defmodule OctomoctoWeb.SchulteController do
         "Train your focus and speed with a Schulte table. Find the numbers from 1 to 90 in order, alone or in a race with up to 3 friends. Free, in your browser."
     )
   end
+
+  # Nil for a guest
+  defp user_results(%{user: _} = scope, filter), do: Schulte.user_results(scope, filter)
+  defp user_results(nil, _filter), do: nil
 
   defp user_token(%{user: user}), do: OctomoctoWeb.UserSocket.user_token(user.id)
   defp user_token(nil), do: nil

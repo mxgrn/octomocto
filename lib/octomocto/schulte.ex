@@ -90,6 +90,26 @@ defmodule Octomocto.Schulte do
     %{latest: latest_games(settings), best: best_results(settings)}
   end
 
+  @doc """
+  Gives the results of the scope's user for the settings: the latest
+  results (the newest first) and the best result (nil when there are no
+  results).
+  """
+  def user_results(%{user: user}, settings) do
+    user_query =
+      from(r in Result, where: r.settings == type(^settings, :map) and r.user_id == ^user.id)
+
+    latest =
+      from(r in user_query, order_by: [desc: r.inserted_at], limit: @list_size)
+      |> Repo.all()
+
+    best =
+      from(r in user_query, order_by: [asc: r.elapsed_ms, asc: r.inserted_at], limit: 1)
+      |> Repo.one()
+
+    %{latest: latest, best: best}
+  end
+
   defp latest_games(settings) do
     game_ids =
       from(r in Result,

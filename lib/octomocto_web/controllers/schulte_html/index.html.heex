@@ -82,6 +82,53 @@
 
     <div id="schulte-leaderboard" class="mx-auto grid w-full max-w-md gap-4">
       <.score_list
+        id="your-results"
+        icon="hero-user"
+        icon_class="text-sky-500"
+        title="Your results"
+        empty={@user_results != nil and @user_results.latest == []}
+      >
+        <:aside :if={@user_results && @user_results.best}>
+          <span
+            id="your-best"
+            class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
+          >
+            <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
+            <span class="text-base-content/60">Best</span>
+            <span class="font-semibold tabular-nums">
+              {format_time(@user_results.best.elapsed_ms)}
+            </span>
+          </span>
+        </:aside>
+        <%= if @user_results do %>
+          <li :for={result <- @user_results.latest} class="flex items-baseline gap-3 py-2">
+            <span class="flex-1 text-base-content/60">
+              {Calendar.strftime(result.inserted_at, "%b %-d")}
+            </span>
+            <span :if={@players > 1} class="tabular-nums text-base-content/60">
+              {result.score} pts
+            </span>
+            <span class={[
+              "w-16 text-right font-medium tabular-nums",
+              result.id == @user_results.best.id && "text-amber-600"
+            ]}>
+              {format_time(result.elapsed_ms)}
+            </span>
+          </li>
+        <% else %>
+          <li class="py-2 text-center text-base-content/60">
+            <.link
+              id="your-results-sign-in"
+              href={~p"/signin"}
+              class="font-medium text-emerald-600 transition hover:text-emerald-500 hover:underline"
+            >
+              Sign in
+            </.link>
+            to see your results.
+          </li>
+        <% end %>
+      </.score_list>
+      <.score_list
         id="latest-games"
         icon="hero-clock"
         icon_class="text-emerald-600"

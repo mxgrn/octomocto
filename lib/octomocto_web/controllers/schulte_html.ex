@@ -52,14 +52,18 @@ defmodule OctomoctoWeb.SchulteHTML do
   attr :icon_class, :string, required: true
   attr :empty, :boolean, required: true
   slot :inner_block, required: true
+  slot :aside, doc: "shown at the right of the title"
 
   @doc "A list of results. An empty list has one row with \"---\"."
   def score_list(assigns) do
     ~H"""
     <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
-      <h3 class="mb-3 flex items-center gap-2 font-semibold">
-        <.icon name={@icon} class={["size-4", @icon_class]} /> {@title}
-      </h3>
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <h3 class="flex items-center gap-2 font-semibold">
+          <.icon name={@icon} class={["size-4", @icon_class]} /> {@title}
+        </h3>
+        {render_slot(@aside)}
+      </div>
       <ol id={@id} class="divide-y divide-base-content/5 text-sm">
         {render_slot(@inner_block)}
         <li :if={@empty} class="py-2 text-center text-base-content/40">---</li>
