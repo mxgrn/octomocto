@@ -16,22 +16,51 @@
       </div>
 
       <div id="schulte-settings" class="flex w-full flex-col gap-4">
-        <.setting label="Board">
+        <.setting
+          label="Board"
+          hint={
+            if(@board == "classic",
+              do: "The board is always the same.",
+              else: "The board is new for each game."
+            )
+          }
+        >
           <.option
             :for={{value, label} <- [{"classic", "Classic"}, {"random", "Random"}]}
             id={"board-#{value}"}
             selected={@board == value}
-            href={~p"/schulte?#{[board: value, players: @players]}"}
+            href={~p"/schulte?#{[board: value, mode: @mode, players: @players]}"}
           >
             {label}
           </.option>
         </.setting>
-        <.setting label="Players">
+        <.setting
+          label="Mode"
+          hint={
+            if(@mode == "easy",
+              do: "The found numbers disappear.",
+              else: "The found numbers stay on the board."
+            )
+          }
+        >
+          <.option
+            :for={{value, label} <- [{"easy", "Easy"}, {"normal", "Normal"}]}
+            id={"mode-#{value}"}
+            selected={@mode == value}
+            href={~p"/schulte?#{[board: @board, mode: value, players: @players]}"}
+          >
+            {label}
+          </.option>
+        </.setting>
+        <.setting
+          label="Players"
+          hint={if(@players > 1, do: "The race starts when all players are in.")}
+        >
           <.option
             :for={n <- 1..4}
             id={"players-#{n}"}
             selected={@players == n}
-            href={~p"/schulte?#{[board: @board, players: n]}"}
+            href={~p"/schulte?#{[board: @board, mode: @mode, players: n]}"}
           >
             {n}
           </.option>
@@ -40,14 +69,14 @@
 
       <.link
         id="new-game"
-        href={~p"/schulte?#{[board: @board, players: @players]}"}
+        href={~p"/schulte?#{[board: @board, mode: @mode, players: @players]}"}
         method="post"
         class="rounded-full bg-emerald-600 px-8 py-3 font-medium text-white shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-xl active:translate-y-0"
       >
         New game
       </.link>
       <p class="text-sm text-base-content/50">
-        You get a link to share with other players. The race starts when all players are in. The classic board is always the same, and the random board is new for each game.
+        You get a link to share with other players.
       </p>
     </div>
 

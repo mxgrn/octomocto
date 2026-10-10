@@ -9,7 +9,7 @@ defmodule Octomocto.SchulteTest do
   # One player, if the test has no `@tag players: n`
   setup tags do
     id = "game-#{System.unique_integer([:positive])}"
-    pid = start_supervised!({Game, {id, :random, tags[:players] || 1}})
+    pid = start_supervised!({Game, {id, :random, :easy, tags[:players] || 1}})
     Ecto.Adapters.SQL.Sandbox.allow(Repo, self(), pid)
     Phoenix.PubSub.subscribe(Octomocto.PubSub, Game.topic(id))
     %{id: id}
@@ -112,7 +112,7 @@ defmodule Octomocto.SchulteTest do
            ] = Repo.all(from r in Result, order_by: r.score)
 
     assert user_id == user.id
-    assert player.settings == %{"type" => "random", "players" => 2}
+    assert player.settings == %{"type" => "random", "mode" => "easy", "players" => 2}
     assert player.elapsed_ms == elapsed_ms
     assert guest.game_id == player.game_id
   end
@@ -130,8 +130,8 @@ defmodule Octomocto.SchulteTest do
   end
 
   describe "leaderboard/1" do
-    @solo %{"type" => "classic", "players" => 1}
-    @duo %{"type" => "classic", "players" => 2}
+    @solo %{"type" => "classic", "mode" => "easy", "players" => 1}
+    @duo %{"type" => "classic", "mode" => "easy", "players" => 2}
 
     test "shows only the results with the given settings" do
       user = user_fixture()

@@ -119,6 +119,9 @@ type alias Game =
     -- True until the game has all its players. The cells are empty then.
     , waiting : Bool
     , playersNeeded : Int
+
+    -- True in the easy mode. In the normal mode, the found numbers stay.
+    , hidesFound : Bool
     }
 
 
@@ -245,7 +248,7 @@ update msg model =
                     else if number == game.next then
                         ( model, schultePick number )
 
-                    else if number > game.next then
+                    else if number > game.next || not game.hidesFound then
                         let
                             count =
                                 model.shakeCount + 1
@@ -400,6 +403,7 @@ gameDecoder =
         (Decode.field "elapsed_ms" Decode.int)
         |> andMap (Decode.field "waiting" Decode.bool)
         |> andMap (Decode.field "players_needed" Decode.int)
+        |> andMap (Decode.field "mode" (Decode.map ((==) "easy") Decode.string))
 
 
 andMap : Decoder a -> Decoder (a -> b) -> Decoder b
@@ -670,7 +674,7 @@ viewField model game =
             [ Svg.clipPath [ SA.id "schulte-board-shape" ] [ boardRect 0 cornerRadius [] ] ]
         , Svg.g [ SA.clipPath "url(#schulte-board-shape)" ]
             (boardRect 0 cornerRadius [ SA.fill "#fbf5e1" ]
-                :: List.map (viewCell model game.minStretch) game.cells
+                :: List.map (viewCell model game) game.cells
                 -- The bursts are on top of all the cells, so that the
                 -- next cells do not cover the particles
                 ++ [ Svg.Keyed.node "g"
@@ -745,11 +749,16 @@ formatTime ms =
     String.fromInt (seconds // 60) ++ ":" ++ String.padLeft 2 '0' (String.fromInt (modBy 60 seconds))
 
 
-viewCell : Model -> Float -> Cell -> Svg Msg
-viewCell model minStretch cell =
+{-| In the normal mode, a found cell looks the same as the other cells.
+-}
+viewCell : Model -> Game -> Cell -> Svg Msg
+viewCell model game cell =
     let
         found =
-            cell.foundBy /= Nothing
+            game.hidesFound && cell.foundBy /= Nothing
+
+        minStretch =
+            game.minStretch
     in
     Svg.g
         [ SA.id ("schulte-cell-" ++ String.fromInt cell.number)

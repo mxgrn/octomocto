@@ -16,7 +16,7 @@ defmodule OctomoctoWeb.SchulteControllerTest do
   test "GET /schulte shows the results of the selected settings only", %{conn: conn} do
     user = Octomocto.AccountsFixtures.user_fixture()
 
-    Schulte.save_results("a", %{"type" => "random", "players" => 2}, 1000, [
+    Schulte.save_results("a", %{"type" => "random", "mode" => "easy", "players" => 2}, 1000, [
       %{user_id: user.id, score: 90}
     ])
 

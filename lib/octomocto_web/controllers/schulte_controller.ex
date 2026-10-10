@@ -4,17 +4,18 @@ defmodule OctomoctoWeb.SchulteController do
   alias Octomocto.Schulte
 
   def index(conn, params) do
-    {board, players} = settings(params)
-    leaderboard = Schulte.leaderboard(%{"type" => board, "players" => players})
-    render(conn, :index, board: board, players: players, leaderboard: leaderboard)
+    {board, mode, players} = settings(params)
+    leaderboard = Schulte.leaderboard(%{"type" => board, "mode" => mode, "players" => players})
+    render(conn, :index, board: board, mode: mode, players: players, leaderboard: leaderboard)
   end
 
   def create(conn, params) do
-    {board, players} = settings(params)
+    {board, mode, players} = settings(params)
     # Not String.to_existing_atom/1: in dev, the atom can be missing until
     # the Schulte.Game module is loaded
     layout = if board == "random", do: :random, else: :classic
-    id = Schulte.create_game(layout, players)
+    mode = if mode == "normal", do: :normal, else: :easy
+    id = Schulte.create_game(layout, mode, players)
     redirect(conn, to: ~p"/schulte/#{id}")
   end
 
@@ -28,9 +29,11 @@ defmodule OctomoctoWeb.SchulteController do
     end
   end
 
-  # The classic board for one player, when the params do not say otherwise
+  # The classic board in the easy mode for one player, when the params do
+  # not say otherwise
   defp settings(params) do
     board = if params["board"] == "random", do: "random", else: "classic"
+    mode = if params["mode"] == "normal", do: "normal", else: "easy"
 
     players =
       case Integer.parse(params["players"] || "") do
@@ -38,7 +41,7 @@ defmodule OctomoctoWeb.SchulteController do
         _ -> 1
       end
 
-    {board, players}
+    {board, mode, players}
   end
 
   defp user_token(%{user: user}), do: OctomoctoWeb.UserSocket.user_token(user.id)

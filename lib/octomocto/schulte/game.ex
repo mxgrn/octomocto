@@ -4,6 +4,8 @@ defmodule Octomocto.Schulte.Game do
   layout is `:random` (a new board for each field, see
   `Octomocto.Schulte.Layout`) or `:classic` (always the same board, see
   `Octomocto.Schulte.Classic`). The numbers are in a random order.
+  The mode is `:easy` (the client hides the found numbers) or `:normal`
+  (the found numbers stay on the board).
   The first player to click the next number gets a point. The game owns the
   field and the players, and broadcasts each change on the
   `"schulte_game:<id>"` PubSub topic as `{:schulte_state, state}`.
@@ -39,9 +41,9 @@ defmodule Octomocto.Schulte.Game do
     {"indigo", "#4f46e5"}
   ]
 
-  def start_link({id, layout, needed})
-      when layout in [:random, :classic] and needed in 1..4 do
-    GenServer.start_link(__MODULE__, {id, layout, needed}, name: via(id))
+  def start_link({id, layout, mode, needed})
+      when layout in [:random, :classic] and mode in [:easy, :normal] and needed in 1..4 do
+    GenServer.start_link(__MODULE__, {id, layout, mode, needed}, name: via(id))
   end
 
   def via(id), do: {:via, Registry, {Octomocto.Schulte.Registry, id}}
@@ -49,9 +51,9 @@ defmodule Octomocto.Schulte.Game do
   def topic(id), do: "schulte_game:" <> id
 
   @impl true
-  def init({id, layout, needed}) do
+  def init({id, layout, mode, needed}) do
     schedule_idle_check()
-    {:ok, new_field(%{id: id, layout: layout, needed: needed, players: %{}})}
+    {:ok, new_field(%{id: id, layout: layout, mode: mode, needed: needed, players: %{}})}
   end
 
   @impl true
@@ -151,7 +153,12 @@ defmodule Octomocto.Schulte.Game do
 
   defp save_results(state)
        when state.next > @last and map_size(state.players) == state.needed do
-    settings = %{"type" => Atom.to_string(state.layout), "players" => state.needed}
+    settings = %{
+      "type" => Atom.to_string(state.layout),
+      "mode" => Atom.to_string(state.mode),
+      "players" => state.needed
+    }
+
     players = Map.values(state.players)
     Schulte.save_results(state.field_id, settings, state.finished_at - state.started_at, players)
     state
@@ -207,6 +214,7 @@ defmodule Octomocto.Schulte.Game do
     %{
       board: Tuple.to_list(size),
       min_stretch: min_stretch,
+      mode: state.mode,
       waiting: waiting?,
       elapsed_ms: if(waiting?, do: 0, else: (state.finished_at || now()) - state.started_at),
       total: @last,

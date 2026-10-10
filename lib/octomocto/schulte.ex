@@ -13,16 +13,17 @@ defmodule Octomocto.Schulte do
   @list_size 10
 
   @doc """
-  Starts a new game with a `:random` or a `:classic` layout for the given
-  number of players, and returns its id.
+  Starts a new game with a `:random` or a `:classic` layout, in the
+  `:easy` or the `:normal` mode, for the given number of players, and
+  returns its id.
   """
-  def create_game(layout, players) do
+  def create_game(layout, mode, players) do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
 
     {:ok, _pid} =
       DynamicSupervisor.start_child(
         Octomocto.Schulte.GameSupervisor,
-        {Game, {id, layout, players}}
+        {Game, {id, layout, mode, players}}
       )
 
     id
@@ -81,7 +82,7 @@ defmodule Octomocto.Schulte do
 
   @doc """
   Gives the leaderboard for the settings, for example
-  `%{"type" => "classic", "players" => 2}`: the latest games (with all
+  `%{"type" => "classic", "mode" => "easy", "players" => 2}`: the latest games (with all
   players, the best score first) and the best result of each signed-in
   user (the fastest first).
   """

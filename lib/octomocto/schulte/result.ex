@@ -2,7 +2,8 @@ defmodule Octomocto.Schulte.Result do
   @moduledoc """
   The result of one player in one finished field. All rows of a field have
   the same `game_id`, `settings` and `elapsed_ms`. The `settings` tell which
-  results can be compared, for example `%{"type" => "classic", "players" => 2}`.
+  results can be compared, for example
+  `%{"type" => "classic", "mode" => "easy", "players" => 2}`.
   """
   use Ecto.Schema
 
