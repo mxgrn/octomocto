@@ -101,12 +101,15 @@
           </span>
         </:aside>
         <%= if @user_results do %>
-          <li :for={result <- @user_results.latest} class="flex items-baseline gap-3 py-2">
-            <span class="flex-1 text-base-content/60">
+          <li
+            :for={%{result: result, players: players} <- @user_results.latest}
+            class="flex items-baseline gap-3 py-2"
+          >
+            <span :if={@players == 1} class="flex-1 text-base-content/60">
               {Calendar.strftime(result.inserted_at, "%b %-d")}
             </span>
-            <span :if={@players > 1} class="tabular-nums text-base-content/60">
-              {result.score} pts
+            <span :if={@players > 1} class="flex-1 truncate">
+              <.player_list players={players} scores />
             </span>
             <span class={[
               "w-16 text-right font-medium tabular-nums",
@@ -137,7 +140,7 @@
       >
         <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
           <span class="flex-1 truncate">
-            {Enum.map_join(game.players, ", ", &player_name(&1.user))}
+            <.player_list players={game.players} scores={@players > 1} />
           </span>
           <span class="font-medium tabular-nums">{format_time(game.elapsed_ms)}</span>
         </li>

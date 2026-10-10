@@ -114,8 +114,8 @@ defmodule Octomocto.Schulte do
 
   @doc """
   Gives the results of the scope's user for the settings: the latest
-  results (the newest first) and the best result (nil when there are no
-  results).
+  results (the newest first, each with all players of its game, the user
+  first) and the best result (nil when there are no results).
   """
   def user_results(%{user: user}, settings) do
     user_query =
@@ -124,6 +124,14 @@ defmodule Octomocto.Schulte do
     latest =
       from(r in user_query, order_by: [desc: r.inserted_at], limit: @list_size)
       |> Repo.all()
+
+    players = game_players(Enum.map(latest, & &1.game_id))
+
+    latest =
+      Enum.map(latest, fn result ->
+        {mine, others} = Enum.split_with(players[result.game_id], &(&1.id == result.id))
+        %{result: result, players: mine ++ others}
+      end)
 
     best =
       from(r in user_query, order_by: [asc: r.elapsed_ms, asc: r.inserted_at], limit: 1)
@@ -143,19 +151,24 @@ defmodule Octomocto.Schulte do
       )
       |> Repo.all()
 
-    results =
-      from(r in Result,
-        where: r.game_id in ^game_ids,
-        order_by: [desc: r.score],
-        preload: :user
-      )
-      |> Repo.all()
-      |> Enum.group_by(& &1.game_id)
+    players = game_players(game_ids)
 
     Enum.map(game_ids, fn game_id ->
-      [first | _] = players = results[game_id]
-      %{game_id: game_id, elapsed_ms: first.elapsed_ms, players: players}
+      [first | _] = players[game_id]
+      %{game_id: game_id, elapsed_ms: first.elapsed_ms, players: players[game_id]}
     end)
+  end
+
+  # Gives the results of all players of the games, by game id, the best
+  # score first.
+  defp game_players(game_ids) do
+    from(r in Result,
+      where: r.game_id in ^game_ids,
+      order_by: [desc: r.score],
+      preload: :user
+    )
+    |> Repo.all()
+    |> Enum.group_by(& &1.game_id)
   end
 
   defp best_results(settings) do

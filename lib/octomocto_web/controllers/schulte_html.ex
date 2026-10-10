@@ -72,6 +72,18 @@ defmodule OctomoctoWeb.SchulteHTML do
     """
   end
 
+  attr :players, :list, required: true, doc: "the results of the players of one game"
+  attr :scores, :boolean, required: true, doc: "shows the points next to each player"
+
+  @doc "The names of the players of one game, separated by commas."
+  def player_list(assigns) do
+    ~H"""
+    <span :for={{player, index} <- Enum.with_index(@players)}>{if index > 0, do: ", "}{player_name(
+      player.user
+    )}<span :if={@scores} class="ml-1 tabular-nums text-base-content/60">{player.score} pts</span></span>
+    """
+  end
+
   @doc "Shows the time as minutes, seconds and tenths, for example \"1:05.3\"."
   def format_time(ms) do
     seconds = div(ms, 1000)
