@@ -115,10 +115,18 @@ if (schulteNode) {
   socket.connect()
 
   // The token gets the same player back when the channel joins again, for
-  // example after a reconnect to another server in a deploy.
+  // example after a reconnect to another server in a deploy, or after a
+  // reload of the page. The tab remembers it, so that a new tab gets a new
+  // player.
+  const tokenKey = `schulte-token:${schulteNode.dataset.gameId}`
   let token = null
+  try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
     token = reply.token
+    try {
+      if (token) sessionStorage.setItem(tokenKey, token)
+      else sessionStorage.removeItem(tokenKey)
+    } catch (_e) {}
     schulte.ports.schulteJoined.send(reply)
   }
   const channel = socket.channel(`schulte:${schulteNode.dataset.gameId}`, () => token ? {token} : {})
