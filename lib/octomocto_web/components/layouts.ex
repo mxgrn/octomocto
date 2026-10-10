@@ -61,7 +61,7 @@ defmodule OctomoctoWeb.Layouts do
               alt=""
               class="size-6 rounded-full"
             />
-            {@current_scope.user.name || @current_scope.user.email}
+            {@current_scope.user.display_name || @current_scope.user.name || @current_scope.user.email}
           </button>
           <%!-- pt-2 instead of a margin keeps the hover area unbroken between button and menu --%>
           <div
