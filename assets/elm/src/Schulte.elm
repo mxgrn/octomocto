@@ -674,8 +674,9 @@ viewShareLink model =
         ]
 
 
-{-| The row of the player who found the last number flashes in orange. The key changes on each found number, so that the row is made
-again and the flash starts again.
+{-| The row of the player who found the last number flashes in orange,
+but not my own row. The key changes on each found number, so that the row
+is made again and the flash starts again.
 -}
 viewScores : Model -> Me -> List Player -> Html Msg
 viewScores model me players =
@@ -684,7 +685,7 @@ viewScores model me players =
             (\player ->
                 let
                     flashing =
-                        model.lastFinder == Just player.id
+                        model.lastFinder == Just player.id && not (isMe me player)
                 in
                 ( if flashing then
                     player.id ++ "-" ++ String.fromInt model.findCount
