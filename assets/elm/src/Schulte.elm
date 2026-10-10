@@ -569,7 +569,7 @@ viewGame model me game =
                     [ text "This game is full, so you can only watch it." ]
 
               else
-                text ""
+                viewRestartButton
             ]
         , div [ class "min-w-0 flex-1" ]
             [ div [ class "relative mx-auto", style "width" (fieldWidth game) ]
@@ -622,6 +622,20 @@ viewMuteButton muted =
                 )
             ]
             []
+        ]
+
+
+{-| Starts a new field for all players, also during a race.
+-}
+viewRestartButton : Html Msg
+viewRestartButton =
+    button
+        [ id "schulte-restart"
+        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start"
+        , onClick Restart
+        ]
+        [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
+        , text "Restart game"
         ]
 
 

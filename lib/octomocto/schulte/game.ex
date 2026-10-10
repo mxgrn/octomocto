@@ -105,14 +105,14 @@ defmodule Octomocto.Schulte.Game do
 
   def handle_cast({:pick, _player_id, _number}, state), do: {:noreply, state}
 
-  def handle_cast(:restart, state) when state.next > @last do
+  # A restart is possible at any time. A field that is not finished is not
+  # saved.
+  def handle_cast(:restart, state) do
     players = Map.new(state.players, fn {id, p} -> {id, %{p | score: 0}} end)
     state = %{state | players: players} |> new_field() |> start_clock()
     broadcast(state)
     {:noreply, state}
   end
-
-  def handle_cast(:restart, state), do: {:noreply, state}
 
   @impl true
   def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
