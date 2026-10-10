@@ -77,6 +77,11 @@ defmodule OctomoctoWeb.SchulteHTML do
 
   # Do not show the full email of a user to other players.
   def player_name(nil), do: "Guest"
+
+  def player_name(%{display_name: display_name})
+      when is_binary(display_name) and display_name != "",
+      do: display_name
+
   def player_name(%{name: name}) when is_binary(name) and name != "", do: name
   def player_name(%{telegram_username: username}) when is_binary(username), do: "@" <> username
   def player_name(%{email: email}), do: email |> String.split("@") |> hd()
