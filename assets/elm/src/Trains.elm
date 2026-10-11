@@ -2,9 +2,9 @@ port module Trains exposing (main)
 
 {-| Cooperative "Right on Track" game for 1 to 4 players.
 
-Trains leave the station one at a time. Each train has the number of one of
+Trains leave the station one at a time. Each train has the colors of one of
 the houses. The players click the switches to send each train to the house
-with its number. Each round has a new random track layout.
+with its colors. Each round has a new random track layout.
 
 The board is a grid. The tracks make a tree: the station is the root, each
 switch has two branches and each house is at the end of a branch.
@@ -119,27 +119,12 @@ type Pace
     | Expert
 
 
-{-| The players can select 4, 6, 8 or 12 switches. Fewer switches get a
-smaller board with larger cells.
+{-| The players can select 4, 6, 8 or 12 switches. All boards have the
+same size.
 -}
 boardFor : Int -> Int -> Pace -> Board
 boardFor switches trainsPerHouse pace =
-    let
-        ( cols, rows ) =
-            case switches of
-                4 ->
-                    ( 9, 7 )
-
-                6 ->
-                    ( 11, 8 )
-
-                8 ->
-                    ( 12, 9 )
-
-                _ ->
-                    ( 15, 11 )
-    in
-    { switches = switches, trainsPerHouse = trainsPerHouse, pace = pace, cols = cols, rows = rows }
+    { switches = switches, trainsPerHouse = trainsPerHouse, pace = pace, cols = 9, rows = 7 }
 
 
 cellSize : Float
@@ -152,7 +137,7 @@ switch and each house is at least 2 cells after the switch before it.
 -}
 firstSwitchRun : Int
 firstSwitchRun =
-    4
+    3
 
 
 trainCount : Board -> Int
@@ -224,7 +209,8 @@ type Dir
 
 {-| `children` has one cell for a plain track and two cells for a switch.
 A house cell has no children. `houses` gives the number of each house,
-from 0. The board shows the numbers from 1.
+from 0. The board shows the colors of the house with this number (see
+`houseColors`).
 -}
 type alias Layout =
     { board : Board
@@ -1232,7 +1218,7 @@ type alias Growth =
     }
 
 
-{-| Make some correct layouts and keep the one that covers the board best.
+{-| Make some correct layouts and keep the one with the shortest tracks.
 -}
 generateLayout : Board -> Random.Seed -> ( Layout, Random.Seed )
 generateLayout board seed =
@@ -1258,19 +1244,21 @@ pickBestLayout board left best seed =
             ( layout, nextSeed ) =
                 generateLayoutHelp board 1000 seed
         in
-        if coverage layout > coverage best then
+        if layoutScore layout > layoutScore best then
             pickBestLayout board (left - 1) layout nextSeed
 
         else
             pickBestLayout board (left - 1) best nextSeed
 
 
-{-| How evenly the tracks cover the board. The board is divided into 3 × 3
-areas. Each area with a track counts most, then each row and each column
-with a track.
+{-| Fewer cells with a track give a better score, so the tracks do not wind
+more than necessary. Between layouts with the same number of cells, the
+tracks that spread more evenly win: the board is divided into 3 × 3 areas,
+and each area with a track counts, then each row and each column with a
+track.
 -}
-coverage : Layout -> Int
-coverage layout =
+layoutScore : Layout -> Int
+layoutScore layout =
     let
         cells =
             layout.station :: Dict.keys (parents layout)
@@ -1281,7 +1269,7 @@ coverage layout =
         count f =
             Set.size (Set.fromList (List.map f cells))
     in
-    10 * count area + count Tuple.first + count Tuple.second
+    10 * count area + count Tuple.first + count Tuple.second - 100 * List.length cells
 
 
 generateLayoutHelp : Board -> Int -> Random.Seed -> ( Layout, Random.Seed )
@@ -1335,20 +1323,19 @@ grow growth =
         Random.constant growth
 
     else
-        Random.map4 (growTip growth)
+        Random.map2 (growTip growth)
             (Random.int 0 (List.length growth.tips - 1))
-            (Random.float 0 1)
-            (Random.float 0 1)
             (Random.float 0 1)
             |> Random.andThen grow
 
 
 {-| Make one tip split into a switch, stop at a house, or go one cell forward.
 The first switch is `firstSwitchRun` cells after the station. Each other
-switch and each house has at least one plain cell before it.
+switch and each house has one plain cell before it. A tip goes further
+only when it has no space to split.
 -}
-growTip : Growth -> Int -> Float -> Float -> Float -> Growth
-growTip growth index splitRoll stopRoll dirRoll =
+growTip : Growth -> Int -> Float -> Growth
+growTip growth index dirRoll =
     case List.drop index growth.tips of
         [] ->
             growth
@@ -1374,10 +1361,10 @@ growTip growth index splitRoll stopRoll dirRoll =
                     else
                         2
             in
-            if tip.run >= splitRun && not allSplit && List.length options >= 2 && (splitRoll < 0.45 || tip.run >= splitRun + 2) then
+            if tip.run >= splitRun && not allSplit && List.length options >= 2 then
                 split tip (pickTwo dirRoll options) rest
 
-            else if List.isEmpty options || (allSplit && tip.run >= 2 && (stopRoll < 0.3 || tip.run >= 5)) then
+            else if List.isEmpty options || (allSplit && tip.run >= 2) then
                 if tip.run >= 2 then
                     { rest | houses = tip.cell :: rest.houses }
 
@@ -1664,10 +1651,10 @@ viewGame model me game =
                 , p [ class "text-sm opacity-60" ]
                     [ text
                         (if solo then
-                            "Click the switches to send each train to the house with its number."
+                            "Click the switches to send each train to the house with its colors."
 
                          else
-                            "Send each train to the house with its number. You can flip only the switches in your color."
+                            "Send each train to the house with its colors. You can flip only the switches in your color."
                         )
                     ]
                 ]
@@ -2090,14 +2077,13 @@ railsOf rail color =
         )
 
 
-{-| Two rails, with the ties between them.
+{-| Two rails.
 -}
 viewRails : String -> Piece -> Svg msg
 viewRails color p =
     Svg.g [ SA.fill "none" ]
         [ Svg.path [ SA.d (pathData p), SA.stroke color, SA.strokeWidth "11" ] []
         , Svg.path [ SA.d (pathData p), SA.stroke "#e7e5e4", SA.strokeWidth "6" ] []
-        , Svg.path [ SA.d (pathData p), SA.stroke "#a16207", SA.strokeOpacity "0.6", SA.strokeWidth "6", SA.strokeDasharray "2.5 4.5" ] []
         ]
 
 
@@ -2115,7 +2101,61 @@ switchRect ( x, y ) attrs =
         []
 
 
-{-| The number does not turn with the train, so that it is never upside down.
+{-| The roof and wall colors of each house, by its number. The first houses
+have one color, and the next houses have two colors, so that the colors stay
+different also on the largest boards. No two houses have the same two colors
+in the opposite order.
+-}
+houseColors : Int -> { roof : String, walls : String }
+houseColors number =
+    let
+        red =
+            "#ef4444"
+
+        blue =
+            "#3b82f6"
+
+        yellow =
+            "#facc15"
+
+        purple =
+            "#a855f7"
+
+        orange =
+            "#f97316"
+
+        black =
+            "#1e293b"
+
+        white =
+            "#f8fafc"
+
+        pairs =
+            [ ( red, red )
+            , ( blue, blue )
+            , ( yellow, yellow )
+            , ( purple, purple )
+            , ( orange, orange )
+            , ( black, black )
+            , ( white, white )
+            , ( black, yellow )
+            , ( red, white )
+            , ( blue, orange )
+            , ( yellow, purple )
+            , ( white, blue )
+            , ( orange, black )
+            ]
+    in
+    case List.drop (modBy (List.length pairs) number) pairs of
+        ( roof, walls ) :: _ ->
+            { roof = roof, walls = walls }
+
+        [] ->
+            { roof = black, walls = black }
+
+
+{-| The body of the train has the wall color of its house, and the cab has
+the roof color.
 -}
 viewTrain : Train -> Svg msg
 viewTrain train =
@@ -2123,29 +2163,17 @@ viewTrain train =
         p =
             trainPiece train
 
-        position =
-            pointAt p train.t
+        colors =
+            houseColors train.number
     in
-    Svg.g [ SA.transform (translate position) ]
-        [ Svg.g [ SA.transform ("rotate(" ++ String.fromFloat (angleAt p train.t) ++ ")") ]
-            [ Svg.rect [ SA.x "-16", SA.y "-11", SA.width "32", SA.height "22", SA.rx "6", SA.fill "#1e293b" ] []
-            , Svg.rect [ SA.x "9", SA.y "-7", SA.width "4", SA.height "14", SA.rx "1.5", SA.fill "#fbbf24" ] []
-            ]
-        , viewNumber "#f8fafc" train.number
+    Svg.g
+        [ SA.transform
+            (translate (pointAt p train.t) ++ " rotate(" ++ String.fromFloat (angleAt p train.t) ++ ")")
         ]
-
-
-viewNumber : String -> Int -> Svg msg
-viewNumber color number =
-    Svg.text_
-        [ SA.textAnchor "middle"
-        , SA.dominantBaseline "central"
-        , SA.fontSize "14"
-        , SA.fontWeight "700"
-        , SA.fill color
-        , SA.class "tabular-nums"
+        [ Svg.rect [ SA.x "-16", SA.y "-11", SA.width "32", SA.height "22", SA.rx "6", SA.fill colors.walls, SA.stroke "#1e293b", SA.strokeWidth "2" ] []
+        , Svg.rect [ SA.x "-11", SA.y "-7", SA.width "14", SA.height "14", SA.rx "3", SA.fill colors.roof, SA.stroke "#1e293b", SA.strokeWidth "1.5" ] []
+        , Svg.rect [ SA.x "9", SA.y "-7", SA.width "4", SA.height "14", SA.rx "1.5", SA.fill "#fbbf24", SA.stroke "#1e293b", SA.strokeWidth "1" ] []
         ]
-        [ Svg.text (String.fromInt (number + 1)) ]
 
 
 viewStation : Cell -> Svg msg
@@ -2160,14 +2188,18 @@ viewStation cell =
 
 viewHouse : ( Cell, Int ) -> Svg msg
 viewHouse ( ( x, y ) as cell, number ) =
+    let
+        colors =
+            houseColors number
+    in
     Svg.g
         [ SA.id ("trains-house-" ++ String.fromInt x ++ "-" ++ String.fromInt y)
         , SA.transform (translate (center cell))
         ]
         [ Svg.ellipse [ SA.cx "0", SA.cy "17", SA.rx "18", SA.ry "4", SA.fill "#365314", SA.opacity "0.2" ] []
-        , Svg.rect [ SA.x "-15", SA.y "-6", SA.width "30", SA.height "22", SA.rx "3", SA.fill "#fef3c7", SA.stroke "#334155", SA.strokeWidth "2" ] []
-        , Svg.polygon [ SA.points "-20,-4 0,-22 20,-4", SA.fill "#334155", SA.strokeLinejoin "round", SA.stroke "#334155", SA.strokeWidth "3" ] []
-        , Svg.g [ SA.transform "translate(0 5.5)" ] [ viewNumber "#1e293b" number ]
+        , Svg.rect [ SA.x "-15", SA.y "-6", SA.width "30", SA.height "22", SA.rx "3", SA.fill colors.walls, SA.stroke "#1e293b", SA.strokeWidth "2" ] []
+        , Svg.rect [ SA.x "-4", SA.y "4", SA.width "8", SA.height "12", SA.rx "1", SA.fill "#1e293b", SA.fillOpacity "0.35" ] []
+        , Svg.polygon [ SA.points "-20,-4 0,-22 20,-4", SA.fill colors.roof, SA.strokeLinejoin "round", SA.stroke "#1e293b", SA.strokeWidth "2" ] []
         ]
 
 
