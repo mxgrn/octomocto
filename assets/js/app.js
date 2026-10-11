@@ -87,10 +87,47 @@ if (astronautNode) {
 // Start the train game. It is single player, so it needs no channel.
 // Audio can start only after a click, so the first click on the page
 // (normally on Start) unlocks it.
+// Start the trains game and connect its ports to the game channel. The
+// token gets the same player back after a reload, as in the Schulte race
+// below.
 const trainsNode = document.getElementById("trains-main")
 if (trainsNode) {
+  if (navigator.userActivation?.hasBeenActive) unlockAudio()
   document.addEventListener("pointerdown", unlockAudio, {once: true})
-  const trains = window.Elm.Trains.init({node: trainsNode, flags: {seed: Date.now()}})
+  const trains = window.Elm.Trains.init({node: trainsNode, flags: {gameUrl: window.location.href}})
+  const socket = new Socket("/socket", {params: {user_token: trainsNode.dataset.userToken}})
+  socket.connect()
+
+  const tokenKey = `trains-token:${trainsNode.dataset.gameId}`
+  let token = null
+  try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
+  const joined = reply => {
+    token = reply.token
+    try {
+      if (token) sessionStorage.setItem(tokenKey, token)
+      else sessionStorage.removeItem(tokenKey)
+    } catch (_e) {}
+    trains.ports.trainsJoined.send(reply)
+  }
+  const channel = socket.channel(`trains:${trainsNode.dataset.gameId}`, () => token ? {token} : {})
+  channel.on("state", state => trains.ports.trainsState.send(state))
+  channel.on("flip", flip => trains.ports.trainsFlipped.send(flip))
+  channel.on("decision", decision => trains.ports.trainsDecided.send(decision))
+  channel.on("joined", joined)
+  channel.join()
+    .receive("ok", joined)
+    .receive("error", ({reason}) => {
+      // The server of the game stopped a moment ago. The channel tries again.
+      if (reason === "unavailable") return
+      channel.leave()
+      trains.ports.trainsJoinFailed.send(reason)
+    })
+
+  trains.ports.trainsStart.subscribe(() => channel.push("start", {}))
+  trains.ports.trainsFlip.subscribe(flip => channel.push("flip", flip))
+  trains.ports.trainsDecision.subscribe(decision => channel.push("decision", decision))
+  trains.ports.trainsRestart.subscribe(() => channel.push("restart", {}))
+  trains.ports.trainsCopyText.subscribe(text => navigator.clipboard.writeText(text))
   trains.ports.playTrainSound.subscribe(playTrainSound)
 }
 

@@ -1000,7 +1000,7 @@ viewCountdown seconds =
         [ Html.Keyed.node "div"
             []
             [ ( String.fromInt seconds
-              , p [ class "schulte-countdown text-9xl font-bold text-white tabular-nums" ] [ text (String.fromInt seconds) ]
+              , p [ class "countdown-pop text-9xl font-bold text-white tabular-nums" ] [ text (String.fromInt seconds) ]
               )
             ]
         ]

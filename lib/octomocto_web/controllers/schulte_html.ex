@@ -7,12 +7,12 @@ defmodule OctomoctoWeb.SchulteHTML do
   attr :hint, :string, default: nil, doc: "a short explanation of the selected option"
   slot :inner_block, required: true
 
-  @doc "One setting of a new game, with its options in a row."
+  @doc "One setting of a new game: the label, and its options in a row below it."
   def setting(assigns) do
     ~H"""
     <div class="rounded-2xl bg-base-100 px-4 py-2.5 ring-1 ring-base-content/10">
-      <div class="flex items-center justify-between gap-4">
-        <span class="text-sm font-medium text-base-content/60">{@label}</span>
+      <p class="text-left text-sm font-bold text-base-content/80">{@label}</p>
+      <div class="mt-2 flex justify-center">
         <div class="flex gap-1 rounded-full bg-base-200 p-1">
           {render_slot(@inner_block)}
         </div>

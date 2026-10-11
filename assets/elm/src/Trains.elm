@@ -1,29 +1,54 @@
 port module Trains exposing (main)
 
-{-| Single player "Right on Track" game.
+{-| Cooperative "Right on Track" game for 1 to 4 players.
 
-Trains leave the station one at a time. Each train has the color of one of
-the houses. The player clicks the switches to send each train to the house
-of its color. Each game has a new random track layout.
+Trains leave the station one at a time. Each train has the number of one of
+the houses. The players click the switches to send each train to the house
+with its number. Each round has a new random track layout.
 
 The board is a grid. The tracks make a tree: the station is the root, each
 switch has two branches and each house is at the end of a branch.
 
-The game sends the names of sounds out through a port. app.js plays them.
+The server keeps the players, the seed of the round, its start time, the
+switch positions and the route decisions (see `Octomocto.Trains.Game`).
+Each browser makes the board and the trains from the seed and runs the
+round itself, on a clock that starts at the start time of the round.
+
+Each player owns some of the switches and can flip only those. The owner
+decides the route of each train at a switch: when a train comes into the
+cell of a switch, the owner's browser picks the exit from its own switch
+position and sends this decision out. The other browsers use the switch
+position that they know. When a decision comes and the train went the
+other way, they move the train back to the switch and run it again on the
+correct branch. Trains do not affect each other, so a correction changes
+only one train.
+
+A browser that joins in the middle of a round makes the round from the
+seed, the switch positions and the decisions, and runs it fast up to now.
+
+The game sends the names of sounds out through a port. app.js plays them
+and connects the other ports to a Phoenix channel. The names of the
+channel ports start with "trains", because Elm does not allow two ports
+with the same name in one bundle.
 
 -}
 
 import Browser
 import Browser.Events
 import Dict exposing (Dict)
-import Html exposing (Html, aside, button, div, h1, p, span, text)
-import Html.Attributes exposing (class, id, style)
+import Html exposing (Html, a, aside, button, div, h1, input, li, p, span, text, ul)
+import Html.Attributes exposing (class, href, id, readonly, style, value)
 import Html.Events exposing (onClick)
+import Html.Keyed
+import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
 import Random exposing (Generator)
 import Set exposing (Set)
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events
+import Task
+import Time
 
 
 
@@ -35,30 +60,91 @@ import Svg.Events
 port playTrainSound : String -> Cmd msg
 
 
+port trainsStart : () -> Cmd msg
+
+
+{-| `{cell: [x, y], value: 0 or 1}`
+-}
+port trainsFlip : Encode.Value -> Cmd msg
+
+
+{-| `{train, cell: [x, y], exit: [x, y]}`
+-}
+port trainsDecision : Encode.Value -> Cmd msg
+
+
+port trainsRestart : () -> Cmd msg
+
+
+port trainsCopyText : String -> Cmd msg
+
+
+port trainsJoined : (Decode.Value -> msg) -> Sub msg
+
+
+port trainsState : (Decode.Value -> msg) -> Sub msg
+
+
+port trainsFlipped : (Decode.Value -> msg) -> Sub msg
+
+
+port trainsDecided : (Decode.Value -> msg) -> Sub msg
+
+
+port trainsJoinFailed : (String -> msg) -> Sub msg
+
+
 
 -- CONSTANTS
 
 
-cols : Int
-cols =
-    9
+{-| The size of the board and the settings of the round. There is one
+more house than there are switches.
+-}
+type alias Board =
+    { switches : Int
+    , trainsPerHouse : Int
+    , pace : Pace
+    , cols : Int
+    , rows : Int
+    }
 
 
-rows : Int
-rows =
-    7
+{-| How the pause between trains changes during a round, see `pauseAfter`.
+-}
+type Pace
+    = Easy
+    | Normal
+    | Hard
+    | Expert
+
+
+{-| The players can select 4, 6, 8 or 12 switches. Fewer switches get a
+smaller board with larger cells.
+-}
+boardFor : Int -> Int -> Pace -> Board
+boardFor switches trainsPerHouse pace =
+    let
+        ( cols, rows ) =
+            case switches of
+                4 ->
+                    ( 9, 7 )
+
+                6 ->
+                    ( 11, 8 )
+
+                8 ->
+                    ( 12, 9 )
+
+                _ ->
+                    ( 15, 11 )
+    in
+    { switches = switches, trainsPerHouse = trainsPerHouse, pace = pace, cols = cols, rows = rows }
 
 
 cellSize : Float
 cellSize =
     60
-
-
-{-| There is one more house than there are switches.
--}
-switchCount : Int
-switchCount =
-    4
 
 
 {-| The number of cells from the station to the first switch. Each later
@@ -69,26 +155,23 @@ firstSwitchRun =
     4
 
 
-trainCount : Int
-trainCount =
-    15
+trainCount : Board -> Int
+trainCount board =
+    board.trainsPerHouse * (board.switches + 1)
 
 
-{-| The pause between trains gets shorter for each train, down to the minimum.
+{-| Except in the easy pace, the pause between trains gets shorter after
+each train: from the pause after the first train to the pause before the
+last train (see `pauseAfter`).
 -}
 firstPauseMs : Float
 firstPauseMs =
     8000
 
 
-pauseStepMs : Float
-pauseStepMs =
-    400
-
-
-minPauseMs : Float
-minPauseMs =
-    4400
+lastPauseMs : Float
+lastPauseMs =
+    2000
 
 
 {-| Time for a train to go through one cell on a straight track.
@@ -98,16 +181,26 @@ cellMs =
     1860
 
 
+{-| The time from the start of a round to the first train.
+-}
+firstDepartureMs : Float
+firstDepartureMs =
+    600
+
+
+{-| A round that must run more than this to get to now runs without sounds,
+for example after a join or when the tab was hidden.
+-}
+quietCatchUpMs : Float
+quietCatchUpMs =
+    1000
+
+
 {-| Time to show the mark above a house after a train arrives.
 -}
 arrivalMs : Float
 arrivalMs =
     900
-
-
-houseColors : List String
-houseColors =
-    [ "#ef4444", "#3b82f6", "#eab308", "#22c55e", "#a855f7" ]
 
 
 
@@ -130,10 +223,12 @@ type Dir
 
 
 {-| `children` has one cell for a plain track and two cells for a switch.
-A house cell has no children. `houses` gives the color of each house.
+A house cell has no children. `houses` gives the number of each house,
+from 0. The board shows the numbers from 1.
 -}
 type alias Layout =
-    { station : Cell
+    { board : Board
+    , station : Cell
     , children : Dict Cell (List Cell)
     , houses : Dict Cell Int
     }
@@ -154,14 +249,18 @@ type alias Piece =
 {-| A train is in `cell` and goes from the `from` side to the `exit` side.
 `t` is how far it is through the cell, from 0 to 1. The train selects its
 exit when it comes into a cell, so a switch change has no effect on a train
-that is already on the switch.
+that is already on the switch. The `id` is the number of the train in the
+order of departure. `passed` has the game time when the train came into
+each switch cell, and the exit that it took there.
 -}
 type alias Train =
-    { color : Int
+    { id : Int
+    , number : Int
     , cell : Cell
     , from : Maybe Cell
     , exit : Maybe Cell
     , t : Float
+    , passed : Dict Cell ( Float, Cell )
     }
 
 
@@ -172,56 +271,113 @@ type alias Arrival =
     }
 
 
-type Phase
-    = Ready
-    | Playing
-    | Over
-
-
-type alias Model =
-    { seed : Random.Seed
+{-| One round on one board. `time` is the game time in ms since the start
+of the round. `decisions` has the exits of the trains (by their ids) at
+the switches. `numbers` has the house numbers of the trains that did not
+leave yet.
+-}
+type alias Round =
+    { seed : Int
     , layout : Layout
     , switches : Dict Cell Int
-    , phase : Phase
+    , decisions : Dict ( Int, Cell ) Cell
+    , time : Float
     , trains : List Train
+    , numbers : List Int
     , sent : Int
-    , untilNext : Float
-    , colors : List Int
+    , nextDeparture : Float
     , correct : Int
+    , arrived : Int
     , arrivals : List Arrival
     }
 
 
+{-| The `name` is the display name of a signed-in player, or Nothing for a
+guest. Then the player is known by the `colorName`. The `slot` (from 0)
+selects the switches of the player.
+-}
+type alias Player =
+    { id : String
+    , name : Maybe String
+    , color : String
+    , colorName : String
+    , slot : Int
+    }
+
+
+{-| `started` is True after a player clicked start.
+-}
+type alias Game =
+    { players : List Player
+    , needed : Int
+    , started : Bool
+    , round : Round
+    }
+
+
+{-| The player id of this browser. Nothing for a watcher.
+-}
+type alias Me =
+    Maybe String
+
+
+type Connection
+    = Connecting
+    | Joined Me Game
+    | Failed String
+
+
+{-| `clockStart` is the local time (in ms) at the start of the round. It is
+Nothing until the round starts and the clock is in sync.
+-}
+type alias Model =
+    { gameUrl : String
+    , connection : Connection
+    , copied : Bool
+    , clockStart : Maybe Int
+    , now : Int
+    }
+
+
 type alias Flags =
-    { seed : Int }
+    { gameUrl : String }
 
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( newGame (Random.initialSeed flags.seed), Cmd.none )
+    ( { gameUrl = flags.gameUrl
+      , connection = Connecting
+      , copied = False
+      , clockStart = Nothing
+      , now = 0
+      }
+    , Cmd.none
+    )
 
 
-newGame : Random.Seed -> Model
-newGame seed0 =
+newRound : Int -> Board -> Round
+newRound seed board =
     let
         ( layout, seed1 ) =
-            generateLayout seed0
+            generateLayout board (Random.initialSeed seed)
 
         ( switches, seed2 ) =
             Random.step (randomSwitches layout) seed1
 
-        ( colors, seed3 ) =
-            Random.step trainColors seed2
+        ( numbers, _ ) =
+            Random.step (trainNumbers board) seed2
     in
-    { seed = seed3
+    { seed = seed
     , layout = layout
     , switches = switches
-    , phase = Ready
+    , decisions = Dict.empty
+    , time = 0
     , trains = []
+    , numbers = numbers
     , sent = 0
-    , untilNext = 0
-    , colors = colors
+    , nextDeparture = firstDepartureMs
     , correct = 0
+    , arrived = 0
     , arrivals = []
     }
 
@@ -236,215 +392,739 @@ randomSwitches layout =
         |> Random.map (\states -> Dict.fromList (List.map2 Tuple.pair cells states))
 
 
+over : Round -> Bool
+over round =
+    round.arrived >= trainCount round.layout.board
+
+
 
 -- UPDATE
 
 
 type Msg
-    = Start
-    | PlayAgain
+    = GotJoined Decode.Value
+    | GotState Decode.Value
+    | GotFlip Decode.Value
+    | GotDecision Decode.Value
+    | GotJoinFailed String
+    | SyncClock Int Time.Posix
+    | Tick Time.Posix
+    | Start
     | Toggle Cell
-    | Frame Float
+    | Restart
+    | CopyLink
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Start ->
-            ( { model | phase = Playing, untilNext = 600 }, Cmd.none )
-
-        PlayAgain ->
-            ( newGame model.seed, Cmd.none )
-
-        Toggle cell ->
-            ( { model | switches = Dict.update cell (Maybe.map (\i -> 1 - i)) model.switches }, playTrainSound "switch" )
-
-        Frame delta ->
-            let
-                moved =
-                    model |> moveTrains delta |> sendTrain delta
-            in
-            ( checkOver moved, Cmd.batch (List.map playTrainSound (frameSounds model moved)) )
-
-
-{-| The sounds for the trains that arrived or left in one frame.
--}
-frameSounds : Model -> Model -> List String
-frameSounds before after =
-    let
-        arrivals =
-            after.arrivals
-                |> List.filter (\a -> a.age == 0)
-                |> List.map
-                    (\a ->
-                        if a.correct then
-                            "correct"
-
-                        else
-                            "wrong"
+        GotJoined value ->
+            case Decode.decodeValue joinedDecoder value of
+                Ok ( me, state ) ->
+                    ( { model | connection = Joined me (gameFromState state), clockStart = Nothing }
+                    , syncClock state
                     )
-    in
-    if after.sent > before.sent then
-        "depart" :: arrivals
 
-    else
-        arrivals
+                Err error ->
+                    ( { model | connection = Failed (Decode.errorToString error) }, Cmd.none )
 
-
-moveTrains : Float -> Model -> Model
-moveTrains delta model =
-    let
-        moved =
-            List.map (moveTrain model delta) model.trains
-
-        newArrivals =
-            List.filterMap
-                (\( train, arrived ) ->
-                    if arrived then
-                        Just
-                            { cell = train.cell
-                            , correct = Dict.get train.cell model.layout.houses == Just train.color
-                            , age = 0
-                            }
+        GotState value ->
+            case ( model.connection, Decode.decodeValue stateDecoder value ) of
+                ( Joined me game, Ok state ) ->
+                    if state.seed /= game.round.seed then
+                        -- A new round
+                        ( { model | connection = Joined me (gameFromState state), clockStart = Nothing }
+                        , syncClock state
+                        )
 
                     else
-                        Nothing
-                )
-                moved
+                        -- The switches and the decisions come through their own
+                        -- events. The state can be older than my last flip.
+                        ( { model
+                            | connection =
+                                Joined me
+                                    { game
+                                        | players = state.players
+                                        , needed = state.needed
+                                        , started = state.elapsedMs /= Nothing
+                                    }
+                          }
+                        , syncClock state
+                        )
 
-        oldArrivals =
-            model.arrivals
-                |> List.map (\a -> { a | age = a.age + delta })
-                |> List.filter (\a -> a.age < arrivalMs)
+                _ ->
+                    ( model, Cmd.none )
+
+        GotFlip value ->
+            case ( model.connection, Decode.decodeValue flipDecoder value ) of
+                ( Joined me game, Ok flip ) ->
+                    if Just flip.playerId == me || not (Dict.member flip.cell game.round.switches) then
+                        ( model, Cmd.none )
+
+                    else
+                        let
+                            round =
+                                game.round
+                        in
+                        ( { model | connection = Joined me { game | round = { round | switches = Dict.insert flip.cell flip.value round.switches } } }
+                        , Cmd.none
+                        )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        GotDecision value ->
+            case ( model.connection, Decode.decodeValue decisionDecoder value ) of
+                ( Joined me game, Ok decision ) ->
+                    if Just decision.playerId == me then
+                        ( model, Cmd.none )
+
+                    else
+                        let
+                            ( round, events ) =
+                                applyDecision (mySwitches me game) decision game.round
+                        in
+                        ( { model | connection = Joined me { game | round = round } }, eventsCmd True events )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        GotJoinFailed reason ->
+            ( { model | connection = Failed reason }, Cmd.none )
+
+        SyncClock elapsedMs time ->
+            let
+                ms =
+                    Time.posixToMillis time
+
+                -- The state with the shortest delay gives the best clock.
+                clockStart =
+                    case model.clockStart of
+                        Just old ->
+                            min old (ms - elapsedMs)
+
+                        Nothing ->
+                            ms - elapsedMs
+            in
+            ( { model | clockStart = Just clockStart, now = ms }, Cmd.none )
+
+        Tick time ->
+            let
+                ms =
+                    Time.posixToMillis time
+            in
+            case ( model.connection, model.clockStart ) of
+                ( Joined me game, Just clockStart ) ->
+                    let
+                        target =
+                            toFloat (ms - clockStart)
+
+                        -- No sounds when the round runs fast up to now, for
+                        -- example after a join or when the tab was hidden.
+                        sounds =
+                            target - game.round.time < quietCatchUpMs
+
+                        ( round, events ) =
+                            advance (mySwitches me game) target game.round
+                    in
+                    ( { model | now = ms, connection = Joined me { game | round = round } }
+                    , eventsCmd sounds events
+                    )
+
+                _ ->
+                    ( { model | now = ms }, Cmd.none )
+
+        Start ->
+            ( model, trainsStart () )
+
+        Toggle cell ->
+            case model.connection of
+                Joined me game ->
+                    if Set.member cell (mySwitches me game) then
+                        let
+                            round =
+                                game.round
+
+                            position =
+                                1 - Maybe.withDefault 0 (Dict.get cell round.switches)
+                        in
+                        ( { model | connection = Joined me { game | round = { round | switches = Dict.insert cell position round.switches } } }
+                        , Cmd.batch
+                            [ playTrainSound "switch"
+                            , trainsFlip (Encode.object [ ( "cell", encodeCell cell ), ( "value", Encode.int position ) ])
+                            ]
+                        )
+
+                    else
+                        ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        Restart ->
+            ( model, trainsRestart () )
+
+        CopyLink ->
+            ( { model | copied = True }, trainsCopyText model.gameUrl )
+
+
+gameFromState : ServerState -> Game
+gameFromState state =
+    let
+        round =
+            newRound state.seed state.board
+
+        switches =
+            List.foldl
+                (\( cell, position ) ->
+                    Dict.update cell (Maybe.map (\_ -> position))
+                )
+                round.switches
+                state.switches
     in
-    { model
-        | trains = List.filterMap (\( train, arrived ) -> if arrived then Nothing else Just train) moved
-        , arrivals = newArrivals ++ oldArrivals
-        , correct = model.correct + List.length (List.filter .correct newArrivals)
+    { players = state.players
+    , needed = state.needed
+    , started = state.elapsedMs /= Nothing
+    , round = { round | switches = switches, decisions = Dict.fromList state.decisions }
     }
 
 
-{-| Move a train forward. The Bool is True when the train is at its house.
+syncClock : ServerState -> Cmd Msg
+syncClock state =
+    case state.elapsedMs of
+        Just elapsedMs ->
+            Task.perform (SyncClock elapsedMs) Time.now
+
+        Nothing ->
+            Cmd.none
+
+
+type Event
+    = Departed
+    | Arrived Bool
+    | Decided Int Cell Cell
+
+
+eventsCmd : Bool -> List Event -> Cmd Msg
+eventsCmd sounds events =
+    Cmd.batch
+        (List.map
+            (\event ->
+                case event of
+                    Departed ->
+                        if sounds then
+                            playTrainSound "depart"
+
+                        else
+                            Cmd.none
+
+                    Arrived correct ->
+                        if sounds && correct then
+                            playTrainSound "correct"
+
+                        else if sounds then
+                            playTrainSound "wrong"
+
+                        else
+                            Cmd.none
+
+                    Decided train cell exit ->
+                        trainsDecision
+                            (Encode.object
+                                [ ( "train", Encode.int train )
+                                , ( "cell", encodeCell cell )
+                                , ( "exit", encodeCell exit )
+                                ]
+                            )
+            )
+            (List.reverse events)
+        )
+
+
+encodeCell : Cell -> Encode.Value
+encodeCell ( x, y ) =
+    Encode.list Encode.int [ x, y ]
+
+
+
+-- SIMULATION
+
+
+{-| Run the round up to the game time `target`. `mine` has the switches
+of this browser: it sends the decisions for them out.
 -}
-moveTrain : Model -> Float -> Train -> ( Train, Bool )
-moveTrain model delta train =
+advance : Set Cell -> Float -> Round -> ( Round, List Event )
+advance mine target round =
+    advanceHelp mine target ( round, [] )
+
+
+advanceHelp : Set Cell -> Float -> ( Round, List Event ) -> ( Round, List Event )
+advanceHelp mine target ( round, events ) =
+    if round.time >= target then
+        ( round, events )
+
+    else
+        case round.numbers of
+            number :: rest ->
+                if round.nextDeparture <= target then
+                    moveAll mine (max round.time round.nextDeparture) ( round, events )
+                        |> depart mine number rest
+                        |> advanceHelp mine target
+
+                else
+                    moveAll mine target ( round, events )
+
+            [] ->
+                moveAll mine target ( round, events )
+
+
+depart : Set Cell -> Int -> List Int -> ( Round, List Event ) -> ( Round, List Event )
+depart mine number rest ( round, events ) =
     let
-        t =
-            train.t + delta / (cellMs * (trainPiece train).length)
+        ( train, round1, events1 ) =
+            chooseExit mine
+                round.time
+                { id = round.sent
+                , number = number
+                , cell = round.layout.station
+                , from = Nothing
+                , exit = Nothing
+                , t = 0
+                , passed = Dict.empty
+                }
+                ( round, events )
     in
-    if t < 1 then
-        ( { train | t = t }, False )
+    ( { round1
+        | trains = round1.trains ++ [ train ]
+        , numbers = rest
+        , sent = round1.sent + 1
+        , nextDeparture = round1.nextDeparture + pauseAfter round1.layout.board round1.sent
+      }
+    , Departed :: events1
+    )
+
+
+{-| Move all trains up to the game time `until`.
+-}
+moveAll : Set Cell -> Float -> ( Round, List Event ) -> ( Round, List Event )
+moveAll mine until ( round, events ) =
+    let
+        delta =
+            until - round.time
+
+        aged =
+            round.arrivals
+                |> List.map (\arrival -> { arrival | age = arrival.age + delta })
+                |> List.filter (\arrival -> arrival.age < arrivalMs)
+
+        ( kept, round1, events1 ) =
+            List.foldl
+                (\train ( trains, r, evs ) ->
+                    case moveTrain mine round.time delta train ( r, evs ) of
+                        ( Just moved, r1, evs1 ) ->
+                            ( moved :: trains, r1, evs1 )
+
+                        ( Nothing, r1, evs1 ) ->
+                            ( trains, r1, evs1 )
+                )
+                ( [], { round | arrivals = aged }, events )
+                round.trains
+    in
+    ( { round1 | trains = List.reverse kept, time = until }, events1 )
+
+
+{-| Move a train forward by `left` ms from the game time `clock`. Nothing
+when the train gets to its house.
+-}
+moveTrain : Set Cell -> Float -> Float -> Train -> ( Round, List Event ) -> ( Maybe Train, Round, List Event )
+moveTrain mine clock left train ( round, events ) =
+    let
+        duration =
+            cellMs * (trainPiece train).length
+
+        toEnd =
+            (1 - train.t) * duration
+    in
+    if left < toEnd then
+        ( Just { train | t = train.t + left / duration }, round, events )
 
     else
         case train.exit of
             Just next ->
-                ( { train | cell = next, from = Just train.cell, exit = route model next, t = 0 }, False )
+                let
+                    ( entered, round1, events1 ) =
+                        chooseExit mine (clock + toEnd) { train | cell = next, from = Just train.cell, t = 0 } ( round, events )
+                in
+                moveTrain mine (clock + toEnd) (left - toEnd) entered ( round1, events1 )
 
             Nothing ->
-                ( train, True )
+                let
+                    correct =
+                        Dict.get train.cell round.layout.houses == Just train.number
+
+                    arrival =
+                        { cell = train.cell, correct = correct, age = left - toEnd }
+                in
+                ( Nothing
+                , { round
+                    | arrived = round.arrived + 1
+                    , correct =
+                        if correct then
+                            round.correct + 1
+
+                        else
+                            round.correct
+                    , arrivals = arrival :: round.arrivals
+                  }
+                , Arrived correct :: events
+                )
 
 
-route : Model -> Cell -> Maybe Cell
-route model cell =
-    case Dict.get cell model.layout.children of
-        Just [ next ] ->
-            Just next
-
+{-| The train came into its cell at the game time `at`: select its exit. At
+a switch, a known decision comes first. Without one, the switch position
+decides, and the owner sends this decision out.
+-}
+chooseExit : Set Cell -> Float -> Train -> ( Round, List Event ) -> ( Train, Round, List Event )
+chooseExit mine at train ( round, events ) =
+    case Dict.get train.cell round.layout.children of
         Just [ first, second ] ->
-            if Dict.get cell model.switches == Just 1 then
-                Just second
+            let
+                position =
+                    if Dict.get train.cell round.switches == Just 1 then
+                        second
 
-            else
-                Just first
+                    else
+                        first
+
+                ( exit, round1, events1 ) =
+                    case Dict.get ( train.id, train.cell ) round.decisions of
+                        Just decided ->
+                            ( decided, round, events )
+
+                        Nothing ->
+                            if Set.member train.cell mine then
+                                ( position
+                                , { round | decisions = Dict.insert ( train.id, train.cell ) position round.decisions }
+                                , Decided train.id train.cell position :: events
+                                )
+
+                            else
+                                ( position, round, events )
+            in
+            ( { train | exit = Just exit, passed = Dict.insert train.cell ( at, exit ) train.passed }, round1, events1 )
+
+        Just [ next ] ->
+            ( { train | exit = Just next }, round, events )
 
         _ ->
-            Nothing
+            ( { train | exit = Nothing }, round, events )
 
 
-sendTrain : Float -> Model -> Model
-sendTrain delta model =
+{-| A decision of another browser. When the train already went the other
+way at that switch, it goes back to the switch and runs again on the
+decided branch up to now.
+-}
+applyDecision : Set Cell -> RemoteDecision -> Round -> ( Round, List Event )
+applyDecision mine { train, cell, exit } round =
     let
-        untilNext =
-            model.untilNext - delta
+        decided =
+            { round | decisions = Dict.insert ( train, cell ) exit round.decisions }
+
+        wrong t =
+            case Dict.get cell t.passed of
+                Just ( _, taken ) ->
+                    t.id == train && taken /= exit
+
+                Nothing ->
+                    False
     in
-    case model.colors of
-        color :: colors ->
-            if untilNext <= 0 then
-                let
-                    station =
-                        model.layout.station
+    case List.filter wrong round.trains of
+        moved :: _ ->
+            case Dict.get cell moved.passed of
+                Just ( at, _ ) ->
+                    let
+                        again =
+                            { moved
+                                | cell = cell
+                                , from = Dict.get cell (parents round.layout)
+                                , exit = Just exit
+                                , t = 0
+                                , passed =
+                                    moved.passed
+                                        |> Dict.filter (\_ ( time, _ ) -> time < at)
+                                        |> Dict.insert cell ( at, exit )
+                            }
 
-                    train =
-                        { color = color, cell = station, from = Nothing, exit = route model station, t = 0 }
-                in
-                { model
-                    | colors = colors
-                    , trains = model.trains ++ [ train ]
-                    , sent = model.sent + 1
-                    , untilNext = untilNext + pauseAfter model.sent
-                }
+                        others =
+                            { decided | trains = List.filter (\t -> t.id /= train) round.trains }
 
-            else
-                { model | untilNext = untilNext }
+                        ( result, round1, events ) =
+                            moveTrain mine at (round.time - at) again ( others, [] )
+                    in
+                    case result of
+                        Just t ->
+                            ( { round1 | trains = List.sortBy .id (t :: round1.trains) }, events )
+
+                        Nothing ->
+                            ( round1, events )
+
+                Nothing ->
+                    ( decided, [] )
 
         [] ->
-            { model | untilNext = untilNext }
+            ( decided, [] )
 
 
-{-| The colors of all trains in one game, in order. Each color has the same
-number of trains, or one more if the trains do not divide equally. Two trains
-in a row never have the same color.
+
+-- OWNERS
+
+
+{-| The switches in the order of their distance from the station.
 -}
-trainColors : Generator (List Int)
-trainColors =
+switchOrder : Layout -> List Cell
+switchOrder layout =
     let
-        colorCount =
-            switchCount + 1
+        walk queue found =
+            case queue of
+                [] ->
+                    List.reverse found
+
+                cell :: rest ->
+                    let
+                        next =
+                            Dict.get cell layout.children |> Maybe.withDefault []
+                    in
+                    if List.length next == 2 then
+                        walk (rest ++ next) (cell :: found)
+
+                    else
+                        walk (rest ++ next) found
     in
-    shuffle (List.range 0 switchCount)
+    walk [ layout.station ] []
+
+
+{-| The owner of each switch. The switches go to the slots in equal blocks,
+from the station. The switches of an empty slot (a player left) go to the
+player in the nearest slot.
+-}
+owners : Game -> Dict Cell Player
+owners game =
+    let
+        order =
+            switchOrder game.round.layout
+
+        blockSize =
+            max 1 (List.length order // game.needed)
+
+        nearest slot =
+            game.players
+                |> List.sortBy (\player -> ( abs (player.slot - slot), player.slot ))
+                |> List.head
+    in
+    order
+        |> List.indexedMap
+            (\i cell ->
+                nearest (min (game.needed - 1) (i // blockSize))
+                    |> Maybe.map (Tuple.pair cell)
+            )
+        |> List.filterMap identity
+        |> Dict.fromList
+
+
+mySwitches : Me -> Game -> Set Cell
+mySwitches me game =
+    case me of
+        Just playerId ->
+            owners game
+                |> Dict.filter (\_ player -> player.id == playerId)
+                |> Dict.keys
+                |> Set.fromList
+
+        Nothing ->
+            Set.empty
+
+
+
+-- DECODERS
+
+
+type alias ServerState =
+    { seed : Int
+    , board : Board
+    , players : List Player
+    , needed : Int
+    , elapsedMs : Maybe Int
+    , switches : List ( Cell, Int )
+    , decisions : List ( ( Int, Cell ), Cell )
+    }
+
+
+type alias RemoteFlip =
+    { playerId : String
+    , cell : Cell
+    , value : Int
+    }
+
+
+type alias RemoteDecision =
+    { playerId : String
+    , train : Int
+    , cell : Cell
+    , exit : Cell
+    }
+
+
+joinedDecoder : Decoder ( Me, ServerState )
+joinedDecoder =
+    Decode.map2 Tuple.pair
+        (Decode.field "player_id" (Decode.nullable Decode.string))
+        (Decode.field "state" stateDecoder)
+
+
+stateDecoder : Decoder ServerState
+stateDecoder =
+    Decode.map7 ServerState
+        (Decode.field "seed" Decode.int)
+        (Decode.map3 boardFor
+            (Decode.field "switch_count" Decode.int)
+            (Decode.field "trains_per_house" Decode.int)
+            (Decode.field "pace" paceDecoder)
+        )
+        (Decode.field "players" (Decode.list playerDecoder))
+        (Decode.field "players_needed" Decode.int)
+        (Decode.field "elapsed_ms" (Decode.nullable Decode.int))
+        (Decode.field "switches"
+            (Decode.list
+                (Decode.map2 Tuple.pair
+                    (Decode.field "cell" cellDecoder)
+                    (Decode.field "value" Decode.int)
+                )
+            )
+        )
+        (Decode.field "decisions"
+            (Decode.list
+                (Decode.map3 (\train cell exit -> ( ( train, cell ), exit ))
+                    (Decode.field "train" Decode.int)
+                    (Decode.field "cell" cellDecoder)
+                    (Decode.field "exit" cellDecoder)
+                )
+            )
+        )
+
+
+playerDecoder : Decoder Player
+playerDecoder =
+    Decode.map5 Player
+        (Decode.field "id" Decode.string)
+        (Decode.field "name" (Decode.nullable Decode.string))
+        (Decode.field "color" Decode.string)
+        (Decode.field "color_name" Decode.string)
+        (Decode.field "slot" Decode.int)
+
+
+flipDecoder : Decoder RemoteFlip
+flipDecoder =
+    Decode.map3 RemoteFlip
+        (Decode.field "player_id" Decode.string)
+        (Decode.field "cell" cellDecoder)
+        (Decode.field "value" Decode.int)
+
+
+decisionDecoder : Decoder RemoteDecision
+decisionDecoder =
+    Decode.map4 RemoteDecision
+        (Decode.field "player_id" Decode.string)
+        (Decode.field "train" Decode.int)
+        (Decode.field "cell" cellDecoder)
+        (Decode.field "exit" cellDecoder)
+
+
+paceDecoder : Decoder Pace
+paceDecoder =
+    Decode.string
+        |> Decode.map
+            (\pace ->
+                case pace of
+                    "easy" ->
+                        Easy
+
+                    "hard" ->
+                        Hard
+
+                    "expert" ->
+                        Expert
+
+                    _ ->
+                        Normal
+            )
+
+
+cellDecoder : Decoder Cell
+cellDecoder =
+    Decode.map2 Tuple.pair (Decode.index 0 Decode.int) (Decode.index 1 Decode.int)
+
+
+
+-- TRAINS
+
+
+{-| The house numbers of all trains in one game, in order. Each house gets
+the same number of trains, or one more if the trains do not divide equally.
+Two trains in a row never go to the same house.
+-}
+trainNumbers : Board -> Generator (List Int)
+trainNumbers board =
+    let
+        houseCount =
+            board.switches + 1
+
+        count =
+            trainCount board
+    in
+    shuffle (List.range 0 board.switches)
         |> Random.andThen
             (\order ->
                 order
                     |> List.indexedMap
-                        (\i color ->
-                            if i < modBy colorCount trainCount then
-                                ( color, trainCount // colorCount + 1 )
+                        (\i number ->
+                            if i < modBy houseCount count then
+                                ( number, count // houseCount + 1 )
 
                             else
-                                ( color, trainCount // colorCount )
+                                ( number, count // houseCount )
                         )
                     |> Dict.fromList
-                    |> orderColors
+                    |> orderNumbers
             )
 
 
-{-| Put the colors in a random order. Try again if the last trains left
-can only have the same color in a row.
+{-| Put the numbers in a random order. Try again if the last trains left
+can only have the same number in a row.
 -}
-orderColors : Dict Int Int -> Generator (List Int)
-orderColors counts =
-    pickColors counts Nothing []
+orderNumbers : Dict Int Int -> Generator (List Int)
+orderNumbers counts =
+    pickNumbers counts Nothing []
         |> Random.andThen
             (\result ->
                 case result of
-                    Just colors ->
-                        Random.constant colors
+                    Just numbers ->
+                        Random.constant numbers
 
                     Nothing ->
-                        Random.lazy (\_ -> orderColors counts)
+                        Random.lazy (\_ -> orderNumbers counts)
             )
 
 
-{-| Colors with more trains left are more likely, so the last trains do
-not all have the same color.
+{-| Numbers with more trains left are more likely, so the last trains do
+not all have the same number.
 -}
-pickColors : Dict Int Int -> Maybe Int -> List Int -> Generator (Maybe (List Int))
-pickColors counts last picked =
+pickNumbers : Dict Int Int -> Maybe Int -> List Int -> Generator (Maybe (List Int))
+pickNumbers counts last picked =
     let
         options =
             Dict.toList counts
-                |> List.filter (\( color, left ) -> left > 0 && Just color /= last)
-                |> List.map (\( color, left ) -> ( toFloat left, color ))
+                |> List.filter (\( number, left ) -> left > 0 && Just number /= last)
+                |> List.map (\( number, left ) -> ( toFloat left, number ))
     in
     if List.all (\left -> left == 0) (Dict.values counts) then
         Random.constant (Just (List.reverse picked))
@@ -454,26 +1134,49 @@ pickColors counts last picked =
             first :: rest ->
                 Random.weighted first rest
                     |> Random.andThen
-                        (\color ->
-                            pickColors (Dict.update color (Maybe.map (\left -> left - 1)) counts) (Just color) (color :: picked)
+                        (\number ->
+                            pickNumbers (Dict.update number (Maybe.map (\left -> left - 1)) counts) (Just number) (number :: picked)
                         )
 
             [] ->
                 Random.constant Nothing
 
 
-pauseAfter : Int -> Float
-pauseAfter sent =
-    max minPauseMs (firstPauseMs - toFloat sent * pauseStepMs)
+{-| The pause after the train with the index `sent` (from 0). Easy keeps
+the first pause. The other paces go from the first pause to the last pause:
+normal on a line, hard on a square curve, and expert on a steep exponential
+curve. The harder curves get short sooner.
+-}
+pauseAfter : Board -> Int -> Float
+pauseAfter board sent =
+    let
+        pauses =
+            trainCount board - 1
 
+        -- How far through the round, from 0 to 1
+        x =
+            if pauses <= 1 then
+                0
 
-checkOver : Model -> Model
-checkOver model =
-    if model.sent == trainCount && List.isEmpty model.trains then
-        { model | phase = Over, arrivals = [] }
+            else
+                toFloat sent / toFloat (pauses - 1)
 
-    else
-        model
+        -- From 1 at the start to 0 at the end
+        left =
+            case board.pace of
+                Easy ->
+                    1
+
+                Normal ->
+                    1 - x
+
+                Hard ->
+                    (1 - x) ^ 2
+
+                Expert ->
+                    (e ^ (-5 * x) - e ^ -5) / (1 - e ^ -5)
+    in
+    lastPauseMs + (firstPauseMs - lastPauseMs) * left
 
 
 
@@ -491,7 +1194,8 @@ type alias Tip =
 
 
 type alias Growth =
-    { occupied : Set Cell
+    { board : Board
+    , occupied : Set Cell
     , children : Dict Cell (List Cell)
     , tips : List Tip
     , houses : List Cell
@@ -502,13 +1206,13 @@ type alias Growth =
 
 {-| Make some correct layouts and keep the one that covers the board best.
 -}
-generateLayout : Random.Seed -> ( Layout, Random.Seed )
-generateLayout seed =
+generateLayout : Board -> Random.Seed -> ( Layout, Random.Seed )
+generateLayout board seed =
     let
         ( first, seed1 ) =
-            generateLayoutHelp 1000 seed
+            generateLayoutHelp board 1000 seed
     in
-    pickBestLayout (layoutCandidates - 1) first seed1
+    pickBestLayout board (layoutCandidates - 1) first seed1
 
 
 layoutCandidates : Int
@@ -516,21 +1220,21 @@ layoutCandidates =
     40
 
 
-pickBestLayout : Int -> Layout -> Random.Seed -> ( Layout, Random.Seed )
-pickBestLayout left best seed =
+pickBestLayout : Board -> Int -> Layout -> Random.Seed -> ( Layout, Random.Seed )
+pickBestLayout board left best seed =
     if left <= 0 then
         ( best, seed )
 
     else
         let
             ( layout, nextSeed ) =
-                generateLayoutHelp 1000 seed
+                generateLayoutHelp board 1000 seed
         in
         if coverage layout > coverage best then
-            pickBestLayout (left - 1) layout nextSeed
+            pickBestLayout board (left - 1) layout nextSeed
 
         else
-            pickBestLayout (left - 1) best nextSeed
+            pickBestLayout board (left - 1) best nextSeed
 
 
 {-| How evenly the tracks cover the board. The board is divided into 3 × 3
@@ -544,7 +1248,7 @@ coverage layout =
             layout.station :: Dict.keys (parents layout)
 
         area ( x, y ) =
-            ( x * 3 // cols, y * 3 // rows )
+            ( x * 3 // layout.board.cols, y * 3 // layout.board.rows )
 
         count f =
             Set.size (Set.fromList (List.map f cells))
@@ -552,31 +1256,32 @@ coverage layout =
     10 * count area + count Tuple.first + count Tuple.second
 
 
-generateLayoutHelp : Int -> Random.Seed -> ( Layout, Random.Seed )
-generateLayoutHelp attemptsLeft seed =
+generateLayoutHelp : Board -> Int -> Random.Seed -> ( Layout, Random.Seed )
+generateLayoutHelp board attemptsLeft seed =
     let
         ( ( station, growth ), seed1 ) =
-            Random.step growLayout seed
+            Random.step (growLayout board) seed
 
-        ( colors, seed2 ) =
-            Random.step (shuffle (List.range 0 switchCount)) seed1
+        ( numbers, seed2 ) =
+            Random.step (shuffle (List.range 0 board.switches)) seed1
 
         layout =
-            { station = station
+            { board = board
+            , station = station
             , children = growth.children
-            , houses = Dict.fromList (List.map2 Tuple.pair growth.houses colors)
+            , houses = Dict.fromList (List.map2 Tuple.pair growth.houses numbers)
             }
     in
-    if (not growth.failed && growth.splits == switchCount) || attemptsLeft <= 1 then
+    if (not growth.failed && growth.splits == board.switches) || attemptsLeft <= 1 then
         ( layout, seed2 )
 
     else
-        generateLayoutHelp (attemptsLeft - 1) seed2
+        generateLayoutHelp board (attemptsLeft - 1) seed2
 
 
-growLayout : Generator ( Cell, Growth )
-growLayout =
-    Random.int 1 (rows - 2)
+growLayout : Board -> Generator ( Cell, Growth )
+growLayout board =
+    Random.int 1 (board.rows - 2)
         |> Random.andThen
             (\row ->
                 let
@@ -584,7 +1289,8 @@ growLayout =
                         ( 0, row )
                 in
                 grow
-                    { occupied = Set.singleton station
+                    { board = board
+                    , occupied = Set.singleton station
                     , children = Dict.empty
                     , tips = [ { cell = station, dir = East, run = 0 } ]
                     , houses = []
@@ -627,10 +1333,10 @@ growTip growth index splitRoll stopRoll dirRoll =
                 options =
                     [ tip.dir, turnLeft tip.dir, turnRight tip.dir ]
                         |> List.map (\d -> ( d, step d tip.cell ))
-                        |> List.filter (\( _, cell ) -> free growth.occupied cell)
+                        |> List.filter (\( _, cell ) -> free growth.board growth.occupied cell)
 
                 allSplit =
-                    growth.splits == switchCount
+                    growth.splits == growth.board.switches
 
                 -- Before the first split, the only tip is the station track.
                 splitRun =
@@ -698,9 +1404,9 @@ shuffle items =
             )
 
 
-free : Set Cell -> Cell -> Bool
-free occupied (( x, y ) as cell) =
-    x >= 0 && x < cols && y >= 0 && y < rows && not (Set.member cell occupied)
+free : Board -> Set Cell -> Cell -> Bool
+free board occupied (( x, y ) as cell) =
+    x >= 0 && x < board.cols && y >= 0 && y < board.rows && not (Set.member cell occupied)
 
 
 step : Dir -> Cell -> Cell
@@ -844,32 +1550,126 @@ angleAt { start, control, end } t =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    if model.phase == Playing then
-        -- Limit the step, so that trains do not jump after the tab was hidden.
-        Browser.Events.onAnimationFrameDelta (min 100 >> Frame)
+    Sub.batch
+        [ trainsJoined GotJoined
+        , trainsState GotState
+        , trainsFlipped GotFlip
+        , trainsDecided GotDecision
+        , trainsJoinFailed GotJoinFailed
+        , case model.connection of
+            Joined _ game ->
+                if game.started && not (over game.round) then
+                    Browser.Events.onAnimationFrame Tick
 
-    else
-        Sub.none
+                else
+                    Sub.none
+
+            _ ->
+                Sub.none
+        ]
 
 
 
 -- VIEW
 
 
+type Phase
+    = Waiting
+    | Ready
+    | Countdown Int
+    | Playing
+    | Over
+
+
+phase : Model -> Game -> Phase
+phase model game =
+    if not game.started then
+        if List.length game.players < game.needed then
+            Waiting
+
+        else
+            Ready
+
+    else if over game.round then
+        Over
+
+    else
+        case model.clockStart of
+            Just clockStart ->
+                if model.now < clockStart then
+                    Countdown (ceiling (toFloat (clockStart - model.now) / 1000))
+
+                else
+                    Playing
+
+            Nothing ->
+                Playing
+
+
 view : Model -> Html Msg
 view model =
+    case model.connection of
+        Connecting ->
+            p [ id "trains-connecting", class "py-24 text-center opacity-60" ] [ text "Joining the game…" ]
+
+        Failed reason ->
+            p [ id "trains-failed", class "py-24 text-center text-red-600" ] [ text ("Could not join the game: " ++ reason) ]
+
+        Joined me game ->
+            viewGame model me game
+
+
+viewGame : Model -> Me -> Game -> Html Msg
+viewGame model me game =
+    let
+        owned =
+            owners game
+
+        solo =
+            game.needed == 1
+    in
     div [ id "trains-root", class "flex w-full max-w-[1400px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
-        [ aside [ id "trains-panel", class "flex flex-wrap items-end justify-between gap-3 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:flex-col lg:items-start lg:gap-5" ]
+        [ aside [ id "trains-panel", class "flex flex-col gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
             [ div []
-                [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Right on Track" ]
-                , p [ class "text-sm opacity-60" ] [ text "Click the switches to send each train to the house of its color." ]
+                [ h1 [ class "text-2xl font-semibold tracking-tight" ]
+                    [ a [ id "trains-title-link", href "/trains", class "transition hover:text-amber-600" ] [ text "Right on Track" ] ]
+                , p [ class "text-sm opacity-60" ]
+                    [ text
+                        (if solo then
+                            "Click the switches to send each train to the house with its number."
+
+                         else
+                            "Send each train to the house with its number. You can flip only the switches in your color."
+                        )
+                    ]
                 ]
-            , viewStats model
+            , viewStats game.round
+            , if phase model game == Ready then
+                viewReady me game
+
+              else
+                text ""
+            , if solo then
+                text ""
+
+              else
+                viewShareLink model
+            , if solo then
+                text ""
+
+              else
+                viewPlayers me game owned
+            , if me == Nothing then
+                p [ id "trains-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200" ]
+                    [ text "This game is full or has started, so you can only watch it." ]
+
+              else
+                viewRestartButton
             ]
         , div [ class "min-w-0 flex-1" ]
-            [ div [ class "relative mx-auto", style "width" boardWidth ]
-                [ viewBoard model
-                , viewOverlay model
+            [ div [ class "relative mx-auto", style "width" (boardWidth game.round.layout.board) ]
+                [ viewBoard me game owned
+                , viewOverlay model me game
                 ]
             ]
         ]
@@ -878,61 +1678,215 @@ view model =
 {-| Make the board as wide as possible, but never taller than the screen
 (minus the 3rem header and the 1.5rem bottom padding of the page).
 -}
-boardWidth : String
-boardWidth =
-    "min(100%, calc((100dvh - 4.5rem) * " ++ String.fromFloat (toFloat cols / toFloat rows) ++ "))"
+boardWidth : Board -> String
+boardWidth board =
+    "min(100%, calc((100dvh - 4.5rem) * " ++ String.fromFloat (toFloat board.cols / toFloat board.rows) ++ "))"
 
 
-viewStats : Model -> Html Msg
-viewStats model =
-    div [ class "flex gap-2 text-sm lg:flex-col lg:items-start" ]
+{-| Shows in the panel before the start.
+-}
+viewReady : Me -> Game -> Html Msg
+viewReady me game =
+    div
+        [ id "trains-ready"
+        , class "flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-2xl bg-slate-900 px-4 py-3 text-white shadow-lg lg:flex-col lg:items-stretch"
+        ]
+        [ div []
+            [ p [ class "font-semibold" ] [ text (String.fromInt (trainCount game.round.layout.board) ++ " trains are ready") ]
+            , p [ class "text-sm opacity-75" ]
+                [ text
+                    (if game.needed == 1 then
+                        "Look at the tracks, then start."
+
+                     else
+                        "Look at the tracks and find your switches, then start."
+                    )
+                ]
+            ]
+        , if me == Nothing then
+            span [ class "text-sm opacity-60" ] [ text "Waiting for a player to start." ]
+
+          else
+            button
+                [ id "trains-start"
+                , class "rounded-full bg-amber-400 px-6 py-2 font-medium text-slate-900 shadow-lg shadow-amber-500/30 transition hover:-translate-y-0.5 hover:bg-amber-300 active:translate-y-0"
+                , onClick Start
+                ]
+                [ text "Start" ]
+        ]
+
+
+viewStats : Round -> Html Msg
+viewStats round =
+    div [ class "flex gap-2 text-sm" ]
         [ div [ id "trains-correct", class "rounded-full bg-emerald-50 px-3 py-1 text-emerald-900 ring-1 ring-emerald-200" ]
-            [ text "Correct ", span [ class "font-semibold tabular-nums" ] [ text (String.fromInt model.correct) ] ]
+            [ text "Correct ", span [ class "font-semibold tabular-nums" ] [ text (String.fromInt round.correct) ] ]
         , div [ id "trains-sent", class "rounded-full bg-white px-3 py-1 text-slate-700 shadow-sm ring-1 ring-slate-200" ]
             [ text "Train "
             , span [ class "font-semibold tabular-nums" ]
-                [ text (String.fromInt model.sent ++ " / " ++ String.fromInt trainCount) ]
+                [ text (String.fromInt round.sent ++ " / " ++ String.fromInt (trainCount round.layout.board)) ]
             ]
         ]
 
 
-viewOverlay : Model -> Html Msg
-viewOverlay model =
-    case model.phase of
+viewShareLink : Model -> Html Msg
+viewShareLink model =
+    div [ class "flex items-center gap-2 rounded-full bg-amber-50 p-1 pl-4 text-sm ring-1 ring-amber-200 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
+        [ input
+            [ id "trains-link"
+            , readonly True
+            , value model.gameUrl
+            , class "min-w-0 flex-1 truncate bg-transparent text-amber-900 outline-none lg:px-2 lg:py-1"
+            ]
+            []
+        , button
+            [ id "trains-copy-link"
+            , class "rounded-full bg-amber-500 px-4 py-1.5 font-medium text-white transition hover:bg-amber-400 active:scale-95"
+            , onClick CopyLink
+            ]
+            [ text
+                (if model.copied then
+                    "Copied!"
+
+                 else
+                    "Copy link"
+                )
+            ]
+        ]
+
+
+viewPlayers : Me -> Game -> Dict Cell Player -> Html Msg
+viewPlayers me game owned =
+    Html.Keyed.ul [ id "trains-players", class "flex flex-wrap gap-2 lg:flex-col" ]
+        (List.map
+            (\player ->
+                let
+                    count =
+                        Dict.size (Dict.filter (\_ owner -> owner.id == player.id) owned)
+                in
+                ( player.id
+                , li
+                    [ id ("trains-player-" ++ player.id)
+                    , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200"
+                    ]
+                    [ span [ class "size-3 rounded-full", style "background" player.color ] []
+                    , span [ class "lg:flex-1" ] [ text (playerName me player) ]
+                    , span [ class "text-xs text-slate-500 tabular-nums" ]
+                        [ text
+                            (String.fromInt count
+                                ++ (if count == 1 then
+                                        " switch"
+
+                                    else
+                                        " switches"
+                                   )
+                            )
+                        ]
+                    ]
+                )
+            )
+            game.players
+        )
+
+
+playerName : Me -> Player -> String
+playerName me player =
+    if me == Just player.id then
+        Maybe.withDefault player.colorName player.name ++ " (you)"
+
+    else
+        Maybe.withDefault player.colorName player.name
+
+
+{-| Starts a new round with a new board for all players, also during a
+round.
+-}
+viewRestartButton : Html Msg
+viewRestartButton =
+    button
+        [ id "trains-restart"
+        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start"
+        , onClick Restart
+        ]
+        [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
+        , text "New board"
+        ]
+
+
+viewOverlay : Model -> Me -> Game -> Html Msg
+viewOverlay model me game =
+    case phase model game of
+        Waiting ->
+            overlay "trains-waiting"
+                [ p [ class "text-2xl font-semibold" ] [ text "Waiting for players" ]
+                , p [ id "trains-waiting-count", class "text-lg tabular-nums opacity-80" ]
+                    [ text
+                        (String.fromInt (List.length game.players)
+                            ++ " of "
+                            ++ String.fromInt game.needed
+                            ++ " players are in"
+                        )
+                    ]
+                , span [ class "text-sm opacity-70" ] [ text "Send the link to the other players." ]
+                ]
+
         Ready ->
-            overlay
-                [ p [ class "text-2xl font-semibold" ] [ text (String.fromInt trainCount ++ " trains are ready") ]
-                , span [ class "text-sm opacity-80" ] [ text "Look at the tracks, then start." ]
-                , overlayButton "trains-start" Start "Start"
+            -- The ready card is in the panel, so that the players can look at the whole board.
+            text ""
+
+        Countdown seconds ->
+            -- No dark layer, so that the players can still look at the board
+            div
+                [ id "trains-countdown"
+                , class "pointer-events-none absolute inset-0 flex items-center justify-center"
+                ]
+                [ Html.Keyed.node "div"
+                    []
+                    [ ( String.fromInt seconds
+                      , p
+                            [ class "countdown-pop text-9xl font-bold text-white tabular-nums"
+                            , style "text-shadow" "0 4px 24px rgb(15 23 42 / 0.6), 0 0 2px rgb(15 23 42 / 0.8)"
+                            ]
+                            [ text (String.fromInt seconds) ]
+                      )
+                    ]
                 ]
 
         Playing ->
             text ""
 
         Over ->
-            overlay
+            overlay "trains-over"
                 [ p [ id "trains-result", class "text-2xl font-semibold" ]
-                    [ text (String.fromInt model.correct ++ " of " ++ String.fromInt trainCount ++ " trains got home") ]
-                , span [ class "text-sm opacity-80" ] [ text (verdict model.correct) ]
-                , overlayButton "trains-again" PlayAgain "Play again"
+                    [ text (String.fromInt game.round.correct ++ " of " ++ String.fromInt (trainCount game.round.layout.board) ++ " trains got home") ]
+                , span [ class "text-sm opacity-80" ] [ text (verdict game.round) ]
+                , if me == Nothing then
+                    text ""
+
+                  else
+                    overlayButton "trains-again" Restart "Play again"
                 ]
 
 
-verdict : Int -> String
-verdict correct =
-    if correct == trainCount then
+verdict : Round -> String
+verdict round =
+    let
+        total =
+            trainCount round.layout.board
+    in
+    if round.correct == total then
         "Perfect!"
 
-    else if correct * 3 >= trainCount * 2 then
+    else if round.correct * 3 >= total * 2 then
         "Good work."
 
     else
         "Try again with a new layout."
 
 
-overlay : List (Html Msg) -> Html Msg
-overlay =
-    div [ class "absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-slate-900/55 text-white backdrop-blur-[2px]" ]
+overlay : String -> List (Html Msg) -> Html Msg
+overlay overlayId =
+    div [ id overlayId, class "absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-slate-900/55 p-4 text-center text-white backdrop-blur-[2px]" ]
 
 
 overlayButton : String -> Msg -> String -> Html Msg
@@ -945,17 +1899,26 @@ overlayButton buttonId msg label =
         [ text label ]
 
 
-viewBoard : Model -> Html Msg
-viewBoard model =
+viewBoard : Me -> Game -> Dict Cell Player -> Html Msg
+viewBoard me game owned =
     let
+        round =
+            game.round
+
         width =
-            toFloat cols * cellSize
+            toFloat round.layout.board.cols * cellSize
 
         height =
-            toFloat rows * cellSize
+            toFloat round.layout.board.rows * cellSize
 
         rails =
-            trackPieces model
+            trackPieces round
+
+        switches =
+            switchCells round.layout
+
+        mine cell =
+            me /= Nothing && Maybe.map .id (Dict.get cell owned) == me
     in
     Svg.svg
         [ SA.id "trains-board"
@@ -963,15 +1926,25 @@ viewBoard model =
         , SA.class "block h-auto w-full"
         ]
         [ Svg.rect [ SA.width (String.fromFloat width), SA.height (String.fromFloat height), SA.rx "16", SA.fill "#ecfccb" ] []
-        , Svg.g [] (List.map viewSwitchPad (switchCells model.layout))
+        , Svg.g []
+            (List.map
+                (\cell ->
+                    if game.needed == 1 then
+                        viewSwitchPad cell
+
+                    else
+                        viewOwnedPad (mine cell) (Dict.get cell owned) cell
+                )
+                switches
+            )
         , Svg.g [ SA.opacity "0.2" ] (railsOf SwitchOff "#57534e" rails)
         , Svg.g [] (railsOf Plain "#57534e" rails)
         , Svg.g [] (railsOf SwitchOn "#d97706" rails)
-        , Svg.g [] (List.map viewSwitchTarget (switchCells model.layout))
-        , Svg.g [ SA.pointerEvents "none" ] (List.map viewTrain model.trains)
-        , viewStation model.layout.station
-        , Svg.g [ SA.pointerEvents "none" ] (List.map viewHouse (Dict.toList model.layout.houses))
-        , Svg.g [ SA.pointerEvents "none" ] (List.map viewArrival model.arrivals)
+        , Svg.g [] (List.map viewSwitchTarget (List.filter mine switches))
+        , Svg.g [ SA.pointerEvents "none" ] (List.map viewTrain round.trains)
+        , viewStation round.layout.station
+        , Svg.g [ SA.pointerEvents "none" ] (List.map viewHouse (Dict.toList round.layout.houses))
+        , Svg.g [ SA.pointerEvents "none" ] (List.map viewArrival round.arrivals)
         ]
 
 
@@ -984,11 +1957,11 @@ type Rail
     | SwitchOff
 
 
-trackPieces : Model -> List ( Piece, Rail )
-trackPieces model =
+trackPieces : Round -> List ( Piece, Rail )
+trackPieces round =
     let
         layout =
-            model.layout
+            round.layout
 
         parentOf =
             parents layout
@@ -1002,23 +1975,70 @@ trackPieces model =
                 Just [ exit ] ->
                     [ ( piece cell from (Just exit), Plain ) ]
 
-                Just next ->
+                Just [ first, second ] ->
+                    let
+                        on =
+                            if Dict.get cell round.switches == Just 1 then
+                                second
+
+                            else
+                                first
+                    in
                     List.map
                         (\exit ->
                             ( piece cell from (Just exit)
-                            , if route model cell == Just exit then
+                            , if exit == on then
                                 SwitchOn
 
                               else
                                 SwitchOff
                             )
                         )
-                        next
+                        [ first, second ]
 
-                Nothing ->
+                _ ->
                     [ ( piece cell from Nothing, Plain ) ]
     in
     List.concatMap cellPieces (layout.station :: Dict.keys parentOf)
+
+
+viewSwitchPad : Cell -> Svg msg
+viewSwitchPad cell =
+    switchRect cell [ SA.fill "#fef3c7", SA.stroke "#fcd34d", SA.strokeWidth "2" ]
+
+
+{-| A switch in the color of its owner. The switches of the other players
+are lighter and have a dashed border.
+-}
+viewOwnedPad : Bool -> Maybe Player -> Cell -> Svg msg
+viewOwnedPad mine owner cell =
+    let
+        color =
+            Maybe.map .color owner |> Maybe.withDefault "#a8a29e"
+    in
+    if mine then
+        switchRect cell [ SA.fill color, SA.fillOpacity "0.22", SA.stroke color, SA.strokeWidth "3" ]
+
+    else
+        switchRect cell
+            [ SA.fill color
+            , SA.fillOpacity "0.08"
+            , SA.stroke color
+            , SA.strokeOpacity "0.7"
+            , SA.strokeWidth "2"
+            , SA.strokeDasharray "5 4"
+            ]
+
+
+{-| An invisible click target above the rails. It lights up on hover.
+-}
+viewSwitchTarget : Cell -> Svg Msg
+viewSwitchTarget (( x, y ) as cell) =
+    switchRect cell
+        [ SA.id ("trains-switch-" ++ String.fromInt x ++ "-" ++ String.fromInt y)
+        , SA.class "cursor-pointer fill-transparent transition-colors hover:fill-amber-300/30"
+        , Svg.Events.onClick (Toggle cell)
+        ]
 
 
 pathData : Piece -> String
@@ -1067,46 +2087,37 @@ switchRect ( x, y ) attrs =
         []
 
 
-viewSwitchPad : Cell -> Svg msg
-viewSwitchPad cell =
-    switchRect cell [ SA.fill "#fef3c7", SA.stroke "#fcd34d", SA.strokeWidth "2" ]
-
-
-{-| An invisible click target above the rails. It lights up on hover.
+{-| The number does not turn with the train, so that it is never upside down.
 -}
-viewSwitchTarget : Cell -> Svg Msg
-viewSwitchTarget (( x, y ) as cell) =
-    switchRect cell
-        [ SA.id ("trains-switch-" ++ String.fromInt x ++ "-" ++ String.fromInt y)
-        , SA.class "cursor-pointer fill-transparent transition-colors hover:fill-amber-300/30"
-        , Svg.Events.onClick (Toggle cell)
-        ]
-
-
 viewTrain : Train -> Svg msg
 viewTrain train =
     let
         p =
             trainPiece train
 
-        ( x, y ) =
+        position =
             pointAt p train.t
     in
-    Svg.g
-        [ SA.transform
-            ("translate("
-                ++ String.fromFloat x
-                ++ " "
-                ++ String.fromFloat y
-                ++ ") rotate("
-                ++ String.fromFloat (angleAt p train.t)
-                ++ ")"
-            )
+    Svg.g [ SA.transform (translate position) ]
+        [ Svg.g [ SA.transform ("rotate(" ++ String.fromFloat (angleAt p train.t) ++ ")") ]
+            [ Svg.rect [ SA.x "-16", SA.y "-11", SA.width "32", SA.height "22", SA.rx "6", SA.fill "#1e293b" ] []
+            , Svg.rect [ SA.x "9", SA.y "-7", SA.width "4", SA.height "14", SA.rx "1.5", SA.fill "#fbbf24" ] []
+            ]
+        , viewNumber "#f8fafc" train.number
         ]
-        [ Svg.rect [ SA.x "-15", SA.y "-10", SA.width "30", SA.height "20", SA.rx "6", SA.fill (houseColor train.color), SA.stroke "#1e293b", SA.strokeWidth "2" ] []
-        , Svg.rect [ SA.x "4", SA.y "-6", SA.width "6", SA.height "12", SA.rx "2", SA.fill "#f8fafc", SA.opacity "0.85" ] []
-        , Svg.circle [ SA.cx "-6", SA.cy "0", SA.r "3.5", SA.fill "#1e293b", SA.opacity "0.35" ] []
+
+
+viewNumber : String -> Int -> Svg msg
+viewNumber color number =
+    Svg.text_
+        [ SA.textAnchor "middle"
+        , SA.dominantBaseline "central"
+        , SA.fontSize "14"
+        , SA.fontWeight "700"
+        , SA.fill color
+        , SA.class "tabular-nums"
         ]
+        [ Svg.text (String.fromInt (number + 1)) ]
 
 
 viewStation : Cell -> Svg msg
@@ -1120,15 +2131,15 @@ viewStation cell =
 
 
 viewHouse : ( Cell, Int ) -> Svg msg
-viewHouse ( ( x, y ) as cell, color ) =
+viewHouse ( ( x, y ) as cell, number ) =
     Svg.g
         [ SA.id ("trains-house-" ++ String.fromInt x ++ "-" ++ String.fromInt y)
         , SA.transform (translate (center cell))
         ]
         [ Svg.ellipse [ SA.cx "0", SA.cy "17", SA.rx "18", SA.ry "4", SA.fill "#365314", SA.opacity "0.2" ] []
-        , Svg.rect [ SA.x "-15", SA.y "-6", SA.width "30", SA.height "22", SA.rx "3", SA.fill (houseColor color) ] []
+        , Svg.rect [ SA.x "-15", SA.y "-6", SA.width "30", SA.height "22", SA.rx "3", SA.fill "#fef3c7", SA.stroke "#334155", SA.strokeWidth "2" ] []
         , Svg.polygon [ SA.points "-20,-4 0,-22 20,-4", SA.fill "#334155", SA.strokeLinejoin "round", SA.stroke "#334155", SA.strokeWidth "3" ] []
-        , Svg.rect [ SA.x "-4", SA.y "4", SA.width "8", SA.height "12", SA.rx "1.5", SA.fill "#1e293b", SA.opacity "0.45" ] []
+        , Svg.g [ SA.transform "translate(0 5.5)" ] [ viewNumber "#1e293b" number ]
         ]
 
 
@@ -1177,11 +2188,6 @@ viewArrival arrival =
 translate : Point -> String
 translate ( x, y ) =
     "translate(" ++ String.fromFloat x ++ " " ++ String.fromFloat y ++ ")"
-
-
-houseColor : Int -> String
-houseColor i =
-    List.drop i houseColors |> List.head |> Maybe.withDefault "#64748b"
 
 
 

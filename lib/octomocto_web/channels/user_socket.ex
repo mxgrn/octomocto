@@ -3,6 +3,7 @@ defmodule OctomoctoWeb.UserSocket do
 
   channel "astronaut:*", OctomoctoWeb.AstronautChannel
   channel "schulte:*", OctomoctoWeb.SchulteChannel
+  channel "trains:*", OctomoctoWeb.TrainsChannel
 
   @impl true
   def connect(params, socket, _connect_info) do

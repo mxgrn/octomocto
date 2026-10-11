@@ -44,3 +44,6 @@ config :phoenix,
 
 # Start Schulte races without the countdown, and remove players at once when they leave
 config :octomocto, schulte_countdown_ms: 0, schulte_rejoin_grace_ms: 0
+
+# The same for the trains games
+config :octomocto, trains_countdown_ms: 0, trains_rejoin_grace_ms: 0

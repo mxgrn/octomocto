@@ -172,17 +172,17 @@
 .schulte-next { animation: schulte-next-in 200ms ease-out; }
 
 /* Each step of the countdown starts large and shrinks into place */
-@keyframes schulte-countdown {
+@keyframes countdown-pop {
   from { transform: scale(1.6); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
 
-.schulte-countdown { animation: schulte-countdown 300ms ease-out; }
+.countdown-pop { animation: countdown-pop 300ms ease-out; }
 
 @media (prefers-reduced-motion: reduce) {
   .schulte-pop { animation: none; opacity: 0; }
   .schulte-next { animation: none; }
-  .schulte-countdown { animation: none; }
+  .countdown-pop { animation: none; }
 }
 
 /* Header. The eyes in the wordmark blink one time when the pointer moves onto it.

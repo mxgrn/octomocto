@@ -26,6 +26,8 @@ defmodule OctomoctoWeb.Router do
     post "/astronaut", AstronautController, :create
     get "/astronaut/:id", AstronautController, :show
     get "/trains", TrainsController, :index
+    post "/trains", TrainsController, :create
+    get "/trains/:id", TrainsController, :show
     get "/schulte", SchulteController, :index
     post "/schulte", SchulteController, :create
     get "/schulte/:id", SchulteController, :show

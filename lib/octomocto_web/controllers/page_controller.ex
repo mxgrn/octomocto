@@ -5,7 +5,7 @@ defmodule OctomoctoWeb.PageController do
     %{
       id: "trains",
       name: "Right on Track",
-      description: "Click the switches to send each train to the house of its color.",
+      description: "Click the switches to send each train to the house with its number.",
       path: "/trains",
       icon: "🚂",
       icon_class: "bg-octo-orange/10 dark:bg-octo-orange-light/15"

@@ -1,3 +1,79 @@
-<Layouts.app flash={@flash} current_scope={@current_scope} wide>
-  <div id="trains-main"></div>
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <div
+    id="trains-index"
+    class="mx-auto flex w-full max-w-md flex-col items-center gap-6 py-12 text-center lg:py-16"
+  >
+    <div class="flex size-20 items-center justify-center rounded-3xl bg-amber-100 text-4xl shadow-inner">
+      🚂
+    </div>
+    <div class="space-y-2">
+      <h1 class="text-3xl font-semibold tracking-tight">Right on Track</h1>
+      <p class="text-base-content/70">
+        Click the switches to send each train to the house with its number.
+      </p>
+    </div>
+
+    <div id="trains-settings" class="flex w-full flex-col gap-4">
+      <.setting
+        label="Players"
+        hint={
+          if(@settings.players > 1,
+            do: "Play together. Each player owns some of the switches.",
+            else: "You own all the switches."
+          )
+        }
+      >
+        <.option
+          :for={n <- 1..4}
+          id={"players-#{n}"}
+          selected={@settings.players == n}
+          href={settings_path(@settings, %{players: n})}
+        >
+          {n}
+        </.option>
+      </.setting>
+      <.setting label="Switches" hint={switches_hint(@settings.switch_count, @settings.players)}>
+        <.option
+          :for={n <- @switch_counts}
+          id={"switches-#{n}"}
+          selected={@settings.switch_count == n}
+          href={settings_path(@settings, %{switch_count: n})}
+        >
+          {n}
+        </.option>
+      </.setting>
+      <.setting label="Trains per house" hint={trains_hint(@settings)}>
+        <.option
+          :for={n <- 1..7}
+          id={"trains-#{n}"}
+          selected={@settings.trains_per_house == n}
+          href={settings_path(@settings, %{trains_per_house: n})}
+        >
+          {n}
+        </.option>
+      </.setting>
+      <.setting label="Pace" hint={pace_hint(@settings.pace)}>
+        <.option
+          :for={pace <- Octomocto.Trains.paces()}
+          id={"pace-#{pace}"}
+          selected={@settings.pace == pace}
+          href={settings_path(@settings, %{pace: pace})}
+        >
+          {String.capitalize(pace)}
+        </.option>
+      </.setting>
+    </div>
+
+    <.link
+      id="new-game"
+      href={settings_path(@settings)}
+      method="post"
+      class="rounded-full bg-amber-500 px-8 py-3 font-medium text-white shadow-lg shadow-amber-500/25 transition hover:-translate-y-0.5 hover:bg-amber-400 hover:shadow-xl active:translate-y-0"
+    >
+      New game
+    </.link>
+    <p :if={@settings.players > 1} class="text-sm text-base-content/50">
+      You get a link to share with the other players.
+    </p>
+  </div>
 </Layouts.app>

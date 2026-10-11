@@ -14,12 +14,13 @@ defmodule Octomocto.Application do
       OctomoctoWeb.Telemetry,
       Octomocto.Repo,
       {Cluster.Supervisor, [topologies, [name: Octomocto.ClusterSupervisor]]},
-      # Before the endpoint: a new node gets the Schulte games from the
+      # Before the endpoint: a new node gets the Schulte and trains games from the
       # other node before it serves requests.
       {Mnesiac.Supervisor, [hosts, [name: Octomocto.MnesiacSupervisor]]},
       {Phoenix.PubSub, name: Octomocto.PubSub},
       {DynamicSupervisor, name: Octomocto.Astronaut.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Schulte.GameSupervisor},
+      {DynamicSupervisor, name: Octomocto.Trains.GameSupervisor},
       # Start a worker by calling: Octomocto.Worker.start_link(arg)
       # {Octomocto.Worker, arg},
       # Start to serve requests, typically the last entry
