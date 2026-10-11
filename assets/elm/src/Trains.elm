@@ -903,31 +903,59 @@ switchOrder layout =
     walk [ layout.station ] []
 
 
-{-| The owner of each switch. The switches go to the slots in equal blocks,
-from the station. The switches of an empty slot (a player left) go to the
-player in the nearest slot.
+{-| The owner of each switch. The switches are shuffled with the seed of the
+round and dealt to the slots one by one, so the counts differ by 1 at most.
+The switches of an empty slot (a player left) are dealt in the same way to
+the players in the game, first to the players with fewer switches. The other
+switches keep their owners.
 -}
 owners : Game -> Dict Cell Player
 owners game =
     let
-        order =
-            switchOrder game.round.layout
+        ( order, _ ) =
+            Random.step
+                (shuffle (switchOrder game.round.layout))
+                (Random.initialSeed game.round.seed)
 
-        blockSize =
-            max 1 (List.length order // game.needed)
-
-        nearest slot =
+        bySlot =
             game.players
-                |> List.sortBy (\player -> ( abs (player.slot - slot), player.slot ))
-                |> List.head
+                |> List.map (\player -> ( player.slot, player ))
+                |> Dict.fromList
+
+        dealt =
+            List.indexedMap
+                (\i cell -> ( cell, Dict.get (modBy (max 1 game.needed) i) bySlot ))
+                order
+
+        owned =
+            List.filterMap (\( cell, owner ) -> Maybe.map (Tuple.pair cell) owner) dealt
+
+        orphans =
+            List.filterMap
+                (\( cell, owner ) ->
+                    if owner == Nothing then
+                        Just cell
+
+                    else
+                        Nothing
+                )
+                dealt
+
+        count player =
+            List.length (List.filter (\( _, owner ) -> owner.id == player.id) owned)
+
+        heirs =
+            List.sortBy (\player -> ( count player, player.slot )) game.players
     in
-    order
+    orphans
         |> List.indexedMap
             (\i cell ->
-                nearest (min (game.needed - 1) (i // blockSize))
+                List.drop (modBy (max 1 (List.length heirs)) i) heirs
+                    |> List.head
                     |> Maybe.map (Tuple.pair cell)
             )
         |> List.filterMap identity
+        |> (++) owned
         |> Dict.fromList
 
 
