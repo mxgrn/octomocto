@@ -15,10 +15,10 @@ Each browser makes the board and the trains from the seed and runs the
 round itself, on a clock that starts at the start time of the round.
 
 Each player owns some of the switches and can flip only those. The owner
-decides the route of each train at a switch: when a train comes into the
-cell of a switch, the owner's browser picks the exit from its own switch
-position and sends this decision out. The other browsers use the switch
-position that they know. When a decision comes and the train went the
+decides the route of each train at a switch: when a train is a little
+before the center of a switch cell (see `decisionPoint`), the owner's
+browser picks the exit from its own switch position and sends this
+decision out. The other browsers use the switch position that they know. When a decision comes and the train went the
 other way, they move the train back to the switch and run it again on the
 correct branch. Trains do not affect each other, so a correction changes
 only one train.
@@ -181,6 +181,14 @@ quietCatchUpMs =
     1000
 
 
+{-| How far a train goes through a switch cell (from 0 to 1) before its
+exit is final. Up to this point, a switch change also moves the train.
+-}
+decisionPoint : Float
+decisionPoint =
+    0.4
+
+
 {-| Time to show the mark above a house after a train arrives.
 -}
 arrivalMs : Float
@@ -233,11 +241,11 @@ type alias Piece =
 
 
 {-| A train is in `cell` and goes from the `from` side to the `exit` side.
-`t` is how far it is through the cell, from 0 to 1. The train selects its
-exit when it comes into a cell, so a switch change has no effect on a train
-that is already on the switch. The `id` is the number of the train in the
-order of departure. `passed` has the game time when the train came into
-each switch cell, and the exit that it took there.
+`t` is how far it is through the cell, from 0 to 1. On a switch, the exit
+follows the switch position until the train gets to `decisionPoint`. Then
+the exit is final. The `id` is the number of the train in the order
+of departure. `passed` has the game time when the train got to
+`decisionPoint` in each switch cell, and the exit that it took there.
 -}
 type alias Train =
     { id : Int
@@ -654,7 +662,7 @@ advanceHelp mine target ( round, events ) =
             number :: rest ->
                 if round.nextDeparture <= target then
                     moveAll mine (max round.time round.nextDeparture) ( round, events )
-                        |> depart mine number rest
+                        |> depart number rest
                         |> advanceHelp mine target
 
                 else
@@ -664,12 +672,11 @@ advanceHelp mine target ( round, events ) =
                 moveAll mine target ( round, events )
 
 
-depart : Set Cell -> Int -> List Int -> ( Round, List Event ) -> ( Round, List Event )
-depart mine number rest ( round, events ) =
+depart : Int -> List Int -> ( Round, List Event ) -> ( Round, List Event )
+depart number rest ( round, events ) =
     let
-        ( train, round1, events1 ) =
-            chooseExit mine
-                round.time
+        train =
+            enterCell round
                 { id = round.sent
                 , number = number
                 , cell = round.layout.station
@@ -678,15 +685,14 @@ depart mine number rest ( round, events ) =
                 , t = 0
                 , passed = Dict.empty
                 }
-                ( round, events )
     in
-    ( { round1
-        | trains = round1.trains ++ [ train ]
+    ( { round
+        | trains = round.trains ++ [ train ]
         , numbers = rest
-        , sent = round1.sent + 1
-        , nextDeparture = round1.nextDeparture + pauseAfter round1.layout.board round1.sent
+        , sent = round.sent + 1
+        , nextDeparture = round.nextDeparture + pauseAfter round.layout.board round.sent
       }
-    , Departed :: events1
+    , Departed :: events
     )
 
 
@@ -723,25 +729,38 @@ moveAll mine until ( round, events ) =
 when the train gets to its house.
 -}
 moveTrain : Set Cell -> Float -> Float -> Train -> ( Round, List Event ) -> ( Maybe Train, Round, List Event )
-moveTrain mine clock left train ( round, events ) =
+moveTrain mine clock left current ( round, events ) =
     let
+        train =
+            followSwitch round current
+
         duration =
             cellMs * (trainPiece train).length
+
+        toDecision =
+            (decisionPoint - train.t) * duration
 
         toEnd =
             (1 - train.t) * duration
     in
-    if left < toEnd then
+    if undecided round train && left >= toDecision then
+        let
+            ( decided, round1, events1 ) =
+                decideExit mine (clock + toDecision) { train | t = decisionPoint } ( round, events )
+        in
+        moveTrain mine (clock + toDecision) (left - toDecision) decided ( round1, events1 )
+
+    else if left < toEnd then
         ( Just { train | t = train.t + left / duration }, round, events )
 
     else
         case train.exit of
             Just next ->
-                let
-                    ( entered, round1, events1 ) =
-                        chooseExit mine (clock + toEnd) { train | cell = next, from = Just train.cell, t = 0 } ( round, events )
-                in
-                moveTrain mine (clock + toEnd) (left - toEnd) entered ( round1, events1 )
+                moveTrain mine
+                    (clock + toEnd)
+                    (left - toEnd)
+                    (enterCell round { train | cell = next, from = Just train.cell, t = 0 })
+                    ( round, events )
 
             Nothing ->
                 let
@@ -766,49 +785,91 @@ moveTrain mine clock left train ( round, events ) =
                 )
 
 
-{-| The train came into its cell at the game time `at`: select its exit. At
-a switch, a known decision comes first. Without one, the switch position
-decides, and the owner sends this decision out.
+{-| The train came into its cell: select its exit. On a switch, this exit
+can still change, see `followSwitch`.
 -}
-chooseExit : Set Cell -> Float -> Train -> ( Round, List Event ) -> ( Train, Round, List Event )
-chooseExit mine at train ( round, events ) =
+enterCell : Round -> Train -> Train
+enterCell round train =
+    case Dict.get train.cell round.layout.children of
+        Just [ next ] ->
+            { train | exit = Just next }
+
+        Just _ ->
+            followSwitch round train
+
+        Nothing ->
+            { train | exit = Nothing }
+
+
+{-| A train on a switch before `decisionPoint` has no final exit.
+-}
+undecided : Round -> Train -> Bool
+undecided round train =
+    switchExits round train /= Nothing && not (Dict.member train.cell train.passed)
+
+
+{-| Before `decisionPoint`, the exit of a train on a switch follows the
+switch position. A known decision comes first.
+-}
+followSwitch : Round -> Train -> Train
+followSwitch round train =
+    case ( undecided round train, switchExits round train ) of
+        ( True, Just ( exit, _ ) ) ->
+            { train | exit = Just exit }
+
+        _ ->
+            train
+
+
+{-| The exit that a known decision or the switch position gives, and if it
+comes from a decision.
+-}
+switchExits : Round -> Train -> Maybe ( Cell, Bool )
+switchExits round train =
     case Dict.get train.cell round.layout.children of
         Just [ first, second ] ->
-            let
-                position =
+            case Dict.get ( train.id, train.cell ) round.decisions of
+                Just decided ->
+                    Just ( decided, True )
+
+                Nothing ->
                     if Dict.get train.cell round.switches == Just 1 then
-                        second
+                        Just ( second, False )
 
                     else
-                        first
+                        Just ( first, False )
 
-                ( exit, round1, events1 ) =
-                    case Dict.get ( train.id, train.cell ) round.decisions of
-                        Just decided ->
-                            ( decided, round, events )
+        _ ->
+            Nothing
 
-                        Nothing ->
-                            if Set.member train.cell mine then
-                                ( position
-                                , { round | decisions = Dict.insert ( train.id, train.cell ) position round.decisions }
-                                , Decided train.id train.cell position :: events
-                                )
 
-                            else
-                                ( position, round, events )
+{-| The train got to `decisionPoint` in a switch cell at the game time `at`:
+its exit is final now. Without a known decision, the owner sends this
+decision out.
+-}
+decideExit : Set Cell -> Float -> Train -> ( Round, List Event ) -> ( Train, Round, List Event )
+decideExit mine at train ( round, events ) =
+    case switchExits round train of
+        Just ( exit, known ) ->
+            let
+                ( round1, events1 ) =
+                    if not known && Set.member train.cell mine then
+                        ( { round | decisions = Dict.insert ( train.id, train.cell ) exit round.decisions }
+                        , Decided train.id train.cell exit :: events
+                        )
+
+                    else
+                        ( round, events )
             in
             ( { train | exit = Just exit, passed = Dict.insert train.cell ( at, exit ) train.passed }, round1, events1 )
 
-        Just [ next ] ->
-            ( { train | exit = Just next }, round, events )
-
-        _ ->
-            ( { train | exit = Nothing }, round, events )
+        Nothing ->
+            ( train, round, events )
 
 
 {-| A decision of another browser. When the train already went the other
-way at that switch, it goes back to the switch and runs again on the
-decided branch up to now.
+way at that switch, it goes back to `decisionPoint` on the switch and runs again
+on the decided branch up to now.
 -}
 applyDecision : Set Cell -> RemoteDecision -> Round -> ( Round, List Event )
 applyDecision mine { train, cell, exit } round =
@@ -834,7 +895,7 @@ applyDecision mine { train, cell, exit } round =
                                 | cell = cell
                                 , from = Dict.get cell (parents round.layout)
                                 , exit = Just exit
-                                , t = 0
+                                , t = decisionPoint
                                 , passed =
                                     moved.passed
                                         |> Dict.filter (\_ ( time, _ ) -> time < at)
@@ -2183,7 +2244,6 @@ viewTrain train =
         ]
         [ Svg.rect [ SA.x "-16", SA.y "-11", SA.width "32", SA.height "22", SA.rx "6", SA.fill colors.walls, SA.stroke "#1e293b", SA.strokeWidth "2" ] []
         , Svg.rect [ SA.x "-11", SA.y "-7", SA.width "14", SA.height "14", SA.rx "3", SA.fill colors.roof, SA.stroke "#1e293b", SA.strokeWidth "1.5" ] []
-        , Svg.rect [ SA.x "9", SA.y "-7", SA.width "4", SA.height "14", SA.rx "1.5", SA.fill "#fbbf24", SA.stroke "#1e293b", SA.strokeWidth "1" ] []
         ]
 
 
