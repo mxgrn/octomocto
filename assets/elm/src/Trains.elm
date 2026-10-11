@@ -2274,6 +2274,10 @@ viewHouse ( ( x, y ) as cell, number ) =
         ]
 
 
+{-| The mark is on the walls of the house, so that it stays on the board
+also for a house in the top row. It grows a little and fades out. The white
+border keeps it visible on a red or a green house.
+-}
 viewArrival : Arrival -> Svg msg
 viewArrival arrival =
     let
@@ -2284,11 +2288,13 @@ viewArrival arrival =
             arrival.age / arrivalMs
     in
     Svg.g
-        [ SA.transform (translate ( x, y - 32 - 14 * progress ))
+        [ SA.transform (translate ( x, y + 5 ) ++ " scale(" ++ String.fromFloat (0.8 + 0.3 * progress) ++ ")")
         , SA.opacity (String.fromFloat (1 - progress * progress))
         ]
         [ Svg.circle
             [ SA.r "11"
+            , SA.stroke "white"
+            , SA.strokeWidth "2"
             , SA.fill
                 (if arrival.correct then
                     "#16a34a"
