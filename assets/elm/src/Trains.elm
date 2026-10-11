@@ -1952,9 +1952,18 @@ viewBoard me game owned =
                 )
                 switches
             )
+        , Svg.defs []
+            [ Svg.mask [ SA.id "trains-outside-switches" ]
+                (Svg.rect [ SA.width (String.fromFloat width), SA.height (String.fromFloat height), SA.fill "white" ] []
+                    :: List.map (\cell -> switchCircle cell [ SA.fill "black" ]) switches
+                )
+            ]
         , Svg.g [ SA.opacity "0.2" ] (railsOf SwitchOff "#57534e" rails)
+
+        -- Outside the switch circle, the branch that is off looks like a plain track.
+        , Svg.g [ SA.mask "url(#trains-outside-switches)" ] (railsOf SwitchOff "#57534e" rails)
         , Svg.g [] (railsOf Plain "#57534e" rails)
-        , Svg.g [] (railsOf SwitchOn "#d97706" rails)
+        , Svg.g [] (railsOf SwitchOn "#57534e" rails)
         , Svg.g [] (List.map viewSwitchTarget (List.filter mine switches))
         , Svg.g [ SA.pointerEvents "none" ] (List.map viewTrain round.trains)
         , viewStation round.layout.station
@@ -1963,8 +1972,8 @@ viewBoard me game owned =
         ]
 
 
-{-| A switch shows the branch that it points to now in a different color,
-so the player can see where the next train goes.
+{-| A switch shows the branch that it points to now in full color and the
+other branch faded, so the player can see where the next train goes.
 -}
 type Rail
     = Plain
@@ -2019,7 +2028,7 @@ trackPieces round =
 
 viewSwitchPad : Cell -> Svg msg
 viewSwitchPad cell =
-    switchRect cell [ SA.fill "#fef3c7", SA.stroke "#fcd34d", SA.strokeWidth "2" ]
+    switchCircle cell [ SA.fill "#fef3c7", SA.stroke "#fcd34d", SA.strokeWidth "2" ]
 
 
 {-| A switch in the color of its owner. The switches of the other players
@@ -2032,10 +2041,10 @@ viewOwnedPad mine owner cell =
             Maybe.map .color owner |> Maybe.withDefault "#a8a29e"
     in
     if mine then
-        switchRect cell [ SA.fill color, SA.fillOpacity "0.22", SA.stroke color, SA.strokeWidth "3" ]
+        switchCircle cell [ SA.fill color, SA.fillOpacity "0.22", SA.stroke color, SA.strokeWidth "3" ]
 
     else
-        switchRect cell
+        switchCircle cell
             [ SA.fill color
             , SA.fillOpacity "0.08"
             , SA.stroke color
@@ -2049,7 +2058,7 @@ viewOwnedPad mine owner cell =
 -}
 viewSwitchTarget : Cell -> Svg Msg
 viewSwitchTarget (( x, y ) as cell) =
-    switchRect cell
+    switchCircle cell
         [ SA.id ("trains-switch-" ++ String.fromInt x ++ "-" ++ String.fromInt y)
         , SA.class "cursor-pointer fill-transparent transition-colors hover:fill-amber-300/30"
         , Svg.Events.onClick (Toggle cell)
@@ -2087,14 +2096,16 @@ viewRails color p =
         ]
 
 
-switchRect : Cell -> List (Svg.Attribute msg) -> Svg msg
-switchRect ( x, y ) attrs =
-    Svg.rect
-        ([ SA.x (String.fromFloat (toFloat x * cellSize + 4))
-         , SA.y (String.fromFloat (toFloat y * cellSize + 4))
-         , SA.width (String.fromFloat (cellSize - 8))
-         , SA.height (String.fromFloat (cellSize - 8))
-         , SA.rx "14"
+switchCircle : Cell -> List (Svg.Attribute msg) -> Svg msg
+switchCircle cell attrs =
+    let
+        ( cx, cy ) =
+            center cell
+    in
+    Svg.circle
+        ([ SA.cx (String.fromFloat cx)
+         , SA.cy (String.fromFloat cy)
+         , SA.r (String.fromFloat (cellSize / 2 - 4))
          ]
             ++ attrs
         )
@@ -2125,7 +2136,7 @@ houseColors number =
             "#f97316"
 
         black =
-            "#1e293b"
+            "#334155"
 
         white =
             "#f8fafc"
