@@ -371,6 +371,22 @@
 .sudoku-cell.is-wrong { background: #fee2e2; }
 .sudoku-cell.is-wrong .sudoku-digit { color: #dc2626; animation: schulte-shake 220ms ease-in-out; }
 .sudoku-pop { animation: sudoku-pop 250ms ease-out; }
+
+/* Sudoku in the dark theme: dark cells, darker lines and light
+   highlights. The digits of the players are lighter, so that the dark
+   player colors stay easy to read. */
+[data-theme=dark] .sudoku-board { background: #111419; }
+[data-theme=dark] .sudoku-box { background: #23272f; }
+[data-theme=dark] .sudoku-cell { background: #323844; }
+[data-theme=dark] .sudoku-cell.is-playable:hover { background: #3a4050; }
+[data-theme=dark] .sudoku-cell.is-peer { background: #3a404c; }
+[data-theme=dark] .sudoku-cell.is-same { background: rgb(140 140 255 / 0.2); }
+[data-theme=dark] .sudoku-cell.is-selected,
+[data-theme=dark] .sudoku-cell.is-selected:hover { background: rgb(140 140 255 / 0.35); }
+[data-theme=dark] .sudoku-cell.is-conflict { background: rgb(248 113 113 / 0.2); color: #f87171; }
+[data-theme=dark] .sudoku-cell.is-wrong { background: rgb(248 113 113 / 0.2); }
+[data-theme=dark] .sudoku-cell.is-wrong .sudoku-digit { color: #f87171; }
+[data-theme=dark] .sudoku-cell .sudoku-pop { filter: brightness(1.35); }
 .sudoku-pad-key {
   -webkit-tap-highlight-color: transparent;
   transition: transform 120ms, background-color 120ms, box-shadow 120ms, opacity 120ms;
