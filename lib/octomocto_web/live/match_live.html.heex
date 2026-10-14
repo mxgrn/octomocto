@@ -34,7 +34,7 @@
       <.open_games
         games={@open_games}
         matches={&same_settings?(&1, @settings)}
-        path={fn id -> ~p"/match/#{id}" end}
+        path={&~p"/match/#{&1.id}"}
       >
         <:icon :let={game}>
           <img
@@ -45,7 +45,7 @@
         </:icon>
         <:summary :let={game}>{game_summary(game)}</:summary>
       </.open_games>
-      <.ongoing_games games={@ongoing_games} path={fn id -> ~p"/match/#{id}" end}>
+      <.ongoing_games games={@ongoing_games} path={&~p"/match/#{&1.id}"}>
         <:icon :let={game}>
           <img
             src={~p"/images/match/#{game.settings.theme}/1.svg"}

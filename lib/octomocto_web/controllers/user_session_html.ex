@@ -65,12 +65,74 @@ defmodule OctomoctoWeb.UserSessionHTML do
   end
 
   @doc """
+  Renders the sign-in forms of a guest in one row: the Telegram Login Widget
+  and the magic link form. For the top of the front page.
+  """
+  def sign_in_bar(assigns) do
+    assigns =
+      assign(assigns,
+        form: to_form(%{}, as: "user"),
+        telegram?: TelegramAuth.bot_username() != nil
+      )
+
+    ~H"""
+    <div
+      id="sign-in-bar"
+      class="flex w-full max-w-xl flex-col items-center gap-2 sm:w-auto lg:items-end"
+    >
+      <div class="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row">
+        <.telegram_widget
+          :if={@telegram?}
+          id="telegram-sign-in"
+          auth_path={~p"/auth/telegram"}
+          class="shrink-0 justify-center"
+        />
+        <span
+          :if={@telegram?}
+          class="text-xs font-medium uppercase tracking-wider text-base-content/40"
+        >
+          or
+        </span>
+        <.form
+          for={@form}
+          id="sign-in-form"
+          action={~p"/signin"}
+          class="flex w-full min-w-0 flex-1 gap-2 sm:w-auto sm:flex-none rounded-2xl bg-base-100 p-1.5 shadow-sm ring-1 ring-base-content/10 transition focus-within:ring-2 focus-within:ring-indigo-500"
+        >
+          <input
+            type="email"
+            name={@form[:email].name}
+            id="sign-in-email"
+            placeholder="you@example.com"
+            autocomplete="username"
+            spellcheck="false"
+            aria-label="Email"
+            required
+            class="min-w-0 flex-1 sm:w-52 sm:flex-none border-0 bg-transparent px-3 text-sm placeholder:text-base-content/30 focus:outline-none"
+          />
+          <button
+            id="sign-in-submit"
+            class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
+          >
+            Email me a sign-in link
+          </button>
+        </.form>
+      </div>
+      <p :if={local_mail_adapter?()} class="text-xs text-base-content/50">
+        Dev: see sent emails in <.link href="/dev/mailbox" class="underline">the mailbox</.link>.
+      </p>
+    </div>
+    """
+  end
+
+  @doc """
   Renders a container for the Telegram Login Widget.
 
   The widget script is added by app.js. Nothing is shown if no bot is set.
   """
   attr :id, :string, required: true
   attr :auth_path, :string, required: true
+  attr :class, :any, default: "justify-center"
 
   def telegram_widget(assigns) do
     assigns = assign(assigns, :bot_username, TelegramAuth.bot_username())
@@ -79,7 +141,9 @@ defmodule OctomoctoWeb.UserSessionHTML do
     <div
       :if={@bot_username}
       id={@id}
-      class="flex min-h-10 justify-center"
+      class={["flex min-h-10", @class]}
+      phx-hook="TelegramLogin"
+      phx-update="ignore"
       data-telegram-login={@bot_username}
       data-auth-path={@auth_path}
     >

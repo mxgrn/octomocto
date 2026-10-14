@@ -34,7 +34,7 @@
       <.open_games
         games={@open_games}
         matches={&same_settings?(&1, @settings)}
-        path={fn id -> ~p"/schulte/#{id}" end}
+        path={&~p"/schulte/#{&1.id}"}
       >
         <:icon>
           <.lobby_icon />
@@ -43,7 +43,7 @@
       </.open_games>
       <.ongoing_games
         games={@ongoing_games}
-        path={fn id -> ~p"/schulte/#{id}" end}
+        path={&~p"/schulte/#{&1.id}"}
       >
         <:icon>
           <.lobby_icon />

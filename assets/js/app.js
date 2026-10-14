@@ -33,10 +33,15 @@ import {playSetSound} from "./set_sounds"
 import {playSudokuSound} from "./sudoku_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+// On a LiveView page, also after live navigation
+const TelegramLogin = {
+  mounted() { showTelegramLogin(this.el) },
+}
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks},
+  hooks: {...colocatedHooks, TelegramLogin},
 })
 
 // Show progress bar on live navigation and form submits
@@ -344,8 +349,10 @@ if (sudokuNode) {
 
 // Show the Telegram Login Widget. The widget script puts its iframe in the
 // place of the script tag, so we add the script into each container.
-// Telegram needs a full URL to send the user back to.
-document.querySelectorAll("[data-telegram-login]").forEach(node => {
+// Telegram needs a full URL to send the user back to. A container that has
+// the widget already is left as it is.
+function showTelegramLogin(node) {
+  if (node.childElementCount > 0) return
   const script = document.createElement("script")
   script.async = true
   script.src = "https://telegram.org/js/telegram-widget.js?22"
@@ -353,7 +360,10 @@ document.querySelectorAll("[data-telegram-login]").forEach(node => {
   script.dataset.size = "large"
   script.dataset.authUrl = new URL(node.dataset.authPath, window.location.href).href
   node.appendChild(script)
-})
+}
+
+// On a page without a LiveView
+document.querySelectorAll("[data-telegram-login]").forEach(showTelegramLogin)
 
 // connect if there are any LiveViews on the page
 liveSocket.connect()

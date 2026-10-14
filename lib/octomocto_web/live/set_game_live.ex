@@ -40,7 +40,7 @@ defmodule OctomoctoWeb.SetGameLive do
      )}
   end
 
-  def handle_info({:lobby_changed, id, entry}, socket) do
+  def handle_info({:lobby_changed, _game, id, entry}, socket) do
     {:noreply, assign_lobby(socket, Lobby.put_entry(socket.assigns.lobby, id, entry))}
   end
 
@@ -143,4 +143,7 @@ defmodule OctomoctoWeb.SetGameLive do
 
   # True when the open game has the same settings as the new game
   defp same_settings?(game, settings), do: game.players_needed == settings.players
+
+  @doc "The settings of a game in the lists of open and ongoing games."
+  def game_summary(_game), do: "Normal · 81 cards"
 end

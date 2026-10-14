@@ -1,0 +1,78 @@
+<Layouts.app flash={@flash} current_scope={@current_scope} home wide>
+  <%!-- Soft brand-colored light behind the page --%>
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-octo-mist via-white to-white dark:from-base-300 dark:via-base-100 dark:to-base-100">
+    </div>
+    <div class="absolute -top-32 left-1/2 size-[28rem] -translate-x-[85%] rounded-full bg-octo-orange/10 blur-3xl dark:bg-octo-orange-light/10">
+    </div>
+    <div class="absolute top-24 left-1/2 size-[28rem] -translate-x-[15%] rounded-full bg-octo-indigo/10 blur-3xl dark:bg-octo-indigo-light/10">
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-8 pt-2 pb-10">
+    <%!-- One short band, so that the games are on the first screen --%>
+    <section
+      id="hero"
+      class={[
+        "flex flex-col items-center gap-6 lg:flex-row",
+        if(@current_scope, do: "lg:justify-center", else: "lg:justify-between")
+      ]}
+    >
+      <div class="flex items-center gap-4">
+        <.octopi class="h-20 shrink-0 drop-shadow-sm" />
+        <p
+          id="slogan"
+          class="text-xl font-medium tracking-tight text-octo-navy/70 sm:text-2xl dark:text-base-content/70"
+        >
+          Use your heads
+        </p>
+      </div>
+      <OctomoctoWeb.UserSessionHTML.sign_in_bar :if={!@current_scope} />
+    </section>
+
+    <%!--
+      One column on a small screen: the games, then the open and ongoing
+      games. On a large screen, the open and ongoing games go to the left,
+      and the games get the wider column on the right.
+    --%>
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:items-start lg:gap-10">
+      <section id="catalog" class="lg:col-start-2 lg:row-start-1">
+        <h2 class="sr-only">Games</h2>
+        <ul id="games" class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <li :for={game <- @games}>
+            <.link
+              id={"game-#{game.id}"}
+              navigate={game.path}
+              class="group flex h-full flex-col items-center gap-3 rounded-2xl bg-base-100 p-5 text-center shadow-sm ring-1 ring-base-content/10 transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-octo-orange/10 hover:ring-octo-orange/30 dark:hover:ring-octo-orange-light/40"
+            >
+              <.game_icon game={game} />
+              <div class="min-w-0">
+                <h3 class="font-semibold text-octo-navy dark:text-base-content">{game.name}</h3>
+                <p class="text-sm text-octo-navy/60 dark:text-base-content/60">
+                  {game.description}
+                </p>
+              </div>
+            </.link>
+          </li>
+        </ul>
+      </section>
+
+      <div id="lobby" class="grid gap-4 lg:col-start-1 lg:row-start-1">
+        <.open_games games={@open_games} path={&game_path/1}>
+          <:icon :let={game}><.game_icon game={@kinds[game.kind]} small /></:icon>
+          <:summary :let={game}>
+            <span class="font-semibold">{@kinds[game.kind].name}</span>
+            <span class="text-base-content/60">· {game_summary(game)}</span>
+          </:summary>
+        </.open_games>
+        <.ongoing_games games={@ongoing_games} path={&game_path/1}>
+          <:icon :let={game}><.game_icon game={@kinds[game.kind]} small /></:icon>
+          <:summary :let={game}>
+            <span class="font-semibold">{@kinds[game.kind].name}</span>
+            <span class="text-base-content/60">· {game_summary(game)}</span>
+          </:summary>
+        </.ongoing_games>
+      </div>
+    </div>
+  </div>
+</Layouts.app>

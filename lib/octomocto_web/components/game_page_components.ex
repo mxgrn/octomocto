@@ -14,10 +14,10 @@ defmodule OctomoctoWeb.GamePageComponents do
   attr :games, :list, required: true, doc: "see `Octomocto.Lobby.open_games/1`"
 
   attr :matches, :any,
-    required: true,
+    default: &__MODULE__.no_match/1,
     doc: "a function that is true for a game with the settings of the new game"
 
-  attr :path, :any, required: true, doc: "a function that gives the path of a game by its id"
+  attr :path, :any, required: true, doc: "a function that gives the path of a game"
   slot :icon, required: true, doc: "the image of a game, with the game as the argument"
   slot :summary, required: true, doc: "the settings of a game, with the game as the argument"
 
@@ -68,7 +68,7 @@ defmodule OctomoctoWeb.GamePageComponents do
           </span>
           <.link
             id={"join-#{game.id}"}
-            href={@path.(game.id)}
+            href={@path.(game)}
             class={[
               "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium text-white shadow-sm transition hover:-translate-y-0.5 active:translate-y-0",
               "bg-octo-indigo hover:bg-octo-indigo/90"
@@ -82,8 +82,11 @@ defmodule OctomoctoWeb.GamePageComponents do
     """
   end
 
+  @doc false
+  def no_match(_game), do: false
+
   attr :games, :list, required: true, doc: "see `Octomocto.Lobby.ongoing_games/1`"
-  attr :path, :any, required: true, doc: "a function that gives the path of a game by its id"
+  attr :path, :any, required: true, doc: "a function that gives the path of a game"
   slot :icon, required: true, doc: "the image of a game, with the game as the argument"
   slot :summary, required: true, doc: "the settings of a game, with the game as the argument"
 
@@ -140,7 +143,7 @@ defmodule OctomoctoWeb.GamePageComponents do
           </div>
           <.link
             id={"watch-#{game.id}"}
-            href={@path.(game.id) <> "?watch=1"}
+            href={@path.(game) <> "?watch=1"}
             class={[
               "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ring-1 transition hover:-translate-y-0.5 active:translate-y-0",
               "text-octo-indigo ring-octo-indigo/30 hover:bg-octo-mist dark:text-octo-indigo-light dark:hover:bg-octo-indigo-light/10"

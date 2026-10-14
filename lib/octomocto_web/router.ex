@@ -20,7 +20,6 @@ defmodule OctomoctoWeb.Router do
   scope "/", OctomoctoWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
     get "/elm", PageController, :elm
     get "/astronaut", AstronautController, :index
     post "/astronaut", AstronautController, :create
@@ -31,9 +30,11 @@ defmodule OctomoctoWeb.Router do
     get "/set/:id", SetGameController, :show
     get "/sudoku/:id", SudokuController, :show
 
-    # The settings of a new game. A LiveView changes the settings without a
-    # page load, so the page does not scroll to the top on each click.
+    # The front page updates its lists of open and ongoing games live. The
+    # settings of a new game: a LiveView changes the settings without a page
+    # load, so the page does not scroll to the top on each click.
     live_session :default, on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}] do
+      live "/", HomeLive
       live "/trains", TrainsLive
       live "/schulte", SchulteLive
       live "/match", MatchLive

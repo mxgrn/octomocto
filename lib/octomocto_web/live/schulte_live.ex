@@ -37,7 +37,7 @@ defmodule OctomoctoWeb.SchulteLive do
      )}
   end
 
-  def handle_info({:lobby_changed, id, entry}, socket) do
+  def handle_info({:lobby_changed, _game, id, entry}, socket) do
     {:noreply, assign_lobby(socket, Lobby.put_entry(socket.assigns.lobby, id, entry))}
   end
 
@@ -117,7 +117,8 @@ defmodule OctomoctoWeb.SchulteLive do
       {settings.board, settings.mode, settings.players}
   end
 
-  defp game_summary(%{settings: settings}) do
+  @doc "The settings of a game in the lists of open and ongoing games."
+  def game_summary(%{settings: settings}) do
     board = if settings.layout == :classic, do: "Classic", else: "Random"
     mode = if settings.mode == :normal, do: "Normal", else: "Easy"
     "#{board} board · #{mode}"

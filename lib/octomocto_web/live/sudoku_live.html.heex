@@ -34,14 +34,14 @@
       <.open_games
         games={@open_games}
         matches={&same_settings?(&1, @settings)}
-        path={fn id -> ~p"/sudoku/#{id}" end}
+        path={&~p"/sudoku/#{&1.id}"}
       >
         <:icon :let={_game}><.grid_icon class="w-8 shrink-0" /></:icon>
-        <:summary :let={game}>{String.capitalize(game.settings.difficulty)} · 9×9</:summary>
+        <:summary :let={game}>{game_summary(game)}</:summary>
       </.open_games>
-      <.ongoing_games games={@ongoing_games} path={fn id -> ~p"/sudoku/#{id}" end}>
+      <.ongoing_games games={@ongoing_games} path={&~p"/sudoku/#{&1.id}"}>
         <:icon :let={_game}><.grid_icon class="w-8 shrink-0" /></:icon>
-        <:summary :let={game}>{String.capitalize(game.settings.difficulty)} · 9×9</:summary>
+        <:summary :let={game}>{game_summary(game)}</:summary>
       </.ongoing_games>
     </div>
 

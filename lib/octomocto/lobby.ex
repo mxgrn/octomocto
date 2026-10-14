@@ -7,9 +7,10 @@ defmodule Octomocto.Lobby do
   A game module gives the row of a game in the lists with `lobby_entry/1`,
   or nil when the game is in no list. Only a public game can be in a list.
   After each change, such a game sends its new row with `broadcast/3`, and
-  a settings page updates its rows with `put_entry/3`. The row is in the
-  message, because the copy of the store on the node of a page can be older
-  than the message.
+  a page updates its rows with `put_entry/3`. The row is in the message,
+  because the copy of the store on the node of a page can be older than the
+  message. The game module is in the message too, so that the front page
+  knows the kind of game of each row.
 
   A row is a map with:
 
@@ -32,7 +33,7 @@ defmodule Octomocto.Lobby do
 
   @doc "Sends the new row of a game. The `entry` is nil when the game is in no list."
   def broadcast(game, id, entry) do
-    Phoenix.PubSub.broadcast(Octomocto.PubSub, topic(game), {:lobby_changed, id, entry})
+    Phoenix.PubSub.broadcast(Octomocto.PubSub, topic(game), {:lobby_changed, game, id, entry})
   end
 
   @doc """

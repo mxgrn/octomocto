@@ -80,10 +80,8 @@ defmodule OctomoctoWeb.PageControllerTest do
         pace: "normal"
       })
 
-    home = LazyHTML.from_document(html_response(get(conn, ~p"/"), 200))
     game = LazyHTML.from_document(html_response(get(conn, ~p"/trains/#{id}"), 200))
 
-    assert LazyHTML.query(home, "main > .max-w-2xl") |> Enum.count() == 1
     assert LazyHTML.query(game, "main > .max-w-2xl") |> Enum.count() == 0
   end
 

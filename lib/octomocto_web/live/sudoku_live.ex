@@ -40,7 +40,7 @@ defmodule OctomoctoWeb.SudokuLive do
      )}
   end
 
-  def handle_info({:lobby_changed, id, entry}, socket) do
+  def handle_info({:lobby_changed, _game, id, entry}, socket) do
     {:noreply, assign_lobby(socket, Lobby.put_entry(socket.assigns.lobby, id, entry))}
   end
 
@@ -159,4 +159,7 @@ defmodule OctomoctoWeb.SudokuLive do
   defp same_settings?(game, settings) do
     game.players_needed == settings.players and game.settings.difficulty == settings.difficulty
   end
+
+  @doc "The settings of a game in the lists of open and ongoing games."
+  def game_summary(game), do: "#{String.capitalize(game.settings.difficulty)} · 9×9"
 end

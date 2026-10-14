@@ -34,14 +34,14 @@
       <.open_games
         games={@open_games}
         matches={&same_settings?(&1, @settings)}
-        path={fn id -> ~p"/set/#{id}" end}
+        path={&~p"/set/#{&1.id}"}
       >
         <:icon :let={_game}><.card_icon class="w-9 shrink-0" /></:icon>
-        <:summary :let={_game}>Normal · 81 cards</:summary>
+        <:summary :let={game}>{game_summary(game)}</:summary>
       </.open_games>
-      <.ongoing_games games={@ongoing_games} path={fn id -> ~p"/set/#{id}" end}>
+      <.ongoing_games games={@ongoing_games} path={&~p"/set/#{&1.id}"}>
         <:icon :let={_game}><.card_icon class="w-9 shrink-0" /></:icon>
-        <:summary :let={_game}>Normal · 81 cards</:summary>
+        <:summary :let={game}>{game_summary(game)}</:summary>
       </.ongoing_games>
     </div>
 

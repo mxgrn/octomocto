@@ -41,7 +41,7 @@ defmodule OctomoctoWeb.MatchLive do
      )}
   end
 
-  def handle_info({:lobby_changed, id, entry}, socket) do
+  def handle_info({:lobby_changed, _game, id, entry}, socket) do
     {:noreply, assign_lobby(socket, Lobby.put_entry(socket.assigns.lobby, id, entry))}
   end
 
@@ -170,7 +170,8 @@ defmodule OctomoctoWeb.MatchLive do
       {Map.take(settings, [:theme, :set, :cards]), settings.players}
   end
 
-  defp game_summary(%{settings: settings}) do
+  @doc "The settings of a game in the lists of open and ongoing games."
+  def game_summary(%{settings: settings}) do
     set = if settings.set == 3, do: "Triplets", else: "Pairs"
     "#{Themes.get(settings.theme).title} · #{set} · #{settings.cards} cards"
   end
