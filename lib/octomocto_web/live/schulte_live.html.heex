@@ -31,7 +31,7 @@
             :for={{value, label} <- [{"classic", "Classic"}, {"random", "Random"}]}
             id={"board-#{value}"}
             selected={@board == value}
-            href={~p"/schulte?#{[board: value, mode: @mode, players: @players]}"}
+            patch={~p"/schulte?#{[board: value, mode: @mode, players: @players]}"}
           >
             {label}
           </.option>
@@ -49,7 +49,7 @@
             :for={{value, label} <- [{"easy", "Easy"}, {"normal", "Normal"}]}
             id={"mode-#{value}"}
             selected={@mode == value}
-            href={~p"/schulte?#{[board: @board, mode: value, players: @players]}"}
+            patch={~p"/schulte?#{[board: @board, mode: value, players: @players]}"}
           >
             {label}
           </.option>
@@ -62,21 +62,22 @@
             :for={n <- 1..4}
             id={"players-#{n}"}
             selected={@players == n}
-            href={~p"/schulte?#{[board: @board, mode: @mode, players: n]}"}
+            patch={~p"/schulte?#{[board: @board, mode: @mode, players: n]}"}
           >
             {n}
           </.option>
         </.setting>
       </div>
 
-      <.link
+      <button
         id="new-game"
-        href={~p"/schulte?#{[board: @board, mode: @mode, players: @players]}"}
-        method="post"
-        class="rounded-full bg-emerald-600 px-8 py-3 font-medium text-white shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-xl active:translate-y-0"
+        type="button"
+        phx-click="new_game"
+        phx-disable-with="Starting..."
+        class="cursor-pointer rounded-full bg-emerald-600 px-8 py-3 font-medium text-white shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-xl active:translate-y-0"
       >
         New game
-      </.link>
+      </button>
       <p :if={@players > 1} class="text-sm text-base-content/50">
         You get a link to share with other players.
       </p>

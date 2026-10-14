@@ -25,15 +25,17 @@ defmodule OctomoctoWeb.Router do
     get "/astronaut", AstronautController, :index
     post "/astronaut", AstronautController, :create
     get "/astronaut/:id", AstronautController, :show
-    get "/trains", TrainsController, :index
-    post "/trains", TrainsController, :create
     get "/trains/:id", TrainsController, :show
-    get "/schulte", SchulteController, :index
-    post "/schulte", SchulteController, :create
     get "/schulte/:id", SchulteController, :show
-    get "/match", MatchController, :index
-    post "/match", MatchController, :create
     get "/match/:id", MatchController, :show
+
+    # The settings of a new game. A LiveView changes the settings without a
+    # page load, so the page does not scroll to the top on each click.
+    live_session :default, on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}] do
+      live "/trains", TrainsLive
+      live "/schulte", SchulteLive
+      live "/match", MatchLive
+    end
   end
 
   # For deploys to check that the app is up

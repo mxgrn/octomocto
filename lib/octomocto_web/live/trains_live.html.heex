@@ -29,7 +29,7 @@
           :for={n <- 1..4}
           id={"players-#{n}"}
           selected={@settings.players == n}
-          href={settings_path(@settings, %{players: n})}
+          patch={settings_path(@settings, %{players: n})}
         >
           {n}
         </.option>
@@ -39,7 +39,7 @@
           :for={n <- @switch_counts}
           id={"switches-#{n}"}
           selected={@settings.switch_count == n}
-          href={settings_path(@settings, %{switch_count: n})}
+          patch={settings_path(@settings, %{switch_count: n})}
         >
           {n}
         </.option>
@@ -49,7 +49,7 @@
           :for={n <- 1..7}
           id={"trains-#{n}"}
           selected={@settings.trains_per_house == n}
-          href={settings_path(@settings, %{trains_per_house: n})}
+          patch={settings_path(@settings, %{trains_per_house: n})}
         >
           {n}
         </.option>
@@ -59,21 +59,22 @@
           :for={pace <- Octomocto.Trains.paces()}
           id={"pace-#{pace}"}
           selected={@settings.pace == pace}
-          href={settings_path(@settings, %{pace: pace})}
+          patch={settings_path(@settings, %{pace: pace})}
         >
           {String.capitalize(pace)}
         </.option>
       </.setting>
     </div>
 
-    <.link
+    <button
       id="new-game"
-      href={settings_path(@settings)}
-      method="post"
-      class="rounded-full bg-amber-500 px-8 py-3 font-medium text-white shadow-lg shadow-amber-500/25 transition hover:-translate-y-0.5 hover:bg-amber-400 hover:shadow-xl active:translate-y-0"
+      type="button"
+      phx-click="new_game"
+      phx-disable-with="Starting..."
+      class="cursor-pointer rounded-full bg-amber-500 px-8 py-3 font-medium text-white shadow-lg shadow-amber-500/25 transition hover:-translate-y-0.5 hover:bg-amber-400 hover:shadow-xl active:translate-y-0"
     >
       New game
-    </.link>
+    </button>
     <p :if={@settings.players > 1} class="text-sm text-base-content/50">
       You get a link to share with the other players.
     </p>

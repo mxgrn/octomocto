@@ -23,15 +23,16 @@ defmodule OctomoctoWeb.SchulteHTML do
   end
 
   attr :id, :string, required: true
-  attr :href, :string, required: true
+  attr :patch, :string, required: true
   attr :selected, :boolean, required: true
   slot :inner_block, required: true
 
+  @doc "One option of a setting. A click changes the settings in the URL without a page load."
   def option(assigns) do
     ~H"""
     <.link
       id={@id}
-      href={@href}
+      patch={@patch}
       aria-current={@selected && "true"}
       class={[
         "min-w-10 rounded-full px-4 py-1.5 text-sm font-medium transition",

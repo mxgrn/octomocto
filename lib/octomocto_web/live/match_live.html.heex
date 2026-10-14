@@ -24,7 +24,7 @@
             <.link
               :for={theme <- @themes}
               id={"theme-#{theme.name}"}
-              href={~p"/match?#{query(@settings, theme: theme.name)}"}
+              patch={~p"/match?#{query(@settings, theme: theme.name)}"}
               aria-current={@settings.theme == theme.name && "true"}
               class={[
                 "group flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
@@ -56,7 +56,7 @@
             :for={{value, set, label} <- [{"pairs", 2, "Pairs"}, {"triplets", 3, "Triplets"}]}
             id={"set-#{value}"}
             selected={@settings.set == set}
-            href={~p"/match?#{query(@settings, set: set)}"}
+            patch={~p"/match?#{query(@settings, set: set)}"}
           >
             {label}
           </.option>
@@ -66,7 +66,7 @@
             id="cards-less"
             icon="hero-minus"
             label="Fewer cards"
-            href={
+            patch={
               if size = step_size(@sizes, @settings.cards, -1),
                 do: ~p"/match?#{query(@settings, cards: size)}"
             }
@@ -81,7 +81,7 @@
             id="cards-more"
             icon="hero-plus"
             label="More cards"
-            href={
+            patch={
               if size = step_size(@sizes, @settings.cards, 1),
                 do: ~p"/match?#{query(@settings, cards: size)}"
             }
@@ -99,21 +99,22 @@
             :for={n <- 1..5}
             id={"players-#{n}"}
             selected={@settings.players == n}
-            href={~p"/match?#{query(@settings, players: n)}"}
+            patch={~p"/match?#{query(@settings, players: n)}"}
           >
             {n}
           </.option>
         </.setting>
       </div>
 
-      <.link
+      <button
         id="new-game"
-        href={~p"/match?#{query(@settings)}"}
-        method="post"
-        class="rounded-full bg-sky-600 px-8 py-3 font-medium text-white shadow-lg shadow-sky-600/25 transition hover:-translate-y-0.5 hover:bg-sky-500 hover:shadow-xl active:translate-y-0"
+        type="button"
+        phx-click="new_game"
+        phx-disable-with="Starting..."
+        class="cursor-pointer rounded-full bg-sky-600 px-8 py-3 font-medium text-white shadow-lg shadow-sky-600/25 transition hover:-translate-y-0.5 hover:bg-sky-500 hover:shadow-xl active:translate-y-0"
       >
         New game
-      </.link>
+      </button>
       <p :if={@settings.players > 1} class="text-sm text-base-content/50">
         You get a link to share with other players.
       </p>

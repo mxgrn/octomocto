@@ -142,8 +142,34 @@ defmodule OctomoctoWeb.UserAuth do
     |> put_resp_cookie(@remember_me_cookie, token, @remember_me_options)
   end
 
+  # The live socket id lets log_out_user/1 disconnect the open LiveViews
   defp put_token_in_session(conn, token) do
-    put_session(conn, :user_token, token)
+    conn
+    |> put_session(:user_token, token)
+    |> put_session(:live_socket_id, user_session_topic(token))
+  end
+
+  defp user_session_topic(token), do: "users_sessions:#{Base.url_encode64(token)}"
+
+  @doc """
+  Assigns the current scope to the LiveView socket, from the session token.
+
+  Use it in a `live_session`:
+
+      live_session :default, on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}] do
+        ...
+      end
+  """
+  def on_mount(:mount_current_scope, _params, session, socket) do
+    {:cont,
+     Phoenix.Component.assign_new(socket, :current_scope, fn ->
+       {user, _token_inserted_at} =
+         if token = session["user_token"] do
+           Accounts.get_user_by_session_token(token)
+         end || {nil, nil}
+
+       Scope.for_user(user)
+     end)}
   end
 
   @doc """
