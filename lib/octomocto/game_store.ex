@@ -48,6 +48,11 @@ defmodule Octomocto.GameStore do
         end
       end
 
+      # The states of all games, from the copy on this node
+      def all do
+        :mnesia.dirty_select(@table, [{{@table, :_, :"$1"}, [], [:"$1"]}])
+      end
+
       def delete(id) do
         :mnesia.dirty_delete(@table, id)
       end

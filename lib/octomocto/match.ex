@@ -17,8 +17,8 @@ defmodule Octomocto.Match do
 
   @doc """
   Starts a new game and returns its id. The `config` has the `:theme`, the
-  `:set` size (2 or 3), the number of `:cards` and the number of
-  `:players`.
+  `:set` size (2 or 3), the number of `:cards`, the number of `:players`
+  and `:public` (a public game is in `open_games/0`).
   """
   def create_game(config) do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
@@ -31,6 +31,38 @@ defmodule Octomocto.Match do
 
   def game_exists?(id) do
     Store.read(id) != nil
+  end
+
+  @doc """
+  The public games that wait for players, with the fewest free seats first,
+  and the oldest game first when the free seats are the same. Each game is
+  a map with the settings of the game, its `:players` (the `:name` is nil
+  for a guest, `:away` is true during the grace time) and its
+  `:seats_left`.
+  """
+  def open_games do
+    Store.all()
+    # A state from before the list of open games has no `:listed`
+    |> Enum.filter(&(Map.get(&1, :listed, false) and &1.players != %{}))
+    |> Enum.map(fn state ->
+      players =
+        state.players
+        |> Map.values()
+        |> Enum.sort_by(& &1.joined_at)
+        |> Enum.map(&%{name: &1.name, color_name: &1.color_name, away: &1.left != nil})
+
+      %{
+        id: state.id,
+        theme: state.theme,
+        set: state.set,
+        cards: state.size,
+        players_needed: state.needed,
+        players: players,
+        seats_left: state.needed - map_size(state.players),
+        created_at: state.created_at
+      }
+    end)
+    |> Enum.sort_by(&{&1.seats_left, &1.created_at})
   end
 
   @doc """

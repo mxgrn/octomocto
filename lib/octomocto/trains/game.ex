@@ -50,7 +50,7 @@ defmodule Octomocto.Trains.Game do
   @rejoin_grace_ms Application.compile_env(
                      :octomocto,
                      :trains_rejoin_grace_ms,
-                     :timer.seconds(30)
+                     :timer.seconds(15)
                    )
 
   # The size of all boards, the same as `boardFor` in Trains.elm. The server

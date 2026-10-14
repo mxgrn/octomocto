@@ -43,7 +43,7 @@ defmodule Octomocto.Schulte.Game do
   @rejoin_grace_ms Application.compile_env(
                      :octomocto,
                      :schulte_rejoin_grace_ms,
-                     :timer.seconds(30)
+                     :timer.seconds(15)
                    )
 
   @colors [

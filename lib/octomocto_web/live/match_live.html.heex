@@ -1,22 +1,35 @@
 <Layouts.app flash={@flash} current_scope={@current_scope}>
-  <%!-- Wider than the app container, so that the two columns have room --%>
+  <%!--
+    Wider than the app container, so that the columns have room. One column
+    on a small screen: the title, the open games, the settings and the
+    results. Two columns on a large screen: the results go to the right.
+    Three columns on an extra large screen: the open games go to the left.
+    The last row takes the free height, so that the tall results column does
+    not make gaps between the rows on the left.
+  --%>
   <div
     id="match-index"
-    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-10 py-12 lg:grid-cols-2 lg:items-start lg:gap-12 lg:py-16"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 py-12 lg:grid-cols-2 lg:grid-rows-[auto_auto_1fr] lg:items-start lg:gap-x-12 lg:py-16 xl:w-[min(96vw,78rem)] xl:grid-cols-3 xl:grid-rows-[auto_1fr]"
   >
-    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8">
-      <div class="space-y-2">
-        <div class="flex items-center justify-center gap-3">
-          <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-2xl shadow-inner">
-            🃏
-          </div>
-          <h1 class="text-3xl font-semibold tracking-tight">Match</h1>
+    <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2">
+      <div class="flex items-center justify-center gap-3">
+        <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-2xl shadow-inner">
+          🃏
         </div>
-        <p class="text-base-content/70">
-          Turn the cards face up and find the cards with the same image. Each set you find goes off the field.
-        </p>
+        <h1 class="text-3xl font-semibold tracking-tight">Match</h1>
       </div>
+      <p class="text-base-content/70">
+        Turn the cards face up and find the cards with the same image. Each set you find goes off the field.
+      </p>
+    </div>
 
+    <.open_games
+      games={@open_games}
+      settings={@settings}
+      class="lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1"
+    />
+
+    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2">
       <div id="match-settings" class="flex w-full flex-col gap-4">
         <div class="rounded-2xl bg-base-100 px-4 py-2.5 ring-1 ring-base-content/10">
           <p class="text-left text-sm font-bold text-base-content/80">Theme</p>
@@ -104,6 +117,30 @@
             {n}
           </.option>
         </.setting>
+        <.setting
+          :if={@settings.players > 1}
+          label="Visibility"
+          hint={
+            if(@settings.public,
+              do: "Other players see this game in Open games.",
+              else: "Only players with the link can join."
+            )
+          }
+        >
+          <.option
+            :for={
+              {value, public, label} <- [
+                {"public", true, "Public"},
+                {"private", false, "Private"}
+              ]
+            }
+            id={"visibility-#{value}"}
+            selected={@settings.public == public}
+            patch={~p"/match?#{query(@settings, public: public)}"}
+          >
+            {label}
+          </.option>
+        </.setting>
       </div>
 
       <button
@@ -120,7 +157,10 @@
       </p>
     </div>
 
-    <div id="match-leaderboard" class="mx-auto grid w-full max-w-md gap-4">
+    <div
+      id="match-leaderboard"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2"
+    >
       <.score_list
         id="your-results"
         icon="hero-user"

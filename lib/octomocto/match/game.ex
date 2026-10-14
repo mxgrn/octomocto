@@ -22,6 +22,11 @@ defmodule Octomocto.Match.Game do
   `Octomocto.Match.save_results/4`). The game stops after some time with no
   players.
 
+  A public game is in the list of open games (see `Octomocto.Match.open_games/0`)
+  until it has all its players for the first time. While it is in the list,
+  the game tells the settings pages about each change of its players on the
+  `lobby_topic/0` as `:lobby_changed`.
+
   The game is registered in the whole cluster, and it writes its state to
   `Octomocto.Match.Store` after each change. When its node stops, the game
   starts again on another node from that state. Thus the clock uses the
@@ -38,7 +43,7 @@ defmodule Octomocto.Match.Game do
   @rejoin_grace_ms Application.compile_env(
                      :octomocto,
                      :match_rejoin_grace_ms,
-                     :timer.seconds(30)
+                     :timer.seconds(15)
                    )
   # With more than 2 players, the turn goes to the next player after this
   # time with no card turned
@@ -55,8 +60,10 @@ defmodule Octomocto.Match.Game do
     {"indigo", "#4f46e5"}
   ]
 
-  def start_link({id, %{theme: theme, set: set, cards: cards, players: needed} = config})
-      when set in [2, 3] and needed in 1..5 do
+  def start_link(
+        {id, %{theme: theme, set: set, cards: cards, players: needed, public: public} = config}
+      )
+      when set in [2, 3] and needed in 1..5 and is_boolean(public) do
     true = cards in Board.sizes(theme, set)
     GenServer.start_link(__MODULE__, {id, config}, name: via(id))
   end
@@ -70,6 +77,8 @@ defmodule Octomocto.Match.Game do
 
   def topic(id), do: "match_game:" <> id
 
+  def lobby_topic, do: "match_lobby"
+
   @impl true
   def init({id, config}) do
     schedule_idle_check()
@@ -81,7 +90,11 @@ defmodule Octomocto.Match.Game do
         set: config.set,
         size: config.cards,
         needed: config.players,
-        players: %{}
+        players: %{},
+        created_at: now(),
+        # True while the game is in the list of open games. A game with one
+        # player is never in it.
+        listed: config.public and config.players > 1
       })
 
     Store.write(state)
@@ -92,8 +105,16 @@ defmodule Octomocto.Match.Game do
   # again during the grace time.
   def init(%{} = state) do
     schedule_idle_check()
-    state = Enum.reduce(Map.keys(state.players), state, &leave(&2, &1)) |> restart_turn_timer()
+
+    state =
+      Enum.reduce(Map.keys(state.players), state, &leave(&2, &1))
+      |> restart_turn_timer()
+      # A state from before the list of open games
+      |> Map.put_new(:created_at, now())
+      |> Map.put_new(:listed, false)
+
     Store.write(state)
+    notify_lobby(state.listed)
     {:ok, state}
   end
 
@@ -103,6 +124,7 @@ defmodule Octomocto.Match.Game do
     Process.monitor(pid)
     state = update_in(state.players[player_id], &%{&1 | pid: pid, left: nil})
     Store.write(state)
+    notify_lobby(state.listed)
     {:reply, {:ok, player_id, public(state)}, state}
   end
 
@@ -129,12 +151,16 @@ defmodule Octomocto.Match.Game do
       left: nil
     }
 
+    # The game leaves the list when it has all its players
+    listed = state.listed
+
     state =
       put_in(state.players[player_id], player)
       |> Map.update!(:turn, &(&1 || player_id))
       |> make_ready()
 
     publish(state)
+    notify_lobby(listed)
     {:reply, {:ok, player_id, public(state)}, state}
   end
 
@@ -185,6 +211,7 @@ defmodule Octomocto.Match.Game do
       {player_id, _player} ->
         state = leave(state, player_id)
         Store.write(state)
+        notify_lobby(state.listed)
         {:noreply, state}
 
       nil ->
@@ -204,6 +231,7 @@ defmodule Octomocto.Match.Game do
         state = %{state | players: Map.delete(state.players, player_id)}
         state = if state.players == %{}, do: %{state | turn: nil}, else: state
         publish(state)
+        notify_lobby(state.listed)
         {:noreply, state}
 
       _ ->
@@ -259,8 +287,10 @@ defmodule Octomocto.Match.Game do
     })
   end
 
+  # A game that is ready once does not go back to the list of open games,
+  # even when a player leaves later: nobody joins in the middle of a field.
   defp make_ready(%{ready: false} = state) when map_size(state.players) == state.needed do
-    %{state | ready: true} |> restart_turn_timer()
+    %{state | ready: true, listed: false} |> restart_turn_timer()
   end
 
   defp make_ready(state), do: state
@@ -363,6 +393,13 @@ defmodule Octomocto.Match.Game do
     Process.send_after(self(), {:remove, player_id, left}, @rejoin_grace_ms)
     update_in(state.players[player_id], &%{&1 | pid: nil, left: left})
   end
+
+  # Tells the settings pages to read the list of open games again
+  defp notify_lobby(true) do
+    Phoenix.PubSub.broadcast(Octomocto.PubSub, lobby_topic(), :lobby_changed)
+  end
+
+  defp notify_lobby(false), do: :ok
 
   defp publish(state) do
     Store.write(state)
