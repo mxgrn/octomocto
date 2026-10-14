@@ -147,7 +147,16 @@ defmodule OctomoctoWeb.Layouts do
         id="site-footer"
         class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 px-4 py-6 text-xs text-base-content/50 sm:px-6 lg:px-8"
       >
-        <span>&copy; 2026 Octomocto</span>
+        <span>
+          &copy; 2026
+          <a
+            id="author-link"
+            href="https://mxgrn.com?utm_source=octomocto"
+            class="transition hover:text-base-content"
+          >
+            Max Gorin
+          </a>
+        </span>
         <.link
           id="privacy-link"
           navigate={~p"/privacy"}
