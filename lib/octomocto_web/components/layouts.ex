@@ -93,7 +93,7 @@ defmodule OctomoctoWeb.Layouts do
         </div>
 
         <div class="ml-auto flex items-center gap-4">
-          <.theme_toggle />
+          <.theme_toggle :if={!@current_scope} />
 
           <nav :if={@current_scope} id="user-menu" class="group relative text-sm">
             <button
@@ -115,11 +115,15 @@ defmodule OctomoctoWeb.Layouts do
               id="user-menu-dropdown"
               class="invisible absolute right-0 z-10 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
             >
-              <div class="min-w-36 rounded-lg border border-base-300 bg-base-100 py-1 shadow-lg">
+              <div class="min-w-36 space-y-1 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg">
+                <div class="flex items-center justify-between gap-6 px-3 py-2">
+                  <span class="text-base-content/70">Theme</span>
+                  <.theme_toggle />
+                </div>
                 <.link
                   id="settings-link"
                   href={~p"/settings"}
-                  class="block px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+                  class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
                 >
                   Settings
                 </.link>
@@ -127,7 +131,7 @@ defmodule OctomoctoWeb.Layouts do
                   id="sign-out-link"
                   href={~p"/signout"}
                   method="delete"
-                  class="block px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+                  class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
                 >
                   Sign out
                 </.link>
