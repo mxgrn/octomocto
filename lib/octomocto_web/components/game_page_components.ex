@@ -70,7 +70,7 @@ defmodule OctomoctoWeb.GamePageComponents do
               <span :for={player <- game.players} class="flex items-center gap-1">
                 <.presence away={player.away} />
                 <span class={[
-                  player[:turn] && not game[:finished] && "font-semibold text-base-content"
+                  player[:turn] && !game[:finished] && "font-semibold text-base-content"
                 ]}>
                   {player_name(player)}
                 </span>
