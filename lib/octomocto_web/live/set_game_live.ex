@@ -8,7 +8,7 @@ defmodule OctomoctoWeb.SetGameLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Lobby, SetGame}
-  alias Octomocto.SetGame.{Game, Store}
+  alias Octomocto.SetGame.{Deck, Game, Store}
 
   def mount(_params, _session, socket) do
     if connected?(socket), do: Lobby.subscribe(Game)
@@ -30,7 +30,7 @@ defmodule OctomoctoWeb.SetGameLive do
 
   def handle_params(params, _uri, socket) do
     settings = settings(params)
-    filter = %{"mode" => "normal", "players" => settings.players}
+    filter = %{"mode" => settings.mode, "players" => settings.players}
 
     {:noreply,
      assign(socket,
@@ -49,7 +49,8 @@ defmodule OctomoctoWeb.SetGameLive do
     {:noreply, redirect(socket, to: ~p"/set/#{id}")}
   end
 
-  # One player and a public game, when the params do not say otherwise
+  # One player, the normal mode and a public game, when the params do not
+  # say otherwise
   defp settings(params) do
     players =
       case Integer.parse(params["players"] || "") do
@@ -57,7 +58,9 @@ defmodule OctomoctoWeb.SetGameLive do
         _ -> 1
       end
 
-    %{players: players, public: params["visibility"] != "private"}
+    mode = if params["mode"] in Deck.modes(), do: params["mode"], else: "normal"
+
+    %{players: players, mode: mode, public: params["visibility"] != "private"}
   end
 
   defp assign_lobby(socket, entries) do
@@ -76,7 +79,8 @@ defmodule OctomoctoWeb.SetGameLive do
       "Click 3 cards to claim a set. A correct set goes off the table, and new cards take its place. A wrong set changes nothing.",
       "When the table has no set, 3 more cards come from the deck.",
       "All players look at the same table. The first player who claims a set gets the point.",
-      "The game ends when the deck is empty and the table has no set. Alone, find all sets as fast as you can. With other players, find the most sets."
+      "The game ends when the deck is empty and the table has no set. Alone, find all sets as fast as you can. With other players, find the most sets.",
+      "In the easy mode, the deck has only the 27 solid cards."
     ]
   end
 
@@ -131,15 +135,21 @@ defmodule OctomoctoWeb.SetGameLive do
   # The query of the page for the settings, with some of them changed
   defp query(settings, changes) do
     settings = Map.merge(settings, Map.new(changes))
-    query = [players: settings.players]
+    query = [players: settings.players, mode: settings.mode]
 
     # A public game has no param, so that most links stay short
     if settings.public, do: query, else: query ++ [visibility: "private"]
   end
 
   # True when the open game has the same settings as the new game
-  defp same_settings?(game, settings), do: game.players_needed == settings.players
+  defp same_settings?(game, settings) do
+    game.players_needed == settings.players and game.settings.mode == settings.mode
+  end
+
+  defp mode_hint("easy"), do: "27 cards, all solid."
+  defp mode_hint("normal"), do: "All 81 cards."
 
   @doc "The settings of a game in the list of public games."
+  def game_summary(%{settings: %{mode: "easy"}}), do: "Easy · 27 cards"
   def game_summary(_game), do: "Normal · 81 cards"
 end

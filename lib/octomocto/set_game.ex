@@ -18,8 +18,8 @@ defmodule Octomocto.SetGame do
 
   @doc """
   Starts a new game and returns its id. The `config` has the number of
-  `:players` and `:public` (a public game is in the lists of the settings
-  page).
+  `:players`, the `:mode` (see `Octomocto.SetGame.Deck.modes/0`) and
+  `:public` (a public game is in the lists of the settings page).
   """
   def create_game(config) do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)

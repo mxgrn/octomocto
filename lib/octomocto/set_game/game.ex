@@ -1,7 +1,7 @@
 defmodule Octomocto.SetGame.Game do
   @moduledoc """
-  One multiplayer Set game. The table has 12 cards from a deck of 81 (see
-  `Octomocto.SetGame.Deck`). All players look for sets at the same time,
+  One multiplayer Set game. The table has 12 cards from a deck of 81, or
+  of 27 solid cards in the easy mode (see `Octomocto.SetGame.Deck`). All players look for sets at the same time,
   and the first player who claims a set gets one point. The cards of the
   set go off the table, and cards from the deck take their places. A wrong
   claim changes nothing.
@@ -65,8 +65,8 @@ defmodule Octomocto.SetGame.Game do
     {"indigo", "#4f46e5"}
   ]
 
-  def start_link({id, %{players: needed, public: public} = config})
-      when needed in 1..5 and is_boolean(public) do
+  def start_link({id, %{players: needed, public: public, mode: mode} = config})
+      when needed in 1..5 and is_boolean(public) and mode in ~w(easy normal) do
     GenServer.start_link(__MODULE__, {id, config}, name: via(id))
   end
 
@@ -95,7 +95,8 @@ defmodule Octomocto.SetGame.Game do
 
     entry = %{
       id: state.id,
-      settings: %{mode: :normal},
+      # The store can have a state from before the modes
+      settings: %{mode: Map.get(state, :mode, "normal")},
       players_needed: state.needed,
       players: players
     }
@@ -133,6 +134,7 @@ defmodule Octomocto.SetGame.Game do
       new_table(%{
         id: id,
         needed: config.players,
+        mode: config.mode,
         players: %{},
         public: config.public,
         created_at: now(),
@@ -149,6 +151,8 @@ defmodule Octomocto.SetGame.Game do
   # again during the grace time.
   def init(%{} = state) do
     Process.flag(:trap_exit, true)
+    # A state from before the modes
+    state = Map.put_new(state, :mode, "normal")
     schedule_idle_check()
 
     if state.started_at != nil and now() < state.started_at do
@@ -288,7 +292,7 @@ defmodule Octomocto.SetGame.Game do
   end
 
   defp new_table(state) do
-    {table, deck} = Enum.split(Deck.shuffled(), Deck.table())
+    {table, deck} = Enum.split(Deck.shuffled(state.mode), Deck.table())
 
     Map.merge(state, %{
       # Groups the saved results of this table
@@ -357,7 +361,7 @@ defmodule Octomocto.SetGame.Game do
 
   defp save_results(state)
        when state.finished_at != nil and map_size(state.players) == state.needed do
-    settings = %{"mode" => "normal", "players" => state.needed}
+    settings = %{"mode" => state.mode, "players" => state.needed}
     players = Map.values(state.players)
 
     SetGame.save_results(

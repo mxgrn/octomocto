@@ -7,6 +7,9 @@ defmodule Octomocto.SetGame.Deck do
   Three cards are a set when each attribute is the same on all 3 cards or
   different on all 3 cards. For digits from 0 to 2, that is when the sum
   of the digits can be divided by 3.
+
+  The easy deck has the 27 solid cards. These rules are also correct for
+  the easy deck.
   """
 
   @size 81
@@ -14,12 +17,19 @@ defmodule Octomocto.SetGame.Deck do
   # there is no extra card
   @table 12
 
-  def size, do: @size
+  def modes, do: ~w(easy normal)
 
   def table, do: @table
 
-  @doc "All cards in a random order."
-  def shuffled, do: Enum.shuffle(0..(@size - 1))
+  @doc "The cards of the mode in a random order."
+  def shuffled("normal"), do: Enum.shuffle(0..(@size - 1))
+
+  # The shading is the digit of weight 9, and 0 is solid
+  def shuffled("easy") do
+    0..(@size - 1)
+    |> Enum.filter(&(digit(&1, 9) == 0))
+    |> Enum.shuffle()
+  end
 
   def set?([a, b, c]) when a != b and b != c and a != c do
     Enum.all?([1, 3, 9, 27], fn weight ->
