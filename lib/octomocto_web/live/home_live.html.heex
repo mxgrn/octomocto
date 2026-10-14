@@ -9,27 +9,13 @@
     </div>
   </div>
 
-  <div class="flex flex-col gap-8 pt-2 pb-10">
-    <%!-- One short band, so that the games are on the first screen --%>
-    <section
-      id="hero"
-      class={[
-        "flex flex-col items-center gap-6 xl:flex-row",
-        if(@current_scope, do: "xl:justify-center", else: "xl:justify-between")
-      ]}
-    >
-      <div class="flex items-center gap-4">
-        <.octopi class="h-20 shrink-0 drop-shadow-sm" />
-        <p
-          id="slogan"
-          class="text-xl font-medium tracking-tight text-octo-navy/70 sm:text-2xl dark:text-base-content/70"
-        >
-          Use your heads
-        </p>
-      </div>
-      <OctomoctoWeb.UserSessionHTML.sign_in_bar :if={!@current_scope} />
+  <:header :if={!@current_scope}>
+    <section id="hero" class="flex justify-center xl:justify-end">
+      <OctomoctoWeb.UserSessionHTML.sign_in_bar />
     </section>
+  </:header>
 
+  <div class="flex flex-col gap-8 pt-2 pb-10">
     <%!--
       One column on a small screen: the games, then the open and ongoing
       games. On a large screen, the open and ongoing games go to the left,

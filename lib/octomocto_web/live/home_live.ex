@@ -6,7 +6,6 @@ defmodule OctomoctoWeb.HomeLive do
   use OctomoctoWeb, :live_view
 
   import OctomoctoWeb.GamePageComponents
-  import OctomoctoWeb.PageHTML, only: [octopi: 1]
 
   alias Octomocto.Lobby
 

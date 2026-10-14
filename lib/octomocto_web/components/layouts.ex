@@ -31,20 +31,44 @@ defmodule OctomoctoWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
-  attr :home, :boolean, default: false, doc: "shows a larger wordmark in the header"
+  attr :home, :boolean,
+    default: false,
+    doc: "shows the octopi, a larger wordmark and the slogan in the header"
 
   attr :wide, :boolean,
     default: false,
     doc: "uses the full page width, so that the content lines up with the header"
 
+  slot :header,
+    doc: "content between the wordmark and the theme toggle; on a small screen it goes below them"
+
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <header id="site-header" class="flex h-16 items-center px-4 sm:px-6 lg:px-8">
-      <.link id="home-link" navigate={~p"/"} class="group block">
-        <.wordmark class={if(@home, do: "h-8", else: "h-6 -translate-y-0.5")} />
+    <header
+      id="site-header"
+      class="flex min-h-16 flex-wrap items-center gap-x-8 gap-y-4 px-4 py-3 sm:px-6 lg:px-8"
+    >
+      <.link :if={@home} id="home-link" navigate={~p"/"} class="group flex items-center gap-4">
+        <OctomoctoWeb.PageHTML.octopi class="h-20 shrink-0 drop-shadow-sm" />
+        <div class="flex flex-col gap-1">
+          <.wordmark class="h-8" />
+          <p
+            id="slogan"
+            class="text-lg font-medium tracking-tight text-octo-navy/70 dark:text-base-content/70"
+          >
+            Use your heads
+          </p>
+        </div>
       </.link>
+      <.link :if={!@home} id="home-link" navigate={~p"/"} class="group block">
+        <.wordmark class="h-6 -translate-y-0.5" />
+      </.link>
+
+      <div :if={@header != []} class="order-last w-full xl:order-none xl:w-auto xl:flex-1">
+        {render_slot(@header)}
+      </div>
 
       <div class="ml-auto flex items-center gap-4">
         <.theme_toggle />
