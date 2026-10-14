@@ -85,12 +85,4 @@ defmodule OctomoctoWeb.PageControllerTest do
 
     assert LazyHTML.query(game, "main > .max-w-2xl") |> Enum.count() == 0
   end
-
-  test "GET /elm renders the Elm mount node", %{conn: conn} do
-    conn = get(conn, ~p"/elm")
-
-    document = LazyHTML.from_document(html_response(conn, 200))
-
-    assert LazyHTML.query(document, "#elm-main") |> Enum.count() == 1
-  end
 end

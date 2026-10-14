@@ -20,7 +20,6 @@ defmodule OctomoctoWeb.Router do
   scope "/", OctomoctoWeb do
     pipe_through :browser
 
-    get "/elm", PageController, :elm
     get "/privacy", PageController, :privacy
     get "/terms", PageController, :terms
     get "/astronaut", AstronautController, :index

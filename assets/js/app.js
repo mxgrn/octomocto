@@ -57,12 +57,6 @@ document.addEventListener("pointerenter", e => {
   }
 }, true)
 
-// Start the Elm app if the page has a mount node for it
-const elmNode = document.getElementById("elm-main")
-if (elmNode) {
-  window.Elm.Main.init({node: elmNode})
-}
-
 // Start the astronaut maze and connect its ports to the game channel.
 // Stop the arrow keys from scrolling the page. The player can use only the
 // keys, so a key press also unlocks the audio.
