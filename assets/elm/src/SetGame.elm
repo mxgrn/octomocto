@@ -150,6 +150,10 @@ type alias Model =
     -- until the next click on a card
     , hint : Maybe ( Int, String )
 
+    -- The clues about one set on the table, from the Hint button. They go
+    -- when a card of the set leaves the table.
+    , clue : Maybe Clue
+
     -- The local time (in ms) when the table started, and the local time
     -- now. The clock ticks between the server updates.
     , clockStart : Int
@@ -161,6 +165,16 @@ type alias Model =
     -- The size of the window, to pick the shape of the table
     , viewport : ( Float, Float )
     , muted : Bool
+    }
+
+
+{-| The cards of the set, the clues on the screen (the newest last), and
+the clues for the next clicks
+-}
+type alias Clue =
+    { cards : List Card
+    , shown : List String
+    , next : List String
     }
 
 
@@ -179,6 +193,7 @@ init flags =
       , wrong = []
       , wrongCount = 0
       , hint = Nothing
+      , clue = Nothing
       , clockStart = 0
       , now = 0
       , beepedStep = Nothing
@@ -200,6 +215,8 @@ type Msg
     | Pick Card
     | WrongDone Int
     | GotHint Int String
+    | AskClue
+    | GotClue Clue
     | Restart
     | CopyLink
     | CopiedTimeout
@@ -228,6 +245,16 @@ update msg model =
 
                         -- Another player can take a selected card
                         , selected = List.filter (\card -> List.member card game.table) model.selected
+                        , clue =
+                            Maybe.andThen
+                                (\clue ->
+                                    if List.all (\card -> List.member card game.table) clue.cards then
+                                        model.clue
+
+                                    else
+                                        Nothing
+                                )
+                                model.clue
                       }
                     , Cmd.batch [ syncClock game, playSounds model (stateSounds me old game) ]
                     )
@@ -263,6 +290,30 @@ update msg model =
 
             else
                 ( model, Cmd.none )
+
+        AskClue ->
+            case ( model.connection, model.clue ) of
+                ( _, Just clue ) ->
+                    case clue.next of
+                        sentence :: next ->
+                            ( { model | clue = Just { clue | shown = clue.shown ++ [ sentence ], next = next } }, Cmd.none )
+
+                        [] ->
+                            ( model, Cmd.none )
+
+                ( Joined _ game, Nothing ) ->
+                    case sets game.table of
+                        first :: others ->
+                            ( model, Random.generate GotClue (newClue first others) )
+
+                        [] ->
+                            ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        GotClue clue ->
+            ( { model | clue = Just clue }, Cmd.none )
 
         Restart ->
             ( model, setGameRestart () )
@@ -331,6 +382,96 @@ pick card model =
                     Cmd.none
             ]
         )
+
+
+{-| A random set of the table, with its 4 clues in a random order. The
+first clue is on the screen at once.
+-}
+newClue : List Card -> List (List Card) -> Random.Generator Clue
+newClue first others =
+    Random.map2
+        (\cards keys ->
+            case List.map Tuple.second (List.sortBy Tuple.first (List.map2 Tuple.pair keys (clues cards))) of
+                sentence :: next ->
+                    Clue cards [ sentence ] next
+
+                [] ->
+                    Clue cards [] []
+        )
+        (Random.uniform first others)
+        (Random.list 4 (Random.float 0 1))
+
+
+{-| One clue for each feature of a set, for example "Each of them is red"
+or "Each of them has a different shape"
+-}
+clues : List Card -> List String
+clues cards =
+    let
+        sentence index =
+            case List.map (feature index) cards of
+                [ a, b, _ ] ->
+                    if a == b then
+                        "Each of them "
+                            ++ (case index of
+                                    0 ->
+                                        if a == 0 then
+                                            "has 1 shape"
+
+                                        else
+                                            "has " ++ String.fromInt (a + 1) ++ " shapes"
+
+                                    1 ->
+                                        "has the " ++ name [ "diamond", "oval", "squiggle" ] a ++ " shape"
+
+                                    2 ->
+                                        "is " ++ name [ "solid", "striped", "open" ] a
+
+                                    _ ->
+                                        "is " ++ name [ "red", "green", "purple" ] a
+                               )
+
+                    else
+                        "Each of them has a different "
+                            ++ name [ "number of shapes", "shape", "shading", "color" ] index
+
+                _ ->
+                    ""
+
+        name list value =
+            List.drop value list |> List.head |> Maybe.withDefault ""
+    in
+    List.map sentence [ 0, 1, 2, 3 ]
+
+
+{-| All sets among the cards
+-}
+sets : List Card -> List (List Card)
+sets cards =
+    case cards of
+        a :: rest ->
+            List.concatMap
+                (\( b, others ) ->
+                    List.filter (\c -> isSet [ a, b, c ]) others
+                        |> List.map (\c -> [ a, b, c ])
+                )
+                (tails rest)
+                ++ sets rest
+
+        [] ->
+            []
+
+
+{-| Each card with the cards after it
+-}
+tails : List Card -> List ( Card, List Card )
+tails cards =
+    case cards of
+        a :: rest ->
+            ( a, rest ) :: tails rest
+
+        [] ->
+            []
 
 
 {-| One sentence for each feature that two cards have and the third card
@@ -652,6 +793,11 @@ viewGame model me game =
 
               else
                 text ""
+            , if canPlay me game then
+                viewClue model.clue
+
+              else
+                text ""
             , viewLastSet me game
             , if me == Nothing then
                 p [ id "set-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200" ]
@@ -776,6 +922,47 @@ viewMuteButton muted =
                 )
             ]
             []
+        ]
+
+
+{-| The Hint button, and the clues under it. Each clue is keyed, so that
+only the new clue pops in. The button is off when all clues of the set
+are on the screen.
+-}
+viewClue : Maybe Clue -> Html Msg
+viewClue clue =
+    let
+        shown =
+            Maybe.map .shown clue |> Maybe.withDefault []
+
+        more =
+            Maybe.map (\c -> c.next /= []) clue |> Maybe.withDefault True
+    in
+    div [ class "flex flex-col gap-2" ]
+        [ button
+            [ id "set-hint-button"
+            , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-amber-700 ring-1 ring-amber-200 transition enabled:hover:bg-amber-50 enabled:hover:ring-amber-300 enabled:active:scale-95 disabled:opacity-50 lg:self-start"
+            , Html.Attributes.disabled (not more)
+            , onClick AskClue
+            ]
+            [ span [ class "hero-light-bulb size-4 transition-transform group-enabled:group-hover:-rotate-12" ] []
+            , text
+                (if shown == [] then
+                    "Hint"
+
+                 else if more then
+                    "Next hint"
+
+                 else
+                    "No more hints"
+                )
+            ]
+        , if shown == [] then
+            text ""
+
+          else
+            Html.Keyed.ul [ id "set-clues", class "flex flex-col gap-1 rounded-2xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900 ring-1 ring-amber-200" ]
+                (List.map (\sentence -> ( sentence, li [ class "set-last-pop" ] [ text sentence ] )) shown)
         ]
 
 
