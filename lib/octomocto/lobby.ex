@@ -1,6 +1,6 @@
 defmodule Octomocto.Lobby do
   @moduledoc """
-  The lists of public games on the settings page of each kind of game: the
+  The list of public games on the settings page of each kind of game: the
   open games that wait for players, and the ongoing games that have
   started.
 
@@ -61,23 +61,21 @@ defmodule Octomocto.Lobby do
   end
 
   @doc """
-  The games that wait for players, with the fewest free seats first, and
-  the oldest game first when the free seats are the same.
+  The public games in one list. First the open games, with the fewest free
+  seats first, and the oldest game first when the free seats are the same.
+  Then the #{@ongoing_size} games with the newest fields that have started:
+  first the games that go on, then the finished ones that the players did
+  not start again.
   """
-  def open_games(entries) do
-    entries
-    |> Enum.filter(&(&1.status == :open))
-    |> Enum.sort_by(&{&1.seats_left, &1.created_at})
-  end
+  def games(entries) do
+    {open, started} = Enum.split_with(entries, &(&1.status == :open))
 
-  @doc """
-  The #{@ongoing_size} games with the newest fields that have started, also
-  the finished ones that the players did not start again.
-  """
-  def ongoing_games(entries) do
-    entries
-    |> Enum.filter(&(&1.status == :ongoing))
-    |> Enum.sort_by(& &1.started_at, :desc)
-    |> Enum.take(@ongoing_size)
+    started =
+      started
+      |> Enum.sort_by(& &1.started_at, :desc)
+      |> Enum.take(@ongoing_size)
+      |> Enum.sort_by(& &1.finished)
+
+    Enum.sort_by(open, &{&1.seats_left, &1.created_at}) ++ started
   end
 end

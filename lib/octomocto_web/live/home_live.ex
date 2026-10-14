@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.HomeLive do
   @moduledoc """
-  The front page: the list of all games, and the open and ongoing games of
-  all games together (see `Octomocto.Lobby`).
+  The front page: the list of all games, and the public games of all
+  games together (see `Octomocto.Lobby`).
   """
   use OctomoctoWeb, :live_view
 
@@ -70,7 +70,7 @@ defmodule OctomoctoWeb.HomeLive do
     }
   ]
 
-  # The games that have lists of open and ongoing games, by the id in
+  # The games that have lists of public games, by the id in
   # @games, with the game module, its store and the page that gives the
   # settings of a game in a row
   @lobbies %{
@@ -104,11 +104,7 @@ defmodule OctomoctoWeb.HomeLive do
   end
 
   defp assign_lobby(socket, entries) do
-    assign(socket,
-      lobby: entries,
-      open_games: Lobby.open_games(entries),
-      ongoing_games: Lobby.ongoing_games(entries)
-    )
+    assign(socket, lobby: entries, lobby_games: Lobby.games(entries))
   end
 
   defp game_path(game), do: "/#{game.kind}/#{game.id}"

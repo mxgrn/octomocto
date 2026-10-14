@@ -61,11 +61,7 @@ defmodule OctomoctoWeb.SetGameLive do
   end
 
   defp assign_lobby(socket, entries) do
-    assign(socket,
-      lobby: entries,
-      open_games: Lobby.open_games(entries),
-      ongoing_games: Lobby.ongoing_games(entries)
-    )
+    assign(socket, lobby: entries, lobby_games: Lobby.games(entries))
   end
 
   # Nil for a guest
@@ -144,6 +140,6 @@ defmodule OctomoctoWeb.SetGameLive do
   # True when the open game has the same settings as the new game
   defp same_settings?(game, settings), do: game.players_needed == settings.players
 
-  @doc "The settings of a game in the lists of open and ongoing games."
+  @doc "The settings of a game in the list of public games."
   def game_summary(_game), do: "Normal · 81 cards"
 end

@@ -1,9 +1,9 @@
 <Layouts.app flash={@flash} current_scope={@current_scope}>
   <%!--
     Wider than the app container, so that the columns have room. One column
-    on a small screen: the title, the open games, the settings and the
+    on a small screen: the title, the public games, the settings and the
     results. Two columns on a large screen: the results go to the right.
-    Three columns on an extra large screen: the open games go to the left,
+    Three columns on an extra large screen: the public games go to the left,
     and the settings in the center are wider than the other columns. The
     columns use the full width of the screen, with the side padding of the
     header.
@@ -31,18 +31,14 @@
       id="set-lobby"
       class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
     >
-      <.open_games
-        games={@open_games}
+      <.lobby_games
+        games={@lobby_games}
         matches={&same_settings?(&1, @settings)}
         path={&~p"/set/#{&1.id}"}
       >
         <:icon :let={_game}><.card_icon class="w-9 shrink-0" /></:icon>
         <:summary :let={game}>{game_summary(game)}</:summary>
-      </.open_games>
-      <.ongoing_games games={@ongoing_games} path={&~p"/set/#{&1.id}"}>
-        <:icon :let={_game}><.card_icon class="w-9 shrink-0" /></:icon>
-        <:summary :let={game}>{game_summary(game)}</:summary>
-      </.ongoing_games>
+      </.lobby_games>
     </div>
 
     <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">

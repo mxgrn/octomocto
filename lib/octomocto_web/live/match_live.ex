@@ -75,11 +75,7 @@ defmodule OctomoctoWeb.MatchLive do
   end
 
   defp assign_lobby(socket, entries) do
-    assign(socket,
-      lobby: entries,
-      open_games: Lobby.open_games(entries),
-      ongoing_games: Lobby.ongoing_games(entries)
-    )
+    assign(socket, lobby: entries, lobby_games: Lobby.games(entries))
   end
 
   # Nil for a guest
@@ -170,7 +166,7 @@ defmodule OctomoctoWeb.MatchLive do
       {Map.take(settings, [:theme, :set, :cards]), settings.players}
   end
 
-  @doc "The settings of a game in the lists of open and ongoing games."
+  @doc "The settings of a game in the list of public games."
   def game_summary(%{settings: settings}) do
     set = if settings.set == 3, do: "Triplets", else: "Pairs"
     "#{Themes.get(settings.theme).title} · #{set} · #{settings.cards} cards"

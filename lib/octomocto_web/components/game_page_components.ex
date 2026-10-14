@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.GamePageComponents do
   @moduledoc """
-  The parts of the settings page of each game: the lists of open and
-  ongoing games (see `Octomocto.Lobby`), the Start game button, and the
+  The parts of the settings page of each game: the list of public games
+  (see `Octomocto.Lobby`), the Start game button, and the
   rules in a pop-up. All games have the same accent color, the brand
   indigo.
   """
@@ -11,7 +11,7 @@ defmodule OctomoctoWeb.GamePageComponents do
 
   alias Phoenix.LiveView.JS
 
-  attr :games, :list, required: true, doc: "see `Octomocto.Lobby.open_games/1`"
+  attr :games, :list, required: true, doc: "see `Octomocto.Lobby.games/1`"
 
   attr :matches, :any,
     default: &__MODULE__.no_match/1,
@@ -22,32 +22,34 @@ defmodule OctomoctoWeb.GamePageComponents do
   slot :summary, required: true, doc: "the settings of a game, with the game as the argument"
 
   @doc """
-  The public games that wait for players. A game with the same settings as
-  the new game has a green background.
+  The public games: the open games that wait for players, then the games
+  that have started. An open game with the same settings as the new game
+  has a green background. In a started game, the player of the turn is in
+  bold, and the points show when the game has them.
   """
-  def open_games(assigns) do
+  def lobby_games(assigns) do
     ~H"""
     <section
-      id="open-games"
+      id="lobby-games"
       class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
     >
       <h3 class="mb-3 flex items-center gap-2 font-semibold">
-        <.icon name="hero-user-group" class={["size-4", "text-octo-indigo"]} /> Open games
+        <.icon name="hero-user-group" class={["size-4", "text-octo-indigo"]} /> Public games
       </h3>
       <p
         :if={@games == []}
-        id="open-games-empty"
+        id="lobby-games-empty"
         class="py-2 text-center text-sm text-base-content/50"
       >
-        No open games. Make a public one.
+        No games now. Make a public one.
       </p>
-      <ul :if={@games != []} id="open-games-list" class="-mx-2 space-y-1">
+      <ul :if={@games != []} id="lobby-games-list" class="-mx-2 space-y-1">
         <li
           :for={game <- @games}
-          id={"open-game-#{game.id}"}
+          id={"lobby-game-#{game.id}"}
           class={[
             "flex items-center gap-3 rounded-xl px-2 py-2 transition-colors",
-            if(@matches.(game),
+            if(game.status == :open and @matches.(game),
               do: "bg-emerald-50 dark:bg-emerald-500/10",
               else: "hover:bg-base-200/60"
             )
@@ -55,73 +57,10 @@ defmodule OctomoctoWeb.GamePageComponents do
         >
           {render_slot(@icon, game)}
           <div class="min-w-0 flex-1">
-            <p class="truncate text-sm font-medium">{render_slot(@summary, game)}</p>
-            <p class="flex flex-wrap gap-x-2.5 text-xs text-base-content/70">
-              <span :for={player <- game.players} class="flex items-center gap-1">
-                <.presence away={player.away} />
-                {player_name(player)}
-              </span>
-            </p>
-          </div>
-          <span class="shrink-0 text-xs tabular-nums text-base-content/50">
-            {game.players_needed - game.seats_left} of {game.players_needed}
-          </span>
-          <.link
-            id={"join-#{game.id}"}
-            href={@path.(game)}
-            class={[
-              "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium text-white shadow-sm transition hover:-translate-y-0.5 active:translate-y-0",
-              "bg-octo-indigo hover:bg-octo-indigo/90"
-            ]}
-          >
-            Join
-          </.link>
-        </li>
-      </ul>
-    </section>
-    """
-  end
-
-  @doc false
-  def no_match(_game), do: false
-
-  attr :games, :list, required: true, doc: "see `Octomocto.Lobby.ongoing_games/1`"
-  attr :path, :any, required: true, doc: "a function that gives the path of a game"
-  slot :icon, required: true, doc: "the image of a game, with the game as the argument"
-  slot :summary, required: true, doc: "the settings of a game, with the game as the argument"
-
-  @doc """
-  The public games that have started. The player of the turn is in bold,
-  and the points show when the game has them.
-  """
-  def ongoing_games(assigns) do
-    ~H"""
-    <section
-      id="ongoing-games"
-      class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
-    >
-      <h3 class="mb-3 flex items-center gap-2 font-semibold">
-        <.icon name="hero-play-circle" class={["size-4", "text-octo-indigo"]} /> Ongoing games
-      </h3>
-      <p
-        :if={@games == []}
-        id="ongoing-games-empty"
-        class="py-2 text-center text-sm text-base-content/50"
-      >
-        No games now.
-      </p>
-      <ul :if={@games != []} id="ongoing-games-list" class="-mx-2 space-y-1">
-        <li
-          :for={game <- @games}
-          id={"ongoing-game-#{game.id}"}
-          class="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-base-200/60"
-        >
-          {render_slot(@icon, game)}
-          <div class="min-w-0 flex-1">
             <p class="flex items-center gap-2 text-sm font-medium">
               <span class="truncate">{render_slot(@summary, game)}</span>
               <span
-                :if={game.finished}
+                :if={game[:finished]}
                 class="shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400"
               >
                 Finished
@@ -131,7 +70,7 @@ defmodule OctomoctoWeb.GamePageComponents do
               <span :for={player <- game.players} class="flex items-center gap-1">
                 <.presence away={player.away} />
                 <span class={[
-                  player[:turn] && not game.finished && "font-semibold text-base-content"
+                  player[:turn] && not game[:finished] && "font-semibold text-base-content"
                 ]}>
                   {player_name(player)}
                 </span>
@@ -141,21 +80,40 @@ defmodule OctomoctoWeb.GamePageComponents do
               </span>
             </p>
           </div>
-          <.link
-            id={"watch-#{game.id}"}
-            href={@path.(game) <> "?watch=1"}
-            class={[
-              "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ring-1 transition hover:-translate-y-0.5 active:translate-y-0",
-              "text-octo-indigo ring-octo-indigo/30 hover:bg-octo-mist dark:text-octo-indigo-light dark:hover:bg-octo-indigo-light/10"
-            ]}
-          >
-            Watch
-          </.link>
+          <%= if game.status == :open do %>
+            <span class="shrink-0 text-xs tabular-nums text-base-content/50">
+              {game.players_needed - game.seats_left} of {game.players_needed}
+            </span>
+            <.link
+              id={"join-#{game.id}"}
+              href={@path.(game)}
+              class={[
+                "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium text-white shadow-sm transition hover:-translate-y-0.5 active:translate-y-0",
+                "bg-octo-indigo hover:bg-octo-indigo/90"
+              ]}
+            >
+              Join
+            </.link>
+          <% else %>
+            <.link
+              id={"watch-#{game.id}"}
+              href={@path.(game) <> "?watch=1"}
+              class={[
+                "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ring-1 transition hover:-translate-y-0.5 active:translate-y-0",
+                "text-octo-indigo ring-octo-indigo/30 hover:bg-octo-mist dark:text-octo-indigo-light dark:hover:bg-octo-indigo-light/10"
+              ]}
+            >
+              Watch
+            </.link>
+          <% end %>
         </li>
       </ul>
     </section>
     """
   end
+
+  @doc false
+  def no_match(_game), do: false
 
   attr :multiplayer, :boolean, required: true, doc: "shows the hint about the link"
 
@@ -265,10 +223,10 @@ defmodule OctomoctoWeb.GamePageComponents do
   seats, so others can only watch it.
   """
   def visibility_hint(%{players: 1, public: true}),
-    do: "Other players can watch this game in Ongoing games."
+    do: "Other players can watch this game in Public games."
 
   def visibility_hint(%{players: 1, public: false}), do: "Only players with the link can watch."
-  def visibility_hint(%{public: true}), do: "Other players see this game in Open games."
+  def visibility_hint(%{public: true}), do: "Other players see this game in Public games."
   def visibility_hint(%{public: false}), do: "Only players with the link can join."
 
   defp presence(assigns) do

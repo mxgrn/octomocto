@@ -69,11 +69,7 @@ defmodule OctomoctoWeb.SchulteLive do
   end
 
   defp assign_lobby(socket, entries) do
-    assign(socket,
-      lobby: entries,
-      open_games: Lobby.open_games(entries),
-      ongoing_games: Lobby.ongoing_games(entries)
-    )
+    assign(socket, lobby: entries, lobby_games: Lobby.games(entries))
   end
 
   # Nil for a guest
@@ -117,7 +113,7 @@ defmodule OctomoctoWeb.SchulteLive do
       {settings.board, settings.mode, settings.players}
   end
 
-  @doc "The settings of a game in the lists of open and ongoing games."
+  @doc "The settings of a game in the list of public games."
   def game_summary(%{settings: settings}) do
     board = if settings.layout == :classic, do: "Classic", else: "Random"
     mode = if settings.mode == :normal, do: "Normal", else: "Easy"
