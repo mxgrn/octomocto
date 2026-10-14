@@ -23,7 +23,12 @@
     --%>
     <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:items-start lg:gap-10">
       <section id="catalog" class="lg:col-start-2 lg:row-start-1">
-        <h2 class="sr-only">Games</h2>
+        <h2
+          id="catalog-title"
+          class="mb-4 text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content"
+        >
+          Reach for a game
+        </h2>
         <ul id="games" class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <li :for={game <- @games}>
             <.link
