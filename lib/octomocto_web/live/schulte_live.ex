@@ -21,7 +21,7 @@ defmodule OctomoctoWeb.SchulteLive do
     [
       page_title: "Schulte Table Race: Find Numbers 1–90",
       page_description:
-        "Train your focus and speed with a Schulte table. Find the numbers from 1 to 90 in order, alone or in a race with up to 3 friends. Free, in your browser."
+        "Train your focus and speed: find the numbers 1 to 90 in order, solo or in a race with up to 3 friends. Free, in your browser."
     ]
   end
 

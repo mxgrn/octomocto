@@ -24,7 +24,7 @@ defmodule OctomoctoWeb.SudokuLive do
     [
       page_title: "Sudoku Race: Multiplayer Sudoku",
       page_description:
-        "Fill the same sudoku with up to 4 friends. The first player to put the correct digit in a cell gets the point. Free, in your browser."
+        "Fill one sudoku with up to 4 friends. The first to put the correct digit in a cell gets the point. Free, in your browser."
     ]
   end
 

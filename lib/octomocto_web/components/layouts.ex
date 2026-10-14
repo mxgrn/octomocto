@@ -216,7 +216,7 @@ defmodule OctomoctoWeb.Layouts do
     <meta property="og:image" content={url(~p"/images/og.png")} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Octomocto: Use your heads" />
+    <meta property="og:image:alt" content="Octomocto: Use your heads. Play solo or with friends." />
     <meta name="twitter:card" content="summary_large_image" />
     """
   end

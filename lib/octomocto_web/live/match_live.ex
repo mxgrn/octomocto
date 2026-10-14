@@ -24,7 +24,7 @@ defmodule OctomoctoWeb.MatchLive do
     [
       page_title: "Match: Memory Card Game",
       page_description:
-        "Find the matching pairs or triplets of cards. Play alone against the clock, or take turns with up to 4 friends. Free, in your browser."
+        "Find matching pairs or triplets of cards. Play solo against the clock or take turns with up to 4 friends. Free, in a browser."
     ]
   end
 

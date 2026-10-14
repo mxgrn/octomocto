@@ -24,7 +24,7 @@ defmodule OctomoctoWeb.SetGameLive do
     [
       page_title: "Set: Card Game of Quick Eyes",
       page_description:
-        "Find 3 cards where each feature is all the same or all different. Play alone against the clock, or race up to 4 friends. Free, in your browser."
+        "Find 3 cards where each feature is all the same or all different. Play solo against the clock or race up to 4 friends. Free."
     ]
   end
 

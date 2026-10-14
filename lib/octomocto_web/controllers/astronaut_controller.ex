@@ -31,7 +31,7 @@ defmodule OctomoctoWeb.AstronautController do
     merge_assigns(conn,
       page_title: "Station Escape: Multiplayer Space Race",
       page_description:
-        "Race your friends to the escape pod on a space station that spins while you play. A free multiplayer maze game in your browser."
+        "Race your friends to the escape pod on a spinning space station. A free multiplayer maze game in your browser."
     )
   end
 
