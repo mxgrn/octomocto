@@ -852,7 +852,7 @@ viewCard model me game index card =
                         img
                             [ src ("/images/match/" ++ game.theme ++ "/" ++ String.fromInt i ++ ".svg")
                             , alt ""
-                            , class "size-3/4"
+                            , class "size-3/4 object-contain"
                             ]
                             []
 

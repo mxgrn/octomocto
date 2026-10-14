@@ -228,6 +228,9 @@
 }
 .match-card-face {
   display: grid;
+  /* A row and a column of the full size, so that the 3/4 size of the
+     image is a size of the card, also for a tall image */
+  grid-template: 100% / 100%;
   place-items: center;
   background: white;
   transform: rotateY(180deg);
