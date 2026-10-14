@@ -10,12 +10,14 @@ defmodule OctomoctoWeb.MemoryController do
       render(conn, :show,
         id: id,
         user_token: user_token(conn.assigns.current_scope),
+        banner: OctomoctoWeb.MemoryLive.banner(conn.query_params),
         noindex: true
       )
     else
       conn
       |> put_flash(:error, "This game does not exist (any more). Start a new one.")
-      |> redirect(to: ~p"/memory")
+      # Keeps the link source, so that the Memory page can show its banner
+      |> redirect(to: ~p"/memory?#{Map.take(conn.query_params, ["utm_source"])}")
     end
   end
 

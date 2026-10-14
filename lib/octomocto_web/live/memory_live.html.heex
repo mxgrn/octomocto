@@ -1,4 +1,4 @@
-<Layouts.app flash={@flash} current_scope={@current_scope}>
+<Layouts.app flash={@flash} current_scope={@current_scope} banner={@banner}>
   <:header :if={!@current_scope}>
     <section id="sign-in-header" class="flex justify-center xl:justify-end">
       <OctomoctoWeb.UserSessionHTML.sign_in_bar />

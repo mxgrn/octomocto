@@ -10,12 +10,19 @@ defmodule OctomoctoWeb.MemoryLive do
   alias Octomocto.{Lobby, Memory}
   alias Octomocto.Memory.{Board, Game, Store, Themes}
 
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     if connected?(socket), do: Lobby.subscribe(Game)
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/memory"), themes: Themes.list(), rules: rules()] ++ seo())
+     |> assign(
+       [
+         canonical_url: url(~p"/memory"),
+         themes: Themes.list(),
+         rules: rules(),
+         banner: banner(params)
+       ] ++ seo()
+     )
      |> assign_lobby(Lobby.entries(Game, Store))}
   end
 
@@ -26,6 +33,12 @@ defmodule OctomoctoWeb.MemoryLive do
       page_description: "Play Memory online solo or with friends. Free, instant, no sign-up."
     ]
   end
+
+  @doc "The message for the people who come from the links on Pairs One, the old site of the game."
+  def banner(%{"utm_source" => "pairs.one"}),
+    do: "Pairs One found its pair! The game is moving to Octomocto."
+
+  def banner(_params), do: nil
 
   def handle_params(params, _uri, socket) do
     settings = settings(params)

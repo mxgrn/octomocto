@@ -39,6 +39,10 @@ defmodule OctomoctoWeb.Layouts do
     default: false,
     doc: "uses the full page width, so that the content lines up with the header"
 
+  attr :banner, :string,
+    default: nil,
+    doc: "a message in a bar above the header, which the user can close"
+
   slot :header,
     doc: "content between the wordmark and the theme toggle; on a small screen it goes below them"
 
@@ -48,6 +52,22 @@ defmodule OctomoctoWeb.Layouts do
     ~H"""
     <%!-- The column keeps the footer at the bottom of a short page --%>
     <div class="flex min-h-dvh flex-col">
+      <div
+        :if={@banner}
+        id="site-banner"
+        class="flex items-center justify-center gap-3 bg-octo-indigo px-10 py-2 text-center text-sm font-medium text-white relative"
+      >
+        <span>{@banner}</span>
+        <button
+          id="site-banner-close"
+          type="button"
+          aria-label="Close"
+          phx-click={JS.hide(to: "#site-banner")}
+          class="absolute right-2 rounded-full p-1 text-white/70 transition hover:bg-white/10 hover:text-white"
+        >
+          <.icon name="hero-x-mark" class="size-4" />
+        </button>
+      </div>
       <header
         id="site-header"
         class="flex min-h-16 flex-wrap items-center gap-x-8 gap-y-4 px-4 py-3 sm:px-6 lg:px-8"
