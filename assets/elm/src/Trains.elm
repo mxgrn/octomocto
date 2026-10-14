@@ -2197,7 +2197,7 @@ houseColors : Int -> { roof : String, walls : String }
 houseColors number =
     let
         red =
-            "#ef4444"
+            "#c93636"
 
         blue =
             "#3b82f6"
@@ -2209,7 +2209,7 @@ houseColors number =
             "#a855f7"
 
         orange =
-            "#f97316"
+            "#fb923c"
 
         black =
             "#334155"
@@ -2283,9 +2283,9 @@ viewHouse ( ( x, y ) as cell, number ) =
         , SA.transform (translate (center cell))
         ]
         [ Svg.ellipse [ SA.cx "0", SA.cy "17", SA.rx "18", SA.ry "4", SA.fill "#365314", SA.opacity "0.2", SA.class "trains-shadow" ] []
-        , Svg.rect [ SA.x "-15", SA.y "-6", SA.width "30", SA.height "22", SA.rx "3", SA.fill colors.walls, SA.stroke "#1e293b", SA.strokeWidth "2" ] []
+        , Svg.rect [ SA.x "-15", SA.y "-9", SA.width "30", SA.height "25", SA.rx "3", SA.fill colors.walls, SA.stroke "#1e293b", SA.strokeWidth "2" ] []
         , Svg.rect [ SA.x "-4", SA.y "4", SA.width "8", SA.height "12", SA.rx "1", SA.fill "#1e293b", SA.fillOpacity "0.35" ] []
-        , Svg.polygon [ SA.points "-20,-4 0,-22 20,-4", SA.fill colors.roof, SA.strokeLinejoin "round", SA.stroke "#1e293b", SA.strokeWidth "2" ] []
+        , Svg.polygon [ SA.points "-20,-7 0,-25 20,-7", SA.fill colors.roof, SA.strokeLinejoin "round", SA.stroke "#1e293b", SA.strokeWidth "2" ] []
         ]
 
 
