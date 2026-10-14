@@ -521,7 +521,7 @@ viewGame model me game =
             [ div []
                 [ div [ class "flex items-center gap-2" ]
                     [ h1 [ class "text-2xl font-semibold tracking-tight" ]
-                        [ a [ id "match-title-link", href "/match", class "transition hover:text-octo-indigo" ] [ text "Match" ] ]
+                        [ a [ id "match-title-link", href "/match", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Match" ] ]
                     , viewMuteButton model.muted
                     ]
                 , p [ class "text-sm opacity-60" ]
@@ -546,7 +546,7 @@ viewGame model me game =
               else
                 text ""
             , if me == Nothing then
-                p [ id "match-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200" ]
+                p [ id "match-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
                     [ text "This game is full, so you can only watch it." ]
 
               else
@@ -607,7 +607,7 @@ viewMuteButton : Bool -> Html Msg
 viewMuteButton muted =
     button
         [ id "match-mute"
-        , class "grid size-8 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90"
+        , class "grid size-8 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
         , onClick ToggleMuted
         , Html.Attributes.title
             (if muted then
@@ -636,7 +636,7 @@ viewRestartButton : Html Msg
 viewRestartButton =
     button
         [ id "match-restart"
-        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start"
+        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
@@ -646,12 +646,12 @@ viewRestartButton =
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "match-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1 dark:text-slate-100"
             ]
             []
         , button
@@ -689,10 +689,10 @@ viewClock model game =
         setsLeft =
             List.length (List.filter (\card -> card.state /= "cleared") game.cards) // game.set
     in
-    div [ id "match-clock", class "grid grid-cols-2 divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200" ]
+    div [ id "match-clock", class "grid grid-cols-2 divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200 dark:divide-white/10 dark:bg-white/5 dark:shadow-none dark:ring-white/10" ]
         [ div [ class "flex flex-col items-center justify-center" ]
             [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "time" ]
-            , span [ id "match-time", class "text-3xl font-light text-slate-700 tabular-nums" ] [ text (formatTime elapsedMs) ]
+            , span [ id "match-time", class "text-3xl font-light text-slate-700 tabular-nums dark:text-slate-100" ] [ text (formatTime elapsedMs) ]
             ]
         , div [ class "flex flex-col items-center justify-center" ]
             [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ]
@@ -704,7 +704,7 @@ viewClock model game =
                         "triplets left"
                     )
                 ]
-            , span [ id "match-sets-left", class "text-3xl font-bold text-octo-indigo tabular-nums" ] [ text (String.fromInt setsLeft) ]
+            , span [ id "match-sets-left", class "text-3xl font-bold text-octo-indigo tabular-nums dark:text-octo-indigo-light" ] [ text (String.fromInt setsLeft) ]
             ]
         ]
 
@@ -735,7 +735,7 @@ viewScores model me game =
                 in
                 li
                     [ id ("match-score-" ++ player.id)
-                    , class "relative flex items-center gap-2 overflow-hidden rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200 transition"
+                    , class "relative flex items-center gap-2 overflow-hidden rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200 transition dark:bg-white/5 dark:text-slate-100 dark:shadow-none dark:ring-white/10"
                     , classList [ ( "opacity-50", player.away ), ( "match-current", current ) ]
 
                     -- Elm's `style` cannot set a CSS variable
