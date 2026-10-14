@@ -1,6 +1,6 @@
-defmodule Octomocto.Match.Result do
+defmodule Octomocto.Memory.Result do
   @moduledoc """
-  The result of one player in one finished Match field. All rows of a field
+  The result of one player in one finished Memory field. All rows of a field
   have the same `game_id`, `settings` and `elapsed_ms`. The `settings` tell
   which results can be compared, for example
   `%{"set" => 2, "cards" => 16, "players" => 1}`. The theme is not in the

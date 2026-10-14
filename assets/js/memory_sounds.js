@@ -1,4 +1,4 @@
-// Sounds for the Match game.
+// Sounds for the Memory game.
 
 import {audioReady, noise, tone} from "./sounds"
 
@@ -33,6 +33,6 @@ const sounds = {
   },
 }
 
-export function playMatchSound(name) {
+export function playMemorySound(name) {
   if (audioReady()) sounds[name]?.()
 }

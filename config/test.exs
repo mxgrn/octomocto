@@ -48,8 +48,8 @@ config :octomocto, schulte_countdown_ms: 0, schulte_rejoin_grace_ms: 0
 # The same for the trains games
 config :octomocto, trains_countdown_ms: 0, trains_rejoin_grace_ms: 0
 
-# The same for the Match games
-config :octomocto, match_rejoin_grace_ms: 0
+# The same for the Memory games
+config :octomocto, memory_rejoin_grace_ms: 0
 
 # The same for the Set games
 config :octomocto, set_countdown_ms: 0, set_rejoin_grace_ms: 0

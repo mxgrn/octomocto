@@ -1,15 +1,15 @@
-defmodule Octomocto.Match.Board do
+defmodule Octomocto.Memory.Board do
   @moduledoc """
-  The sizes and the shapes of a Match field. A field has a number of cards
+  The sizes and the shapes of a Memory field. A field has a number of cards
   that is a multiple of the cards in a set (2 for pairs, 3 for triplets),
   and that fits in a grid that is almost square. A grid can have one empty
   place (a gap) in the middle, when the number of cards is even.
   """
 
-  alias Octomocto.Match.Themes
+  alias Octomocto.Memory.Themes
 
   # Dev config sets a small value for easier testing.
-  @min_cards Application.compile_env(:octomocto, :match_min_cards, 15)
+  @min_cards Application.compile_env(:octomocto, :memory_min_cards, 15)
   @max_cards 100
 
   @doc "The number of cards in a new field, before the player changes it."

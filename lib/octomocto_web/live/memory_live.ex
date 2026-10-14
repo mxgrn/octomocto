@@ -1,4 +1,4 @@
-defmodule OctomoctoWeb.MatchLive do
+defmodule OctomoctoWeb.MemoryLive do
   use OctomoctoWeb, :live_view
 
   # The same settings and result lists as on the Schulte page
@@ -7,22 +7,22 @@ defmodule OctomoctoWeb.MatchLive do
 
   import OctomoctoWeb.GamePageComponents
 
-  alias Octomocto.{Lobby, Match}
-  alias Octomocto.Match.{Board, Game, Store, Themes}
+  alias Octomocto.{Lobby, Memory}
+  alias Octomocto.Memory.{Board, Game, Store, Themes}
 
   def mount(_params, _session, socket) do
     if connected?(socket), do: Lobby.subscribe(Game)
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/match"), themes: Themes.list(), rules: rules()] ++ seo())
+     |> assign([canonical_url: url(~p"/memory"), themes: Themes.list(), rules: rules()] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))}
   end
 
-  @doc "The title and the description of the Match pages, for search engines."
+  @doc "The title and the description of the Memory pages, for search engines."
   def seo do
     [
-      page_title: "Match: Memory Card Game",
+      page_title: "Memory Card Game",
       page_description:
         "Find matching pairs or triplets of cards. Play solo against the clock or take turns with up to 4 friends. Free, in a browser."
     ]
@@ -36,7 +36,7 @@ defmodule OctomoctoWeb.MatchLive do
      assign(socket,
        settings: settings,
        sizes: Board.sizes(settings.theme, settings.set),
-       leaderboard: Match.leaderboard(filter),
+       leaderboard: Memory.leaderboard(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
   end
@@ -46,8 +46,8 @@ defmodule OctomoctoWeb.MatchLive do
   end
 
   def handle_event("new_game", _params, socket) do
-    id = Match.create_game(socket.assigns.settings)
-    {:noreply, redirect(socket, to: ~p"/match/#{id}")}
+    id = Memory.create_game(socket.assigns.settings)
+    {:noreply, redirect(socket, to: ~p"/memory/#{id}")}
   end
 
   # The first theme, pairs, one player and a public game, when the params
@@ -79,7 +79,7 @@ defmodule OctomoctoWeb.MatchLive do
   end
 
   # Nil for a guest
-  defp user_results(%{user: _} = scope, filter), do: Match.user_results(scope, filter)
+  defp user_results(%{user: _} = scope, filter), do: Memory.user_results(scope, filter)
   defp user_results(nil, _filter), do: nil
 
   defp rules do

@@ -1,7 +1,7 @@
-defmodule Octomocto.Match.Themes do
+defmodule Octomocto.Memory.Themes do
   @moduledoc """
-  The card themes of the Match game. The images of a theme are in
-  `priv/static/images/match/<name>/`, with the names `1.svg` to `<cards>.svg`.
+  The card themes of the Memory game. The images of a theme are in
+  `priv/static/images/memory/<name>/`, with the names `1.svg` to `<cards>.svg`.
   """
 
   @themes [

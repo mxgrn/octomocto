@@ -27,7 +27,7 @@ defmodule OctomoctoWeb.Router do
     get "/astronaut/:id", AstronautController, :show
     get "/trains/:id", TrainsController, :show
     get "/schulte/:id", SchulteController, :show
-    get "/match/:id", MatchController, :show
+    get "/memory/:id", MemoryController, :show
     get "/set/:id", SetGameController, :show
     get "/sudoku/:id", SudokuController, :show
 
@@ -38,7 +38,7 @@ defmodule OctomoctoWeb.Router do
       live "/", HomeLive
       live "/trains", TrainsLive
       live "/schulte", SchulteLive
-      live "/match", MatchLive
+      live "/memory", MemoryLive
       live "/set", SetGameLive
       live "/sudoku", SudokuLive
     end

@@ -29,7 +29,7 @@ config :mnesiac,
   stores: [
     Octomocto.Schulte.Store,
     Octomocto.Trains.Store,
-    Octomocto.Match.Store,
+    Octomocto.Memory.Store,
     Octomocto.SetGame.Store,
     Octomocto.Sudoku.Store
   ]

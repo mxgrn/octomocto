@@ -28,7 +28,7 @@ import {unlockAudio} from "./sounds"
 import {playTrainSound} from "./train_sounds"
 import {playAstronautSound} from "./astronaut_sounds"
 import {playSchulteSound} from "./schulte_sounds"
-import {playMatchSound} from "./match_sounds"
+import {playMemorySound} from "./memory_sounds"
 import {playSetSound} from "./set_sounds"
 import {playSudokuSound} from "./sudoku_sounds"
 
@@ -192,21 +192,21 @@ if (schulteNode) {
   })
 }
 
-// Start the Match game and connect its ports to the game channel. It
+// Start the Memory game and connect its ports to the game channel. It
 // works as the Schulte race above: the browser remembers if the player
 // muted the sounds, and the tab remembers the token of the player.
-const matchNode = document.getElementById("match-main")
-if (matchNode) {
+const memoryNode = document.getElementById("memory-main")
+if (memoryNode) {
   if (navigator.userActivation?.hasBeenActive) unlockAudio()
   document.addEventListener("pointerdown", unlockAudio, {once: true})
   let muted = false
-  try { muted = localStorage.getItem("match-muted") === "true" } catch (_e) {}
+  try { muted = localStorage.getItem("memory-muted") === "true" } catch (_e) {}
 
-  const match = window.Elm.Match.init({node: matchNode, flags: {gameUrl: window.location.href, muted}})
-  const socket = new Socket("/socket", {params: {user_token: matchNode.dataset.userToken}})
+  const memory = window.Elm.Memory.init({node: memoryNode, flags: {gameUrl: window.location.href, muted}})
+  const socket = new Socket("/socket", {params: {user_token: memoryNode.dataset.userToken}})
   socket.connect()
 
-  const tokenKey = `match-token:${matchNode.dataset.gameId}`
+  const tokenKey = `memory-token:${memoryNode.dataset.gameId}`
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
@@ -215,12 +215,12 @@ if (matchNode) {
       if (token) sessionStorage.setItem(tokenKey, token)
       else sessionStorage.removeItem(tokenKey)
     } catch (_e) {}
-    match.ports.matchJoined.send(reply)
+    memory.ports.memoryJoined.send(reply)
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
-  const channel = socket.channel(`match:${matchNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
-  channel.on("state", state => match.ports.matchState.send(state))
+  const channel = socket.channel(`memory:${memoryNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  channel.on("state", state => memory.ports.memoryState.send(state))
   channel.on("joined", joined)
   channel.join()
     .receive("ok", joined)
@@ -228,15 +228,15 @@ if (matchNode) {
       // The server of the game stopped a moment ago. The channel tries again.
       if (reason === "unavailable") return
       channel.leave()
-      match.ports.matchJoinFailed.send(reason)
+      memory.ports.memoryJoinFailed.send(reason)
     })
 
-  match.ports.matchFlip.subscribe(card => channel.push("flip", {card}))
-  match.ports.matchRestart.subscribe(() => channel.push("restart", {}))
-  match.ports.matchCopyText.subscribe(text => navigator.clipboard.writeText(text))
-  match.ports.matchPlaySound.subscribe(playMatchSound)
-  match.ports.matchSaveMuted.subscribe(value => {
-    try { localStorage.setItem("match-muted", String(value)) } catch (_e) {}
+  memory.ports.memoryFlip.subscribe(card => channel.push("flip", {card}))
+  memory.ports.memoryRestart.subscribe(() => channel.push("restart", {}))
+  memory.ports.memoryCopyText.subscribe(text => navigator.clipboard.writeText(text))
+  memory.ports.memoryPlaySound.subscribe(playMemorySound)
+  memory.ports.memorySaveMuted.subscribe(value => {
+    try { localStorage.setItem("memory-muted", String(value)) } catch (_e) {}
   })
 }
 

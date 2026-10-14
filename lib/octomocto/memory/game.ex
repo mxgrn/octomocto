@@ -1,13 +1,13 @@
-defmodule Octomocto.Match.Game do
+defmodule Octomocto.Memory.Game do
   @moduledoc """
-  One multiplayer Match game: a field of face-down cards, with sets of 2
+  One multiplayer Memory game: a field of face-down cards, with sets of 2
   (pairs) or 3 (triplets) cards that have the same image. The players turn
   the cards face up in turns. When the cards of a turn make a set, they go
   off the field, the player gets one point for each card, and the player
   turns more cards. When they do not make a set, they stay face up until
   the next player turns a card, and the turn goes to the next player. The
   game owns the field and the players, and broadcasts each change on the
-  `"match_game:<id>"` PubSub topic as `{:match_state, state}`.
+  `"memory_game:<id>"` PubSub topic as `{:memory_state, state}`.
 
   The game is for a set number of players (`needed`). Nobody can turn a
   card before the game has all its players. The clock starts with the first
@@ -19,7 +19,7 @@ defmodule Octomocto.Match.Game do
   the same player can join again (for example, after a reconnect). Then
   the player is removed. When all cards are off the field with all players
   still in the game, the game saves the result of each player (see
-  `Octomocto.Match.save_results/4`). The game stops after some time with no
+  `Octomocto.Memory.save_results/4`). The game stops after some time with no
   players.
 
   A public game is in the lists of the settings page (see
@@ -28,24 +28,24 @@ defmodule Octomocto.Match.Game do
   in the ongoing games. The game sends
   its new row after each change, and nil when its node stops.
 
-  A process can also join only to watch (see `Octomocto.Match.watch/1`).
+  A process can also join only to watch (see `Octomocto.Memory.watch/1`).
 
   The game is registered in the whole cluster, and it writes its state to
-  `Octomocto.Match.Store` after each change. When its node stops, the game
+  `Octomocto.Memory.Store` after each change. When its node stops, the game
   starts again on another node from that state. Thus the clock uses the
   system time: the monotonic time of one node has no meaning on another
   node.
   """
   use GenServer, restart: :temporary
 
-  alias Octomocto.{Lobby, Match}
-  alias Octomocto.Match.{Board, Store, Themes}
+  alias Octomocto.{Lobby, Memory}
+  alias Octomocto.Memory.{Board, Store, Themes}
 
   @idle_timeout_ms :timer.minutes(5)
   # How long a player stays after its process stops
   @rejoin_grace_ms Application.compile_env(
                      :octomocto,
-                     :match_rejoin_grace_ms,
+                     :memory_rejoin_grace_ms,
                      :timer.seconds(15)
                    )
   # With 2 or more players, the turn goes to the next player after this
@@ -78,9 +78,9 @@ defmodule Octomocto.Match.Game do
 
   def via(id), do: {:via, :global, {__MODULE__, id}}
 
-  def topic(id), do: "match_game:" <> id
+  def topic(id), do: "memory_game:" <> id
 
-  def lobby_topic, do: "match_lobby"
+  def lobby_topic, do: "memory_lobby"
 
   @doc """
   The row of the game in the lists of the settings page (see
@@ -412,7 +412,7 @@ defmodule Octomocto.Match.Game do
        when state.finished_at != nil and map_size(state.players) == state.needed do
     settings = %{"set" => state.set, "cards" => state.size, "players" => state.needed}
     players = Map.values(state.players)
-    Match.save_results(state.field_id, settings, state.finished_at - state.started_at, players)
+    Memory.save_results(state.field_id, settings, state.finished_at - state.started_at, players)
     state
   end
 
@@ -466,7 +466,7 @@ defmodule Octomocto.Match.Game do
 
   defp publish(state) do
     store(state)
-    Phoenix.PubSub.broadcast(Octomocto.PubSub, topic(state.id), {:match_state, public(state)})
+    Phoenix.PubSub.broadcast(Octomocto.PubSub, topic(state.id), {:memory_state, public(state)})
   end
 
   # The state that clients see, ready to encode as JSON. The images of the

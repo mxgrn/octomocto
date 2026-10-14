@@ -17,15 +17,15 @@
     not make gaps between the rows on the left.
   --%>
   <div
-    id="match-index"
+    id="memory-index"
     class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 py-12 lg:grid-cols-2 lg:grid-rows-[auto_auto_1fr] lg:items-start lg:gap-x-12 lg:py-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[1fr_1.4fr_1fr] xl:grid-rows-[auto_1fr]"
   >
     <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 xl:max-w-none">
       <div class="flex items-center justify-center gap-3">
         <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
-          <OctomoctoWeb.GameIcons.game_icon game="match" class="size-9" />
+          <OctomoctoWeb.GameIcons.game_icon game="memory" class="size-9" />
         </div>
-        <h1 class="text-3xl font-semibold tracking-tight">Match</h1>
+        <h1 class="text-3xl font-semibold tracking-tight">Memory</h1>
       </div>
       <p class="text-base-content/70">
         Choose the settings and start a new game.
@@ -34,17 +34,17 @@
     </div>
 
     <div
-      id="match-lobby"
+      id="memory-lobby"
       class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
     >
       <.lobby_games
         games={@lobby_games}
         matches={&same_settings?(&1, @settings)}
-        path={&~p"/match/#{&1.id}"}
+        path={&~p"/memory/#{&1.id}"}
       >
         <:icon :let={game}>
           <img
-            src={~p"/images/match/#{game.settings.theme}/1.svg"}
+            src={~p"/images/memory/#{game.settings.theme}/1.svg"}
             alt=""
             class="size-9 shrink-0"
           />
@@ -54,14 +54,14 @@
     </div>
 
     <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
-      <div id="match-settings" class="flex w-full flex-col gap-4">
+      <div id="memory-settings" class="flex w-full flex-col gap-4">
         <div class="rounded-2xl bg-base-100 px-4 py-2.5 ring-1 ring-base-content/10">
           <p class="text-left text-sm font-bold text-base-content/80">Theme</p>
-          <div id="match-themes" class="mt-2 grid grid-cols-4 gap-2 xl:grid-cols-6">
+          <div id="memory-themes" class="mt-2 grid grid-cols-4 gap-2 xl:grid-cols-6">
             <.link
               :for={theme <- @themes}
               id={"theme-#{theme.name}"}
-              patch={~p"/match?#{query(@settings, theme: theme.name)}"}
+              patch={~p"/memory?#{query(@settings, theme: theme.name)}"}
               aria-current={@settings.theme == theme.name && "true"}
               class={[
                 "group flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
@@ -72,7 +72,7 @@
               ]}
             >
               <img
-                src={~p"/images/match/#{theme.name}/1.svg"}
+                src={~p"/images/memory/#{theme.name}/1.svg"}
                 alt=""
                 class="aspect-square w-full p-1 transition group-hover:scale-105"
               />
@@ -93,7 +93,7 @@
             :for={{value, set, label} <- [{"pairs", 2, "Pairs"}, {"triplets", 3, "Triplets"}]}
             id={"set-#{value}"}
             selected={@settings.set == set}
-            patch={~p"/match?#{query(@settings, set: set)}"}
+            patch={~p"/memory?#{query(@settings, set: set)}"}
           >
             {label}
           </.option>
@@ -105,7 +105,7 @@
             label="Fewer cards"
             patch={
               if size = step_size(@sizes, @settings.cards, -1),
-                do: ~p"/match?#{query(@settings, cards: size)}"
+                do: ~p"/memory?#{query(@settings, cards: size)}"
             }
           />
           <span
@@ -120,7 +120,7 @@
             label="More cards"
             patch={
               if size = step_size(@sizes, @settings.cards, 1),
-                do: ~p"/match?#{query(@settings, cards: size)}"
+                do: ~p"/memory?#{query(@settings, cards: size)}"
             }
           />
         </.setting>
@@ -136,7 +136,7 @@
             :for={n <- 1..5}
             id={"players-#{n}"}
             selected={@settings.players == n}
-            patch={~p"/match?#{query(@settings, players: n)}"}
+            patch={~p"/memory?#{query(@settings, players: n)}"}
           >
             {n}
           </.option>
@@ -154,7 +154,7 @@
             }
             id={"visibility-#{value}"}
             selected={@settings.public == public}
-            patch={~p"/match?#{query(@settings, public: public)}"}
+            patch={~p"/memory?#{query(@settings, public: public)}"}
           >
             {label}
           </.option>
@@ -165,7 +165,7 @@
     </div>
 
     <div
-      id="match-leaderboard"
+      id="memory-leaderboard"
       class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
     >
       <.score_list

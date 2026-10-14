@@ -197,23 +197,23 @@
   .countdown-pop { animation: none; }
 }
 
-/* Match. A card turns over in 3D: the back is in front when the card is
+/* Memory. A card turns over in 3D: the back is in front when the card is
    face down, and the face is in front when it is face up. */
-.match-card {
+.memory-card {
   perspective: 800px;
   cursor: default;
   -webkit-tap-highlight-color: transparent;
   transition: opacity 500ms ease 400ms, scale 500ms ease 400ms;
 }
-.match-card-inner {
+.memory-card-inner {
   position: relative;
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
   transition: transform 300ms ease;
 }
-.match-card.is-up .match-card-inner { transform: rotateY(180deg); }
-.match-card-back, .match-card-face {
+.memory-card.is-up .memory-card-inner { transform: rotateY(180deg); }
+.memory-card-back, .memory-card-face {
   position: absolute;
   inset: 0;
   border-radius: 0.5rem;
@@ -222,11 +222,11 @@
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.12), 0 2px 6px rgb(0 0 0 / 0.06);
 }
 /* The back has the brand indigo with a faded double-octo mark */
-.match-card-back {
+.memory-card-back {
   background: url("/images/card-back.svg") center / auto 72% no-repeat, #5e5ec9;
   transition: filter 150ms, transform 150ms;
 }
-.match-card-face {
+.memory-card-face {
   display: grid;
   /* A row and a column of the full size, so that the 3/4 size of the
      image is a size of the card, also for a tall image */
@@ -237,25 +237,25 @@
 }
 
 /* The player of the turn sees which cards can be turned */
-.match-card.is-clickable { cursor: pointer; }
-.match-card.is-clickable:hover .match-card-back { filter: brightness(1.1); transform: translateY(-2px); }
-.match-card.is-clickable:active .match-card-back { transform: scale(0.96); }
+.memory-card.is-clickable { cursor: pointer; }
+.memory-card.is-clickable:hover .memory-card-back { filter: brightness(1.1); transform: translateY(-2px); }
+.memory-card.is-clickable:active .memory-card-back { transform: scale(0.96); }
 
 /* A found set fades out after the last card is face up. The fade is on
    the card, not on the inner part: opacity on an element with
    preserve-3d makes it flat, and then the back of the card shows. */
-.match-card.is-cleared { pointer-events: none; opacity: 0; scale: 0.85; }
+.memory-card.is-cleared { pointer-events: none; opacity: 0; scale: 0.85; }
 
 /* The score row of the player of the turn has a ring in the player's color */
-.match-current { box-shadow: 0 0 0 2px var(--player-color); }
+.memory-current { box-shadow: 0 0 0 2px var(--player-color); }
 
-/* Match in the dark theme: dark faces, and a light edge on all cards */
-[data-theme=dark] .match-card-back,
-[data-theme=dark] .match-card-face { box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 2px 6px rgb(0 0 0 / 0.3); }
-[data-theme=dark] .match-card-face { background: #3a4252; }
+/* Memory in the dark theme: dark faces, and a light edge on all cards */
+[data-theme=dark] .memory-card-back,
+[data-theme=dark] .memory-card-face { box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 2px 6px rgb(0 0 0 / 0.3); }
+[data-theme=dark] .memory-card-face { background: #3a4252; }
 
 @media (prefers-reduced-motion: reduce) {
-  .match-card-inner { transition: none; }
+  .memory-card-inner { transition: none; }
 }
 
 /* Set. A new card comes with a short deal animation. The shake of a

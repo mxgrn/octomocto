@@ -53,7 +53,7 @@ defmodule OctomoctoWeb.GameIcons do
     """
   end
 
-  def game_icon(%{game: "match"} = assigns) do
+  def game_icon(%{game: "memory"} = assigns) do
     ~H"""
     <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
       <g :for={{x, angle} <- [{5, -10}, {23, 10}]} transform={"rotate(#{angle} #{x + 10} 26)"}>

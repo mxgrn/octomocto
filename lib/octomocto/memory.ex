@@ -1,17 +1,17 @@
-defmodule Octomocto.Match do
+defmodule Octomocto.Memory do
   @moduledoc """
   Multiplayer memory game: find the matching pairs (or triplets) of cards.
-  Each game is a `Octomocto.Match.Game` process on one node of the cluster,
-  found by its id. A copy of its state is in `Octomocto.Match.Store`, so
+  Each game is a `Octomocto.Memory.Game` process on one node of the cluster,
+  found by its id. A copy of its state is in `Octomocto.Memory.Store`, so
   the game continues on another node when its node stops. Finished fields
-  are saved as `Octomocto.Match.Result` rows.
+  are saved as `Octomocto.Memory.Result` rows.
   """
 
   import Ecto.Query
 
   alias Octomocto.GameProcess
   alias Octomocto.Repo
-  alias Octomocto.Match.{Game, Result, Store}
+  alias Octomocto.Memory.{Game, Result, Store}
 
   @list_size 10
 
@@ -24,7 +24,7 @@ defmodule Octomocto.Match do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
 
     {:ok, _pid} =
-      DynamicSupervisor.start_child(Octomocto.Match.GameSupervisor, {Game, {id, config}})
+      DynamicSupervisor.start_child(Octomocto.Memory.GameSupervisor, {Game, {id, config}})
 
     id
   end
@@ -42,13 +42,13 @@ defmodule Octomocto.Match do
 
   Give the `player_id` of a player that is still in the game to bind that
   player to the calling process again. Only give a player id that the
-  caller can trust (see `OctomoctoWeb.MatchChannel`).
+  caller can trust (see `OctomoctoWeb.MemoryChannel`).
 
   Gives `{:error, :unavailable}` when the node of the game stopped a
   moment ago. Try again soon.
   """
   def join(id, user_id \\ nil, name \\ nil, player_id \\ nil) do
-    GameProcess.join(Game, Store, Octomocto.Match.GameSupervisor, id, user_id, name, player_id)
+    GameProcess.join(Game, Store, Octomocto.Memory.GameSupervisor, id, user_id, name, player_id)
   end
 
   @doc """
@@ -57,7 +57,7 @@ defmodule Octomocto.Match do
   updates. Gives the same errors as `join/4`.
   """
   def watch(id) do
-    GameProcess.watch(Game, Store, Octomocto.Match.GameSupervisor, id)
+    GameProcess.watch(Game, Store, Octomocto.Memory.GameSupervisor, id)
   end
 
   @doc "The player turns a card face up. Only the player of the turn can."

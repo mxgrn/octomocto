@@ -9,7 +9,7 @@ defmodule OctomoctoWeb.HomeLive do
 
   alias Octomocto.Lobby
 
-  alias OctomoctoWeb.{GameIcons, MatchLive, SchulteLive, SetGameLive, SudokuLive, TrainsLive}
+  alias OctomoctoWeb.{GameIcons, MemoryLive, SchulteLive, SetGameLive, SudokuLive, TrainsLive}
 
   @games [
     %{
@@ -28,11 +28,11 @@ defmodule OctomoctoWeb.HomeLive do
       icon_class: "bg-octo-orange/10 dark:bg-octo-orange-light/15"
     },
     %{
-      id: "match",
-      name: "Match",
+      id: "memory",
+      name: "Memory",
       description:
         "Find the cards with the same image. Play alone against the clock, or take turns.",
-      path: "/match",
+      path: "/memory",
       icon_class: "bg-sky-500/10 dark:bg-sky-400/15"
     },
     %{
@@ -65,7 +65,7 @@ defmodule OctomoctoWeb.HomeLive do
   # @games, with the game module, its store and the page that gives the
   # settings of a game in a row
   @lobbies %{
-    "match" => {Octomocto.Match.Game, Octomocto.Match.Store, MatchLive},
+    "memory" => {Octomocto.Memory.Game, Octomocto.Memory.Store, MemoryLive},
     "trains" => {Octomocto.Trains.Game, Octomocto.Trains.Store, TrainsLive},
     "set" => {Octomocto.SetGame.Game, Octomocto.SetGame.Store, SetGameLive},
     "sudoku" => {Octomocto.Sudoku.Game, Octomocto.Sudoku.Store, SudokuLive},
