@@ -8,7 +8,7 @@ defmodule OctomoctoWeb.GameChannelTest do
 
   setup do
     id = "game-#{System.unique_integer([:positive])}"
-    pid = start_supervised!({Game, {id, :random, :easy, 2}})
+    pid = start_supervised!({Game, {id, :random, :easy, 2, false}})
     %{id: id, pid: pid}
   end
 

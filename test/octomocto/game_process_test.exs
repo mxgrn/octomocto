@@ -6,7 +6,7 @@ defmodule Octomocto.GameProcessTest do
 
   test "join/7 adds a player to a running game" do
     id = "game-#{System.unique_integer([:positive])}"
-    start_supervised!({Game, {id, :random, :easy, 1}})
+    start_supervised!({Game, {id, :random, :easy, 1, false}})
 
     assert {:ok, player_id, %{players: [%{id: player_id}]}} =
              GameProcess.join(Game, Store, GameSupervisor, id, nil, nil, nil)
@@ -14,7 +14,7 @@ defmodule Octomocto.GameProcessTest do
 
   test "join/7 starts a stopped game again from its copy in the store" do
     id = "game-#{System.unique_integer([:positive])}"
-    pid = start_supervised!({Game, {id, :random, :easy, 1}})
+    pid = start_supervised!({Game, {id, :random, :easy, 1, false}})
     {:ok, _player_id, before} = GameProcess.join(Game, Store, GameSupervisor, id, nil, nil, nil)
 
     # As when the node of the game stops

@@ -1,27 +1,65 @@
 <Layouts.app flash={@flash} current_scope={@current_scope}>
-  <%!-- Wider than the app container, so that the two columns have room --%>
+  <%!--
+    Wider than the app container, so that the columns have room. One column
+    on a small screen: the title, the open games, the settings and the
+    results. Two columns on a large screen: the results go to the right.
+    Three columns on an extra large screen: the open games go to the left,
+    and the settings in the center are wider than the other columns. The
+    columns use the full width of the screen, with the side padding of the
+    header.
+    The last row takes the free height, so that the tall results column does
+    not make gaps between the rows on the left.
+  --%>
   <div
     id="schulte-index"
-    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-10 py-12 lg:grid-cols-2 lg:items-start lg:gap-12 lg:py-16"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 py-12 lg:grid-cols-2 lg:grid-rows-[auto_auto_1fr] lg:items-start lg:gap-x-12 lg:py-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[1fr_1.4fr_1fr] xl:grid-rows-[auto_1fr]"
   >
-    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8">
-      <div class="space-y-2">
-        <div class="flex items-center justify-center gap-3">
-          <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-sm font-bold text-emerald-700 shadow-inner tabular-nums">
-            1·2·3
-          </div>
-          <h1 class="text-3xl font-semibold tracking-tight">Schulte Race</h1>
+    <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 xl:max-w-none">
+      <div class="flex items-center justify-center gap-3">
+        <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-sm font-bold text-emerald-700 shadow-inner tabular-nums">
+          1·2·3
         </div>
-        <p class="text-base-content/70">
-          Find the numbers from 1 to 90 in order. The first player to click the next number gets the point.
-        </p>
+        <h1 class="text-3xl font-semibold tracking-tight">Schulte Race</h1>
       </div>
+      <p class="text-base-content/70">
+        Choose the settings and start a new game, or join an open game.
+      </p>
+      <.how_to_play accent={:emerald} />
+    </div>
 
+    <div
+      id="schulte-lobby"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
+    >
+      <.open_games
+        games={@open_games}
+        matches={&same_settings?(&1, @settings)}
+        path={fn id -> ~p"/schulte/#{id}" end}
+        accent={:emerald}
+      >
+        <:icon>
+          <.lobby_icon />
+        </:icon>
+        <:summary :let={game}>{game_summary(game)}</:summary>
+      </.open_games>
+      <.ongoing_games
+        games={@ongoing_games}
+        path={fn id -> ~p"/schulte/#{id}" end}
+        accent={:emerald}
+      >
+        <:icon>
+          <.lobby_icon />
+        </:icon>
+        <:summary :let={game}>{game_summary(game)}</:summary>
+      </.ongoing_games>
+    </div>
+
+    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
       <div id="schulte-settings" class="flex w-full flex-col gap-4">
         <.setting
           label="Board"
           hint={
-            if(@board == "classic",
+            if(@settings.board == "classic",
               do: "The board is always the same.",
               else: "The board is new for each game."
             )
@@ -30,8 +68,8 @@
           <.option
             :for={{value, label} <- [{"classic", "Classic"}, {"random", "Random"}]}
             id={"board-#{value}"}
-            selected={@board == value}
-            patch={~p"/schulte?#{[board: value, mode: @mode, players: @players]}"}
+            selected={@settings.board == value}
+            patch={~p"/schulte?#{query(@settings, board: value)}"}
           >
             {label}
           </.option>
@@ -39,7 +77,7 @@
         <.setting
           label="Mode"
           hint={
-            if(@mode == "easy",
+            if(@settings.mode == "easy",
               do: "The found numbers disappear.",
               else: "The found numbers stay on the board."
             )
@@ -48,42 +86,58 @@
           <.option
             :for={{value, label} <- [{"easy", "Easy"}, {"normal", "Normal"}]}
             id={"mode-#{value}"}
-            selected={@mode == value}
-            patch={~p"/schulte?#{[board: @board, mode: value, players: @players]}"}
+            selected={@settings.mode == value}
+            patch={~p"/schulte?#{query(@settings, mode: value)}"}
           >
             {label}
           </.option>
         </.setting>
         <.setting
           label="Players"
-          hint={if(@players > 1, do: "The race starts when all players are in.")}
+          hint={if(@settings.players > 1, do: "The race starts when all players are in.")}
         >
           <.option
             :for={n <- 1..4}
             id={"players-#{n}"}
-            selected={@players == n}
-            patch={~p"/schulte?#{[board: @board, mode: @mode, players: n]}"}
+            selected={@settings.players == n}
+            patch={~p"/schulte?#{query(@settings, players: n)}"}
           >
             {n}
           </.option>
         </.setting>
+        <.setting
+          :if={@settings.players > 1}
+          label="Visibility"
+          hint={
+            if(@settings.public,
+              do: "Other players see this game in Open games.",
+              else: "Only players with the link can join."
+            )
+          }
+        >
+          <.option
+            :for={
+              {value, public, label} <- [
+                {"public", true, "Public"},
+                {"private", false, "Private"}
+              ]
+            }
+            id={"visibility-#{value}"}
+            selected={@settings.public == public}
+            patch={~p"/schulte?#{query(@settings, public: public)}"}
+          >
+            {label}
+          </.option>
+        </.setting>
       </div>
 
-      <button
-        id="new-game"
-        type="button"
-        phx-click="new_game"
-        phx-disable-with="Starting..."
-        class="cursor-pointer rounded-full bg-emerald-600 px-8 py-3 font-medium text-white shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-xl active:translate-y-0"
-      >
-        Start game
-      </button>
-      <p :if={@players > 1} class="text-sm text-base-content/50">
-        You get a link to share with other players.
-      </p>
+      <.start_bar accent={:emerald} multiplayer={@settings.players > 1} />
     </div>
 
-    <div id="schulte-leaderboard" class="mx-auto grid w-full max-w-md gap-4">
+    <div
+      id="schulte-leaderboard"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
+    >
       <.score_list
         id="your-results"
         icon="hero-user"
@@ -108,10 +162,10 @@
             :for={%{result: result, players: players} <- @user_results.latest}
             class="flex items-baseline gap-3 py-2"
           >
-            <span :if={@players == 1} class="flex-1 text-base-content/60">
+            <span :if={@settings.players == 1} class="flex-1 text-base-content/60">
               {Calendar.strftime(result.inserted_at, "%b %-d")}
             </span>
-            <span :if={@players > 1} class="flex-1 truncate">
+            <span :if={@settings.players > 1} class="flex-1 truncate">
               <.player_list players={players} scores />
             </span>
             <span class={[
@@ -135,20 +189,6 @@
         <% end %>
       </.score_list>
       <.score_list
-        id="latest-games"
-        icon="hero-clock"
-        icon_class="text-emerald-600"
-        title="Latest games"
-        empty={@leaderboard.latest == []}
-      >
-        <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
-          <span class="flex-1 truncate">
-            <.player_list players={game.players} scores={@players > 1} />
-          </span>
-          <span class="font-medium tabular-nums">{format_time(game.elapsed_ms)}</span>
-        </li>
-      </.score_list>
-      <.score_list
         id="best-results"
         icon="hero-trophy"
         icon_class="text-amber-500"
@@ -164,6 +204,22 @@
           <span class="font-medium tabular-nums">{format_time(result.elapsed_ms)}</span>
         </li>
       </.score_list>
+      <.score_list
+        id="latest-games"
+        icon="hero-clock"
+        icon_class="text-emerald-600"
+        title="Latest games"
+        empty={@leaderboard.latest == []}
+      >
+        <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
+          <span class="flex-1 truncate">
+            <.player_list players={game.players} scores={@settings.players > 1} />
+          </span>
+          <span class="font-medium tabular-nums">{format_time(game.elapsed_ms)}</span>
+        </li>
+      </.score_list>
     </div>
   </div>
+
+  <.rules rules={@rules} accent={:emerald} />
 </Layouts.app>

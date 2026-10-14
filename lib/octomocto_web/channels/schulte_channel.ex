@@ -23,7 +23,7 @@ defmodule OctomoctoWeb.SchulteChannel do
   end
 
   def handle_in("restart", _params, socket) do
-    Schulte.restart(socket.assigns.game_id)
+    Schulte.restart(socket.assigns.game_id, socket.assigns.player_id)
     {:noreply, socket}
   end
 

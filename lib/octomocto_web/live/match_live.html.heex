@@ -24,22 +24,38 @@
       <p class="text-base-content/70">
         Choose the settings and start a new game, or join an open game.
       </p>
-      <button
-        id="how-to-play"
-        type="button"
-        phx-click={show_rules()}
-        class="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-sky-600 transition hover:text-sky-500"
-      >
-        <.icon name="hero-question-mark-circle" class="size-4" /> How to play
-      </button>
+      <.how_to_play accent={:sky} />
     </div>
 
     <div
       id="match-lobby"
       class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
     >
-      <.open_games games={@open_games} settings={@settings} />
-      <.ongoing_games games={@ongoing_games} />
+      <.open_games
+        games={@open_games}
+        matches={&same_settings?(&1, @settings)}
+        path={fn id -> ~p"/match/#{id}" end}
+        accent={:sky}
+      >
+        <:icon :let={game}>
+          <img
+            src={~p"/images/match/#{game.settings.theme}/1.svg"}
+            alt=""
+            class="size-9 shrink-0"
+          />
+        </:icon>
+        <:summary :let={game}>{game_summary(game)}</:summary>
+      </.open_games>
+      <.ongoing_games games={@ongoing_games} path={fn id -> ~p"/match/#{id}" end} accent={:sky}>
+        <:icon :let={game}>
+          <img
+            src={~p"/images/match/#{game.settings.theme}/1.svg"}
+            alt=""
+            class="size-9 shrink-0"
+          />
+        </:icon>
+        <:summary :let={game}>{game_summary(game)}</:summary>
+      </.ongoing_games>
     </div>
 
     <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
@@ -156,29 +172,7 @@
         </.setting>
       </div>
 
-      <%!--
-        Stays at the bottom of the screen while the settings above it do not
-        fit, so that a new player sees how to start. The settings go under it
-        into the page color. It is wider than the settings, so that it also
-        covers the borders of the cards, which are outside of the cards.
-      --%>
-      <div
-        id="new-game-bar"
-        class="sticky bottom-0 z-10 -mx-2 -mt-6 flex w-[calc(100%+1rem)] flex-col items-center gap-2 bg-linear-to-t from-base-100 from-70% to-transparent pt-8 pb-5"
-      >
-        <button
-          id="new-game"
-          type="button"
-          phx-click="new_game"
-          phx-disable-with="Starting..."
-          class="cursor-pointer rounded-full bg-sky-600 px-8 py-3 font-medium text-white shadow-lg shadow-sky-600/25 transition hover:-translate-y-0.5 hover:bg-sky-500 hover:shadow-xl active:translate-y-0"
-        >
-          Start game
-        </button>
-        <p :if={@settings.players > 1} class="text-sm text-base-content/50">
-          You get a link to share with other players.
-        </p>
-      </div>
+      <.start_bar accent={:sky} multiplayer={@settings.players > 1} />
     </div>
 
     <div
@@ -268,5 +262,5 @@
     </div>
   </div>
 
-  <.rules />
+  <.rules rules={@rules} accent={:sky} />
 </Layouts.app>

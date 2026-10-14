@@ -9,7 +9,7 @@ defmodule Octomocto.SchulteTest do
   # One player, if the test has no `@tag players: n`
   setup tags do
     id = "game-#{System.unique_integer([:positive])}"
-    pid = start_supervised!({Game, {id, :random, :easy, tags[:players] || 1}})
+    pid = start_supervised!({Game, {id, :random, :easy, tags[:players] || 1, false}})
     Ecto.Adapters.SQL.Sandbox.allow(Repo, self(), pid)
     Phoenix.PubSub.subscribe(Octomocto.PubSub, Game.topic(id))
     %{id: id}
@@ -86,11 +86,11 @@ defmodule Octomocto.SchulteTest do
     assert {:ok, _, %{elapsed_ms: ^elapsed_ms}} = Schulte.join(id)
   end
 
-  test "restart/1 starts a new field with zero scores after all numbers are found", %{id: id} do
+  test "restart/2 starts a new field with zero scores after all numbers are found", %{id: id} do
     {:ok, player_id, _} = Schulte.join(id)
 
     for n <- 1..90, do: Schulte.pick(id, player_id, n)
-    Schulte.restart(id)
+    Schulte.restart(id, player_id)
 
     assert_receive {:schulte_state, %{next: 91, players: [%{score: 90}]}}
     assert_receive {:schulte_state, %{next: 1, players: [%{score: 0}]}}

@@ -4,7 +4,7 @@ defmodule OctomoctoWeb.SchulteControllerTest do
   alias Octomocto.Schulte
 
   test "GET /schulte/:id has the mount node for the game", %{conn: conn} do
-    id = Schulte.create_game(:random, :easy, 2)
+    id = Schulte.create_game(:random, :easy, 2, false)
     conn = get(conn, ~p"/schulte/#{id}")
 
     document = LazyHTML.from_document(html_response(conn, 200))

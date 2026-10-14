@@ -14,7 +14,6 @@ defmodule Octomocto.Match do
   alias Octomocto.Match.{Game, Result, Store}
 
   @list_size 10
-  @ongoing_size 10
 
   @doc """
   Starts a new game and returns its id. The `config` has the `:theme`, the
@@ -32,49 +31,6 @@ defmodule Octomocto.Match do
 
   def game_exists?(id) do
     Store.read(id) != nil
-  end
-
-  @doc """
-  The rows of all games in the lists of the settings page (see
-  `Octomocto.Match.Game.lobby_entry/1`). Use `open_games/1` and
-  `ongoing_games/1` to get the lists.
-  """
-  def lobby do
-    Store.all()
-    # The game of a node that stopped is in the store until a player joins
-    # it again. Nobody plays in it.
-    |> Enum.filter(&GenServer.whereis(Game.via(&1.id)))
-    |> Enum.map(&Game.lobby_entry/1)
-    |> Enum.reject(&is_nil/1)
-  end
-
-  @doc """
-  Puts the new row of one game in the rows of `lobby/0`. The `entry` is nil
-  when the game is in no list.
-  """
-  def put_lobby_entry(entries, id, entry) do
-    entries |> Enum.reject(&(&1.id == id)) |> Enum.concat(List.wrap(entry))
-  end
-
-  @doc """
-  The games that wait for players, with the fewest free seats first, and
-  the oldest game first when the free seats are the same.
-  """
-  def open_games(entries) do
-    entries
-    |> Enum.filter(&(&1.status == :open))
-    |> Enum.sort_by(&{&1.seats_left, &1.created_at})
-  end
-
-  @doc """
-  The #{@ongoing_size} games with the newest fields that have started, also
-  the finished ones that the players did not start again.
-  """
-  def ongoing_games(entries) do
-    entries
-    |> Enum.filter(&(&1.status == :ongoing))
-    |> Enum.sort_by(& &1.ready_at, :desc)
-    |> Enum.take(@ongoing_size)
   end
 
   @doc """

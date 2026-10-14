@@ -23,11 +23,9 @@ defmodule Octomocto.Match.Game do
   players.
 
   A public game for more than one player is in the lists of the settings
-  page: in the open games until it has all its players for the first time,
-  then in the ongoing games. After each change, such a game sends its new
-  row (see `lobby_entry/1`) on the `lobby_topic/0`, as
-  `{:lobby_changed, id, entry}`. The entry is nil when the game is in no
-  list, also when its node stops.
+  page (see `Octomocto.Lobby`): in the open games until it has all its
+  players for the first time, then in the ongoing games. The game sends
+  its new row after each change, and nil when its node stops.
 
   A process can also join only to watch (see `Octomocto.Match.watch/1`).
 
@@ -39,7 +37,7 @@ defmodule Octomocto.Match.Game do
   """
   use GenServer, restart: :temporary
 
-  alias Octomocto.Match
+  alias Octomocto.{Lobby, Match}
   alias Octomocto.Match.{Board, Store, Themes}
 
   @idle_timeout_ms :timer.minutes(5)
@@ -84,12 +82,9 @@ defmodule Octomocto.Match.Game do
   def lobby_topic, do: "match_lobby"
 
   @doc """
-  The row of the game in the lists of the settings page, or nil when the
-  game is in no list. The `:status` is `:open` for a game that waits for
-  players, and `:ongoing` for a game that has started (see
-  `Octomocto.Match.lobby/0`). The `:name` of a player is nil for a guest,
-  `:away` is true during the grace time, and `:turn` is true for the player
-  of the turn.
+  The row of the game in the lists of the settings page (see
+  `Octomocto.Lobby`), or nil when the game is in no list. Each player has
+  a `:score` and a `:turn`.
   """
   # A state from before the lists has no `:public`
   def lobby_entry(%{public: true} = state)
@@ -98,20 +93,12 @@ defmodule Octomocto.Match.Game do
       state.players
       |> Enum.sort_by(fn {_id, p} -> p.joined_at end)
       |> Enum.map(fn {id, p} ->
-        %{
-          name: p.name,
-          color_name: p.color_name,
-          away: p.left != nil,
-          score: p.score,
-          turn: id == state.turn
-        }
+        p |> Lobby.player() |> Map.merge(%{score: p.score, turn: id == state.turn})
       end)
 
     entry = %{
       id: state.id,
-      theme: state.theme,
-      set: state.set,
-      cards: state.size,
+      settings: %{theme: state.theme, set: state.set, cards: state.size},
       players_needed: state.needed,
       players: players
     }
@@ -127,7 +114,7 @@ defmodule Octomocto.Match.Game do
       state.ready ->
         Map.merge(entry, %{
           status: :ongoing,
-          ready_at: state.ready_at,
+          started_at: state.ready_at,
           finished: state.finished_at != nil
         })
 
@@ -327,7 +314,7 @@ defmodule Octomocto.Match.Game do
   # player joins it again on another node (see `Octomocto.GameProcess`).
   @impl true
   def terminate(_reason, state) do
-    if in_lobby?(state), do: broadcast_lobby(state.id, nil)
+    if in_lobby?(state), do: Lobby.broadcast(__MODULE__, state.id, nil)
   end
 
   defp new_field(state) do
@@ -468,19 +455,14 @@ defmodule Octomocto.Match.Game do
   end
 
   # Writes the state to the store, and sends the new row of the game to the
-  # settings pages. The row is in the message, because the copy of the store
-  # on the node of a page can be older than the message.
+  # settings pages
   defp store(state) do
     Store.write(state)
-    if in_lobby?(state), do: broadcast_lobby(state.id, lobby_entry(state))
+    if in_lobby?(state), do: Lobby.broadcast(__MODULE__, state.id, lobby_entry(state))
   end
 
   # True for a game that can be in the lists of the settings page
   defp in_lobby?(state), do: state.public and state.needed > 1
-
-  defp broadcast_lobby(id, entry) do
-    Phoenix.PubSub.broadcast(Octomocto.PubSub, lobby_topic(), {:lobby_changed, id, entry})
-  end
 
   defp publish(state) do
     store(state)

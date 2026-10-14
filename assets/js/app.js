@@ -167,7 +167,9 @@ if (schulteNode) {
     } catch (_e) {}
     schulte.ports.schulteJoined.send(reply)
   }
-  const channel = socket.channel(`schulte:${schulteNode.dataset.gameId}`, () => token ? {token} : {})
+  // A link with ?watch=1 only watches the game. The token of a player wins.
+  const watch = new URLSearchParams(window.location.search).has("watch")
+  const channel = socket.channel(`schulte:${schulteNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
   channel.on("state", state => schulte.ports.schulteState.send(state))
   channel.on("joined", joined)
   channel.join()

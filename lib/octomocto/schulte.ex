@@ -18,15 +18,16 @@ defmodule Octomocto.Schulte do
   @doc """
   Starts a new game with a `:random` or a `:classic` layout, in the
   `:easy` or the `:normal` mode, for the given number of players, and
-  returns its id.
+  returns its id. A `public` game is in the lists of the settings page (see
+  `Octomocto.Lobby`).
   """
-  def create_game(layout, mode, players) do
+  def create_game(layout, mode, players, public) do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
 
     {:ok, _pid} =
       DynamicSupervisor.start_child(
         Octomocto.Schulte.GameSupervisor,
-        {Game, {id, layout, mode, players}}
+        {Game, {id, layout, mode, players, public}}
       )
 
     id
@@ -54,14 +55,23 @@ defmodule Octomocto.Schulte do
     GameProcess.join(Game, Store, Octomocto.Schulte.GameSupervisor, id, user_id, name, player_id)
   end
 
+  @doc """
+  Gives the state of the game to a process that only watches, also when the
+  game has a free seat. Subscribe to `Game.topic(id)` first to get all
+  updates. Gives the same errors as `join/4`.
+  """
+  def watch(id) do
+    GameProcess.watch(Game, Store, Octomocto.Schulte.GameSupervisor, id)
+  end
+
   @doc "The player clicks a number. Only the next number counts."
   def pick(id, player_id, number) when is_integer(number) do
     GenServer.cast(Game.via(id), {:pick, player_id, number})
   end
 
-  @doc "Starts a new field with zero scores, after all numbers are found."
-  def restart(id) do
-    GenServer.cast(Game.via(id), :restart)
+  @doc "Starts a new field with zero scores. Only a player can."
+  def restart(id, player_id) do
+    GenServer.cast(Game.via(id), {:restart, player_id})
   end
 
   @doc """

@@ -22,6 +22,12 @@ defmodule Octomocto.Schulte.Game do
   `Octomocto.Schulte.save_results/4`). The game stops after some time with
   no players.
 
+  A public game for more than one player is in the lists of the settings
+  page (see `Octomocto.Lobby`): in the open games until it has all its
+  players for the first time, then in the ongoing games. The game sends
+  its new row after each change, and nil when its node stops. A process
+  can also join only to watch (see `Octomocto.Schulte.watch/1`).
+
   The game is registered in the whole cluster, and it writes its state to
   `Octomocto.Schulte.Store` after each change. When its node stops, the
   game starts again on another node from that state. Thus the clock uses
@@ -30,7 +36,7 @@ defmodule Octomocto.Schulte.Game do
   """
   use GenServer, restart: :temporary
 
-  alias Octomocto.Schulte
+  alias Octomocto.{Lobby, Schulte}
   alias Octomocto.Schulte.{Classic, Layout, Store}
 
   @total 90
@@ -57,9 +63,10 @@ defmodule Octomocto.Schulte.Game do
     {"indigo", "#4f46e5"}
   ]
 
-  def start_link({id, layout, mode, needed})
-      when layout in [:random, :classic] and mode in [:easy, :normal] and needed in 1..4 do
-    GenServer.start_link(__MODULE__, {id, layout, mode, needed}, name: via(id))
+  def start_link({id, layout, mode, needed, public})
+      when layout in [:random, :classic] and mode in [:easy, :normal] and needed in 1..4 and
+             is_boolean(public) do
+    GenServer.start_link(__MODULE__, {id, layout, mode, needed, public}, name: via(id))
   end
 
   # Starts the game again from its state in the store
@@ -71,25 +78,94 @@ defmodule Octomocto.Schulte.Game do
 
   def topic(id), do: "schulte_game:" <> id
 
+  def lobby_topic, do: "schulte_lobby"
+
+  @doc """
+  The row of the game in the lists of the settings page (see
+  `Octomocto.Lobby`), or nil when the game is in no list. Each player has
+  a `:score`.
+  """
+  # A state from before the lists has no `:public`
+  def lobby_entry(%{public: true} = state)
+      when state.needed > 1 and map_size(state.players) > 0 do
+    players =
+      state.players
+      |> Map.values()
+      |> Enum.sort_by(& &1.joined_at)
+      |> Enum.map(&Map.put(Lobby.player(&1), :score, &1.score))
+
+    entry = %{
+      id: state.id,
+      settings: %{layout: state.layout, mode: state.mode},
+      players_needed: state.needed,
+      players: players
+    }
+
+    cond do
+      state.listed ->
+        Map.merge(entry, %{
+          status: :open,
+          seats_left: state.needed - map_size(state.players),
+          created_at: state.created_at
+        })
+
+      state.started_at != nil ->
+        Map.merge(entry, %{
+          status: :ongoing,
+          started_at: state.started_at,
+          finished: state.finished_at != nil
+        })
+
+      # Not all players are back after a restart
+      true ->
+        nil
+    end
+  end
+
+  def lobby_entry(_state), do: nil
+
   @impl true
-  def init({id, layout, mode, needed}) do
+  def init({id, layout, mode, needed, public}) do
+    # So that terminate/2 runs when the node stops
+    Process.flag(:trap_exit, true)
     schedule_idle_check()
-    state = new_field(%{id: id, layout: layout, mode: mode, needed: needed, players: %{}})
-    Store.write(state)
+
+    state =
+      new_field(%{
+        id: id,
+        layout: layout,
+        mode: mode,
+        needed: needed,
+        players: %{},
+        public: public,
+        created_at: now(),
+        # True while the game is in the list of open games. A game with one
+        # player is never in it.
+        listed: public and needed > 1
+      })
+
+    store(state)
     {:ok, state}
   end
 
   # The processes of the players were on the old node. The players can join
   # again during the grace time.
   def init(%{} = state) do
+    Process.flag(:trap_exit, true)
     schedule_idle_check()
 
     if state.started_at != nil and now() < state.started_at do
       Process.send_after(self(), {:countdown_over, state.field_id}, state.started_at - now())
     end
 
-    state = Enum.reduce(Map.keys(state.players), state, &leave(&2, &1))
-    Store.write(state)
+    state =
+      Enum.reduce(Map.keys(state.players), state, &leave(&2, &1))
+      # A state from before the lists of the settings page
+      |> Map.put_new(:public, false)
+      |> Map.put_new(:created_at, now())
+      |> Map.put_new(:listed, false)
+
+    store(state)
     {:ok, state}
   end
 
@@ -98,8 +174,12 @@ defmodule Octomocto.Schulte.Game do
       when is_map_key(state.players, player_id) do
     Process.monitor(pid)
     state = update_in(state.players[player_id], &%{&1 | pid: pid, left: nil})
-    Store.write(state)
+    store(state)
     {:reply, {:ok, player_id, public(state)}, state}
+  end
+
+  def handle_call(:watch, _from, state) do
+    {:reply, {:ok, nil, public(state)}, state}
   end
 
   def handle_call({:join, _pid, _user_id, _name, _player_id}, _from, state)
@@ -151,21 +231,23 @@ defmodule Octomocto.Schulte.Game do
 
   def handle_cast({:pick, _player_id, _number}, state), do: {:noreply, state}
 
-  # A restart is possible at any time. A field that is not finished is not
+  # A player can restart at any time. A field that is not finished is not
   # saved.
-  def handle_cast(:restart, state) do
+  def handle_cast({:restart, player_id}, state) when is_map_key(state.players, player_id) do
     players = Map.new(state.players, fn {id, p} -> {id, %{p | score: 0}} end)
     state = %{state | players: players} |> new_field() |> start_clock()
     publish(state)
     {:noreply, state}
   end
 
+  def handle_cast({:restart, _player_id}, state), do: {:noreply, state}
+
   @impl true
   def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
     case Enum.find(state.players, fn {_id, p} -> p.pid == pid end) do
       {player_id, _player} ->
         state = leave(state, player_id)
-        Store.write(state)
+        store(state)
         {:noreply, state}
 
       nil ->
@@ -205,6 +287,13 @@ defmodule Octomocto.Schulte.Game do
     end
   end
 
+  # The node stops. The game leaves the lists of the settings page until a
+  # player joins it again on another node (see `Octomocto.GameProcess`).
+  @impl true
+  def terminate(_reason, state) do
+    if in_lobby?(state), do: Lobby.broadcast(__MODULE__, state.id, nil)
+  end
+
   defp new_field(state) do
     shapes = if state.layout == :classic, do: Classic.regions(), else: Layout.generate(@total)
     regions = Enum.zip_with(Enum.shuffle(1..@total), shapes, &Map.put(&2, :number, &1))
@@ -222,11 +311,13 @@ defmodule Octomocto.Schulte.Game do
   end
 
   # The clock starts after the countdown, so `started_at` is in the future
-  # until then.
+  # until then. A game that starts once does not go back to the list of
+  # open games, even when a player leaves later: nobody joins in the middle
+  # of a race.
   defp start_clock(%{started_at: nil} = state)
        when map_size(state.players) == state.needed do
     Process.send_after(self(), {:countdown_over, state.field_id}, @countdown_ms)
-    %{state | started_at: now() + @countdown_ms}
+    %{state | started_at: now() + @countdown_ms, listed: false}
   end
 
   defp start_clock(state), do: state
@@ -274,8 +365,18 @@ defmodule Octomocto.Schulte.Game do
     update_in(state.players[player_id], &%{&1 | pid: nil, left: left})
   end
 
-  defp publish(state) do
+  # Writes the state to the store, and sends the new row of the game to the
+  # settings pages
+  defp store(state) do
     Store.write(state)
+    if in_lobby?(state), do: Lobby.broadcast(__MODULE__, state.id, lobby_entry(state))
+  end
+
+  # True for a game that can be in the lists of the settings page
+  defp in_lobby?(state), do: state.public and state.needed > 1
+
+  defp publish(state) do
+    store(state)
     broadcast(state)
   end
 
