@@ -15,9 +15,21 @@ defmodule Octomocto.GameProcess do
   (try again soon).
   """
   def join(game, store, supervisor, id, user_id, name, player_id) do
+    call(game, store, supervisor, id, {:join, self(), user_id, name, player_id})
+  end
+
+  @doc """
+  Gives the reply of a `:watch` call to the game: the state for a process
+  that only watches. Gives the same errors as `join/7`.
+  """
+  def watch(game, store, supervisor, id) do
+    call(game, store, supervisor, id, :watch)
+  end
+
+  defp call(game, store, supervisor, id, request) do
     case whereis(game, store, supervisor, id) do
       nil -> {:error, :not_found}
-      pid -> GenServer.call(pid, {:join, self(), user_id, name, player_id})
+      pid -> GenServer.call(pid, request)
     end
   catch
     :exit, _reason -> {:error, :unavailable}

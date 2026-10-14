@@ -11,13 +11,16 @@ defmodule OctomoctoWeb.GameChannel do
 
   The browser sends the token in the join params when it joins again (for
   example, after a reload or a reconnect to another node in a deploy), and
-  gets back the same player. When the game stops on its node, the channel
+  gets back the same player. A browser with `"watch": true` in the join
+  params and no token of a player only watches, also when the game has a
+  free seat. When the game stops on its node, the channel
   joins the game again (on this node) and pushes a new reply as a
   `"joined"` event.
 
   The `opts` are:
 
     * `:context` - the module with `join/4`, for example `Octomocto.Schulte`,
+      and `watch/1` when its browsers can only watch,
     * `:game` - the game process module, with `via/1` and `topic/1`,
     * `:salt` - the salt of the player tokens of this game.
   """
@@ -34,7 +37,9 @@ defmodule OctomoctoWeb.GameChannel do
     Phoenix.PubSub.subscribe(Octomocto.PubSub, opts[:game].topic(game_id))
 
     player_id = verify_token(game_id, params["token"], opts)
-    socket = assign(socket, game_id: game_id, player_id: player_id)
+
+    socket =
+      assign(socket, game_id: game_id, player_id: player_id, watch: params["watch"] == true)
 
     case join_game(socket, opts) do
       {:ok, reply, socket} -> {:ok, reply, socket}
@@ -77,15 +82,21 @@ defmodule OctomoctoWeb.GameChannel do
   end
 
   defp join_game(socket, opts) do
-    %{game_id: game_id, player_id: player_id} = socket.assigns
-    user_id = socket.assigns[:user_id]
-
-    with {:ok, player_id, state} <-
-           opts[:context].join(game_id, user_id, Accounts.display_name(user_id), player_id) do
+    with {:ok, player_id, state} <- join_or_watch(socket.assigns, opts) do
+      game_id = socket.assigns.game_id
       socket = assign(socket, player_id: player_id, game_ref: monitor_game(game_id, opts))
       reply = %{player_id: player_id, token: sign_token(game_id, player_id, opts), state: state}
       {:ok, reply, socket}
     end
+  end
+
+  defp join_or_watch(%{game_id: game_id, player_id: nil, watch: true}, opts) do
+    opts[:context].watch(game_id)
+  end
+
+  defp join_or_watch(%{game_id: game_id, player_id: player_id} = assigns, opts) do
+    user_id = assigns[:user_id]
+    opts[:context].join(game_id, user_id, Accounts.display_name(user_id), player_id)
   end
 
   defp monitor_game(game_id, opts) do

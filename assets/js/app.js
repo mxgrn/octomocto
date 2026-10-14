@@ -213,7 +213,9 @@ if (matchNode) {
     } catch (_e) {}
     match.ports.matchJoined.send(reply)
   }
-  const channel = socket.channel(`match:${matchNode.dataset.gameId}`, () => token ? {token} : {})
+  // A link with ?watch=1 only watches the game. The token of a player wins.
+  const watch = new URLSearchParams(window.location.search).has("watch")
+  const channel = socket.channel(`match:${matchNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
   channel.on("state", state => match.ports.matchState.send(state))
   channel.on("joined", joined)
   channel.join()

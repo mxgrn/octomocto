@@ -11,7 +11,7 @@ defmodule OctomoctoWeb.MatchLive do
   def mount(_params, _session, socket) do
     if connected?(socket), do: Phoenix.PubSub.subscribe(Octomocto.PubSub, Game.lobby_topic())
 
-    {:ok, assign(socket, [themes: Themes.list(), open_games: Match.open_games()] ++ seo())}
+    {:ok, socket |> assign([themes: Themes.list()] ++ seo()) |> assign_lobby(Match.lobby())}
   end
 
   @doc "The title and the description of the Match pages, for search engines."
@@ -37,7 +37,7 @@ defmodule OctomoctoWeb.MatchLive do
   end
 
   def handle_info({:lobby_changed, id, entry}, socket) do
-    {:noreply, update(socket, :open_games, &Match.put_open_game(&1, id, entry))}
+    {:noreply, assign_lobby(socket, Match.put_lobby_entry(socket.assigns.lobby, id, entry))}
   end
 
   def handle_event("new_game", _params, socket) do
@@ -69,13 +69,20 @@ defmodule OctomoctoWeb.MatchLive do
     %{theme: theme, set: set, cards: cards, players: players, public: public}
   end
 
+  defp assign_lobby(socket, entries) do
+    assign(socket,
+      lobby: entries,
+      open_games: Match.open_games(entries),
+      ongoing_games: Match.ongoing_games(entries)
+    )
+  end
+
   # Nil for a guest
   defp user_results(%{user: _} = scope, filter), do: Match.user_results(scope, filter)
   defp user_results(nil, _filter), do: nil
 
-  attr :games, :list, required: true, doc: "see `Octomocto.Match.open_games/0`"
+  attr :games, :list, required: true, doc: "see `Octomocto.Match.open_games/1`"
   attr :settings, :map, required: true, doc: "the settings of the new game"
-  attr :class, :string, default: nil
 
   # The public games that wait for players. A game with the same settings
   # as the new game has a green background.
@@ -83,10 +90,7 @@ defmodule OctomoctoWeb.MatchLive do
     ~H"""
     <section
       id="open-games"
-      class={[
-        "mx-auto w-full max-w-md rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10",
-        @class
-      ]}
+      class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
     >
       <h3 class="mb-3 flex items-center gap-2 font-semibold">
         <.icon name="hero-user-group" class="size-4 text-sky-600" /> Open games
@@ -132,6 +136,70 @@ defmodule OctomoctoWeb.MatchLive do
             class="shrink-0 rounded-full bg-sky-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-sky-500 active:translate-y-0"
           >
             Join
+          </.link>
+        </li>
+      </ul>
+    </section>
+    """
+  end
+
+  attr :games, :list, required: true, doc: "see `Octomocto.Match.ongoing_games/1`"
+
+  # The public games that have started. The player of the turn is in bold.
+  defp ongoing_games(assigns) do
+    ~H"""
+    <section
+      id="ongoing-games"
+      class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
+    >
+      <h3 class="mb-3 flex items-center gap-2 font-semibold">
+        <.icon name="hero-play-circle" class="size-4 text-sky-600" /> Ongoing games
+      </h3>
+      <p
+        :if={@games == []}
+        id="ongoing-games-empty"
+        class="py-2 text-center text-sm text-base-content/50"
+      >
+        No games now.
+      </p>
+      <ul :if={@games != []} id="ongoing-games-list" class="-mx-2 space-y-1">
+        <li
+          :for={game <- @games}
+          id={"ongoing-game-#{game.id}"}
+          class="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-base-200/60"
+        >
+          <img src={~p"/images/match/#{game.theme}/1.svg"} alt="" class="size-9 shrink-0" />
+          <div class="min-w-0 flex-1">
+            <p class="flex items-center gap-2 text-sm font-medium">
+              <span class="truncate">{game_summary(game)}</span>
+              <span
+                :if={game.finished}
+                class="shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400"
+              >
+                Finished
+              </span>
+            </p>
+            <p class="flex flex-wrap gap-x-2.5 text-xs text-base-content/70">
+              <span :for={player <- game.players} class="flex items-center gap-1">
+                <span class={[
+                  "size-1.5 rounded-full transition-colors",
+                  if(player.away, do: "bg-base-content/25", else: "bg-emerald-500")
+                ]} />
+                <span class={[
+                  (player.turn and not game.finished) && "font-semibold text-base-content"
+                ]}>
+                  {lobby_name(player)}
+                </span>
+                <span class="tabular-nums text-base-content/50">{player.score}</span>
+              </span>
+            </p>
+          </div>
+          <.link
+            id={"watch-#{game.id}"}
+            href={~p"/match/#{game.id}?watch=1"}
+            class="shrink-0 rounded-full px-4 py-1.5 text-sm font-medium text-sky-700 ring-1 ring-sky-600/30 transition hover:-translate-y-0.5 hover:bg-sky-50 active:translate-y-0 dark:text-sky-400 dark:hover:bg-sky-500/10"
+          >
+            Watch
           </.link>
         </li>
       </ul>

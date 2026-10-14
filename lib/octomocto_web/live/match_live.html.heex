@@ -34,11 +34,13 @@
       </button>
     </div>
 
-    <.open_games
-      games={@open_games}
-      settings={@settings}
-      class="lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
-    />
+    <div
+      id="match-lobby"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
+    >
+      <.open_games games={@open_games} settings={@settings} />
+      <.ongoing_games games={@ongoing_games} />
+    </div>
 
     <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
       <div id="match-settings" class="flex w-full flex-col gap-4">

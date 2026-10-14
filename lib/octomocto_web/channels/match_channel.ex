@@ -23,7 +23,7 @@ defmodule OctomoctoWeb.MatchChannel do
   end
 
   def handle_in("restart", _params, socket) do
-    Match.restart(socket.assigns.game_id)
+    Match.restart(socket.assigns.game_id, socket.assigns.player_id)
     {:noreply, socket}
   end
 
