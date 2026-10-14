@@ -4,13 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <meta
-      name="description"
-      content={
-        assigns[:page_description] ||
-          "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
-      }
-    />
+    <meta name="description" content={page_description(assigns)} />
     <%!-- Game rooms are private links, so search engines must not show them --%>
     <meta :if={assigns[:noindex]} name="robots" content="noindex" />
     <%!--
@@ -18,6 +12,11 @@
       Search engines must show only the URL without the query.
     --%>
     <link :if={assigns[:canonical_url]} rel="canonical" href={@canonical_url} />
+    <.social_tags
+      title={assigns[:page_title]}
+      description={page_description(assigns)}
+      url={assigns[:canonical_url]}
+    />
     <.live_title
       default="Octomocto"
       suffix={

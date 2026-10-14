@@ -199,6 +199,38 @@ defmodule OctomoctoWeb.Layouts do
   end
 
   @doc """
+  Adds the Open Graph and Twitter tags, so that shared links show a preview
+  card.
+  """
+  attr :title, :string, default: nil, doc: "the page title, without the site name"
+  attr :description, :string, required: true
+  attr :url, :string, default: nil, doc: "the canonical URL of the page"
+
+  def social_tags(assigns) do
+    ~H"""
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Octomocto" />
+    <meta property="og:title" content={og_title(@title)} />
+    <meta property="og:description" content={@description} />
+    <meta :if={@url} property="og:url" content={@url} />
+    <meta property="og:image" content={url(~p"/images/og.png")} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Octomocto: Use your heads" />
+    <meta name="twitter:card" content="summary_large_image" />
+    """
+  end
+
+  defp page_description(assigns) do
+    assigns[:page_description] ||
+      "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
+  end
+
+  # The same title as in the browser tab
+  defp og_title(nil), do: "Octomocto · Brain Games to Play Solo or with Friends"
+  defp og_title(title), do: "#{title} · Octomocto"
+
+  @doc """
   Adds the Google tag (gtag.js) for Google Analytics.
   """
   def gtag(assigns) do
