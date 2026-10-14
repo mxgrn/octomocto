@@ -31,5 +31,5 @@
       </g>
     </mask>
   </defs>
-  <rect y="-5" width="240" height="310" fill="#fff" opacity="0.1" mask="url(#cutout)"/>
+  <rect y="-5" width="240" height="310" fill="#fff" opacity="0.05" mask="url(#cutout)"/>
 </svg>

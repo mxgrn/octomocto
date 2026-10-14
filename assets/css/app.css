@@ -223,7 +223,7 @@
 }
 /* The back has the brand indigo with a faded double-octo mark */
 .match-card-back {
-  background: url("/images/card-back.svg") center / auto 72% no-repeat, #4b4be8;
+  background: url("/images/card-back.svg") center / auto 72% no-repeat, #5e5ec9;
   transition: filter 150ms, transform 150ms;
 }
 .match-card-face {
