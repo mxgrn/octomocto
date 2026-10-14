@@ -36,34 +36,30 @@ defmodule Octomocto.Match do
   @doc """
   The public games that wait for players, with the fewest free seats first,
   and the oldest game first when the free seats are the same. Each game is
-  a map with the settings of the game, its `:players` (the `:name` is nil
-  for a guest, `:away` is true during the grace time) and its
-  `:seats_left`.
+  a `Octomocto.Match.Game.lobby_entry/1`.
   """
   def open_games do
     Store.all()
-    # A state from before the list of open games has no `:listed`
-    |> Enum.filter(&(Map.get(&1, :listed, false) and &1.players != %{}))
-    |> Enum.map(fn state ->
-      players =
-        state.players
-        |> Map.values()
-        |> Enum.sort_by(& &1.joined_at)
-        |> Enum.map(&%{name: &1.name, color_name: &1.color_name, away: &1.left != nil})
-
-      %{
-        id: state.id,
-        theme: state.theme,
-        set: state.set,
-        cards: state.size,
-        players_needed: state.needed,
-        players: players,
-        seats_left: state.needed - map_size(state.players),
-        created_at: state.created_at
-      }
-    end)
-    |> Enum.sort_by(&{&1.seats_left, &1.created_at})
+    # The game of a node that stopped is in the store until a player joins
+    # it again. Nobody waits in it.
+    |> Enum.filter(&GenServer.whereis(Game.via(&1.id)))
+    |> Enum.map(&Game.lobby_entry/1)
+    |> Enum.reject(&is_nil/1)
+    |> sort_open_games()
   end
+
+  @doc """
+  Puts the new row of one game in a list of `open_games/0`. The `entry` is
+  nil when the game left the list.
+  """
+  def put_open_game(games, id, entry) do
+    games
+    |> Enum.reject(&(&1.id == id))
+    |> Enum.concat(List.wrap(entry))
+    |> sort_open_games()
+  end
+
+  defp sort_open_games(games), do: Enum.sort_by(games, &{&1.seats_left, &1.created_at})
 
   @doc """
   Adds a player for the calling process. The player is removed some time

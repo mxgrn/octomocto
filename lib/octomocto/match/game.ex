@@ -24,8 +24,9 @@ defmodule Octomocto.Match.Game do
 
   A public game is in the list of open games (see `Octomocto.Match.open_games/0`)
   until it has all its players for the first time. While it is in the list,
-  the game tells the settings pages about each change of its players on the
-  `lobby_topic/0` as `:lobby_changed`.
+  the game sends its new row (see `lobby_entry/1`) on the `lobby_topic/0`
+  after each change of its players, as `{:lobby_changed, id, entry}`. The
+  entry is nil when the game leaves the list, also when its node stops.
 
   The game is registered in the whole cluster, and it writes its state to
   `Octomocto.Match.Store` after each change. When its node stops, the game
@@ -79,8 +80,37 @@ defmodule Octomocto.Match.Game do
 
   def lobby_topic, do: "match_lobby"
 
+  @doc """
+  The row of the game in the list of open games, or nil when the game is not
+  in the list. The `:name` of a player is nil for a guest, and `:away` is
+  true during the grace time.
+  """
+  # A state from before the list of open games has no `:listed`
+  def lobby_entry(%{listed: true} = state) when map_size(state.players) > 0 do
+    players =
+      state.players
+      |> Map.values()
+      |> Enum.sort_by(& &1.joined_at)
+      |> Enum.map(&%{name: &1.name, color_name: &1.color_name, away: &1.left != nil})
+
+    %{
+      id: state.id,
+      theme: state.theme,
+      set: state.set,
+      cards: state.size,
+      players_needed: state.needed,
+      players: players,
+      seats_left: state.needed - map_size(state.players),
+      created_at: state.created_at
+    }
+  end
+
+  def lobby_entry(_state), do: nil
+
   @impl true
   def init({id, config}) do
+    # So that terminate/2 runs when the node stops
+    Process.flag(:trap_exit, true)
     schedule_idle_check()
 
     state =
@@ -104,6 +134,7 @@ defmodule Octomocto.Match.Game do
   # The processes of the players were on the old node. The players can join
   # again during the grace time.
   def init(%{} = state) do
+    Process.flag(:trap_exit, true)
     schedule_idle_check()
 
     state =
@@ -114,7 +145,7 @@ defmodule Octomocto.Match.Game do
       |> Map.put_new(:listed, false)
 
     Store.write(state)
-    notify_lobby(state.listed)
+    notify_lobby(state, state.listed)
     {:ok, state}
   end
 
@@ -124,7 +155,7 @@ defmodule Octomocto.Match.Game do
     Process.monitor(pid)
     state = update_in(state.players[player_id], &%{&1 | pid: pid, left: nil})
     Store.write(state)
-    notify_lobby(state.listed)
+    notify_lobby(state, state.listed)
     {:reply, {:ok, player_id, public(state)}, state}
   end
 
@@ -160,7 +191,7 @@ defmodule Octomocto.Match.Game do
       |> make_ready()
 
     publish(state)
-    notify_lobby(listed)
+    notify_lobby(state, listed)
     {:reply, {:ok, player_id, public(state)}, state}
   end
 
@@ -211,7 +242,7 @@ defmodule Octomocto.Match.Game do
       {player_id, _player} ->
         state = leave(state, player_id)
         Store.write(state)
-        notify_lobby(state.listed)
+        notify_lobby(state, state.listed)
         {:noreply, state}
 
       nil ->
@@ -231,7 +262,7 @@ defmodule Octomocto.Match.Game do
         state = %{state | players: Map.delete(state.players, player_id)}
         state = if state.players == %{}, do: %{state | turn: nil}, else: state
         publish(state)
-        notify_lobby(state.listed)
+        notify_lobby(state, state.listed)
         {:noreply, state}
 
       _ ->
@@ -256,6 +287,15 @@ defmodule Octomocto.Match.Game do
     else
       schedule_idle_check()
       {:noreply, state}
+    end
+  end
+
+  # The node stops. The game leaves the list of open games until a player
+  # joins it again on another node (see `Octomocto.GameProcess`).
+  @impl true
+  def terminate(_reason, state) do
+    if state.listed do
+      Phoenix.PubSub.broadcast(Octomocto.PubSub, lobby_topic(), {:lobby_changed, state.id, nil})
     end
   end
 
@@ -395,11 +435,18 @@ defmodule Octomocto.Match.Game do
   end
 
   # Tells the settings pages to read the list of open games again
-  defp notify_lobby(true) do
-    Phoenix.PubSub.broadcast(Octomocto.PubSub, lobby_topic(), :lobby_changed)
+  # Sends the new row of the game to the settings pages. The row is in the
+  # message, because the copy of the store on the node of a page can be
+  # older than the message.
+  defp notify_lobby(state, true) do
+    Phoenix.PubSub.broadcast(
+      Octomocto.PubSub,
+      lobby_topic(),
+      {:lobby_changed, state.id, lobby_entry(state)}
+    )
   end
 
-  defp notify_lobby(false), do: :ok
+  defp notify_lobby(_state, false), do: :ok
 
   defp publish(state) do
     Store.write(state)

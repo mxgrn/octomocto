@@ -36,8 +36,8 @@ defmodule OctomoctoWeb.MatchLive do
      )}
   end
 
-  def handle_info(:lobby_changed, socket) do
-    {:noreply, assign(socket, open_games: Match.open_games())}
+  def handle_info({:lobby_changed, id, entry}, socket) do
+    {:noreply, update(socket, :open_games, &Match.put_open_game(&1, id, entry))}
   end
 
   def handle_event("new_game", _params, socket) do
