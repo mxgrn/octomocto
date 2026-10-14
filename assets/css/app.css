@@ -210,7 +210,7 @@
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transition: transform 300ms ease;
+  transition: transform 180ms ease;
 }
 .memory-card.is-up .memory-card-inner { transform: rotateY(180deg); }
 .memory-card-back, .memory-card-face {
