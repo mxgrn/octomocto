@@ -740,7 +740,7 @@ viewGame model me game =
             [ div []
                 [ div [ class "flex items-center gap-2" ]
                     [ h1 [ class "text-2xl font-semibold tracking-tight" ]
-                        [ a [ id "sudoku-title-link", href "/sudoku", class "transition hover:text-rose-600" ] [ text "Sudoku Race" ] ]
+                        [ a [ id "sudoku-title-link", href "/sudoku", class "transition hover:text-octo-indigo" ] [ text "Sudoku Race" ] ]
                     , viewMuteButton model.muted
                     ]
                 , p [ class "text-sm opacity-60" ]
@@ -831,17 +831,17 @@ viewRestartButton =
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-rose-50 p-1 pl-4 text-sm ring-1 ring-rose-200 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
         [ input
             [ id "sudoku-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-rose-900 outline-none lg:px-2 lg:py-1"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1"
             ]
             []
         , button
             [ id "sudoku-copy-link"
-            , class "rounded-full bg-rose-600 px-4 py-1.5 font-medium text-white transition hover:bg-rose-500 active:scale-95"
+            , class "rounded-full bg-octo-indigo px-4 py-1.5 font-medium text-white transition hover:bg-octo-indigo/90 active:scale-95"
             , onClick CopyLink
             ]
             [ text
@@ -878,7 +878,7 @@ viewClock model game =
             ]
         , div [ class "flex flex-col items-center justify-center" ]
             [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "empty" ]
-            , span [ id "sudoku-empty-left", class "text-3xl font-bold text-rose-600 tabular-nums" ]
+            , span [ id "sudoku-empty-left", class "text-3xl font-bold text-octo-indigo tabular-nums" ]
                 [ text
                     (if Array.isEmpty game.cells then
                         "–"
@@ -1049,7 +1049,7 @@ viewBoardCell model game playable selectedDigit cell =
               )
             , ( "is-wrong", wrong /= Nothing )
             , ( "is-conflict", List.member cell model.conflicts )
-            , ( "ring-2 ring-inset ring-rose-300", isLast && not game.finished && model.selected /= Just cell )
+            , ( "ring-2 ring-inset ring-octo-indigo/40", isLast && not game.finished && model.selected /= Just cell )
             ]
         , onClick (Select cell)
         , Html.Attributes.attribute "aria-label" (cellName cell filled)
@@ -1100,7 +1100,7 @@ viewPad model game =
                     [ id ("sudoku-key-" ++ String.fromInt digit)
                     , class "sudoku-pad-key flex flex-col items-center justify-center rounded-xl bg-white py-2 shadow-sm ring-1 ring-slate-200"
                     , classList
-                        [ ( "enabled:hover:-translate-y-0.5 enabled:hover:bg-rose-50 enabled:hover:ring-rose-300 enabled:active:scale-95", ready )
+                        [ ( "enabled:hover:-translate-y-0.5 enabled:hover:bg-octo-mist enabled:hover:ring-octo-indigo/40 enabled:active:scale-95", ready )
                         , ( "opacity-30", left == 0 )
                         ]
                     , Html.Attributes.disabled (left == 0)
@@ -1124,7 +1124,7 @@ viewWaiting : Game -> Html Msg
 viewWaiting game =
     div
         [ id "sudoku-waiting"
-        , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl bg-rose-950/80 p-4 text-center text-white"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl bg-octo-navy/80 p-4 text-center text-white"
         ]
         [ p [ class "text-3xl font-semibold" ] [ text "Waiting for players" ]
         , p [ id "sudoku-waiting-count", class "text-lg tabular-nums opacity-80" ]
@@ -1145,7 +1145,7 @@ viewCountdown : Int -> Html Msg
 viewCountdown seconds =
     div
         [ id "sudoku-countdown"
-        , class "absolute inset-0 flex items-center justify-center rounded-xl bg-rose-950/80"
+        , class "absolute inset-0 flex items-center justify-center rounded-xl bg-octo-navy/80"
         ]
         [ Html.Keyed.node "div"
             []
@@ -1198,7 +1198,7 @@ viewResult me game =
     in
     div
         [ id "sudoku-result"
-        , class "absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-xl bg-rose-950/70 p-4 text-white backdrop-blur-sm"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-xl bg-octo-navy/70 p-4 text-white backdrop-blur-sm"
         ]
         [ p [ class "text-3xl font-semibold" ] [ text message ]
         , p [ id "sudoku-final-time", class "text-lg tabular-nums opacity-80" ]
@@ -1224,7 +1224,7 @@ viewResult me game =
           else
             button
                 [ id "sudoku-play-again"
-                , class "rounded-full bg-white px-6 py-2.5 font-medium text-rose-800 shadow-lg transition hover:-translate-y-0.5 hover:bg-rose-50 active:translate-y-0"
+                , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:-translate-y-0.5 hover:bg-octo-mist active:translate-y-0"
                 , onClick Restart
                 ]
                 [ text "Play again" ]

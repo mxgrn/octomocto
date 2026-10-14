@@ -2,8 +2,8 @@ defmodule OctomoctoWeb.GamePageComponents do
   @moduledoc """
   The parts of the settings page of each game: the lists of open and
   ongoing games (see `Octomocto.Lobby`), the Start game button, and the
-  rules in a pop-up. Each game has its own `accent` color: `:sky`,
-  `:emerald`, `:violet` or `:rose`.
+  rules in a pop-up. All games have the same accent color, the brand
+  indigo.
   """
   use Phoenix.Component
 
@@ -18,7 +18,6 @@ defmodule OctomoctoWeb.GamePageComponents do
     doc: "a function that is true for a game with the settings of the new game"
 
   attr :path, :any, required: true, doc: "a function that gives the path of a game by its id"
-  attr :accent, :atom, required: true
   slot :icon, required: true, doc: "the image of a game, with the game as the argument"
   slot :summary, required: true, doc: "the settings of a game, with the game as the argument"
 
@@ -33,7 +32,7 @@ defmodule OctomoctoWeb.GamePageComponents do
       class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
     >
       <h3 class="mb-3 flex items-center gap-2 font-semibold">
-        <.icon name="hero-user-group" class={["size-4", accent(@accent, :icon)]} /> Open games
+        <.icon name="hero-user-group" class={["size-4", "text-octo-indigo"]} /> Open games
       </h3>
       <p
         :if={@games == []}
@@ -72,7 +71,7 @@ defmodule OctomoctoWeb.GamePageComponents do
             href={@path.(game.id)}
             class={[
               "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium text-white shadow-sm transition hover:-translate-y-0.5 active:translate-y-0",
-              accent(@accent, :button)
+              "bg-octo-indigo hover:bg-octo-indigo/90"
             ]}
           >
             Join
@@ -85,7 +84,6 @@ defmodule OctomoctoWeb.GamePageComponents do
 
   attr :games, :list, required: true, doc: "see `Octomocto.Lobby.ongoing_games/1`"
   attr :path, :any, required: true, doc: "a function that gives the path of a game by its id"
-  attr :accent, :atom, required: true
   slot :icon, required: true, doc: "the image of a game, with the game as the argument"
   slot :summary, required: true, doc: "the settings of a game, with the game as the argument"
 
@@ -100,7 +98,7 @@ defmodule OctomoctoWeb.GamePageComponents do
       class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
     >
       <h3 class="mb-3 flex items-center gap-2 font-semibold">
-        <.icon name="hero-play-circle" class={["size-4", accent(@accent, :icon)]} /> Ongoing games
+        <.icon name="hero-play-circle" class={["size-4", "text-octo-indigo"]} /> Ongoing games
       </h3>
       <p
         :if={@games == []}
@@ -145,7 +143,7 @@ defmodule OctomoctoWeb.GamePageComponents do
             href={@path.(game.id) <> "?watch=1"}
             class={[
               "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ring-1 transition hover:-translate-y-0.5 active:translate-y-0",
-              accent(@accent, :outline)
+              "text-octo-indigo ring-octo-indigo/30 hover:bg-octo-mist dark:text-octo-indigo-light dark:hover:bg-octo-indigo-light/10"
             ]}
           >
             Watch
@@ -156,7 +154,6 @@ defmodule OctomoctoWeb.GamePageComponents do
     """
   end
 
-  attr :accent, :atom, required: true
   attr :multiplayer, :boolean, required: true, doc: "shows the hint about the link"
 
   @doc """
@@ -180,7 +177,7 @@ defmodule OctomoctoWeb.GamePageComponents do
         phx-disable-with="Starting..."
         class={[
           "pointer-events-auto cursor-pointer rounded-full px-8 py-3 font-medium text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0",
-          accent(@accent, :start)
+          "bg-octo-indigo shadow-octo-indigo/25 hover:bg-octo-indigo/90"
         ]}
       >
         Start game
@@ -192,8 +189,6 @@ defmodule OctomoctoWeb.GamePageComponents do
     """
   end
 
-  attr :accent, :atom, required: true
-
   @doc "The link that opens the `rules/1` pop-up."
   def how_to_play(assigns) do
     ~H"""
@@ -203,7 +198,7 @@ defmodule OctomoctoWeb.GamePageComponents do
       phx-click={show_rules()}
       class={[
         "inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition",
-        accent(@accent, :link)
+        "text-octo-indigo hover:text-octo-indigo/80"
       ]}
     >
       <.icon name="hero-question-mark-circle" class="size-4" /> How to play
@@ -212,7 +207,6 @@ defmodule OctomoctoWeb.GamePageComponents do
   end
 
   attr :rules, :list, required: true, doc: "the rules, one sentence or more each"
-  attr :accent, :atom, required: true
 
   @doc """
   The rules of the game in a pop-up. It opens and closes in the browser,
@@ -250,7 +244,7 @@ defmodule OctomoctoWeb.GamePageComponents do
           </div>
           <ul class="space-y-2.5 text-base-content/80">
             <li :for={rule <- @rules} class="flex gap-3">
-              <span class={["mt-2.5 size-1.5 shrink-0 rounded-full", accent(@accent, :bullet)]} />
+              <span class={["mt-2.5 size-1.5 shrink-0 rounded-full", "bg-octo-indigo"]} />
               <span>{rule}</span>
             </li>
           </ul>
@@ -308,44 +302,4 @@ defmodule OctomoctoWeb.GamePageComponents do
     # Waits for the panel and the backdrop to go
     |> JS.hide(to: "#rules", time: 200, transition: {"duration-200", "", ""})
   end
-
-  # The full class names, so that Tailwind finds them
-  defp accent(:sky, :icon), do: "text-sky-600"
-  defp accent(:sky, :link), do: "text-sky-600 hover:text-sky-500"
-  defp accent(:sky, :bullet), do: "bg-sky-500"
-  defp accent(:sky, :button), do: "bg-sky-600 hover:bg-sky-500"
-  defp accent(:sky, :start), do: "bg-sky-600 shadow-sky-600/25 hover:bg-sky-500"
-
-  defp accent(:sky, :outline),
-    do: "text-sky-700 ring-sky-600/30 hover:bg-sky-50 dark:text-sky-400 dark:hover:bg-sky-500/10"
-
-  defp accent(:emerald, :icon), do: "text-emerald-600"
-  defp accent(:emerald, :link), do: "text-emerald-600 hover:text-emerald-500"
-  defp accent(:emerald, :bullet), do: "bg-emerald-500"
-  defp accent(:emerald, :button), do: "bg-emerald-600 hover:bg-emerald-500"
-  defp accent(:emerald, :start), do: "bg-emerald-600 shadow-emerald-600/25 hover:bg-emerald-500"
-
-  defp accent(:emerald, :outline),
-    do:
-      "text-emerald-700 ring-emerald-600/30 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
-
-  defp accent(:violet, :icon), do: "text-violet-600"
-  defp accent(:violet, :link), do: "text-violet-600 hover:text-violet-500"
-  defp accent(:violet, :bullet), do: "bg-violet-500"
-  defp accent(:violet, :button), do: "bg-violet-600 hover:bg-violet-500"
-  defp accent(:violet, :start), do: "bg-violet-600 shadow-violet-600/25 hover:bg-violet-500"
-
-  defp accent(:violet, :outline),
-    do:
-      "text-violet-700 ring-violet-600/30 hover:bg-violet-50 dark:text-violet-400 dark:hover:bg-violet-500/10"
-
-  defp accent(:rose, :icon), do: "text-rose-600"
-  defp accent(:rose, :link), do: "text-rose-600 hover:text-rose-500"
-  defp accent(:rose, :bullet), do: "bg-rose-500"
-  defp accent(:rose, :button), do: "bg-rose-600 hover:bg-rose-500"
-  defp accent(:rose, :start), do: "bg-rose-600 shadow-rose-600/25 hover:bg-rose-500"
-
-  defp accent(:rose, :outline),
-    do:
-      "text-rose-700 ring-rose-600/30 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10"
 end

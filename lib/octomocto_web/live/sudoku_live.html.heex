@@ -16,7 +16,7 @@
   >
     <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 xl:max-w-none">
       <div class="flex items-center justify-center gap-3">
-        <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-rose-100 shadow-inner">
+        <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
           <.grid_icon class="w-8" />
         </div>
         <h1 class="text-3xl font-semibold tracking-tight">Sudoku Race</h1>
@@ -24,7 +24,7 @@
       <p class="text-base-content/70">
         Choose the settings and start a new game, or join an open game.
       </p>
-      <.how_to_play accent={:rose} />
+      <.how_to_play />
     </div>
 
     <div
@@ -35,12 +35,11 @@
         games={@open_games}
         matches={&same_settings?(&1, @settings)}
         path={fn id -> ~p"/sudoku/#{id}" end}
-        accent={:rose}
       >
         <:icon :let={_game}><.grid_icon class="w-8 shrink-0" /></:icon>
         <:summary :let={game}>{String.capitalize(game.settings.difficulty)} · 9×9</:summary>
       </.open_games>
-      <.ongoing_games games={@ongoing_games} path={fn id -> ~p"/sudoku/#{id}" end} accent={:rose}>
+      <.ongoing_games games={@ongoing_games} path={fn id -> ~p"/sudoku/#{id}" end}>
         <:icon :let={_game}><.grid_icon class="w-8 shrink-0" /></:icon>
         <:summary :let={game}>{String.capitalize(game.settings.difficulty)} · 9×9</:summary>
       </.ongoing_games>
@@ -95,7 +94,7 @@
         </.setting>
       </div>
 
-      <.start_bar accent={:rose} multiplayer={@settings.players > 1} />
+      <.start_bar multiplayer={@settings.players > 1} />
     </div>
 
     <div
@@ -105,7 +104,7 @@
       <.score_list
         id="your-results"
         icon="hero-user"
-        icon_class="text-rose-500"
+        icon_class="text-octo-indigo"
         title="Your results"
         empty={@user_results != nil and @user_results.latest == []}
       >
@@ -144,7 +143,7 @@
             <.link
               id="your-results-sign-in"
               href={~p"/signin"}
-              class="font-medium text-rose-600 transition hover:text-rose-500 hover:underline"
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
             >
               Sign in
             </.link>
@@ -171,7 +170,7 @@
       <.score_list
         id="latest-games"
         icon="hero-clock"
-        icon_class="text-rose-600"
+        icon_class="text-octo-indigo"
         title="Latest games"
         empty={@leaderboard.latest == []}
       >
@@ -185,5 +184,5 @@
     </div>
   </div>
 
-  <.rules rules={@rules} accent={:rose} />
+  <.rules rules={@rules} />
 </Layouts.app>

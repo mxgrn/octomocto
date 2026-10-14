@@ -95,7 +95,7 @@ defmodule OctomoctoWeb.SchulteLive do
   # A small copy of the badge of the page, for a row of the lists
   defp lobby_icon(assigns) do
     ~H"""
-    <div class="grid size-9 shrink-0 place-items-center rounded-xl bg-emerald-100 text-[0.6rem] font-bold text-emerald-700 tabular-nums">
+    <div class="grid size-9 shrink-0 place-items-center rounded-xl bg-octo-indigo/10 text-[0.6rem] font-bold text-octo-indigo tabular-nums">
       1·2·3
     </div>
     """

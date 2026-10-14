@@ -16,7 +16,7 @@
   >
     <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 xl:max-w-none">
       <div class="flex items-center justify-center gap-3">
-        <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-2xl shadow-inner">
+        <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 text-2xl shadow-inner">
           🃏
         </div>
         <h1 class="text-3xl font-semibold tracking-tight">Match</h1>
@@ -24,7 +24,7 @@
       <p class="text-base-content/70">
         Choose the settings and start a new game, or join an open game.
       </p>
-      <.how_to_play accent={:sky} />
+      <.how_to_play />
     </div>
 
     <div
@@ -35,7 +35,6 @@
         games={@open_games}
         matches={&same_settings?(&1, @settings)}
         path={fn id -> ~p"/match/#{id}" end}
-        accent={:sky}
       >
         <:icon :let={game}>
           <img
@@ -46,7 +45,7 @@
         </:icon>
         <:summary :let={game}>{game_summary(game)}</:summary>
       </.open_games>
-      <.ongoing_games games={@ongoing_games} path={fn id -> ~p"/match/#{id}" end} accent={:sky}>
+      <.ongoing_games games={@ongoing_games} path={fn id -> ~p"/match/#{id}" end}>
         <:icon :let={game}>
           <img
             src={~p"/images/match/#{game.settings.theme}/1.svg"}
@@ -71,7 +70,7 @@
               class={[
                 "group flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
                 if(@settings.theme == theme.name,
-                  do: "bg-sky-50 ring-2 ring-sky-500 dark:bg-sky-500/10",
+                  do: "bg-octo-mist ring-2 ring-octo-indigo dark:bg-octo-indigo-light/10",
                   else: "ring-1 ring-base-content/5 hover:bg-base-200 hover:ring-base-content/15"
                 )
               ]}
@@ -166,7 +165,7 @@
         </.setting>
       </div>
 
-      <.start_bar accent={:sky} multiplayer={@settings.players > 1} />
+      <.start_bar multiplayer={@settings.players > 1} />
     </div>
 
     <div
@@ -176,7 +175,7 @@
       <.score_list
         id="your-results"
         icon="hero-user"
-        icon_class="text-sky-500"
+        icon_class="text-octo-indigo"
         title="Your results"
         empty={@user_results != nil and @user_results.latest == []}
       >
@@ -215,7 +214,7 @@
             <.link
               id="your-results-sign-in"
               href={~p"/signin"}
-              class="font-medium text-sky-600 transition hover:text-sky-500 hover:underline"
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
             >
               Sign in
             </.link>
@@ -242,7 +241,7 @@
       <.score_list
         id="latest-games"
         icon="hero-clock"
-        icon_class="text-sky-600"
+        icon_class="text-octo-indigo"
         title="Latest games"
         empty={@leaderboard.latest == []}
       >
@@ -256,5 +255,5 @@
     </div>
   </div>
 
-  <.rules rules={@rules} accent={:sky} />
+  <.rules rules={@rules} />
 </Layouts.app>

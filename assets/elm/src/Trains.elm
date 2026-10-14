@@ -1708,7 +1708,7 @@ viewGame model me game =
         [ aside [ id "trains-panel", class "flex flex-col gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
             [ div []
                 [ h1 [ class "text-2xl font-semibold tracking-tight" ]
-                    [ a [ id "trains-title-link", href "/trains", class "transition hover:text-amber-600" ] [ text "Right on Track" ] ]
+                    [ a [ id "trains-title-link", href "/trains", class "transition hover:text-octo-indigo" ] [ text "Right on Track" ] ]
                 , p [ class "text-sm opacity-60" ]
                     [ text
                         (if solo then
@@ -1785,7 +1785,7 @@ viewReady me game =
           else
             button
                 [ id "trains-start"
-                , class "rounded-full bg-amber-400 px-6 py-2 font-medium text-slate-900 shadow-lg shadow-amber-500/30 transition hover:-translate-y-0.5 hover:bg-amber-300 active:translate-y-0"
+                , class "rounded-full bg-octo-indigo px-6 py-2 font-medium text-white shadow-lg shadow-octo-indigo/30 transition hover:-translate-y-0.5 hover:bg-octo-indigo/90 active:translate-y-0"
                 , onClick Start
                 ]
                 [ text "Start" ]
@@ -1807,17 +1807,17 @@ viewStats round =
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-amber-50 p-1 pl-4 text-sm ring-1 ring-amber-200 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
         [ input
             [ id "trains-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-amber-900 outline-none lg:px-2 lg:py-1"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1"
             ]
             []
         , button
             [ id "trains-copy-link"
-            , class "rounded-full bg-amber-500 px-4 py-1.5 font-medium text-white transition hover:bg-amber-400 active:scale-95"
+            , class "rounded-full bg-octo-indigo px-4 py-1.5 font-medium text-white transition hover:bg-octo-indigo/90 active:scale-95"
             , onClick CopyLink
             ]
             [ text
@@ -1969,7 +1969,7 @@ overlayButton : String -> Msg -> String -> Html Msg
 overlayButton buttonId msg label =
     button
         [ id buttonId
-        , class "mt-3 rounded-full bg-amber-400 px-6 py-2.5 font-medium text-slate-900 shadow-lg shadow-amber-500/30 transition hover:-translate-y-0.5 hover:bg-amber-300 active:translate-y-0"
+        , class "mt-3 rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/30 transition hover:-translate-y-0.5 hover:bg-octo-indigo/90 active:translate-y-0"
         , onClick msg
         ]
         [ text label ]

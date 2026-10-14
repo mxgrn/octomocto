@@ -111,7 +111,7 @@ defmodule OctomoctoWeb.MatchLive do
       class={[
         "min-w-10 rounded-full px-4 py-1.5 text-sm font-medium transition",
         if(@selected,
-          do: "bg-sky-600 text-white shadow-sm",
+          do: "bg-octo-indigo text-white shadow-sm",
           else: "text-base-content/70 hover:bg-base-100 hover:text-base-content"
         )
       ]}

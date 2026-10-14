@@ -776,7 +776,7 @@ viewGame model me game =
             [ div []
                 [ div [ class "flex items-center gap-2" ]
                     [ h1 [ class "text-2xl font-semibold tracking-tight" ]
-                        [ a [ id "set-title-link", href "/set", class "transition hover:text-violet-600" ] [ text "Set" ] ]
+                        [ a [ id "set-title-link", href "/set", class "transition hover:text-octo-indigo" ] [ text "Set" ] ]
                     , viewMuteButton model.muted
                     ]
                 , p [ class "text-sm opacity-60" ]
@@ -982,17 +982,17 @@ viewRestartButton =
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-violet-50 p-1 pl-4 text-sm ring-1 ring-violet-200 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
         [ input
             [ id "set-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-violet-900 outline-none lg:px-2 lg:py-1"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1"
             ]
             []
         , button
             [ id "set-copy-link"
-            , class "rounded-full bg-violet-600 px-4 py-1.5 font-medium text-white transition hover:bg-violet-500 active:scale-95"
+            , class "rounded-full bg-octo-indigo px-4 py-1.5 font-medium text-white transition hover:bg-octo-indigo/90 active:scale-95"
             , onClick CopyLink
             ]
             [ text
@@ -1029,7 +1029,7 @@ viewClock model game =
             ]
         , div [ class "flex flex-col items-center justify-center" ]
             [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "deck" ]
-            , span [ id "set-deck-left", class "text-3xl font-bold text-violet-600 tabular-nums" ] [ text (String.fromInt game.deckLeft) ]
+            , span [ id "set-deck-left", class "text-3xl font-bold text-octo-indigo tabular-nums" ] [ text (String.fromInt game.deckLeft) ]
             ]
         ]
 
@@ -1298,7 +1298,7 @@ viewWaiting : Game -> Html Msg
 viewWaiting game =
     div
         [ id "set-waiting"
-        , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-violet-950/80 p-4 text-center text-white"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-octo-navy/80 p-4 text-center text-white"
         ]
         [ p [ class "text-3xl font-semibold" ] [ text "Waiting for players" ]
         , p [ id "set-waiting-count", class "text-lg tabular-nums opacity-80" ]
@@ -1319,7 +1319,7 @@ viewCountdown : Int -> Html Msg
 viewCountdown seconds =
     div
         [ id "set-countdown"
-        , class "absolute inset-0 flex items-center justify-center rounded-2xl bg-violet-950/80"
+        , class "absolute inset-0 flex items-center justify-center rounded-2xl bg-octo-navy/80"
         ]
         [ Html.Keyed.node "div"
             []
@@ -1372,7 +1372,7 @@ viewResult me game =
     in
     div
         [ id "set-result"
-        , class "absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl bg-violet-950/70 p-4 text-white backdrop-blur-sm"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl bg-octo-navy/70 p-4 text-white backdrop-blur-sm"
         ]
         [ p [ class "text-3xl font-semibold" ] [ text message ]
         , p [ id "set-final-time", class "text-lg tabular-nums opacity-80" ]
@@ -1398,7 +1398,7 @@ viewResult me game =
           else
             button
                 [ id "set-play-again"
-                , class "rounded-full bg-white px-6 py-2.5 font-medium text-violet-800 shadow-lg transition hover:-translate-y-0.5 hover:bg-violet-50 active:translate-y-0"
+                , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:-translate-y-0.5 hover:bg-octo-mist active:translate-y-0"
                 , onClick Restart
                 ]
                 [ text "Play again" ]

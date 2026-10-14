@@ -16,7 +16,7 @@
   >
     <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 xl:max-w-none">
       <div class="flex items-center justify-center gap-3">
-        <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 shadow-inner">
+        <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
           <.card_icon class="w-9" />
         </div>
         <h1 class="text-3xl font-semibold tracking-tight">Set</h1>
@@ -24,7 +24,7 @@
       <p class="text-base-content/70">
         Choose the settings and start a new game, or join an open game.
       </p>
-      <.how_to_play accent={:violet} />
+      <.how_to_play />
     </div>
 
     <div
@@ -35,12 +35,11 @@
         games={@open_games}
         matches={&same_settings?(&1, @settings)}
         path={fn id -> ~p"/set/#{id}" end}
-        accent={:violet}
       >
         <:icon :let={_game}><.card_icon class="w-9 shrink-0" /></:icon>
         <:summary :let={_game}>Normal · 81 cards</:summary>
       </.open_games>
-      <.ongoing_games games={@ongoing_games} path={fn id -> ~p"/set/#{id}" end} accent={:violet}>
+      <.ongoing_games games={@ongoing_games} path={fn id -> ~p"/set/#{id}" end}>
         <:icon :let={_game}><.card_icon class="w-9 shrink-0" /></:icon>
         <:summary :let={_game}>Normal · 81 cards</:summary>
       </.ongoing_games>
@@ -85,7 +84,7 @@
         </.setting>
       </div>
 
-      <.start_bar accent={:violet} multiplayer={@settings.players > 1} />
+      <.start_bar multiplayer={@settings.players > 1} />
     </div>
 
     <div
@@ -95,7 +94,7 @@
       <.score_list
         id="your-results"
         icon="hero-user"
-        icon_class="text-violet-500"
+        icon_class="text-octo-indigo"
         title="Your results"
         empty={@user_results != nil and @user_results.latest == []}
       >
@@ -134,7 +133,7 @@
             <.link
               id="your-results-sign-in"
               href={~p"/signin"}
-              class="font-medium text-violet-600 transition hover:text-violet-500 hover:underline"
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
             >
               Sign in
             </.link>
@@ -161,7 +160,7 @@
       <.score_list
         id="latest-games"
         icon="hero-clock"
-        icon_class="text-violet-600"
+        icon_class="text-octo-indigo"
         title="Latest games"
         empty={@leaderboard.latest == []}
       >
@@ -175,5 +174,5 @@
     </div>
   </div>
 
-  <.rules rules={@rules} accent={:violet} />
+  <.rules rules={@rules} />
 </Layouts.app>

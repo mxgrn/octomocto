@@ -258,9 +258,9 @@
 .set-card.is-playable:active { transform: scale(0.97); }
 .set-card.is-selected,
 .set-card.is-selected:hover {
-  background: #f5f3ff;
+  background: var(--color-octo-mist);
   transform: translateY(-3px);
-  box-shadow: 0 0 0 3px #7c3aed, 0 6px 14px rgb(124 58 237 / 0.25);
+  box-shadow: 0 0 0 3px var(--color-octo-indigo), 0 6px 14px rgb(75 75 232 / 0.25);
 }
 .set-card.is-wrong { box-shadow: 0 0 0 3px #ef4444; }
 .set-card.is-wrong .set-card-face { animation: set-shake 220ms ease-in-out; }
@@ -312,11 +312,11 @@
   transition: background-color 120ms;
 }
 .sudoku-cell.is-playable { cursor: pointer; }
-.sudoku-cell.is-playable:hover { background: #fff1f2; }
+.sudoku-cell.is-playable:hover { background: var(--color-octo-mist); }
 .sudoku-cell.is-peer { background: #f8fafc; }
-.sudoku-cell.is-same { background: #ffe4e6; }
+.sudoku-cell.is-same { background: rgb(75 75 232 / 0.12); }
 .sudoku-cell.is-selected,
-.sudoku-cell.is-selected:hover { background: #fecdd3; }
+.sudoku-cell.is-selected:hover { background: rgb(75 75 232 / 0.25); }
 .sudoku-cell.is-conflict { background: #fee2e2; color: #dc2626; }
 .sudoku-cell.is-wrong { background: #fee2e2; }
 .sudoku-cell.is-wrong .sudoku-digit { color: #dc2626; animation: schulte-shake 220ms ease-in-out; }

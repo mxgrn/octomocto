@@ -101,7 +101,7 @@ defmodule OctomoctoWeb.SudokuLive do
       class={[
         "min-w-10 rounded-full px-4 py-1.5 text-sm font-medium transition",
         if(@selected,
-          do: "bg-rose-600 text-white shadow-sm",
+          do: "bg-octo-indigo text-white shadow-sm",
           else: "text-base-content/70 hover:bg-base-100 hover:text-base-content"
         )
       ]}
@@ -134,7 +134,7 @@ defmodule OctomoctoWeb.SudokuLive do
         text-anchor="middle"
         font-size="9"
         font-weight="700"
-        fill="#e11d48"
+        class="fill-octo-indigo"
       >
         {digit}
       </text>

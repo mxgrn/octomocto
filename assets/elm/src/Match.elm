@@ -521,7 +521,7 @@ viewGame model me game =
             [ div []
                 [ div [ class "flex items-center gap-2" ]
                     [ h1 [ class "text-2xl font-semibold tracking-tight" ]
-                        [ a [ id "match-title-link", href "/match", class "transition hover:text-sky-600" ] [ text "Match" ] ]
+                        [ a [ id "match-title-link", href "/match", class "transition hover:text-octo-indigo" ] [ text "Match" ] ]
                     , viewMuteButton model.muted
                     ]
                 , p [ class "text-sm opacity-60" ]
@@ -646,17 +646,17 @@ viewRestartButton =
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-sky-50 p-1 pl-4 text-sm ring-1 ring-sky-200 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
         [ input
             [ id "match-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-sky-900 outline-none lg:px-2 lg:py-1"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1"
             ]
             []
         , button
             [ id "match-copy-link"
-            , class "rounded-full bg-sky-600 px-4 py-1.5 font-medium text-white transition hover:bg-sky-500 active:scale-95"
+            , class "rounded-full bg-octo-indigo px-4 py-1.5 font-medium text-white transition hover:bg-octo-indigo/90 active:scale-95"
             , onClick CopyLink
             ]
             [ text
@@ -704,7 +704,7 @@ viewClock model game =
                         "triplets left"
                     )
                 ]
-            , span [ id "match-sets-left", class "text-3xl font-bold text-sky-600 tabular-nums" ] [ text (String.fromInt setsLeft) ]
+            , span [ id "match-sets-left", class "text-3xl font-bold text-octo-indigo tabular-nums" ] [ text (String.fromInt setsLeft) ]
             ]
         ]
 
@@ -869,7 +869,7 @@ viewWaiting : Game -> Html Msg
 viewWaiting game =
     div
         [ id "match-waiting"
-        , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-sky-950/80 p-4 text-center text-white"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-octo-navy/80 p-4 text-center text-white"
         ]
         [ p [ class "text-3xl font-semibold" ] [ text "Waiting for players" ]
         , p [ id "match-waiting-count", class "text-lg tabular-nums opacity-80" ]
@@ -918,7 +918,7 @@ viewResult me game =
     in
     div
         [ id "match-result"
-        , class "absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl bg-sky-950/70 p-4 text-white backdrop-blur-sm"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl bg-octo-navy/70 p-4 text-white backdrop-blur-sm"
         ]
         [ p [ class "text-3xl font-semibold" ] [ text message ]
         , p [ id "match-final-time", class "text-lg tabular-nums opacity-80" ]
@@ -944,7 +944,7 @@ viewResult me game =
           else
             button
                 [ id "match-play-again"
-                , class "rounded-full bg-white px-6 py-2.5 font-medium text-sky-800 shadow-lg transition hover:-translate-y-0.5 hover:bg-sky-50 active:translate-y-0"
+                , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:-translate-y-0.5 hover:bg-octo-mist active:translate-y-0"
                 , onClick Restart
                 ]
                 [ text "Play again" ]
