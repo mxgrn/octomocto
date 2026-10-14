@@ -53,6 +53,16 @@ defmodule Octomocto.Trains.Game do
                      :timer.seconds(30)
                    )
 
+  # The size of all boards, the same as `boardFor` in Trains.elm. The server
+  # does not know the board, but it accepts only cells inside it, so that a
+  # client cannot make the state grow without a limit.
+  @cols 9
+  @rows 7
+
+  defguardp on_board(cell)
+            when is_list(cell) and length(cell) == 2 and
+                   hd(cell) in 0..(@cols - 1)//1 and hd(tl(cell)) in 0..(@rows - 1)//1
+
   @colors [
     {"pink", "#ec4899"},
     {"sky", "#0ea5e9"},
@@ -151,7 +161,7 @@ defmodule Octomocto.Trains.Game do
   def handle_cast({:start, _player_id}, state), do: {:noreply, state}
 
   def handle_cast({:flip, player_id, cell, value}, state)
-      when is_map_key(state.players, player_id) do
+      when is_map_key(state.players, player_id) and on_board(cell) and value in [0, 1] do
     state = put_in(state.switches[cell], value)
     Store.write(state)
     broadcast(state, {:trains_flip, %{player_id: player_id, cell: cell, value: value}})
@@ -159,9 +169,14 @@ defmodule Octomocto.Trains.Game do
   end
 
   # The first decision counts. A second one can come when the switch gets
-  # a new owner at the moment the train is there.
+  # a new owner at the moment the train is there. The trains have the
+  # numbers from 0 to the number of trains - 1 (see `trainCount` in
+  # Trains.elm).
   def handle_cast({:decision, player_id, train, cell, exit}, state)
-      when is_map_key(state.players, player_id) and state.started_at != nil do
+      when is_map_key(state.players, player_id) and state.started_at != nil and
+             is_integer(train) and train >= 0 and
+             train < state.trains_per_house * (state.switch_count + 1) and
+             on_board(cell) and on_board(exit) do
     if is_map_key(state.decisions, {train, cell}) do
       {:noreply, state}
     else
