@@ -78,9 +78,9 @@ defmodule OctomoctoWeb.UserSessionHTML do
     ~H"""
     <div
       id="sign-in-bar"
-      class="flex w-full max-w-xl flex-col items-center gap-2 sm:w-auto lg:items-end"
+      class="flex w-full max-w-xl flex-col items-center gap-2 lg:w-auto lg:max-w-none xl:items-end"
     >
-      <div class="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row">
+      <div class="flex w-full flex-col items-center gap-3 lg:w-auto lg:flex-row">
         <.telegram_widget
           :if={@telegram?}
           id="telegram-sign-in"
@@ -93,11 +93,24 @@ defmodule OctomoctoWeb.UserSessionHTML do
         >
           or
         </span>
+        <%!-- The form shows only after a click, so that the bar stays short --%>
+        <button
+          id="sign-in-email-toggle"
+          type="button"
+          phx-click={
+            JS.hide()
+            |> JS.show(to: "#sign-in-form", display: "flex")
+            |> JS.focus(to: "#sign-in-email")
+          }
+          class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
+        >
+          Email me a sign-in link
+        </button>
         <.form
           for={@form}
           id="sign-in-form"
           action={~p"/signin"}
-          class="flex w-full min-w-0 flex-1 gap-2 sm:w-auto sm:flex-none rounded-2xl bg-base-100 p-1.5 shadow-sm ring-1 ring-base-content/10 transition focus-within:ring-2 focus-within:ring-indigo-500"
+          class="hidden w-full min-w-0 flex-1 gap-2 lg:w-auto lg:flex-none rounded-2xl bg-base-100 p-1.5 shadow-sm ring-1 ring-base-content/10 transition focus-within:ring-2 focus-within:ring-indigo-500"
         >
           <input
             type="email"
@@ -108,13 +121,13 @@ defmodule OctomoctoWeb.UserSessionHTML do
             spellcheck="false"
             aria-label="Email"
             required
-            class="min-w-0 flex-1 sm:w-52 sm:flex-none border-0 bg-transparent px-3 text-sm placeholder:text-base-content/30 focus:outline-none"
+            class="min-w-0 flex-1 lg:w-52 lg:flex-none border-0 bg-transparent px-3 text-sm placeholder:text-base-content/30 focus:outline-none"
           />
           <button
             id="sign-in-submit"
             class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
           >
-            Email me a sign-in link
+            Send
           </button>
         </.form>
       </div>
