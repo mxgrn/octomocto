@@ -142,6 +142,7 @@ type Connection
 type alias Model =
     { gameUrl : String
     , settingsUrl : String
+    , guest : Bool
     , connection : Connection
     , copied : Bool
 
@@ -169,6 +170,7 @@ type alias Model =
 type alias Flags =
     { gameUrl : String
     , settingsUrl : String
+    , guest : Bool
     , muted : Bool
     }
 
@@ -177,6 +179,7 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { gameUrl = flags.gameUrl
       , settingsUrl = flags.settingsUrl
+      , guest = flags.guest
       , connection = Connecting
       , copied = False
       , shaking = Nothing
@@ -438,6 +441,7 @@ syncClock game =
     Time.now |> Task.perform (SyncClock game.elapsedMs)
 
 
+
 -- DECODERS
 
 
@@ -584,7 +588,7 @@ viewGame model me game =
                     viewCountdown (Maybe.withDefault 0 (countdownStep model))
 
                   else if finished game then
-                    viewResult model.settingsUrl me game
+                    viewResult model.settingsUrl model.guest me game
 
                   else
                     text ""
@@ -1009,8 +1013,8 @@ viewCountdown seconds =
         ]
 
 
-viewResult : String -> Me -> Game -> Html Msg
-viewResult settingsUrl me game =
+viewResult : String -> Bool -> Me -> Game -> Html Msg
+viewResult settingsUrl guest me game =
     let
         players =
             game.players
@@ -1079,6 +1083,20 @@ viewResult settingsUrl me game =
             , class "text-sm font-medium text-white/80 underline-offset-4 transition hover:text-white hover:underline"
             ]
             [ text "Latest games and best results" ]
+
+        -- Only a guest who played gets the call to sign in, not a spectator
+        , if guest && me /= Nothing then
+            p [ id "schulte-sign-in", class "text-sm text-white/70" ]
+                [ a
+                    [ href "/signin"
+                    , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
+                    ]
+                    [ text "Sign in" ]
+                , text " to keep your scores."
+                ]
+
+          else
+            text ""
         ]
 
 

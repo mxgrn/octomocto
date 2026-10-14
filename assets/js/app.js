@@ -150,7 +150,7 @@ if (schulteNode) {
   let muted = false
   try { muted = localStorage.getItem("schulte-muted") === "true" } catch (_e) {}
 
-  const schulte = window.Elm.Schulte.init({node: schulteNode, flags: {gameUrl: window.location.href, settingsUrl: schulteNode.dataset.settingsUrl, muted}})
+  const schulte = window.Elm.Schulte.init({node: schulteNode, flags: {gameUrl: window.location.href, settingsUrl: schulteNode.dataset.settingsUrl, guest: !schulteNode.dataset.userToken, muted}})
   const socket = new Socket("/socket", {params: {user_token: schulteNode.dataset.userToken}})
   socket.connect()
 
@@ -202,7 +202,7 @@ if (memoryNode) {
   let muted = false
   try { muted = localStorage.getItem("memory-muted") === "true" } catch (_e) {}
 
-  const memory = window.Elm.Memory.init({node: memoryNode, flags: {gameUrl: window.location.href, settingsUrl: memoryNode.dataset.settingsUrl, muted}})
+  const memory = window.Elm.Memory.init({node: memoryNode, flags: {gameUrl: window.location.href, settingsUrl: memoryNode.dataset.settingsUrl, guest: !memoryNode.dataset.userToken, muted}})
   const socket = new Socket("/socket", {params: {user_token: memoryNode.dataset.userToken}})
   socket.connect()
 
@@ -250,7 +250,7 @@ if (setNode) {
   let muted = false
   try { muted = localStorage.getItem("set-muted") === "true" } catch (_e) {}
 
-  const setGame = window.Elm.SetGame.init({node: setNode, flags: {gameUrl: window.location.href, settingsUrl: setNode.dataset.settingsUrl, muted}})
+  const setGame = window.Elm.SetGame.init({node: setNode, flags: {gameUrl: window.location.href, settingsUrl: setNode.dataset.settingsUrl, guest: !setNode.dataset.userToken, muted}})
   const socket = new Socket("/socket", {params: {user_token: setNode.dataset.userToken}})
   socket.connect()
 
@@ -298,7 +298,7 @@ if (sudokuNode) {
   let muted = false
   try { muted = localStorage.getItem("sudoku-muted") === "true" } catch (_e) {}
 
-  const sudoku = window.Elm.Sudoku.init({node: sudokuNode, flags: {gameUrl: window.location.href, settingsUrl: sudokuNode.dataset.settingsUrl, muted}})
+  const sudoku = window.Elm.Sudoku.init({node: sudokuNode, flags: {gameUrl: window.location.href, settingsUrl: sudokuNode.dataset.settingsUrl, guest: !sudokuNode.dataset.userToken, muted}})
   const socket = new Socket("/socket", {params: {user_token: sudokuNode.dataset.userToken}})
   socket.connect()
 
