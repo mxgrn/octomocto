@@ -553,7 +553,7 @@ viewGame model me game =
                 viewRestartButton
             ]
         , div [ class "min-w-0 flex-1" ]
-            [ div [ class "relative mx-auto", style "width" (fieldWidth layout) ]
+            [ div [ id "memory-board", class "relative mx-auto rounded-2xl bg-white p-2 shadow-sm ring-1 ring-slate-200 dark:bg-white/5 dark:shadow-none dark:ring-white/10", style "width" (fieldWidth layout) ]
                 [ viewField model me game layout
                 , if game.waiting then
                     viewWaiting game
@@ -581,10 +581,10 @@ bestLayout model game =
 
         space =
             if width >= 1024 then
-                (width - 400) / (height - 152)
+                (width - 416) / (height - 168)
 
             else
-                (width - 32) / (height - 152)
+                (width - 48) / (height - 168)
 
         distance layout =
             abs (toFloat layout.columns / toFloat layout.rows - space)
@@ -595,13 +595,14 @@ bestLayout model game =
         |> Maybe.withDefault (Layout (List.length game.cards) 1 0)
 
 
-{-| Make the field as wide as possible, but small enough that the page
+{-| Make the board as wide as possible, but small enough that the page
 footer is also on the screen (minus the 4rem header, the 1.5rem bottom
-padding of the page and the 4rem footer).
+padding of the page and the 4rem footer). The 0.5rem padding of the board
+is on each side of the field.
 -}
 fieldWidth : Layout -> String
 fieldWidth layout =
-    "min(100%, calc((100dvh - 9.5rem) * " ++ String.fromFloat (toFloat layout.columns / toFloat layout.rows) ++ "))"
+    "min(100%, calc((100dvh - 10.5rem) * " ++ String.fromFloat (toFloat layout.columns / toFloat layout.rows) ++ " + 1rem))"
 
 
 viewMuteButton : Bool -> Html Msg

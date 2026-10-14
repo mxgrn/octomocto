@@ -203,7 +203,7 @@
   perspective: 800px;
   cursor: default;
   -webkit-tap-highlight-color: transparent;
-  transition: opacity 500ms ease 400ms, scale 500ms ease 400ms;
+  transition: opacity 500ms ease, scale 500ms ease;
 }
 .memory-card-inner {
   position: relative;
@@ -219,7 +219,7 @@
   border-radius: 0.5rem;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12), 0 2px 6px rgb(0 0 0 / 0.06);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
 }
 /* The back has the brand indigo with a faded double-octo mark */
 .memory-card-back {
@@ -234,6 +234,8 @@
   place-items: center;
   background: white;
   transform: rotateY(180deg);
+  /* An edge, so that the white face shows on the white board */
+  box-shadow: 0 0 0 1px #cbd5e1, 0 1px 2px rgb(0 0 0 / 0.08);
 }
 
 /* The player of the turn sees which cards can be turned */
@@ -241,7 +243,7 @@
 .memory-card.is-clickable:hover .memory-card-back { filter: brightness(1.1); transform: translateY(-2px); }
 .memory-card.is-clickable:active .memory-card-back { transform: scale(0.96); }
 
-/* A found set fades out after the last card is face up. The fade is on
+/* A found set starts to fade out at once. The fade is on
    the card, not on the inner part: opacity on an element with
    preserve-3d makes it flat, and then the back of the card shows. */
 .memory-card.is-cleared { pointer-events: none; opacity: 0; scale: 0.85; }
@@ -267,7 +269,7 @@
   background: white;
   cursor: default;
   -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12), 0 2px 6px rgb(0 0 0 / 0.06);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
   transition: transform 150ms, box-shadow 150ms, background-color 150ms;
   animation: set-deal 300ms ease-out;
 }
