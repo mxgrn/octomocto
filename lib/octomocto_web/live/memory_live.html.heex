@@ -98,7 +98,7 @@
             {label}
           </.option>
         </.setting>
-        <.setting label="Cards">
+        <.setting label="Cards" wide>
           <.step_button
             id="cards-less"
             icon="hero-minus"
@@ -108,9 +108,23 @@
                 do: ~p"/memory?#{query(@settings, cards: size)}"
             }
           />
+          <.form for={%{}} id="cards-form" phx-change="cards" class="flex flex-1 items-center">
+            <input
+              type="range"
+              id="cards-slider"
+              name="index"
+              phx-debounce="100"
+              phx-patch-focused
+              aria-label="Cards"
+              min="0"
+              max={length(@sizes) - 1}
+              value={Enum.find_index(@sizes, &(&1 == @settings.cards))}
+              class="w-full cursor-pointer accent-octo-indigo outline-none"
+            />
+          </.form>
           <span
             id="cards-count"
-            class="min-w-16 self-center text-center text-sm font-semibold tabular-nums"
+            class="min-w-10 self-center text-center text-sm font-semibold tabular-nums"
           >
             {@settings.cards}
           </span>

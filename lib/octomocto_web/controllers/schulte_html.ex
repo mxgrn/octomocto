@@ -5,6 +5,7 @@ defmodule OctomoctoWeb.SchulteHTML do
 
   attr :label, :string, required: true
   attr :hint, :string, default: nil, doc: "a short explanation of the selected option"
+  attr :wide, :boolean, default: false, doc: "true when the options use the full width"
   slot :inner_block, required: true
 
   @doc "One setting of a new game: the label, and its options in a row below it."
@@ -13,7 +14,7 @@ defmodule OctomoctoWeb.SchulteHTML do
     <div class="rounded-2xl bg-base-100 px-4 py-2.5 ring-1 ring-base-content/10">
       <p class="text-left text-sm font-bold text-base-content/80">{@label}</p>
       <div class="mt-2 flex justify-center">
-        <div class="flex gap-1 rounded-full bg-base-200 p-1">
+        <div class={["flex gap-1 rounded-full bg-base-200 p-1", @wide && "w-full"]}>
           {render_slot(@inner_block)}
         </div>
       </div>

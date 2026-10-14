@@ -62,6 +62,21 @@ defmodule OctomoctoWeb.MemoryLive do
     {:noreply, redirect(socket, to: ~p"/memory/#{id}")}
   end
 
+  # The slider gives the position of the size in the list of possible sizes,
+  # so that each step of the slider is a possible number of cards
+  def handle_event("cards", %{"index" => index}, socket) do
+    %{sizes: sizes, settings: settings} = socket.assigns
+
+    case Integer.parse(index) do
+      {i, ""} when i in 0..(length(sizes) - 1)//1 ->
+        {:noreply,
+         push_patch(socket, to: ~p"/memory?#{query(settings, cards: Enum.at(sizes, i))}")}
+
+      _ ->
+        {:noreply, socket}
+    end
+  end
+
   # The first theme, pairs, one player and a public game, when the params
   # do not say otherwise. A number of cards that is not possible changes to the
   # nearest possible one.
