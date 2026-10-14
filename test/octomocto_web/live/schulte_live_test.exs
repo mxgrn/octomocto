@@ -35,11 +35,11 @@ defmodule OctomoctoWeb.SchulteLiveTest do
     assert view |> element("#best-results li") |> render() =~ "0:01.0"
   end
 
-  test "shows \"---\" in an empty list", %{conn: conn} do
+  test "shows an empty-state text in an empty list", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/schulte")
 
-    assert view |> element("#latest-games li") |> render() =~ "---"
-    assert view |> element("#best-results li") |> render() =~ "---"
+    assert view |> element("#latest-games li") |> render() =~ "No games yet — be the first."
+    assert view |> element("#best-results li") |> render() =~ "No games yet — be the first."
   end
 
   test "new game starts a game with the settings and opens its page", %{conn: conn} do

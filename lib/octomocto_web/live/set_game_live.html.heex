@@ -93,6 +93,7 @@
         icon_class="text-octo-indigo"
         title="Your results"
         empty={@user_results != nil and @user_results.latest == []}
+        empty_text="No games yet."
       >
         <:aside :if={@user_results && @user_results.best}>
           <span

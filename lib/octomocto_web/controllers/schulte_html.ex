@@ -52,10 +52,11 @@ defmodule OctomoctoWeb.SchulteHTML do
   attr :icon, :string, required: true
   attr :icon_class, :string, required: true
   attr :empty, :boolean, required: true
+  attr :empty_text, :string, default: "No games yet — be the first."
   slot :inner_block, required: true
   slot :aside, doc: "shown at the right of the title"
 
-  @doc "A list of results. An empty list has one row with \"---\"."
+  @doc "A list of results. An empty list has one row with `empty_text`."
   def score_list(assigns) do
     ~H"""
     <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
@@ -67,7 +68,7 @@ defmodule OctomoctoWeb.SchulteHTML do
       </div>
       <ol id={@id} class="divide-y divide-base-content/5 text-sm">
         {render_slot(@inner_block)}
-        <li :if={@empty} class="py-2 text-center text-base-content/40">---</li>
+        <li :if={@empty} class="py-2 text-center text-base-content/40">{@empty_text}</li>
       </ol>
     </div>
     """
