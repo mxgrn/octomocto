@@ -139,6 +139,83 @@ defmodule OctomoctoWeb.MatchLive do
     """
   end
 
+  # The rules of the game in a pop-up. It opens and closes in the browser,
+  # with no call to the server.
+  defp rules(assigns) do
+    ~H"""
+    <div
+      id="rules"
+      class="fixed inset-0 z-50 hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rules-title"
+      phx-window-keydown={hide_rules()}
+      phx-key="Escape"
+    >
+      <div id="rules-backdrop" class="absolute inset-0 hidden bg-black/40 backdrop-blur-sm" />
+      <div class="relative flex min-h-full items-center justify-center p-4">
+        <div
+          id="rules-panel"
+          phx-click-away={hide_rules()}
+          class="hidden w-full max-w-lg rounded-2xl bg-base-100 p-6 shadow-xl ring-1 ring-base-content/10"
+        >
+          <div class="mb-4 flex items-center justify-between gap-3">
+            <h2 id="rules-title" class="text-xl font-semibold">How to play</h2>
+            <button
+              id="rules-close"
+              type="button"
+              phx-click={hide_rules()}
+              aria-label="Close"
+              class="grid size-9 cursor-pointer place-items-center rounded-full text-base-content/60 transition hover:bg-base-200 hover:text-base-content"
+            >
+              <.icon name="hero-x-mark" class="size-5" />
+            </button>
+          </div>
+          <ul class="space-y-2.5 text-base-content/80">
+            <li :for={rule <- rules_text()} class="flex gap-3">
+              <span class="mt-2.5 size-1.5 shrink-0 rounded-full bg-sky-500" />
+              <span>{rule}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp rules_text do
+    [
+      "All cards are face down. Each image is on 2 cards (pairs) or 3 cards (triplets).",
+      "On your turn, turn the cards face up one by one.",
+      "When the cards make a set, they go off the field. You get one point for each card, and you turn more cards.",
+      "When they do not make a set, the turn goes to the next player. The cards stay face up until the next player turns a card, so remember them.",
+      "With more than 2 players, a player who turns no card for 15 seconds loses the turn.",
+      "The clock starts with the first card and stops when the field is empty. Alone, find all sets as fast as you can. With other players, get the most points."
+    ]
+  end
+
+  defp show_rules do
+    JS.show(to: "#rules")
+    |> JS.show(
+      to: "#rules-backdrop",
+      time: 200,
+      transition: {"transition-opacity ease-out duration-200", "opacity-0", "opacity-100"}
+    )
+    |> show("#rules-panel")
+    |> JS.focus_first(to: "#rules-panel")
+  end
+
+  defp hide_rules do
+    hide("#rules-panel")
+    |> JS.hide(
+      to: "#rules-backdrop",
+      time: 200,
+      transition: {"transition-opacity ease-in duration-200", "opacity-100", "opacity-0"}
+    )
+    # Waits for the panel and the backdrop to go
+    |> JS.hide(to: "#rules", time: 200, transition: {"duration-200", "", ""})
+  end
+
   attr :id, :string, required: true
   attr :patch, :string, required: true
   attr :selected, :boolean, required: true

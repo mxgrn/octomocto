@@ -3,15 +3,18 @@
     Wider than the app container, so that the columns have room. One column
     on a small screen: the title, the open games, the settings and the
     results. Two columns on a large screen: the results go to the right.
-    Three columns on an extra large screen: the open games go to the left.
+    Three columns on an extra large screen: the open games go to the left,
+    and the settings in the center are wider than the other columns. The
+    columns use the full width of the screen, with the side padding of the
+    header.
     The last row takes the free height, so that the tall results column does
     not make gaps between the rows on the left.
   --%>
   <div
     id="match-index"
-    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 py-12 lg:grid-cols-2 lg:grid-rows-[auto_auto_1fr] lg:items-start lg:gap-x-12 lg:py-16 xl:w-[min(96vw,78rem)] xl:grid-cols-3 xl:grid-rows-[auto_1fr]"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 py-12 lg:grid-cols-2 lg:grid-rows-[auto_auto_1fr] lg:items-start lg:gap-x-12 lg:py-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[1fr_1.4fr_1fr] xl:grid-rows-[auto_1fr]"
   >
-    <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2">
+    <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 xl:max-w-none">
       <div class="flex items-center justify-center gap-3">
         <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-2xl shadow-inner">
           🃏
@@ -19,21 +22,29 @@
         <h1 class="text-3xl font-semibold tracking-tight">Match</h1>
       </div>
       <p class="text-base-content/70">
-        Turn the cards face up and find the cards with the same image. Each set you find goes off the field.
+        Choose the settings and start a new game, or join an open game.
       </p>
+      <button
+        id="how-to-play"
+        type="button"
+        phx-click={show_rules()}
+        class="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-sky-600 transition hover:text-sky-500"
+      >
+        <.icon name="hero-question-mark-circle" class="size-4" /> How to play
+      </button>
     </div>
 
     <.open_games
       games={@open_games}
       settings={@settings}
-      class="lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1"
+      class="lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
     />
 
-    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2">
+    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
       <div id="match-settings" class="flex w-full flex-col gap-4">
         <div class="rounded-2xl bg-base-100 px-4 py-2.5 ring-1 ring-base-content/10">
           <p class="text-left text-sm font-bold text-base-content/80">Theme</p>
-          <div id="match-themes" class="mt-2 grid grid-cols-4 gap-2">
+          <div id="match-themes" class="mt-2 grid grid-cols-4 gap-2 xl:grid-cols-6">
             <.link
               :for={theme <- @themes}
               id={"theme-#{theme.name}"}
@@ -143,23 +154,34 @@
         </.setting>
       </div>
 
-      <button
-        id="new-game"
-        type="button"
-        phx-click="new_game"
-        phx-disable-with="Starting..."
-        class="cursor-pointer rounded-full bg-sky-600 px-8 py-3 font-medium text-white shadow-lg shadow-sky-600/25 transition hover:-translate-y-0.5 hover:bg-sky-500 hover:shadow-xl active:translate-y-0"
+      <%!--
+        Stays at the bottom of the screen while the settings above it do not
+        fit, so that a new player sees how to start. The settings go under it
+        into the page color. It is wider than the settings, so that it also
+        covers the borders of the cards, which are outside of the cards.
+      --%>
+      <div
+        id="new-game-bar"
+        class="sticky bottom-0 z-10 -mx-2 -mt-6 flex w-[calc(100%+1rem)] flex-col items-center gap-2 bg-linear-to-t from-base-100 from-70% to-transparent pt-8 pb-5"
       >
-        Start game
-      </button>
-      <p :if={@settings.players > 1} class="text-sm text-base-content/50">
-        You get a link to share with other players.
-      </p>
+        <button
+          id="new-game"
+          type="button"
+          phx-click="new_game"
+          phx-disable-with="Starting..."
+          class="cursor-pointer rounded-full bg-sky-600 px-8 py-3 font-medium text-white shadow-lg shadow-sky-600/25 transition hover:-translate-y-0.5 hover:bg-sky-500 hover:shadow-xl active:translate-y-0"
+        >
+          Start game
+        </button>
+        <p :if={@settings.players > 1} class="text-sm text-base-content/50">
+          You get a link to share with other players.
+        </p>
+      </div>
     </div>
 
     <div
       id="match-leaderboard"
-      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
     >
       <.score_list
         id="your-results"
@@ -243,4 +265,6 @@
       </.score_list>
     </div>
   </div>
+
+  <.rules />
 </Layouts.app>
