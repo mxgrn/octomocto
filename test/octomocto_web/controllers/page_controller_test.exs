@@ -77,7 +77,8 @@ defmodule OctomoctoWeb.PageControllerTest do
         players: 1,
         switch_count: 12,
         trains_per_house: 2,
-        pace: "normal"
+        pace: "normal",
+        public: false
       })
 
     game = LazyHTML.from_document(html_response(get(conn, ~p"/trains/#{id}"), 200))

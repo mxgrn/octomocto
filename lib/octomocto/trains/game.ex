@@ -22,7 +22,18 @@ defmodule Octomocto.Trains.Game do
   clients give the switches to the players by their slots.
 
   A round starts when a player clicks start, after a countdown. Restart
-  starts a new round with a new board.
+  starts a new round with a new board. The clients tell when the round
+  ends and how many trains got home (see `Octomocto.Trains.finish/4`).
+  The first report of the round is the score of the round. When all
+  players are still in the game, the game saves it as the result of each
+  player (see `Octomocto.Trains.save_results/4`).
+
+  A public game is in the lists of the settings page (see
+  `Octomocto.Lobby`): in the open games until it has all its players for
+  the first time, then in the ongoing games after a player clicks start. A
+  game for one player is only in the ongoing games. The game sends its new
+  row after each change, and nil when its node stops. A process can also
+  join only to watch (see `Octomocto.Trains.watch/1`).
 
   Each player is bound to the process that joined (a channel). When that
   process stops, the player stays in the game for a short time, so that
@@ -41,6 +52,7 @@ defmodule Octomocto.Trains.Game do
   """
   use GenServer, restart: :temporary
 
+  alias Octomocto.{Lobby, Trains}
   alias Octomocto.Trains.Store
 
   @idle_timeout_ms :timer.minutes(5)
@@ -63,6 +75,9 @@ defmodule Octomocto.Trains.Game do
             when is_list(cell) and length(cell) == 2 and
                    hd(cell) in 0..(@cols - 1)//1 and hd(tl(cell)) in 0..(@rows - 1)//1
 
+  # The number of trains of a round, the same as `trainCount` in Trains.elm
+  defguardp trains(state) when state.trains_per_house * (state.switch_count + 1)
+
   @colors [
     {"pink", "#ec4899"},
     {"sky", "#0ea5e9"},
@@ -70,7 +85,9 @@ defmodule Octomocto.Trains.Game do
     {"violet", "#8b5cf6"}
   ]
 
-  def start_link({id, %{players: _, switch_count: _, trains_per_house: _, pace: _}} = args) do
+  def start_link(
+        {id, %{players: _, switch_count: _, trains_per_house: _, pace: _, public: _}} = args
+      ) do
     GenServer.start_link(__MODULE__, args, name: via(id))
   end
 
@@ -83,8 +100,61 @@ defmodule Octomocto.Trains.Game do
 
   def topic(id), do: "trains_game:" <> id
 
+  def lobby_topic, do: "trains_lobby"
+
+  @doc """
+  The row of the game in the lists of the settings page (see
+  `Octomocto.Lobby`), or nil when the game is in no list. An ongoing game
+  has the `:score` of the round (nil until the round ends) and its
+  `:trains`.
+  """
+  def lobby_entry(%{public: true} = state) when map_size(state.players) > 0 do
+    players =
+      state.players
+      |> Map.values()
+      |> Enum.sort_by(& &1.slot)
+      |> Enum.map(&Lobby.player/1)
+
+    entry = %{
+      id: state.id,
+      settings: %{
+        switch_count: state.switch_count,
+        trains_per_house: state.trains_per_house,
+        pace: state.pace
+      },
+      players_needed: state.needed,
+      players: players
+    }
+
+    cond do
+      state.listed ->
+        Map.merge(entry, %{
+          status: :open,
+          seats_left: state.needed - map_size(state.players),
+          created_at: state.created_at
+        })
+
+      state.started_at != nil ->
+        Map.merge(entry, %{
+          status: :ongoing,
+          started_at: state.started_at,
+          finished: state.score != nil,
+          score: state.score,
+          trains: trains(state)
+        })
+
+      # Nobody clicked start yet
+      true ->
+        nil
+    end
+  end
+
+  def lobby_entry(_state), do: nil
+
   @impl true
   def init({id, settings}) do
+    # So that terminate/2 runs when the node stops
+    Process.flag(:trap_exit, true)
     schedule_idle_check()
 
     state =
@@ -95,19 +165,33 @@ defmodule Octomocto.Trains.Game do
         trains_per_house: settings.trains_per_house,
         pace: settings.pace,
         players: %{},
-        opened: true
+        opened: true,
+        public: settings.public,
+        created_at: now(),
+        # True while the game is in the list of open games. A game with one
+        # player is never in it.
+        listed: settings.public and settings.players > 1
       })
 
-    Store.write(state)
+    store(state)
     {:ok, state}
   end
 
   # The processes of the players were on the old node. The players can join
   # again during the grace time.
   def init(%{} = state) do
+    Process.flag(:trap_exit, true)
     schedule_idle_check()
+
+    # A state from before the results and the lists of the settings page
+    state =
+      Map.merge(
+        %{round_id: Ecto.UUID.generate(), score: nil, public: false, listed: false},
+        state
+      )
+
     state = Enum.reduce(Map.keys(state.players), state, &leave(&2, &1))
-    Store.write(state)
+    store(state)
     {:ok, state}
   end
 
@@ -116,8 +200,12 @@ defmodule Octomocto.Trains.Game do
       when is_map_key(state.players, player_id) do
     Process.monitor(pid)
     state = update_in(state.players[player_id], &%{&1 | pid: pid, left: nil})
-    Store.write(state)
+    store(state)
     {:reply, {:ok, player_id, public(state)}, state}
+  end
+
+  def handle_call(:watch, _from, state) do
+    {:reply, {:ok, nil, public(state)}, state}
   end
 
   def handle_call({:join, _pid, _user_id, _name, _player_id}, _from, state)
@@ -144,6 +232,8 @@ defmodule Octomocto.Trains.Game do
     }
 
     state = put_in(state.players[player_id], player)
+    # The game leaves the open games when it is full for the first time
+    state = %{state | listed: state.listed and map_size(state.players) < state.needed}
     publish(state)
     {:reply, {:ok, player_id, public(state)}, state}
   end
@@ -175,7 +265,7 @@ defmodule Octomocto.Trains.Game do
   def handle_cast({:decision, player_id, train, cell, exit}, state)
       when is_map_key(state.players, player_id) and state.started_at != nil and
              is_integer(train) and train >= 0 and
-             train < state.trains_per_house * (state.switch_count + 1) and
+             train < trains(state) and
              on_board(cell) and on_board(exit) do
     if is_map_key(state.decisions, {train, cell}) do
       {:noreply, state}
@@ -192,6 +282,16 @@ defmodule Octomocto.Trains.Game do
     end
   end
 
+  def handle_cast({:finish, player_id, seed, correct}, state)
+      when is_map_key(state.players, player_id) and seed == state.seed and
+             state.started_at != nil and state.score == nil and is_integer(correct) and
+             correct >= 0 and correct <= trains(state) do
+    save_results(state, correct)
+    state = %{state | score: correct}
+    store(state)
+    {:noreply, state}
+  end
+
   def handle_cast({:restart, player_id}, state) when is_map_key(state.players, player_id) do
     state = new_round(state)
     publish(state)
@@ -205,7 +305,7 @@ defmodule Octomocto.Trains.Game do
     case Enum.find(state.players, fn {_id, p} -> p.pid == pid end) do
       {player_id, _player} ->
         state = leave(state, player_id)
-        Store.write(state)
+        store(state)
         {:noreply, state}
 
       nil ->
@@ -248,6 +348,10 @@ defmodule Octomocto.Trains.Game do
       # The clients make the board and the trains from it. Elm uses 32-bit
       # integers for seeds.
       seed: :rand.uniform(2_000_000_000),
+      # The game id of the results of the round
+      round_id: Ecto.UUID.generate(),
+      # The number of trains that got home, nil until the round ends
+      score: nil,
       # Nil until a player clicks start
       started_at: nil,
       # The positions of the flipped switches, by cell
@@ -256,6 +360,20 @@ defmodule Octomocto.Trains.Game do
       decisions: %{}
     })
   end
+
+  defp save_results(state, correct) when map_size(state.players) == state.needed do
+    settings = %{
+      "switch_count" => state.switch_count,
+      "trains_per_house" => state.trains_per_house,
+      "pace" => state.pace,
+      "players" => state.needed
+    }
+
+    Trains.save_results(state.round_id, settings, correct, Map.values(state.players))
+  end
+
+  # A player left: the result does not count
+  defp save_results(_state, _correct), do: nil
 
   defp slots(state), do: Enum.map(state.players, fn {_id, p} -> p.slot end)
 
@@ -272,8 +390,22 @@ defmodule Octomocto.Trains.Game do
     update_in(state.players[player_id], &%{&1 | pid: nil, left: left})
   end
 
-  defp publish(state) do
+  # The node stops. The game leaves the lists of the settings page until a
+  # player joins it again on another node (see `Octomocto.GameProcess`).
+  @impl true
+  def terminate(_reason, state) do
+    if state.public, do: Lobby.broadcast(__MODULE__, state.id, nil)
+  end
+
+  # Writes the state to the store, and sends the new row of the game to the
+  # settings pages
+  defp store(state) do
     Store.write(state)
+    if state.public, do: Lobby.broadcast(__MODULE__, state.id, lobby_entry(state))
+  end
+
+  defp publish(state) do
+    store(state)
     broadcast(state, {:trains_state, public(state)})
   end
 

@@ -1,9 +1,18 @@
 <Layouts.app flash={@flash} current_scope={@current_scope}>
+  <%!--
+    The same layout as the Set page. One column on a small screen: the
+    title, the public games, the settings and the results. Two columns on a
+    large screen: the results go to the right. Three columns on an extra
+    large screen: the public games go to the left, and the settings in the
+    center are wider than the other columns.
+    The last row takes the free height, so that the tall results column does
+    not make gaps between the rows on the left.
+  --%>
   <div
     id="trains-index"
-    class="mx-auto flex w-full max-w-md flex-col items-center gap-6 py-12 text-center lg:py-16"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 py-12 lg:grid-cols-2 lg:grid-rows-[auto_auto_1fr] lg:items-start lg:gap-x-12 lg:py-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[1fr_1.4fr_1fr] xl:grid-rows-[auto_1fr]"
   >
-    <div class="space-y-2">
+    <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 xl:max-w-none">
       <div class="flex items-center justify-center gap-3">
         <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
           <OctomoctoWeb.GameIcons.game_icon game="trains" class="size-9" />
@@ -13,70 +22,186 @@
       <p class="text-base-content/70">
         Click the switches to send each train to the house with its colors.
       </p>
+      <.how_to_play />
     </div>
 
-    <div id="trains-settings" class="flex w-full flex-col gap-4">
-      <.setting
-        label="Players"
-        hint={
-          if(@settings.players > 1,
-            do: "Play together. Each player owns some of the switches.",
-            else: "You own all the switches."
-          )
-        }
-      >
-        <.option
-          :for={n <- 1..4}
-          id={"players-#{n}"}
-          selected={@settings.players == n}
-          patch={settings_path(@settings, %{players: n})}
-        >
-          {n}
-        </.option>
-      </.setting>
-      <.setting label="Switches" hint={switches_hint(@settings.switch_count, @settings.players)}>
-        <.option
-          :for={n <- @switch_counts}
-          id={"switches-#{n}"}
-          selected={@settings.switch_count == n}
-          patch={settings_path(@settings, %{switch_count: n})}
-        >
-          {n}
-        </.option>
-      </.setting>
-      <.setting label="Trains per house" hint={trains_hint(@settings)}>
-        <.option
-          :for={n <- 1..7}
-          id={"trains-#{n}"}
-          selected={@settings.trains_per_house == n}
-          patch={settings_path(@settings, %{trains_per_house: n})}
-        >
-          {n}
-        </.option>
-      </.setting>
-      <.setting label="Pace" hint={pace_hint(@settings.pace)}>
-        <.option
-          :for={pace <- Octomocto.Trains.paces()}
-          id={"pace-#{pace}"}
-          selected={@settings.pace == pace}
-          patch={settings_path(@settings, %{pace: pace})}
-        >
-          {String.capitalize(pace)}
-        </.option>
-      </.setting>
-    </div>
-
-    <button
-      id="new-game"
-      type="button"
-      phx-click="new_game"
-      phx-disable-with="Starting..."
-      class="cursor-pointer rounded-full bg-octo-indigo px-8 py-3 font-medium text-white shadow-lg shadow-octo-indigo/25 transition hover:-translate-y-0.5 hover:bg-octo-indigo/90 hover:shadow-xl active:translate-y-0"
+    <div
+      id="trains-lobby"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
     >
-      Start game
-    </button>
-    <p :if={@settings.players > 1} class="text-sm text-base-content/50">
-      You get a link to share with the other players.
-    </p>
+      <.lobby_games
+        games={@lobby_games}
+        matches={&same_settings?(&1, @settings)}
+        path={&~p"/trains/#{&1.id}"}
+      >
+        <:icon :let={_game}>
+          <OctomoctoWeb.GameIcons.game_icon game="trains" class="size-9 shrink-0" />
+        </:icon>
+        <:summary :let={game}>{game_summary(game)}</:summary>
+      </.lobby_games>
+    </div>
+
+    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
+      <div id="trains-settings" class="flex w-full flex-col gap-4">
+        <.setting
+          label="Players"
+          hint={
+            if(@settings.players > 1,
+              do: "Play together. Each player owns some of the switches.",
+              else: "You own all the switches."
+            )
+          }
+        >
+          <.option
+            :for={n <- 1..4}
+            id={"players-#{n}"}
+            selected={@settings.players == n}
+            patch={settings_path(@settings, %{players: n})}
+          >
+            {n}
+          </.option>
+        </.setting>
+        <.setting label="Switches" hint={switches_hint(@settings.switch_count, @settings.players)}>
+          <.option
+            :for={n <- @switch_counts}
+            id={"switches-#{n}"}
+            selected={@settings.switch_count == n}
+            patch={settings_path(@settings, %{switch_count: n})}
+          >
+            {n}
+          </.option>
+        </.setting>
+        <.setting label="Trains per house" hint={trains_hint(@settings)}>
+          <.option
+            :for={n <- 1..7}
+            id={"trains-#{n}"}
+            selected={@settings.trains_per_house == n}
+            patch={settings_path(@settings, %{trains_per_house: n})}
+          >
+            {n}
+          </.option>
+        </.setting>
+        <.setting label="Pace" hint={pace_hint(@settings.pace)}>
+          <.option
+            :for={pace <- Octomocto.Trains.paces()}
+            id={"pace-#{pace}"}
+            selected={@settings.pace == pace}
+            patch={settings_path(@settings, %{pace: pace})}
+          >
+            {String.capitalize(pace)}
+          </.option>
+        </.setting>
+        <.setting label="Visibility" hint={visibility_hint(@settings)}>
+          <.option
+            :for={
+              {value, public, label} <- [
+                {"public", true, "Public"},
+                {"private", false, "Private"}
+              ]
+            }
+            id={"visibility-#{value}"}
+            selected={@settings.public == public}
+            patch={settings_path(@settings, %{public: public})}
+          >
+            {label}
+          </.option>
+        </.setting>
+      </div>
+
+      <.start_bar multiplayer={@settings.players > 1} />
+    </div>
+
+    <div
+      id="trains-leaderboard"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
+    >
+      <.score_list
+        id="your-results"
+        icon="hero-user"
+        icon_class="text-octo-indigo"
+        title="Your results"
+        empty={@user_results != nil and @user_results.latest == []}
+        empty_text="No games yet."
+      >
+        <:aside :if={@user_results && @user_results.best}>
+          <span
+            id="your-best"
+            class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
+          >
+            <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
+            <span class="text-base-content/60">Best</span>
+            <span class="font-semibold tabular-nums">
+              {format_score(@user_results.best.score, trains(@settings))}
+            </span>
+          </span>
+        </:aside>
+        <%= if @user_results do %>
+          <li
+            :for={%{result: result, players: players} <- @user_results.latest}
+            class="flex items-baseline gap-3 py-2"
+          >
+            <span :if={@settings.players == 1} class="flex-1 text-base-content/60">
+              {Calendar.strftime(result.inserted_at, "%b %-d")}
+            </span>
+            <span :if={@settings.players > 1} class="flex-1 truncate">
+              <.player_list players={players} scores={false} />
+            </span>
+            <span class={[
+              "text-right font-medium tabular-nums",
+              result.id == @user_results.best.id && "text-amber-600"
+            ]}>
+              {format_score(result.score, trains(@settings))}
+            </span>
+          </li>
+        <% else %>
+          <li class="py-2 text-center text-base-content/60">
+            <.link
+              id="your-results-sign-in"
+              href={~p"/signin"}
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
+            >
+              Sign in
+            </.link>
+            to see your results.
+          </li>
+        <% end %>
+      </.score_list>
+      <.score_list
+        id="best-results"
+        icon="hero-trophy"
+        icon_class="text-amber-500"
+        title="Best results"
+        empty={@leaderboard.best == []}
+      >
+        <li
+          :for={{result, place} <- Enum.with_index(@leaderboard.best, 1)}
+          class="flex items-baseline gap-3 py-2"
+        >
+          <span class="w-5 text-right tabular-nums text-base-content/40">{place}</span>
+          <span class="flex-1 truncate">{player_name(result.user)}</span>
+          <span class="font-medium tabular-nums">
+            {format_score(result.score, trains(@settings))}
+          </span>
+        </li>
+      </.score_list>
+      <.score_list
+        id="latest-games"
+        icon="hero-clock"
+        icon_class="text-octo-indigo"
+        title="Latest games"
+        empty={@leaderboard.latest == []}
+      >
+        <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
+          <span class="flex-1 truncate">
+            <.player_list players={game.players} scores={false} />
+          </span>
+          <span class="font-medium tabular-nums">
+            {format_score(game.score, trains(@settings))}
+          </span>
+        </li>
+      </.score_list>
+    </div>
   </div>
+
+  <.rules rules={@rules} />
 </Layouts.app>

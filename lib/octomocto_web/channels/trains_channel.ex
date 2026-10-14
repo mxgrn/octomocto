@@ -2,8 +2,8 @@ defmodule OctomoctoWeb.TrainsChannel do
   @moduledoc """
   Connects one browser to a trains game (see `OctomoctoWeb.GameChannel` for
   the join and the rejoin). A browser only watches when the game is full
-  or started. Changes are pushed as `"state"`, `"flip"` and `"decision"`
-  events.
+  or started, or with `"watch": true` in the join params. Changes are
+  pushed as `"state"`, `"flip"` and `"decision"` events.
   """
   use Phoenix.Channel
 
@@ -35,6 +35,11 @@ defmodule OctomoctoWeb.TrainsChannel do
       Trains.decide(socket.assigns.game_id, socket.assigns.player_id, train, cell, exit)
     end
 
+    {:noreply, socket}
+  end
+
+  def handle_in("finished", %{"seed" => seed, "correct" => correct}, socket) do
+    Trains.finish(socket.assigns.game_id, socket.assigns.player_id, seed, correct)
     {:noreply, socket}
   end
 

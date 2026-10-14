@@ -76,6 +76,12 @@ port trainsDecision : Encode.Value -> Cmd msg
 port trainsRestart : () -> Cmd msg
 
 
+{-| `{seed, correct}`: the round with the seed ended, and `correct` trains
+got home.
+-}
+port trainsFinished : Encode.Value -> Cmd msg
+
+
 port trainsCopyText : String -> Cmd msg
 
 
@@ -520,9 +526,18 @@ update msg model =
 
                         ( round, events ) =
                             advance (mySwitches me game) target game.round
+
+                        -- Each player reports, and the server keeps the first
+                        -- report. A watcher cannot report.
+                        finished =
+                            if me /= Nothing && over round && not (over game.round) then
+                                trainsFinished (Encode.object [ ( "seed", Encode.int round.seed ), ( "correct", Encode.int round.correct ) ])
+
+                            else
+                                Cmd.none
                     in
                     ( { model | now = ms, connection = Joined me { game | round = round } }
-                    , eventsCmd sounds events
+                    , Cmd.batch [ eventsCmd sounds events, finished ]
                     )
 
                 _ ->

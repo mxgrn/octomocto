@@ -1,12 +1,22 @@
 defmodule OctomoctoWeb.TrainsLive do
   use OctomoctoWeb, :live_view
 
-  import OctomoctoWeb.SchulteHTML, only: [setting: 1, option: 1]
+  # The same settings and result lists as on the Schulte page
+  import OctomoctoWeb.SchulteHTML,
+    only: [setting: 1, option: 1, score_list: 1, player_list: 1, player_name: 1]
 
-  alias Octomocto.Trains
+  import OctomoctoWeb.GamePageComponents
+
+  alias Octomocto.{Lobby, Trains}
+  alias Octomocto.Trains.{Game, Store}
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, [canonical_url: url(~p"/trains")] ++ seo())}
+    if connected?(socket), do: Lobby.subscribe(Game)
+
+    {:ok,
+     socket
+     |> assign([canonical_url: url(~p"/trains"), rules: rules()] ++ seo())
+     |> assign_lobby(Lobby.entries(Game, Store))}
   end
 
   @doc "The title and the description of the Right on Track pages, for search engines."
@@ -21,8 +31,24 @@ defmodule OctomoctoWeb.TrainsLive do
   def handle_params(params, _uri, socket) do
     settings = settings(params)
 
+    filter = %{
+      "switch_count" => settings.switch_count,
+      "trains_per_house" => settings.trains_per_house,
+      "pace" => settings.pace,
+      "players" => settings.players
+    }
+
     {:noreply,
-     assign(socket, settings: settings, switch_counts: Trains.switch_counts(settings.players))}
+     assign(socket,
+       settings: settings,
+       switch_counts: Trains.switch_counts(settings.players),
+       leaderboard: Trains.leaderboard(filter),
+       user_results: user_results(socket.assigns.current_scope, filter)
+     )}
+  end
+
+  def handle_info({:lobby_changed, _game, id, entry}, socket) do
+    {:noreply, assign_lobby(socket, Lobby.put_entry(socket.assigns.lobby, id, entry))}
   end
 
   def handle_event("new_game", _params, socket) do
@@ -30,9 +56,9 @@ defmodule OctomoctoWeb.TrainsLive do
     {:noreply, redirect(socket, to: ~p"/trains/#{id}")}
   end
 
-  # One player, 12 switches, 2 trains for each house and the normal pace,
-  # when the params do not say otherwise. The switches must divide equally
-  # between the players.
+  # One player, 12 switches, 2 trains for each house, the normal pace and a
+  # public game, when the params do not say otherwise. The switches must
+  # divide equally between the players.
   defp settings(params) do
     players = int_param(params["players"], 1..4, 1)
     switches = int_param(params["switches"], 1..12, 12)
@@ -41,8 +67,28 @@ defmodule OctomoctoWeb.TrainsLive do
       players: players,
       switch_count: Trains.fit_switch_count(switches, players),
       trains_per_house: int_param(params["trains"], 1..7, 2),
-      pace: if(params["pace"] in Trains.paces(), do: params["pace"], else: "normal")
+      pace: if(params["pace"] in Trains.paces(), do: params["pace"], else: "normal"),
+      public: params["visibility"] != "private"
     }
+  end
+
+  defp assign_lobby(socket, entries) do
+    assign(socket, lobby: entries, lobby_games: Lobby.games(entries))
+  end
+
+  # Nil for a guest
+  defp user_results(%{user: _} = scope, filter), do: Trains.user_results(scope, filter)
+  defp user_results(nil, _filter), do: nil
+
+  defp rules do
+    [
+      "Trains leave the station one at a time. Each train has the colors of one of the houses.",
+      "The tracks split at the switches. Click a switch to change its direction. A train follows the direction of each switch on its way.",
+      "Send each train to the house with its colors.",
+      "With more players, each player owns some of the switches and can change only those.",
+      "The pace tells how fast the trains come one after another.",
+      "The round ends when all trains have arrived. The score is the number of trains that got to the correct house."
+    ]
   end
 
   defp int_param(value, range, default) do
@@ -56,8 +102,42 @@ defmodule OctomoctoWeb.TrainsLive do
   defp settings_path(settings, changes) do
     s = Map.merge(settings, changes)
 
-    ~p"/trains?#{[players: s.players, switches: s.switch_count, trains: s.trains_per_house, pace: s.pace]}"
+    query = [
+      players: s.players,
+      switches: s.switch_count,
+      trains: s.trains_per_house,
+      pace: s.pace
+    ]
+
+    # A public game has no param, so that most links stay short
+    query = if s.public, do: query, else: query ++ [visibility: "private"]
+    ~p"/trains?#{query}"
   end
+
+  # True when the open game has the same settings as the new game
+  defp same_settings?(game, settings) do
+    game.players_needed == settings.players and
+      game.settings.switch_count == settings.switch_count and
+      game.settings.trains_per_house == settings.trains_per_house and
+      game.settings.pace == settings.pace
+  end
+
+  @doc """
+  The settings of a game in the list of public games, and the score when
+  the round ended.
+  """
+  def game_summary(%{settings: settings} = game) do
+    summary =
+      "#{settings.switch_count} switches · #{settings.trains_per_house} per house · #{String.capitalize(settings.pace)}"
+
+    if game[:score], do: summary <> " · " <> format_score(game.score, game.trains), else: summary
+  end
+
+  # The number of trains of a round with the settings
+  defp trains(settings), do: settings.trains_per_house * (settings.switch_count + 1)
+
+  # For example "92% · 11 of 12"
+  defp format_score(score, trains), do: "#{round(score * 100 / trains)}% · #{score} of #{trains}"
 
   # Tells what a number of switches gives: there is one more house than switches
   defp switches_hint(switches, 1), do: "#{switches + 1} houses."

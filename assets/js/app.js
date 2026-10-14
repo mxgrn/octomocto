@@ -92,12 +92,10 @@ if (astronautNode) {
   astronaut.ports.playAstronautSound.subscribe(playAstronautSound)
 }
 
-// Start the train game. It is single player, so it needs no channel.
-// Audio can start only after a click, so the first click on the page
-// (normally on Start) unlocks it.
 // Start the trains game and connect its ports to the game channel. The
 // token gets the same player back after a reload, as in the Schulte race
-// below.
+// below. Audio can start only after a click, so the first click on the
+// page (normally on Start) unlocks it.
 const trainsNode = document.getElementById("trains-main")
 if (trainsNode) {
   if (navigator.userActivation?.hasBeenActive) unlockAudio()
@@ -117,7 +115,9 @@ if (trainsNode) {
     } catch (_e) {}
     trains.ports.trainsJoined.send(reply)
   }
-  const channel = socket.channel(`trains:${trainsNode.dataset.gameId}`, () => token ? {token} : {})
+  // A link with ?watch=1 only watches the game. The token of a player wins.
+  const watch = new URLSearchParams(window.location.search).has("watch")
+  const channel = socket.channel(`trains:${trainsNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
   channel.on("state", state => trains.ports.trainsState.send(state))
   channel.on("flip", flip => trains.ports.trainsFlipped.send(flip))
   channel.on("decision", decision => trains.ports.trainsDecided.send(decision))
@@ -135,6 +135,7 @@ if (trainsNode) {
   trains.ports.trainsFlip.subscribe(flip => channel.push("flip", flip))
   trains.ports.trainsDecision.subscribe(decision => channel.push("decision", decision))
   trains.ports.trainsRestart.subscribe(() => channel.push("restart", {}))
+  trains.ports.trainsFinished.subscribe(result => channel.push("finished", result))
   trains.ports.trainsCopyText.subscribe(text => navigator.clipboard.writeText(text))
   trains.ports.playTrainSound.subscribe(playTrainSound)
 }

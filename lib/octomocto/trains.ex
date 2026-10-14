@@ -3,14 +3,18 @@ defmodule Octomocto.Trains do
   Cooperative trains games. Each game is a `Octomocto.Trains.Game` process
   on one node of the cluster, found by its id. A copy of its state is in
   `Octomocto.Trains.Store`, so the game continues on another node when its
-  node stops.
+  node stops. Finished rounds are saved as `Octomocto.Trains.Result` rows.
   """
 
+  import Ecto.Query
+
   alias Octomocto.GameProcess
-  alias Octomocto.Trains.{Game, Store}
+  alias Octomocto.Repo
+  alias Octomocto.Trains.{Game, Result, Store}
 
   @switch_counts [4, 6, 8, 12]
   @paces ~w(easy normal hard expert)
+  @list_size 10
 
   @doc """
   How the pause between trains changes: it stays at 8 s (`"easy"`), or it
@@ -43,14 +47,20 @@ defmodule Octomocto.Trains do
     * `:players` - from 1 to 4,
     * `:switch_count` - see `switch_counts/1`,
     * `:trains_per_house` - from 1 to 7,
-    * `:pace` - see `paces/0`.
+    * `:pace` - see `paces/0`,
+    * `:public` - true when the game is in the lists of the settings page.
   """
   def create_game(
-        %{players: players, switch_count: switches, trains_per_house: trains, pace: pace} =
-          settings
+        %{
+          players: players,
+          switch_count: switches,
+          trains_per_house: trains,
+          pace: pace,
+          public: public
+        } = settings
       )
       when players in 1..4 and switches in @switch_counts and rem(switches, players) == 0 and
-             trains in 1..7 and pace in @paces do
+             trains in 1..7 and pace in @paces and is_boolean(public) do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
 
     {:ok, _pid} =
@@ -81,6 +91,15 @@ defmodule Octomocto.Trains do
     GameProcess.join(Game, Store, Octomocto.Trains.GameSupervisor, id, user_id, name, player_id)
   end
 
+  @doc """
+  Gives the state of the game to a process that only watches, also when the
+  game has a free seat. Subscribe to `Game.topic(id)` first to get all
+  updates. Gives the same errors as `join/4`.
+  """
+  def watch(id) do
+    GameProcess.watch(Game, Store, Octomocto.Trains.GameSupervisor, id)
+  end
+
   @doc "Starts the round after a countdown, when the game has all its players."
   def start(id, player_id) do
     GenServer.cast(Game.via(id), {:start, player_id})
@@ -100,8 +119,119 @@ defmodule Octomocto.Trains do
     GenServer.cast(Game.via(id), {:decision, player_id, train, cell, exit})
   end
 
+  @doc """
+  The player tells that the round with the `seed` ended, and that
+  `correct` trains got to the correct house. The server does not run the
+  trains, so it trusts this number. Only the first report of a round
+  counts.
+  """
+  def finish(id, player_id, seed, correct) do
+    GenServer.cast(Game.via(id), {:finish, player_id, seed, correct})
+  end
+
   @doc "Starts a new round with a new board."
   def restart(id, player_id) do
     GenServer.cast(Game.via(id), {:restart, player_id})
+  end
+
+  @doc """
+  Saves one finished round. All players get the same `score`. Each player
+  is a map with `:user_id` (nil for a guest).
+  """
+  def save_results(game_id, settings, score, players) do
+    now = DateTime.utc_now()
+
+    rows =
+      Enum.map(players, fn player ->
+        %{
+          game_id: game_id,
+          settings: settings,
+          score: score,
+          user_id: player.user_id,
+          inserted_at: now
+        }
+      end)
+
+    Repo.insert_all(Result, rows)
+  end
+
+  @doc """
+  Gives the leaderboard for the settings, for example
+  `%{"switch_count" => 6, "trains_per_house" => 2, "pace" => "normal",
+  "players" => 2}`: the latest rounds (with all players) and the best
+  result of each signed-in user (the most trains first).
+  """
+  def leaderboard(settings) do
+    %{latest: latest_games(settings), best: best_results(settings)}
+  end
+
+  @doc """
+  Gives the results of the scope's user for the settings: the latest
+  results (the newest first, each with all players of its round, the user
+  first) and the best result (nil when there are no results).
+  """
+  def user_results(%{user: user}, settings) do
+    user_query =
+      from(r in Result, where: r.settings == type(^settings, :map) and r.user_id == ^user.id)
+
+    latest =
+      from(r in user_query, order_by: [desc: r.inserted_at], limit: @list_size)
+      |> Repo.all()
+
+    players = game_players(Enum.map(latest, & &1.game_id))
+
+    latest =
+      Enum.map(latest, fn result ->
+        {mine, others} = Enum.split_with(players[result.game_id], &(&1.id == result.id))
+        %{result: result, players: mine ++ others}
+      end)
+
+    best =
+      from(r in user_query, order_by: [desc: r.score, asc: r.inserted_at], limit: 1)
+      |> Repo.one()
+
+    %{latest: latest, best: best}
+  end
+
+  defp latest_games(settings) do
+    game_ids =
+      from(r in Result,
+        where: r.settings == type(^settings, :map),
+        group_by: r.game_id,
+        order_by: [desc: max(r.inserted_at)],
+        limit: @list_size,
+        select: r.game_id
+      )
+      |> Repo.all()
+
+    players = game_players(game_ids)
+
+    Enum.map(game_ids, fn game_id ->
+      [first | _] = players[game_id]
+      %{game_id: game_id, score: first.score, players: players[game_id]}
+    end)
+  end
+
+  # Gives the results of all players of the rounds, by game id
+  defp game_players(game_ids) do
+    from(r in Result, where: r.game_id in ^game_ids, order_by: r.id, preload: :user)
+    |> Repo.all()
+    |> Enum.group_by(& &1.game_id)
+  end
+
+  defp best_results(settings) do
+    best_of_each_user =
+      from(r in Result,
+        where: r.settings == type(^settings, :map) and not is_nil(r.user_id),
+        distinct: r.user_id,
+        order_by: [asc: r.user_id, desc: r.score, asc: r.inserted_at]
+      )
+
+    from(r in subquery(best_of_each_user),
+      order_by: [desc: r.score, asc: r.inserted_at],
+      limit: @list_size,
+      preload: :user
+    )
+    |> Repo.all()
   end
 end

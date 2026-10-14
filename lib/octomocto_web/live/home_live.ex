@@ -9,7 +9,7 @@ defmodule OctomoctoWeb.HomeLive do
 
   alias Octomocto.Lobby
 
-  alias OctomoctoWeb.{GameIcons, MatchLive, SchulteLive, SetGameLive, SudokuLive}
+  alias OctomoctoWeb.{GameIcons, MatchLive, SchulteLive, SetGameLive, SudokuLive, TrainsLive}
 
   @games [
     %{
@@ -66,6 +66,7 @@ defmodule OctomoctoWeb.HomeLive do
   # settings of a game in a row
   @lobbies %{
     "match" => {Octomocto.Match.Game, Octomocto.Match.Store, MatchLive},
+    "trains" => {Octomocto.Trains.Game, Octomocto.Trains.Store, TrainsLive},
     "set" => {Octomocto.SetGame.Game, Octomocto.SetGame.Store, SetGameLive},
     "sudoku" => {Octomocto.Sudoku.Game, Octomocto.Sudoku.Store, SudokuLive},
     "schulte" => {Octomocto.Schulte.Game, Octomocto.Schulte.Store, SchulteLive}
