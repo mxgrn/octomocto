@@ -83,12 +83,9 @@ defmodule OctomoctoWeb.MemoryLive do
 
   defp rules do
     [
-      "All cards are face down. Each image is on 2 cards (pairs) or 3 cards (triplets).",
-      "On your turn, turn the cards face up one by one.",
-      "When the cards make a set, they go off the field. You get one point for each card, and you turn more cards.",
-      "When they do not make a set, the turn goes to the next player. The cards stay face up until the next player turns a card, so remember them.",
-      "With other players, a player who turns no card for 15 seconds loses the turn.",
-      "The clock starts with the first card and stops when the field is empty. Alone, find all sets as fast as you can. With other players, get the most points."
+      "Turn over 2 cards at a time (3 for triplets) to find the cards with the same image.",
+      "If they match, you get a point for each card, and you go again. If not, the next player goes.",
+      "Whoever has the most points wins. Alone, clear the field as fast as you can."
     ]
   end
 
