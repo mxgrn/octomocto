@@ -1704,7 +1704,7 @@ view model =
             p [ id "trains-connecting", class "py-24 text-center opacity-60" ] [ text "Joining the game…" ]
 
         Failed reason ->
-            p [ id "trains-failed", class "py-24 text-center text-red-600" ] [ text ("Could not join the game: " ++ reason) ]
+            p [ id "trains-failed", class "py-24 text-center text-red-600 dark:text-red-400" ] [ text ("Could not join the game: " ++ reason) ]
 
         Joined me game ->
             viewGame model me game
@@ -1723,7 +1723,7 @@ viewGame model me game =
         [ aside [ id "trains-panel", class "flex flex-col gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
             [ div []
                 [ h1 [ class "text-2xl font-semibold tracking-tight" ]
-                    [ a [ id "trains-title-link", href "/trains", class "transition hover:text-octo-indigo" ] [ text "Right on Track" ] ]
+                    [ a [ id "trains-title-link", href "/trains", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Right on Track" ] ]
                 , p [ class "text-sm opacity-60" ]
                     [ text
                         (if solo then
@@ -1751,7 +1751,7 @@ viewGame model me game =
               else
                 viewPlayers me game owned
             , if me == Nothing then
-                p [ id "trains-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200" ]
+                p [ id "trains-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
                     [ text "This game is full or has started, so you can only watch it." ]
 
               else
@@ -1780,7 +1780,7 @@ viewReady : Me -> Game -> Html Msg
 viewReady me game =
     div
         [ id "trains-ready"
-        , class "flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-2xl bg-slate-900 px-4 py-3 text-white shadow-lg lg:flex-col lg:items-stretch"
+        , class "flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-2xl bg-slate-900 px-4 py-3 text-white shadow-lg lg:flex-col lg:items-stretch dark:bg-white/5 dark:shadow-none dark:ring-1 dark:ring-white/10"
         ]
         [ div []
             [ p [ class "font-semibold" ] [ text (String.fromInt (trainCount game.round.layout.board) ++ " trains are ready") ]
@@ -1810,9 +1810,9 @@ viewReady me game =
 viewStats : Round -> Html Msg
 viewStats round =
     div [ class "flex gap-2 text-sm" ]
-        [ div [ id "trains-correct", class "rounded-full bg-emerald-50 px-3 py-1 text-emerald-900 ring-1 ring-emerald-200" ]
+        [ div [ id "trains-correct", class "rounded-full bg-emerald-50 px-3 py-1 text-emerald-900 ring-1 ring-emerald-200 dark:bg-emerald-400/10 dark:text-emerald-200 dark:ring-emerald-400/25" ]
             [ text "Correct ", span [ class "font-semibold tabular-nums" ] [ text (String.fromInt round.correct) ] ]
-        , div [ id "trains-sent", class "rounded-full bg-white px-3 py-1 text-slate-700 shadow-sm ring-1 ring-slate-200" ]
+        , div [ id "trains-sent", class "rounded-full bg-white px-3 py-1 text-slate-700 shadow-sm ring-1 ring-slate-200 dark:bg-white/5 dark:text-slate-200 dark:shadow-none dark:ring-white/10" ]
             [ text "Train "
             , span [ class "font-semibold tabular-nums" ]
                 [ text (String.fromInt round.sent ++ " / " ++ String.fromInt (trainCount round.layout.board)) ]
@@ -1822,12 +1822,12 @@ viewStats round =
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "trains-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1 dark:text-slate-100"
             ]
             []
         , button
@@ -1858,11 +1858,11 @@ viewPlayers me game owned =
                 ( player.id
                 , li
                     [ id ("trains-player-" ++ player.id)
-                    , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200"
+                    , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200 dark:bg-white/5 dark:text-slate-100 dark:shadow-none dark:ring-white/10"
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
                     , span [ class "lg:flex-1" ] [ text (playerName me player) ]
-                    , span [ class "text-xs text-slate-500 tabular-nums" ]
+                    , span [ class "text-xs text-slate-500 tabular-nums dark:text-slate-400" ]
                         [ text
                             (String.fromInt count
                                 ++ (if count == 1 then
@@ -1896,7 +1896,7 @@ viewRestartButton : Html Msg
 viewRestartButton =
     button
         [ id "trains-restart"
-        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start"
+        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
@@ -2016,7 +2016,7 @@ viewBoard me game owned =
         , SA.viewBox ("0 0 " ++ String.fromFloat width ++ " " ++ String.fromFloat height)
         , SA.class "block h-auto w-full"
         ]
-        [ Svg.rect [ SA.width (String.fromFloat width), SA.height (String.fromFloat height), SA.rx "16", SA.fill "#ecfccb" ] []
+        [ Svg.rect [ SA.width (String.fromFloat width), SA.height (String.fromFloat height), SA.rx "16", SA.fill "#ecfccb", SA.class "trains-ground" ] []
         , Svg.g []
             (List.map
                 (\cell ->
@@ -2104,7 +2104,7 @@ trackPieces round =
 
 viewSwitchPad : Cell -> Svg msg
 viewSwitchPad cell =
-    switchCircle cell [ SA.fill "#fef3c7", SA.stroke "#fcd34d", SA.strokeWidth "2" ]
+    switchCircle cell [ SA.fill "#fef3c7", SA.stroke "#fcd34d", SA.strokeWidth "2", SA.class "trains-pad" ]
 
 
 {-| A switch in the color of its owner. The switches of the other players
@@ -2167,8 +2167,8 @@ railsOf rail color =
 viewRails : String -> Piece -> Svg msg
 viewRails color p =
     Svg.g [ SA.fill "none" ]
-        [ Svg.path [ SA.d (pathData p), SA.stroke color, SA.strokeWidth "11" ] []
-        , Svg.path [ SA.d (pathData p), SA.stroke "#e7e5e4", SA.strokeWidth "6" ] []
+        [ Svg.path [ SA.d (pathData p), SA.stroke color, SA.strokeWidth "11", SA.class "trains-rail" ] []
+        , Svg.path [ SA.d (pathData p), SA.stroke "#e7e5e4", SA.strokeWidth "6", SA.class "trains-track-bed" ] []
         ]
 
 
@@ -2282,7 +2282,7 @@ viewHouse ( ( x, y ) as cell, number ) =
         [ SA.id ("trains-house-" ++ String.fromInt x ++ "-" ++ String.fromInt y)
         , SA.transform (translate (center cell))
         ]
-        [ Svg.ellipse [ SA.cx "0", SA.cy "17", SA.rx "18", SA.ry "4", SA.fill "#365314", SA.opacity "0.2" ] []
+        [ Svg.ellipse [ SA.cx "0", SA.cy "17", SA.rx "18", SA.ry "4", SA.fill "#365314", SA.opacity "0.2", SA.class "trains-shadow" ] []
         , Svg.rect [ SA.x "-15", SA.y "-6", SA.width "30", SA.height "22", SA.rx "3", SA.fill colors.walls, SA.stroke "#1e293b", SA.strokeWidth "2" ] []
         , Svg.rect [ SA.x "-4", SA.y "4", SA.width "8", SA.height "12", SA.rx "1", SA.fill "#1e293b", SA.fillOpacity "0.35" ] []
         , Svg.polygon [ SA.points "-20,-4 0,-22 20,-4", SA.fill colors.roof, SA.strokeLinejoin "round", SA.stroke "#1e293b", SA.strokeWidth "2" ] []

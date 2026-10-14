@@ -300,6 +300,17 @@
 [data-theme=dark] .set-color-1 { color: #4ade80; }
 [data-theme=dark] .set-color-2 { color: #b197fc; }
 
+/* Right on Track in the dark theme: dark grass, light rails on a dark bed,
+   and switch pads that glow a little. The slate color of the station and of
+   the "black" houses and trains is lighter, so that it does not go into the
+   dark grass. */
+[data-theme=dark] #trains-board .trains-ground { fill: #26352b; }
+[data-theme=dark] #trains-board .trains-rail { stroke: #d6d3d1; }
+[data-theme=dark] #trains-board .trains-track-bed { stroke: #44403c; }
+[data-theme=dark] #trains-board .trains-pad { fill: rgb(251 191 36 / 0.14); stroke: rgb(251 191 36 / 0.55); }
+[data-theme=dark] #trains-board .trains-shadow { fill: #000; opacity: 0.35; }
+[data-theme=dark] #trains-board [fill="#334155"] { fill: #64748b; }
+
 @keyframes set-last-pop {
   from { opacity: 0; transform: scale(0.95); }
 }
