@@ -236,20 +236,6 @@
         <% end %>
       </.score_list>
       <.score_list
-        id="latest-games"
-        icon="hero-clock"
-        icon_class="text-sky-600"
-        title="Latest games"
-        empty={@leaderboard.latest == []}
-      >
-        <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
-          <span class="flex-1 truncate">
-            <.player_list players={game.players} scores={@settings.players > 1} />
-          </span>
-          <span class="font-medium tabular-nums">{format_time(game.elapsed_ms)}</span>
-        </li>
-      </.score_list>
-      <.score_list
         id="best-results"
         icon="hero-trophy"
         icon_class="text-amber-500"
@@ -263,6 +249,20 @@
           <span class="w-5 text-right tabular-nums text-base-content/40">{place}</span>
           <span class="flex-1 truncate">{player_name(result.user)}</span>
           <span class="font-medium tabular-nums">{format_time(result.elapsed_ms)}</span>
+        </li>
+      </.score_list>
+      <.score_list
+        id="latest-games"
+        icon="hero-clock"
+        icon_class="text-sky-600"
+        title="Latest games"
+        empty={@leaderboard.latest == []}
+      >
+        <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
+          <span class="flex-1 truncate">
+            <.player_list players={game.players} scores={@settings.players > 1} />
+          </span>
+          <span class="font-medium tabular-nums">{format_time(game.elapsed_ms)}</span>
         </li>
       </.score_list>
     </div>
