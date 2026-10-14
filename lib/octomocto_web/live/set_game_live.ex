@@ -15,7 +15,7 @@ defmodule OctomoctoWeb.SetGameLive do
 
     {:ok,
      socket
-     |> assign([rules: rules()] ++ seo())
+     |> assign([canonical_url: url(~p"/set"), rules: rules()] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))}
   end
 

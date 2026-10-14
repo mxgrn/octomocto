@@ -85,7 +85,7 @@ defmodule OctomoctoWeb.HomeLive do
 
     {:ok,
      socket
-     |> assign(games: @games, kinds: Map.new(@games, &{&1.id, &1}))
+     |> assign(canonical_url: url(~p"/"), games: @games, kinds: Map.new(@games, &{&1.id, &1}))
      |> assign_lobby(entries)}
   end
 

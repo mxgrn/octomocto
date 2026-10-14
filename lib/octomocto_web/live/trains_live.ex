@@ -6,7 +6,7 @@ defmodule OctomoctoWeb.TrainsLive do
   alias Octomocto.Trains
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, seo())}
+    {:ok, assign(socket, [canonical_url: url(~p"/trains")] ++ seo())}
   end
 
   @doc "The title and the description of the Right on Track pages, for search engines."

@@ -15,7 +15,7 @@ defmodule OctomoctoWeb.MatchLive do
 
     {:ok,
      socket
-     |> assign([themes: Themes.list(), rules: rules()] ++ seo())
+     |> assign([canonical_url: url(~p"/match"), themes: Themes.list(), rules: rules()] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))}
   end
 

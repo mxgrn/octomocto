@@ -13,6 +13,11 @@
     />
     <%!-- Game rooms are private links, so search engines must not show them --%>
     <meta :if={assigns[:noindex]} name="robots" content="noindex" />
+    <%!--
+      The settings of a page are in its query, so one page has many URLs.
+      Search engines must show only the URL without the query.
+    --%>
+    <link :if={assigns[:canonical_url]} rel="canonical" href={@canonical_url} />
     <.live_title
       default="Octomocto"
       suffix={
