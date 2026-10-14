@@ -46,79 +46,100 @@ defmodule OctomoctoWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header
-      id="site-header"
-      class="flex min-h-16 flex-wrap items-center gap-x-8 gap-y-4 px-4 py-3 sm:px-6 lg:px-8"
-    >
-      <.link :if={@home} id="home-link" navigate={~p"/"} class="group flex items-center gap-4">
-        <OctomoctoWeb.PageHTML.octopi class="h-20 shrink-0 drop-shadow-sm" />
-        <div class="flex flex-col gap-1">
-          <.wordmark class="h-8" />
-          <p
-            id="slogan"
-            class="text-lg font-medium tracking-tight text-octo-navy/70 dark:text-base-content/70"
-          >
-            Use your heads
-          </p>
-        </div>
-      </.link>
-      <.link :if={!@home} id="home-link" navigate={~p"/"} class="group block">
-        <.wordmark class="h-6 -translate-y-0.5" />
-      </.link>
-
-      <div :if={@header != []} class="order-last w-full xl:order-none xl:w-auto xl:flex-1">
-        {render_slot(@header)}
-      </div>
-
-      <div class="ml-auto flex items-center gap-4">
-        <.theme_toggle />
-
-        <nav :if={@current_scope} id="user-menu" class="group relative text-sm">
-          <button
-            id="user-menu-button"
-            type="button"
-            class="flex cursor-default items-center gap-2 text-base-content/70 transition group-hover:text-base-content group-focus-within:text-base-content"
-          >
-            <img
-              :if={@current_scope.user.avatar_url}
-              src={@current_scope.user.avatar_url}
-              alt=""
-              class="size-6 rounded-full"
-            />
-            {@current_scope.user.display_name || @current_scope.user.name || @current_scope.user.email}
-          </button>
-          <%!-- pt-2 instead of a margin keeps the hover area unbroken between button and menu --%>
-          <div
-            id="user-menu-dropdown"
-            class="invisible absolute right-0 z-10 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
-          >
-            <div class="min-w-36 rounded-lg border border-base-300 bg-base-100 py-1 shadow-lg">
-              <.link
-                id="settings-link"
-                href={~p"/settings"}
-                class="block px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
-              >
-                Settings
-              </.link>
-              <.link
-                id="sign-out-link"
-                href={~p"/signout"}
-                method="delete"
-                class="block px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
-              >
-                Sign out
-              </.link>
-            </div>
+    <%!-- The column keeps the footer at the bottom of a short page --%>
+    <div class="flex min-h-dvh flex-col">
+      <header
+        id="site-header"
+        class="flex min-h-16 flex-wrap items-center gap-x-8 gap-y-4 px-4 py-3 sm:px-6 lg:px-8"
+      >
+        <.link :if={@home} id="home-link" navigate={~p"/"} class="group flex items-center gap-4">
+          <OctomoctoWeb.PageHTML.octopi class="h-20 shrink-0 drop-shadow-sm" />
+          <div class="flex flex-col gap-1">
+            <.wordmark class="h-8" />
+            <p
+              id="slogan"
+              class="text-lg font-medium tracking-tight text-octo-navy/70 dark:text-base-content/70"
+            >
+              Use your heads
+            </p>
           </div>
-        </nav>
-      </div>
-    </header>
+        </.link>
+        <.link :if={!@home} id="home-link" navigate={~p"/"} class="group block">
+          <.wordmark class="h-6 -translate-y-0.5" />
+        </.link>
 
-    <main class="px-4 pb-6 sm:px-6 lg:px-8">
-      <div class={["space-y-4", if(@wide, do: "w-full", else: "mx-auto max-w-2xl")]}>
-        {render_slot(@inner_block)}
-      </div>
-    </main>
+        <div :if={@header != []} class="order-last w-full xl:order-none xl:w-auto xl:flex-1">
+          {render_slot(@header)}
+        </div>
+
+        <div class="ml-auto flex items-center gap-4">
+          <.theme_toggle />
+
+          <nav :if={@current_scope} id="user-menu" class="group relative text-sm">
+            <button
+              id="user-menu-button"
+              type="button"
+              class="flex cursor-default items-center gap-2 text-base-content/70 transition group-hover:text-base-content group-focus-within:text-base-content"
+            >
+              <img
+                :if={@current_scope.user.avatar_url}
+                src={@current_scope.user.avatar_url}
+                alt=""
+                class="size-6 rounded-full"
+              />
+              {@current_scope.user.display_name || @current_scope.user.name ||
+                @current_scope.user.email}
+            </button>
+            <%!-- pt-2 instead of a margin keeps the hover area unbroken between button and menu --%>
+            <div
+              id="user-menu-dropdown"
+              class="invisible absolute right-0 z-10 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+            >
+              <div class="min-w-36 rounded-lg border border-base-300 bg-base-100 py-1 shadow-lg">
+                <.link
+                  id="settings-link"
+                  href={~p"/settings"}
+                  class="block px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+                >
+                  Settings
+                </.link>
+                <.link
+                  id="sign-out-link"
+                  href={~p"/signout"}
+                  method="delete"
+                  class="block px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+                >
+                  Sign out
+                </.link>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <main class="flex-1 px-4 pb-6 sm:px-6 lg:px-8">
+        <div class={["space-y-4", if(@wide, do: "w-full", else: "mx-auto max-w-2xl")]}>
+          {render_slot(@inner_block)}
+        </div>
+      </main>
+
+      <footer
+        id="site-footer"
+        class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 px-4 py-6 text-xs text-base-content/50 sm:px-6 lg:px-8"
+      >
+        <span>&copy; 2026 Octomocto</span>
+        <.link
+          id="privacy-link"
+          navigate={~p"/privacy"}
+          class="transition hover:text-base-content"
+        >
+          Privacy Policy
+        </.link>
+        <.link id="terms-link" navigate={~p"/terms"} class="transition hover:text-base-content">
+          Terms of Service
+        </.link>
+      </footer>
+    </div>
 
     <.flash_group flash={@flash} />
     """

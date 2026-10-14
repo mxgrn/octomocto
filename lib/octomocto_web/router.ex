@@ -21,6 +21,8 @@ defmodule OctomoctoWeb.Router do
     pipe_through :browser
 
     get "/elm", PageController, :elm
+    get "/privacy", PageController, :privacy
+    get "/terms", PageController, :terms
     get "/astronaut", AstronautController, :index
     post "/astronaut", AstronautController, :create
     get "/astronaut/:id", AstronautController, :show

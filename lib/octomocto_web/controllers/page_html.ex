@@ -56,4 +56,33 @@ defmodule OctomoctoWeb.PageHTML do
     />
     """
   end
+
+  @doc """
+  Renders a legal page, such as the Privacy Policy, with a title, the date
+  of the last change and styles for the headings, paragraphs and lists inside.
+  """
+  attr :id, :string, required: true
+  attr :title, :string, required: true
+  attr :updated, :string, required: true
+  slot :inner_block, required: true
+
+  def legal_page(assigns) do
+    ~H"""
+    <article
+      id={@id}
+      class={[
+        "space-y-4 pt-4 text-sm leading-relaxed text-base-content/80",
+        "[&_h2]:pt-4 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-base-content",
+        "[&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5",
+        "[&_a]:text-octo-indigo [&_a]:underline [&_a]:underline-offset-2 dark:[&_a]:text-octo-indigo-light"
+      ]}
+    >
+      <header class="space-y-1">
+        <h1 class="text-2xl font-semibold tracking-tight text-base-content">{@title}</h1>
+        <p class="text-xs text-base-content/50">Last updated: {@updated}</p>
+      </header>
+      {render_slot(@inner_block)}
+    </article>
+    """
+  end
 end
