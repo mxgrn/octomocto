@@ -25,7 +25,13 @@ config :octomocto,
   generators: [timestamp_type: :utc_datetime]
 
 # The Mnesia tables that the cluster nodes share
-config :mnesiac, stores: [Octomocto.Schulte.Store, Octomocto.Trains.Store, Octomocto.Match.Store]
+config :mnesiac,
+  stores: [
+    Octomocto.Schulte.Store,
+    Octomocto.Trains.Store,
+    Octomocto.Match.Store,
+    Octomocto.SetGame.Store
+  ]
 
 # Configure the endpoint
 config :octomocto, OctomoctoWeb.Endpoint,

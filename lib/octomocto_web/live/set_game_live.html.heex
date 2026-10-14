@@ -1,0 +1,185 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <%!--
+    Wider than the app container, so that the columns have room. One column
+    on a small screen: the title, the open games, the settings and the
+    results. Two columns on a large screen: the results go to the right.
+    Three columns on an extra large screen: the open games go to the left,
+    and the settings in the center are wider than the other columns. The
+    columns use the full width of the screen, with the side padding of the
+    header.
+    The last row takes the free height, so that the tall results column does
+    not make gaps between the rows on the left.
+  --%>
+  <div
+    id="set-index"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 py-12 lg:grid-cols-2 lg:grid-rows-[auto_auto_1fr] lg:items-start lg:gap-x-12 lg:py-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[1fr_1.4fr_1fr] xl:grid-rows-[auto_1fr]"
+  >
+    <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 xl:max-w-none">
+      <div class="flex items-center justify-center gap-3">
+        <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 shadow-inner">
+          <.card_icon class="w-9" />
+        </div>
+        <h1 class="text-3xl font-semibold tracking-tight">Set</h1>
+      </div>
+      <p class="text-base-content/70">
+        Choose the settings and start a new game, or join an open game.
+      </p>
+      <.how_to_play accent={:violet} />
+    </div>
+
+    <div
+      id="set-lobby"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
+    >
+      <.open_games
+        games={@open_games}
+        matches={&same_settings?(&1, @settings)}
+        path={fn id -> ~p"/set/#{id}" end}
+        accent={:violet}
+      >
+        <:icon :let={_game}><.card_icon class="w-9 shrink-0" /></:icon>
+        <:summary :let={_game}>Normal · 81 cards</:summary>
+      </.open_games>
+      <.ongoing_games games={@ongoing_games} path={fn id -> ~p"/set/#{id}" end} accent={:violet}>
+        <:icon :let={_game}><.card_icon class="w-9 shrink-0" /></:icon>
+        <:summary :let={_game}>Normal · 81 cards</:summary>
+      </.ongoing_games>
+    </div>
+
+    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
+      <div id="set-settings" class="flex w-full flex-col gap-4">
+        <.setting
+          label="Players"
+          hint={
+            if(@settings.players > 1,
+              do: "All players race on the same table. The game starts when all players are in."
+            )
+          }
+        >
+          <.option
+            :for={n <- 1..5}
+            id={"players-#{n}"}
+            selected={@settings.players == n}
+            patch={~p"/set?#{query(@settings, players: n)}"}
+          >
+            {n}
+          </.option>
+        </.setting>
+        <.setting
+          :if={@settings.players > 1}
+          label="Visibility"
+          hint={
+            if(@settings.public,
+              do: "Other players see this game in Open games.",
+              else: "Only players with the link can join."
+            )
+          }
+        >
+          <.option
+            :for={
+              {value, public, label} <- [
+                {"public", true, "Public"},
+                {"private", false, "Private"}
+              ]
+            }
+            id={"visibility-#{value}"}
+            selected={@settings.public == public}
+            patch={~p"/set?#{query(@settings, public: public)}"}
+          >
+            {label}
+          </.option>
+        </.setting>
+      </div>
+
+      <.start_bar accent={:violet} multiplayer={@settings.players > 1} />
+    </div>
+
+    <div
+      id="set-leaderboard"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
+    >
+      <.score_list
+        id="your-results"
+        icon="hero-user"
+        icon_class="text-violet-500"
+        title="Your results"
+        empty={@user_results != nil and @user_results.latest == []}
+      >
+        <:aside :if={@user_results && @user_results.best}>
+          <span
+            id="your-best"
+            class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
+          >
+            <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
+            <span class="text-base-content/60">Best</span>
+            <span class="font-semibold tabular-nums">
+              {format_time(@user_results.best.elapsed_ms)}
+            </span>
+          </span>
+        </:aside>
+        <%= if @user_results do %>
+          <li
+            :for={%{result: result, players: players} <- @user_results.latest}
+            class="flex items-baseline gap-3 py-2"
+          >
+            <span :if={@settings.players == 1} class="flex-1 text-base-content/60">
+              {Calendar.strftime(result.inserted_at, "%b %-d")}
+            </span>
+            <span :if={@settings.players > 1} class="flex-1 truncate">
+              <.player_list players={players} scores />
+            </span>
+            <span class={[
+              "w-16 text-right font-medium tabular-nums",
+              result.id == @user_results.best.id && "text-amber-600"
+            ]}>
+              {format_time(result.elapsed_ms)}
+            </span>
+          </li>
+        <% else %>
+          <li class="py-2 text-center text-base-content/60">
+            <.link
+              id="your-results-sign-in"
+              href={~p"/signin"}
+              class="font-medium text-violet-600 transition hover:text-violet-500 hover:underline"
+            >
+              Sign in
+            </.link>
+            to see your results.
+          </li>
+        <% end %>
+      </.score_list>
+      <.score_list
+        id="best-results"
+        icon="hero-trophy"
+        icon_class="text-amber-500"
+        title="Best results"
+        empty={@leaderboard.best == []}
+      >
+        <li
+          :for={{result, place} <- Enum.with_index(@leaderboard.best, 1)}
+          class="flex items-baseline gap-3 py-2"
+        >
+          <span class="w-5 text-right tabular-nums text-base-content/40">{place}</span>
+          <span class="flex-1 truncate">{player_name(result.user)}</span>
+          <span class="font-medium tabular-nums">{format_time(result.elapsed_ms)}</span>
+        </li>
+      </.score_list>
+      <.score_list
+        id="latest-games"
+        icon="hero-clock"
+        icon_class="text-violet-600"
+        title="Latest games"
+        empty={@leaderboard.latest == []}
+      >
+        <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
+          <span class="flex-1 truncate">
+            <.player_list players={game.players} scores={@settings.players > 1} />
+          </span>
+          <span class="font-medium tabular-nums">{format_time(game.elapsed_ms)}</span>
+        </li>
+      </.score_list>
+    </div>
+  </div>
+
+  <.rules rules={@rules} accent={:violet} />
+</Layouts.app>

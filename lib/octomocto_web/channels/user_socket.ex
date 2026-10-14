@@ -4,6 +4,7 @@ defmodule OctomoctoWeb.UserSocket do
   channel "astronaut:*", OctomoctoWeb.AstronautChannel
   channel "match:*", OctomoctoWeb.MatchChannel
   channel "schulte:*", OctomoctoWeb.SchulteChannel
+  channel "set:*", OctomoctoWeb.SetGameChannel
   channel "trains:*", OctomoctoWeb.TrainsChannel
 
   @impl true

@@ -1,0 +1,1137 @@
+port module SetGame exposing (main)
+
+{-| Multiplayer Set: find 3 cards where each feature is the same on all
+cards or different on all cards.
+
+The server owns the game: the table, the deck and the scores. This module
+draws the state that comes in through ports and sends the player's claims
+out. app.js connects the ports to a Phoenix channel.
+
+A card is an integer from 0 to 80. Its 4 features are its digits in base
+3: the number of shapes, the shape, the shading and the color. Three cards
+are a set when the sum of each digit can be divided by 3.
+
+The player selects 3 cards. A set goes to the server, which gives the
+point to the first player who claims it. A wrong set shakes and changes
+nothing, so it does not go to the server.
+
+All players race on the same table. Before all of them are in, nobody sees
+the cards. A countdown with beeps comes before each table. A browser that
+joins a full game only watches: it has no player id.
+
+The module compares each new state with the old one and sends the names of
+the sounds to play out through a port. The player can mute the sounds.
+
+The module is not named `Set`, because elm/core has a `Set` module. The
+port names start with "setGame", because Elm does not allow two ports with
+the same name in one bundle.
+
+-}
+
+import Browser
+import Browser.Dom
+import Browser.Events
+import Html exposing (Html, a, aside, button, div, h1, input, li, ol, p, span, text, ul)
+import Html.Attributes exposing (class, classList, href, id, readonly, style, value)
+import Html.Events exposing (onClick)
+import Html.Keyed
+import Json.Decode as Decode exposing (Decoder)
+import Process
+import Svg exposing (Svg)
+import Svg.Attributes as SA
+import Task
+import Time
+
+
+
+-- PORTS
+
+
+port setGameClaim : List Int -> Cmd msg
+
+
+port setGameRestart : () -> Cmd msg
+
+
+port setGameCopyText : String -> Cmd msg
+
+
+port setGameJoined : (Decode.Value -> msg) -> Sub msg
+
+
+port setGameState : (Decode.Value -> msg) -> Sub msg
+
+
+port setGameJoinFailed : (String -> msg) -> Sub msg
+
+
+port setGamePlaySound : String -> Cmd msg
+
+
+port setGameSaveMuted : Bool -> Cmd msg
+
+
+
+-- MODEL
+
+
+{-| The `name` is the display name of a signed-in player, or Nothing for a
+guest. Then the player is known by the `colorName`. An `away` player lost
+the connection, and can come back for a short time.
+-}
+type alias Player =
+    { id : String
+    , name : Maybe String
+    , color : String
+    , colorName : String
+    , score : Int
+    , away : Bool
+    }
+
+
+type alias Card =
+    Int
+
+
+{-| The last set that a player found
+-}
+type alias FoundSet =
+    { playerId : String
+    , cards : List Card
+    }
+
+
+type alias Game =
+    { -- Empty before the start and during the countdown
+      table : List Card
+    , deckLeft : Int
+    , lastSet : Maybe FoundSet
+
+    -- True until the game has all its players
+    , waiting : Bool
+    , finished : Bool
+
+    -- The time since the start, below zero during the countdown. After the
+    -- end, the final time.
+    , elapsedMs : Int
+    , players : List Player
+    , playersNeeded : Int
+    }
+
+
+{-| The player id of this browser. Nothing for a watcher.
+-}
+type alias Me =
+    Maybe String
+
+
+type Connection
+    = Connecting
+    | Joined Me Game
+    | Failed String
+
+
+type alias Model =
+    { gameUrl : String
+    , connection : Connection
+    , copied : Bool
+
+    -- The selected cards, in the order of the clicks
+    , selected : List Card
+
+    -- The cards of the last wrong set, while they shake. The number tells
+    -- the shakes apart, so that the end of an old shake does not stop a
+    -- new one.
+    , wrong : List Card
+    , wrongCount : Int
+
+    -- The local time (in ms) when the table started, and the local time
+    -- now. The clock ticks between the server updates.
+    , clockStart : Int
+    , now : Int
+
+    -- The countdown step that last played its beep (see `countdownStep`)
+    , beepedStep : Maybe Int
+
+    -- The size of the window, to pick the shape of the table
+    , viewport : ( Float, Float )
+    , muted : Bool
+    }
+
+
+type alias Flags =
+    { gameUrl : String
+    , muted : Bool
+    }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    ( { gameUrl = flags.gameUrl
+      , connection = Connecting
+      , copied = False
+      , selected = []
+      , wrong = []
+      , wrongCount = 0
+      , clockStart = 0
+      , now = 0
+      , beepedStep = Nothing
+      , viewport = ( 1024, 768 )
+      , muted = flags.muted
+      }
+    , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
+    )
+
+
+
+-- UPDATE
+
+
+type Msg
+    = GotJoined Decode.Value
+    | GotState Decode.Value
+    | GotJoinFailed String
+    | Pick Card
+    | WrongDone Int
+    | Restart
+    | CopyLink
+    | CopiedTimeout
+    | SyncClock Int Time.Posix
+    | Tick Time.Posix
+    | Resized Float Float
+    | ToggleMuted
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        GotJoined value ->
+            case Decode.decodeValue joinedDecoder value of
+                Ok ( me, game ) ->
+                    ( { model | connection = Joined me game, selected = [] }, syncClock game )
+
+                Err err ->
+                    ( { model | connection = Failed (Decode.errorToString err) }, Cmd.none )
+
+        GotState value ->
+            case ( model.connection, Decode.decodeValue gameDecoder value ) of
+                ( Joined me old, Ok game ) ->
+                    ( { model
+                        | connection = Joined me game
+
+                        -- Another player can take a selected card
+                        , selected = List.filter (\card -> List.member card game.table) model.selected
+                      }
+                    , Cmd.batch [ syncClock game, playSounds model (stateSounds me old game) ]
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        GotJoinFailed reason ->
+            ( { model | connection = Failed reason }, Cmd.none )
+
+        Pick card ->
+            case model.connection of
+                Joined me game ->
+                    if canPlay me game then
+                        pick card model
+
+                    else
+                        ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        WrongDone count ->
+            if count == model.wrongCount then
+                ( { model | wrong = [] }, Cmd.none )
+
+            else
+                ( model, Cmd.none )
+
+        Restart ->
+            ( model, setGameRestart () )
+
+        CopyLink ->
+            ( { model | copied = True }
+            , Cmd.batch
+                [ setGameCopyText model.gameUrl
+                , Process.sleep 1500 |> Task.perform (\_ -> CopiedTimeout)
+                ]
+            )
+
+        CopiedTimeout ->
+            ( { model | copied = False }, Cmd.none )
+
+        SyncClock elapsedMs time ->
+            let
+                ms =
+                    Time.posixToMillis time
+            in
+            beepCountdown { model | clockStart = ms - elapsedMs, now = ms }
+
+        Tick time ->
+            beepCountdown { model | now = Time.posixToMillis time }
+
+        Resized width height ->
+            ( { model | viewport = ( width, height ) }, Cmd.none )
+
+        ToggleMuted ->
+            ( { model | muted = not model.muted }, setGameSaveMuted (not model.muted) )
+
+
+{-| A click on a selected card removes it from the selection. The third card
+makes a claim. After a claim, the cards stay selected until the server
+takes them, and the next click starts a new selection.
+-}
+pick : Card -> Model -> ( Model, Cmd Msg )
+pick card model =
+    let
+        selection =
+            if List.length model.selected == 3 then
+                [ card ]
+
+            else
+                model.selected ++ [ card ]
+    in
+    if List.member card model.selected then
+        ( { model | selected = List.filter ((/=) card) model.selected }, Cmd.none )
+
+    else if List.length selection < 3 then
+        ( { model | selected = selection }, playSounds model [ "select" ] )
+
+    else if isSet selection then
+        ( { model | selected = selection }, setGameClaim selection )
+
+    else
+        ( { model | selected = [], wrong = selection, wrongCount = model.wrongCount + 1 }
+        , Cmd.batch
+            [ playSounds model [ "wrong" ]
+            , Process.sleep 500 |> Task.perform (\_ -> WrongDone (model.wrongCount + 1))
+            ]
+        )
+
+
+{-| A player can select cards while the table is on the screen
+-}
+canPlay : Me -> Game -> Bool
+canPlay me game =
+    me /= Nothing && not game.waiting && not game.finished && game.table /= []
+
+
+{-| The digit of the card for the feature: 0 for the number of shapes, 1 for
+the shape, 2 for the shading and 3 for the color.
+-}
+feature : Int -> Card -> Int
+feature index card =
+    modBy 3 (card // (3 ^ index))
+
+
+isSet : List Card -> Bool
+isSet cards =
+    List.length cards
+        == 3
+        && List.all (\index -> modBy 3 (List.sum (List.map (feature index) cards)) == 0) [ 0, 1, 2, 3 ]
+
+
+{-| The seconds left in the countdown (3, 2, 1), 0 after it, and Nothing
+when no table runs. The step is right only after the clock is in sync.
+-}
+countdownStep : Model -> Maybe Int
+countdownStep model =
+    case model.connection of
+        Joined _ game ->
+            if game.waiting || game.finished then
+                Nothing
+
+            else
+                Just (max 0 (ceiling (toFloat (model.clockStart - model.now) / 1000)))
+
+        _ ->
+            Nothing
+
+
+{-| A beep on each step of the countdown, and a higher beep at the start.
+There is no start beep without a countdown before it, for example for a
+watcher who joins later.
+-}
+beepCountdown : Model -> ( Model, Cmd Msg )
+beepCountdown model =
+    let
+        step =
+            countdownStep model
+
+        sounds =
+            if step == model.beepedStep then
+                []
+
+            else
+                case step of
+                    Just 0 ->
+                        if Maybe.withDefault 0 model.beepedStep > 0 then
+                            [ "go" ]
+
+                        else
+                            []
+
+                    Just _ ->
+                        [ "countdown" ]
+
+                    Nothing ->
+                        []
+    in
+    ( { model | beepedStep = step }, playSounds model sounds )
+
+
+playSounds : Model -> List String -> Cmd Msg
+playSounds model names =
+    if model.muted then
+        Cmd.none
+
+    else
+        Cmd.batch (List.map setGamePlaySound names)
+
+
+{-| The sounds for the change from the old state to the new one: a set that
+I found or that another player found, and the end of the game.
+-}
+stateSounds : Me -> Game -> Game -> List String
+stateSounds me old new =
+    let
+        foundSound =
+            case new.lastSet of
+                Just found ->
+                    if new.lastSet == old.lastSet || new.finished then
+                        []
+
+                    else if me == Just found.playerId then
+                        [ "found" ]
+
+                    else
+                        [ "other_found" ]
+
+                Nothing ->
+                    []
+
+        endSound =
+            if new.finished && not old.finished then
+                case winners new.players of
+                    [ winner ] ->
+                        if isMe me winner || List.length new.players == 1 then
+                            [ "win" ]
+
+                        else
+                            [ "lose" ]
+
+                    _ ->
+                        [ "lose" ]
+
+            else
+                []
+    in
+    foundSound ++ endSound
+
+
+isMe : Me -> Player -> Bool
+isMe me player =
+    me == Just player.id
+
+
+winners : List Player -> List Player
+winners players =
+    let
+        best =
+            List.maximum (List.map .score players) |> Maybe.withDefault 0
+    in
+    List.filter (\p -> p.score == best) players
+
+
+syncClock : Game -> Cmd Msg
+syncClock game =
+    Time.now |> Task.perform (SyncClock game.elapsedMs)
+
+
+
+-- DECODERS
+
+
+joinedDecoder : Decoder ( Me, Game )
+joinedDecoder =
+    Decode.map2 Tuple.pair
+        (Decode.field "player_id" (Decode.nullable Decode.string))
+        (Decode.field "state" gameDecoder)
+
+
+gameDecoder : Decoder Game
+gameDecoder =
+    Decode.map8 Game
+        (Decode.field "table" (Decode.list Decode.int))
+        (Decode.field "deck_left" Decode.int)
+        (Decode.field "last_set" (Decode.nullable foundSetDecoder))
+        (Decode.field "waiting" Decode.bool)
+        (Decode.field "finished" Decode.bool)
+        (Decode.field "elapsed_ms" Decode.int)
+        (Decode.field "players" (Decode.list playerDecoder))
+        (Decode.field "players_needed" Decode.int)
+
+
+foundSetDecoder : Decoder FoundSet
+foundSetDecoder =
+    Decode.map2 FoundSet
+        (Decode.field "player_id" Decode.string)
+        (Decode.field "cards" (Decode.list Decode.int))
+
+
+playerDecoder : Decoder Player
+playerDecoder =
+    Decode.map6 Player
+        (Decode.field "id" Decode.string)
+        (Decode.field "name" (Decode.nullable Decode.string))
+        (Decode.field "color" Decode.string)
+        (Decode.field "color_name" Decode.string)
+        (Decode.field "score" Decode.int)
+        (Decode.field "away" Decode.bool)
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ setGameJoined GotJoined
+        , setGameState GotState
+        , setGameJoinFailed GotJoinFailed
+        , Browser.Events.onResize (\w h -> Resized (toFloat w) (toFloat h))
+        , case model.connection of
+            Joined _ game ->
+                -- The cards come only after the countdown, so an empty table
+                -- means a countdown. It ticks on each frame, so that the
+                -- beeps are on time.
+                if not game.waiting && not game.finished && game.table == [] then
+                    Browser.Events.onAnimationFrame Tick
+
+                else if not game.waiting && not game.finished then
+                    Time.every 200 Tick
+
+                else
+                    Sub.none
+
+            _ ->
+                Sub.none
+        ]
+
+
+
+-- VIEW
+
+
+view : Model -> Html Msg
+view model =
+    case model.connection of
+        Connecting ->
+            p [ id "set-connecting", class "py-24 text-center opacity-60" ] [ text "Joining the game…" ]
+
+        Failed reason ->
+            p [ id "set-failed", class "py-24 text-center text-red-600" ] [ text ("Could not join the game: " ++ reason) ]
+
+        Joined me game ->
+            viewGame model me game
+
+
+viewGame : Model -> Me -> Game -> Html Msg
+viewGame model me game =
+    let
+        layout =
+            tableLayout model game
+
+        countdown =
+            Maybe.withDefault 0 (countdownStep model)
+    in
+    div [ id "set-root", class "flex w-full max-w-[1400px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
+        [ stripePatterns
+        , aside [ id "set-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
+            [ div []
+                [ div [ class "flex items-center gap-2" ]
+                    [ h1 [ class "text-2xl font-semibold tracking-tight" ]
+                        [ a [ id "set-title-link", href "/set", class "transition hover:text-violet-600" ] [ text "Set" ] ]
+                    , viewMuteButton model.muted
+                    ]
+                , p [ class "text-sm opacity-60" ]
+                    [ text "Find 3 cards where each feature is all the same or all different." ]
+                ]
+            , viewClock model game
+            , if game.playersNeeded > 1 then
+                viewShareLink model
+
+              else
+                text ""
+            , if List.length game.players > 1 then
+                viewScores me game
+
+              else
+                text ""
+            , viewLastSet me game
+            , if me == Nothing then
+                p [ id "set-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200" ]
+                    [ text "This game is full, so you can only watch it." ]
+
+              else
+                viewRestartButton
+            ]
+        , div [ class "min-w-0 flex-1" ]
+            [ div [ class "relative mx-auto", style "width" (tableWidth layout) ]
+                [ viewTable model me game layout
+                , if game.waiting then
+                    viewWaiting game
+
+                  else if game.finished then
+                    viewResult me game
+
+                  else if countdown > 0 || game.table == [] then
+                    viewCountdown countdown
+
+                  else
+                    text ""
+                ]
+            ]
+        ]
+
+
+{-| The width of a card divided by its height
+-}
+cardRatio : Float
+cardRatio =
+    1.6
+
+
+type alias Layout =
+    { columns : Int
+    , rows : Int
+
+    -- True when the cards fill the columns first, so that 3 more cards
+    -- make a new column
+    , byColumn : Bool
+    }
+
+
+{-| On a wide screen, the table has 3 rows, and 3 more cards make a new
+column. On a narrow screen, it has 3 columns, and 3 more cards make a new
+row. Before the start, the table has room for 12 cards.
+-}
+tableLayout : Model -> Game -> Layout
+tableLayout model game =
+    let
+        lines =
+            max 4 (List.length game.table // 3)
+    in
+    if Tuple.first model.viewport >= 640 then
+        Layout lines 3 True
+
+    else
+        Layout 3 lines False
+
+
+{-| Make the table as wide as possible, but never taller than the screen
+(minus the 3rem header and the 1.5rem bottom padding of the page), and
+never with cards wider than 14rem.
+-}
+tableWidth : Layout -> String
+tableWidth layout =
+    let
+        ratio =
+            toFloat layout.columns * cardRatio / toFloat layout.rows
+    in
+    "min(100%, "
+        ++ String.fromInt (layout.columns * 14)
+        ++ "rem, calc((100dvh - 4.5rem) * "
+        ++ String.fromFloat ratio
+        ++ "))"
+
+
+viewMuteButton : Bool -> Html Msg
+viewMuteButton muted =
+    button
+        [ id "set-mute"
+        , class "grid size-8 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90"
+        , onClick ToggleMuted
+        , Html.Attributes.title
+            (if muted then
+                "Turn the sounds on"
+
+             else
+                "Turn the sounds off"
+            )
+        ]
+        [ span
+            [ class
+                (if muted then
+                    "hero-speaker-x-mark size-5"
+
+                 else
+                    "hero-speaker-wave size-5"
+                )
+            ]
+            []
+        ]
+
+
+{-| Starts a new table for all players, also during a game.
+-}
+viewRestartButton : Html Msg
+viewRestartButton =
+    button
+        [ id "set-restart"
+        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start"
+        , onClick Restart
+        ]
+        [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
+        , text "Restart game"
+        ]
+
+
+viewShareLink : Model -> Html Msg
+viewShareLink model =
+    div [ class "flex items-center gap-2 rounded-full bg-violet-50 p-1 pl-4 text-sm ring-1 ring-violet-200 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
+        [ input
+            [ id "set-link"
+            , readonly True
+            , value model.gameUrl
+            , class "min-w-0 flex-1 truncate bg-transparent text-violet-900 outline-none lg:px-2 lg:py-1"
+            ]
+            []
+        , button
+            [ id "set-copy-link"
+            , class "rounded-full bg-violet-600 px-4 py-1.5 font-medium text-white transition hover:bg-violet-500 active:scale-95"
+            , onClick CopyLink
+            ]
+            [ text
+                (if model.copied then
+                    "Copied!"
+
+                 else
+                    "Copy link"
+                )
+            ]
+        ]
+
+
+{-| The time on the left, and the cards that are still in the deck on the
+right.
+-}
+viewClock : Model -> Game -> Html Msg
+viewClock model game =
+    let
+        elapsedMs =
+            if game.finished then
+                game.elapsedMs
+
+            else if game.waiting then
+                0
+
+            else
+                max 0 (model.now - model.clockStart)
+    in
+    div [ id "set-clock", class "grid grid-cols-2 divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200" ]
+        [ div [ class "flex flex-col items-center justify-center" ]
+            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "time" ]
+            , span [ id "set-time", class "text-3xl font-light text-slate-700 tabular-nums" ] [ text (formatTime elapsedMs) ]
+            ]
+        , div [ class "flex flex-col items-center justify-center" ]
+            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "deck" ]
+            , span [ id "set-deck-left", class "text-3xl font-bold text-violet-600 tabular-nums" ] [ text (String.fromInt game.deckLeft) ]
+            ]
+        ]
+
+
+{-| Show the time as minutes and seconds, for example "1:05".
+-}
+formatTime : Int -> String
+formatTime ms =
+    let
+        seconds =
+            ms // 1000
+    in
+    String.fromInt (seconds // 60) ++ ":" ++ String.padLeft 2 '0' (String.fromInt (modBy 60 seconds))
+
+
+{-| The players in the order in which they joined, with the sets they found
+-}
+viewScores : Me -> Game -> Html Msg
+viewScores me game =
+    ul [ id "set-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
+        (List.map
+            (\player ->
+                li
+                    [ id ("set-score-" ++ player.id)
+                    , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200 transition"
+                    , classList [ ( "opacity-50", player.away ) ]
+                    ]
+                    [ span [ class "size-3 rounded-full", style "background" player.color ] []
+                    , span [ class "lg:flex-1" ] [ text (playerName me player) ]
+                    , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
+                    ]
+            )
+            game.players
+        )
+
+
+playerName : Me -> Player -> String
+playerName me player =
+    if isMe me player then
+        Maybe.withDefault player.colorName player.name ++ " (you)"
+
+    else
+        Maybe.withDefault player.colorName player.name
+
+
+{-| The last set that a player found, in small cards. With more than one
+player, a dot in the color of the player shows who found it. The set is
+keyed, so that it pops in again for each new set.
+-}
+viewLastSet : Me -> Game -> Html Msg
+viewLastSet me game =
+    case game.lastSet of
+        Just found ->
+            let
+                finder =
+                    List.filter (\player -> player.id == found.playerId) game.players |> List.head
+            in
+            div [ id "set-last", class "rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200" ]
+                [ p [ class "mb-2 flex items-center gap-2 text-xs font-medium tracking-wide text-slate-400 uppercase" ]
+                    (text "last set"
+                        :: (case ( finder, List.length game.players > 1 ) of
+                                ( Just player, True ) ->
+                                    [ span [ class "size-2 rounded-full", style "background" player.color ] []
+                                    , span [ class "truncate tracking-normal normal-case text-slate-500" ] [ text (playerName me player) ]
+                                    ]
+
+                                _ ->
+                                    []
+                           )
+                    )
+                , Html.Keyed.node "div"
+                    []
+                    [ ( String.join "-" (List.map String.fromInt found.cards)
+                      , div [ class "set-last-pop grid grid-cols-3 gap-2" ]
+                            (List.map (\card -> div [ class "set-mini-card" ] [ cardImage card ]) found.cards)
+                      )
+                    ]
+                ]
+
+        Nothing ->
+            text ""
+
+
+{-| The cards in a grid. Each card is keyed, so that a new card is dealt
+with an animation and the other cards stay as they are. Before the start,
+empty places keep the size of the table under the cover.
+-}
+viewTable : Model -> Me -> Game -> Layout -> Html Msg
+viewTable model me game layout =
+    let
+        playable =
+            canPlay me game
+
+        cards =
+            if game.table == [] then
+                List.map (\index -> ( "empty-" ++ String.fromInt index, div [ class "set-card is-empty" ] [] )) (List.range 1 12)
+
+            else
+                List.map (\card -> ( String.fromInt card, viewCard model playable card )) game.table
+    in
+    Html.Keyed.node "div"
+        ([ id "set-table"
+         , class "grid gap-2 sm:gap-3"
+         , style "grid-template-columns" ("repeat(" ++ String.fromInt layout.columns ++ ", minmax(0, 1fr))")
+         ]
+            ++ (if layout.byColumn then
+                    [ style "grid-template-rows" "repeat(3, auto)", style "grid-auto-flow" "column" ]
+
+                else
+                    []
+               )
+        )
+        cards
+
+
+viewCard : Model -> Bool -> Card -> Html Msg
+viewCard model playable card =
+    button
+        [ id ("set-card-" ++ String.fromInt card)
+        , class "set-card"
+        , classList
+            [ ( "is-selected", List.member card model.selected )
+            , ( "is-wrong", List.member card model.wrong )
+            , ( "is-playable", playable )
+            ]
+        , onClick (Pick card)
+        , Html.Attributes.attribute "aria-label" (cardName card)
+        ]
+        [ div [ class "set-card-face" ] [ cardImage card ] ]
+
+
+{-| For example, "2 green striped ovals"
+-}
+cardName : Card -> String
+cardName card =
+    let
+        count =
+            feature 0 card + 1
+
+        pick3 index names =
+            List.drop (feature index card) names |> List.head |> Maybe.withDefault ""
+    in
+    String.join " "
+        [ String.fromInt count
+        , pick3 3 [ "red", "green", "purple" ]
+        , pick3 2 [ "solid", "striped", "open" ]
+        , pick3 1 [ "diamond", "oval", "squiggle" ]
+            ++ (if count > 1 then
+                    "s"
+
+                else
+                    ""
+               )
+        ]
+
+
+
+-- CARD IMAGES
+
+
+colors : List String
+colors =
+    [ "#dc2626", "#16a34a", "#7c3aed" ]
+
+
+cardColor : Card -> String
+cardColor card =
+    List.drop (feature 3 card) colors |> List.head |> Maybe.withDefault "#000"
+
+
+{-| One pattern of stripes for each color. The shapes of all cards use
+them. The SVG has no size, but it is not hidden with "display: none":
+some browsers do not draw patterns from a hidden SVG.
+-}
+stripePatterns : Html Msg
+stripePatterns =
+    Svg.svg [ SA.width "0", SA.height "0", SA.class "absolute" ]
+        [ Svg.defs []
+            (List.indexedMap
+                (\index color ->
+                    Svg.pattern
+                        [ SA.id ("set-stripes-" ++ String.fromInt index)
+                        , SA.patternUnits "userSpaceOnUse"
+                        , SA.width "10"
+                        , SA.height "9"
+                        ]
+                        [ Svg.rect [ SA.width "10", SA.height "3.5", SA.fill color ] [] ]
+                )
+                colors
+            )
+        ]
+
+
+{-| The shapes stand side by side in the middle of a wide card. Each shape
+is drawn in a box of 50 by 100 units.
+-}
+cardImage : Card -> Html Msg
+cardImage card =
+    let
+        count =
+            feature 0 card + 1
+
+        width =
+            toFloat count * 35 + toFloat (count - 1) * 10
+
+        left =
+            (160 - width) / 2
+
+        color =
+            cardColor card
+
+        fill =
+            case feature 2 card of
+                0 ->
+                    color
+
+                1 ->
+                    "url(#set-stripes-" ++ String.fromInt (feature 3 card) ++ ")"
+
+                _ ->
+                    "none"
+    in
+    Svg.svg [ SA.viewBox "0 0 160 100", SA.class "size-full" ]
+        (List.map
+            (\index ->
+                Svg.g
+                    [ SA.transform ("translate(" ++ String.fromFloat (left + toFloat index * 45) ++ " 15) scale(0.7)") ]
+                    [ shape (feature 1 card)
+                        [ SA.fill fill
+                        , SA.stroke color
+                        , SA.strokeWidth "6"
+                        , SA.strokeLinejoin "round"
+                        ]
+                    ]
+            )
+            (List.range 0 (count - 1))
+        )
+
+
+shape : Int -> List (Svg.Attribute Msg) -> Svg Msg
+shape index attributes =
+    case index of
+        0 ->
+            Svg.path (SA.d "M25 5 L46 50 L25 95 L4 50 Z" :: attributes) []
+
+        1 ->
+            Svg.rect ([ SA.x "5", SA.y "5", SA.width "40", SA.height "90", SA.rx "20" ] ++ attributes) []
+
+        _ ->
+            -- The squiggle of setwithfriends.com (MIT license, (c) 2020 Eric
+            -- Zhang, Cynthia Du), scaled from its 200 by 400 box to ours
+            Svg.path
+                (SA.d "m16.97,3.19c10.81,-1.68 26.84,1.65 30.26,14.69c3.42,13.03 -11.21,40.37 -11.27,51.16c1.14,14.24 20.95,21.98 5.58,26.45c-15.37,4.47 -31.53,-0.46 -35.93,-10.48c-4.4,-10.02 12.32,-30.03 11.54,-47.02c-0.78,-17 -5.47,-17.56 -12.4,-20.04c-6.93,-2.48 1.42,-13.07 12.23,-14.75z"
+                    :: attributes
+                )
+                []
+
+
+
+-- COVERS
+
+
+{-| Covers the table until all players are in.
+-}
+viewWaiting : Game -> Html Msg
+viewWaiting game =
+    div
+        [ id "set-waiting"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-violet-950/80 p-4 text-center text-white"
+        ]
+        [ p [ class "text-3xl font-semibold" ] [ text "Waiting for players" ]
+        , p [ id "set-waiting-count", class "text-lg tabular-nums opacity-80" ]
+            [ text
+                (String.fromInt (List.length game.players)
+                    ++ " of "
+                    ++ String.fromInt game.playersNeeded
+                    ++ " players are in"
+                )
+            ]
+        , p [ class "text-sm opacity-60" ] [ text "Send the link to the other players. The game starts when all of them are in." ]
+        ]
+
+
+{-| The number is keyed, so that it pops in again on each step.
+-}
+viewCountdown : Int -> Html Msg
+viewCountdown seconds =
+    div
+        [ id "set-countdown"
+        , class "absolute inset-0 flex items-center justify-center rounded-2xl bg-violet-950/80"
+        ]
+        [ Html.Keyed.node "div"
+            []
+            [ ( String.fromInt seconds
+              , p [ class "countdown-pop text-9xl font-bold text-white tabular-nums" ]
+                    [ text
+                        (if seconds > 0 then
+                            String.fromInt seconds
+
+                         else
+                            ""
+                        )
+                    ]
+              )
+            ]
+        ]
+
+
+viewResult : Me -> Game -> Html Msg
+viewResult me game =
+    let
+        players =
+            game.players
+
+        solo =
+            List.length players == 1
+
+        message =
+            case ( solo, winners players ) of
+                ( True, _ ) ->
+                    "Done!"
+
+                ( False, [ winner ] ) ->
+                    if isMe me winner then
+                        "You win!"
+
+                    else
+                        case winner.name of
+                            Just name ->
+                                name ++ " wins!"
+
+                            Nothing ->
+                                "The " ++ winner.colorName ++ " player wins!"
+
+                ( False, _ ) ->
+                    "It's a tie!"
+
+        ranked =
+            List.reverse (List.sortBy .score players)
+    in
+    div
+        [ id "set-result"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl bg-violet-950/70 p-4 text-white backdrop-blur-sm"
+        ]
+        [ p [ class "text-3xl font-semibold" ] [ text message ]
+        , p [ id "set-final-time", class "text-lg tabular-nums opacity-80" ]
+            [ text ("Time " ++ formatTime game.elapsedMs) ]
+        , if solo then
+            text ""
+
+          else
+            ol [ class "flex flex-col gap-1 text-sm" ]
+                (List.map
+                    (\player ->
+                        li [ class "flex items-center gap-2" ]
+                            [ span [ class "size-3 rounded-full", style "background" player.color ] []
+                            , span [ class "flex-1" ] [ text (playerName me player) ]
+                            , span [ class "pl-6 font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
+                            ]
+                    )
+                    ranked
+                )
+        , if me == Nothing then
+            text ""
+
+          else
+            button
+                [ id "set-play-again"
+                , class "rounded-full bg-white px-6 py-2.5 font-medium text-violet-800 shadow-lg transition hover:-translate-y-0.5 hover:bg-violet-50 active:translate-y-0"
+                , onClick Restart
+                ]
+                [ text "Play again" ]
+        , a
+            [ id "set-leaderboards-link"
+            , href "/set"
+            , class "text-sm font-medium text-white/80 underline-offset-4 transition hover:text-white hover:underline"
+            ]
+            [ text "Latest games and best results" ]
+        ]
+
+
+
+-- MAIN
+
+
+main : Program Flags Model Msg
+main =
+    Browser.element
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }

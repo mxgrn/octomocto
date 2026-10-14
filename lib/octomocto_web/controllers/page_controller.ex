@@ -29,6 +29,16 @@ defmodule OctomoctoWeb.PageController do
       icon_class: "bg-sky-500/10 dark:bg-sky-400/15"
     },
     %{
+      id: "set",
+      name: "Set",
+      description:
+        "Find 3 cards where each feature is all the same or all different. Race your friends.",
+      path: "/set",
+      icon: "◆◆◆",
+      icon_class:
+        "bg-violet-500/10 text-sm tracking-tighter text-violet-600 dark:bg-violet-400/15 dark:text-violet-400"
+    },
+    %{
       id: "schulte",
       name: "Schulte Race",
       description:

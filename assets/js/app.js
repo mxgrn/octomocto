@@ -29,6 +29,7 @@ import {playTrainSound} from "./train_sounds"
 import {playAstronautSound} from "./astronaut_sounds"
 import {playSchulteSound} from "./schulte_sounds"
 import {playMatchSound} from "./match_sounds"
+import {playSetSound} from "./set_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
@@ -235,6 +236,54 @@ if (matchNode) {
   match.ports.matchPlaySound.subscribe(playMatchSound)
   match.ports.matchSaveMuted.subscribe(value => {
     try { localStorage.setItem("match-muted", String(value)) } catch (_e) {}
+  })
+}
+
+// Start the Set game and connect its ports to the game channel. It works
+// as the Schulte race above: the browser remembers if the player muted the
+// sounds, and the tab remembers the token of the player.
+const setNode = document.getElementById("set-main")
+if (setNode) {
+  if (navigator.userActivation?.hasBeenActive) unlockAudio()
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  let muted = false
+  try { muted = localStorage.getItem("set-muted") === "true" } catch (_e) {}
+
+  const setGame = window.Elm.SetGame.init({node: setNode, flags: {gameUrl: window.location.href, muted}})
+  const socket = new Socket("/socket", {params: {user_token: setNode.dataset.userToken}})
+  socket.connect()
+
+  const tokenKey = `set-token:${setNode.dataset.gameId}`
+  let token = null
+  try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
+  const joined = reply => {
+    token = reply.token
+    try {
+      if (token) sessionStorage.setItem(tokenKey, token)
+      else sessionStorage.removeItem(tokenKey)
+    } catch (_e) {}
+    setGame.ports.setGameJoined.send(reply)
+  }
+  // A link with ?watch=1 only watches the game. The token of a player wins.
+  const watch = new URLSearchParams(window.location.search).has("watch")
+  const channel = socket.channel(`set:${setNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  channel.on("state", state => setGame.ports.setGameState.send(state))
+  channel.on("joined", joined)
+  channel.join()
+    .receive("ok", joined)
+    .receive("error", ({reason}) => {
+      // The server of the game stopped a moment ago. The channel tries again.
+      if (reason === "unavailable") return
+      channel.leave()
+      setGame.ports.setGameJoinFailed.send(reason)
+    })
+
+  setGame.ports.setGameClaim.subscribe(cards => channel.push("claim", {cards}))
+  setGame.ports.setGameRestart.subscribe(() => channel.push("restart", {}))
+  setGame.ports.setGameCopyText.subscribe(text => navigator.clipboard.writeText(text))
+  setGame.ports.setGamePlaySound.subscribe(playSetSound)
+  setGame.ports.setGameSaveMuted.subscribe(value => {
+    try { localStorage.setItem("set-muted", String(value)) } catch (_e) {}
   })
 }
 

@@ -2,8 +2,8 @@ defmodule OctomoctoWeb.GamePageComponents do
   @moduledoc """
   The parts of the settings page of each game: the lists of open and
   ongoing games (see `Octomocto.Lobby`), the Start game button, and the
-  rules in a pop-up. Each game has its own `accent` color: `:sky` or
-  `:emerald`.
+  rules in a pop-up. Each game has its own `accent` color: `:sky`,
+  `:emerald` or `:violet`.
   """
   use Phoenix.Component
 
@@ -317,4 +317,14 @@ defmodule OctomoctoWeb.GamePageComponents do
   defp accent(:emerald, :outline),
     do:
       "text-emerald-700 ring-emerald-600/30 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+
+  defp accent(:violet, :icon), do: "text-violet-600"
+  defp accent(:violet, :link), do: "text-violet-600 hover:text-violet-500"
+  defp accent(:violet, :bullet), do: "bg-violet-500"
+  defp accent(:violet, :button), do: "bg-violet-600 hover:bg-violet-500"
+  defp accent(:violet, :start), do: "bg-violet-600 shadow-violet-600/25 hover:bg-violet-500"
+
+  defp accent(:violet, :outline),
+    do:
+      "text-violet-700 ring-violet-600/30 hover:bg-violet-50 dark:text-violet-400 dark:hover:bg-violet-500/10"
 end
