@@ -2,6 +2,7 @@ defmodule OctomoctoWeb.UserSocket do
   use Phoenix.Socket
 
   channel "astronaut:*", OctomoctoWeb.AstronautChannel
+  channel "match:*", OctomoctoWeb.MatchChannel
   channel "schulte:*", OctomoctoWeb.SchulteChannel
   channel "trains:*", OctomoctoWeb.TrainsChannel
 

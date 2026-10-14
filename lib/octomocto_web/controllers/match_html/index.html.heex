@@ -1,0 +1,205 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <%!-- Wider than the app container, so that the two columns have room --%>
+  <div
+    id="match-index"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-10 py-12 lg:grid-cols-2 lg:items-start lg:gap-12 lg:py-16"
+  >
+    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8">
+      <div class="space-y-2">
+        <div class="flex items-center justify-center gap-3">
+          <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-2xl shadow-inner">
+            🃏
+          </div>
+          <h1 class="text-3xl font-semibold tracking-tight">Match</h1>
+        </div>
+        <p class="text-base-content/70">
+          Turn the cards face up and find the cards with the same image. Each set you find goes off the field.
+        </p>
+      </div>
+
+      <div id="match-settings" class="flex w-full flex-col gap-4">
+        <div class="rounded-2xl bg-base-100 px-4 py-2.5 ring-1 ring-base-content/10">
+          <p class="text-left text-sm font-bold text-base-content/80">Theme</p>
+          <div id="match-themes" class="mt-2 grid grid-cols-4 gap-2">
+            <.link
+              :for={theme <- @themes}
+              id={"theme-#{theme.name}"}
+              href={~p"/match?#{query(@settings, theme: theme.name)}"}
+              aria-current={@settings.theme == theme.name && "true"}
+              class={[
+                "group flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
+                if(@settings.theme == theme.name,
+                  do: "bg-sky-50 ring-2 ring-sky-500 dark:bg-sky-500/10",
+                  else: "ring-1 ring-base-content/5 hover:bg-base-200 hover:ring-base-content/15"
+                )
+              ]}
+            >
+              <img
+                src={~p"/images/match/#{theme.name}/1.svg"}
+                alt=""
+                class="aspect-square w-full p-1 transition group-hover:scale-105"
+              />
+              <span class="w-full truncate text-xs text-base-content/70">{theme.title}</span>
+            </.link>
+          </div>
+        </div>
+        <.setting
+          label="Find"
+          hint={
+            if(@settings.set == 2,
+              do: "Find 2 cards with the same image.",
+              else: "Find 3 cards with the same image."
+            )
+          }
+        >
+          <.option
+            :for={{value, set, label} <- [{"pairs", 2, "Pairs"}, {"triplets", 3, "Triplets"}]}
+            id={"set-#{value}"}
+            selected={@settings.set == set}
+            href={~p"/match?#{query(@settings, set: set)}"}
+          >
+            {label}
+          </.option>
+        </.setting>
+        <.setting label="Cards">
+          <.step_button
+            id="cards-less"
+            icon="hero-minus"
+            label="Fewer cards"
+            href={
+              if size = step_size(@sizes, @settings.cards, -1),
+                do: ~p"/match?#{query(@settings, cards: size)}"
+            }
+          />
+          <span
+            id="cards-count"
+            class="min-w-16 self-center text-center text-sm font-semibold tabular-nums"
+          >
+            {@settings.cards}
+          </span>
+          <.step_button
+            id="cards-more"
+            icon="hero-plus"
+            label="More cards"
+            href={
+              if size = step_size(@sizes, @settings.cards, 1),
+                do: ~p"/match?#{query(@settings, cards: size)}"
+            }
+          />
+        </.setting>
+        <.setting
+          label="Players"
+          hint={
+            if(@settings.players > 1,
+              do: "The players take turns. The game starts when all players are in."
+            )
+          }
+        >
+          <.option
+            :for={n <- 1..5}
+            id={"players-#{n}"}
+            selected={@settings.players == n}
+            href={~p"/match?#{query(@settings, players: n)}"}
+          >
+            {n}
+          </.option>
+        </.setting>
+      </div>
+
+      <.link
+        id="new-game"
+        href={~p"/match?#{query(@settings)}"}
+        method="post"
+        class="rounded-full bg-sky-600 px-8 py-3 font-medium text-white shadow-lg shadow-sky-600/25 transition hover:-translate-y-0.5 hover:bg-sky-500 hover:shadow-xl active:translate-y-0"
+      >
+        New game
+      </.link>
+      <p :if={@settings.players > 1} class="text-sm text-base-content/50">
+        You get a link to share with other players.
+      </p>
+    </div>
+
+    <div id="match-leaderboard" class="mx-auto grid w-full max-w-md gap-4">
+      <.score_list
+        id="your-results"
+        icon="hero-user"
+        icon_class="text-sky-500"
+        title="Your results"
+        empty={@user_results != nil and @user_results.latest == []}
+      >
+        <:aside :if={@user_results && @user_results.best}>
+          <span
+            id="your-best"
+            class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
+          >
+            <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
+            <span class="text-base-content/60">Best</span>
+            <span class="font-semibold tabular-nums">
+              {format_time(@user_results.best.elapsed_ms)}
+            </span>
+          </span>
+        </:aside>
+        <%= if @user_results do %>
+          <li
+            :for={%{result: result, players: players} <- @user_results.latest}
+            class="flex items-baseline gap-3 py-2"
+          >
+            <span :if={@settings.players == 1} class="flex-1 text-base-content/60">
+              {Calendar.strftime(result.inserted_at, "%b %-d")}
+            </span>
+            <span :if={@settings.players > 1} class="flex-1 truncate">
+              <.player_list players={players} scores />
+            </span>
+            <span class={[
+              "w-16 text-right font-medium tabular-nums",
+              result.id == @user_results.best.id && "text-amber-600"
+            ]}>
+              {format_time(result.elapsed_ms)}
+            </span>
+          </li>
+        <% else %>
+          <li class="py-2 text-center text-base-content/60">
+            <.link
+              id="your-results-sign-in"
+              href={~p"/signin"}
+              class="font-medium text-sky-600 transition hover:text-sky-500 hover:underline"
+            >
+              Sign in
+            </.link>
+            to see your results.
+          </li>
+        <% end %>
+      </.score_list>
+      <.score_list
+        id="latest-games"
+        icon="hero-clock"
+        icon_class="text-sky-600"
+        title="Latest games"
+        empty={@leaderboard.latest == []}
+      >
+        <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
+          <span class="flex-1 truncate">
+            <.player_list players={game.players} scores={@settings.players > 1} />
+          </span>
+          <span class="font-medium tabular-nums">{format_time(game.elapsed_ms)}</span>
+        </li>
+      </.score_list>
+      <.score_list
+        id="best-results"
+        icon="hero-trophy"
+        icon_class="text-amber-500"
+        title="Best results"
+        empty={@leaderboard.best == []}
+      >
+        <li
+          :for={{result, place} <- Enum.with_index(@leaderboard.best, 1)}
+          class="flex items-baseline gap-3 py-2"
+        >
+          <span class="w-5 text-right tabular-nums text-base-content/40">{place}</span>
+          <span class="flex-1 truncate">{player_name(result.user)}</span>
+          <span class="font-medium tabular-nums">{format_time(result.elapsed_ms)}</span>
+        </li>
+      </.score_list>
+    </div>
+  </div>
+</Layouts.app>

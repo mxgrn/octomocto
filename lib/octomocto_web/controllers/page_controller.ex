@@ -20,6 +20,15 @@ defmodule OctomoctoWeb.PageController do
       icon_class: "bg-octo-navy dark:bg-black/30 dark:ring-1 dark:ring-white/10"
     },
     %{
+      id: "match",
+      name: "Match",
+      description:
+        "Find the cards with the same image. Play alone against the clock, or take turns.",
+      path: "/match",
+      icon: "🃏",
+      icon_class: "bg-sky-500/10 dark:bg-sky-400/15"
+    },
+    %{
       id: "schulte",
       name: "Schulte Race",
       description:

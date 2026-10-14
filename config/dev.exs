@@ -3,6 +3,9 @@ import Config
 # End the Schulte race after number 3 for easier testing.
 config :octomocto, schulte_last_number: 3
 
+# Allow very small Match fields for easier testing.
+config :octomocto, match_min_cards: 4
+
 # Configure your database
 config :octomocto, Octomocto.Repo,
   username: "postgres",

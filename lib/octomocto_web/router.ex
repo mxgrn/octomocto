@@ -31,6 +31,9 @@ defmodule OctomoctoWeb.Router do
     get "/schulte", SchulteController, :index
     post "/schulte", SchulteController, :create
     get "/schulte/:id", SchulteController, :show
+    get "/match", MatchController, :index
+    post "/match", MatchController, :create
+    get "/match/:id", MatchController, :show
   end
 
   # For deploys to check that the app is up
