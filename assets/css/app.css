@@ -123,6 +123,18 @@
 .schulte-cell.schulte-found { cursor: default; }
 .schulte-cell.schulte-found:hover path { filter: none; }
 
+/* Schulte in the dark theme: deep versions of the cell colors, dark lines
+   and light numbers. The server sends the colors of the cells, so the
+   rules find them by the color. */
+[data-theme=dark] #schulte-field [fill="#fbf5e1"] { fill: #3a3f4b; }
+[data-theme=dark] #schulte-field [fill="#9dedc4"] { fill: #1f5c48; }
+[data-theme=dark] #schulte-field [fill="#ff9c98"] { fill: #7a3a3c; }
+[data-theme=dark] #schulte-field [fill="#ffd06c"] { fill: #7a5d24; }
+[data-theme=dark] #schulte-field [stroke="#474d50"] { stroke: #181b21; }
+[data-theme=dark] #schulte-field [fill="#474d50"] { fill: #c8c2b3; }
+[data-theme=dark] .schulte-cell:hover path { filter: brightness(1.2); }
+[data-theme=dark] .schulte-cell.schulte-found:hover path { filter: none; }
+
 @keyframes schulte-shake {
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-5px); }
