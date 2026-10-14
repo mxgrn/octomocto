@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -5 240 310">
+  <!-- The double-octo mark (see mark.svg) in one color, for the back of a
+       Match card. The eyes and the smile are cut out of each head. The
+       opacity is on the whole group, so that the parts that overlap do not
+       get lighter. The two octopi have a small gap between them. -->
+  <defs>
+    <g id="octo">
+      <g fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round">
+        <path d="M78 120C52 128 34 112 30 86"/>
+        <path d="M92 134C64 142 30 140 10 118"/>
+        <path d="M162 120C188 128 206 112 210 86"/>
+        <path d="M148 134C176 142 210 140 230 118"/>
+      </g>
+      <circle cx="120" cy="88" r="62" fill="#fff"/>
+    </g>
+    <g id="face">
+      <circle cx="98" cy="84" r="15" fill="#000"/>
+      <circle cx="142" cy="84" r="15" fill="#000"/>
+      <circle cx="98" cy="90" r="7" fill="#fff"/>
+      <circle cx="142" cy="90" r="7" fill="#fff"/>
+      <path d="M110 112Q120 120 130 112" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <mask id="cutout" maskUnits="userSpaceOnUse" x="0" y="-5" width="240" height="310">
+      <g transform="translate(0 -5)">
+        <use href="#octo"/>
+        <use href="#face"/>
+      </g>
+      <g transform="translate(0 305) scale(1 -1)">
+        <use href="#octo"/>
+        <use href="#face"/>
+      </g>
+    </mask>
+  </defs>
+  <rect y="-5" width="240" height="310" fill="#fff" opacity="0.1" mask="url(#cutout)"/>
+</svg>

@@ -817,8 +817,7 @@ viewField model me game layout =
     in
     div
         [ id "match-field"
-        , class "grid gap-1.5 rounded-2xl bg-sky-950/5 p-2 sm:gap-2 sm:p-3"
-        , classList [ ( "match-my-turn", myTurn me game && not game.waiting && not game.finished ) ]
+        , class "grid gap-1.5 sm:gap-2"
         , style "grid-template-columns" ("repeat(" ++ String.fromInt layout.columns ++ ", minmax(0, 1fr))")
         ]
         places
