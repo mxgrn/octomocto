@@ -7,6 +7,11 @@ defmodule Octomocto.Application do
 
   @impl true
   def start(_type, _args) do
+    # Sends the crashes of processes to Sentry
+    :logger.add_handler(:sentry_handler, Sentry.LoggerHandler, %{
+      config: %{metadata: [:file, :line]}
+    })
+
     topologies = Application.get_env(:libcluster, :topologies, [])
     hosts = topologies[:default][:config][:hosts] || []
 

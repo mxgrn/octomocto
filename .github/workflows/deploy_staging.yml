@@ -78,5 +78,6 @@ jobs:
               -e GITHUB_SHA=${{github.sha}} \
               -e PHX_HOST=staging.octomocto.com \
               -e RESEND_API_KEY=${{secrets.RESEND_API_KEY}} \
+              -e SENTRY_DSN=${{secrets.SENTRY_DSN}} \
               ghcr.io/mxgrn/${{matrix.app}}_${{matrix.env}}
             for i in {1..60}; do curl localhost:${{matrix.port}}/health && break || { [ $i -eq 60 ] && echo "Failed after 60 attempts" && exit 1 || sleep 1; }; done

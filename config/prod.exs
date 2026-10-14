@@ -19,8 +19,11 @@ config :octomocto, OctomoctoWeb.Endpoint,
     ]
   ]
 
-# Enables production-only features, such as Google Analytics
-config :octomocto, prod: true
+# The DSN and the environment name are set in config/runtime.exs.
+# `mix sentry.package_source_code` needs these options at compile time.
+config :sentry,
+  enable_source_code_context: true,
+  root_source_code_paths: [File.cwd!()]
 
 # Configure Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Req

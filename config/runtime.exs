@@ -49,6 +49,17 @@ if config_env() != :test do
 end
 
 if config_env() == :prod do
+  # Staging also builds with MIX_ENV=prod, so PROD_ENV tells the two apart
+  prod_env = System.get_env("PROD_ENV", "prod")
+
+  # Enables production-only features, such as Google Analytics
+  config :octomocto, prod: prod_env == "prod"
+
+  # Without SENTRY_DSN, Sentry sends no events
+  config :sentry,
+    dsn: System.get_env("SENTRY_DSN"),
+    environment_name: prod_env
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """

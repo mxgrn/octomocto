@@ -63,6 +63,9 @@ COPY lib lib
 # Compile the release
 RUN mix compile
 
+# Sentry shows the source code around the lines of a stacktrace
+RUN mix sentry.package_source_code
+
 COPY assets assets
 
 # compile assets
