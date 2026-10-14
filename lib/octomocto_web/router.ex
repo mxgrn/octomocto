@@ -50,6 +50,11 @@ defmodule OctomoctoWeb.Router do
     get "/health", HealthController, :show
   end
 
+  # For search engines. Not in the :browser pipeline, because it accepts only html.
+  scope "/", OctomoctoWeb do
+    get "/sitemap.xml", SitemapController, :show
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", OctomoctoWeb do
   #   pipe_through :api
