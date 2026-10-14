@@ -37,6 +37,7 @@ import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
 import Process
+import Random
 import Svg exposing (Svg)
 import Svg.Attributes as SA
 import Task
@@ -145,6 +146,10 @@ type alias Model =
     , wrong : List Card
     , wrongCount : Int
 
+    -- Why the last wrong set is not a set, with the number of its shake,
+    -- until the next click on a card
+    , hint : Maybe ( Int, String )
+
     -- The local time (in ms) when the table started, and the local time
     -- now. The clock ticks between the server updates.
     , clockStart : Int
@@ -173,6 +178,7 @@ init flags =
       , selected = []
       , wrong = []
       , wrongCount = 0
+      , hint = Nothing
       , clockStart = 0
       , now = 0
       , beepedStep = Nothing
@@ -193,6 +199,7 @@ type Msg
     | GotJoinFailed String
     | Pick Card
     | WrongDone Int
+    | GotHint Int String
     | Restart
     | CopyLink
     | CopiedTimeout
@@ -235,7 +242,7 @@ update msg model =
             case model.connection of
                 Joined me game ->
                     if canPlay me game then
-                        pick card model
+                        pick card { model | hint = Nothing }
 
                     else
                         ( model, Cmd.none )
@@ -246,6 +253,13 @@ update msg model =
         WrongDone count ->
             if count == model.wrongCount then
                 ( { model | wrong = [] }, Cmd.none )
+
+            else
+                ( model, Cmd.none )
+
+        GotHint count hint ->
+            if count == model.wrongCount then
+                ( { model | hint = Just ( count, hint ) }, Cmd.none )
 
             else
                 ( model, Cmd.none )
@@ -309,8 +323,73 @@ pick card model =
         , Cmd.batch
             [ playSounds model [ "wrong" ]
             , Process.sleep 500 |> Task.perform (\_ -> WrongDone (model.wrongCount + 1))
+            , case hints selection of
+                first :: others ->
+                    Random.generate (GotHint (model.wrongCount + 1)) (Random.uniform first others)
+
+                [] ->
+                    Cmd.none
             ]
         )
+
+
+{-| One sentence for each feature that two cards have and the third card
+does not have, for example "Two cards are red, but one is green."
+-}
+hints : List Card -> List String
+hints cards =
+    let
+        names index =
+            case index of
+                0 ->
+                    ( "have", [ "1 shape", "2 shapes", "3 shapes" ] )
+
+                1 ->
+                    ( "have", [ "diamonds", "ovals", "squiggles" ] )
+
+                2 ->
+                    ( "are", [ "solid", "striped", "open" ] )
+
+                _ ->
+                    ( "are", [ "red", "green", "purple" ] )
+
+        name list value =
+            List.drop value list |> List.head |> Maybe.withDefault ""
+
+        hint index =
+            case List.map (feature index) cards of
+                [ a, b, c ] ->
+                    let
+                        ( verb, list ) =
+                            names index
+
+                        ( pair, odd ) =
+                            if a == b then
+                                ( a, c )
+
+                            else if a == c then
+                                ( a, b )
+
+                            else
+                                ( b, a )
+
+                        oneVerb =
+                            if verb == "are" then
+                                "is"
+
+                            else
+                                "has"
+                    in
+                    if modBy 3 (a + b + c) == 0 then
+                        Nothing
+
+                    else
+                        Just ("Two cards " ++ verb ++ " " ++ name list pair ++ ", but one " ++ oneVerb ++ " " ++ name list odd ++ ".")
+
+                _ ->
+                    Nothing
+    in
+    List.filterMap hint [ 0, 1, 2, 3 ]
 
 
 {-| A player can select cards while the table is on the screen
@@ -596,8 +675,30 @@ viewGame model me game =
                   else
                     text ""
                 ]
+            , viewHint model.hint
             ]
         ]
+
+
+{-| Why the last wrong set is not a set. It is keyed, so that it pops in
+again for each wrong set.
+-}
+viewHint : Maybe ( Int, String ) -> Html Msg
+viewHint hint =
+    case hint of
+        Just ( count, sentence ) ->
+            Html.Keyed.node "div"
+                []
+                [ ( String.fromInt count
+                  , p [ id "set-hint", class "set-last-pop mt-3 text-center text-sm text-slate-500" ]
+                        [ span [ class "hero-light-bulb mr-1 size-4 align-[-3px] text-amber-500" ] []
+                        , text sentence
+                        ]
+                  )
+                ]
+
+        Nothing ->
+            text ""
 
 
 {-| The width of a card divided by its height
