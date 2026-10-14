@@ -9,6 +9,7 @@ defmodule Octomocto.Match do
 
   import Ecto.Query
 
+  alias Octomocto.GameProcess
   alias Octomocto.Repo
   alias Octomocto.Match.{Game, Result, Store}
 
@@ -47,24 +48,7 @@ defmodule Octomocto.Match do
   moment ago. Try again soon.
   """
   def join(id, user_id \\ nil, name \\ nil, player_id \\ nil) do
-    case game_pid(id) do
-      nil -> {:error, :not_found}
-      pid -> GenServer.call(pid, {:join, self(), user_id, name, player_id})
-    end
-  catch
-    :exit, _reason -> {:error, :unavailable}
-  end
-
-  # When no node runs the game (for example, its node stopped in a deploy),
-  # starts the game on this node from its copy in the store.
-  defp game_pid(id) do
-    with nil <- GenServer.whereis(Game.via(id)),
-         %{} = state <- Store.read(id) do
-      case DynamicSupervisor.start_child(Octomocto.Match.GameSupervisor, {Game, state}) do
-        {:ok, pid} -> pid
-        {:error, {:already_started, pid}} -> pid
-      end
-    end
+    GameProcess.join(Game, Store, Octomocto.Match.GameSupervisor, id, user_id, name, player_id)
   end
 
   @doc "The player turns a card face up. Only the player of the turn can."

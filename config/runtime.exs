@@ -81,7 +81,7 @@ if config_env() == :prod do
   host = System.get_env("PHX_HOST") || "example.com"
 
   # The two hosts run one node each. A deploy restarts one host at a time,
-  # so that the other node keeps the Schulte games (see Octomocto.Schulte.Store).
+  # so that the other node keeps the games (see Octomocto.GameStore).
   config :libcluster, :topologies,
     default: [
       strategy: Cluster.Strategy.Epmd,
