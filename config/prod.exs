@@ -19,6 +19,9 @@ config :octomocto, OctomoctoWeb.Endpoint,
     ]
   ]
 
+# Enables production-only features, such as Google Analytics
+config :octomocto, prod: true
+
 # Configure Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Req
 

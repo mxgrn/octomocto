@@ -199,6 +199,23 @@ defmodule OctomoctoWeb.Layouts do
   end
 
   @doc """
+  Adds the Google tag (gtag.js) for Google Analytics.
+  """
+  def gtag(assigns) do
+    ~H"""
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-95LZEBCCVE">
+    </script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-95LZEBCCVE');
+    </script>
+    """
+  end
+
+  @doc """
   Shows a selector for the system, light and dark themes.
 
   The script in `root.html.heex` keeps the choice and sets `data-theme-mode`
