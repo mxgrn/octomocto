@@ -146,6 +146,7 @@ type Connection
 
 type alias Model =
     { gameUrl : String
+    , settingsUrl : String
     , connection : Connection
     , copied : Bool
 
@@ -168,6 +169,7 @@ type alias Model =
 
 type alias Flags =
     { gameUrl : String
+    , settingsUrl : String
     , muted : Bool
     }
 
@@ -175,6 +177,7 @@ type alias Flags =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { gameUrl = flags.gameUrl
+      , settingsUrl = flags.settingsUrl
       , connection = Connecting
       , copied = False
       , images = Dict.empty
@@ -559,7 +562,7 @@ viewGame model me game =
                     viewWaiting game
 
                   else if game.finished then
-                    viewResult me game
+                    viewResult model.settingsUrl me game
 
                   else
                     text ""
@@ -886,8 +889,8 @@ viewWaiting game =
         ]
 
 
-viewResult : Me -> Game -> Html Msg
-viewResult me game =
+viewResult : String -> Me -> Game -> Html Msg
+viewResult settingsUrl me game =
     let
         players =
             game.players
@@ -952,7 +955,7 @@ viewResult me game =
                 [ text "Play again" ]
         , a
             [ id "memory-leaderboards-link"
-            , href "/memory"
+            , href settingsUrl
             , class "text-sm font-medium text-white/80 underline-offset-4 transition hover:text-white hover:underline"
             ]
             [ text "Latest games and best results" ]

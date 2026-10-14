@@ -1,16 +1,18 @@
 defmodule OctomoctoWeb.MemoryController do
   use OctomoctoWeb, :controller
 
-  alias Octomocto.Memory
+  alias Octomocto.Memory.Store
+  alias OctomoctoWeb.MemoryLive
 
   plug :put_seo
 
   def show(conn, %{"id" => id}) do
-    if Memory.game_exists?(id) do
+    if state = Store.read(id) do
       render(conn, :show,
         id: id,
+        settings_path: MemoryLive.settings_path(state),
         user_token: user_token(conn.assigns.current_scope),
-        banner: OctomoctoWeb.MemoryLive.banner(conn.query_params),
+        banner: MemoryLive.banner(conn.query_params),
         noindex: true
       )
     else
@@ -21,7 +23,7 @@ defmodule OctomoctoWeb.MemoryController do
     end
   end
 
-  defp put_seo(conn, _opts), do: merge_assigns(conn, OctomoctoWeb.MemoryLive.seo())
+  defp put_seo(conn, _opts), do: merge_assigns(conn, MemoryLive.seo())
 
   defp user_token(%{user: user}), do: OctomoctoWeb.UserSocket.user_token(user.id)
   defp user_token(nil), do: nil

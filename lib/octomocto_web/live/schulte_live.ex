@@ -97,6 +97,18 @@ defmodule OctomoctoWeb.SchulteLive do
     """
   end
 
+  @doc "The path of this page with the settings of the game in the given state."
+  def settings_path(state) do
+    settings = %{
+      board: Atom.to_string(state.layout),
+      mode: Atom.to_string(state.mode),
+      players: state.needed,
+      public: state.public
+    }
+
+    ~p"/schulte?#{query(settings, [])}"
+  end
+
   # The query of the page for the settings, with some of them changed
   defp query(settings, changes) do
     settings = Map.merge(settings, Map.new(changes))

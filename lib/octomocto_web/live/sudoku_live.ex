@@ -138,6 +138,13 @@ defmodule OctomoctoWeb.SudokuLive do
     """
   end
 
+  @doc "The path of this page with the settings of the game in the given state."
+  def settings_path(state) do
+    settings = %{players: state.needed, difficulty: state.difficulty, public: state.public}
+
+    ~p"/sudoku?#{query(settings, [])}"
+  end
+
   # The query of the page for the settings, with some of them changed
   defp query(settings, changes) do
     settings = Map.merge(settings, Map.new(changes))
