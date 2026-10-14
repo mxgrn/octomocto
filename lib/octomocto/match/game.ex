@@ -48,7 +48,7 @@ defmodule Octomocto.Match.Game do
                      :match_rejoin_grace_ms,
                      :timer.seconds(15)
                    )
-  # With more than 2 players, the turn goes to the next player after this
+  # With 2 or more players, the turn goes to the next player after this
   # time with no card turned
   @turn_timeout_ms :timer.seconds(15)
 
@@ -418,9 +418,9 @@ defmodule Octomocto.Match.Game do
 
   defp save_results(state), do: state
 
-  # The timer runs only in a game with more than 2 players
+  # The timer runs only in a game with 2 or more players
   defp restart_turn_timer(state) when state.ready and state.finished_at == nil do
-    if state.needed > 2 do
+    if state.needed > 1 do
       ref = make_ref()
       Process.send_after(self(), {:turn_timeout, ref}, @turn_timeout_ms)
       %{state | turn_since: now(), turn_ref: ref}
@@ -509,7 +509,7 @@ defmodule Octomocto.Match.Game do
       # The time since the last card of the turn, and the time limit (nil
       # when there is none)
       turn_ms: if(state.turn_since, do: now() - state.turn_since, else: 0),
-      turn_limit_ms: if(state.needed > 2, do: @turn_timeout_ms),
+      turn_limit_ms: if(state.needed > 1, do: @turn_timeout_ms),
       players: players,
       players_needed: state.needed
     }

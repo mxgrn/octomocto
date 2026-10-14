@@ -88,7 +88,7 @@ defmodule OctomoctoWeb.MatchLive do
       "On your turn, turn the cards face up one by one.",
       "When the cards make a set, they go off the field. You get one point for each card, and you turn more cards.",
       "When they do not make a set, the turn goes to the next player. The cards stay face up until the next player turns a card, so remember them.",
-      "With more than 2 players, a player who turns no card for 15 seconds loses the turn.",
+      "With other players, a player who turns no card for 15 seconds loses the turn.",
       "The clock starts with the first card and stops when the field is empty. Alone, find all sets as fast as you can. With other players, get the most points."
     ]
   end
