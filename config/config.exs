@@ -30,7 +30,8 @@ config :mnesiac,
     Octomocto.Schulte.Store,
     Octomocto.Trains.Store,
     Octomocto.Match.Store,
-    Octomocto.SetGame.Store
+    Octomocto.SetGame.Store,
+    Octomocto.Sudoku.Store
   ]
 
 # Configure the endpoint

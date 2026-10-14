@@ -53,3 +53,6 @@ config :octomocto, match_rejoin_grace_ms: 0
 
 # The same for the Set games
 config :octomocto, set_countdown_ms: 0, set_rejoin_grace_ms: 0
+
+# The same for the sudoku games
+config :octomocto, sudoku_countdown_ms: 0, sudoku_rejoin_grace_ms: 0

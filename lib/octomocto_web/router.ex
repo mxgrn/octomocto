@@ -29,6 +29,7 @@ defmodule OctomoctoWeb.Router do
     get "/schulte/:id", SchulteController, :show
     get "/match/:id", MatchController, :show
     get "/set/:id", SetGameController, :show
+    get "/sudoku/:id", SudokuController, :show
 
     # The settings of a new game. A LiveView changes the settings without a
     # page load, so the page does not scroll to the top on each click.
@@ -37,6 +38,7 @@ defmodule OctomoctoWeb.Router do
       live "/schulte", SchulteLive
       live "/match", MatchLive
       live "/set", SetGameLive
+      live "/sudoku", SudokuLive
     end
   end
 

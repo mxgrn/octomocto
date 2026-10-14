@@ -289,6 +289,51 @@
   .set-card, .set-card.is-wrong .set-card-face, .set-last-pop { animation: none; }
 }
 
+/* Sudoku. The lines of the grid are the gaps between the cells: thin
+   lines in a box, thick lines between the boxes. A wrong digit shakes in
+   its cell, and a digit that a player puts pops in. */
+.sudoku-board { container-type: inline-size; background: #334155; gap: 2px; padding: 2px; border-radius: 0.75rem; overflow: hidden; }
+.sudoku-box { background: #cbd5e1; gap: 1px; overflow: hidden; }
+/* The corner boxes follow the round corners of the board, so that the
+   thick line has the same width all around */
+.sudoku-box:nth-child(1) { border-top-left-radius: calc(0.75rem - 2px); }
+.sudoku-box:nth-child(3) { border-top-right-radius: calc(0.75rem - 2px); }
+.sudoku-box:nth-child(7) { border-bottom-left-radius: calc(0.75rem - 2px); }
+.sudoku-box:nth-child(9) { border-bottom-right-radius: calc(0.75rem - 2px); }
+.sudoku-cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  background: white;
+  font-size: 6cqw;
+  line-height: 1;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 120ms;
+}
+.sudoku-cell.is-playable { cursor: pointer; }
+.sudoku-cell.is-playable:hover { background: #fff1f2; }
+.sudoku-cell.is-peer { background: #f8fafc; }
+.sudoku-cell.is-same { background: #ffe4e6; }
+.sudoku-cell.is-selected,
+.sudoku-cell.is-selected:hover { background: #fecdd3; }
+.sudoku-cell.is-conflict { background: #fee2e2; color: #dc2626; }
+.sudoku-cell.is-wrong { background: #fee2e2; }
+.sudoku-cell.is-wrong .sudoku-digit { color: #dc2626; animation: schulte-shake 220ms ease-in-out; }
+.sudoku-pop { animation: sudoku-pop 250ms ease-out; }
+.sudoku-pad-key {
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms, background-color 120ms, box-shadow 120ms, opacity 120ms;
+}
+
+@keyframes sudoku-pop {
+  from { opacity: 0; transform: scale(1.6); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sudoku-cell.is-wrong .sudoku-digit, .sudoku-pop { animation: none; }
+}
+
 /* Header. The eyes in the wordmark blink one time when the pointer moves onto it.
    Only the orange or only the blue eyes blink. app.js sets data-blink at random. */
 @keyframes wordmark-blink {

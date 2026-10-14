@@ -1,0 +1,1251 @@
+port module Sudoku exposing (main)
+
+{-| Multiplayer sudoku: put a digit from 1 to 9 in each empty cell, so that
+each row, each column and each box of 3 by 3 cells has each digit one time.
+
+The server owns the game: the grid, the solution and the scores. This
+module draws the state that comes in through ports and sends the digits of
+the player out. app.js connects the ports to a Phoenix channel.
+
+The player selects a cell, then types a digit or clicks it on the pad. A
+digit that is already in the row, the column or the box of the cell is
+wrong at once: it shakes, the cell with the same digit turns red, and it
+does not go to the server. Other digits go to the server, which compares
+them with the solution. The first player who puts the correct digit in a
+cell gets the point. The reply of the server tells if the digit is wrong,
+and then it shakes too.
+
+All players race on the same grid. Before all of them are in, nobody sees
+the grid. A countdown with beeps comes before each puzzle. A browser that
+joins a full game only watches: it has no player id.
+
+The module compares each new state with the old one and sends the names of
+the sounds to play out through a port. The player can mute the sounds.
+
+-}
+
+import Array exposing (Array)
+import Browser
+import Browser.Events
+import Html exposing (Html, a, aside, button, div, h1, input, li, ol, p, span, text, ul)
+import Html.Attributes exposing (class, classList, href, id, readonly, style, value)
+import Html.Events exposing (onClick)
+import Html.Keyed
+import Json.Decode as Decode exposing (Decoder)
+import Process
+import Task
+import Time
+
+
+
+-- PORTS
+
+
+port sudokuPlace : { cell : Int, digit : Int } -> Cmd msg
+
+
+port sudokuRestart : () -> Cmd msg
+
+
+port sudokuCopyText : String -> Cmd msg
+
+
+port sudokuJoined : (Decode.Value -> msg) -> Sub msg
+
+
+port sudokuState : (Decode.Value -> msg) -> Sub msg
+
+
+port sudokuJoinFailed : (String -> msg) -> Sub msg
+
+
+{-| The reply of the server to a digit: "ok", "wrong" or "ignored"
+-}
+port sudokuPlaced : ({ cell : Int, digit : Int, result : String } -> msg) -> Sub msg
+
+
+port sudokuPlaySound : String -> Cmd msg
+
+
+port sudokuSaveMuted : Bool -> Cmd msg
+
+
+
+-- MODEL
+
+
+{-| The `name` is the display name of a signed-in player, or Nothing for a
+guest. Then the player is known by the `colorName`. An `away` player lost
+the connection, and can come back for a short time.
+-}
+type alias Player =
+    { id : String
+    , name : Maybe String
+    , color : String
+    , colorName : String
+    , score : Int
+    , away : Bool
+    }
+
+
+{-| A digit on the grid. A digit of the puzzle has no player and no color.
+-}
+type alias Filled =
+    { digit : Int
+    , playerId : Maybe String
+    , color : Maybe String
+    }
+
+
+{-| The last cell that a player filled
+-}
+type alias Last =
+    { playerId : String
+    , cell : Int
+    }
+
+
+type alias Game =
+    { -- The 81 cells, row by row. Empty before the start and during the
+      -- countdown.
+      cells : Array (Maybe Filled)
+    , last : Maybe Last
+    , difficulty : String
+
+    -- True until the game has all its players
+    , waiting : Bool
+    , finished : Bool
+
+    -- The time since the start, below zero during the countdown. After the
+    -- end, the final time.
+    , elapsedMs : Int
+    , players : List Player
+    , playersNeeded : Int
+    }
+
+
+{-| The player id of this browser. Nothing for a watcher.
+-}
+type alias Me =
+    Maybe String
+
+
+type Connection
+    = Connecting
+    | Joined Me Game
+    | Failed String
+
+
+{-| A digit in a cell
+-}
+type alias Move =
+    { cell : Int
+    , digit : Int
+    }
+
+
+type alias Model =
+    { gameUrl : String
+    , connection : Connection
+    , copied : Bool
+
+    -- The selected cell
+    , selected : Maybe Int
+
+    -- The digit that went to the server, until it is on the grid or the
+    -- server rejects it
+    , pending : Maybe Move
+
+    -- The last wrong digit, while it shakes, and the cells with the same
+    -- digit in its row, column or box. The number tells the shakes apart,
+    -- so that the end of an old shake does not stop a new one.
+    , wrong : Maybe Move
+    , conflicts : List Int
+    , wrongCount : Int
+
+    -- The local time (in ms) when the puzzle started, and the local time
+    -- now. The clock ticks between the server updates.
+    , clockStart : Int
+    , now : Int
+
+    -- The countdown step that last played its beep (see `countdownStep`)
+    , beepedStep : Maybe Int
+    , muted : Bool
+    }
+
+
+type alias Flags =
+    { gameUrl : String
+    , muted : Bool
+    }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    ( { gameUrl = flags.gameUrl
+      , connection = Connecting
+      , copied = False
+      , selected = Nothing
+      , pending = Nothing
+      , wrong = Nothing
+      , conflicts = []
+      , wrongCount = 0
+      , clockStart = 0
+      , now = 0
+      , beepedStep = Nothing
+      , muted = flags.muted
+      }
+    , Cmd.none
+    )
+
+
+
+-- UPDATE
+
+
+type Msg
+    = GotJoined Decode.Value
+    | GotState Decode.Value
+    | GotJoinFailed String
+    | GotPlaced { cell : Int, digit : Int, result : String }
+    | Select Int
+    | Place Int
+    | KeyDown String
+    | WrongDone Int
+    | Restart
+    | CopyLink
+    | CopiedTimeout
+    | SyncClock Int Time.Posix
+    | Tick Time.Posix
+    | ToggleMuted
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        GotJoined value ->
+            case Decode.decodeValue joinedDecoder value of
+                Ok ( me, game ) ->
+                    ( { model | connection = Joined me game, pending = Nothing }, syncClock game )
+
+                Err err ->
+                    ( { model | connection = Failed (Decode.errorToString err) }, Cmd.none )
+
+        GotState value ->
+            case ( model.connection, Decode.decodeValue gameDecoder value ) of
+                ( Joined me old, Ok game ) ->
+                    ( { model
+                        | connection = Joined me game
+
+                        -- The digit is on the grid, or another player
+                        -- filled the cell first
+                        , pending =
+                            model.pending
+                                |> Maybe.andThen
+                                    (\placed ->
+                                        if digitAt game placed.cell == Nothing then
+                                            Just placed
+
+                                        else
+                                            Nothing
+                                    )
+                        , selected =
+                            if Array.isEmpty game.cells then
+                                Nothing
+
+                            else
+                                model.selected
+                      }
+                    , Cmd.batch [ syncClock game, playSounds model (stateSounds me old game) ]
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        GotJoinFailed reason ->
+            ( { model | connection = Failed reason }, Cmd.none )
+
+        GotPlaced placed ->
+            if model.pending /= Just { cell = placed.cell, digit = placed.digit } then
+                ( model, Cmd.none )
+
+            else
+                case placed.result of
+                    "wrong" ->
+                        shake { cell = placed.cell, digit = placed.digit } [] { model | pending = Nothing }
+
+                    -- The new state removes the pending digit
+                    "ok" ->
+                        ( model, Cmd.none )
+
+                    _ ->
+                        ( { model | pending = Nothing }, Cmd.none )
+
+        Select cell ->
+            case model.connection of
+                Joined me game ->
+                    if canPlay me game then
+                        ( { model
+                            | selected =
+                                if model.selected == Just cell then
+                                    Nothing
+
+                                else
+                                    Just cell
+                          }
+                        , Cmd.none
+                        )
+
+                    else
+                        ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        Place digit ->
+            place digit model
+
+        KeyDown key ->
+            case String.toInt key of
+                Just digit ->
+                    if digit >= 1 && digit <= 9 then
+                        place digit model
+
+                    else
+                        ( model, Cmd.none )
+
+                Nothing ->
+                    case key of
+                        "ArrowUp" ->
+                            move -9 model
+
+                        "ArrowDown" ->
+                            move 9 model
+
+                        "ArrowLeft" ->
+                            move -1 model
+
+                        "ArrowRight" ->
+                            move 1 model
+
+                        "Escape" ->
+                            ( { model | selected = Nothing }, Cmd.none )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+        WrongDone count ->
+            if count == model.wrongCount then
+                ( { model | wrong = Nothing, conflicts = [] }, Cmd.none )
+
+            else
+                ( model, Cmd.none )
+
+        Restart ->
+            ( { model | selected = Nothing, pending = Nothing }, sudokuRestart () )
+
+        CopyLink ->
+            ( { model | copied = True }
+            , Cmd.batch
+                [ sudokuCopyText model.gameUrl
+                , Process.sleep 1500 |> Task.perform (\_ -> CopiedTimeout)
+                ]
+            )
+
+        CopiedTimeout ->
+            ( { model | copied = False }, Cmd.none )
+
+        SyncClock elapsedMs time ->
+            let
+                ms =
+                    Time.posixToMillis time
+            in
+            beepCountdown { model | clockStart = ms - elapsedMs, now = ms }
+
+        Tick time ->
+            beepCountdown { model | now = Time.posixToMillis time }
+
+        ToggleMuted ->
+            ( { model | muted = not model.muted }, sudokuSaveMuted (not model.muted) )
+
+
+{-| Puts the digit in the selected empty cell. Only one digit at a time
+goes to the server.
+-}
+place : Int -> Model -> ( Model, Cmd Msg )
+place digit model =
+    case ( model.connection, model.selected ) of
+        ( Joined me game, Just cell ) ->
+            if canPlay me game && digitAt game cell == Nothing && model.pending == Nothing then
+                case conflicts game cell digit of
+                    [] ->
+                        ( { model | pending = Just { cell = cell, digit = digit } }
+                        , sudokuPlace { cell = cell, digit = digit }
+                        )
+
+                    others ->
+                        shake { cell = cell, digit = digit } others model
+
+            else
+                ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+shake : Move -> List Int -> Model -> ( Model, Cmd Msg )
+shake wrong others model =
+    ( { model | wrong = Just wrong, conflicts = others, wrongCount = model.wrongCount + 1 }
+    , Cmd.batch
+        [ playSounds model [ "wrong" ]
+        , Process.sleep 600 |> Task.perform (\_ -> WrongDone (model.wrongCount + 1))
+        ]
+    )
+
+
+{-| Moves the selection with the arrow keys. With no selection, the first
+key selects the center of the grid. The selection stops at the edges.
+-}
+move : Int -> Model -> ( Model, Cmd Msg )
+move step model =
+    case model.connection of
+        Joined me game ->
+            if canPlay me game then
+                case model.selected of
+                    Nothing ->
+                        ( { model | selected = Just 40 }, Cmd.none )
+
+                    Just cell ->
+                        let
+                            next =
+                                cell + step
+
+                            inside =
+                                next >= 0 && next < 81 && (abs step == 9 || next // 9 == cell // 9)
+                        in
+                        if inside then
+                            ( { model | selected = Just next }, Cmd.none )
+
+                        else
+                            ( model, Cmd.none )
+
+            else
+                ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+{-| A player can put digits while the grid is on the screen
+-}
+canPlay : Me -> Game -> Bool
+canPlay me game =
+    me /= Nothing && not game.waiting && not game.finished && not (Array.isEmpty game.cells)
+
+
+digitAt : Game -> Int -> Maybe Int
+digitAt game cell =
+    Array.get cell game.cells
+        |> Maybe.andThen identity
+        |> Maybe.map .digit
+
+
+rowOf : Int -> Int
+rowOf cell =
+    cell // 9
+
+
+colOf : Int -> Int
+colOf cell =
+    modBy 9 cell
+
+
+boxOf : Int -> Int
+boxOf cell =
+    (rowOf cell // 3) * 3 + colOf cell // 3
+
+
+{-| True when the two cells are in the same row, column or box
+-}
+sameUnit : Int -> Int -> Bool
+sameUnit a b =
+    rowOf a == rowOf b || colOf a == colOf b || boxOf a == boxOf b
+
+
+{-| The other cells in the row, the column and the box of the cell that
+have the digit
+-}
+conflicts : Game -> Int -> Int -> List Int
+conflicts game cell digit =
+    List.filter
+        (\other -> other /= cell && sameUnit cell other && digitAt game other == Just digit)
+        (List.range 0 80)
+
+
+{-| The cells that are still empty
+-}
+emptyCount : Game -> Int
+emptyCount game =
+    Array.foldl
+        (\filled count ->
+            if filled == Nothing then
+                count + 1
+
+            else
+                count
+        )
+        0
+        game.cells
+
+
+{-| How many times the digit is on the grid
+-}
+digitCount : Game -> Int -> Int
+digitCount game digit =
+    Array.foldl
+        (\filled count ->
+            if Maybe.map .digit filled == Just digit then
+                count + 1
+
+            else
+                count
+        )
+        0
+        game.cells
+
+
+{-| The seconds left in the countdown (3, 2, 1), 0 after it, and Nothing
+when no puzzle runs. The step is right only after the clock is in sync.
+-}
+countdownStep : Model -> Maybe Int
+countdownStep model =
+    case model.connection of
+        Joined _ game ->
+            if game.waiting || game.finished then
+                Nothing
+
+            else
+                Just (max 0 (ceiling (toFloat (model.clockStart - model.now) / 1000)))
+
+        _ ->
+            Nothing
+
+
+{-| A beep on each step of the countdown, and a higher beep at the start.
+There is no start beep without a countdown before it, for example for a
+watcher who joins later.
+-}
+beepCountdown : Model -> ( Model, Cmd Msg )
+beepCountdown model =
+    let
+        step =
+            countdownStep model
+
+        sounds =
+            if step == model.beepedStep then
+                []
+
+            else
+                case step of
+                    Just 0 ->
+                        if Maybe.withDefault 0 model.beepedStep > 0 then
+                            [ "go" ]
+
+                        else
+                            []
+
+                    Just _ ->
+                        [ "countdown" ]
+
+                    Nothing ->
+                        []
+    in
+    ( { model | beepedStep = step }, playSounds model sounds )
+
+
+playSounds : Model -> List String -> Cmd Msg
+playSounds model names =
+    if model.muted then
+        Cmd.none
+
+    else
+        Cmd.batch (List.map sudokuPlaySound names)
+
+
+{-| The sounds for the change from the old state to the new one: a cell
+that I filled or that another player filled, and the end of the game.
+-}
+stateSounds : Me -> Game -> Game -> List String
+stateSounds me old new =
+    let
+        filledSound =
+            case new.last of
+                Just last ->
+                    if new.last == old.last || new.finished then
+                        []
+
+                    else if me == Just last.playerId then
+                        [ "found" ]
+
+                    else
+                        [ "other_found" ]
+
+                Nothing ->
+                    []
+
+        endSound =
+            if new.finished && not old.finished then
+                case winners new.players of
+                    [ winner ] ->
+                        if isMe me winner || List.length new.players == 1 then
+                            [ "win" ]
+
+                        else
+                            [ "lose" ]
+
+                    _ ->
+                        [ "lose" ]
+
+            else
+                []
+    in
+    filledSound ++ endSound
+
+
+isMe : Me -> Player -> Bool
+isMe me player =
+    me == Just player.id
+
+
+winners : List Player -> List Player
+winners players =
+    let
+        best =
+            List.maximum (List.map .score players) |> Maybe.withDefault 0
+    in
+    List.filter (\p -> p.score == best) players
+
+
+syncClock : Game -> Cmd Msg
+syncClock game =
+    Time.now |> Task.perform (SyncClock game.elapsedMs)
+
+
+
+-- DECODERS
+
+
+joinedDecoder : Decoder ( Me, Game )
+joinedDecoder =
+    Decode.map2 Tuple.pair
+        (Decode.field "player_id" (Decode.nullable Decode.string))
+        (Decode.field "state" gameDecoder)
+
+
+gameDecoder : Decoder Game
+gameDecoder =
+    Decode.map8 Game
+        (Decode.field "cells" (Decode.array (Decode.nullable filledDecoder)))
+        (Decode.field "last" (Decode.nullable lastDecoder))
+        (Decode.field "difficulty" Decode.string)
+        (Decode.field "waiting" Decode.bool)
+        (Decode.field "finished" Decode.bool)
+        (Decode.field "elapsed_ms" Decode.int)
+        (Decode.field "players" (Decode.list playerDecoder))
+        (Decode.field "players_needed" Decode.int)
+
+
+filledDecoder : Decoder Filled
+filledDecoder =
+    Decode.map3 Filled
+        (Decode.field "digit" Decode.int)
+        (Decode.field "player_id" (Decode.nullable Decode.string))
+        (Decode.field "color" (Decode.nullable Decode.string))
+
+
+lastDecoder : Decoder Last
+lastDecoder =
+    Decode.map2 Last
+        (Decode.field "player_id" Decode.string)
+        (Decode.field "cell" Decode.int)
+
+
+playerDecoder : Decoder Player
+playerDecoder =
+    Decode.map6 Player
+        (Decode.field "id" Decode.string)
+        (Decode.field "name" (Decode.nullable Decode.string))
+        (Decode.field "color" Decode.string)
+        (Decode.field "color_name" Decode.string)
+        (Decode.field "score" Decode.int)
+        (Decode.field "away" Decode.bool)
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ sudokuJoined GotJoined
+        , sudokuState GotState
+        , sudokuJoinFailed GotJoinFailed
+        , sudokuPlaced GotPlaced
+        , Browser.Events.onKeyDown (Decode.map KeyDown (Decode.field "key" Decode.string))
+        , case model.connection of
+            Joined _ game ->
+                -- The grid comes only after the countdown, so an empty grid
+                -- means a countdown. It ticks on each frame, so that the
+                -- beeps are on time.
+                if not game.waiting && not game.finished && Array.isEmpty game.cells then
+                    Browser.Events.onAnimationFrame Tick
+
+                else if not game.waiting && not game.finished then
+                    Time.every 200 Tick
+
+                else
+                    Sub.none
+
+            _ ->
+                Sub.none
+        ]
+
+
+
+-- VIEW
+
+
+view : Model -> Html Msg
+view model =
+    case model.connection of
+        Connecting ->
+            p [ id "sudoku-connecting", class "py-24 text-center opacity-60" ] [ text "Joining the game…" ]
+
+        Failed reason ->
+            p [ id "sudoku-failed", class "py-24 text-center text-red-600" ] [ text ("Could not join the game: " ++ reason) ]
+
+        Joined me game ->
+            viewGame model me game
+
+
+viewGame : Model -> Me -> Game -> Html Msg
+viewGame model me game =
+    let
+        countdown =
+            Maybe.withDefault 0 (countdownStep model)
+    in
+    div [ id "sudoku-root", class "flex w-full max-w-[1100px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
+        [ aside [ id "sudoku-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
+            [ div []
+                [ div [ class "flex items-center gap-2" ]
+                    [ h1 [ class "text-2xl font-semibold tracking-tight" ]
+                        [ a [ id "sudoku-title-link", href "/sudoku", class "transition hover:text-rose-600" ] [ text "Sudoku Race" ] ]
+                    , viewMuteButton model.muted
+                    ]
+                , p [ class "text-sm opacity-60" ]
+                    [ text (String.toUpper (String.left 1 game.difficulty) ++ String.dropLeft 1 game.difficulty ++ ". Each row, column and box has each digit one time.") ]
+                ]
+            , viewClock model game
+            , if game.playersNeeded > 1 then
+                viewShareLink model
+
+              else
+                text ""
+            , if List.length game.players > 1 then
+                viewScores me game
+
+              else
+                text ""
+            , if me == Nothing then
+                p [ id "sudoku-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200" ]
+                    [ text "This game is full, so you can only watch it." ]
+
+              else
+                viewRestartButton
+            ]
+        , div [ class "mx-auto flex w-full min-w-0 flex-1 flex-col items-center gap-4" ]
+            [ div [ class "relative w-full", style "max-width" "min(100%, 36rem, calc(100dvh - 10rem))" ]
+                [ viewBoard model me game
+                , if game.waiting then
+                    viewWaiting game
+
+                  else if game.finished then
+                    viewResult me game
+
+                  else if countdown > 0 || Array.isEmpty game.cells then
+                    viewCountdown countdown
+
+                  else
+                    text ""
+                ]
+            , if canPlay me game then
+                viewPad model game
+
+              else
+                text ""
+            ]
+        ]
+
+
+viewMuteButton : Bool -> Html Msg
+viewMuteButton muted =
+    button
+        [ id "sudoku-mute"
+        , class "grid size-8 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90"
+        , onClick ToggleMuted
+        , Html.Attributes.title
+            (if muted then
+                "Turn the sounds on"
+
+             else
+                "Turn the sounds off"
+            )
+        ]
+        [ span
+            [ class
+                (if muted then
+                    "hero-speaker-x-mark size-5"
+
+                 else
+                    "hero-speaker-wave size-5"
+                )
+            ]
+            []
+        ]
+
+
+{-| Starts a new puzzle for all players, also during a game.
+-}
+viewRestartButton : Html Msg
+viewRestartButton =
+    button
+        [ id "sudoku-restart"
+        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start"
+        , onClick Restart
+        ]
+        [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
+        , text "Restart game"
+        ]
+
+
+viewShareLink : Model -> Html Msg
+viewShareLink model =
+    div [ class "flex items-center gap-2 rounded-full bg-rose-50 p-1 pl-4 text-sm ring-1 ring-rose-200 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
+        [ input
+            [ id "sudoku-link"
+            , readonly True
+            , value model.gameUrl
+            , class "min-w-0 flex-1 truncate bg-transparent text-rose-900 outline-none lg:px-2 lg:py-1"
+            ]
+            []
+        , button
+            [ id "sudoku-copy-link"
+            , class "rounded-full bg-rose-600 px-4 py-1.5 font-medium text-white transition hover:bg-rose-500 active:scale-95"
+            , onClick CopyLink
+            ]
+            [ text
+                (if model.copied then
+                    "Copied!"
+
+                 else
+                    "Copy link"
+                )
+            ]
+        ]
+
+
+{-| The time on the left, and the empty cells on the right. Before the
+start, the grid is not known, so the right side shows a dash.
+-}
+viewClock : Model -> Game -> Html Msg
+viewClock model game =
+    let
+        elapsedMs =
+            if game.finished then
+                game.elapsedMs
+
+            else if game.waiting then
+                0
+
+            else
+                max 0 (model.now - model.clockStart)
+    in
+    div [ id "sudoku-clock", class "grid grid-cols-2 divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200" ]
+        [ div [ class "flex flex-col items-center justify-center" ]
+            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "time" ]
+            , span [ id "sudoku-time", class "text-3xl font-light text-slate-700 tabular-nums" ] [ text (formatTime elapsedMs) ]
+            ]
+        , div [ class "flex flex-col items-center justify-center" ]
+            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "empty" ]
+            , span [ id "sudoku-empty-left", class "text-3xl font-bold text-rose-600 tabular-nums" ]
+                [ text
+                    (if Array.isEmpty game.cells then
+                        "–"
+
+                     else
+                        String.fromInt (emptyCount game)
+                    )
+                ]
+            ]
+        ]
+
+
+{-| Show the time as minutes and seconds, for example "1:05".
+-}
+formatTime : Int -> String
+formatTime ms =
+    let
+        seconds =
+            ms // 1000
+    in
+    String.fromInt (seconds // 60) ++ ":" ++ String.padLeft 2 '0' (String.fromInt (modBy 60 seconds))
+
+
+{-| The players in the order in which they joined, with the cells they
+filled
+-}
+viewScores : Me -> Game -> Html Msg
+viewScores me game =
+    ul [ id "sudoku-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
+        (List.map
+            (\player ->
+                li
+                    [ id ("sudoku-score-" ++ player.id)
+                    , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200 transition"
+                    , classList [ ( "opacity-50", player.away ) ]
+                    ]
+                    [ span [ class "size-3 rounded-full", style "background" player.color ] []
+                    , span [ class "lg:flex-1" ] [ text (playerName me player) ]
+                    , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
+                    ]
+            )
+            game.players
+        )
+
+
+playerName : Me -> Player -> String
+playerName me player =
+    if isMe me player then
+        Maybe.withDefault player.colorName player.name ++ " (you)"
+
+    else
+        Maybe.withDefault player.colorName player.name
+
+
+
+-- BOARD
+
+
+{-| The grid as 9 boxes of 9 cells. The gaps between the cells are the
+lines of the grid (see app.css). Before the start, the cells are empty.
+-}
+viewBoard : Model -> Me -> Game -> Html Msg
+viewBoard model me game =
+    let
+        playable =
+            canPlay me game
+
+        selectedDigit =
+            model.selected |> Maybe.andThen (digitAt game)
+
+        viewCell cell =
+            viewBoardCell model game playable selectedDigit cell
+    in
+    div [ id "sudoku-board", class "sudoku-board grid grid-cols-3 shadow-sm" ]
+        (List.map
+            (\box ->
+                div [ class "sudoku-box grid grid-cols-3" ]
+                    (List.map
+                        (\inner ->
+                            viewCell (((box // 3) * 3 + inner // 3) * 9 + modBy 3 box * 3 + modBy 3 inner)
+                        )
+                        (List.range 0 8)
+                    )
+            )
+            (List.range 0 8)
+        )
+
+
+viewBoardCell : Model -> Game -> Bool -> Maybe Int -> Int -> Html Msg
+viewBoardCell model game playable selectedDigit cell =
+    let
+        filled =
+            Array.get cell game.cells |> Maybe.andThen identity
+
+        wrong =
+            model.wrong
+                |> Maybe.andThen
+                    (\w ->
+                        if w.cell == cell then
+                            Just w.digit
+
+                        else
+                            Nothing
+                    )
+
+        pending =
+            model.pending
+                |> Maybe.andThen
+                    (\p ->
+                        if p.cell == cell then
+                            Just p.digit
+
+                        else
+                            Nothing
+                    )
+
+        isLast =
+            Maybe.map .cell game.last == Just cell
+
+        digitView =
+            case ( filled, wrong, pending ) of
+                ( Just f, _, _ ) ->
+                    -- Keyed by the digit, so that a new digit pops in
+                    Html.Keyed.node "span"
+                        []
+                        [ ( String.fromInt f.digit
+                          , span
+                                [ classList
+                                    [ ( "font-semibold text-slate-800", f.color == Nothing )
+                                    , ( "font-bold", f.color /= Nothing )
+                                    , ( "sudoku-pop inline-block", f.color /= Nothing )
+                                    ]
+                                , style "color" (Maybe.withDefault "" f.color)
+                                ]
+                                [ text (String.fromInt f.digit) ]
+                          )
+                        ]
+
+                ( Nothing, Just digit, _ ) ->
+                    -- Keyed by the shake, so that each wrong digit shakes
+                    Html.Keyed.node "span"
+                        []
+                        [ ( String.fromInt model.wrongCount
+                          , span [ class "sudoku-digit inline-block font-bold" ] [ text (String.fromInt digit) ]
+                          )
+                        ]
+
+                ( Nothing, Nothing, Just digit ) ->
+                    span [ class "sudoku-digit font-bold text-slate-300" ] [ text (String.fromInt digit) ]
+
+                _ ->
+                    text ""
+    in
+    button
+        [ id ("sudoku-cell-" ++ String.fromInt cell)
+        , class "sudoku-cell"
+        , classList
+            [ ( "is-playable", playable )
+            , ( "is-selected", model.selected == Just cell )
+            , ( "is-same", selectedDigit /= Nothing && Maybe.map .digit filled == selectedDigit && model.selected /= Just cell )
+            , ( "is-peer"
+              , case model.selected of
+                    Just selected ->
+                        selected /= cell && sameUnit selected cell
+
+                    Nothing ->
+                        False
+              )
+            , ( "is-wrong", wrong /= Nothing )
+            , ( "is-conflict", List.member cell model.conflicts )
+            , ( "ring-2 ring-inset ring-rose-300", isLast && not game.finished && model.selected /= Just cell )
+            ]
+        , onClick (Select cell)
+        , Html.Attributes.attribute "aria-label" (cellName cell filled)
+        ]
+        [ digitView ]
+
+
+{-| For example, "Row 3, column 5, 7" or "Row 3, column 5, empty"
+-}
+cellName : Int -> Maybe Filled -> String
+cellName cell filled =
+    "Row "
+        ++ String.fromInt (rowOf cell + 1)
+        ++ ", column "
+        ++ String.fromInt (colOf cell + 1)
+        ++ ", "
+        ++ (case filled of
+                Just f ->
+                    String.fromInt f.digit
+
+                Nothing ->
+                    "empty"
+           )
+
+
+{-| The digits 1 to 9, each with the number of times that it must still go
+on the grid. A digit that is on the grid 9 times is off.
+-}
+viewPad : Model -> Game -> Html Msg
+viewPad model game =
+    let
+        ready =
+            case model.selected of
+                Just cell ->
+                    digitAt game cell == Nothing && model.pending == Nothing
+
+                Nothing ->
+                    False
+    in
+    div [ id "sudoku-pad", class "grid w-full grid-cols-9 gap-1.5 sm:gap-2", style "max-width" "min(100%, 36rem, calc(100dvh - 10rem))" ]
+        (List.map
+            (\digit ->
+                let
+                    left =
+                        9 - digitCount game digit
+                in
+                button
+                    [ id ("sudoku-key-" ++ String.fromInt digit)
+                    , class "sudoku-pad-key flex flex-col items-center justify-center rounded-xl bg-white py-2 shadow-sm ring-1 ring-slate-200"
+                    , classList
+                        [ ( "enabled:hover:-translate-y-0.5 enabled:hover:bg-rose-50 enabled:hover:ring-rose-300 enabled:active:scale-95", ready )
+                        , ( "opacity-30", left == 0 )
+                        ]
+                    , Html.Attributes.disabled (left == 0)
+                    , onClick (Place digit)
+                    ]
+                    [ span [ class "text-xl font-semibold text-slate-800 sm:text-2xl" ] [ text (String.fromInt digit) ]
+                    , span [ class "text-[10px] text-slate-400 tabular-nums sm:text-xs" ] [ text (String.fromInt left) ]
+                    ]
+            )
+            (List.range 1 9)
+        )
+
+
+
+-- COVERS
+
+
+{-| Covers the grid until all players are in.
+-}
+viewWaiting : Game -> Html Msg
+viewWaiting game =
+    div
+        [ id "sudoku-waiting"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl bg-rose-950/80 p-4 text-center text-white"
+        ]
+        [ p [ class "text-3xl font-semibold" ] [ text "Waiting for players" ]
+        , p [ id "sudoku-waiting-count", class "text-lg tabular-nums opacity-80" ]
+            [ text
+                (String.fromInt (List.length game.players)
+                    ++ " of "
+                    ++ String.fromInt game.playersNeeded
+                    ++ " players are in"
+                )
+            ]
+        , p [ class "text-sm opacity-60" ] [ text "Send the link to the other players. The game starts when all of them are in." ]
+        ]
+
+
+{-| The number is keyed, so that it pops in again on each step.
+-}
+viewCountdown : Int -> Html Msg
+viewCountdown seconds =
+    div
+        [ id "sudoku-countdown"
+        , class "absolute inset-0 flex items-center justify-center rounded-xl bg-rose-950/80"
+        ]
+        [ Html.Keyed.node "div"
+            []
+            [ ( String.fromInt seconds
+              , p [ class "countdown-pop text-9xl font-bold text-white tabular-nums" ]
+                    [ text
+                        (if seconds > 0 then
+                            String.fromInt seconds
+
+                         else
+                            ""
+                        )
+                    ]
+              )
+            ]
+        ]
+
+
+viewResult : Me -> Game -> Html Msg
+viewResult me game =
+    let
+        players =
+            game.players
+
+        solo =
+            List.length players == 1
+
+        message =
+            case ( solo, winners players ) of
+                ( True, _ ) ->
+                    "Solved!"
+
+                ( False, [ winner ] ) ->
+                    if isMe me winner then
+                        "You win!"
+
+                    else
+                        case winner.name of
+                            Just name ->
+                                name ++ " wins!"
+
+                            Nothing ->
+                                "The " ++ winner.colorName ++ " player wins!"
+
+                ( False, _ ) ->
+                    "It's a tie!"
+
+        ranked =
+            List.reverse (List.sortBy .score players)
+    in
+    div
+        [ id "sudoku-result"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-xl bg-rose-950/70 p-4 text-white backdrop-blur-sm"
+        ]
+        [ p [ class "text-3xl font-semibold" ] [ text message ]
+        , p [ id "sudoku-final-time", class "text-lg tabular-nums opacity-80" ]
+            [ text ("Time " ++ formatTime game.elapsedMs) ]
+        , if solo then
+            text ""
+
+          else
+            ol [ class "flex flex-col gap-1 text-sm" ]
+                (List.map
+                    (\player ->
+                        li [ class "flex items-center gap-2" ]
+                            [ span [ class "size-3 rounded-full", style "background" player.color ] []
+                            , span [ class "flex-1" ] [ text (playerName me player) ]
+                            , span [ class "pl-6 font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
+                            ]
+                    )
+                    ranked
+                )
+        , if me == Nothing then
+            text ""
+
+          else
+            button
+                [ id "sudoku-play-again"
+                , class "rounded-full bg-white px-6 py-2.5 font-medium text-rose-800 shadow-lg transition hover:-translate-y-0.5 hover:bg-rose-50 active:translate-y-0"
+                , onClick Restart
+                ]
+                [ text "Play again" ]
+        , a
+            [ id "sudoku-leaderboards-link"
+            , href "/sudoku"
+            , class "text-sm font-medium text-white/80 underline-offset-4 transition hover:text-white hover:underline"
+            ]
+            [ text "Latest games and best results" ]
+        ]
+
+
+
+-- MAIN
+
+
+main : Program Flags Model Msg
+main =
+    Browser.element
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }

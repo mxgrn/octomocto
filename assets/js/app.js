@@ -30,6 +30,7 @@ import {playAstronautSound} from "./astronaut_sounds"
 import {playSchulteSound} from "./schulte_sounds"
 import {playMatchSound} from "./match_sounds"
 import {playSetSound} from "./set_sounds"
+import {playSudokuSound} from "./sudoku_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
@@ -284,6 +285,60 @@ if (setNode) {
   setGame.ports.setGamePlaySound.subscribe(playSetSound)
   setGame.ports.setGameSaveMuted.subscribe(value => {
     try { localStorage.setItem("set-muted", String(value)) } catch (_e) {}
+  })
+}
+
+// Start the sudoku game and connect its ports to the game channel. It works
+// as the Set game above. The reply to a digit tells the page if the digit
+// is wrong.
+const sudokuNode = document.getElementById("sudoku-main")
+if (sudokuNode) {
+  if (navigator.userActivation?.hasBeenActive) unlockAudio()
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  let muted = false
+  try { muted = localStorage.getItem("sudoku-muted") === "true" } catch (_e) {}
+
+  const sudoku = window.Elm.Sudoku.init({node: sudokuNode, flags: {gameUrl: window.location.href, muted}})
+  const socket = new Socket("/socket", {params: {user_token: sudokuNode.dataset.userToken}})
+  socket.connect()
+
+  const tokenKey = `sudoku-token:${sudokuNode.dataset.gameId}`
+  let token = null
+  try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
+  const joined = reply => {
+    token = reply.token
+    try {
+      if (token) sessionStorage.setItem(tokenKey, token)
+      else sessionStorage.removeItem(tokenKey)
+    } catch (_e) {}
+    sudoku.ports.sudokuJoined.send(reply)
+  }
+  // A link with ?watch=1 only watches the game. The token of a player wins.
+  const watch = new URLSearchParams(window.location.search).has("watch")
+  const channel = socket.channel(`sudoku:${sudokuNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  channel.on("state", state => sudoku.ports.sudokuState.send(state))
+  channel.on("joined", joined)
+  channel.join()
+    .receive("ok", joined)
+    .receive("error", ({reason}) => {
+      // The server of the game stopped a moment ago. The channel tries again.
+      if (reason === "unavailable") return
+      channel.leave()
+      sudoku.ports.sudokuJoinFailed.send(reason)
+    })
+
+  sudoku.ports.sudokuPlace.subscribe(({cell, digit}) => {
+    const placed = result => sudoku.ports.sudokuPlaced.send({cell, digit, result})
+    channel.push("place", {cell, digit})
+      .receive("ok", ({result}) => placed(result))
+      .receive("error", () => placed("ignored"))
+      .receive("timeout", () => placed("ignored"))
+  })
+  sudoku.ports.sudokuRestart.subscribe(() => channel.push("restart", {}))
+  sudoku.ports.sudokuCopyText.subscribe(text => navigator.clipboard.writeText(text))
+  sudoku.ports.sudokuPlaySound.subscribe(playSudokuSound)
+  sudoku.ports.sudokuSaveMuted.subscribe(value => {
+    try { localStorage.setItem("sudoku-muted", String(value)) } catch (_e) {}
   })
 }
 

@@ -39,6 +39,16 @@ defmodule OctomoctoWeb.PageController do
         "bg-violet-500/10 text-sm tracking-tighter text-violet-600 dark:bg-violet-400/15 dark:text-violet-400"
     },
     %{
+      id: "sudoku",
+      name: "Sudoku Race",
+      description:
+        "Fill the same sudoku with your friends. The first player to put the correct digit gets the point.",
+      path: "/sudoku",
+      icon: "9",
+      icon_class:
+        "bg-rose-500/10 font-bold text-rose-600 tabular-nums dark:bg-rose-400/15 dark:text-rose-400"
+    },
+    %{
       id: "schulte",
       name: "Schulte Race",
       description:
