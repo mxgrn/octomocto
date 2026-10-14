@@ -273,6 +273,28 @@
 }
 .set-last-pop { animation: set-last-pop 250ms ease-out; }
 
+/* The three colors of the shapes */
+.set-color-0 { color: #dc2626; }
+.set-color-1 { color: #16a34a; }
+.set-color-2 { color: #7c3aed; }
+
+/* Set in the dark theme: dark cards, and brighter shapes on them */
+[data-theme=dark] .set-card,
+[data-theme=dark] .set-mini-card { background: #3a4252; }
+[data-theme=dark] .set-card { box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 2px 6px rgb(0 0 0 / 0.3); }
+[data-theme=dark] .set-mini-card { box-shadow: 0 0 0 1px rgb(255 255 255 / 0.08); }
+[data-theme=dark] .set-card.is-empty { background: rgb(255 255 255 / 0.04); box-shadow: none; }
+[data-theme=dark] .set-card.is-playable:hover { background: #424b5c; box-shadow: 0 0 0 1px rgb(255 255 255 / 0.1), 0 6px 14px rgb(0 0 0 / 0.35); }
+[data-theme=dark] .set-card.is-selected,
+[data-theme=dark] .set-card.is-selected:hover {
+  background: #3d4166;
+  box-shadow: 0 0 0 3px var(--color-octo-indigo-light), 0 6px 18px rgb(140 140 255 / 0.3);
+}
+[data-theme=dark] .set-card.is-wrong { box-shadow: 0 0 0 3px #f87171; }
+[data-theme=dark] .set-color-0 { color: #f87171; }
+[data-theme=dark] .set-color-1 { color: #4ade80; }
+[data-theme=dark] .set-color-2 { color: #b197fc; }
+
 @keyframes set-last-pop {
   from { opacity: 0; transform: scale(0.95); }
 }
