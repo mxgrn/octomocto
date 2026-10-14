@@ -263,6 +263,17 @@ defmodule OctomoctoWeb.GamePageComponents do
   attr :away, :boolean, required: true
 
   # Green while the player is online, grey during the grace time
+  @doc """
+  The hint under the Visibility setting. A game for one player has no free
+  seats, so others can only watch it.
+  """
+  def visibility_hint(%{players: 1, public: true}),
+    do: "Other players can watch this game in Ongoing games."
+
+  def visibility_hint(%{players: 1, public: false}), do: "Only players with the link can watch."
+  def visibility_hint(%{public: true}), do: "Other players see this game in Open games."
+  def visibility_hint(%{public: false}), do: "Only players with the link can join."
+
   defp presence(assigns) do
     ~H"""
     <span class={[

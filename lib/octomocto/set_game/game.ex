@@ -26,9 +26,10 @@ defmodule Octomocto.SetGame.Game do
   `Octomocto.SetGame.save_results/4`). The game stops after some time with
   no players.
 
-  A public game for more than one player is in the lists of the settings
-  page (see `Octomocto.Lobby`): in the open games until it has all its
-  players for the first time, then in the ongoing games. The game sends
+  A public game is in the lists of the settings page (see
+  `Octomocto.Lobby`): in the open games until it has all its players for
+  the first time, then in the ongoing games. A game for one player is only
+  in the ongoing games. The game sends
   its new row after each change, and nil when its node stops. A process
   can also join only to watch (see `Octomocto.SetGame.watch/1`).
 
@@ -85,8 +86,7 @@ defmodule Octomocto.SetGame.Game do
   `Octomocto.Lobby`), or nil when the game is in no list. Each player has
   a `:score`.
   """
-  def lobby_entry(%{public: true} = state)
-      when state.needed > 1 and map_size(state.players) > 0 do
+  def lobby_entry(%{public: true} = state) when map_size(state.players) > 0 do
     players =
       state.players
       |> Map.values()
@@ -405,7 +405,7 @@ defmodule Octomocto.SetGame.Game do
   end
 
   # True for a game that can be in the lists of the settings page
-  defp in_lobby?(state), do: state.public and state.needed > 1
+  defp in_lobby?(state), do: state.public
 
   defp publish(state) do
     store(state)

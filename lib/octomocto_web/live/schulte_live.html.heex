@@ -106,14 +106,8 @@
           </.option>
         </.setting>
         <.setting
-          :if={@settings.players > 1}
           label="Visibility"
-          hint={
-            if(@settings.public,
-              do: "Other players see this game in Open games.",
-              else: "Only players with the link can join."
-            )
-          }
+          hint={visibility_hint(@settings)}
         >
           <.option
             :for={

@@ -5,11 +5,11 @@ defmodule Octomocto.Lobby do
   started.
 
   A game module gives the row of a game in the lists with `lobby_entry/1`,
-  or nil when the game is in no list. Only a public game for more than one
-  player can be in a list. After each change, such a game sends its new row
-  with `broadcast/3`, and a settings page updates its rows with
-  `put_entry/3`. The row is in the message, because the copy of the store
-  on the node of a page can be older than the message.
+  or nil when the game is in no list. Only a public game can be in a list.
+  After each change, such a game sends its new row with `broadcast/3`, and
+  a settings page updates its rows with `put_entry/3`. The row is in the
+  message, because the copy of the store on the node of a page can be older
+  than the message.
 
   A row is a map with:
 
