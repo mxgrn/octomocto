@@ -43,7 +43,7 @@
         </ul>
       </section>
 
-      <div id="lobby" class="grid gap-4 lg:col-start-1 lg:row-start-1">
+      <div id="lobby" class="grid grid-cols-1 gap-4 lg:col-start-1 lg:row-start-1">
         <.lobby_games games={@lobby_games} path={&game_path/1}>
           <:icon :let={game}><.game_icon game={@kinds[game.kind]} small /></:icon>
           <:summary :let={game}>
