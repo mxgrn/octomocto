@@ -138,7 +138,7 @@ if (trainsNode) {
 // then on.
 //
 // The countdown starts before the player can click on this page. After a
-// click on "New game", the browser lets the page start the audio at once,
+// click on "Start game", the browser lets the page start the audio at once,
 // so that the countdown beeps. A player who opens a shared link gets the
 // audio on the first click.
 const schulteNode = document.getElementById("schulte-main")
