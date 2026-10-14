@@ -23,8 +23,7 @@ defmodule OctomoctoWeb.MemoryLive do
   def seo do
     [
       page_title: "Memory Card Game",
-      page_description:
-        "Find matching pairs or triplets of cards. Play solo against the clock or take turns with up to 4 friends. Free, in a browser."
+      page_description: "Play Memory online solo or with friends. Free, instant, no sign-up."
     ]
   end
 
