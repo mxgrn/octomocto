@@ -61,6 +61,11 @@ defmodule OctomoctoWeb.HomeLive do
     }
   ]
 
+  @doc """
+  The list of all games, as on the front page.
+  """
+  def games, do: @games
+
   # The games that have lists of public games, by the id in
   # @games, with the game module, its store and the page that gives the
   # settings of a game in a row

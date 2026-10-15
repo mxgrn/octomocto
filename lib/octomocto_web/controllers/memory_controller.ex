@@ -2,7 +2,7 @@ defmodule OctomoctoWeb.MemoryController do
   use OctomoctoWeb, :controller
 
   alias Octomocto.Memory.Store
-  alias OctomoctoWeb.MemoryLive
+  alias OctomoctoWeb.{HomeLive, MemoryLive}
 
   plug :put_seo
 
@@ -12,6 +12,8 @@ defmodule OctomoctoWeb.MemoryController do
         id: id,
         settings_path: MemoryLive.settings_path(state),
         user_token: user_token(conn.assigns.current_scope),
+        # The end screen invites the player to try this game
+        next_game: HomeLive.games() |> Enum.reject(&(&1.id == "memory")) |> Enum.random(),
         banner: MemoryLive.banner(conn.query_params),
         noindex: true
       )

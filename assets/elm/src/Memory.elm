@@ -147,6 +147,7 @@ type Connection
 type alias Model =
     { gameUrl : String
     , settingsUrl : String
+    , nextGame : NextGame
     , guest : Bool
     , connection : Connection
     , copied : Bool
@@ -168,9 +169,18 @@ type alias Model =
     }
 
 
+{-| The other game that the end screen invites the player to try
+-}
+type alias NextGame =
+    { name : String
+    , path : String
+    }
+
+
 type alias Flags =
     { gameUrl : String
     , settingsUrl : String
+    , nextGame : NextGame
     , guest : Bool
     , muted : Bool
     }
@@ -180,6 +190,7 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { gameUrl = flags.gameUrl
       , settingsUrl = flags.settingsUrl
+      , nextGame = flags.nextGame
       , guest = flags.guest
       , connection = Connecting
       , copied = False
@@ -557,6 +568,12 @@ viewGame model me game =
 
               else
                 viewRestartButton
+            , a
+                [ id "memory-leaderboards-link"
+                , href model.settingsUrl
+                , class "text-sm font-medium text-octo-indigo underline-offset-4 transition hover:underline dark:text-octo-indigo-light"
+                ]
+                [ text "Latest games and best results" ]
             ]
         , div [ class "min-w-0 flex-1" ]
             [ div [ id "memory-board", class "relative mx-auto rounded-2xl bg-white p-2 shadow-sm ring-1 ring-slate-200 dark:bg-white/5 dark:shadow-none dark:ring-white/10", style "width" (fieldWidth layout) ]
@@ -565,7 +582,7 @@ viewGame model me game =
                     viewWaiting game
 
                   else if game.finished then
-                    viewResult model.settingsUrl model.guest me game
+                    viewResult model.nextGame model.guest me game
 
                   else
                     text ""
@@ -892,8 +909,8 @@ viewWaiting game =
         ]
 
 
-viewResult : String -> Bool -> Me -> Game -> Html Msg
-viewResult settingsUrl guest me game =
+viewResult : NextGame -> Bool -> Me -> Game -> Html Msg
+viewResult nextGame guest me game =
     let
         players =
             game.players
@@ -957,11 +974,13 @@ viewResult settingsUrl guest me game =
                 ]
                 [ text "Play again" ]
         , a
-            [ id "memory-leaderboards-link"
-            , href settingsUrl
-            , class "text-sm font-medium text-white/80 underline-offset-4 transition hover:text-white hover:underline"
+            [ id "memory-next-game"
+            , href nextGame.path
+            , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]
-            [ text "Latest games and best results" ]
+            [ text ("Or try " ++ nextGame.name ++ " ")
+            , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
+            ]
 
         -- Only a guest who played gets the call to sign in, not a spectator
         , if guest && me /= Nothing then
