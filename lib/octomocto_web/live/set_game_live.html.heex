@@ -51,6 +51,7 @@
       <div id="set-settings" class="flex w-full flex-col gap-4">
         <.setting
           label="Players"
+          icon="hero-users"
           hint={
             if(@settings.players > 1,
               do: "All players race on the same table. The game starts when all players are in."
@@ -66,7 +67,7 @@
             {n}
           </.option>
         </.setting>
-        <.setting label="Mode" hint={mode_hint(@settings.mode)}>
+        <.setting label="Mode" icon="hero-adjustments-horizontal" hint={mode_hint(@settings.mode)}>
           <.option
             :for={mode <- Deck.modes()}
             id={"mode-#{mode}"}
@@ -78,6 +79,7 @@
         </.setting>
         <.setting
           label="Visibility"
+          icon="hero-eye"
           hint={visibility_hint(@settings)}
         >
           <.option

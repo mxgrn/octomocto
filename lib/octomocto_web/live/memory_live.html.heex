@@ -57,6 +57,7 @@
       <div id="memory-settings" class="flex w-full flex-col gap-4">
         <.setting
           label="Players"
+          icon="hero-users"
           hint={
             if(@settings.players > 1,
               do: "The players take turns. The game starts when all players are in."
@@ -72,9 +73,9 @@
             {n}
           </.option>
         </.setting>
-        <div class="rounded-2xl bg-base-100 px-4 py-2.5 ring-1 ring-base-content/10">
-          <p class="text-left text-sm font-bold text-base-content/80">Theme</p>
-          <div id="memory-themes" class="mt-2 grid grid-cols-4 gap-2 xl:grid-cols-6">
+        <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
+          <.setting_header label="Theme" icon="hero-swatch" />
+          <div id="memory-themes" class="mt-3 grid grid-cols-4 gap-2 xl:grid-cols-6">
             <.link
               :for={theme <- @themes}
               id={"theme-#{theme.name}"}
@@ -99,6 +100,7 @@
         </div>
         <.setting
           label="Find"
+          icon="hero-magnifying-glass"
           hint={
             if(@settings.set == 2,
               do: "Find 2 cards with the same image.",
@@ -115,7 +117,7 @@
             {label}
           </.option>
         </.setting>
-        <.setting label="Cards" wide>
+        <.setting label="Cards" icon="hero-squares-2x2" wide>
           <.step_button
             id="cards-less"
             icon="hero-minus"
@@ -157,6 +159,7 @@
         </.setting>
         <.setting
           label="Visibility"
+          icon="hero-eye"
           hint={visibility_hint(@settings)}
         >
           <.option

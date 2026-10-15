@@ -51,6 +51,7 @@
       <div id="sudoku-settings" class="flex w-full flex-col gap-4">
         <.setting
           label="Players"
+          icon="hero-users"
           hint={
             if(@settings.players > 1,
               do: "All players race on the same grid. The game starts when all players are in."
@@ -66,7 +67,11 @@
             {n}
           </.option>
         </.setting>
-        <.setting label="Difficulty" hint={difficulty_hint(@settings.difficulty)}>
+        <.setting
+          label="Difficulty"
+          icon="hero-chart-bar"
+          hint={difficulty_hint(@settings.difficulty)}
+        >
           <.option
             :for={difficulty <- Puzzle.difficulties()}
             id={"difficulty-#{difficulty}"}
@@ -78,6 +83,7 @@
         </.setting>
         <.setting
           label="Visibility"
+          icon="hero-eye"
           hint={visibility_hint(@settings)}
         >
           <.option

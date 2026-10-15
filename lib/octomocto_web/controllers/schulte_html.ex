@@ -4,22 +4,35 @@ defmodule OctomoctoWeb.SchulteHTML do
   embed_templates "schulte_html/*"
 
   attr :label, :string, required: true
+  attr :icon, :string, required: true, doc: "a hero icon name, such as `hero-users`"
   attr :hint, :string, default: nil, doc: "a short explanation of the selected option"
   attr :wide, :boolean, default: false, doc: "true when the options use the full width"
   slot :inner_block, required: true
 
-  @doc "One setting of a new game: the label, and its options in a row below it."
+  @doc "One setting of a new game: the header, and the options in a row below it."
   def setting(assigns) do
     ~H"""
-    <div class="rounded-2xl bg-base-100 px-4 py-2.5 ring-1 ring-base-content/10">
-      <p class="text-left text-sm font-bold text-base-content/80">{@label}</p>
-      <div class="mt-2 flex justify-center">
+    <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
+      <.setting_header label={@label} icon={@icon} />
+      <div class="mt-3 flex justify-center">
         <div class={["flex gap-1 rounded-full bg-base-200 p-1", @wide && "w-full"]}>
           {render_slot(@inner_block)}
         </div>
       </div>
       <p :if={@hint} class="mt-1.5 text-left text-xs text-base-content/50">{@hint}</p>
     </div>
+    """
+  end
+
+  attr :label, :string, required: true
+  attr :icon, :string, required: true
+
+  @doc "The header of a setting: an icon and the label, as in the results lists."
+  def setting_header(assigns) do
+    ~H"""
+    <h3 class="flex items-center gap-2 text-left font-semibold">
+      <.icon name={@icon} class="size-4 text-octo-indigo" /> {@label}
+    </h3>
     """
   end
 

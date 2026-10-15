@@ -51,6 +51,7 @@
       <div id="trains-settings" class="flex w-full flex-col gap-4">
         <.setting
           label="Players"
+          icon="hero-users"
           hint={
             if(@settings.players > 1,
               do: "Play together. Each player owns some of the switches.",
@@ -67,7 +68,11 @@
             {n}
           </.option>
         </.setting>
-        <.setting label="Switches" hint={switches_hint(@settings.switch_count, @settings.players)}>
+        <.setting
+          label="Switches"
+          icon="hero-arrows-right-left"
+          hint={switches_hint(@settings.switch_count, @settings.players)}
+        >
           <.option
             :for={n <- @switch_counts}
             id={"switches-#{n}"}
@@ -77,7 +82,7 @@
             {n}
           </.option>
         </.setting>
-        <.setting label="Trains per house" hint={trains_hint(@settings)}>
+        <.setting label="Trains per house" icon="hero-home" hint={trains_hint(@settings)}>
           <.option
             :for={n <- 1..7}
             id={"trains-#{n}"}
@@ -87,7 +92,7 @@
             {n}
           </.option>
         </.setting>
-        <.setting label="Pace" hint={pace_hint(@settings.pace)}>
+        <.setting label="Pace" icon="hero-bolt" hint={pace_hint(@settings.pace)}>
           <.option
             :for={pace <- Octomocto.Trains.paces()}
             id={"pace-#{pace}"}
@@ -97,7 +102,7 @@
             {String.capitalize(pace)}
           </.option>
         </.setting>
-        <.setting label="Visibility" hint={visibility_hint(@settings)}>
+        <.setting label="Visibility" icon="hero-eye" hint={visibility_hint(@settings)}>
           <.option
             :for={
               {value, public, label} <- [

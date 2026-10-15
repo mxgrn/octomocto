@@ -53,6 +53,7 @@
       <div id="schulte-settings" class="flex w-full flex-col gap-4">
         <.setting
           label="Players"
+          icon="hero-users"
           hint={if(@settings.players > 1, do: "The race starts when all players are in.")}
         >
           <.option
@@ -66,6 +67,7 @@
         </.setting>
         <.setting
           label="Board"
+          icon="hero-squares-2x2"
           hint={
             if(@settings.board == "classic",
               do: "The board is always the same.",
@@ -84,6 +86,7 @@
         </.setting>
         <.setting
           label="Mode"
+          icon="hero-adjustments-horizontal"
           hint={
             if(@settings.mode == "easy",
               do: "The found numbers disappear.",
@@ -102,6 +105,7 @@
         </.setting>
         <.setting
           label="Visibility"
+          icon="hero-eye"
           hint={visibility_hint(@settings)}
         >
           <.option
