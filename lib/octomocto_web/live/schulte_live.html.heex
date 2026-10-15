@@ -52,6 +52,19 @@
     <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
       <div id="schulte-settings" class="flex w-full flex-col gap-4">
         <.setting
+          label="Players"
+          hint={if(@settings.players > 1, do: "The race starts when all players are in.")}
+        >
+          <.option
+            :for={n <- 1..4}
+            id={"players-#{n}"}
+            selected={@settings.players == n}
+            patch={~p"/schulte?#{query(@settings, players: n)}"}
+          >
+            {n}
+          </.option>
+        </.setting>
+        <.setting
           label="Board"
           hint={
             if(@settings.board == "classic",
@@ -85,19 +98,6 @@
             patch={~p"/schulte?#{query(@settings, mode: value)}"}
           >
             {label}
-          </.option>
-        </.setting>
-        <.setting
-          label="Players"
-          hint={if(@settings.players > 1, do: "The race starts when all players are in.")}
-        >
-          <.option
-            :for={n <- 1..4}
-            id={"players-#{n}"}
-            selected={@settings.players == n}
-            patch={~p"/schulte?#{query(@settings, players: n)}"}
-          >
-            {n}
           </.option>
         </.setting>
         <.setting

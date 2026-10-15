@@ -49,16 +49,6 @@
 
     <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
       <div id="sudoku-settings" class="flex w-full flex-col gap-4">
-        <.setting label="Difficulty" hint={difficulty_hint(@settings.difficulty)}>
-          <.option
-            :for={difficulty <- Puzzle.difficulties()}
-            id={"difficulty-#{difficulty}"}
-            selected={@settings.difficulty == difficulty}
-            patch={~p"/sudoku?#{query(@settings, difficulty: difficulty)}"}
-          >
-            {String.capitalize(difficulty)}
-          </.option>
-        </.setting>
         <.setting
           label="Players"
           hint={
@@ -74,6 +64,16 @@
             patch={~p"/sudoku?#{query(@settings, players: n)}"}
           >
             {n}
+          </.option>
+        </.setting>
+        <.setting label="Difficulty" hint={difficulty_hint(@settings.difficulty)}>
+          <.option
+            :for={difficulty <- Puzzle.difficulties()}
+            id={"difficulty-#{difficulty}"}
+            selected={@settings.difficulty == difficulty}
+            patch={~p"/sudoku?#{query(@settings, difficulty: difficulty)}"}
+          >
+            {String.capitalize(difficulty)}
           </.option>
         </.setting>
         <.setting

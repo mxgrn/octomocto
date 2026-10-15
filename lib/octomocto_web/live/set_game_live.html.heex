@@ -49,16 +49,6 @@
 
     <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
       <div id="set-settings" class="flex w-full flex-col gap-4">
-        <.setting label="Mode" hint={mode_hint(@settings.mode)}>
-          <.option
-            :for={mode <- Deck.modes()}
-            id={"mode-#{mode}"}
-            selected={@settings.mode == mode}
-            patch={~p"/set?#{query(@settings, mode: mode)}"}
-          >
-            {String.capitalize(mode)}
-          </.option>
-        </.setting>
         <.setting
           label="Players"
           hint={
@@ -74,6 +64,16 @@
             patch={~p"/set?#{query(@settings, players: n)}"}
           >
             {n}
+          </.option>
+        </.setting>
+        <.setting label="Mode" hint={mode_hint(@settings.mode)}>
+          <.option
+            :for={mode <- Deck.modes()}
+            id={"mode-#{mode}"}
+            selected={@settings.mode == mode}
+            patch={~p"/set?#{query(@settings, mode: mode)}"}
+          >
+            {String.capitalize(mode)}
           </.option>
         </.setting>
         <.setting
