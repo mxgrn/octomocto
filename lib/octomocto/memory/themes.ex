@@ -2,6 +2,8 @@ defmodule Octomocto.Memory.Themes do
   @moduledoc """
   The card themes of the Memory game. The images of a theme are in
   `priv/static/images/memory/<name>/`, with the names `1.svg` to `<cards>.svg`.
+  The cover card shows the theme in the theme picker and the lobby. It is
+  card 1, unless the theme sets a different `cover`.
   """
 
   @themes [
@@ -16,7 +18,7 @@ defmodule Octomocto.Memory.Themes do
     %{name: "ecology", title: "Ecology", cards: 50},
     %{name: "music", title: "Music", cards: 50},
     %{name: "halloween", title: "Halloween", cards: 48},
-    %{name: "flags", title: "Flags", cards: 50}
+    %{name: "flags", title: "Flags", cards: 50, cover: 49}
   ]
 
   def list, do: @themes
@@ -25,4 +27,7 @@ defmodule Octomocto.Memory.Themes do
 
   @doc "Gives the theme with the name, or nil."
   def get(name), do: Enum.find(@themes, &(&1.name == name))
+
+  @doc "Gives the file name of the cover card of the theme with the name."
+  def cover(name), do: "#{name |> get() |> Map.get(:cover, 1)}.svg"
 end

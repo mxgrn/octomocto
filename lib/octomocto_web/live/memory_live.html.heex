@@ -44,7 +44,7 @@
       >
         <:icon :let={game}>
           <img
-            src={~p"/images/memory/#{game.settings.theme}/1.svg"}
+            src={~p"/images/memory/#{game.settings.theme}/#{Themes.cover(game.settings.theme)}"}
             alt=""
             class="size-9 shrink-0"
           />
@@ -89,7 +89,7 @@
               ]}
             >
               <img
-                src={~p"/images/memory/#{theme.name}/1.svg"}
+                src={~p"/images/memory/#{theme.name}/#{Themes.cover(theme.name)}"}
                 alt=""
                 class="aspect-square w-full p-1 transition group-hover:scale-105"
               />
