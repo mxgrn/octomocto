@@ -55,6 +55,23 @@
 
     <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
       <div id="memory-settings" class="flex w-full flex-col gap-4">
+        <.setting
+          label="Players"
+          hint={
+            if(@settings.players > 1,
+              do: "The players take turns. The game starts when all players are in."
+            )
+          }
+        >
+          <.option
+            :for={n <- 1..5}
+            id={"players-#{n}"}
+            selected={@settings.players == n}
+            patch={~p"/memory?#{query(@settings, players: n)}"}
+          >
+            {n}
+          </.option>
+        </.setting>
         <div class="rounded-2xl bg-base-100 px-4 py-2.5 ring-1 ring-base-content/10">
           <p class="text-left text-sm font-bold text-base-content/80">Theme</p>
           <div id="memory-themes" class="mt-2 grid grid-cols-4 gap-2 xl:grid-cols-6">
@@ -137,23 +154,6 @@
                 do: ~p"/memory?#{query(@settings, cards: size)}"
             }
           />
-        </.setting>
-        <.setting
-          label="Players"
-          hint={
-            if(@settings.players > 1,
-              do: "The players take turns. The game starts when all players are in."
-            )
-          }
-        >
-          <.option
-            :for={n <- 1..5}
-            id={"players-#{n}"}
-            selected={@settings.players == n}
-            patch={~p"/memory?#{query(@settings, players: n)}"}
-          >
-            {n}
-          </.option>
         </.setting>
         <.setting
           label="Visibility"
