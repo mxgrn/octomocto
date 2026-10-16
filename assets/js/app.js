@@ -33,6 +33,7 @@ import {playSetSound} from "./set_sounds"
 import {playSudokuSound} from "./sudoku_sounds"
 import {playEchoSound} from "./echo_sounds"
 import {playMahjongSound} from "./mahjong_sounds"
+import {LobbySound} from "./lobby_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 // On a LiveView page, also after live navigation
@@ -43,7 +44,7 @@ const TelegramLogin = {
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks, TelegramLogin},
+  hooks: {...colocatedHooks, TelegramLogin, LobbySound},
 })
 
 // Show progress bar on live navigation and form submits

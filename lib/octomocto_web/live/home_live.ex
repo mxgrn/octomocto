@@ -124,8 +124,21 @@ defmodule OctomoctoWeb.HomeLive do
 
   def handle_info({:lobby_changed, game, id, entry}, socket) do
     entry = entry && Map.put(entry, :kind, Map.fetch!(@kinds_by_game, game))
-    {:noreply, assign_lobby(socket, Lobby.put_entry(socket.assigns.lobby, id, entry))}
+
+    {:noreply,
+     socket
+     |> maybe_push_new_game(id, entry)
+     |> assign_lobby(Lobby.put_entry(socket.assigns.lobby, id, entry))}
   end
+
+  # Tells the page to play a sound when a new open game enters the list
+  defp maybe_push_new_game(socket, id, %{status: :open}) do
+    if Enum.any?(socket.assigns.lobby, &(&1.id == id and &1.status == :open)),
+      do: socket,
+      else: push_event(socket, "lobby_new_game", %{})
+  end
+
+  defp maybe_push_new_game(socket, _id, _entry), do: socket
 
   defp assign_lobby(socket, entries) do
     assign(socket, lobby: entries, lobby_games: Lobby.games(entries))

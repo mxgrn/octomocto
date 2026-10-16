@@ -50,6 +50,25 @@
 
       <div id="lobby" class="grid grid-cols-1 gap-4 lg:col-start-1 lg:row-start-1">
         <.lobby_games games={@lobby_games} path={&game_path/1}>
+          <:action>
+            <%!-- The hook plays a sound for a new open game, see lobby_sounds.js --%>
+            <button
+              id="lobby-sound"
+              type="button"
+              phx-hook="LobbySound"
+              phx-update="ignore"
+              aria-pressed="false"
+              aria-label="Sound for new games"
+              class={[
+                "group -my-1 flex size-8 items-center justify-center rounded-full transition",
+                "text-base-content/40 hover:bg-base-200 hover:text-base-content/70 active:scale-90",
+                "aria-pressed:text-octo-indigo aria-pressed:hover:text-octo-indigo dark:aria-pressed:text-octo-indigo-light"
+              ]}
+            >
+              <.icon name="hero-bell-slash" class="size-5 group-aria-pressed:hidden" />
+              <.icon name="hero-bell-alert" class="hidden size-5 group-aria-pressed:block" />
+            </button>
+          </:action>
           <:icon :let={game}><.game_icon game={@kinds[game.kind]} small /></:icon>
           <:summary :let={game}>
             <span class="font-semibold">{@kinds[game.kind].name}</span>

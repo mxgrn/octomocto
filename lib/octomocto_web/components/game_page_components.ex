@@ -20,6 +20,7 @@ defmodule OctomoctoWeb.GamePageComponents do
   attr :path, :any, required: true, doc: "a function that gives the path of a game"
   slot :icon, required: true, doc: "the image of a game, with the game as the argument"
   slot :summary, required: true, doc: "the settings of a game, with the game as the argument"
+  slot :action, doc: "an optional button at the right of the title"
 
   @doc """
   The public games: the open games that wait for players, then the games
@@ -33,9 +34,12 @@ defmodule OctomoctoWeb.GamePageComponents do
       id="lobby-games"
       class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
     >
-      <h3 class="mb-3 flex items-center gap-2 font-semibold">
-        <.icon name="hero-user-group" class={["size-4", "text-octo-indigo"]} /> Public games
-      </h3>
+      <div class="mb-3 flex items-center justify-between gap-2">
+        <h3 class="flex items-center gap-2 font-semibold">
+          <.icon name="hero-user-group" class={["size-4", "text-octo-indigo"]} /> Public games
+        </h3>
+        {render_slot(@action)}
+      </div>
       <p
         :if={@games == []}
         id="lobby-games-empty"
