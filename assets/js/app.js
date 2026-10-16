@@ -105,7 +105,6 @@ if (trainsNode) {
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
-    preload(reply.state)
     token = reply.token
     try {
       if (token) sessionStorage.setItem(tokenKey, token)
@@ -166,7 +165,6 @@ if (schulteNode) {
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
-    preload(reply.state)
     token = reply.token
     try {
       if (token) sessionStorage.setItem(tokenKey, token)
@@ -288,7 +286,6 @@ if (setNode) {
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
-    preload(reply.state)
     token = reply.token
     try {
       if (token) sessionStorage.setItem(tokenKey, token)
@@ -337,7 +334,6 @@ if (sudokuNode) {
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
-    preload(reply.state)
     token = reply.token
     try {
       if (token) sessionStorage.setItem(tokenKey, token)
@@ -397,7 +393,6 @@ if (echoNode) {
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
-    preload(reply.state)
     token = reply.token
     try {
       if (token) sessionStorage.setItem(tokenKey, token)
@@ -450,7 +445,6 @@ if (mahjongNode) {
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
-    preload(reply.state)
     token = reply.token
     try {
       if (token) sessionStorage.setItem(tokenKey, token)
