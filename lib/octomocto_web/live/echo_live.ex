@@ -10,7 +10,7 @@ defmodule OctomoctoWeb.EchoLive do
   alias Octomocto.{Echo, Lobby}
   alias Octomocto.Echo.{Game, Store}
 
-  @default_pads 6
+  @default_pads 4
 
   def mount(_params, _session, socket) do
     if connected?(socket), do: Lobby.subscribe(Game)
@@ -51,7 +51,7 @@ defmodule OctomoctoWeb.EchoLive do
     {:noreply, redirect(socket, to: ~p"/echo/#{id}")}
   end
 
-  # 6 pads, one player and a public game, when the params do not say
+  # 4 pads, one player and a public game, when the params do not say
   # otherwise
   defp settings(params) do
     pads =
