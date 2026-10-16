@@ -214,7 +214,14 @@
               {Calendar.strftime(result.inserted_at, "%b %-d")}
             </span>
             <span :if={@settings.players > 1} class="flex-1 truncate">
-              <.player_list players={players} scores />
+              <.player_list players={players} scores accuracy={&format_accuracy/1} />
+            </span>
+            <span
+              :if={@settings.players == 1}
+              class="w-12 text-right tabular-nums text-base-content/60"
+              title="Accuracy"
+            >
+              {format_accuracy(result)}
             </span>
             <span class={[
               "w-16 text-right font-medium tabular-nums",
@@ -249,6 +256,9 @@
         >
           <span class="w-5 text-right tabular-nums text-base-content/40">{place}</span>
           <span class="flex-1 truncate">{player_name(result.user)}</span>
+          <span class="w-12 text-right tabular-nums text-base-content/60" title="Accuracy">
+            {format_accuracy(result)}
+          </span>
           <span class="font-medium tabular-nums">{format_time(result.elapsed_ms)}</span>
         </li>
       </.score_list>
@@ -261,7 +271,18 @@
       >
         <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
           <span class="flex-1 truncate">
-            <.player_list players={game.players} scores={@settings.players > 1} />
+            <.player_list
+              players={game.players}
+              scores={@settings.players > 1}
+              accuracy={@settings.players > 1 && (&format_accuracy/1)}
+            />
+          </span>
+          <span
+            :if={@settings.players == 1}
+            class="w-12 text-right tabular-nums text-base-content/60"
+            title="Accuracy"
+          >
+            {format_accuracy(hd(game.players))}
           </span>
           <span class="font-medium tabular-nums">{format_time(game.elapsed_ms)}</span>
         </li>

@@ -216,6 +216,14 @@ defmodule OctomoctoWeb.MemoryLive do
     "#{Themes.get(settings.theme).title} · #{set} · #{settings.cards} cards"
   end
 
+  @doc "Shows the accuracy of a player or a result, for example \"92%\", or \"—\" when it has none."
+  def format_accuracy(player) do
+    case Memory.accuracy(player) do
+      nil -> "—"
+      percent -> "#{percent}%"
+    end
+  end
+
   # The possible size before (-1) or after (1) the current one, or nil
   defp step_size(sizes, cards, -1), do: sizes |> Enum.filter(&(&1 < cards)) |> List.last()
   defp step_size(sizes, cards, 1), do: Enum.find(sizes, &(&1 > cards))

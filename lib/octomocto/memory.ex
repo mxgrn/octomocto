@@ -72,7 +72,7 @@ defmodule Octomocto.Memory do
 
   @doc """
   Saves one finished field. Each player is a map with `:user_id` (nil for a
-  guest) and `:score`.
+  guest), `:score`, `:correct` and `:errors`.
   """
   def save_results(game_id, settings, elapsed_ms, players) do
     now = DateTime.utc_now()
@@ -85,12 +85,26 @@ defmodule Octomocto.Memory do
           elapsed_ms: elapsed_ms,
           user_id: player.user_id,
           score: player.score,
+          correct: player.correct,
+          errors: player.errors,
           inserted_at: now
         }
       end)
 
     Repo.insert_all(Result, rows)
   end
+
+  @doc """
+  Gives the accuracy of a player (or a saved result) in percent, from its
+  `:correct` and `:errors` flips. Only the flips where the player can know
+  the answer are counted (see `Octomocto.Memory.Game`). Gives nil when no
+  flip was counted, and for a result from before the accuracy.
+  """
+  def accuracy(%{correct: correct, errors: errors})
+      when is_integer(correct) and is_integer(errors) and correct + errors > 0,
+      do: round(100 * correct / (correct + errors))
+
+  def accuracy(_player), do: nil
 
   @doc """
   Gives the leaderboard for the settings, for example

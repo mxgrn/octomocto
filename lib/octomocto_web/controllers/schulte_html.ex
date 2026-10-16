@@ -91,12 +91,19 @@ defmodule OctomoctoWeb.SchulteHTML do
   attr :players, :list, required: true, doc: "the results of the players of one game"
   attr :scores, :boolean, required: true, doc: "shows the points next to each player"
 
+  attr :accuracy, :any,
+    default: nil,
+    doc: "a function that gives the accuracy text of a player, shown after the points"
+
   @doc "The names of the players of one game, separated by commas."
   def player_list(assigns) do
     ~H"""
     <span :for={{player, index} <- Enum.with_index(@players)}>{if index > 0, do: ", "}{player_name(
       player.user
-    )}<span :if={@scores} class="ml-1 tabular-nums text-base-content/60">{player.score} pts</span></span>
+    )}<span :if={@scores} class="ml-1 tabular-nums text-base-content/60">{player.score} pts</span><span
+      :if={@accuracy}
+      class="tabular-nums text-base-content/60"
+    > · {@accuracy.(player)}</span></span>
     """
   end
 

@@ -5,6 +5,10 @@ defmodule Octomocto.Memory.Result do
   which results can be compared, for example
   `%{"set" => 2, "cards" => 16, "players" => 1}`. The theme is not in the
   settings: it does not change how hard the game is.
+
+  The `correct` and `errors` flips give the accuracy of the player (see
+  `Octomocto.Memory.accuracy/1`). They are nil in the results from before
+  the accuracy.
   """
   use Ecto.Schema
 
@@ -13,6 +17,8 @@ defmodule Octomocto.Memory.Result do
     field :settings, :map
     field :score, :integer
     field :elapsed_ms, :integer
+    field :correct, :integer
+    field :errors, :integer
     belongs_to :user, Octomocto.Accounts.User
 
     timestamps(type: :utc_datetime_usec, updated_at: false)

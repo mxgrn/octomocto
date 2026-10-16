@@ -70,7 +70,8 @@ port memorySaveMuted : Bool -> Cmd msg
 
 {-| The `name` is the display name of a signed-in player, or Nothing for a
 guest. Then the player is known by the `colorName`. An `away` player lost
-the connection, and can come back for a short time.
+the connection, and can come back for a short time. The `accuracy` is in
+percent, Nothing until the server counts a flip of the player.
 -}
 type alias Player =
     { id : String
@@ -78,6 +79,7 @@ type alias Player =
     , color : String
     , colorName : String
     , score : Int
+    , accuracy : Maybe Int
     , away : Bool
     }
 
@@ -477,12 +479,13 @@ layoutDecoder =
 
 playerDecoder : Decoder Player
 playerDecoder =
-    Decode.map6 Player
+    Decode.map7 Player
         (Decode.field "id" Decode.string)
         (Decode.field "name" (Decode.nullable Decode.string))
         (Decode.field "color" Decode.string)
         (Decode.field "color_name" Decode.string)
         (Decode.field "score" Decode.int)
+        (Decode.field "accuracy" (Decode.nullable Decode.int))
         (Decode.field "away" Decode.bool)
 
 
@@ -696,7 +699,8 @@ viewShareLink model =
 
 
 {-| The time on the left, and the sets that are still on the field on the
-right.
+right. For one player, the accuracy is in the middle (with more players,
+it is next to each score).
 -}
 viewClock : Model -> Game -> Html Msg
 viewClock model game =
@@ -713,12 +717,28 @@ viewClock model game =
 
         setsLeft =
             List.length (List.filter (\card -> card.state /= "cleared") game.cards) // game.set
+
+        solo =
+            List.length game.players == 1
     in
-    div [ id "memory-clock", class "grid grid-cols-2 divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200 dark:divide-white/10 dark:bg-white/5 dark:shadow-none dark:ring-white/10" ]
+    div
+        [ id "memory-clock"
+        , class "grid divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200 dark:divide-white/10 dark:bg-white/5 dark:shadow-none dark:ring-white/10"
+        , classList [ ( "grid-cols-3", solo ), ( "grid-cols-2", not solo ) ]
+        ]
         [ div [ class "flex flex-col items-center justify-center" ]
             [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "time" ]
             , span [ id "memory-time", class "text-3xl font-light text-slate-700 tabular-nums dark:text-slate-100" ] [ text (formatTime elapsedMs) ]
             ]
+        , if solo then
+            div [ class "flex flex-col items-center justify-center" ]
+                [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "accuracy" ]
+                , span [ id "memory-accuracy", class "text-3xl font-light text-slate-700 tabular-nums dark:text-slate-100" ]
+                    [ text (formatAccuracy (List.head game.players |> Maybe.andThen .accuracy)) ]
+                ]
+
+          else
+            text ""
         , div [ class "flex flex-col items-center justify-center" ]
             [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ]
                 [ text
@@ -732,6 +752,19 @@ viewClock model game =
             , span [ id "memory-sets-left", class "text-3xl font-bold text-octo-indigo tabular-nums dark:text-octo-indigo-light" ] [ text (String.fromInt setsLeft) ]
             ]
         ]
+
+
+{-| Show the accuracy in percent, for example "92%", or "—" before the
+first counted flip.
+-}
+formatAccuracy : Maybe Int -> String
+formatAccuracy accuracy =
+    case accuracy of
+        Just percent ->
+            String.fromInt percent ++ "%"
+
+        Nothing ->
+            "—"
 
 
 {-| Show the time as minutes and seconds, for example "1:05".
@@ -774,6 +807,8 @@ viewScores model me game =
                       else
                         text ""
                     , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
+                    , span [ id ("memory-accuracy-" ++ player.id), class "text-xs text-slate-400 tabular-nums", Html.Attributes.title "Accuracy" ]
+                        [ text (formatAccuracy player.accuracy) ]
                     , if current then
                         viewTurnTimer model game
 
@@ -947,7 +982,17 @@ viewResult nextGame guest me game =
         ]
         [ p [ class "text-3xl font-semibold" ] [ text message ]
         , p [ id "memory-final-time", class "text-lg tabular-nums opacity-80" ]
-            [ text ("Time " ++ formatTime game.elapsedMs) ]
+            [ text
+                ("Time "
+                    ++ formatTime game.elapsedMs
+                    ++ (if solo then
+                            " · Accuracy " ++ formatAccuracy (List.head players |> Maybe.andThen .accuracy)
+
+                        else
+                            ""
+                       )
+                )
+            ]
         , if solo then
             text ""
 
@@ -959,6 +1004,7 @@ viewResult nextGame guest me game =
                             [ span [ class "size-3 rounded-full", style "background" player.color ] []
                             , span [ class "flex-1" ] [ text (playerName me player) ]
                             , span [ class "pl-6 font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
+                            , span [ class "w-10 text-right tabular-nums opacity-70", Html.Attributes.title "Accuracy" ] [ text (formatAccuracy player.accuracy) ]
                             ]
                     )
                     ranked

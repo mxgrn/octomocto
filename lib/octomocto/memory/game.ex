@@ -28,6 +28,12 @@ defmodule Octomocto.Memory.Game do
   in the ongoing games. The game sends
   its new row after each change, and nil when its node stops.
 
+  Each player has an accuracy (see `Octomocto.Memory.accuracy/1`): the
+  game counts the `correct` and the `errors` flips of the player. Only the
+  flips where the player can know the answer are counted (see
+  `check_flip/3`). All players see all cards, so the cards that were seen
+  (`seen`) are the same for all players.
+
   A process can also join only to watch (see `Octomocto.Memory.watch/1`).
 
   The game is registered in the whole cluster, and it writes its state to
@@ -165,6 +171,11 @@ defmodule Octomocto.Memory.Game do
       |> Map.put_new(:created_at, now())
       |> Map.put_new(:ready_at, now())
       |> Map.put_new(:listed, false)
+      # A state from before the accuracy
+      |> Map.put_new(:seen, MapSet.new())
+      |> Map.update!(:players, fn players ->
+        Map.new(players, fn {id, p} -> {id, Map.merge(%{correct: 0, errors: 0}, p)} end)
+      end)
 
     store(state)
     {:ok, state}
@@ -201,6 +212,8 @@ defmodule Octomocto.Memory.Game do
       color: color,
       color_name: color_name,
       score: 0,
+      correct: 0,
+      errors: 0,
       joined_at: System.system_time(),
       # A reference while the player is away, see leave/2
       left: nil
@@ -225,6 +238,8 @@ defmodule Octomocto.Memory.Game do
       %{state: :down} = card ->
         state =
           %{state | cards: List.replace_at(cards, card_id, %{card | state: :up}), ongoing: true}
+          |> count_flip(player_id, check_flip(cards, state.seen, card_id))
+          |> Map.update!(:seen, &MapSet.put(&1, card_id))
           |> Map.update!(:started_at, &(&1 || now()))
           |> end_turn()
           |> stop_clock()
@@ -244,7 +259,8 @@ defmodule Octomocto.Memory.Game do
   # A player can restart at any time. A field that is not finished is not
   # saved.
   def handle_cast({:restart, player_id}, state) when is_map_key(state.players, player_id) do
-    players = Map.new(state.players, fn {id, p} -> {id, %{p | score: 0}} end)
+    players =
+      Map.new(state.players, fn {id, p} -> {id, %{p | score: 0, correct: 0, errors: 0}} end)
 
     state =
       %{state | players: players}
@@ -330,6 +346,8 @@ defmodule Octomocto.Memory.Game do
       # Groups the saved results of this field
       field_id: Ecto.UUID.generate(),
       cards: cards,
+      # The positions of the cards that were face up at some time
+      seen: MapSet.new(),
       # The id of the player whose turn it is
       turn: Map.get(state, :turn),
       # True while the player of the turn has turned some cards of a set
@@ -375,6 +393,45 @@ defmodule Octomocto.Memory.Game do
         %{state | ongoing: false, turn: next_player(state)}
     end
   end
+
+  # Tells if the flip of the card is :correct, an :error, or not counted
+  # (nil). The `cards` are the cards before the flip.
+  #
+  # A flip is counted only when the face-up cards of the turn can still make
+  # a set (thus never the first flip of a turn, and never a flip after a
+  # miss of a triplet). Then, when a card that completes the set was seen
+  # before, the player must turn such a card. When no such card was seen,
+  # the player must not turn a card that was seen: it cannot complete the
+  # set.
+  defp check_flip(cards, seen, card_id) do
+    up = cards |> Enum.filter(&(&1.state == :up)) |> Enum.map(& &1.image) |> Enum.uniq()
+
+    case up do
+      [image] ->
+        known =
+          for {%{state: :down, image: ^image}, i} <- Enum.with_index(cards),
+              MapSet.member?(seen, i),
+              do: i
+
+        cond do
+          known != [] and card_id in known -> :correct
+          known != [] -> :error
+          MapSet.member?(seen, card_id) -> :error
+          true -> nil
+        end
+
+      _ ->
+        nil
+    end
+  end
+
+  defp count_flip(state, player_id, :correct),
+    do: update_in(state.players[player_id].correct, &(&1 + 1))
+
+  defp count_flip(state, player_id, :error),
+    do: update_in(state.players[player_id].errors, &(&1 + 1))
+
+  defp count_flip(state, _player_id, nil), do: state
 
   # Gives the turn to the next player. The cards of an unfinished turn go
   # face down again.
@@ -482,6 +539,8 @@ defmodule Octomocto.Memory.Game do
           color: p.color,
           color_name: p.color_name,
           score: p.score,
+          # In percent, nil when no flip was counted
+          accuracy: Memory.accuracy(p),
           away: p.left != nil
         }
       end)
