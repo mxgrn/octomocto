@@ -80,6 +80,8 @@ if (astronautNode) {
   channel.join()
     .receive("ok", reply => astronaut.ports.astronautJoined.send(reply))
     .receive("error", ({reason}) => {
+      // The game ended. The page redirects to the start of the game.
+      if (reason === "not_found") return window.location.reload()
       channel.leave()
       astronaut.ports.astronautJoinFailed.send(reason)
     })
@@ -124,6 +126,8 @@ if (trainsNode) {
     .receive("error", ({reason}) => {
       // The server of the game stopped a moment ago. The channel tries again.
       if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
       channel.leave()
       trains.ports.trainsJoinFailed.send(reason)
     })
@@ -182,6 +186,8 @@ if (schulteNode) {
     .receive("error", ({reason}) => {
       // The server of the game stopped a moment ago. The channel tries again.
       if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
       channel.leave()
       schulte.ports.schulteJoinFailed.send(reason)
     })
@@ -247,6 +253,8 @@ if (memoryNode) {
     .receive("error", ({reason}) => {
       // The server of the game stopped a moment ago. The channel tries again.
       if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
       channel.leave()
       memory.ports.memoryJoinFailed.send(reason)
     })
@@ -303,6 +311,8 @@ if (setNode) {
     .receive("error", ({reason}) => {
       // The server of the game stopped a moment ago. The channel tries again.
       if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
       channel.leave()
       setGame.ports.setGameJoinFailed.send(reason)
     })
@@ -351,6 +361,8 @@ if (sudokuNode) {
     .receive("error", ({reason}) => {
       // The server of the game stopped a moment ago. The channel tries again.
       if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
       channel.leave()
       sudoku.ports.sudokuJoinFailed.send(reason)
     })
@@ -410,6 +422,8 @@ if (echoNode) {
     .receive("error", ({reason}) => {
       // The server of the game stopped a moment ago. The channel tries again.
       if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
       channel.leave()
       echo.ports.echoJoinFailed.send(reason)
     })
@@ -462,6 +476,8 @@ if (mahjongNode) {
     .receive("error", ({reason}) => {
       // The server of the game stopped a moment ago. The channel tries again.
       if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
       channel.leave()
       mahjong.ports.mahjongJoinFailed.send(reason)
     })
