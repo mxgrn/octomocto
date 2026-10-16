@@ -527,7 +527,9 @@ defmodule Octomocto.Memory.Game do
   end
 
   # The state that clients see, ready to encode as JSON. The images of the
-  # face-down cards are not in it, so that nobody can look at them.
+  # face-down cards are not in it, so that nobody can look at them. The
+  # `images` are all images of the field in order, so that the browser can
+  # load them before the cards turn. They do not show where an image is.
   defp public(state) do
     players =
       state.players
@@ -557,6 +559,7 @@ defmodule Octomocto.Memory.Game do
       theme: state.theme,
       set: state.set,
       cards: cards,
+      images: state.cards |> Enum.map(& &1.image) |> Enum.uniq() |> Enum.sort(),
       layouts: Enum.map(Board.layouts(state.size), &Tuple.to_list/1),
       waiting: not state.ready,
       # The clock runs from the first card

@@ -105,6 +105,7 @@ if (trainsNode) {
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
+    preload(reply.state)
     token = reply.token
     try {
       if (token) sessionStorage.setItem(tokenKey, token)
@@ -165,6 +166,7 @@ if (schulteNode) {
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
+    preload(reply.state)
     token = reply.token
     try {
       if (token) sessionStorage.setItem(tokenKey, token)
@@ -213,6 +215,7 @@ if (memoryNode) {
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
+    preload(reply.state)
     token = reply.token
     try {
       if (token) sessionStorage.setItem(tokenKey, token)
@@ -223,7 +226,23 @@ if (memoryNode) {
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
   const channel = socket.channel(`memory:${memoryNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
-  channel.on("state", state => memory.ports.memoryState.send(state))
+  // Loads the images of the field before the cards turn, so that a face
+  // does not come in empty during the turn (slow on phones and tablets)
+  const preloaded = new Map()
+  const preload = state => {
+    for (const image of state.images) {
+      const url = `/images/memory/${state.theme}/${image}.svg`
+      if (preloaded.has(url)) continue
+      const img = new Image()
+      img.src = url
+      img.decode().catch(() => {})
+      preloaded.set(url, img)
+    }
+  }
+  channel.on("state", state => {
+    preload(state)
+    memory.ports.memoryState.send(state)
+  })
   channel.on("joined", joined)
   channel.join()
     .receive("ok", joined)
@@ -261,6 +280,7 @@ if (setNode) {
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
+    preload(reply.state)
     token = reply.token
     try {
       if (token) sessionStorage.setItem(tokenKey, token)
@@ -309,6 +329,7 @@ if (sudokuNode) {
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
+    preload(reply.state)
     token = reply.token
     try {
       if (token) sessionStorage.setItem(tokenKey, token)
@@ -368,6 +389,7 @@ if (echoNode) {
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
+    preload(reply.state)
     token = reply.token
     try {
       if (token) sessionStorage.setItem(tokenKey, token)
@@ -420,6 +442,7 @@ if (mahjongNode) {
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
+    preload(reply.state)
     token = reply.token
     try {
       if (token) sessionStorage.setItem(tokenKey, token)

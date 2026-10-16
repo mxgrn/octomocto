@@ -238,10 +238,14 @@
   box-shadow: 0 0 0 1px #cbd5e1, 0 1px 2px rgb(0 0 0 / 0.08);
 }
 
-/* The player of the turn sees which cards can be turned */
+/* The player of the turn sees which cards can be turned. Only with a
+   mouse: on a touch screen a tap also starts the hover, and WebKit then
+   does not show the turn of the card correctly. */
 .memory-card.is-clickable { cursor: pointer; }
-.memory-card.is-clickable:hover .memory-card-back { filter: brightness(1.1); transform: translateY(-2px); }
-.memory-card.is-clickable:active .memory-card-back { transform: scale(0.96); }
+@media (hover: hover) and (pointer: fine) {
+  .memory-card.is-clickable:hover .memory-card-back { filter: brightness(1.1); transform: translateY(-2px); }
+  .memory-card.is-clickable:active .memory-card-back { transform: scale(0.96); }
+}
 
 /* A found set starts to fade out at once. The fade is on
    the card, not on the inner part: opacity on an element with
