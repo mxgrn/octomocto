@@ -253,6 +253,14 @@ if (memoryNode) {
       memory.ports.memoryJoinFailed.send(reason)
     })
 
+  // On a small screen, the page does not scroll during the play (see
+  // app.css). Mobile Safari scrolls also with `overflow: hidden`, so the
+  // moves of the finger are stopped here too.
+  const smallScreen = window.matchMedia("(width < 64rem)")
+  document.addEventListener("touchmove", e => {
+    if (smallScreen.matches && document.querySelector("#memory-root.is-playing")) e.preventDefault()
+  }, {passive: false})
+
   memory.ports.memoryFlip.subscribe(card => channel.push("flip", {card}))
   memory.ports.memoryRestart.subscribe(() => channel.push("restart", {}))
   memory.ports.memoryCopyText.subscribe(text => navigator.clipboard.writeText(text))

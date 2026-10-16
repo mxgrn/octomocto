@@ -539,7 +539,11 @@ viewGame model me game =
         gap =
             cardGap (fieldSpace model me game) layout
     in
-    div [ id "memory-root", class "flex w-full flex-col gap-2 select-none lg:flex-row lg:items-start lg:gap-8" ]
+    div
+        [ id "memory-root"
+        , class "flex w-full flex-col gap-2 select-none lg:flex-row lg:items-start lg:gap-8"
+        , classList [ ( "is-playing", not game.waiting && not game.finished ) ]
+        ]
         [ aside [ id "memory-panel", class "flex flex-col gap-2 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
             -- On a small screen, the title, the stats and the restart button
             -- are in one compact row. On a large screen, the row is not a
