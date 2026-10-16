@@ -32,6 +32,7 @@ import {playMemorySound} from "./memory_sounds"
 import {playSetSound} from "./set_sounds"
 import {playSudokuSound} from "./sudoku_sounds"
 import {playEchoSound} from "./echo_sounds"
+import {playMahjongSound} from "./mahjong_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 // On a LiveView page, also after live navigation
@@ -397,6 +398,61 @@ if (echoNode) {
   })
   echo.ports.echoSaveShapes.subscribe(value => {
     try { localStorage.setItem("echo-shapes", String(value)) } catch (_e) {}
+  })
+}
+
+// Start the mahjong game and connect its ports to the game channel. It
+// works as the sudoku game above. The reply to a pair tells the page if the
+// pair went off the board.
+const mahjongNode = document.getElementById("mahjong-main")
+if (mahjongNode) {
+  if (navigator.userActivation?.hasBeenActive) unlockAudio()
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  let muted = false
+  try { muted = localStorage.getItem("mahjong-muted") === "true" } catch (_e) {}
+
+  const mahjong = window.Elm.Mahjong.init({node: mahjongNode, flags: {gameUrl: window.location.href, settingsUrl: mahjongNode.dataset.settingsUrl, nextGame: {name: mahjongNode.dataset.nextGameName, path: mahjongNode.dataset.nextGamePath}, guest: !mahjongNode.dataset.userToken, muted}})
+  const socket = new Socket("/socket", {params: {user_token: mahjongNode.dataset.userToken}})
+  socket.connect()
+
+  const tokenKey = `mahjong-token:${mahjongNode.dataset.gameId}`
+  let token = null
+  try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
+  const joined = reply => {
+    token = reply.token
+    try {
+      if (token) sessionStorage.setItem(tokenKey, token)
+      else sessionStorage.removeItem(tokenKey)
+    } catch (_e) {}
+    mahjong.ports.mahjongJoined.send(reply)
+  }
+  // A link with ?watch=1 only watches the game. The token of a player wins.
+  const watch = new URLSearchParams(window.location.search).has("watch")
+  const channel = socket.channel(`mahjong:${mahjongNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  channel.on("state", state => mahjong.ports.mahjongState.send(state))
+  channel.on("joined", joined)
+  channel.join()
+    .receive("ok", joined)
+    .receive("error", ({reason}) => {
+      // The server of the game stopped a moment ago. The channel tries again.
+      if (reason === "unavailable") return
+      channel.leave()
+      mahjong.ports.mahjongJoinFailed.send(reason)
+    })
+
+  mahjong.ports.mahjongRemove.subscribe(({a, b}) => {
+    const removed = result => mahjong.ports.mahjongRemoved.send({a, b, result})
+    channel.push("remove", {a, b})
+      .receive("ok", ({result}) => removed(result))
+      .receive("error", () => removed("ignored"))
+      .receive("timeout", () => removed("ignored"))
+  })
+  mahjong.ports.mahjongShuffle.subscribe(() => channel.push("shuffle", {}))
+  mahjong.ports.mahjongRestart.subscribe(() => channel.push("restart", {}))
+  mahjong.ports.mahjongCopyText.subscribe(text => navigator.clipboard.writeText(text))
+  mahjong.ports.mahjongPlaySound.subscribe(playMahjongSound)
+  mahjong.ports.mahjongSaveMuted.subscribe(value => {
+    try { localStorage.setItem("mahjong-muted", String(value)) } catch (_e) {}
   })
 }
 

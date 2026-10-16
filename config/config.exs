@@ -32,7 +32,8 @@ config :mnesiac,
     Octomocto.Memory.Store,
     Octomocto.SetGame.Store,
     Octomocto.Sudoku.Store,
-    Octomocto.Echo.Store
+    Octomocto.Echo.Store,
+    Octomocto.Mahjong.Store
   ]
 
 # Configure the endpoint

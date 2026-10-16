@@ -381,6 +381,57 @@ between the pads: white in the light theme, and dark in the dark theme. */
   .echo-shake { animation: none; }
 }
 
+/* Mahjong. Each tile has a dark side, a lighter edge and the face, see
+tileShape in Mahjong.elm. The tiles keep their ivory color in the dark
+theme, as real tiles. A free tile lifts a little on hover. */
+.mahjong-side { fill: #A79F8C; }
+.mahjong-edge { fill: #DCD5C4; }
+.mahjong-face { fill: url(#mahjong-face); stroke: #CFC8B6; stroke-width: 1; transition: fill 120ms ease, stroke 120ms ease; }
+[data-theme=dark] .mahjong-side { fill: #5E5848; }
+[data-theme=dark] .mahjong-edge { fill: #B9B19E; }
+.mahjong-shade { fill: #3B3320; pointer-events: none; }
+.mahjong-glyph { font-family: "Songti SC", "STSong", "SimSun", "Noto Serif CJK SC", "Noto Serif SC", serif; font-weight: 700; }
+.mahjong-tile { -webkit-tap-highlight-color: transparent; outline: none; }
+.mahjong-tile.is-playable { cursor: pointer; }
+/* The tiles slide from their old places to their new places in a shuffle,
+see viewTile in Mahjong.elm. During its delay, a tile waits in its old
+place. The `translate` adds to the `transform` of the place. */
+.mahjong-tile.is-shuffling { animation: mahjong-slide 380ms cubic-bezier(0.5, 0, 0.2, 1) backwards; }
+@keyframes mahjong-slide {
+  from { translate: var(--from-x) var(--from-y); }
+}
+.mahjong-tile-body { transition: transform 120ms ease; }
+.mahjong-tile.is-free:hover .mahjong-tile-body { transform: translate(-1px, -2px); }
+.mahjong-tile.is-free:hover .mahjong-face { stroke: var(--color-octo-indigo-light); stroke-width: 2; }
+.mahjong-tile.is-selected .mahjong-tile-body { transform: translate(-1px, -3px); }
+.mahjong-tile.is-selected .mahjong-face { fill: #E4E4FD; stroke: var(--color-octo-indigo); stroke-width: 3; }
+.mahjong-flip { transform-box: fill-box; transform-origin: center; animation: mahjong-flip 260ms ease-out; }
+@keyframes mahjong-flip {
+  from { transform: scaleX(0.2); opacity: 0.4; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+.mahjong-shake { animation: mahjong-shake 260ms ease; }
+@keyframes mahjong-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-2.5px); }
+  40%, 80% { transform: translateX(2.5px); }
+}
+.mahjong-ghost { transform-box: fill-box; transform-origin: center; animation: mahjong-ghost 450ms ease-in forwards; }
+@keyframes mahjong-ghost {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.12); }
+}
+.mahjong-notice { animation: mahjong-notice 220ms ease-out; }
+@keyframes mahjong-notice {
+  from { transform: translateY(6px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mahjong-flip, .mahjong-shake, .mahjong-notice { animation: none; }
+  .mahjong-tile.is-shuffling { animation: none; }
+  .mahjong-ghost { animation: none; opacity: 0; }
+}
+
 /* Sudoku. The lines of the grid are the gaps between the cells: thin
    lines in a box, thick lines between the boxes. A wrong digit shakes in
    its cell, and a digit that a player puts pops in. */

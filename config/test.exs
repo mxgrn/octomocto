@@ -59,3 +59,6 @@ config :octomocto, sudoku_countdown_ms: 0, sudoku_rejoin_grace_ms: 0
 
 # The same for the Echo games
 config :octomocto, echo_rejoin_grace_ms: 0
+
+# The same for the Mahjong games
+config :octomocto, mahjong_countdown_ms: 0, mahjong_rejoin_grace_ms: 0

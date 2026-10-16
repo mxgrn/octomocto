@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "elm-watch": "chokidar 'elm/src/**/*.elm' -c 'npm run elm-build' --initial",
-    "elm-build": "cd elm && elm make src/Astronaut.elm src/Trains.elm src/Schulte.elm src/Memory.elm src/SetGame.elm src/Sudoku.elm src/Echo.elm --output ../../priv/static/assets/js/elm.js"
+    "elm-build": "cd elm && elm make src/Astronaut.elm src/Trains.elm src/Schulte.elm src/Memory.elm src/SetGame.elm src/Sudoku.elm src/Echo.elm src/Mahjong.elm --output ../../priv/static/assets/js/elm.js"
   },
   "devDependencies": {
     "chokidar-cli": "^3.0.0",

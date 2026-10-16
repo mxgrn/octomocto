@@ -128,6 +128,22 @@ defmodule OctomoctoWeb.GameIcons do
     """
   end
 
+  # Two mahjong tiles, one on the other. The front tile has one blue dot
+  # of the dots suit, and the back tile shows the bamboo suit.
+  def game_icon(%{game: "mahjong"} = assigns) do
+    ~H"""
+    <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
+      <rect x="7" y="7" width="22" height="29" rx="3.5" fill="#C9C3B3" />
+      <rect x="5" y="4" width="22" height="29" rx="3.5" fill="#FBF8F1" stroke="#D8D2C2" />
+      <rect :for={x <- [11, 18]} x={x} y="9" width="3" height="19" rx="1.5" fill="#1E7D3A" />
+      <rect x="21" y="18" width="22" height="29" rx="3.5" fill="#C9C3B3" />
+      <rect x="19" y="15" width="22" height="29" rx="3.5" fill="#FBF8F1" stroke="#D8D2C2" />
+      <circle cx="30" cy="29.5" r="7.5" fill="none" stroke="#1F3A93" stroke-width="2.5" />
+      <circle cx="30" cy="29.5" r="3" fill="#C0392B" />
+    </svg>
+    """
+  end
+
   def game_icon(%{game: "sudoku"} = assigns) do
     ~H"""
     <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">

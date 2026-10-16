@@ -19,12 +19,13 @@ defmodule Octomocto.Application do
       OctomoctoWeb.Telemetry,
       Octomocto.Repo,
       {Cluster.Supervisor, [topologies, [name: Octomocto.ClusterSupervisor]]},
-      # Before the endpoint: a new node gets the Schulte, trains, Memory, Set, sudoku and Echo games from the
+      # Before the endpoint: a new node gets the Schulte, trains, Memory, Set, sudoku, Echo and Mahjong games from the
       # other node before it serves requests.
       {Mnesiac.Supervisor, [hosts, [name: Octomocto.MnesiacSupervisor]]},
       {Phoenix.PubSub, name: Octomocto.PubSub},
       {DynamicSupervisor, name: Octomocto.Astronaut.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Echo.GameSupervisor},
+      {DynamicSupervisor, name: Octomocto.Mahjong.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Memory.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Schulte.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.SetGame.GameSupervisor},

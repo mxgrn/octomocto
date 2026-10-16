@@ -12,6 +12,7 @@ defmodule OctomoctoWeb.SitemapController do
       url(~p"/set"),
       url(~p"/sudoku"),
       url(~p"/echo"),
+      url(~p"/mahjong"),
       url(~p"/astronaut"),
       url(~p"/privacy"),
       url(~p"/terms")

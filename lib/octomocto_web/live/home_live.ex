@@ -12,6 +12,7 @@ defmodule OctomoctoWeb.HomeLive do
   alias OctomoctoWeb.{
     EchoLive,
     GameIcons,
+    MahjongLive,
     MemoryLive,
     SchulteLive,
     SetGameLive,
@@ -68,6 +69,14 @@ defmodule OctomoctoWeb.HomeLive do
       icon_class: "bg-amber-500/10 dark:bg-amber-400/15"
     },
     %{
+      id: "mahjong",
+      name: "Mahjong",
+      description:
+        "Remove pairs of free tiles from the Turtle. With friends, the first to take a pair gets the point.",
+      path: "/mahjong",
+      icon_class: "bg-emerald-500/10 dark:bg-emerald-400/15"
+    },
+    %{
       id: "astronaut",
       name: "Station Escape",
       description:
@@ -91,7 +100,8 @@ defmodule OctomoctoWeb.HomeLive do
     "set" => {Octomocto.SetGame.Game, Octomocto.SetGame.Store, SetGameLive},
     "sudoku" => {Octomocto.Sudoku.Game, Octomocto.Sudoku.Store, SudokuLive},
     "schulte" => {Octomocto.Schulte.Game, Octomocto.Schulte.Store, SchulteLive},
-    "echo" => {Octomocto.Echo.Game, Octomocto.Echo.Store, EchoLive}
+    "echo" => {Octomocto.Echo.Game, Octomocto.Echo.Store, EchoLive},
+    "mahjong" => {Octomocto.Mahjong.Game, Octomocto.Mahjong.Store, MahjongLive}
   }
 
   @kinds_by_game Map.new(@lobbies, fn {kind, {game, _store, _page}} -> {game, kind} end)
