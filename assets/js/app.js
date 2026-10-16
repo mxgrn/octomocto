@@ -31,6 +31,7 @@ import {playSchulteSound} from "./schulte_sounds"
 import {playMemorySound} from "./memory_sounds"
 import {playSetSound} from "./set_sounds"
 import {playSudokuSound} from "./sudoku_sounds"
+import {playEchoSound} from "./echo_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 // On a LiveView page, also after live navigation
@@ -339,6 +340,63 @@ if (sudokuNode) {
   sudoku.ports.sudokuPlaySound.subscribe(playSudokuSound)
   sudoku.ports.sudokuSaveMuted.subscribe(value => {
     try { localStorage.setItem("sudoku-muted", String(value)) } catch (_e) {}
+  })
+}
+
+// Start the Echo game and connect its ports to the game channel. It works
+// as the Memory game above. The browser also remembers if the player hid
+// the shapes on the pads.
+const echoNode = document.getElementById("echo-main")
+if (echoNode) {
+  if (navigator.userActivation?.hasBeenActive) unlockAudio()
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  document.addEventListener("keydown", unlockAudio, {once: true})
+  let muted = false
+  let shapes = true
+  try {
+    muted = localStorage.getItem("echo-muted") === "true"
+    shapes = localStorage.getItem("echo-shapes") !== "false"
+  } catch (_e) {}
+
+  const echo = window.Elm.Echo.init({node: echoNode, flags: {gameUrl: window.location.href, settingsUrl: echoNode.dataset.settingsUrl, nextGame: {name: echoNode.dataset.nextGameName, path: echoNode.dataset.nextGamePath}, guest: !echoNode.dataset.userToken, muted, shapes}})
+  const socket = new Socket("/socket", {params: {user_token: echoNode.dataset.userToken}})
+  socket.connect()
+
+  const tokenKey = `echo-token:${echoNode.dataset.gameId}`
+  let token = null
+  try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
+  const joined = reply => {
+    token = reply.token
+    try {
+      if (token) sessionStorage.setItem(tokenKey, token)
+      else sessionStorage.removeItem(tokenKey)
+    } catch (_e) {}
+    echo.ports.echoJoined.send(reply)
+  }
+  // A link with ?watch=1 only watches the game. The token of a player wins.
+  const watch = new URLSearchParams(window.location.search).has("watch")
+  const channel = socket.channel(`echo:${echoNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  channel.on("state", state => echo.ports.echoState.send(state))
+  channel.on("joined", joined)
+  channel.join()
+    .receive("ok", joined)
+    .receive("error", ({reason}) => {
+      // The server of the game stopped a moment ago. The channel tries again.
+      if (reason === "unavailable") return
+      channel.leave()
+      echo.ports.echoJoinFailed.send(reason)
+    })
+
+  echo.ports.echoStart.subscribe(() => channel.push("start", {}))
+  echo.ports.echoPress.subscribe(pad => channel.push("press", {pad}))
+  echo.ports.echoRestart.subscribe(() => channel.push("restart", {}))
+  echo.ports.echoCopyText.subscribe(text => navigator.clipboard.writeText(text))
+  echo.ports.echoPlaySound.subscribe(playEchoSound)
+  echo.ports.echoSaveMuted.subscribe(value => {
+    try { localStorage.setItem("echo-muted", String(value)) } catch (_e) {}
+  })
+  echo.ports.echoSaveShapes.subscribe(value => {
+    try { localStorage.setItem("echo-shapes", String(value)) } catch (_e) {}
   })
 }
 

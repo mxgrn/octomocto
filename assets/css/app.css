@@ -344,6 +344,43 @@
   .set-card, .set-card.is-wrong .set-card-face, .set-last-pop { animation: none; }
 }
 
+/* Echo. A shade over each pad makes it pale (light theme) or dark (dark
+theme) until it lights up. The backing under the pads shows in the gaps
+between the pads: white in the light theme, and dark in the dark theme. */
+.echo-backing { fill: #fff; }
+[data-theme=dark] .echo-backing { fill: var(--color-octo-navy); }
+.echo-pad { -webkit-tap-highlight-color: transparent; outline: none; }
+.echo-pad.is-playable { cursor: pointer; }
+/* A dark layer over each pad, see viewPad in Echo.elm */
+.echo-pad-shade { fill: #fff; opacity: 0.6; transition: opacity 140ms ease; }
+.echo-pad.is-playable:hover + .echo-pad-shade { opacity: 0.42; }
+[data-theme=dark] .echo-pad-shade { fill: #000; opacity: 0.42; }
+[data-theme=dark] .echo-pad.is-playable:hover + .echo-pad-shade { opacity: 0.28; }
+.echo-pad-shade.is-lit, .echo-pad.is-playable:hover + .echo-pad-shade.is-lit { opacity: 0; }
+.echo-glyph { stroke: rgb(20 21 31 / 0.5); }
+[data-theme=dark] .echo-glyph { stroke: rgb(20 21 31 / 0.72); }
+.echo-no-shapes .echo-glyph { display: none; }
+.echo-hub {
+  background: #fff; border: 3px solid #e7e5e0; color: var(--color-octo-navy);
+  box-shadow: 0 0 0 6px #f4f3ef, 0 2px 8px rgb(0 0 0 / 0.08);
+  transition: border-color 140ms ease, transform 140ms ease; -webkit-tap-highlight-color: transparent;
+}
+[data-theme=dark] .echo-hub {
+  background: var(--color-base-100); border-color: #2A2C3D; color: var(--color-base-content); box-shadow: none;
+}
+.echo-hub.is-startable { cursor: pointer; }
+.echo-hub.is-startable:hover { transform: scale(1.04); }
+.echo-hub.is-startable:active { transform: scale(0.97); }
+.echo-shake { animation: echo-shake 320ms ease; }
+@keyframes echo-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .echo-shake { animation: none; }
+}
+
 /* Sudoku. The lines of the grid are the gaps between the cells: thin
    lines in a box, thick lines between the boxes. A wrong digit shakes in
    its cell, and a digit that a player puts pops in. */

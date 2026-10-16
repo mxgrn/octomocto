@@ -31,6 +31,7 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
     get "/set/:id", SetGameController, :show
     get "/sudoku/:id", SudokuController, :show
+    get "/echo/:id", EchoController, :show
 
     # The front page updates its list of public games live. The
     # settings of a new game: a LiveView changes the settings without a page
@@ -42,6 +43,7 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive
       live "/set", SetGameLive
       live "/sudoku", SudokuLive
+      live "/echo", EchoLive
     end
   end
 

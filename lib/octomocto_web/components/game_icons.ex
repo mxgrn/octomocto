@@ -103,6 +103,31 @@ defmodule OctomoctoWeb.GameIcons do
     """
   end
 
+  # A ring of 6 colored pads around a hub. Each pad is a part of the stroke
+  # of one circle: the dash is a pad, and the rest of the circle is the gap.
+  def game_icon(%{game: "echo"} = assigns) do
+    ~H"""
+    <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
+      <circle
+        :for={
+          {color, index} <-
+            Enum.with_index(["#FF8A3D", "#3D8BFF", "#FFD23F", "#9B6BFF", "#A6E04A", "#FF5A4E"])
+        }
+        cx="24"
+        cy="24"
+        r="15"
+        fill="none"
+        stroke={color}
+        stroke-width="10"
+        stroke-dasharray="13.2 81.05"
+        transform={"rotate(#{index * 60 - 120} 24 24)"}
+        opacity={if index == 0, do: "1", else: "0.75"}
+      />
+      <circle cx="24" cy="24" r="7.5" fill="#171532" />
+    </svg>
+    """
+  end
+
   def game_icon(%{game: "sudoku"} = assigns) do
     ~H"""
     <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">

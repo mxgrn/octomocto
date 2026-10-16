@@ -31,7 +31,8 @@ config :mnesiac,
     Octomocto.Trains.Store,
     Octomocto.Memory.Store,
     Octomocto.SetGame.Store,
-    Octomocto.Sudoku.Store
+    Octomocto.Sudoku.Store,
+    Octomocto.Echo.Store
   ]
 
 # Configure the endpoint

@@ -11,7 +11,7 @@ defmodule OctomoctoWeb.PageControllerTest do
       |> LazyHTML.query("#games a")
       |> LazyHTML.attribute("href")
 
-    assert hrefs == ["/schulte", "/trains", "/memory", "/set", "/sudoku", "/astronaut"]
+    assert hrefs == ["/schulte", "/trains", "/memory", "/set", "/sudoku", "/echo", "/astronaut"]
   end
 
   test "the header shows the slogan", %{conn: conn} do

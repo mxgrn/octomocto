@@ -9,7 +9,15 @@ defmodule OctomoctoWeb.HomeLive do
 
   alias Octomocto.Lobby
 
-  alias OctomoctoWeb.{GameIcons, MemoryLive, SchulteLive, SetGameLive, SudokuLive, TrainsLive}
+  alias OctomoctoWeb.{
+    EchoLive,
+    GameIcons,
+    MemoryLive,
+    SchulteLive,
+    SetGameLive,
+    SudokuLive,
+    TrainsLive
+  }
 
   @games [
     %{
@@ -52,6 +60,14 @@ defmodule OctomoctoWeb.HomeLive do
       icon_class: "bg-rose-500/10 dark:bg-rose-400/15"
     },
     %{
+      id: "echo",
+      name: "Echo",
+      description:
+        "Repeat the sequence of colored pads. With friends, each player adds a pad of their choice.",
+      path: "/echo",
+      icon_class: "bg-amber-500/10 dark:bg-amber-400/15"
+    },
+    %{
       id: "astronaut",
       name: "Station Escape",
       description:
@@ -74,7 +90,8 @@ defmodule OctomoctoWeb.HomeLive do
     "trains" => {Octomocto.Trains.Game, Octomocto.Trains.Store, TrainsLive},
     "set" => {Octomocto.SetGame.Game, Octomocto.SetGame.Store, SetGameLive},
     "sudoku" => {Octomocto.Sudoku.Game, Octomocto.Sudoku.Store, SudokuLive},
-    "schulte" => {Octomocto.Schulte.Game, Octomocto.Schulte.Store, SchulteLive}
+    "schulte" => {Octomocto.Schulte.Game, Octomocto.Schulte.Store, SchulteLive},
+    "echo" => {Octomocto.Echo.Game, Octomocto.Echo.Store, EchoLive}
   }
 
   @kinds_by_game Map.new(@lobbies, fn {kind, {game, _store, _page}} -> {game, kind} end)
