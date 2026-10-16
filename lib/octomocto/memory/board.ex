@@ -30,14 +30,16 @@ defmodule Octomocto.Memory.Board do
 
   @doc """
   Gives the grids for the number of cards as `{columns, rows, gaps}`. The
-  client picks the grid that fits its screen best.
+  client picks the grid that fits its screen best, and puts the gaps (the
+  empty places) at equal distances in the grid. The grid has the smallest
+  number of rows for its columns, so there are fewer gaps than columns. A
+  grid is at most 3 times as wide as it is tall, or as tall as it is wide.
   """
   def layouts(cards) do
     for columns <- 2..max(2, round(cards / 2))//1,
         rows = ceil(cards / columns),
         gaps = rows * columns - cards,
-        gaps == 0 or (gaps == 1 and rem(cards, 2) == 0),
-        columns * 2 >= rows and rows * 2 >= columns,
+        columns * 3 >= rows and rows * 3 >= columns,
         do: {columns, rows, gaps}
   end
 

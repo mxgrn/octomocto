@@ -534,27 +534,47 @@ viewGame : Model -> Me -> Game -> Html Msg
 viewGame model me game =
     let
         layout =
-            bestLayout model game
-    in
-    div [ id "memory-root", class "flex w-full max-w-[1400px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
-        [ aside [ id "memory-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
-            [ div []
-                [ div [ class "flex items-center gap-2" ]
-                    [ h1 [ class "text-2xl font-semibold tracking-tight" ]
-                        [ a [ id "memory-title-link", href "/memory", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Memory" ] ]
-                    , viewMuteButton model.muted
-                    ]
-                , p [ class "text-sm opacity-60" ]
-                    [ text
-                        (if game.set == 2 then
-                            "Find the pairs of cards with the same image."
+            bestLayout model me game
 
-                         else
-                            "Find the triplets of cards with the same image."
-                        )
+        gap =
+            cardGap (fieldSpace model me game) layout
+    in
+    div [ id "memory-root", class "flex w-full flex-col gap-2 select-none lg:flex-row lg:items-start lg:gap-8" ]
+        [ aside [ id "memory-panel", class "flex flex-col gap-2 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
+            -- On a small screen, the title, the stats and the restart button
+            -- are in one compact row. On a large screen, the row is not a
+            -- box (`contents`), so its items are in the column of the panel.
+            [ div [ class "flex items-center gap-1 lg:contents" ]
+                [ div [ class "min-w-0 lg:order-1" ]
+                    [ div [ class "flex items-center gap-1 lg:gap-2" ]
+                        [ a
+                            [ id "memory-back"
+                            , href model.settingsUrl
+                            , class "grid size-8 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 lg:hidden dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
+                            , Html.Attributes.title "Back to the settings"
+                            ]
+                            [ span [ class "hero-arrow-left size-5" ] [] ]
+                        , h1 [ class "text-xl font-semibold tracking-tight lg:text-2xl" ]
+                            [ a [ id "memory-title-link", href "/memory", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Memory" ] ]
+                        , viewMuteButton model.muted
+                        ]
+                    , p [ class "hidden text-sm opacity-60 lg:block" ]
+                        [ text
+                            (if game.set == 2 then
+                                "Find the pairs of cards with the same image."
+
+                             else
+                                "Find the triplets of cards with the same image."
+                            )
+                        ]
                     ]
+                , viewClock model game
+                , if me == Nothing then
+                    text ""
+
+                  else
+                    viewRestartButton
                 ]
-            , viewClock model game
             , if game.playersNeeded > 1 then
                 viewShareLink model
 
@@ -566,26 +586,26 @@ viewGame model me game =
               else
                 text ""
             , if me == Nothing then
-                p [ id "memory-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
+                p [ id "memory-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 lg:order-5 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
                     [ text "This game is full, so you can only watch it." ]
 
               else
-                viewRestartButton
+                text ""
             , a
                 [ id "memory-leaderboards-link"
                 , href model.settingsUrl
-                , class "text-sm font-medium text-octo-indigo underline-offset-4 transition hover:underline dark:text-octo-indigo-light"
+                , class "hidden text-sm font-medium text-octo-indigo underline-offset-4 transition hover:underline lg:order-6 lg:block dark:text-octo-indigo-light"
                 ]
                 [ text "Latest games and best results" ]
             ]
         , div [ class "min-w-0 flex-1" ]
-            [ div [ id "memory-board", class "relative mx-auto rounded-2xl bg-white p-2 shadow-sm ring-1 ring-slate-200 dark:bg-white/5 dark:shadow-none dark:ring-white/10", style "width" (fieldWidth layout) ]
-                [ viewField model me game layout
+            [ div [ id "memory-board", class "relative mx-auto lg:rounded-2xl lg:bg-white lg:p-2 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10", style "width" (fieldWidth model me game layout gap) ]
+                [ viewField model me game layout gap
                 , if game.waiting then
                     viewWaiting game
 
                   else if game.finished then
-                    viewResult model.nextGame model.guest me game
+                    viewResult model.settingsUrl model.nextGame model.guest me game
 
                   else
                     text ""
@@ -594,41 +614,125 @@ viewGame model me game =
         ]
 
 
-{-| The grid whose shape is the nearest to the shape of the space for the
-field. On a large screen, the panel is at the left of the field. On a
-small screen, it is above the field, so the field can be as tall as the
-screen.
+{-| The width of the screen from which the panel is at the left of the
+field. On a smaller screen, the panel is a compact row above the field, and
+the page has no header and no footer.
 -}
-bestLayout : Model -> Game -> Layout
-bestLayout model game =
+largeScreen : Float
+largeScreen =
+    1024
+
+
+{-| The grid with the largest cards in the space for the field. With the
+same size of the cards, the grid with fewer empty places.
+-}
+bestLayout : Model -> Me -> Game -> Layout
+bestLayout model me game =
     let
-        ( width, height ) =
-            model.viewport
-
         space =
-            if width >= 1024 then
-                (width - 416) / (height - 168)
-
-            else
-                (width - 48) / (height - 168)
-
-        distance layout =
-            abs (toFloat layout.columns / toFloat layout.rows - space)
+            fieldSpace model me game
     in
     game.layouts
-        |> List.sortBy distance
+        |> List.sortBy (\layout -> ( -(cardSize space layout), layout.gaps ))
         |> List.head
         |> Maybe.withDefault (Layout (List.length game.cards) 1 0)
 
 
-{-| Make the board as wide as possible, but small enough that the page
-footer is also on the screen (minus the 4rem header, the 1.5rem bottom
-padding of the page and the 4rem footer). The 0.5rem padding of the board
-is on each side of the field.
+{-| The width and the height in pixels of the space for the field. On a
+large screen, the panel is at the left of the field. On a small screen, it
+is above the field, so the field can be as tall as the screen.
 -}
-fieldWidth : Layout -> String
-fieldWidth layout =
-    "min(100%, calc((100dvh - 10.5rem) * " ++ String.fromFloat (toFloat layout.columns / toFloat layout.rows) ++ " + 1rem))"
+fieldSpace : Model -> Me -> Game -> ( Float, Float )
+fieldSpace model me game =
+    let
+        ( width, height ) =
+            model.viewport
+    in
+    ( if width >= largeScreen then
+        width - 416
+
+      else
+        width - 16
+    , height - reservedHeight model me game
+    )
+
+
+{-| The gap in pixels between the cards. It is approximately 6% of the size
+of a card, so that smaller cards have smaller gaps, from 2 to 8 pixels.
+-}
+cardGap : ( Float, Float ) -> Layout -> Float
+cardGap ( width, height ) layout =
+    min (width / toFloat layout.columns) (height / toFloat layout.rows)
+        * 0.06
+        |> round
+        |> clamp 2 8
+        |> toFloat
+
+
+cardSize : ( Float, Float ) -> Layout -> Float
+cardSize (( width, height ) as space) layout =
+    let
+        gap =
+            cardGap space layout
+    in
+    min
+        ((width - gap * toFloat (layout.columns - 1)) / toFloat layout.columns)
+        ((height - gap * toFloat (layout.rows - 1)) / toFloat layout.rows)
+
+
+{-| The height in pixels of the screen that is not for the field. On a large
+screen, it is the 4rem header, the 1.5rem bottom padding of the page and the
+4rem footer, and the 0.5rem padding of the board on each side. On a small
+screen, it is the 0.5rem padding of the page at the top and at the bottom,
+and the rows of the panel with the 0.5rem gaps between them. The heights of
+the rows are approximate, because the scores can wrap.
+-}
+reservedHeight : Model -> Me -> Game -> Float
+reservedHeight model me game =
+    if Tuple.first model.viewport >= largeScreen then
+        168
+
+    else
+        let
+            row condition rowHeight =
+                if condition then
+                    rowHeight + 8
+
+                else
+                    0
+        in
+        16
+            + row True 40
+            + row (game.playersNeeded > 1) 40
+            + row (List.length game.players > 1) 30
+            + row (me == Nothing) 44
+
+
+{-| Make the board as wide as possible, but small enough that it is all on
+the screen. The cards are square, so the width comes from the height of
+the space without the gaps between the rows.
+-}
+fieldWidth : Model -> Me -> Game -> Layout -> Float -> String
+fieldWidth model me game layout gap =
+    let
+        px value =
+            String.fromFloat value ++ "px"
+
+        padding =
+            if Tuple.first model.viewport >= largeScreen then
+                " + 1rem"
+
+            else
+                ""
+    in
+    "min(100%, calc((100dvh - "
+        ++ px (reservedHeight model me game + gap * toFloat (layout.rows - 1))
+        ++ ") * "
+        ++ String.fromFloat (toFloat layout.columns / toFloat layout.rows)
+        ++ " + "
+        ++ px (gap * toFloat (layout.columns - 1))
+        ++ padding
+        ++ "))"
 
 
 viewMuteButton : Bool -> Html Msg
@@ -658,23 +762,25 @@ viewMuteButton muted =
         ]
 
 
-{-| Starts a new field for all players, also during a game.
+{-| Starts a new field for all players, also during a game. On a small
+screen, only the icon shows.
 -}
 viewRestartButton : Html Msg
 viewRestartButton =
     button
         [ id "memory-restart"
-        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
+        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
+        , Html.Attributes.title "Restart game"
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , text "Restart game"
+        , span [ class "hidden lg:inline" ] [ text "Restart game" ]
         ]
 
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 lg:order-3 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "memory-link"
             , readonly True
@@ -698,9 +804,9 @@ viewShareLink model =
         ]
 
 
-{-| The time on the left, and the sets that are still on the field on the
-right. For one player, the accuracy is in the middle (with more players,
-it is next to each score).
+{-| The time, and for one player, the accuracy (with more players, it is
+next to each score). On a small screen, they are small and without a box,
+at the right of the compact row of the panel.
 -}
 viewClock : Model -> Game -> Html Msg
 viewClock model game =
@@ -715,42 +821,26 @@ viewClock model game =
             else
                 0
 
-        setsLeft =
-            List.length (List.filter (\card -> card.state /= "cleared") game.cards) // game.set
-
         solo =
             List.length game.players == 1
+
+        stat label valueId value =
+            div [ class "flex flex-col items-center justify-center" ]
+                [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text label ]
+                , span [ id valueId, class "text-lg leading-tight font-light text-slate-700 tabular-nums lg:text-3xl dark:text-slate-100" ] [ text value ]
+                ]
     in
     div
         [ id "memory-clock"
-        , class "grid divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200 dark:divide-white/10 dark:bg-white/5 dark:shadow-none dark:ring-white/10"
-        , classList [ ( "grid-cols-3", solo ), ( "grid-cols-2", not solo ) ]
+        , class "ml-auto flex gap-4 pr-2 lg:order-2 lg:ml-0 lg:grid lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10"
+        , classList [ ( "lg:grid-cols-2", solo ), ( "lg:grid-cols-1", not solo ) ]
         ]
-        [ div [ class "flex flex-col items-center justify-center" ]
-            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "time" ]
-            , span [ id "memory-time", class "text-3xl font-light text-slate-700 tabular-nums dark:text-slate-100" ] [ text (formatTime elapsedMs) ]
-            ]
+        [ stat "time" "memory-time" (formatTime elapsedMs)
         , if solo then
-            div [ class "flex flex-col items-center justify-center" ]
-                [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "accuracy" ]
-                , span [ id "memory-accuracy", class "text-3xl font-light text-slate-700 tabular-nums dark:text-slate-100" ]
-                    [ text (formatAccuracy (List.head game.players |> Maybe.andThen .accuracy)) ]
-                ]
+            stat "accuracy" "memory-accuracy" (formatAccuracy (List.head game.players |> Maybe.andThen .accuracy))
 
           else
             text ""
-        , div [ class "flex flex-col items-center justify-center" ]
-            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ]
-                [ text
-                    (if game.set == 2 then
-                        "pairs left"
-
-                     else
-                        "triplets left"
-                    )
-                ]
-            , span [ id "memory-sets-left", class "text-3xl font-bold text-octo-indigo tabular-nums dark:text-octo-indigo-light" ] [ text (String.fromInt setsLeft) ]
-            ]
         ]
 
 
@@ -784,7 +874,7 @@ time that is left in the last seconds of the turn.
 -}
 viewScores : Model -> Me -> Game -> Html Msg
 viewScores model me game =
-    ul [ id "memory-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
+    ul [ id "memory-scores", class "flex flex-wrap gap-2 lg:order-4 lg:flex-col" ]
         (List.map
             (\player ->
                 let
@@ -857,30 +947,51 @@ playerName me player =
         Maybe.withDefault player.colorName player.name
 
 
-{-| The cards in a grid. A grid with an empty place has it in the middle.
+{-| The cards in a grid. The empty places of the grid are at equal
+distances along the rows and along the columns, so each one is in a
+different column. One empty place is in the middle.
 -}
-viewField : Model -> Me -> Game -> Layout -> Html Msg
-viewField model me game layout =
+viewField : Model -> Me -> Game -> Layout -> Float -> Html Msg
+viewField model me game layout gap =
     let
         cards =
             List.indexedMap (viewCard model me game) game.cards
 
-        middle =
-            List.length cards // 2
+        -- The middle of part k of the equal parts of the rows or the columns
+        middle k count =
+            (2 * k + 1) * count // (2 * layout.gaps)
 
-        places =
-            if layout.gaps > 0 then
-                List.take middle cards ++ div [] [] :: List.drop middle cards
-
-            else
-                cards
+        gapPlaces =
+            List.map (\k -> middle k layout.rows * layout.columns + middle k layout.columns) (List.range 0 (layout.gaps - 1))
     in
     div
         [ id "memory-field"
-        , class "grid gap-1.5 sm:gap-2"
+        , class "grid"
+        , style "gap" (String.fromFloat gap ++ "px")
         , style "grid-template-columns" ("repeat(" ++ String.fromInt layout.columns ++ ", minmax(0, 1fr))")
         ]
-        places
+        (withGaps 0 gapPlaces cards)
+
+
+{-| Puts an empty place at each of the places of the grid in the list.
+-}
+withGaps : Int -> List Int -> List (Html Msg) -> List (Html Msg)
+withGaps place gapPlaces cards =
+    case ( gapPlaces, cards ) of
+        ( gap :: otherGaps, _ ) ->
+            if place == gap then
+                div [] [] :: withGaps (place + 1) otherGaps cards
+
+            else
+                case cards of
+                    card :: otherCards ->
+                        card :: withGaps (place + 1) gapPlaces otherCards
+
+                    [] ->
+                        []
+
+        ( [], _ ) ->
+            cards
 
 
 viewCard : Model -> Me -> Game -> Int -> Card -> Html Msg
@@ -944,8 +1055,8 @@ viewWaiting game =
         ]
 
 
-viewResult : NextGame -> Bool -> Me -> Game -> Html Msg
-viewResult nextGame guest me game =
+viewResult : String -> NextGame -> Bool -> Me -> Game -> Html Msg
+viewResult settingsUrl nextGame guest me game =
     let
         players =
             game.players
@@ -1027,6 +1138,14 @@ viewResult nextGame guest me game =
             [ text ("Or try " ++ nextGame.name ++ " ")
             , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
             ]
+
+        -- On a large screen, the link is in the panel
+        , a
+            [ id "memory-result-leaderboards-link"
+            , href settingsUrl
+            , class "text-sm font-medium text-white underline-offset-4 transition hover:underline lg:hidden"
+            ]
+            [ text "Latest games and best results" ]
 
         -- Only a guest who played gets the call to sign in, not a spectator
         , if guest && me /= Nothing then

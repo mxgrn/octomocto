@@ -39,6 +39,11 @@ defmodule OctomoctoWeb.Layouts do
     default: false,
     doc: "uses the full page width, so that the content lines up with the header"
 
+  attr :game, :boolean,
+    default: false,
+    doc:
+      "on a small screen, removes the header and the footer, so that the game uses all of the screen"
+
   attr :banner, :string,
     default: nil,
     doc: "a message in a bar above the header, which the user can close"
@@ -70,7 +75,10 @@ defmodule OctomoctoWeb.Layouts do
       </div>
       <header
         id="site-header"
-        class="flex min-h-16 flex-wrap items-center gap-x-8 gap-y-4 px-4 py-3 sm:px-6 lg:px-8"
+        class={[
+          "flex min-h-16 flex-wrap items-center gap-x-8 gap-y-4 px-4 py-3 sm:px-6 lg:px-8",
+          @game && "max-lg:hidden"
+        ]}
       >
         <.link :if={@home} id="home-link" navigate={~p"/"} class="group flex items-center gap-4">
           <OctomoctoWeb.PageHTML.octopi class="h-20 shrink-0 drop-shadow-sm" />
@@ -141,7 +149,10 @@ defmodule OctomoctoWeb.Layouts do
         </div>
       </header>
 
-      <main class="flex-1 px-4 pb-6 sm:px-6 lg:px-8">
+      <main class={[
+        "flex-1",
+        if(@game, do: "px-2 py-2 lg:px-8 lg:pt-0 lg:pb-6", else: "px-4 pb-6 sm:px-6 lg:px-8")
+      ]}>
         <div class={["space-y-4", if(@wide, do: "w-full", else: "mx-auto max-w-2xl")]}>
           {render_slot(@inner_block)}
         </div>
@@ -149,7 +160,10 @@ defmodule OctomoctoWeb.Layouts do
 
       <footer
         id="site-footer"
-        class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 px-4 py-6 text-xs text-base-content/50 sm:px-6 lg:px-8"
+        class={[
+          "flex flex-wrap items-center justify-center gap-x-6 gap-y-2 px-4 py-6 text-xs text-base-content/50 sm:px-6 lg:px-8",
+          @game && "max-lg:hidden"
+        ]}
       >
         <span>
           &copy; 2026
