@@ -951,9 +951,7 @@ playerName me player =
         Maybe.withDefault player.colorName player.name
 
 
-{-| The cards in a grid. The empty places of the grid are at equal
-distances along the rows and along the columns, so each one is in a
-different column. One empty place is in the middle.
+{-| The cards in a grid. A grid with an empty place has it in the middle.
 -}
 viewField : Model -> Me -> Game -> Layout -> Float -> Html Msg
 viewField model me game layout gap =
@@ -961,12 +959,15 @@ viewField model me game layout gap =
         cards =
             List.indexedMap (viewCard model me game) game.cards
 
-        -- The middle of part k of the equal parts of the rows or the columns
-        middle k count =
-            (2 * k + 1) * count // (2 * layout.gaps)
+        middle =
+            List.length cards // 2
 
-        gapPlaces =
-            List.map (\k -> middle k layout.rows * layout.columns + middle k layout.columns) (List.range 0 (layout.gaps - 1))
+        places =
+            if layout.gaps > 0 then
+                List.take middle cards ++ div [] [] :: List.drop middle cards
+
+            else
+                cards
     in
     div
         [ id "memory-field"
@@ -974,28 +975,7 @@ viewField model me game layout gap =
         , style "gap" (String.fromFloat gap ++ "px")
         , style "grid-template-columns" ("repeat(" ++ String.fromInt layout.columns ++ ", minmax(0, 1fr))")
         ]
-        (withGaps 0 gapPlaces cards)
-
-
-{-| Puts an empty place at each of the places of the grid in the list.
--}
-withGaps : Int -> List Int -> List (Html Msg) -> List (Html Msg)
-withGaps place gapPlaces cards =
-    case ( gapPlaces, cards ) of
-        ( gap :: otherGaps, _ ) ->
-            if place == gap then
-                div [] [] :: withGaps (place + 1) otherGaps cards
-
-            else
-                case cards of
-                    card :: otherCards ->
-                        card :: withGaps (place + 1) gapPlaces otherCards
-
-                    [] ->
-                        []
-
-        ( [], _ ) ->
-            cards
+        places
 
 
 viewCard : Model -> Me -> Game -> Int -> Card -> Html Msg
