@@ -1039,7 +1039,7 @@ viewBoard model me game =
         [ id "mahjong-board"
         , SA.class "mahjong-board block h-auto w-full min-w-[640px] sm:min-w-0"
         , SA.viewBox ("0 0 " ++ String.fromInt boardWidth ++ " " ++ String.fromInt boardHeight)
-        , style "max-height" "calc(100dvh - 7rem)"
+        , style "max-height" "calc(100dvh - 9.5rem)"
         , Html.Attributes.attribute "role" "group"
         , Html.Attributes.attribute "aria-label" "Mahjong board"
         ]

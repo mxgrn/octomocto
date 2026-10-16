@@ -15,7 +15,7 @@
     </section>
   </:header>
 
-  <div class="flex flex-col gap-8 pt-2 pb-10">
+  <div class="flex flex-col gap-8 pt-2 pb-4">
     <%!--
       One column on a small screen: the games, then the public
       games. On a large screen, the public games go to the left,
@@ -34,7 +34,7 @@
             <.link
               id={"game-#{game.id}"}
               navigate={game.path}
-              class="group flex h-full flex-col items-center gap-3 rounded-2xl bg-base-100 p-5 text-center shadow-sm ring-1 ring-base-content/10 transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-octo-orange/10 hover:ring-octo-orange/30 dark:hover:ring-octo-orange-light/40"
+              class="group flex h-full flex-col items-center gap-2 rounded-2xl bg-base-100 p-4 text-center shadow-sm ring-1 ring-base-content/10 transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-octo-orange/10 hover:ring-octo-orange/30 dark:hover:ring-octo-orange-light/40"
             >
               <.game_icon game={game} />
               <div class="min-w-0">

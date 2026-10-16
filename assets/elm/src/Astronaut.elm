@@ -574,11 +574,12 @@ viewGame model me game =
 
 
 {-| The station is square. Make it as wide as possible, but never taller than
-the screen (minus the 3rem header and the 1.5rem bottom padding of the page).
+the screen, so that the footer is also on the screen (minus the 4rem header,
+the 1.5rem bottom padding of the page and the 4rem footer).
 -}
 boardWidth : String
 boardWidth =
-    "min(100%, calc(100dvh - 4.5rem))"
+    "min(100%, calc(100dvh - 9.5rem))"
 
 
 viewShareLink : Model -> Html Msg

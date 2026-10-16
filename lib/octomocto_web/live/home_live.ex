@@ -161,11 +161,11 @@ defmodule OctomoctoWeb.HomeLive do
       "flex shrink-0 items-center justify-center",
       if(@small,
         do: "size-9 rounded-xl",
-        else: "size-14 rounded-2xl transition group-hover:scale-105"
+        else: "size-12 rounded-2xl transition group-hover:scale-105"
       ),
       @game.icon_class
     ]}>
-      <GameIcons.game_icon game={@game.id} class={if(@small, do: "size-7", else: "size-10")} />
+      <GameIcons.game_icon game={@game.id} class={if(@small, do: "size-7", else: "size-9")} />
     </div>
     """
   end

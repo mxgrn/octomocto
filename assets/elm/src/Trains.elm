@@ -1766,12 +1766,13 @@ viewGame model me game =
         ]
 
 
-{-| Make the board as wide as possible, but never taller than the screen
-(minus the 3rem header and the 1.5rem bottom padding of the page).
+{-| Make the board as wide as possible, but never taller than the screen,
+so that the footer is also on the screen (minus the 4rem header, the 1.5rem
+bottom padding of the page and the 4rem footer).
 -}
 boardWidth : Board -> String
 boardWidth board =
-    "min(100%, calc((100dvh - 4.5rem) * " ++ String.fromFloat (toFloat board.cols / toFloat board.rows) ++ "))"
+    "min(100%, calc((100dvh - 9.5rem) * " ++ String.fromFloat (toFloat board.cols / toFloat board.rows) ++ "))"
 
 
 {-| Shows in the panel before the start.

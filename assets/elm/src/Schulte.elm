@@ -597,12 +597,13 @@ viewGame model me game =
         ]
 
 
-{-| Make the board as wide as possible, but never taller than the screen
-(minus the 3rem header and the 1.5rem bottom padding of the page).
+{-| Make the board as wide as possible, but never taller than the screen,
+so that the footer is also on the screen (minus the 4rem header, the 1.5rem
+bottom padding of the page and the 4rem footer).
 -}
 fieldWidth : Game -> String
 fieldWidth game =
-    "min(100%, calc((100dvh - 4.5rem) * " ++ String.fromFloat (game.width / game.height) ++ "))"
+    "min(100%, calc((100dvh - 9.5rem) * " ++ String.fromFloat (game.width / game.height) ++ "))"
 
 
 viewMuteButton : Bool -> Html Msg

@@ -888,8 +888,8 @@ tableLayout model game =
 
 
 {-| Make the table as wide as possible, but never taller than the screen
-(minus the 3rem header and the 1.5rem bottom padding of the page), and
-never with cards wider than 14rem.
+(minus the 4rem header, the 1.5rem bottom padding of the page and the 4rem
+footer), and never with cards wider than 14rem.
 -}
 tableWidth : Layout -> String
 tableWidth layout =
@@ -899,7 +899,7 @@ tableWidth layout =
     in
     "min(100%, "
         ++ String.fromInt (layout.columns * 14)
-        ++ "rem, calc((100dvh - 4.5rem) * "
+        ++ "rem, calc((100dvh - 9.5rem) * "
         ++ String.fromFloat ratio
         ++ "))"
 
