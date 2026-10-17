@@ -38,7 +38,7 @@ defmodule OctomoctoWeb.GamePageComponents do
       <div class="mb-3 flex items-center justify-between gap-2">
         <h3 class="flex items-center gap-2 font-semibold">
           <.icon name="hero-user-group" class={["size-4", "text-octo-indigo"]} /> {gettext(
-            "Public games"
+            "Ongoing games"
           )}
         </h3>
         {render_slot(@action)}
@@ -233,13 +233,13 @@ defmodule OctomoctoWeb.GamePageComponents do
   seats, so others can only watch it.
   """
   def visibility_hint(%{players: 1, public: true}),
-    do: gettext("Other players can watch this game in Public games.")
+    do: gettext("Other players can watch this game in Ongoing games.")
 
   def visibility_hint(%{players: 1, public: false}),
     do: gettext("Only players with the link can watch.")
 
   def visibility_hint(%{public: true}),
-    do: gettext("Other players see this game in Public games.")
+    do: gettext("Other players see this game in Ongoing games.")
 
   def visibility_hint(%{public: false}), do: gettext("Only players with the link can join.")
 
