@@ -93,13 +93,17 @@ if (astronautNode) {
 
 // Start the trains game and connect its ports to the game channel. The
 // token gets the same player back after a reload, as in the Schulte race
-// below. Audio can start only after a click, so the first click on the
-// page (normally on "Start game") unlocks it.
+// below. The browser remembers if the player muted the sounds. Audio can
+// start only after a click, so the first click on the page (normally on
+// "Start game") unlocks it.
 const trainsNode = document.getElementById("trains-main")
 if (trainsNode) {
   if (navigator.userActivation?.hasBeenActive) unlockAudio()
   document.addEventListener("pointerdown", unlockAudio, {once: true})
-  const trains = window.Elm.Trains.init({node: trainsNode, flags: {gameUrl: window.location.href}})
+  let muted = false
+  try { muted = localStorage.getItem("trains-muted") === "true" } catch (_e) {}
+
+  const trains = window.Elm.Trains.init({node: trainsNode, flags: {gameUrl: window.location.href, settingsUrl: trainsNode.dataset.settingsUrl, muted}})
   const socket = new Socket("/socket", {params: {user_token: trainsNode.dataset.userToken}})
   socket.connect()
 
@@ -138,6 +142,9 @@ if (trainsNode) {
   trains.ports.trainsFinished.subscribe(result => channel.push("finished", result))
   trains.ports.trainsCopyText.subscribe(text => navigator.clipboard.writeText(text))
   trains.ports.playTrainSound.subscribe(playTrainSound)
+  trains.ports.trainsSaveMuted.subscribe(value => {
+    try { localStorage.setItem("trains-muted", String(value)) } catch (_e) {}
+  })
 }
 
 // Start the Schulte race and connect its ports to the game channel.

@@ -34,6 +34,7 @@ with the same name in one bundle.
 -}
 
 import Browser
+import Browser.Dom
 import Browser.Events
 import Dict exposing (Dict)
 import Html exposing (Html, a, aside, button, div, h1, input, li, p, span, text, ul)
@@ -80,6 +81,9 @@ port trainsFinished : Encode.Value -> Cmd msg
 
 
 port trainsCopyText : String -> Cmd msg
+
+
+port trainsSaveMuted : Bool -> Cmd msg
 
 
 port trainsJoined : (Decode.Value -> msg) -> Sub msg
@@ -329,26 +333,35 @@ Nothing until the round starts and the clock is in sync.
 -}
 type alias Model =
     { gameUrl : String
+    , settingsUrl : String
     , connection : Connection
     , copied : Bool
     , clockStart : Maybe Int
     , now : Int
+    , muted : Bool
+    , viewport : ( Float, Float )
     }
 
 
 type alias Flags =
-    { gameUrl : String }
+    { gameUrl : String
+    , settingsUrl : String
+    , muted : Bool
+    }
 
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { gameUrl = flags.gameUrl
+      , settingsUrl = flags.settingsUrl
       , connection = Connecting
       , copied = False
       , clockStart = Nothing
       , now = 0
+      , muted = flags.muted
+      , viewport = ( 1024, 768 )
       }
-    , Cmd.none
+    , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
     )
 
 
@@ -409,6 +422,8 @@ type Msg
     | Toggle Cell
     | Restart
     | CopyLink
+    | ToggleMuted
+    | Resized Float Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -480,7 +495,7 @@ update msg model =
                             ( round, events ) =
                                 applyDecision (mySwitches me game) decision game.round
                         in
-                        ( { model | connection = Joined me { game | round = round } }, eventsCmd True events )
+                        ( { model | connection = Joined me { game | round = round } }, eventsCmd (not model.muted) events )
 
                 _ ->
                     ( model, Cmd.none )
@@ -533,7 +548,7 @@ update msg model =
                                 Cmd.none
                     in
                     ( { model | now = ms, connection = Joined me { game | round = round } }
-                    , Cmd.batch [ eventsCmd sounds events, finished ]
+                    , Cmd.batch [ eventsCmd (sounds && not model.muted) events, finished ]
                     )
 
                 _ ->
@@ -552,7 +567,11 @@ update msg model =
                         in
                         ( { model | connection = Joined me { game | round = { round | switches = Dict.insert cell position round.switches } } }
                         , Cmd.batch
-                            [ playTrainSound "switch"
+                            [ if model.muted then
+                                Cmd.none
+
+                              else
+                                playTrainSound "switch"
                             , trainsFlip (Encode.object [ ( "cell", encodeCell cell ), ( "value", Encode.int position ) ])
                             ]
                         )
@@ -568,6 +587,12 @@ update msg model =
 
         CopyLink ->
             ( { model | copied = True }, trainsCopyText model.gameUrl )
+
+        ToggleMuted ->
+            ( { model | muted = not model.muted }, trainsSaveMuted (not model.muted) )
+
+        Resized width height ->
+            ( { model | viewport = ( width, height ) }, Cmd.none )
 
 
 gameFromState : ServerState -> Game
@@ -1640,6 +1665,7 @@ subscriptions model =
         , trainsFlipped GotFlip
         , trainsDecided GotDecision
         , trainsJoinFailed GotJoinFailed
+        , Browser.Events.onResize (\w h -> Resized (toFloat w) (toFloat h))
         , case model.connection of
             Joined _ game ->
                 if game.started && not (over game.round) then
@@ -1707,22 +1733,45 @@ viewGame model me game =
         solo =
             game.needed == 1
     in
-    div [ id "trains-root", class "flex w-full max-w-[1400px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
-        [ aside [ id "trains-panel", class "flex flex-col gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
-            [ div []
-                [ h1 [ class "text-2xl font-semibold tracking-tight" ]
-                    [ a [ id "trains-title-link", href "/trains", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Right on Track" ] ]
-                , p [ class "text-sm opacity-60" ]
-                    [ text
-                        (if solo then
-                            "Click the switches to send each train to the house with its colors."
+    div [ id "trains-root", class "flex w-full flex-col gap-2 select-none max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:gap-3 lg:flex-row lg:items-start lg:gap-8" ]
+        [ aside [ id "trains-panel", class "flex flex-col gap-2 max-lg:landscape:w-56 max-lg:landscape:shrink-0 max-lg:landscape:gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
+            -- On a small screen, the title, the stats and the restart button
+            -- are in one compact row. On a small screen that is wider than
+            -- tall, they are in a narrow column at the left of the board, so
+            -- the board can be as tall as the screen. On a large screen, the
+            -- row is not a box (`contents`), so its items are in the column
+            -- of the panel.
+            [ div [ class "flex items-center gap-1 max-lg:landscape:flex-col max-lg:landscape:items-start max-lg:landscape:gap-4 lg:contents" ]
+                [ div [ class "min-w-0 lg:order-1" ]
+                    [ div [ class "flex items-center gap-1 lg:gap-2" ]
+                        [ a
+                            [ id "trains-back"
+                            , href model.settingsUrl
+                            , class "grid size-8 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 lg:hidden dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
+                            , Html.Attributes.title "Back to the settings"
+                            ]
+                            [ span [ class "hero-arrow-left size-5" ] [] ]
+                        , h1 [ class "truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
+                            [ a [ id "trains-title-link", href "/trains", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Right on Track" ] ]
+                        , viewMuteButton model.muted
+                        ]
+                    , p [ class "hidden text-sm opacity-60 lg:block" ]
+                        [ text
+                            (if solo then
+                                "Click the switches to send each train to the house with its colors."
 
-                         else
-                            "Send each train to the house with its colors. You can flip only the switches in your color."
-                        )
+                             else
+                                "Send each train to the house with its colors. You can flip only the switches in your color."
+                            )
+                        ]
                     ]
+                , viewStats game.round
+                , if me == Nothing then
+                    text ""
+
+                  else
+                    viewRestartButton
                 ]
-            , viewStats game.round
             , if solo then
                 text ""
 
@@ -1734,56 +1783,190 @@ viewGame model me game =
               else
                 viewPlayers me game owned
             , if me == Nothing then
-                p [ id "trains-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
+                p [ id "trains-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 lg:order-5 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
                     [ text "This game is full or has started, so you can only watch it." ]
 
               else
-                viewRestartButton
+                text ""
             ]
         , div [ class "min-w-0 flex-1" ]
-            [ div [ class "relative mx-auto", style "width" (boardWidth game.round.layout.board) ]
-                [ if phase model game == Waiting then
-                    -- The players see the board only when all can see it
-                    viewEmptyBoard game.round.layout.board
+            [ if upright model then
+                viewTurnRequest model me game
 
-                  else
-                    viewBoard me game owned
-                , viewOverlay model me game
-                ]
+              else
+                div [ class "relative mx-auto", style "width" (boardWidth model me game) ]
+                    [ if phase model game == Waiting then
+                        -- The players see the board only when all can see it
+                        viewEmptyBoard game.round.layout.board
+
+                      else
+                        viewBoard me game owned
+                    , viewOverlay model me game
+                    ]
             ]
         ]
 
 
-{-| Make the board as wide as possible, but never taller than the screen,
-so that the footer is also on the screen (minus the 4rem header, the 1.5rem
-bottom padding of the page and the 4rem footer).
+{-| The width of the screen from which the panel is at the left of the
+board. On a smaller screen, the panel is a compact row above the board, and
+the page has no header and no footer.
 -}
-boardWidth : Board -> String
-boardWidth board =
-    "min(100%, calc((100dvh - 9.5rem) * " ++ String.fromFloat (toFloat board.cols / toFloat board.rows) ++ "))"
+largeScreen : Float
+largeScreen =
+    1024
 
 
+{-| A small screen that is wider than tall. The panel is a narrow column at
+the left of the board, as the `max-lg:landscape:` classes make it.
+-}
+sideways : Model -> Bool
+sideways model =
+    let
+        ( width, height ) =
+            model.viewport
+    in
+    width < largeScreen && width > height
+
+
+{-| A small screen that is taller than wide. The board is too small on it, so
+the player gets a request to turn the screen.
+-}
+upright : Model -> Bool
+upright model =
+    let
+        ( width, height ) =
+            model.viewport
+    in
+    width < largeScreen && width <= height
+
+
+{-| The height in pixels of the screen that is not for the board. On a large
+screen, it is the 4rem header, the 1.5rem bottom padding of the page and the
+4rem footer. On a small screen that is wider than tall, the panel is at the
+left, so it is only the 0.5rem padding of the page at the top and at the
+bottom. On other small screens, it is also the rows of the panel (the
+compact row, the link and the players for a game with more players, and
+maybe the message for a watcher) with the 0.5rem gaps between them. The
+heights of the rows are approximate, because the players can wrap.
+-}
+reservedHeight : Model -> Me -> Game -> Float
+reservedHeight model me game =
+    if Tuple.first model.viewport >= largeScreen then
+        152
+
+    else if sideways model then
+        16
+
+    else
+        16
+            + 48
+            + (if game.needed > 1 then
+                46 + 36
+
+               else
+                0
+              )
+            + (if me == Nothing then
+                52
+
+               else
+                0
+              )
+
+
+{-| Make the board as wide as possible, but small enough that it is all on
+the screen.
+-}
+boardWidth : Model -> Me -> Game -> String
+boardWidth model me game =
+    let
+        board =
+            game.round.layout.board
+    in
+    "min(100%, calc((100dvh - "
+        ++ String.fromFloat (reservedHeight model me game)
+        ++ "px) * "
+        ++ String.fromFloat (toFloat board.cols / toFloat board.rows)
+        ++ "))"
+
+
+{-| On a small screen that is taller than wide, the board is too small, so
+the request to turn the screen is in its place. It fills the free height,
+so that the result of a round that ends shows over it.
+-}
+viewTurnRequest : Model -> Me -> Game -> Html Msg
+viewTurnRequest model me game =
+    div
+        [ id "trains-turn"
+        , class "relative flex flex-col items-center justify-center gap-3 rounded-2xl bg-octo-mist p-6 text-center ring-1 ring-octo-indigo/15 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25"
+        , style "height" ("calc(100dvh - " ++ String.fromFloat (reservedHeight model me game) ++ "px)")
+        ]
+        [ span [ class "turn-phone hero-device-phone-mobile size-14 text-octo-indigo dark:text-octo-indigo-light" ] []
+        , p [ class "mt-2 text-xl font-semibold text-octo-navy dark:text-slate-100" ] [ text "Turn your screen" ]
+        , p [ class "max-w-60 text-sm text-slate-500 dark:text-slate-400" ] [ text "The board needs a screen that is wider than tall." ]
+        , if phase model game == Over then
+            viewOverlay model me game
+
+          else
+            text ""
+        ]
+
+
+viewMuteButton : Bool -> Html Msg
+viewMuteButton muted =
+    button
+        [ id "trains-mute"
+        , class "grid size-8 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
+        , onClick ToggleMuted
+        , Html.Attributes.title
+            (if muted then
+                "Turn the sounds on"
+
+             else
+                "Turn the sounds off"
+            )
+        ]
+        [ span
+            [ class
+                (if muted then
+                    "hero-speaker-x-mark size-5"
+
+                 else
+                    "hero-speaker-wave size-5"
+                )
+            ]
+            []
+        ]
+
+
+{-| The trains that got home, and the number of the last train that left
+the station. On a small screen, they are small and without a box, at the
+right of the compact row of the panel, or under the title in the column of
+a screen that is wider than tall.
+-}
 viewStats : Round -> Html Msg
 viewStats round =
-    div [ class "flex gap-2 text-sm" ]
-        [ div [ id "trains-correct", class "rounded-full bg-emerald-50 px-3 py-1 text-emerald-900 ring-1 ring-emerald-200 dark:bg-emerald-400/10 dark:text-emerald-200 dark:ring-emerald-400/25" ]
-            [ text "Correct ", span [ class "font-semibold tabular-nums" ] [ text (String.fromInt round.correct) ] ]
-        , div [ id "trains-sent", class "rounded-full bg-white px-3 py-1 text-slate-700 shadow-sm ring-1 ring-slate-200 dark:bg-white/5 dark:text-slate-200 dark:shadow-none dark:ring-white/10" ]
-            [ text "Train "
-            , span [ class "font-semibold tabular-nums" ]
-                [ text (String.fromInt round.sent ++ " / " ++ String.fromInt (trainCount round.layout.board)) ]
-            ]
+    let
+        stat label valueId valueClass value =
+            div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
+                [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text label ]
+                , span [ id valueId, class ("text-lg leading-tight tabular-nums lg:text-3xl " ++ valueClass) ] [ text value ]
+                ]
+    in
+    div [ id "trains-stats", class "ml-auto flex gap-4 pr-2 max-lg:landscape:ml-0 max-lg:landscape:gap-6 max-lg:landscape:pr-0 max-lg:landscape:pl-2 lg:order-2 lg:ml-0 lg:grid lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10" ]
+        [ stat "correct" "trains-correct" "font-semibold text-emerald-600 dark:text-emerald-400" (String.fromInt round.correct)
+        , stat "train" "trains-sent" "font-light text-slate-700 dark:text-slate-100" (String.fromInt round.sent ++ "/" ++ String.fromInt (trainCount round.layout.board))
         ]
 
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:order-3 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "trains-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1 dark:text-slate-100"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none max-lg:landscape:px-2 max-lg:landscape:py-1 lg:px-2 lg:py-1 dark:text-slate-100"
             ]
             []
         , button
@@ -1804,7 +1987,7 @@ viewShareLink model =
 
 viewPlayers : Me -> Game -> Dict Cell Player -> Html Msg
 viewPlayers me game owned =
-    Html.Keyed.ul [ id "trains-players", class "flex flex-wrap gap-2 lg:flex-col" ]
+    Html.Keyed.ul [ id "trains-players", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:order-4 lg:flex-col" ]
         (List.map
             (\player ->
                 let
@@ -1817,7 +2000,7 @@ viewPlayers me game owned =
                     , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200 dark:bg-white/5 dark:text-slate-100 dark:shadow-none dark:ring-white/10"
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "lg:flex-1" ] [ text (playerName me player) ]
+                    , span [ class "max-lg:landscape:flex-1 lg:flex-1" ] [ text (playerName me player) ]
                     , span [ class "text-xs text-slate-500 tabular-nums dark:text-slate-400" ]
                         [ text
                             (String.fromInt count
@@ -1846,17 +2029,19 @@ playerName me player =
 
 
 {-| Starts a new round with a new board for all players, also during a
-round.
+round. On a small screen, only the icon shows, but not in the column of a
+screen that is wider than tall.
 -}
 viewRestartButton : Html Msg
 viewRestartButton =
     button
         [ id "trains-restart"
-        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
+        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
+        , Html.Attributes.title "New board"
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , text "New board"
+        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text "New board" ]
         ]
 
 

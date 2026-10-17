@@ -1,14 +1,16 @@
 defmodule OctomoctoWeb.TrainsController do
   use OctomoctoWeb, :controller
 
-  alias Octomocto.Trains
+  alias Octomocto.Trains.Store
+  alias OctomoctoWeb.TrainsLive
 
   plug :put_seo
 
   def show(conn, %{"id" => id}) do
-    if Trains.game_exists?(id) do
+    if state = Store.read(id) do
       render(conn, :show,
         id: id,
+        settings_path: TrainsLive.settings_path(state),
         user_token: user_token(conn.assigns.current_scope),
         noindex: true
       )
@@ -19,7 +21,7 @@ defmodule OctomoctoWeb.TrainsController do
     end
   end
 
-  defp put_seo(conn, _opts), do: merge_assigns(conn, OctomoctoWeb.TrainsLive.seo())
+  defp put_seo(conn, _opts), do: merge_assigns(conn, TrainsLive.seo())
 
   defp user_token(%{user: user}), do: OctomoctoWeb.UserSocket.user_token(user.id)
   defp user_token(nil), do: nil

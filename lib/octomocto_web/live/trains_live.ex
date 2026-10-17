@@ -98,6 +98,19 @@ defmodule OctomoctoWeb.TrainsLive do
     end
   end
 
+  @doc "The path of this page with the settings of the game in the given state."
+  def settings_path(state) do
+    settings = %{
+      players: state.needed,
+      switch_count: state.switch_count,
+      trains_per_house: state.trains_per_house,
+      pace: state.pace,
+      public: state.public
+    }
+
+    settings_path(settings, %{})
+  end
+
   # The start page with the settings, and with the given changes
   defp settings_path(settings, changes) do
     s = Map.merge(settings, changes)

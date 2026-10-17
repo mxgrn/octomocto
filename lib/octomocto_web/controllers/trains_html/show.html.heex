@@ -1,3 +1,9 @@
-<Layouts.app flash={@flash} current_scope={@current_scope} wide>
-  <div id="trains-main" data-game-id={@id} data-user-token={@user_token}></div>
+<Layouts.app flash={@flash} current_scope={@current_scope} wide game>
+  <div
+    id="trains-main"
+    data-game-id={@id}
+    data-user-token={@user_token}
+    data-settings-url={@settings_path}
+  >
+  </div>
 </Layouts.app>

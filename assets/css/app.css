@@ -193,19 +193,19 @@
 
 /* The phone in the request to turn the screen turns to landscape, waits,
    and turns back */
-@keyframes schulte-turn-phone {
+@keyframes turn-phone {
   0%, 15% { transform: rotate(0deg); }
   40%, 75% { transform: rotate(-90deg); }
   100% { transform: rotate(0deg); }
 }
 
-.schulte-turn-phone { animation: schulte-turn-phone 2.4s ease-in-out infinite; }
+.turn-phone { animation: turn-phone 2.4s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   .schulte-pop { animation: none; opacity: 0; }
   .schulte-next { animation: none; }
   .countdown-pop { animation: none; }
-  .schulte-turn-phone { animation: none; }
+  .turn-phone { animation: none; }
 }
 
 /* Memory. A card turns over in 3D: the back is in front when the card is
