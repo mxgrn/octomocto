@@ -25,6 +25,7 @@ with the same name in one bundle.
 -}
 
 import Browser
+import Browser.Dom
 import Browser.Events
 import Html exposing (Html, a, aside, button, div, h1, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (class, href, id, readonly, style, value)
@@ -164,6 +165,9 @@ type alias Model =
     -- The countdown step that last played its beep (see `countdownStep`)
     , beepedStep : Maybe Int
     , muted : Bool
+
+    -- The width and the height of the browser window
+    , viewport : ( Float, Float )
     }
 
 
@@ -190,8 +194,9 @@ init flags =
       , now = 0
       , beepedStep = Nothing
       , muted = flags.muted
+      , viewport = ( 1024, 768 )
       }
-    , Cmd.none
+    , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
     )
 
 
@@ -216,6 +221,7 @@ type Msg
     | SyncClock Int Time.Posix
     | Tick Time.Posix
     | ToggleMuted
+    | Resized Float Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -308,6 +314,9 @@ update msg model =
 
         Tick time ->
             beepCountdown { model | now = Time.posixToMillis time }
+
+        Resized width height ->
+            ( { model | viewport = ( width, height ) }, Cmd.none )
 
         ToggleMuted ->
             ( { model | muted = not model.muted }, schulteSaveMuted (not model.muted) )
@@ -512,6 +521,7 @@ subscriptions model =
         [ schulteJoined GotJoined
         , schulteState GotState
         , schulteJoinFailed GotJoinFailed
+        , Browser.Events.onResize (\w h -> Resized (toFloat w) (toFloat h))
         , case model.connection of
             Joined _ game ->
                 -- The numbers come only after the countdown, so no cells
@@ -550,12 +560,26 @@ view model =
 
 viewGame : Model -> Me -> Game -> Html Msg
 viewGame model me game =
-    div [ id "schulte-root", class "flex w-full max-w-[1400px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
-        [ aside [ id "schulte-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
-            [ div [ class "flex items-end justify-between gap-4 lg:flex-col lg:items-start" ]
-                [ div []
-                    [ div [ class "flex items-center gap-2" ]
-                        [ h1 [ class "text-2xl font-semibold tracking-tight" ]
+    let
+        tall =
+            isTall model me game
+    in
+    div [ id "schulte-root", class "flex w-full flex-col gap-2 select-none lg:flex-row lg:items-start lg:gap-8" ]
+        [ aside [ id "schulte-panel", class "flex flex-col gap-2 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
+            -- On a small screen, the title, the stats and the restart button
+            -- are in one compact row. On a large screen, the row is not a
+            -- box (`contents`), so its items are in the column of the panel.
+            [ div [ class "flex items-center gap-1 lg:contents" ]
+                [ div [ class "min-w-0 lg:order-1" ]
+                    [ div [ class "flex items-center gap-1 lg:gap-2" ]
+                        [ a
+                            [ id "schulte-back"
+                            , href model.settingsUrl
+                            , class "grid size-8 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 lg:hidden dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
+                            , Html.Attributes.title "Back to the settings"
+                            ]
+                            [ span [ class "hero-arrow-left size-5" ] [] ]
+                        , h1 [ class "truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
                             [ a
                                 [ id "schulte-title-link"
                                 , href "/schulte"
@@ -565,22 +589,35 @@ viewGame model me game =
                             ]
                         , viewMuteButton model.muted
                         ]
-                    , p [ class "text-sm opacity-60" ] [ text "Click the numbers in order. The first click gets the point." ]
+                    , p [ class "hidden text-sm opacity-60 lg:block" ] [ text "Click the numbers in order. The first click gets the point." ]
                     ]
+                , viewClock model game
+                , if me == Nothing then
+                    text ""
+
+                  else
+                    viewRestartButton
                 ]
-            , viewClock model game
-            , viewShareLink model
-            , viewScores model me game.players
+            , if game.playersNeeded > 1 then
+                viewShareLink model
+
+              else
+                text ""
+            , if game.playersNeeded > 1 then
+                viewScores model me game.players
+
+              else
+                text ""
             , if me == Nothing then
-                p [ id "schulte-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
+                p [ id "schulte-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 lg:order-5 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
                     [ text "This game is full, so you can only watch it." ]
 
               else
-                viewRestartButton
+                text ""
             ]
         , div [ class "min-w-0 flex-1" ]
-            [ div [ class "relative mx-auto", style "width" (fieldWidth game) ]
-                [ viewField model game
+            [ div [ class "relative mx-auto", style "width" (fieldWidth model me tall game) ]
+                [ viewField model tall game
                 , if game.waiting then
                     viewWaiting game
 
@@ -597,13 +634,93 @@ viewGame model me game =
         ]
 
 
-{-| Make the board as wide as possible, but never taller than the screen,
-so that the footer is also on the screen (minus the 4rem header, the 1.5rem
-bottom padding of the page and the 4rem footer).
+{-| The width of the screen from which the panel is at the left of the
+board. On a smaller screen, the panel is a compact row above the board, and
+the page has no header and no footer.
 -}
-fieldWidth : Game -> String
-fieldWidth game =
-    "min(100%, calc((100dvh - 9.5rem) * " ++ String.fromFloat (game.width / game.height) ++ "))"
+largeScreen : Float
+largeScreen =
+    1024
+
+
+{-| The width and the height in pixels of the space for the board. On a
+large screen, the panel is at the left of the board.
+-}
+boardSpace : Model -> Me -> Game -> ( Float, Float )
+boardSpace model me game =
+    let
+        ( width, height ) =
+            model.viewport
+    in
+    ( if width >= largeScreen then
+        width - 384
+
+      else
+        width - 16
+    , height - reservedHeight model me game
+    )
+
+
+{-| The height in pixels of the screen that is not for the board. On a large
+screen, it is the 4rem header, the 1.5rem bottom padding of the page and the
+4rem footer. On a small screen, it is the 0.5rem padding of the page at the
+top and at the bottom, and the rows of the panel (the compact row, the link
+and the scores for a game with more players, and maybe the message for a
+watcher) with the 0.5rem gaps between them. The heights of the rows are approximate, because the scores can wrap.
+-}
+reservedHeight : Model -> Me -> Game -> Float
+reservedHeight model me game =
+    if Tuple.first model.viewport >= largeScreen then
+        152
+
+    else
+        16
+            + 48
+            + (if game.playersNeeded > 1 then
+                46 + 36
+
+               else
+                0
+              )
+            + (if me == Nothing then
+                52
+
+               else
+                0
+              )
+
+
+{-| True when the board is larger turned 90 degrees, so that it is taller
+than wide. This is on a screen that is taller than wide, for example a
+phone. The player turns the phone to read the numbers.
+-}
+isTall : Model -> Me -> Game -> Bool
+isTall model me game =
+    let
+        ( width, height ) =
+            boardSpace model me game
+    in
+    min (width / game.height) (height / game.width) > min (width / game.width) (height / game.height)
+
+
+{-| Make the board as wide as possible, but small enough that it is all on
+the screen.
+-}
+fieldWidth : Model -> Me -> Bool -> Game -> String
+fieldWidth model me tall game =
+    let
+        ratio =
+            if tall then
+                game.height / game.width
+
+            else
+                game.width / game.height
+    in
+    "min(100%, calc((100dvh - "
+        ++ String.fromFloat (reservedHeight model me game)
+        ++ "px) * "
+        ++ String.fromFloat ratio
+        ++ "))"
 
 
 viewMuteButton : Bool -> Html Msg
@@ -633,17 +750,19 @@ viewMuteButton muted =
         ]
 
 
-{-| Starts a new field for all players, also during a race.
+{-| Starts a new field for all players, also during a race. On a small
+screen, only the icon shows.
 -}
 viewRestartButton : Html Msg
 viewRestartButton =
     button
         [ id "schulte-restart"
-        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
+        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
+        , Html.Attributes.title "Restart game"
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , text "Restart game"
+        , span [ class "hidden lg:inline" ] [ text "Restart game" ]
         ]
 
 
@@ -658,7 +777,7 @@ nextText game =
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm lg:order-3 ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "schulte-link"
             , readonly True
@@ -688,7 +807,7 @@ is made again and the flash starts again.
 -}
 viewScores : Model -> Me -> List Player -> Html Msg
 viewScores model me players =
-    Html.Keyed.ul [ id "schulte-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
+    Html.Keyed.ul [ id "schulte-scores", class "flex flex-wrap gap-2 lg:order-4 lg:flex-col" ]
         (List.map
             (\player ->
                 let
@@ -730,11 +849,25 @@ playerName me player =
         Maybe.withDefault player.colorName player.name
 
 
-viewField : Model -> Game -> Html Msg
-viewField model game =
+{-| The board. When it is tall, all of it (the cells and the numbers) is
+turned 90 degrees clockwise: the top of the board is at the right.
+-}
+viewField : Model -> Bool -> Game -> Html Msg
+viewField model tall game =
     let
         viewBox =
-            "0 0 " ++ String.fromFloat game.width ++ " " ++ String.fromFloat game.height
+            if tall then
+                "0 0 " ++ String.fromFloat game.height ++ " " ++ String.fromFloat game.width
+
+            else
+                "0 0 " ++ String.fromFloat game.width ++ " " ++ String.fromFloat game.height
+
+        turn =
+            if tall then
+                [ SA.transform ("matrix(0 1 -1 0 " ++ String.fromFloat game.height ++ " 0)") ]
+
+            else
+                []
 
         -- The board has rounded corners. The cells are clipped to the
         -- rounded shape, and the border is drawn inside its edge, so that
@@ -757,27 +890,29 @@ viewField model game =
         , SA.class "block h-auto w-full drop-shadow-sm"
         , SA.strokeLinejoin "round"
         ]
-        [ Svg.defs []
-            [ Svg.clipPath [ SA.id "schulte-board-shape" ] [ boardRect 0 cornerRadius [] ] ]
-        , Svg.g [ SA.clipPath "url(#schulte-board-shape)" ]
-            (boardRect 0 cornerRadius [ SA.fill "#fbf5e1" ]
-                :: List.map (viewCell model game) game.cells
-                -- The bursts are on top of all the cells, so that the
-                -- next cells do not cover the particles
-                ++ [ Svg.Keyed.node "g"
-                        [ SA.pointerEvents "none" ]
-                        (game.cells
-                            |> List.filter (\cell -> cell.foundBy /= Nothing)
-                            |> List.map (\cell -> ( String.fromInt cell.number, viewBurst cell ))
-                        )
-                   ]
-            )
-        , boardRect 1.5
-            (cornerRadius - 1.5)
-            [ SA.fill "none"
-            , SA.stroke ink
-            , SA.strokeWidth "3"
-            , SA.pointerEvents "none"
+        [ Svg.g turn
+            [ Svg.defs []
+                [ Svg.clipPath [ SA.id "schulte-board-shape" ] [ boardRect 0 cornerRadius [] ] ]
+            , Svg.g [ SA.clipPath "url(#schulte-board-shape)" ]
+                (boardRect 0 cornerRadius [ SA.fill "#fbf5e1" ]
+                    :: List.map (viewCell model game) game.cells
+                    -- The bursts are on top of all the cells, so that the
+                    -- next cells do not cover the particles
+                    ++ [ Svg.Keyed.node "g"
+                            [ SA.pointerEvents "none" ]
+                            (game.cells
+                                |> List.filter (\cell -> cell.foundBy /= Nothing)
+                                |> List.map (\cell -> ( String.fromInt cell.number, viewBurst cell ))
+                            )
+                       ]
+                )
+            , boardRect 1.5
+                (cornerRadius - 1.5)
+                [ SA.fill "none"
+                , SA.stroke ink
+                , SA.strokeWidth "3"
+                , SA.pointerEvents "none"
+                ]
             ]
         ]
 
@@ -808,15 +943,15 @@ viewClock model game =
             else
                 max 0 (model.now - model.clockStart)
     in
-    div [ id "schulte-clock", class "grid grid-cols-2 divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200 dark:divide-white/10 dark:bg-white/5 dark:shadow-none dark:ring-white/10" ]
+    div [ id "schulte-clock", class "ml-auto flex gap-4 pr-2 lg:order-2 lg:ml-0 lg:grid lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10" ]
         [ div [ class "flex flex-col items-center justify-center" ]
-            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "time" ]
-            , span [ id "schulte-time", class "text-3xl font-light text-slate-700 tabular-nums dark:text-slate-100" ] [ text (formatTime elapsedMs) ]
+            [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text "time" ]
+            , span [ id "schulte-time", class "text-lg leading-tight font-light text-slate-700 tabular-nums lg:text-3xl dark:text-slate-100" ] [ text (formatTime elapsedMs) ]
             ]
         , div [ class "flex flex-col items-center justify-center" ]
-            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "looking for" ]
+            [ span [ class "text-[0.625rem] font-medium tracking-wide whitespace-nowrap text-slate-400 uppercase lg:text-xs" ] [ text "looking for" ]
             , Html.Keyed.node "span"
-                [ class "text-4xl leading-none font-bold text-[#d9534f] tabular-nums dark:text-[#f0807b]" ]
+                [ class "text-xl leading-tight font-bold text-[#d9534f] tabular-nums lg:text-4xl lg:leading-none dark:text-[#f0807b]" ]
                 [ ( nextText game
                   , span [ id "schulte-next", class "schulte-next inline-block" ] [ text (nextText game) ]
                   )
