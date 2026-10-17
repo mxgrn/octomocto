@@ -47,6 +47,10 @@ defmodule OctomoctoWeb.Layouts do
     default: nil,
     doc: "a message in a bar above the header, which the user can close"
 
+  attr :languages, :list,
+    default: [],
+    doc: "the links to the page in each language (see `OctomoctoWeb.Locale.languages/3`)"
+
   slot :header,
     doc: "content between the wordmark and the theme toggle; on a small screen it goes below them"
 
@@ -65,7 +69,7 @@ defmodule OctomoctoWeb.Layouts do
         <button
           id="site-banner-close"
           type="button"
-          aria-label="Close"
+          aria-label={gettext("Close")}
           phx-click={JS.hide(to: "#site-banner")}
           class="absolute right-2 rounded-full p-1 text-white/70 transition hover:bg-white/10 hover:text-white"
         >
@@ -85,7 +89,7 @@ defmodule OctomoctoWeb.Layouts do
               id="slogan"
               class="text-lg font-medium tracking-tight text-octo-navy/70 dark:text-base-content/70"
             >
-              Use your heads
+              {gettext("Use your heads")}
             </p>
           </div>
         </.link>
@@ -122,7 +126,7 @@ defmodule OctomoctoWeb.Layouts do
             >
               <div class="min-w-36 space-y-1 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg">
                 <div class="flex items-center justify-between gap-6 px-3 py-2">
-                  <span class="text-base-content/70">Theme</span>
+                  <span class="text-base-content/70">{gettext("Theme")}</span>
                   <.theme_toggle />
                 </div>
                 <.link
@@ -130,7 +134,7 @@ defmodule OctomoctoWeb.Layouts do
                   href={~p"/settings"}
                   class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
                 >
-                  Settings
+                  {gettext("Settings")}
                 </.link>
                 <.link
                   id="sign-out-link"
@@ -138,7 +142,7 @@ defmodule OctomoctoWeb.Layouts do
                   method="delete"
                   class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
                 >
-                  Sign out
+                  {gettext("Sign out")}
                 </.link>
               </div>
             </div>
@@ -175,10 +179,10 @@ defmodule OctomoctoWeb.Layouts do
           navigate={~p"/privacy"}
           class="transition hover:text-base-content"
         >
-          Privacy Policy
+          {gettext("Privacy Policy")}
         </.link>
         <.link id="terms-link" navigate={~p"/terms"} class="transition hover:text-base-content">
-          Terms of Service
+          {gettext("Terms of Service")}
         </.link>
         <a
           id="patreon-link"
@@ -192,8 +196,33 @@ defmodule OctomoctoWeb.Layouts do
           ]}
         >
           <.icon name="hero-heart-solid" class="size-3.5 transition group-hover:scale-110" />
-          Feed Octo &amp; Mocto
+          {gettext("Feed Octo & Mocto")}
         </a>
+        <nav
+          :if={@languages != []}
+          id="language-switcher"
+          aria-label={gettext("Language")}
+          class="flex items-center gap-1"
+        >
+          <.icon name="hero-language" class="size-3.5" />
+          <%= for language <- @languages do %>
+            <span
+              :if={language.current}
+              class="rounded-full px-2 py-0.5 font-semibold text-base-content/70"
+            >
+              {language.name}
+            </span>
+            <a
+              :if={!language.current}
+              id={"language-#{language.locale}"}
+              href={language.path}
+              hreflang={language.locale}
+              class="rounded-full px-2 py-0.5 transition hover:bg-base-content/5 hover:text-base-content"
+            >
+              {language.name}
+            </a>
+          <% end %>
+        </nav>
       </footer>
     </div>
 
@@ -272,18 +301,23 @@ defmodule OctomoctoWeb.Layouts do
     <meta property="og:image" content={url(~p"/images/og.png")} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Octomocto: Use your heads. Play solo or with friends." />
+    <meta
+      property="og:image:alt"
+      content={gettext("Octomocto: Use your heads. Play solo or with friends.")}
+    />
     <meta name="twitter:card" content="summary_large_image" />
     """
   end
 
   defp page_description(assigns) do
     assigns[:page_description] ||
-      "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
+      gettext(
+        "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
+      )
   end
 
   # The same title as in the browser tab
-  defp og_title(nil), do: "Octomocto · Brain Games to Play Solo or with Friends"
+  defp og_title(nil), do: "Octomocto · " <> gettext("Brain Games to Play Solo or with Friends")
   defp og_title(title), do: "#{title} · Octomocto"
 
   @doc """
@@ -321,11 +355,12 @@ defmodule OctomoctoWeb.Layouts do
       <button
         :for={
           {mode, icon, label, active_class} <- [
-            {"system", "hero-computer-desktop-micro", "System theme",
+            {"system", "hero-computer-desktop-micro", gettext("System theme"),
              "[[data-theme-mode=system]_&]:text-base-content"},
-            {"light", "hero-sun-micro", "Light theme",
+            {"light", "hero-sun-micro", gettext("Light theme"),
              "[[data-theme-mode=light]_&]:text-base-content"},
-            {"dark", "hero-moon-micro", "Dark theme", "[[data-theme-mode=dark]_&]:text-base-content"}
+            {"dark", "hero-moon-micro", gettext("Dark theme"),
+             "[[data-theme-mode=dark]_&]:text-base-content"}
           ]
         }
         id={"theme-#{mode}"}

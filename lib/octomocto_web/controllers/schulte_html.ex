@@ -66,7 +66,7 @@ defmodule OctomoctoWeb.SchulteHTML do
   attr :icon, :string, required: true
   attr :icon_class, :string, required: true
   attr :empty, :boolean, required: true
-  attr :empty_text, :string, default: "No games yet — be the first."
+  attr :empty_text, :string, default: nil, doc: "by default, a call to be the first"
   slot :inner_block, required: true
   slot :aside, doc: "shown at the right of the title"
 
@@ -82,7 +82,9 @@ defmodule OctomoctoWeb.SchulteHTML do
       </div>
       <ol id={@id} class="divide-y divide-base-content/5 text-sm">
         {render_slot(@inner_block)}
-        <li :if={@empty} class="py-2 text-center text-base-content/40">{@empty_text}</li>
+        <li :if={@empty} class="py-2 text-center text-base-content/40">
+          {@empty_text || gettext("No games yet — be the first.")}
+        </li>
       </ol>
     </div>
     """
@@ -100,7 +102,9 @@ defmodule OctomoctoWeb.SchulteHTML do
     ~H"""
     <span :for={{player, index} <- Enum.with_index(@players)}>{if index > 0, do: ", "}{player_name(
       player.user
-    )}<span :if={@scores} class="ml-1 tabular-nums text-base-content/60">{player.score} pts</span><span
+    )}<span :if={@scores} class="ml-1 tabular-nums text-base-content/60">{gettext("%{score} pts",
+      score: player.score
+    )}</span><span
       :if={@accuracy}
       class="tabular-nums text-base-content/60"
     > · {@accuracy.(player)}</span></span>
@@ -115,7 +119,7 @@ defmodule OctomoctoWeb.SchulteHTML do
   end
 
   # Do not show the full email of a user to other players.
-  def player_name(nil), do: "Guest"
+  def player_name(nil), do: gettext("Guest")
 
   def player_name(%{display_name: display_name})
       when is_binary(display_name) and display_name != "",

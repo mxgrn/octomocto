@@ -12,6 +12,11 @@ defmodule OctomoctoWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_scope_for_user
+    plug OctomoctoWeb.Locale, "en"
+  end
+
+  pipeline :portuguese do
+    plug OctomoctoWeb.Locale, "pt"
   end
 
   pipeline :api do
@@ -37,7 +42,8 @@ defmodule OctomoctoWeb.Router do
     # The front page updates its list of public games live. The
     # settings of a new game: a LiveView changes the settings without a page
     # load, so the page does not scroll to the top on each click.
-    live_session :default, on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}] do
+    live_session :default,
+      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "en"}] do
       live "/", HomeLive
       live "/trains", TrainsLive
       live "/schulte", SchulteLive
@@ -47,6 +53,22 @@ defmodule OctomoctoWeb.Router do
       live "/echo", EchoLive
       live "/mahjong", MahjongLive
     end
+  end
+
+  # The pages in Portuguese, in the same pipeline as the English pages. Only
+  # the games with translations are here (see `OctomoctoWeb.Locale`). The
+  # other URLs with the prefix go to the English pages.
+  scope "/pt", OctomoctoWeb do
+    pipe_through [:browser, :portuguese]
+
+    get "/memory/:id", MemoryController, :show
+
+    live_session :portuguese,
+      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "pt"}] do
+      live "/memory", MemoryLive
+    end
+
+    get "/*path", LocaleController, :english
   end
 
   # For deploys to check that the app is up

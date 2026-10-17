@@ -91,7 +91,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
           :if={@telegram?}
           class="text-xs font-medium uppercase tracking-wider text-base-content/40"
         >
-          or
+          {gettext("or")}
         </span>
         <%!-- The form shows only after a click, so that the bar stays short --%>
         <button
@@ -104,7 +104,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
           }
           class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
         >
-          Email me a sign-in link
+          {gettext("Email me a sign-in link")}
         </button>
         <.form
           for={@form}
@@ -116,10 +116,10 @@ defmodule OctomoctoWeb.UserSessionHTML do
             type="email"
             name={@form[:email].name}
             id="sign-in-email"
-            placeholder="you@example.com"
+            placeholder={gettext("you@example.com")}
             autocomplete="username"
             spellcheck="false"
-            aria-label="Email"
+            aria-label={gettext("Email")}
             required
             class="min-w-0 flex-1 lg:w-52 lg:flex-none border-0 bg-transparent px-3 text-sm placeholder:text-base-content/30 focus:outline-none"
           />
@@ -127,7 +127,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
             id="sign-in-submit"
             class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
           >
-            Send
+            {gettext("Send")}
           </button>
         </.form>
       </div>

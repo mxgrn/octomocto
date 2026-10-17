@@ -1,4 +1,9 @@
-<Layouts.app flash={@flash} current_scope={@current_scope} banner={@banner}>
+<Layouts.app
+  flash={@flash}
+  current_scope={@current_scope}
+  banner={@banner}
+  languages={@languages}
+>
   <:header :if={!@current_scope}>
     <section id="sign-in-header" class="flex justify-center xl:justify-end">
       <OctomoctoWeb.UserSessionHTML.sign_in_bar />
@@ -25,10 +30,10 @@
         <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
           <OctomoctoWeb.GameIcons.game_icon game="memory" class="size-9" />
         </div>
-        <h1 class="text-3xl font-semibold tracking-tight">Memory</h1>
+        <h1 class="text-3xl font-semibold tracking-tight">{dgettext("memory", "Memory")}</h1>
       </div>
       <p class="text-base-content/70">
-        Choose the settings and start a new game.
+        {dgettext("memory", "Choose the settings and start a new game.")}
       </p>
       <.how_to_play />
     </div>
@@ -40,7 +45,7 @@
       <.lobby_games
         games={@lobby_games}
         matches={&same_settings?(&1, @settings)}
-        path={&~p"/memory/#{&1.id}"}
+        path={&Locale.path(@locale, ~p"/memory/#{&1.id}")}
       >
         <:icon :let={game}>
           <img
@@ -56,11 +61,15 @@
     <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
       <div id="memory-settings" class="flex w-full flex-col gap-4">
         <.setting
-          label="Players"
+          label={dgettext("memory", "Players")}
           icon="hero-users"
           hint={
             if(@settings.players > 1,
-              do: "The players take turns. The game starts when all players are in."
+              do:
+                dgettext(
+                  "memory",
+                  "The players take turns. The game starts when all players are in."
+                )
             )
           }
         >
@@ -68,18 +77,18 @@
             :for={n <- 1..5}
             id={"players-#{n}"}
             selected={@settings.players == n}
-            patch={~p"/memory?#{query(@settings, players: n)}"}
+            patch={settings_path(@locale, @settings, players: n)}
           >
             {n}
           </.option>
         </.setting>
         <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
-          <.setting_header label="Theme" icon="hero-swatch" />
+          <.setting_header label={dgettext("memory", "Theme")} icon="hero-swatch" />
           <div id="memory-themes" class="mt-3 grid grid-cols-4 gap-2 xl:grid-cols-6">
             <.link
               :for={theme <- @themes}
               id={"theme-#{theme.name}"}
-              patch={~p"/memory?#{query(@settings, theme: theme.name)}"}
+              patch={settings_path(@locale, @settings, theme: theme.name)}
               aria-current={@settings.theme == theme.name && "true"}
               class={[
                 "group flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
@@ -94,37 +103,42 @@
                 alt=""
                 class="aspect-square w-full p-1 transition group-hover:scale-105"
               />
-              <span class="w-full truncate text-xs text-base-content/70">{theme.title}</span>
+              <span class="w-full truncate text-xs text-base-content/70">{theme_title(theme)}</span>
             </.link>
           </div>
         </div>
         <.setting
-          label="Look for"
+          label={dgettext("memory", "Look for")}
           icon="hero-magnifying-glass"
           hint={
             if(@settings.set == 2,
-              do: "Find 2 cards with the same image.",
-              else: "Find 3 cards with the same image."
+              do: dgettext("memory", "Find 2 cards with the same image."),
+              else: dgettext("memory", "Find 3 cards with the same image.")
             )
           }
         >
           <.option
-            :for={{value, set, label} <- [{"pairs", 2, "Pairs"}, {"triplets", 3, "Triplets"}]}
+            :for={
+              {value, set, label} <- [
+                {"pairs", 2, dgettext("memory", "Pairs")},
+                {"triplets", 3, dgettext("memory", "Triplets")}
+              ]
+            }
             id={"set-#{value}"}
             selected={@settings.set == set}
-            patch={~p"/memory?#{query(@settings, set: set)}"}
+            patch={settings_path(@locale, @settings, set: set)}
           >
             {label}
           </.option>
         </.setting>
-        <.setting label="Cards" icon="hero-squares-2x2" wide>
+        <.setting label={dgettext("memory", "Cards")} icon="hero-squares-2x2" wide>
           <.step_button
             id="cards-less"
             icon="hero-minus"
-            label="Fewer cards"
+            label={dgettext("memory", "Fewer cards")}
             patch={
               if size = step_size(@sizes, @settings.cards, -1),
-                do: ~p"/memory?#{query(@settings, cards: size)}"
+                do: settings_path(@locale, @settings, cards: size)
             }
           />
           <.form for={%{}} id="cards-form" phx-change="cards" class="flex flex-1 items-center">
@@ -134,7 +148,7 @@
               name="index"
               phx-debounce="100"
               phx-patch-focused
-              aria-label="Cards"
+              aria-label={dgettext("memory", "Cards")}
               min="0"
               max={length(@sizes) - 1}
               value={Enum.find_index(@sizes, &(&1 == @settings.cards))}
@@ -150,28 +164,28 @@
           <.step_button
             id="cards-more"
             icon="hero-plus"
-            label="More cards"
+            label={dgettext("memory", "More cards")}
             patch={
               if size = step_size(@sizes, @settings.cards, 1),
-                do: ~p"/memory?#{query(@settings, cards: size)}"
+                do: settings_path(@locale, @settings, cards: size)
             }
           />
         </.setting>
         <.setting
-          label="Visibility"
+          label={dgettext("memory", "Visibility")}
           icon="hero-eye"
           hint={visibility_hint(@settings)}
         >
           <.option
             :for={
               {value, public, label} <- [
-                {"public", true, "Public"},
-                {"private", false, "Private"}
+                {"public", true, dgettext("memory", "Public")},
+                {"private", false, dgettext("memory", "Private")}
               ]
             }
             id={"visibility-#{value}"}
             selected={@settings.public == public}
-            patch={~p"/memory?#{query(@settings, public: public)}"}
+            patch={settings_path(@locale, @settings, public: public)}
           >
             {label}
           </.option>
@@ -189,9 +203,9 @@
         id="your-results"
         icon="hero-user"
         icon_class="text-octo-indigo"
-        title="Your results"
+        title={dgettext("memory", "Your results")}
         empty={@user_results != nil and @user_results.latest == []}
-        empty_text="No games yet."
+        empty_text={dgettext("memory", "No games yet.")}
       >
         <:aside :if={@user_results && @user_results.best}>
           <span
@@ -199,7 +213,7 @@
             class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
           >
             <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
-            <span class="text-base-content/60">Best</span>
+            <span class="text-base-content/60">{dgettext("memory", "Best")}</span>
             <span class="font-semibold tabular-nums">
               {format_time(@user_results.best.elapsed_ms)}
             </span>
@@ -211,7 +225,7 @@
             class="flex items-baseline gap-3 py-2"
           >
             <span :if={@settings.players == 1} class="flex-1 text-base-content/60">
-              {Calendar.strftime(result.inserted_at, "%b %-d")}
+              {Locale.short_date(result.inserted_at)}
             </span>
             <span :if={@settings.players > 1} class="flex-1 truncate">
               <.player_list players={players} scores accuracy={&format_accuracy/1} />
@@ -219,7 +233,7 @@
             <span
               :if={@settings.players == 1}
               class="w-12 text-right tabular-nums text-base-content/60"
-              title="Accuracy"
+              title={dgettext("memory", "Accuracy")}
             >
               {format_accuracy(result)}
             </span>
@@ -237,9 +251,9 @@
               href={~p"/signin"}
               class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
             >
-              Sign in
+              {dgettext("memory", "Sign in")}
             </.link>
-            to see your results.
+            {dgettext("memory", "to see your results.")}
           </li>
         <% end %>
       </.score_list>
@@ -247,7 +261,7 @@
         id="best-results"
         icon="hero-trophy"
         icon_class="text-amber-500"
-        title="Best results"
+        title={dgettext("memory", "Best results")}
         empty={@leaderboard.best == []}
       >
         <li
@@ -256,7 +270,10 @@
         >
           <span class="w-5 text-right tabular-nums text-base-content/40">{place}</span>
           <span class="flex-1 truncate">{player_name(result.user)}</span>
-          <span class="w-12 text-right tabular-nums text-base-content/60" title="Accuracy">
+          <span
+            class="w-12 text-right tabular-nums text-base-content/60"
+            title={dgettext("memory", "Accuracy")}
+          >
             {format_accuracy(result)}
           </span>
           <span class="font-medium tabular-nums">{format_time(result.elapsed_ms)}</span>
@@ -266,7 +283,7 @@
         id="latest-games"
         icon="hero-clock"
         icon_class="text-octo-indigo"
-        title="Latest games"
+        title={dgettext("memory", "Latest games")}
         empty={@leaderboard.latest == []}
       >
         <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
@@ -280,7 +297,7 @@
           <span
             :if={@settings.players == 1}
             class="w-12 text-right tabular-nums text-base-content/60"
-            title="Accuracy"
+            title={dgettext("memory", "Accuracy")}
           >
             {format_accuracy(hd(game.players))}
           </span>

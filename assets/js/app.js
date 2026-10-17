@@ -224,7 +224,7 @@ if (memoryNode) {
   let muted = false
   try { muted = localStorage.getItem("memory-muted") === "true" } catch (_e) {}
 
-  const memory = window.Elm.Memory.init({node: memoryNode, flags: {gameUrl: window.location.href, settingsUrl: memoryNode.dataset.settingsUrl, nextGame: {name: memoryNode.dataset.nextGameName, path: memoryNode.dataset.nextGamePath}, guest: !memoryNode.dataset.userToken, muted}})
+  const memory = window.Elm.Memory.init({node: memoryNode, flags: {gameUrl: window.location.href, indexUrl: memoryNode.dataset.indexUrl, settingsUrl: memoryNode.dataset.settingsUrl, nextGame: {name: memoryNode.dataset.nextGameName, path: memoryNode.dataset.nextGamePath}, guest: !memoryNode.dataset.userToken, muted, texts: JSON.parse(memoryNode.dataset.texts)}})
   const socket = new Socket("/socket", {params: {user_token: memoryNode.dataset.userToken}})
   socket.connect()
 

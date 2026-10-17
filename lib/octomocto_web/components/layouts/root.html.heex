@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang={OctomoctoWeb.Locale.html_lang()}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -12,6 +12,13 @@
       Search engines must show only the URL without the query.
     --%>
     <link :if={assigns[:canonical_url]} rel="canonical" href={@canonical_url} />
+    <%!-- The same page in the other languages --%>
+    <link
+      :for={{hreflang, url} <- assigns[:alternate_urls] || []}
+      rel="alternate"
+      hreflang={hreflang}
+      href={url}
+    />
     <.social_tags
       title={assigns[:page_title]}
       description={page_description(assigns)}
@@ -22,7 +29,7 @@
       suffix={
         if(assigns[:page_title],
           do: " · Octomocto",
-          else: " · Brain Games to Play Solo or with Friends"
+          else: " · " <> gettext("Brain Games to Play Solo or with Friends")
         )
       }
       phx-no-format

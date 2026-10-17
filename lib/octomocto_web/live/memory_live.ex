@@ -19,12 +19,14 @@ defmodule OctomoctoWeb.MemoryLive do
 
   def mount(params, _session, socket) do
     if connected?(socket), do: Lobby.subscribe(Game)
+    locale = socket.assigns.locale
 
     {:ok,
      socket
      |> assign(
        [
-         canonical_url: url(~p"/memory"),
+         canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/memory"),
+         alternate_urls: Locale.alternate_urls("memory", ~p"/memory"),
          themes: Themes.list(),
          rules: rules(),
          banner: banner(params)
@@ -36,14 +38,15 @@ defmodule OctomoctoWeb.MemoryLive do
   @doc "The title and the description of the Memory pages, for search engines."
   def seo do
     [
-      page_title: "Memory Card Game",
-      page_description: "Play Memory online solo or with friends. Free, instant, no sign-up."
+      page_title: dgettext("memory", "Memory Card Game"),
+      page_description:
+        dgettext("memory", "Play Memory online solo or with friends. Free, instant, no sign-up.")
     ]
   end
 
   @doc "The message for the people who come from the links on Pairs One, the old site of the game."
   def banner(%{"utm_source" => "pairs.one"}),
-    do: "Pairs One found its pair! The game is moving to Octomocto."
+    do: dgettext("memory", "Pairs One found its pair! The game is moving to Octomocto.")
 
   def banner(_params), do: nil
 
@@ -54,6 +57,9 @@ defmodule OctomoctoWeb.MemoryLive do
     {:noreply,
      assign(socket,
        settings: settings,
+       # The other language keeps the settings
+       languages:
+         Locale.languages("memory", socket.assigns.locale, ~p"/memory?#{query(settings, [])}"),
        sizes: Board.sizes(settings.theme, settings.set),
        leaderboard: Memory.leaderboard(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
@@ -66,18 +72,18 @@ defmodule OctomoctoWeb.MemoryLive do
 
   def handle_event("new_game", _params, socket) do
     id = Memory.create_game(socket.assigns.settings)
-    {:noreply, redirect(socket, to: ~p"/memory/#{id}")}
+    {:noreply, redirect(socket, to: Locale.path(socket.assigns.locale, ~p"/memory/#{id}"))}
   end
 
   # The slider gives the position of the size in the list of possible sizes,
   # so that each step of the slider is a possible number of cards
   def handle_event("cards", %{"index" => index}, socket) do
-    %{sizes: sizes, settings: settings} = socket.assigns
+    %{sizes: sizes, settings: settings, locale: locale} = socket.assigns
 
     case Integer.parse(index) do
       {i, ""} when i in 0..(length(sizes) - 1)//1 ->
         {:noreply,
-         push_patch(socket, to: ~p"/memory?#{query(settings, cards: Enum.at(sizes, i))}")}
+         push_patch(socket, to: settings_path(locale, settings, cards: Enum.at(sizes, i)))}
 
       _ ->
         {:noreply, socket}
@@ -118,9 +124,18 @@ defmodule OctomoctoWeb.MemoryLive do
 
   defp rules do
     [
-      "Turn over 2 cards at a time (3 for triplets) to find the cards with the same image.",
-      "If they match, you get a point for each card, and you go again. If not, the next player goes.",
-      "Whoever has the most points wins. Alone, clear the field as fast as you can."
+      dgettext(
+        "memory",
+        "Turn over 2 cards at a time (3 for triplets) to find the cards with the same image."
+      ),
+      dgettext(
+        "memory",
+        "If they match, you get a point for each card, and you go again. If not, the next player goes."
+      ),
+      dgettext(
+        "memory",
+        "Whoever has the most points wins. Alone, clear the field as fast as you can."
+      )
     ]
   end
 
@@ -176,8 +191,8 @@ defmodule OctomoctoWeb.MemoryLive do
     """
   end
 
-  @doc "The path of this page with the settings of the game in the given state."
-  def settings_path(state) do
+  @doc "The path of this page in the language with the settings of the game in the given state."
+  def settings_path(locale, state) do
     settings = %{
       theme: state.theme,
       set: state.set,
@@ -186,7 +201,12 @@ defmodule OctomoctoWeb.MemoryLive do
       public: state.public
     }
 
-    ~p"/memory?#{query(settings, [])}"
+    settings_path(locale, settings, [])
+  end
+
+  # The path of this page in the language for the settings, with some of them changed
+  defp settings_path(locale, settings, changes) do
+    Locale.path(locale, ~p"/memory?#{query(settings, changes)}")
   end
 
   # The query of the page for the settings, with some of them changed
@@ -212,9 +232,33 @@ defmodule OctomoctoWeb.MemoryLive do
 
   @doc "The settings of a game in the list of public games."
   def game_summary(%{settings: settings}) do
-    set = if settings.set == 3, do: "Triplets", else: "Pairs"
-    "#{Themes.get(settings.theme).title} · #{set} · #{settings.cards} cards"
+    set =
+      if settings.set == 3, do: dgettext("memory", "Triplets"), else: dgettext("memory", "Pairs")
+
+    cards = dngettext("memory", "%{count} card", "%{count} cards", settings.cards)
+    "#{theme_title(Themes.get(settings.theme))} · #{set} · #{cards}"
   end
+
+  # The titles of the themes in `Themes`, for `mix gettext.extract`. A new
+  # theme must be in the list too.
+  @theme_titles [
+    dgettext_noop("memory", "Eighties"),
+    dgettext_noop("memory", "Spring"),
+    dgettext_noop("memory", "Flowers"),
+    dgettext_noop("memory", "Birds"),
+    dgettext_noop("memory", "Pets"),
+    dgettext_noop("memory", "Workout"),
+    dgettext_noop("memory", "Animals"),
+    dgettext_noop("memory", "Fairy Tales"),
+    dgettext_noop("memory", "Ecology"),
+    dgettext_noop("memory", "Music"),
+    dgettext_noop("memory", "Halloween"),
+    dgettext_noop("memory", "Flags")
+  ]
+
+  @doc "The title of a theme in the language of the page."
+  def theme_title(%{title: title}) when title in @theme_titles,
+    do: Gettext.dgettext(OctomoctoWeb.Gettext, "memory", title)
 
   @doc "Shows the accuracy of a player or a result, for example \"92%\", or \"—\" when it has none."
   def format_accuracy(player) do

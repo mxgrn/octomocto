@@ -2,15 +2,18 @@ defmodule OctomoctoWeb.MemoryController do
   use OctomoctoWeb, :controller
 
   alias Octomocto.Memory.Store
-  alias OctomoctoWeb.{HomeLive, MemoryLive}
+  alias OctomoctoWeb.{HomeLive, Locale, MemoryLive}
 
   plug :put_seo
 
   def show(conn, %{"id" => id}) do
+    locale = conn.assigns.locale
+
     if state = Store.read(id) do
       render(conn, :show,
         id: id,
-        settings_path: MemoryLive.settings_path(state),
+        index_path: Locale.path(locale, ~p"/memory"),
+        settings_path: MemoryLive.settings_path(locale, state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
         next_game: HomeLive.games() |> Enum.reject(&(&1.id == "memory")) |> Enum.random(),
@@ -19,9 +22,11 @@ defmodule OctomoctoWeb.MemoryController do
       )
     else
       conn
-      |> put_flash(:error, "This game does not exist (any more). Start a new one.")
+      |> put_flash(:error, gettext("This game does not exist (any more). Start a new one."))
       # Keeps the link source, so that the Memory page can show its banner
-      |> redirect(to: ~p"/memory?#{Map.take(conn.query_params, ["utm_source"])}")
+      |> redirect(
+        to: Locale.path(locale, ~p"/memory?#{Map.take(conn.query_params, ["utm_source"])}")
+      )
     end
   end
 

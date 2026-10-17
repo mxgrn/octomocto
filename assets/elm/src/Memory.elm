@@ -148,6 +148,7 @@ type Connection
 
 type alias Model =
     { gameUrl : String
+    , indexUrl : String
     , settingsUrl : String
     , nextGame : NextGame
     , guest : Bool
@@ -168,7 +169,15 @@ type alias Model =
     -- The size of the window, to pick the grid that fits best
     , viewport : ( Float, Float )
     , muted : Bool
+    , texts : Texts
     }
+
+
+{-| The texts in the language of the page, by the English text (see
+`OctomoctoWeb.MemoryHTML.elm_texts/0`).
+-}
+type alias Texts =
+    Dict String String
 
 
 {-| The other game that the end screen invites the player to try
@@ -181,16 +190,19 @@ type alias NextGame =
 
 type alias Flags =
     { gameUrl : String
+    , indexUrl : String
     , settingsUrl : String
     , nextGame : NextGame
     , guest : Bool
     , muted : Bool
+    , texts : Decode.Value
     }
 
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { gameUrl = flags.gameUrl
+      , indexUrl = flags.indexUrl
       , settingsUrl = flags.settingsUrl
       , nextGame = flags.nextGame
       , guest = flags.guest
@@ -202,6 +214,7 @@ init flags =
       , now = 0
       , viewport = ( 1024, 768 )
       , muted = flags.muted
+      , texts = Decode.decodeValue (Decode.dict Decode.string) flags.texts |> Result.withDefault Dict.empty
       }
     , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
     )
@@ -517,14 +530,30 @@ subscriptions model =
 -- VIEW
 
 
+{-| The text in the language of the page. A text without a translation
+stays in English.
+-}
+t : Texts -> String -> String
+t texts english =
+    Dict.get english texts |> Maybe.withDefault english
+
+
+{-| The text in the language of the page, with the values in its `{name}`
+parts.
+-}
+tf : Texts -> String -> List ( String, String ) -> String
+tf texts english values =
+    List.foldl (\( name, value ) result -> String.replace ("{" ++ name ++ "}") value result) (t texts english) values
+
+
 view : Model -> Html Msg
 view model =
     case model.connection of
         Connecting ->
-            p [ id "memory-connecting", class "py-24 text-center opacity-60" ] [ text "Joining the game…" ]
+            p [ id "memory-connecting", class "py-24 text-center opacity-60" ] [ text (t model.texts "Joining the game…") ]
 
         Failed reason ->
-            p [ id "memory-failed", class "py-24 text-center text-red-600" ] [ text ("Could not join the game: " ++ reason) ]
+            p [ id "memory-failed", class "py-24 text-center text-red-600" ] [ text (tf model.texts "Could not join the game: {reason}" [ ( "reason", reason ) ]) ]
 
         Joined me game ->
             viewGame model me game
@@ -558,20 +587,22 @@ viewGame model me game =
                             [ id "memory-back"
                             , href model.settingsUrl
                             , class "grid size-8 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 lg:hidden dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
-                            , Html.Attributes.title "Back to the settings"
+                            , Html.Attributes.title (t model.texts "Back to the settings")
                             ]
                             [ span [ class "hero-arrow-left size-5" ] [] ]
                         , h1 [ class "text-xl font-semibold tracking-tight lg:text-2xl" ]
-                            [ a [ id "memory-title-link", href "/memory", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Memory" ] ]
-                        , viewMuteButton model.muted
+                            [ a [ id "memory-title-link", href model.indexUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text (t model.texts "Memory") ] ]
+                        , viewMuteButton model.texts model.muted
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
                         [ text
-                            (if game.set == 2 then
-                                "Find the pairs of cards with the same image."
+                            (t model.texts
+                                (if game.set == 2 then
+                                    "Find the pairs of cards with the same image."
 
-                             else
-                                "Find the triplets of cards with the same image."
+                                 else
+                                    "Find the triplets of cards with the same image."
+                                )
                             )
                         ]
                     ]
@@ -580,7 +611,7 @@ viewGame model me game =
                     text ""
 
                   else
-                    viewRestartButton
+                    viewRestartButton model.texts
                 ]
             , if game.playersNeeded > 1 then
                 viewShareLink model
@@ -594,7 +625,7 @@ viewGame model me game =
                 text ""
             , if me == Nothing then
                 p [ id "memory-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 lg:order-5 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
-                    [ text "This game is full, so you can only watch it." ]
+                    [ text (t model.texts "This game is full, so you can only watch it.") ]
 
               else
                 text ""
@@ -603,16 +634,16 @@ viewGame model me game =
                 , href model.settingsUrl
                 , class "hidden text-sm font-medium text-octo-indigo underline-offset-4 transition hover:underline lg:order-6 lg:block dark:text-octo-indigo-light"
                 ]
-                [ text "Latest games and best results" ]
+                [ text (t model.texts "Latest games and best results") ]
             ]
         , div [ class "min-w-0 flex-1" ]
             [ div [ id "memory-board", class "relative mx-auto lg:rounded-2xl lg:bg-white lg:p-2 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10", style "width" (fieldWidth model me game layout gap) ]
                 [ viewField model me game layout gap
                 , if game.waiting then
-                    viewWaiting game
+                    viewWaiting model.texts game
 
                   else if game.finished then
-                    viewResult model.settingsUrl model.nextGame model.guest me game
+                    viewResult model me game
 
                   else
                     text ""
@@ -764,18 +795,20 @@ fieldWidth model me game layout gap =
         ++ "))"
 
 
-viewMuteButton : Bool -> Html Msg
-viewMuteButton muted =
+viewMuteButton : Texts -> Bool -> Html Msg
+viewMuteButton texts muted =
     button
         [ id "memory-mute"
         , class "grid size-8 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
         , onClick ToggleMuted
         , Html.Attributes.title
-            (if muted then
-                "Turn the sounds on"
+            (t texts
+                (if muted then
+                    "Turn the sounds on"
 
-             else
-                "Turn the sounds off"
+                 else
+                    "Turn the sounds off"
+                )
             )
         ]
         [ span
@@ -795,16 +828,16 @@ viewMuteButton muted =
 screen, only the icon shows, but not in the column of a screen that is wider
 than tall.
 -}
-viewRestartButton : Html Msg
-viewRestartButton =
+viewRestartButton : Texts -> Html Msg
+viewRestartButton texts =
     button
         [ id "memory-restart"
         , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
-        , Html.Attributes.title "Restart game"
+        , Html.Attributes.title (t texts "Restart game")
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text "Restart game" ]
+        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text (t texts "Restart game") ]
         ]
 
 
@@ -824,11 +857,13 @@ viewShareLink model =
             , onClick CopyLink
             ]
             [ text
-                (if model.copied then
-                    "Copied!"
+                (t model.texts
+                    (if model.copied then
+                        "Copied!"
 
-                 else
-                    "Copy link"
+                     else
+                        "Copy link"
+                    )
                 )
             ]
         ]
@@ -857,7 +892,7 @@ viewClock model game =
 
         stat label valueId value =
             div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
-                [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text label ]
+                [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text (t model.texts label) ]
                 , span [ id valueId, class "text-lg leading-tight font-light text-slate-700 tabular-nums lg:text-3xl dark:text-slate-100" ] [ text value ]
                 ]
     in
@@ -921,14 +956,14 @@ viewScores model me game =
                     , Html.Attributes.attribute "style" ("--player-color: " ++ player.color)
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "max-lg:landscape:flex-1 lg:flex-1" ] [ text (playerName me player) ]
+                    , span [ class "max-lg:landscape:flex-1 lg:flex-1" ] [ text (playerName model.texts me player) ]
                     , if current then
-                        span [ class "text-xs font-medium tracking-wide uppercase", style "color" player.color ] [ text "turn" ]
+                        span [ class "text-xs font-medium tracking-wide uppercase", style "color" player.color ] [ text (t model.texts "turn") ]
 
                       else
                         text ""
                     , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
-                    , span [ id ("memory-accuracy-" ++ player.id), class "text-xs text-slate-400 tabular-nums", Html.Attributes.title "Accuracy" ]
+                    , span [ id ("memory-accuracy-" ++ player.id), class "text-xs text-slate-400 tabular-nums", Html.Attributes.title (t model.texts "Accuracy") ]
                         [ text (formatAccuracy player.accuracy) ]
                     , if current then
                         viewTurnTimer model game
@@ -969,13 +1004,19 @@ viewTurnTimer model game =
             text ""
 
 
-playerName : Me -> Player -> String
-playerName me player =
+{-| A guest has the name of the color.
+-}
+playerName : Texts -> Me -> Player -> String
+playerName texts me player =
+    let
+        name =
+            Maybe.withDefault (t texts player.colorName) player.name
+    in
     if isMe me player then
-        Maybe.withDefault player.colorName player.name ++ " (you)"
+        tf texts "{name} (you)" [ ( "name", name ) ]
 
     else
-        Maybe.withDefault player.colorName player.name
+        name
 
 
 {-| The cards in a grid. A grid with an empty place has it in the middle.
@@ -1047,28 +1088,32 @@ viewCard model me game index card =
 
 {-| Covers the field until all players are in.
 -}
-viewWaiting : Game -> Html Msg
-viewWaiting game =
+viewWaiting : Texts -> Game -> Html Msg
+viewWaiting texts game =
     div
         [ id "memory-waiting"
         , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-octo-navy/80 p-4 text-center text-white"
         ]
-        [ p [ class "text-3xl font-semibold" ] [ text "Waiting for players" ]
+        [ p [ class "text-3xl font-semibold" ] [ text (t texts "Waiting for players") ]
         , p [ id "memory-waiting-count", class "text-lg tabular-nums opacity-80" ]
             [ text
-                (String.fromInt (List.length game.players)
-                    ++ " of "
-                    ++ String.fromInt game.playersNeeded
-                    ++ " players are in"
+                (tf texts
+                    "{players} of {needed} players are in"
+                    [ ( "players", String.fromInt (List.length game.players) )
+                    , ( "needed", String.fromInt game.playersNeeded )
+                    ]
                 )
             ]
-        , p [ class "text-sm opacity-60" ] [ text "Send the link to the other players. The game starts when all of them are in." ]
+        , p [ class "text-sm opacity-60" ] [ text (t texts "Send the link to the other players. The game starts when all of them are in.") ]
         ]
 
 
-viewResult : String -> NextGame -> Bool -> Me -> Game -> Html Msg
-viewResult settingsUrl nextGame guest me game =
+viewResult : Model -> Me -> Game -> Html Msg
+viewResult model me game =
     let
+        texts =
+            model.texts
+
         players =
             game.players
 
@@ -1078,22 +1123,22 @@ viewResult settingsUrl nextGame guest me game =
         message =
             case ( solo, winners players ) of
                 ( True, _ ) ->
-                    "Done!"
+                    t texts "Done!"
 
                 ( False, [ winner ] ) ->
                     if isMe me winner then
-                        "You win!"
+                        t texts "You win!"
 
                     else
                         case winner.name of
                             Just name ->
-                                name ++ " wins!"
+                                tf texts "{name} wins!" [ ( "name", name ) ]
 
                             Nothing ->
-                                "The " ++ winner.colorName ++ " player wins!"
+                                tf texts "The {color} player wins!" [ ( "color", t texts winner.colorName ) ]
 
                 ( False, _ ) ->
-                    "It's a tie!"
+                    t texts "It's a tie!"
 
         ranked =
             List.reverse (List.sortBy .score players)
@@ -1105,10 +1150,9 @@ viewResult settingsUrl nextGame guest me game =
         [ p [ class "text-3xl font-semibold" ] [ text message ]
         , p [ id "memory-final-time", class "text-lg tabular-nums opacity-80" ]
             [ text
-                ("Time "
-                    ++ formatTime game.elapsedMs
+                (tf texts "Time {time}" [ ( "time", formatTime game.elapsedMs ) ]
                     ++ (if solo then
-                            " · Accuracy " ++ formatAccuracy (List.head players |> Maybe.andThen .accuracy)
+                            " · " ++ tf texts "Accuracy {accuracy}" [ ( "accuracy", formatAccuracy (List.head players |> Maybe.andThen .accuracy) ) ]
 
                         else
                             ""
@@ -1124,9 +1168,9 @@ viewResult settingsUrl nextGame guest me game =
                     (\player ->
                         li [ class "flex items-center gap-2" ]
                             [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                            , span [ class "flex-1" ] [ text (playerName me player) ]
+                            , span [ class "flex-1" ] [ text (playerName texts me player) ]
                             , span [ class "pl-6 font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
-                            , span [ class "w-10 text-right tabular-nums opacity-70", Html.Attributes.title "Accuracy" ] [ text (formatAccuracy player.accuracy) ]
+                            , span [ class "w-10 text-right tabular-nums opacity-70", Html.Attributes.title (t texts "Accuracy") ] [ text (formatAccuracy player.accuracy) ]
                             ]
                     )
                     ranked
@@ -1140,33 +1184,44 @@ viewResult settingsUrl nextGame guest me game =
                 , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:-translate-y-0.5 hover:bg-octo-mist active:translate-y-0"
                 , onClick Restart
                 ]
-                [ text "Play again" ]
+                [ text (t texts "Play again") ]
         , a
             [ id "memory-next-game"
-            , href nextGame.path
+            , href model.nextGame.path
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]
-            [ text ("Or try " ++ nextGame.name ++ " ")
+            [ text (tf texts "Or try {game}" [ ( "game", model.nextGame.name ) ] ++ " ")
             , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
             ]
 
         -- On a large screen, the link is in the panel
         , a
             [ id "memory-result-leaderboards-link"
-            , href settingsUrl
+            , href model.settingsUrl
             , class "text-sm font-medium text-white underline-offset-4 transition hover:underline lg:hidden"
             ]
-            [ text "Latest games and best results" ]
+            [ text (t texts "Latest games and best results") ]
 
         -- Only a guest who played gets the call to sign in, not a spectator
-        , if guest && me /= Nothing then
+        , if model.guest && me /= Nothing then
+            let
+                -- The text around the link, which can be at any place of the text
+                ( before, after ) =
+                    case String.split "{sign_in}" (t texts "{sign_in} to keep your scores.") of
+                        [ b, c ] ->
+                            ( b, c )
+
+                        _ ->
+                            ( "", "" )
+            in
             p [ id "memory-sign-in", class "text-sm text-white/70" ]
-                [ a
+                [ text before
+                , a
                     [ href "/signin"
                     , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
                     ]
-                    [ text "Sign in" ]
-                , text " to keep your scores."
+                    [ text (t texts "Sign in") ]
+                , text after
                 ]
 
           else

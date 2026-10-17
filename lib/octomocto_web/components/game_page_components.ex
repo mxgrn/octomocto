@@ -6,6 +6,7 @@ defmodule OctomoctoWeb.GamePageComponents do
   indigo.
   """
   use Phoenix.Component
+  use Gettext, backend: OctomoctoWeb.Gettext
 
   import OctomoctoWeb.CoreComponents, only: [icon: 1, show: 2, hide: 1]
 
@@ -36,7 +37,9 @@ defmodule OctomoctoWeb.GamePageComponents do
     >
       <div class="mb-3 flex items-center justify-between gap-2">
         <h3 class="flex items-center gap-2 font-semibold">
-          <.icon name="hero-user-group" class={["size-4", "text-octo-indigo"]} /> Public games
+          <.icon name="hero-user-group" class={["size-4", "text-octo-indigo"]} /> {gettext(
+            "Public games"
+          )}
         </h3>
         {render_slot(@action)}
       </div>
@@ -45,7 +48,7 @@ defmodule OctomoctoWeb.GamePageComponents do
         id="lobby-games-empty"
         class="py-2 text-center text-sm text-base-content/50"
       >
-        No games now. Make a public one.
+        {gettext("No games now. Make a public one.")}
       </p>
       <ul :if={@games != []} id="lobby-games-list" class="-mx-2 space-y-1">
         <li
@@ -67,7 +70,7 @@ defmodule OctomoctoWeb.GamePageComponents do
                 :if={game[:finished]}
                 class="shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400"
               >
-                Finished
+                {gettext("Finished")}
               </span>
             </p>
             <p class="flex flex-wrap gap-x-2.5 text-xs text-base-content/70">
@@ -86,7 +89,10 @@ defmodule OctomoctoWeb.GamePageComponents do
           </div>
           <%= if game.status == :open do %>
             <span class="shrink-0 text-xs tabular-nums text-base-content/50">
-              {game.players_needed - game.seats_left} of {game.players_needed}
+              {gettext("%{joined} of %{needed}",
+                joined: game.players_needed - game.seats_left,
+                needed: game.players_needed
+              )}
             </span>
             <.link
               id={"join-#{game.id}"}
@@ -96,7 +102,7 @@ defmodule OctomoctoWeb.GamePageComponents do
                 "bg-octo-indigo hover:bg-octo-indigo/90"
               ]}
             >
-              Join
+              {gettext("Join")}
             </.link>
           <% else %>
             <.link
@@ -107,7 +113,7 @@ defmodule OctomoctoWeb.GamePageComponents do
                 "text-octo-indigo ring-octo-indigo/30 hover:bg-octo-mist dark:text-octo-indigo-light dark:hover:bg-octo-indigo-light/10"
               ]}
             >
-              Watch
+              {gettext("Watch")}
             </.link>
           <% end %>
         </li>
@@ -139,16 +145,16 @@ defmodule OctomoctoWeb.GamePageComponents do
         id="new-game"
         type="button"
         phx-click="new_game"
-        phx-disable-with="Starting..."
+        phx-disable-with={gettext("Starting...")}
         class={[
           "pointer-events-auto cursor-pointer rounded-full px-8 py-3 font-medium text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0",
           "bg-octo-indigo shadow-octo-indigo/25 hover:bg-octo-indigo/90"
         ]}
       >
-        Start game
+        {gettext("Start game")}
       </button>
       <p :if={@multiplayer} class="text-sm text-base-content/50">
-        You get a link to share with other players.
+        {gettext("You get a link to share with other players.")}
       </p>
     </div>
     """
@@ -166,7 +172,7 @@ defmodule OctomoctoWeb.GamePageComponents do
         "text-octo-indigo hover:text-octo-indigo/80"
       ]}
     >
-      <.icon name="hero-question-mark-circle" class="size-4" /> How to play
+      <.icon name="hero-question-mark-circle" class="size-4" /> {gettext("How to play")}
     </button>
     """
   end
@@ -196,12 +202,12 @@ defmodule OctomoctoWeb.GamePageComponents do
           class="hidden w-full max-w-lg rounded-2xl bg-base-100 p-6 shadow-xl ring-1 ring-base-content/10"
         >
           <div class="mb-4 flex items-center justify-between gap-3">
-            <h2 id="rules-title" class="text-xl font-semibold">How to play</h2>
+            <h2 id="rules-title" class="text-xl font-semibold">{gettext("How to play")}</h2>
             <button
               id="rules-close"
               type="button"
               phx-click={hide_rules()}
-              aria-label="Close"
+              aria-label={gettext("Close")}
               class="grid size-9 cursor-pointer place-items-center rounded-full text-base-content/60 transition hover:bg-base-200 hover:text-base-content"
             >
               <.icon name="hero-x-mark" class="size-5" />
@@ -227,11 +233,15 @@ defmodule OctomoctoWeb.GamePageComponents do
   seats, so others can only watch it.
   """
   def visibility_hint(%{players: 1, public: true}),
-    do: "Other players can watch this game in Public games."
+    do: gettext("Other players can watch this game in Public games.")
 
-  def visibility_hint(%{players: 1, public: false}), do: "Only players with the link can watch."
-  def visibility_hint(%{public: true}), do: "Other players see this game in Public games."
-  def visibility_hint(%{public: false}), do: "Only players with the link can join."
+  def visibility_hint(%{players: 1, public: false}),
+    do: gettext("Only players with the link can watch.")
+
+  def visibility_hint(%{public: true}),
+    do: gettext("Other players see this game in Public games.")
+
+  def visibility_hint(%{public: false}), do: gettext("Only players with the link can join.")
 
   defp presence(assigns) do
     ~H"""
@@ -242,8 +252,27 @@ defmodule OctomoctoWeb.GamePageComponents do
     """
   end
 
+  @doc "The names of the colors of the players, the same in all games."
+  def color_names do
+    [
+      gettext_noop("pink"),
+      gettext_noop("sky"),
+      gettext_noop("lime"),
+      gettext_noop("amber"),
+      gettext_noop("violet"),
+      gettext_noop("red"),
+      gettext_noop("teal"),
+      gettext_noop("indigo")
+    ]
+  end
+
+  @doc "The name of a color of a player in the language of the page."
+  def color_name(name), do: Gettext.gettext(OctomoctoWeb.Gettext, name)
+
   # A guest has the name of its color
-  defp player_name(%{name: nil, color_name: color_name}), do: String.capitalize(color_name)
+  defp player_name(%{name: nil, color_name: name}),
+    do: name |> color_name() |> String.capitalize()
+
   defp player_name(%{name: name}), do: name
 
   defp show_rules do

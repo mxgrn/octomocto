@@ -9,6 +9,7 @@ defmodule OctomoctoWeb.SitemapController do
       url(~p"/trains"),
       url(~p"/schulte"),
       url(~p"/memory"),
+      url(~p"/pt/memory"),
       url(~p"/set"),
       url(~p"/sudoku"),
       url(~p"/echo"),
