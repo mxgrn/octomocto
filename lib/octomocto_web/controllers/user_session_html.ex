@@ -78,7 +78,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
     ~H"""
     <div
       id="sign-in-bar"
-      class="flex w-full max-w-xl flex-col items-center gap-2 lg:w-auto lg:max-w-none xl:items-end"
+      class="flex w-full max-w-xl flex-col items-center gap-2 lg:w-auto lg:max-w-none lg:items-end"
     >
       <div class="flex w-full flex-col items-center gap-3 lg:w-auto lg:flex-row">
         <.telegram_widget

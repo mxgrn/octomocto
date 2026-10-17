@@ -10,7 +10,7 @@
   </div>
 
   <:header :if={!@current_scope}>
-    <section id="hero" class="flex justify-center xl:justify-end">
+    <section id="hero" class="flex justify-center lg:justify-end">
       <OctomoctoWeb.UserSessionHTML.sign_in_bar />
     </section>
   </:header>
@@ -27,7 +27,7 @@
           id="catalog-title"
           class="mb-4 text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content"
         >
-          Reach for a game
+          What are we playing today?
         </h2>
         <ul id="games" class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <li :for={game <- @games}>

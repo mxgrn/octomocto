@@ -52,7 +52,8 @@ defmodule OctomoctoWeb.Layouts do
     doc: "the links to the page in each language (see `OctomoctoWeb.Locale.languages/3`)"
 
   slot :header,
-    doc: "content between the wordmark and the theme toggle; on a small screen it goes below them"
+    doc:
+      "content between the wordmark and the theme toggle; on a small screen it goes into the menu"
 
   slot :inner_block, required: true
 
@@ -79,15 +80,21 @@ defmodule OctomoctoWeb.Layouts do
       <header
         :if={!@game}
         id="site-header"
-        class="flex min-h-16 flex-wrap items-center gap-x-8 gap-y-4 px-4 py-3 sm:px-6 lg:px-8"
+        phx-click-away={@header != [] && close_site_menu()}
+        class="relative flex min-h-16 flex-wrap items-center gap-x-4 gap-y-4 sm:gap-x-8 px-4 py-3 sm:px-6 lg:px-8"
       >
-        <.link :if={@home} id="home-link" navigate={~p"/"} class="group flex items-center gap-4">
-          <OctomoctoWeb.PageHTML.octopi class="h-20 shrink-0 drop-shadow-sm" />
+        <.link
+          :if={@home}
+          id="home-link"
+          navigate={~p"/"}
+          class="group flex items-center gap-3 sm:gap-4"
+        >
+          <OctomoctoWeb.PageHTML.octopi class="h-16 shrink-0 sm:h-20 drop-shadow-sm" />
           <div class="flex flex-col gap-1">
-            <.wordmark class="h-8" />
+            <.wordmark class="h-7 sm:h-8" />
             <p
               id="slogan"
-              class="text-lg font-medium tracking-tight text-octo-navy/70 dark:text-base-content/70"
+              class="text-base font-medium tracking-tight text-octo-navy/70 sm:text-lg dark:text-base-content/70"
             >
               {gettext("Use your heads")}
             </p>
@@ -97,56 +104,98 @@ defmodule OctomoctoWeb.Layouts do
           <.wordmark class="h-6 -translate-y-0.5" />
         </.link>
 
-        <div :if={@header != []} class="order-last w-full xl:order-none xl:w-auto xl:flex-1">
-          {render_slot(@header)}
-        </div>
+        <%!--
+          Below the lg breakpoint, the header slot and the theme toggle go into a menu
+          that opens below the header. On a larger screen, the wrapper has
+          `display: contents`, so that its children are items of the header.
+        --%>
+        <button
+          :if={@header != []}
+          id="site-menu-button"
+          type="button"
+          aria-label={gettext("Menu")}
+          aria-controls="site-menu"
+          aria-expanded="false"
+          phx-click={JS.toggle_attribute({"aria-expanded", "true", "false"})}
+          class="peer group ml-auto -mr-2 flex size-10 items-center justify-center rounded-full text-base-content/70 transition hover:bg-base-content/5 hover:text-base-content active:scale-90 lg:hidden"
+        >
+          <.icon name="hero-bars-3" class="size-6 group-aria-expanded:hidden" />
+          <.icon name="hero-x-mark" class="hidden size-6 group-aria-expanded:block" />
+        </button>
 
-        <div class="ml-auto flex items-center gap-4">
-          <.theme_toggle :if={!@current_scope} />
+        <div
+          id="site-menu"
+          class={[
+            "contents",
+            @header != [] &&
+              [
+                "max-lg:absolute max-lg:inset-x-4 max-lg:top-full max-lg:z-30 max-lg:hidden max-lg:flex-col max-lg:items-center max-lg:gap-4",
+                "max-lg:rounded-2xl max-lg:bg-base-100 max-lg:p-4 max-lg:shadow-lg max-lg:ring-1 max-lg:ring-base-content/10",
+                "max-lg:peer-aria-expanded:flex"
+              ]
+          ]}
+        >
+          <div
+            :if={@header != []}
+            class="w-full lg:w-auto lg:flex-1"
+          >
+            {render_slot(@header)}
+          </div>
 
-          <nav :if={@current_scope} id="user-menu" class="group relative text-sm">
-            <button
-              id="user-menu-button"
-              type="button"
-              class="flex cursor-default items-center gap-2 text-base-content/70 transition group-hover:text-base-content group-focus-within:text-base-content"
-            >
-              <img
-                :if={@current_scope.user.avatar_url}
-                src={@current_scope.user.avatar_url}
-                alt=""
-                class="size-6 rounded-full"
-              />
-              {@current_scope.user.display_name || @current_scope.user.name ||
-                @current_scope.user.email}
-            </button>
-            <%!-- pt-2 instead of a margin keeps the hover area unbroken between button and menu --%>
-            <div
-              id="user-menu-dropdown"
-              class="invisible absolute right-0 z-10 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
-            >
-              <div class="min-w-36 space-y-1 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg">
-                <div class="flex items-center justify-between gap-6 px-3 py-2">
-                  <span class="text-base-content/70">{gettext("Theme")}</span>
-                  <.theme_toggle />
+          <div class={[
+            "ml-auto flex items-center gap-4",
+            @header != [] &&
+              "max-lg:ml-0 max-lg:w-full max-lg:justify-between max-lg:border-t max-lg:border-base-content/10 max-lg:pt-4"
+          ]}>
+            <span :if={@header != []} class="text-sm text-base-content/70 lg:hidden">
+              {gettext("Theme")}
+            </span>
+            <.theme_toggle :if={!@current_scope} />
+
+            <nav :if={@current_scope} id="user-menu" class="group relative text-sm">
+              <button
+                id="user-menu-button"
+                type="button"
+                class="flex cursor-default items-center gap-2 text-base-content/70 transition group-hover:text-base-content group-focus-within:text-base-content"
+              >
+                <img
+                  :if={@current_scope.user.avatar_url}
+                  src={@current_scope.user.avatar_url}
+                  alt=""
+                  class="size-6 rounded-full"
+                />
+                {@current_scope.user.display_name || @current_scope.user.name ||
+                  @current_scope.user.email}
+              </button>
+              <%!-- pt-2 instead of a margin keeps the hover area unbroken between button and menu --%>
+              <div
+                id="user-menu-dropdown"
+                class="invisible absolute right-0 z-10 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+              >
+                <div class="min-w-36 space-y-1 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg">
+                  <div class="flex items-center justify-between gap-6 px-3 py-2">
+                    <span class="text-base-content/70">{gettext("Theme")}</span>
+                    <.theme_toggle />
+                  </div>
+                  <.link
+                    id="settings-link"
+                    href={~p"/settings"}
+                    class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+                  >
+                    {gettext("Settings")}
+                  </.link>
+                  <.link
+                    id="sign-out-link"
+                    href={~p"/signout"}
+                    method="delete"
+                    class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+                  >
+                    {gettext("Sign out")}
+                  </.link>
                 </div>
-                <.link
-                  id="settings-link"
-                  href={~p"/settings"}
-                  class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
-                >
-                  {gettext("Settings")}
-                </.link>
-                <.link
-                  id="sign-out-link"
-                  href={~p"/signout"}
-                  method="delete"
-                  class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
-                >
-                  {gettext("Sign out")}
-                </.link>
               </div>
-            </div>
-          </nav>
+            </nav>
+          </div>
         </div>
       </header>
 
@@ -335,6 +384,10 @@ defmodule OctomoctoWeb.Layouts do
       gtag('config', 'G-95LZEBCCVE');
     </script>
     """
+  end
+
+  defp close_site_menu do
+    JS.set_attribute({"aria-expanded", "false"}, to: "#site-menu-button")
   end
 
   @doc """
