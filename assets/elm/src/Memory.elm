@@ -541,14 +541,17 @@ viewGame model me game =
     in
     div
         [ id "memory-root"
-        , class "flex w-full flex-col gap-2 select-none lg:flex-row lg:items-start lg:gap-8"
+        , class "flex w-full flex-col gap-2 select-none max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:gap-3 lg:flex-row lg:items-start lg:gap-8"
         , classList [ ( "is-playing", not game.waiting && not game.finished ) ]
         ]
-        [ aside [ id "memory-panel", class "flex flex-col gap-2 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
+        [ aside [ id "memory-panel", class "flex flex-col gap-2 max-lg:landscape:w-44 max-lg:landscape:shrink-0 max-lg:landscape:gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
             -- On a small screen, the title, the stats and the restart button
-            -- are in one compact row. On a large screen, the row is not a
-            -- box (`contents`), so its items are in the column of the panel.
-            [ div [ class "flex items-center gap-1 lg:contents" ]
+            -- are in one compact row. On a small screen that is wider than
+            -- tall, they are in a narrow column at the left of the field, so
+            -- the field can be as tall as the screen. On a large screen, the
+            -- row is not a box (`contents`), so its items are in the column
+            -- of the panel.
+            [ div [ class "flex items-center gap-1 max-lg:landscape:flex-col max-lg:landscape:items-start max-lg:landscape:gap-4 lg:contents" ]
                 [ div [ class "min-w-0 lg:order-1" ]
                     [ div [ class "flex items-center gap-1 lg:gap-2" ]
                         [ a
@@ -627,6 +630,18 @@ largeScreen =
     1024
 
 
+{-| A small screen that is wider than tall. The panel is a narrow column at
+the left of the field, as the `max-lg:landscape:` classes make it.
+-}
+sideways : Model -> Bool
+sideways model =
+    let
+        ( width, height ) =
+            model.viewport
+    in
+    width < largeScreen && width > height
+
+
 {-| The grid with the largest cards in the space for the field. With the
 same size of the cards, the grid with fewer empty places.
 -}
@@ -643,8 +658,10 @@ bestLayout model me game =
 
 
 {-| The width and the height in pixels of the space for the field. On a
-large screen, the panel is at the left of the field. On a small screen, it
-is above the field, so the field can be as tall as the screen.
+large screen, the panel is at the left of the field. On a small screen that
+is wider than tall, the 11rem panel is at the left with a 0.75rem gap. On
+other small screens, it is above the field, so the field can be as tall as
+the screen.
 -}
 fieldSpace : Model -> Me -> Game -> ( Float, Float )
 fieldSpace model me game =
@@ -654,6 +671,9 @@ fieldSpace model me game =
     in
     ( if width >= largeScreen then
         width - 416
+
+      else if sideways model then
+        width - 204
 
       else
         width - 16
@@ -689,12 +709,17 @@ screen, it is the 4rem header, the 1.5rem bottom padding of the page and the
 4rem footer, and the 0.5rem padding of the board on each side. On a small
 screen, it is the 0.5rem padding of the page at the top and at the bottom,
 and the rows of the panel with the 0.5rem gaps between them. The heights of
-the rows are approximate, because the scores can wrap.
+the rows are approximate, because the scores can wrap. On a small screen
+that is wider than tall, the panel is at the left, so only the padding is
+not for the field.
 -}
 reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
     if Tuple.first model.viewport >= largeScreen then
         168
+
+    else if sideways model then
+        16
 
     else
         let
@@ -767,29 +792,30 @@ viewMuteButton muted =
 
 
 {-| Starts a new field for all players, also during a game. On a small
-screen, only the icon shows.
+screen, only the icon shows, but not in the column of a screen that is wider
+than tall.
 -}
 viewRestartButton : Html Msg
 viewRestartButton =
     button
         [ id "memory-restart"
-        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
+        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
         , Html.Attributes.title "Restart game"
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , span [ class "hidden lg:inline" ] [ text "Restart game" ]
+        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text "Restart game" ]
         ]
 
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 lg:order-3 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 lg:order-3 text-sm ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "memory-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1 dark:text-slate-100"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none max-lg:landscape:px-2 max-lg:landscape:py-1 lg:px-2 lg:py-1 dark:text-slate-100"
             ]
             []
         , button
@@ -810,7 +836,8 @@ viewShareLink model =
 
 {-| The time, and for one player, the accuracy (with more players, it is
 next to each score). On a small screen, they are small and without a box,
-at the right of the compact row of the panel.
+at the right of the compact row of the panel, or under the title in the
+column of a screen that is wider than tall.
 -}
 viewClock : Model -> Game -> Html Msg
 viewClock model game =
@@ -829,14 +856,14 @@ viewClock model game =
             List.length game.players == 1
 
         stat label valueId value =
-            div [ class "flex flex-col items-center justify-center" ]
+            div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
                 [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text label ]
                 , span [ id valueId, class "text-lg leading-tight font-light text-slate-700 tabular-nums lg:text-3xl dark:text-slate-100" ] [ text value ]
                 ]
     in
     div
         [ id "memory-clock"
-        , class "ml-auto flex gap-4 pr-2 lg:order-2 lg:ml-0 lg:grid lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10"
+        , class "ml-auto flex gap-4 pr-2 max-lg:landscape:ml-0 max-lg:landscape:gap-6 max-lg:landscape:pr-0 max-lg:landscape:pl-2 lg:order-2 lg:ml-0 lg:grid lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10"
         , classList [ ( "lg:grid-cols-2", solo ), ( "lg:grid-cols-1", not solo ) ]
         ]
         [ stat "time" "memory-time" (formatTime elapsedMs)
@@ -878,7 +905,7 @@ time that is left in the last seconds of the turn.
 -}
 viewScores : Model -> Me -> Game -> Html Msg
 viewScores model me game =
-    ul [ id "memory-scores", class "flex flex-wrap gap-2 lg:order-4 lg:flex-col" ]
+    ul [ id "memory-scores", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:order-4 lg:flex-col" ]
         (List.map
             (\player ->
                 let
@@ -894,7 +921,7 @@ viewScores model me game =
                     , Html.Attributes.attribute "style" ("--player-color: " ++ player.color)
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "lg:flex-1" ] [ text (playerName me player) ]
+                    , span [ class "max-lg:landscape:flex-1 lg:flex-1" ] [ text (playerName me player) ]
                     , if current then
                         span [ class "text-xs font-medium tracking-wide uppercase", style "color" player.color ] [ text "turn" ]
 
