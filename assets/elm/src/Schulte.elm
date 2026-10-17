@@ -28,7 +28,7 @@ import Browser
 import Browser.Dom
 import Browser.Events
 import Html exposing (Html, a, aside, button, div, h1, input, li, ol, p, span, text, ul)
-import Html.Attributes exposing (class, href, id, readonly, style, value)
+import Html.Attributes exposing (class, classList, href, id, readonly, style, value)
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
@@ -564,7 +564,11 @@ viewGame model me game =
         tall =
             isTall model me game
     in
-    div [ id "schulte-root", class "flex w-full flex-col gap-2 select-none max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:gap-3 lg:flex-row lg:items-start lg:gap-8" ]
+    div
+        [ id "schulte-root"
+        , class "flex w-full flex-col gap-2 select-none max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:gap-3 lg:flex-row lg:items-start lg:gap-8"
+        , classList [ ( "is-playing", not game.waiting && not (finished game) ) ]
+        ]
         [ aside [ id "schulte-panel", class "flex flex-col gap-2 max-lg:landscape:w-48 max-lg:landscape:shrink-0 max-lg:landscape:gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
             -- On a small screen, the title, the stats and the restart button
             -- are in one compact row. On a small screen that is wider than
@@ -671,8 +675,7 @@ viewTurnRequest model me game =
 
 
 {-| The width of the screen from which the panel is at the left of the
-board. On a smaller screen, the panel is a compact row above the board, and
-the page has no header and no footer.
+board. On a smaller screen, the panel is a compact row above the board.
 -}
 largeScreen : Float
 largeScreen =
@@ -726,8 +729,8 @@ boardSpace model me game =
 
 
 {-| The height in pixels of the screen that is not for the board. On a large
-screen, it is the 4rem header, the 1.5rem bottom padding of the page and the
-4rem footer. On a small screen, it is the 0.5rem padding of the page at the
+screen, it is the 1.5rem padding of the page at the top and at the bottom.
+The page of a game has no header and no footer. On a small screen, it is the 0.5rem padding of the page at the
 top and at the bottom, and the rows of the panel (the compact row, the link
 and the scores for a game with more players, and maybe the message for a
 watcher) with the 0.5rem gaps between them. The heights of the rows are approximate, because the scores can wrap. On a small screen that is wider
@@ -737,7 +740,7 @@ board.
 reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
     if Tuple.first model.viewport >= largeScreen then
-        152
+        48
 
     else if sideways model then
         16

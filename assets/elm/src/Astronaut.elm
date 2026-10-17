@@ -17,9 +17,10 @@ names out through a port.
 -}
 
 import Browser
+import Browser.Dom
 import Browser.Events
-import Html exposing (Html, aside, button, div, h1, input, li, p, span, text, ul)
-import Html.Attributes exposing (class, id, readonly, style, value)
+import Html exposing (Html, a, aside, button, div, h1, input, li, p, span, text, ul)
+import Html.Attributes exposing (class, href, id, readonly, style, value)
 import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (Decoder)
 import Process
@@ -134,6 +135,7 @@ type alias Model =
     , sinceStep : Float
     , walkTime : Float
     , copied : Bool
+    , viewport : ( Float, Float )
     }
 
 
@@ -149,8 +151,9 @@ init flags =
       , sinceStep = 0
       , walkTime = 0
       , copied = False
+      , viewport = ( 1024, 768 )
       }
-    , Cmd.none
+    , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
     )
 
 
@@ -168,6 +171,7 @@ type Msg
     | Frame Float
     | CopyLink
     | CopiedTimeout
+    | Resized Float Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -256,6 +260,9 @@ update msg model =
 
         CopiedTimeout ->
             ( { model | copied = False }, Cmd.none )
+
+        Resized width height ->
+            ( { model | viewport = ( width, height ) }, Cmd.none )
 
 
 stopWalking : Model -> Model
@@ -484,6 +491,7 @@ subscriptions model =
         , Browser.Events.onKeyDown keyDownDecoder
         , Browser.Events.onKeyUp (Decode.field "key" Decode.string |> Decode.andThen (arrowDecoder KeyUp))
         , Browser.Events.onVisibilityChange (\_ -> ReleaseKeys)
+        , Browser.Events.onResize (\w h -> Resized (toFloat w) (toFloat h))
         , if model.held == Nothing then
             Sub.none
 
@@ -543,19 +551,37 @@ view model =
             viewGame model me game
 
 
+{-| The rounds follow one after the other, and the message of the winner
+shows only for a short time before the next station. Thus the game is in play
+all the time while the player is in it.
+-}
 viewGame : Model -> String -> Game -> Html Msg
 viewGame model me game =
-    div [ id "astronaut-root", class "flex w-full max-w-[1400px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
-        [ aside [ id "astronaut-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
-            [ div []
-                [ h1 [ class "text-2xl font-semibold tracking-tight" ] [ text "Station Escape" ]
-                , p [ class "text-sm opacity-60" ] [ text "Arrow keys move along the station. Up is always the station's N." ]
+    div [ id "astronaut-root", class "is-playing flex w-full max-w-[1400px] flex-col gap-2 select-none max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:gap-3 lg:flex-row lg:items-start lg:gap-8" ]
+        [ aside [ id "astronaut-panel", class "flex flex-col gap-2 max-lg:landscape:w-48 max-lg:landscape:shrink-0 max-lg:landscape:gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
+            -- On a small screen, the back arrow and the title are in one
+            -- compact row. On a small screen that is wider than tall, the
+            -- panel is a narrow column at the left of the board, so the board
+            -- can be as tall as the screen.
+            [ div [ class "min-w-0" ]
+                [ div [ class "flex items-center gap-1 lg:gap-2" ]
+                    [ a
+                        [ id "astronaut-back"
+                        , href "/astronaut"
+                        , class "grid size-8 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 lg:hidden dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
+                        , Html.Attributes.title "Back to the settings"
+                        ]
+                        [ span [ class "hero-arrow-left size-5" ] [] ]
+                    , h1 [ class "truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
+                        [ a [ id "astronaut-title-link", href "/astronaut", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Station Escape" ] ]
+                    ]
+                , p [ class "hidden text-sm opacity-60 lg:block" ] [ text "Arrow keys move along the station. Up is always the station's N." ]
                 ]
             , viewShareLink model
             , viewScores me game.players
             ]
         , div [ class "min-w-0 flex-1" ]
-            [ div [ class "relative mx-auto", style "width" boardWidth ]
+            [ div [ class "relative mx-auto", style "width" (boardWidth model) ]
                 [ div
                     [ id "astronaut-board"
                     , style "transform" ("rotate(" ++ String.fromInt (game.quarterTurns * 90) ++ "deg)")
@@ -573,23 +599,63 @@ viewGame model me game =
         ]
 
 
-{-| The station is square. Make it as wide as possible, but never taller than
-the screen, so that the footer is also on the screen (minus the 4rem header,
-the 1.5rem bottom padding of the page and the 4rem footer).
+{-| The width of the screen from which the panel is at the left of the
+board. On a smaller screen, the panel is a compact row above the board.
 -}
-boardWidth : String
-boardWidth =
-    "min(100%, calc(100dvh - 9.5rem))"
+largeScreen : Float
+largeScreen =
+    1024
+
+
+{-| A small screen that is wider than tall. The panel is a narrow column at
+the left of the board, as the `max-lg:landscape:` classes make it.
+-}
+sideways : Model -> Bool
+sideways model =
+    let
+        ( width, height ) =
+            model.viewport
+    in
+    width < largeScreen && width > height
+
+
+{-| The height in pixels of the screen that is not for the board. On a large
+screen, it is the 1.5rem padding of the page at the top and at the bottom.
+The page of a game has no header and no footer. On a small screen, it is the
+0.5rem padding of the page at the top and at the bottom, and the rows of the
+panel (the compact row, the link and the scores) with the 0.5rem gaps after
+them. The height of the scores is approximate, because they can wrap. On a
+small screen that is wider than tall, the panel is at the left, so only the
+padding is not for the board.
+-}
+reservedHeight : Model -> Float
+reservedHeight model =
+    if Tuple.first model.viewport >= largeScreen then
+        48
+
+    else if sideways model then
+        16
+
+    else
+        16 + 40 + 46 + 36
+
+
+{-| The station is square. Make it as wide as possible, but small enough that
+it is all on the screen.
+-}
+boardWidth : Model -> String
+boardWidth model =
+    "min(100%, calc(100dvh - " ++ String.fromFloat (reservedHeight model) ++ "px))"
 
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-indigo-50 p-1 pl-4 text-sm ring-1 ring-indigo-200 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
+    div [ class "flex items-center gap-2 rounded-full bg-indigo-50 p-1 pl-4 text-sm ring-1 ring-indigo-200 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2" ]
         [ input
             [ id "astronaut-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-indigo-950 outline-none lg:px-2 lg:py-1"
+            , class "min-w-0 flex-1 truncate bg-transparent text-indigo-950 outline-none max-lg:landscape:px-2 max-lg:landscape:py-1 lg:px-2 lg:py-1"
             ]
             []
         , button
@@ -610,7 +676,7 @@ viewShareLink model =
 
 viewScores : String -> List Player -> Html Msg
 viewScores me players =
-    ul [ id "astronaut-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
+    ul [ id "astronaut-scores", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:flex-col" ]
         (List.map
             (\player ->
                 li
@@ -618,7 +684,7 @@ viewScores me players =
                     , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm shadow-sm ring-1 ring-slate-200"
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "lg:flex-1" ]
+                    , span [ class "max-lg:landscape:flex-1 lg:flex-1" ]
                         [ text
                             (if player.id == me then
                                 playerName player ++ " (you)"

@@ -60,6 +60,13 @@ document.addEventListener("pointerenter", e => {
   }
 }, true)
 
+// The page of a game does not scroll during the play (see app.css). Mobile
+// Safari scrolls also with `overflow: hidden`, so the moves of the finger
+// are stopped here too.
+document.addEventListener("touchmove", e => {
+  if (document.querySelector(".is-playing")) e.preventDefault()
+}, {passive: false})
+
 // Start the astronaut maze and connect its ports to the game channel.
 // Stop the arrow keys from scrolling the page. The player can use only the
 // keys, so a key press also unlocks the audio.
@@ -264,14 +271,6 @@ if (memoryNode) {
       channel.leave()
       memory.ports.memoryJoinFailed.send(reason)
     })
-
-  // On a small screen, the page does not scroll during the play (see
-  // app.css). Mobile Safari scrolls also with `overflow: hidden`, so the
-  // moves of the finger are stopped here too.
-  const smallScreen = window.matchMedia("(width < 64rem)")
-  document.addEventListener("touchmove", e => {
-    if (smallScreen.matches && document.querySelector("#memory-root.is-playing")) e.preventDefault()
-  }, {passive: false})
 
   memory.ports.memoryFlip.subscribe(card => channel.push("flip", {card}))
   memory.ports.memoryRestart.subscribe(() => channel.push("restart", {}))

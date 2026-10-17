@@ -26,6 +26,7 @@ the sounds to play out through a port. The player can mute the sounds.
 
 import Array exposing (Array)
 import Browser
+import Browser.Dom
 import Browser.Events
 import Html exposing (Html, a, aside, button, div, h1, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (class, classList, href, id, readonly, style, value)
@@ -173,6 +174,9 @@ type alias Model =
     -- The countdown step that last played its beep (see `countdownStep`)
     , beepedStep : Maybe Int
     , muted : Bool
+
+    -- The width and the height of the screen in pixels
+    , viewport : ( Float, Float )
     }
 
 
@@ -200,8 +204,9 @@ init flags =
       , now = 0
       , beepedStep = Nothing
       , muted = flags.muted
+      , viewport = ( 1024, 768 )
       }
-    , Cmd.none
+    , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
     )
 
 
@@ -224,6 +229,7 @@ type Msg
     | SyncClock Int Time.Posix
     | Tick Time.Posix
     | ToggleMuted
+    | Resized Float Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -270,6 +276,9 @@ update msg model =
 
         GotJoinFailed reason ->
             ( { model | connection = Failed reason }, Cmd.none )
+
+        Resized width height ->
+            ( { model | viewport = ( width, height ) }, Cmd.none )
 
         GotPlaced placed ->
             if model.pending /= Just { cell = placed.cell, digit = placed.digit } then
@@ -699,6 +708,7 @@ subscriptions model =
         , sudokuJoinFailed GotJoinFailed
         , sudokuPlaced GotPlaced
         , Browser.Events.onKeyDown (Decode.map KeyDown (Decode.field "key" Decode.string))
+        , Browser.Events.onResize (\w h -> Resized (toFloat w) (toFloat h))
         , case model.connection of
             Joined _ game ->
                 -- The grid comes only after the countdown, so an empty grid
@@ -741,18 +751,42 @@ viewGame model me game =
         countdown =
             Maybe.withDefault 0 (countdownStep model)
     in
-    div [ id "sudoku-root", class "flex w-full max-w-[1100px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
-        [ aside [ id "sudoku-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
-            [ div []
-                [ div [ class "flex items-center gap-2" ]
-                    [ h1 [ class "text-2xl font-semibold tracking-tight" ]
-                        [ a [ id "sudoku-title-link", href "/sudoku", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Sudoku Race" ] ]
-                    , viewMuteButton model.muted
+    div
+        [ id "sudoku-root"
+        , class "flex w-full max-w-[1100px] flex-col gap-2 select-none max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:gap-3 lg:flex-row lg:items-start lg:gap-8"
+        , classList [ ( "is-playing", not game.waiting && not game.finished ) ]
+        ]
+        [ aside [ id "sudoku-panel", class "flex flex-col gap-2 max-lg:landscape:w-48 max-lg:landscape:shrink-0 max-lg:landscape:gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
+            -- On a small screen, the title, the stats and the restart button
+            -- are in one compact row. On a small screen that is wider than
+            -- tall, they are in a narrow column at the left of the board, so
+            -- the board can be as tall as the screen. On a large screen, the
+            -- row is not a box (`contents`), so its items are in the column
+            -- of the panel.
+            [ div [ class "flex items-center gap-1 max-lg:landscape:flex-col max-lg:landscape:items-start max-lg:landscape:gap-4 lg:contents" ]
+                [ div [ class "min-w-0 lg:order-1" ]
+                    [ div [ class "flex items-center gap-1 lg:gap-2" ]
+                        [ a
+                            [ id "sudoku-back"
+                            , href model.settingsUrl
+                            , class "grid size-8 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 lg:hidden dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
+                            , Html.Attributes.title "Back to the settings"
+                            ]
+                            [ span [ class "hero-arrow-left size-5" ] [] ]
+                        , h1 [ class "truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
+                            [ a [ id "sudoku-title-link", href "/sudoku", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Sudoku Race" ] ]
+                        , viewMuteButton model.muted
+                        ]
+                    , p [ class "hidden text-sm opacity-60 lg:block" ]
+                        [ text (String.toUpper (String.left 1 game.difficulty) ++ String.dropLeft 1 game.difficulty ++ ". Each row, column and box has each digit one time.") ]
                     ]
-                , p [ class "text-sm opacity-60" ]
-                    [ text (String.toUpper (String.left 1 game.difficulty) ++ String.dropLeft 1 game.difficulty ++ ". Each row, column and box has each digit one time.") ]
+                , viewClock model game
+                , if me == Nothing then
+                    text ""
+
+                  else
+                    viewRestartButton
                 ]
-            , viewClock model game
             , if game.playersNeeded > 1 then
                 viewShareLink model
 
@@ -764,14 +798,17 @@ viewGame model me game =
               else
                 text ""
             , if me == Nothing then
-                p [ id "sudoku-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
+                p [ id "sudoku-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 lg:order-5 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
                     [ text "This game is full, so you can only watch it." ]
 
               else
-                viewRestartButton
+                text ""
             ]
-        , div [ class "mx-auto flex w-full min-w-0 flex-1 flex-col items-center gap-4" ]
-            [ div [ class "relative w-full", style "max-width" "min(100%, 36rem, calc(100dvh - 10rem))" ]
+
+        -- On a small screen that is wider than tall, the pad is at the right
+        -- of the grid. On other screens, it is below the grid.
+        , div [ class "mx-auto flex w-full min-w-0 flex-1 flex-col items-center gap-2 max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:justify-center max-lg:landscape:gap-3 lg:gap-4" ]
+            [ div [ class "relative w-full min-w-0", style "max-width" (boardWidth model me game) ]
                 [ viewBoard model me game
                 , if game.waiting then
                     viewWaiting game
@@ -786,12 +823,97 @@ viewGame model me game =
                     text ""
                 ]
             , if canPlay me game then
-                viewPad model game
+                viewPad model me game
 
               else
                 text ""
             ]
         ]
+
+
+{-| The width of the screen from which the panel is at the left of the
+board. On a smaller screen, the panel is a compact row above the board.
+-}
+largeScreen : Float
+largeScreen =
+    1024
+
+
+{-| A small screen that is wider than tall. The panel is a narrow column at
+the left of the grid and the pad is at the right of the grid, as the
+`max-lg:landscape:` classes make it.
+-}
+sideways : Model -> Bool
+sideways model =
+    let
+        ( width, height ) =
+            model.viewport
+    in
+    width < largeScreen && width > height
+
+
+{-| The height in pixels of the screen that is not for the grid. On a large
+screen, it is the 1.5rem padding of the page at the top and at the bottom,
+and the pad (4rem) with the 1rem gap above it. On a small screen, it is the
+0.5rem padding of the page at the top and at the bottom, the rows of the
+panel (the compact row, the link and the scores for a game with more
+players, and maybe the message for a watcher), the pad and the 0.5rem gaps
+between them. The heights of the rows are approximate, because the scores
+can wrap. On a small screen that is wider than tall, the panel and the pad
+are at the sides of the grid, so only the padding is not for the grid.
+
+The pad shows only during a puzzle, but there is always space for it, so
+that the grid does not change its size when the puzzle starts. A watcher
+has no pad.
+-}
+reservedHeight : Model -> Me -> Game -> Float
+reservedHeight model me game =
+    let
+        pad gap =
+            if me == Nothing then
+                0
+
+            else
+                64 + gap
+    in
+    if Tuple.first model.viewport >= largeScreen then
+        48 + pad 16
+
+    else if sideways model then
+        16
+
+    else
+        16
+            + 48
+            + (if game.playersNeeded > 1 then
+                46
+
+               else
+                0
+              )
+            + (if List.length game.players > 1 then
+                36
+
+               else
+                0
+              )
+            + (if me == Nothing then
+                52
+
+               else
+                0
+              )
+            + pad 8
+
+
+{-| Make the grid as wide as possible, but small enough that the grid and
+the pad are all on the screen. The grid is square.
+-}
+boardWidth : Model -> Me -> Game -> String
+boardWidth model me game =
+    "min(100%, 36rem, calc(100dvh - "
+        ++ String.fromFloat (reservedHeight model me game)
+        ++ "px))"
 
 
 viewMuteButton : Bool -> Html Msg
@@ -827,22 +949,23 @@ viewRestartButton : Html Msg
 viewRestartButton =
     button
         [ id "sudoku-restart"
-        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
+        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
+        , Html.Attributes.title "Restart game"
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , text "Restart game"
+        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text "Restart game" ]
         ]
 
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:order-3 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "sudoku-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1 dark:text-slate-100"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none max-lg:landscape:px-2 max-lg:landscape:py-1 lg:px-2 lg:py-1 dark:text-slate-100"
             ]
             []
         , button
@@ -877,14 +1000,14 @@ viewClock model game =
             else
                 max 0 (model.now - model.clockStart)
     in
-    div [ id "sudoku-clock", class "grid grid-cols-2 divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200 dark:divide-white/10 dark:bg-white/5 dark:shadow-none dark:ring-white/10" ]
-        [ div [ class "flex flex-col items-center justify-center" ]
-            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "time" ]
-            , span [ id "sudoku-time", class "text-3xl font-light text-slate-700 tabular-nums dark:text-slate-100" ] [ text (formatTime elapsedMs) ]
+    div [ id "sudoku-clock", class "ml-auto flex gap-4 pr-2 max-lg:landscape:ml-0 max-lg:landscape:gap-6 max-lg:landscape:pr-0 max-lg:landscape:pl-2 lg:order-2 lg:ml-0 lg:grid lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10" ]
+        [ div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
+            [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text "time" ]
+            , span [ id "sudoku-time", class "text-lg leading-tight font-light text-slate-700 tabular-nums lg:text-3xl dark:text-slate-100" ] [ text (formatTime elapsedMs) ]
             ]
-        , div [ class "flex flex-col items-center justify-center" ]
-            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "empty" ]
-            , span [ id "sudoku-empty-left", class "text-3xl font-bold text-octo-indigo tabular-nums dark:text-octo-indigo-light" ]
+        , div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
+            [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text "empty" ]
+            , span [ id "sudoku-empty-left", class "text-xl leading-tight font-bold text-octo-indigo tabular-nums lg:text-3xl dark:text-octo-indigo-light" ]
                 [ text
                     (if Array.isEmpty game.cells then
                         "–"
@@ -913,7 +1036,7 @@ filled
 -}
 viewScores : Me -> Game -> Html Msg
 viewScores me game =
-    ul [ id "sudoku-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
+    ul [ id "sudoku-scores", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:order-4 lg:flex-col" ]
         (List.map
             (\player ->
                 li
@@ -922,7 +1045,7 @@ viewScores me game =
                     , classList [ ( "opacity-50", player.away ) ]
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "lg:flex-1" ] [ text (playerName me player) ]
+                    , span [ class "max-lg:landscape:flex-1 lg:flex-1" ] [ text (playerName me player) ]
                     , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
                     ]
             )
@@ -1082,10 +1205,12 @@ cellName cell filled =
 
 
 {-| The digits 1 to 9, each with the number of times that it must still go
-on the grid. A digit that is on the grid 9 times is off.
+on the grid. A digit that is on the grid 9 times is off. Below the grid, the
+digits are in one row as wide as the grid. At the right of the grid, they
+are in 3 rows.
 -}
-viewPad : Model -> Game -> Html Msg
-viewPad model game =
+viewPad : Model -> Me -> Game -> Html Msg
+viewPad model me game =
     let
         ready =
             case model.selected of
@@ -1095,7 +1220,7 @@ viewPad model game =
                 Nothing ->
                     False
     in
-    div [ id "sudoku-pad", class "grid w-full grid-cols-9 gap-1.5 sm:gap-2", style "max-width" "min(100%, 36rem, calc(100dvh - 10rem))" ]
+    div [ id "sudoku-pad", class "grid w-full grid-cols-9 gap-1.5 max-lg:landscape:w-40 max-lg:landscape:shrink-0 max-lg:landscape:grid-cols-3 sm:gap-2", style "max-width" (boardWidth model me game) ]
         (List.map
             (\digit ->
                 let

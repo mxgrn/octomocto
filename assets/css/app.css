@@ -191,6 +191,16 @@
 
 .countdown-pop { animation: countdown-pop 300ms ease-out; }
 
+/* The page of a game does not scroll during the play, so that a touch on
+   the board always is a move. The root of each game has the `is-playing`
+   class then, and the board fills the free screen. */
+html:has(.is-playing),
+html:has(.is-playing) body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
 /* The phone in the request to turn the screen turns to landscape, waits,
    and turns back */
 @keyframes turn-phone {
@@ -263,16 +273,6 @@
    preserve-3d makes it flat, and then the back of the card shows. */
 .memory-card.is-cleared { pointer-events: none; opacity: 0; scale: 0.85; }
 
-/* On a small screen, the page does not scroll during the play, so that a
-   touch on a card always turns it. The field fills the free screen there. */
-@media (width < 64rem) {
-  html:has(#memory-root.is-playing),
-  html:has(#memory-root.is-playing) body {
-    overflow: hidden;
-    overscroll-behavior: none;
-    touch-action: none;
-  }
-}
 
 /* The score row of the player of the turn has a ring in the player's color */
 .memory-current { box-shadow: 0 0 0 2px var(--player-color); }

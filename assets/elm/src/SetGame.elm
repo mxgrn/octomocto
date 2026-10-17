@@ -773,23 +773,57 @@ viewGame model me game =
         layout =
             tableLayout model game
 
+        width =
+            tableWidth model me game layout
+
         countdown =
             Maybe.withDefault 0 (countdownStep model)
     in
-    div [ id "set-root", class "flex w-full max-w-[1400px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
+    div
+        [ id "set-root"
+        , class "flex w-full max-w-[1400px] flex-col gap-2 select-none max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:gap-3 lg:flex-row lg:items-start lg:gap-8"
+        , classList [ ( "is-playing", playing game ) ]
+        ]
         [ stripePatterns
-        , aside [ id "set-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
-            [ div []
-                [ div [ class "flex items-center gap-2" ]
-                    [ h1 [ class "text-2xl font-semibold tracking-tight" ]
-                        [ a [ id "set-title-link", href "/set", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Set" ] ]
-                    , viewMuteButton model.muted
+        , aside [ id "set-panel", class "flex flex-col gap-2 max-lg:landscape:w-44 max-lg:landscape:shrink-0 max-lg:landscape:gap-3 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-4" ]
+            -- On a small screen, the title, the stats, the Hint button and
+            -- the restart button are in one compact row. On a small screen
+            -- that is wider than tall, they are in a narrow column at the
+            -- left of the table, so the table can be as tall as the screen.
+            -- On a large screen, the row is not a box (`contents`), so its
+            -- items are in the column of the panel.
+            [ div [ class "flex items-center gap-1 max-lg:landscape:flex-col max-lg:landscape:items-start max-lg:landscape:gap-3 lg:contents" ]
+                [ div [ class "min-w-0 lg:order-1" ]
+                    [ div [ class "flex items-center gap-1 lg:gap-2" ]
+                        [ a
+                            [ id "set-back"
+                            , href model.settingsUrl
+                            , class "grid size-8 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 lg:hidden dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
+                            , Html.Attributes.title "Back to the settings"
+                            ]
+                            [ span [ class "hero-arrow-left size-5" ] [] ]
+                        , h1 [ class "text-xl font-semibold tracking-tight lg:text-2xl" ]
+                            [ a [ id "set-title-link", href "/set", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Set" ] ]
+                        , viewMuteButton model.muted
+                        ]
+                    , p [ class "hidden text-sm opacity-60 lg:block" ]
+                        [ text "Find 3 cards where each feature is all the same or all different." ]
                     ]
-                , p [ class "text-sm opacity-60" ]
-                    [ text "Find 3 cards where each feature is all the same or all different." ]
+                , viewClock model game
+                , if canPlay me game then
+                    viewClueButton model.clue
+
+                  else
+                    text ""
+                , if me == Nothing then
+                    text ""
+
+                  else
+                    viewRestartButton
                 ]
-            , viewClock model game
-            , if game.playersNeeded > 1 then
+
+            -- The link is only for the players who did not join yet
+            , if game.playersNeeded > 1 && not (playing game) then
                 viewShareLink model
 
               else
@@ -799,21 +833,16 @@ viewGame model me game =
 
               else
                 text ""
-            , if canPlay me game then
-                viewClue model.clue
-
-              else
-                text ""
             , viewLastSet me game
             , if me == Nothing then
-                p [ id "set-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
+                p [ id "set-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 lg:order-7 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
                     [ text "This game is full, so you can only watch it." ]
 
               else
-                viewRestartButton
+                text ""
             ]
         , div [ class "min-w-0 flex-1" ]
-            [ div [ class "relative mx-auto", style "width" (tableWidth layout) ]
+            [ div [ class "relative mx-auto", style "width" width ]
                 [ viewTable model me game layout
                 , if game.waiting then
                     viewWaiting game
@@ -827,9 +856,49 @@ viewGame model me game =
                   else
                     text ""
                 ]
-            , viewHint model.hint
+            , viewNotes model me game width
             ]
         ]
+
+
+{-| True from the countdown until the end of the game. Then the page does
+not scroll.
+-}
+playing : Game -> Bool
+playing game =
+    not game.waiting && not game.finished
+
+
+{-| The clues and why the last wrong set is not a set, under the table and
+as wide as the table
+-}
+viewNotes : Model -> Me -> Game -> String -> Html Msg
+viewNotes model me game width =
+    let
+        clue =
+            if canPlay me game then
+                viewClues model.clue
+
+            else
+                text ""
+    in
+    if clueLines model me game == 0 && model.hint == Nothing then
+        text ""
+
+    else
+        div [ class "mx-auto mt-2 flex flex-col gap-2", style "width" width ]
+            [ clue, viewHint model.hint ]
+
+
+{-| The number of clues on the screen
+-}
+clueLines : Model -> Me -> Game -> Int
+clueLines model me game =
+    if canPlay me game then
+        Maybe.map (.shown >> List.length) model.clue |> Maybe.withDefault 0
+
+    else
+        0
 
 
 {-| Why the last wrong set is not a set. It is keyed, so that it pops in
@@ -842,7 +911,7 @@ viewHint hint =
             Html.Keyed.node "div"
                 []
                 [ ( String.fromInt count
-                  , p [ id "set-hint", class "set-last-pop mt-3 text-center text-sm text-slate-500 dark:text-slate-400" ]
+                  , p [ id "set-hint", class "set-last-pop text-center text-sm text-slate-500 dark:text-slate-400" ]
                         [ span [ class "hero-light-bulb mr-1 size-4 align-[-3px] text-amber-500" ] []
                         , text sentence
                         ]
@@ -887,20 +956,119 @@ tableLayout model game =
         Layout 3 lines False
 
 
-{-| Make the table as wide as possible, but never taller than the screen
-(minus the 4rem header, the 1.5rem bottom padding of the page and the 4rem
-footer), and never with cards wider than 14rem.
+{-| The width of the screen from which the panel is at the left of the
+table. On a smaller screen, the panel is a compact row above the table.
 -}
-tableWidth : Layout -> String
-tableWidth layout =
+largeScreen : Float
+largeScreen =
+    1024
+
+
+{-| A small screen that is wider than tall. The panel is a narrow column at
+the left of the table, as the `max-lg:landscape:` classes make it.
+-}
+sideways : Model -> Bool
+sideways model =
     let
-        ratio =
-            toFloat layout.columns * cardRatio / toFloat layout.rows
+        ( width, height ) =
+            model.viewport
     in
-    "min(100%, "
+    width < largeScreen && width > height
+
+
+{-| The gap in pixels between the cards, as the `gap-2 sm:gap-3` classes of
+the table make it
+-}
+cardGap : Model -> Float
+cardGap model =
+    if Tuple.first model.viewport >= 640 then
+        12
+
+    else
+        8
+
+
+{-| The height in pixels of the screen that is not for the table. The page
+of a game has no header and no footer. On a large screen, the panel is at
+the left, so it is the 1.5rem padding of the page at the top and at the
+bottom. On a small screen that is wider than tall, the panel is also at the
+left, so it is the 0.5rem padding of the page at the top and at the bottom.
+On other small screens, it is the padding, and the rows of the panel with
+the 0.5rem gaps between them.
+
+On all screens, the clues and the reason for a wrong set are under the
+table. A clue has one line, and a reason has 2 lines on a narrow screen.
+The heights of the rows are approximate, because the text can wrap.
+
+-}
+reservedHeight : Model -> Me -> Game -> Float
+reservedHeight model me game =
+    let
+        width =
+            Tuple.first model.viewport
+
+        row condition rowHeight =
+            if condition then
+                rowHeight + 8
+
+            else
+                0
+
+        lines =
+            toFloat (clueLines model me game)
+
+        panel =
+            if width >= largeScreen then
+                48
+
+            else if sideways model then
+                16
+
+            else
+                16
+                    + row True 40
+                    + row (game.playersNeeded > 1 && not (playing game)) 40
+                    + row (List.length game.players > 1) 30
+                    + row (game.lastSet /= Nothing) 46
+                    + row (me == Nothing) 44
+    in
+    panel
+        + row (lines > 0) (16 + 24 * lines)
+        + row (model.hint /= Nothing)
+            (if width >= 640 then
+                20
+
+             else
+                40
+            )
+
+
+{-| Make the table as wide as possible, but small enough that it is all on
+the screen, and never with cards wider than 14rem. The width comes from
+the height of the space without the gaps between the rows.
+-}
+tableWidth : Model -> Me -> Game -> Layout -> String
+tableWidth model me game layout =
+    let
+        px value =
+            String.fromFloat value ++ "px"
+
+        gap =
+            cardGap model
+
+        gaps =
+            px (gap * toFloat (layout.columns - 1))
+    in
+    "min(100%, calc("
         ++ String.fromInt (layout.columns * 14)
-        ++ "rem, calc((100dvh - 9.5rem) * "
-        ++ String.fromFloat ratio
+        ++ "rem + "
+        ++ gaps
+        ++ "), calc((100dvh - "
+        ++ px (reservedHeight model me game + gap * toFloat (layout.rows - 1))
+        ++ ") * "
+        ++ String.fromFloat (toFloat layout.columns * cardRatio / toFloat layout.rows)
+        ++ " + "
+        ++ gaps
         ++ "))"
 
 
@@ -931,69 +1099,80 @@ viewMuteButton muted =
         ]
 
 
-{-| The Hint button, and the clues under it. Each clue is keyed, so that
-only the new clue pops in. The button is off when all clues of the set
-are on the screen.
+{-| The Hint button. It is off when all clues of the set are on the screen.
+On a small screen, only the icon shows, but not in the column of a screen
+that is wider than tall.
 -}
-viewClue : Maybe Clue -> Html Msg
-viewClue clue =
+viewClueButton : Maybe Clue -> Html Msg
+viewClueButton clue =
     let
         shown =
             Maybe.map .shown clue |> Maybe.withDefault []
 
         more =
             Maybe.map (\c -> c.next /= []) clue |> Maybe.withDefault True
+
+        label =
+            if shown == [] then
+                "Hint"
+
+            else if more then
+                "Next hint"
+
+            else
+                "No more hints"
     in
-    div [ class "flex flex-col gap-2" ]
-        [ button
-            [ id "set-hint-button"
-            , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-amber-700 ring-1 ring-amber-200 transition enabled:hover:bg-amber-50 enabled:hover:ring-amber-300 enabled:active:scale-95 disabled:opacity-50 lg:self-start dark:text-amber-300 dark:ring-amber-400/30 dark:enabled:hover:bg-amber-400/10 dark:enabled:hover:ring-amber-400/50"
-            , Html.Attributes.disabled (not more)
-            , onClick AskClue
-            ]
-            [ span [ class "hero-light-bulb size-4 transition-transform group-enabled:group-hover:-rotate-12" ] []
-            , text
-                (if shown == [] then
-                    "Hint"
-
-                 else if more then
-                    "Next hint"
-
-                 else
-                    "No more hints"
-                )
-            ]
-        , if shown == [] then
-            text ""
-
-          else
-            Html.Keyed.ul [ id "set-clues", class "flex flex-col gap-1 rounded-2xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
-                (List.map (\sentence -> ( sentence, li [ class "set-last-pop" ] [ text sentence ] )) shown)
+    button
+        [ id "set-hint-button"
+        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-amber-700 ring-1 ring-amber-200 transition enabled:hover:bg-amber-50 enabled:hover:ring-amber-300 enabled:active:scale-95 disabled:opacity-50 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-amber-300 dark:ring-amber-400/30 dark:enabled:hover:bg-amber-400/10 dark:enabled:hover:ring-amber-400/50"
+        , Html.Attributes.disabled (not more)
+        , onClick AskClue
+        , Html.Attributes.title label
+        ]
+        [ span [ class "hero-light-bulb size-4 transition-transform group-enabled:group-hover:-rotate-12" ] []
+        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text label ]
         ]
 
 
-{-| Starts a new table for all players, also during a game.
+{-| The clues from the Hint button. Each clue is keyed, so that only the new
+clue pops in.
+-}
+viewClues : Maybe Clue -> Html Msg
+viewClues clue =
+    case Maybe.map .shown clue |> Maybe.withDefault [] of
+        [] ->
+            text ""
+
+        shown ->
+            Html.Keyed.ul [ id "set-clues", class "flex flex-col gap-1 rounded-2xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
+                (List.map (\sentence -> ( sentence, li [ class "set-last-pop" ] [ text sentence ] )) shown)
+
+
+{-| Starts a new table for all players, also during a game. On a small
+screen, only the icon shows, but not in the column of a screen that is wider
+than tall.
 -}
 viewRestartButton : Html Msg
 viewRestartButton =
     button
         [ id "set-restart"
-        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
+        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-7 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
+        , Html.Attributes.title "Restart game"
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , text "Restart game"
+        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text "Restart game" ]
         ]
 
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:order-3 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "set-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1 dark:text-slate-100"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none max-lg:landscape:px-2 max-lg:landscape:py-1 lg:px-2 lg:py-1 dark:text-slate-100"
             ]
             []
         , button
@@ -1013,7 +1192,9 @@ viewShareLink model =
 
 
 {-| The time on the left, and the cards that are still in the deck on the
-right.
+right. On a small screen, they are small and without a box, at the right of
+the compact row of the panel, or under the title in the column of a screen
+that is wider than tall.
 -}
 viewClock : Model -> Game -> Html Msg
 viewClock model game =
@@ -1027,16 +1208,16 @@ viewClock model game =
 
             else
                 max 0 (model.now - model.clockStart)
+
+        stat label valueId valueClass value =
+            div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
+                [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text label ]
+                , span [ id valueId, class ("text-lg leading-tight tabular-nums lg:text-3xl " ++ valueClass) ] [ text value ]
+                ]
     in
-    div [ id "set-clock", class "grid grid-cols-2 divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200 dark:divide-white/10 dark:bg-white/5 dark:shadow-none dark:ring-white/10" ]
-        [ div [ class "flex flex-col items-center justify-center" ]
-            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "time" ]
-            , span [ id "set-time", class "text-3xl font-light text-slate-700 tabular-nums dark:text-slate-100" ] [ text (formatTime elapsedMs) ]
-            ]
-        , div [ class "flex flex-col items-center justify-center" ]
-            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "deck" ]
-            , span [ id "set-deck-left", class "text-3xl font-bold text-octo-indigo tabular-nums dark:text-octo-indigo-light" ] [ text (String.fromInt game.deckLeft) ]
-            ]
+    div [ id "set-clock", class "ml-auto flex gap-4 pr-2 max-lg:landscape:ml-0 max-lg:landscape:gap-6 max-lg:landscape:pr-0 max-lg:landscape:pl-2 lg:order-2 lg:ml-0 lg:grid lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10" ]
+        [ stat "time" "set-time" "font-light text-slate-700 dark:text-slate-100" (formatTime elapsedMs)
+        , stat "deck" "set-deck-left" "font-bold text-octo-indigo dark:text-octo-indigo-light" (String.fromInt game.deckLeft)
         ]
 
 
@@ -1055,7 +1236,7 @@ formatTime ms =
 -}
 viewScores : Me -> Game -> Html Msg
 viewScores me game =
-    ul [ id "set-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
+    ul [ id "set-scores", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:order-4 lg:flex-col" ]
         (List.map
             (\player ->
                 li
@@ -1064,7 +1245,7 @@ viewScores me game =
                     , classList [ ( "opacity-50", player.away ) ]
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "lg:flex-1" ] [ text (playerName me player) ]
+                    , span [ class "max-lg:landscape:flex-1 lg:flex-1" ] [ text (playerName me player) ]
                     , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
                     ]
             )
@@ -1083,7 +1264,8 @@ playerName me player =
 
 {-| The last set that a player found, in small cards. With more than one
 player, a dot in the color of the player shows who found it. The set is
-keyed, so that it pops in again for each new set.
+keyed, so that it pops in again for each new set. On a small screen that is
+taller than wide, the label is at the left of the cards, so the box is low.
 -}
 viewLastSet : Me -> Game -> Html Msg
 viewLastSet me game =
@@ -1093,8 +1275,8 @@ viewLastSet me game =
                 finder =
                     List.filter (\player -> player.id == found.playerId) game.players |> List.head
             in
-            div [ id "set-last", class "rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200 dark:bg-white/5 dark:shadow-none dark:ring-white/10" ]
-                [ p [ class "mb-2 flex items-center gap-2 text-xs font-medium tracking-wide text-slate-400 uppercase" ]
+            div [ id "set-last", class "flex items-center gap-3 rounded-2xl bg-white p-2 shadow-sm max-lg:landscape:block max-lg:landscape:p-3 lg:order-6 lg:block lg:p-3 ring-1 ring-slate-200 dark:bg-white/5 dark:shadow-none dark:ring-white/10" ]
+                [ p [ class "flex min-w-0 flex-1 items-center gap-2 text-xs font-medium max-lg:landscape:mb-2 lg:mb-2 tracking-wide text-slate-400 uppercase" ]
                     (text "last set"
                         :: (case ( finder, List.length game.players > 1 ) of
                                 ( Just player, True ) ->
@@ -1109,7 +1291,7 @@ viewLastSet me game =
                 , Html.Keyed.node "div"
                     []
                     [ ( String.join "-" (List.map String.fromInt found.cards)
-                      , div [ class "set-last-pop grid grid-cols-3 gap-2" ]
+                      , div [ class "set-last-pop grid w-36 grid-cols-3 gap-2 max-lg:landscape:w-auto lg:w-auto" ]
                             (List.map (\card -> div [ class "set-mini-card" ] [ cardImage card ]) found.cards)
                       )
                     ]

@@ -25,6 +25,7 @@ the sounds to play out through a port. The player can mute the sounds.
 -}
 
 import Browser
+import Browser.Dom
 import Browser.Events
 import Dict exposing (Dict)
 import Html exposing (Html, a, aside, button, div, h1, input, li, ol, p, span, text, ul)
@@ -195,6 +196,9 @@ type alias Model =
     -- The countdown step that last played its beep (see `countdownStep`)
     , beepedStep : Maybe Int
     , muted : Bool
+
+    -- The width and the height of the browser window
+    , viewport : ( Float, Float )
     }
 
 
@@ -225,8 +229,9 @@ init flags =
       , revealing = False
       , beepedStep = Nothing
       , muted = flags.muted
+      , viewport = ( 1024, 768 )
       }
-    , Cmd.none
+    , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
     )
 
 
@@ -251,6 +256,7 @@ type Msg
     | SyncClock Int Time.Posix
     | Tick Time.Posix
     | ToggleMuted
+    | Resized Float Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -389,6 +395,9 @@ update msg model =
 
         ToggleMuted ->
             ( { model | muted = not model.muted }, mahjongSaveMuted (not model.muted) )
+
+        Resized width height ->
+            ( { model | viewport = ( width, height ) }, Cmd.none )
 
 
 keepIf : (a -> Bool) -> a -> Maybe a
@@ -686,6 +695,7 @@ subscriptions model =
         , mahjongJoinFailed GotJoinFailed
         , mahjongRemoved GotRemoved
         , Browser.Events.onKeyDown (Decode.map KeyDown (Decode.field "key" Decode.string))
+        , Browser.Events.onResize (\w h -> Resized (toFloat w) (toFloat h))
         , case model.connection of
             Joined _ game ->
                 -- The faces come only after the countdown, so a board with
@@ -724,21 +734,41 @@ view model =
 
 viewGame : Model -> Me -> Game -> Html Msg
 viewGame model me game =
-    let
-        countdown =
-            Maybe.withDefault 0 (countdownStep model)
-    in
-    div [ id "mahjong-root", class "flex w-full max-w-[1320px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
-        [ aside [ id "mahjong-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-64 lg:shrink-0" ]
-            [ div []
-                [ div [ class "flex items-center gap-2" ]
-                    [ h1 [ class "text-2xl font-semibold tracking-tight" ]
-                        [ a [ id "mahjong-title-link", href "/mahjong", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Mahjong" ] ]
-                    , viewMuteButton model.muted
+    div
+        [ id "mahjong-root"
+        , class "flex w-full max-w-[1320px] flex-col gap-2 select-none max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:gap-3 lg:flex-row lg:items-start lg:gap-8"
+        , classList [ ( "is-playing", not game.waiting && not game.finished ) ]
+        ]
+        [ aside [ id "mahjong-panel", class "flex flex-col gap-2 max-lg:landscape:w-48 max-lg:landscape:shrink-0 max-lg:landscape:gap-4 lg:sticky lg:top-6 lg:w-64 lg:shrink-0 lg:gap-5" ]
+            -- On a small screen, the title, the stats and the restart button
+            -- are in one compact row. On a small screen that is wider than
+            -- tall, they are in a narrow column at the left of the board, so
+            -- the board can be as tall as the screen. On a large screen, the
+            -- row is not a box (`contents`), so its items are in the column
+            -- of the panel.
+            [ div [ class "flex items-center gap-1 max-lg:landscape:flex-col max-lg:landscape:items-start max-lg:landscape:gap-4 lg:contents" ]
+                [ div [ class "min-w-0 lg:order-1" ]
+                    [ div [ class "flex items-center gap-1 lg:gap-2" ]
+                        [ a
+                            [ id "mahjong-back"
+                            , href model.settingsUrl
+                            , class "grid size-8 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 lg:hidden dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
+                            , Html.Attributes.title "Back to the settings"
+                            ]
+                            [ span [ class "hero-arrow-left size-5" ] [] ]
+                        , h1 [ class "truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
+                            [ a [ id "mahjong-title-link", href "/mahjong", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Mahjong" ] ]
+                        , viewMuteButton model.muted
+                        ]
+                    , p [ class "hidden text-sm opacity-60 lg:block" ] [ text "Remove pairs of free tiles with the same face." ]
                     ]
-                , p [ class "text-sm opacity-60" ] [ text "Remove pairs of free tiles with the same face." ]
+                , viewClock model game
+                , if me == Nothing then
+                    text ""
+
+                  else
+                    viewRestartButton
                 ]
-            , viewClock model game
             , if game.playersNeeded > 1 then
                 viewShareLink model
 
@@ -750,36 +780,157 @@ viewGame model me game =
               else
                 text ""
             , if me == Nothing then
-                p [ id "mahjong-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
+                p [ id "mahjong-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 lg:order-5 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
                     [ text "This game is full, so you can only watch it." ]
 
               else
-                viewRestartButton
+                text ""
             ]
-        , div [ class "flex w-full min-w-0 flex-1 flex-col items-center gap-3" ]
-            [ div [ class "relative w-full" ]
-                [ -- On a phone, the board is wider than the screen and
-                  -- scrolls to the side, so that the tiles are big enough
-                  -- to click
-                  div [ id "mahjong-board-scroll", class "-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0" ]
-                    [ viewBoard model me game ]
-                , if game.waiting then
-                    viewWaiting game
+        , div [ class "min-w-0 flex-1" ]
+            [ if upright model then
+                viewTurnRequest model me game
 
-                  else if game.finished then
-                    viewResult model.nextGame model.guest me game
-
-                  else if countdown > 0 || not (hasFaces game) then
-                    viewCountdown countdown
-
-                  else if game.stuck then
-                    viewStuck me
-
-                  else
-                    text ""
-                ]
+              else
+                viewBoardArea model me game
             ]
         ]
+
+
+{-| The board, with the message of the game over it. The board is as large
+as possible, but all of it is on the screen.
+-}
+viewBoardArea : Model -> Me -> Game -> Html Msg
+viewBoardArea model me game =
+    let
+        countdown =
+            Maybe.withDefault 0 (countdownStep model)
+    in
+    div [ class "relative mx-auto", style "width" (fieldWidth model me game) ]
+        [ viewBoard model me game
+        , if game.waiting then
+            viewWaiting game
+
+          else if game.finished then
+            viewResult model.nextGame model.guest me game
+
+          else if countdown > 0 || not (hasFaces game) then
+            viewCountdown countdown
+
+          else if game.stuck then
+            viewStuck me
+
+          else
+            text ""
+        ]
+
+
+{-| On a phone that is taller than wide, the tiles are too small to click,
+so the request to turn the screen is in the place of the board. It fills the
+free height, so that the result of a game that ends shows over it.
+-}
+viewTurnRequest : Model -> Me -> Game -> Html Msg
+viewTurnRequest model me game =
+    div
+        [ id "mahjong-turn"
+        , class "relative flex flex-col items-center justify-center gap-3 rounded-2xl bg-octo-mist p-6 text-center ring-1 ring-octo-indigo/15 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25"
+        , style "height" ("calc(100dvh - " ++ String.fromFloat (reservedHeight model me game) ++ "px)")
+        ]
+        [ span [ class "turn-phone hero-device-phone-mobile size-14 text-octo-indigo dark:text-octo-indigo-light" ] []
+        , p [ class "mt-2 text-xl font-semibold text-octo-navy dark:text-slate-100" ] [ text "Turn your screen" ]
+        , p [ class "max-w-60 text-sm text-slate-500 dark:text-slate-400" ] [ text "The board needs a screen that is wider than tall." ]
+        , if game.finished then
+            viewResult model.nextGame model.guest me game
+
+          else
+            text ""
+        ]
+
+
+{-| The width of the screen from which the panel is at the left of the
+board. On a smaller screen, the panel is a compact row above the board.
+-}
+largeScreen : Float
+largeScreen =
+    1024
+
+
+{-| A small screen that is wider than tall. The panel is a narrow column at
+the left of the board, as the `max-lg:landscape:` classes make it.
+-}
+sideways : Model -> Bool
+sideways model =
+    let
+        ( width, height ) =
+            model.viewport
+    in
+    width < largeScreen && width > height
+
+
+{-| A phone that is taller than wide. The board is 15 tiles wide, so on a
+screen that is narrower than 640px, the tiles are too small to click. The
+player gets a request to turn the screen. On a tablet that is taller than
+wide, the board is above the panel, and the tiles are large enough.
+-}
+upright : Model -> Bool
+upright model =
+    let
+        ( width, height ) =
+            model.viewport
+    in
+    width < 640 && width <= height
+
+
+{-| The height in pixels of the screen that is not for the board. On a large
+screen, it is the 1.5rem padding of the page at the top and at the bottom.
+The page of a game has no header and no footer. On a small screen, it is the
+0.5rem padding of the page at the top and at the bottom, and the rows of the
+panel (the compact row, the link for a game with more players, the scores
+when more players are in, and maybe the message for a watcher) with the
+0.5rem gaps between them. The heights of the rows are approximate, because
+the scores can wrap. On a small screen that is wider than tall, the panel is
+at the left, so only the padding is not for the board.
+-}
+reservedHeight : Model -> Me -> Game -> Float
+reservedHeight model me game =
+    if Tuple.first model.viewport >= largeScreen then
+        48
+
+    else if sideways model then
+        16
+
+    else
+        16
+            + 48
+            + (if game.playersNeeded > 1 then
+                46
+
+               else
+                0
+              )
+            + (if List.length game.players > 1 then
+                36
+
+               else
+                0
+              )
+            + (if me == Nothing then
+                52
+
+               else
+                0
+              )
+
+
+{-| Make the board as wide as possible, but small enough that it is all on
+the screen.
+-}
+fieldWidth : Model -> Me -> Game -> String
+fieldWidth model me game =
+    "min(100%, calc((100dvh - "
+        ++ String.fromFloat (reservedHeight model me game)
+        ++ "px) * "
+        ++ String.fromFloat (toFloat boardWidth / toFloat boardHeight)
+        ++ "))"
 
 
 viewMuteButton : Bool -> Html Msg
@@ -809,28 +960,31 @@ viewMuteButton muted =
         ]
 
 
-{-| Starts a new board for all players, also during a game.
+{-| Starts a new board for all players, also during a game. On a small
+screen, only the icon shows, but not in the column of a screen that is wider
+than tall.
 -}
 viewRestartButton : Html Msg
 viewRestartButton =
     button
         [ id "mahjong-restart"
-        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
+        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
+        , Html.Attributes.title "Restart game"
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , text "Restart game"
+        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text "Restart game" ]
         ]
 
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:order-3 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "mahjong-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1 dark:text-slate-100"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none max-lg:landscape:px-2 max-lg:landscape:py-1 lg:px-2 lg:py-1 dark:text-slate-100"
             ]
             []
         , button
@@ -849,7 +1003,8 @@ viewShareLink model =
         ]
 
 
-{-| The time on the left, and the tiles on the board on the right
+{-| The time on the left, and the tiles on the board on the right. On a
+small screen, it is small and at the right of the compact row.
 -}
 viewClock : Model -> Game -> Html Msg
 viewClock model game =
@@ -864,14 +1019,14 @@ viewClock model game =
             else
                 max 0 (model.now - model.clockStart)
     in
-    div [ id "mahjong-clock", class "grid grid-cols-2 divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200 dark:divide-white/10 dark:bg-white/5 dark:shadow-none dark:ring-white/10" ]
-        [ div [ class "flex flex-col items-center justify-center" ]
-            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "time" ]
-            , span [ id "mahjong-time", class "text-3xl font-light text-slate-700 tabular-nums dark:text-slate-100" ] [ text (formatTime elapsedMs) ]
+    div [ id "mahjong-clock", class "ml-auto flex gap-4 pr-2 max-lg:landscape:ml-0 max-lg:landscape:gap-6 max-lg:landscape:pr-0 max-lg:landscape:pl-2 lg:order-2 lg:ml-0 lg:grid lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10" ]
+        [ div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
+            [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text "time" ]
+            , span [ id "mahjong-time", class "text-lg leading-tight font-light text-slate-700 tabular-nums lg:text-3xl dark:text-slate-100" ] [ text (formatTime elapsedMs) ]
             ]
-        , div [ class "flex flex-col items-center justify-center" ]
-            [ span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "tiles" ]
-            , span [ id "mahjong-tiles-left", class "text-3xl font-bold text-octo-indigo tabular-nums dark:text-octo-indigo-light" ]
+        , div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
+            [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text "tiles" ]
+            , span [ id "mahjong-tiles-left", class "text-lg leading-tight font-bold text-octo-indigo tabular-nums lg:text-3xl dark:text-octo-indigo-light" ]
                 [ text (String.fromInt (List.length game.tiles)) ]
             ]
         ]
@@ -893,7 +1048,7 @@ removed
 -}
 viewScores : Me -> Game -> Html Msg
 viewScores me game =
-    ul [ id "mahjong-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
+    ul [ id "mahjong-scores", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:order-4 lg:flex-col" ]
         (List.map
             (\player ->
                 li
@@ -902,7 +1057,7 @@ viewScores me game =
                     , classList [ ( "opacity-50", player.away ) ]
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "lg:flex-1" ] [ text (playerName me player) ]
+                    , span [ class "max-lg:landscape:flex-1 lg:flex-1" ] [ text (playerName me player) ]
                     , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
                     ]
             )
@@ -1037,9 +1192,8 @@ viewBoard model me game =
     in
     Svg.svg
         [ id "mahjong-board"
-        , SA.class "mahjong-board block h-auto w-full min-w-[640px] sm:min-w-0"
+        , SA.class "mahjong-board block h-auto w-full"
         , SA.viewBox ("0 0 " ++ String.fromInt boardWidth ++ " " ++ String.fromInt boardHeight)
-        , style "max-height" "calc(100dvh - 9.5rem)"
         , Html.Attributes.attribute "role" "group"
         , Html.Attributes.attribute "aria-label" "Mahjong board"
         ]

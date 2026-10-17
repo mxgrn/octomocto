@@ -24,6 +24,7 @@ same name in one bundle.
 -}
 
 import Browser
+import Browser.Dom
 import Browser.Events
 import Html exposing (Html, a, aside, button, div, h1, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (attribute, class, classList, href, id, readonly, style, value)
@@ -212,6 +213,9 @@ type alias Model =
     , flash : Maybe ( Int, Int )
     , flashId : Int
     , shaking : Bool
+
+    -- The width and the height of the browser window
+    , viewport : ( Float, Float )
     }
 
 
@@ -251,8 +255,9 @@ init flags =
       , flash = Nothing
       , flashId = 0
       , shaking = False
+      , viewport = ( 1024, 768 )
       }
-    , Cmd.none
+    , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
     )
 
 
@@ -310,6 +315,7 @@ type Msg
     | Tick Time.Posix
     | ToggleMuted
     | ToggleShapes
+    | Resized Float Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -422,6 +428,9 @@ update msg model =
 
         ToggleShapes ->
             ( { model | shapes = not model.shapes }, echoSaveShapes (not model.shapes) )
+
+        Resized width height ->
+            ( { model | viewport = ( width, height ) }, Cmd.none )
 
 
 {-| Alone, a new sequence plays back: after a round, after the start, or
@@ -772,6 +781,7 @@ subscriptions model =
         , echoState GotState
         , echoJoinFailed GotJoinFailed
         , Browser.Events.onKeyDown keyDecoder
+        , Browser.Events.onResize (\w h -> Resized (toFloat w) (toFloat h))
         , if model.playback /= Nothing then
             Browser.Events.onAnimationFrame Frame
 
@@ -829,24 +839,48 @@ view model =
 
 viewGame : Model -> Me -> Game -> Html Msg
 viewGame model me game =
-    div [ id "echo-root", class "flex w-full max-w-[1100px] flex-col gap-5 select-none lg:flex-row lg:items-start lg:gap-8" ]
-        [ aside [ id "echo-panel", class "flex flex-col gap-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0" ]
-            [ div []
-                [ div [ class "flex items-center gap-1" ]
-                    [ h1 [ class "mr-1 text-2xl font-semibold tracking-tight" ]
-                        [ a [ id "echo-title-link", href "/echo", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Echo" ] ]
-                    , viewMuteButton model.muted
-                    , viewShapesButton model.shapes
-                    ]
-                , p [ class "text-sm opacity-60" ]
-                    [ text
-                        (if solo game then
-                            "Watch the pads light up, then tap them in the same order."
+    div
+        [ id "echo-root"
+        , class "flex w-full flex-col gap-2 select-none max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:gap-3 lg:flex-row lg:items-start lg:gap-8"
+        , classList [ ( "is-playing", not game.waiting && not game.finished ) ]
+        ]
+        [ aside [ id "echo-panel", class "flex flex-col gap-2 max-lg:landscape:w-48 max-lg:landscape:shrink-0 max-lg:landscape:gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
+            -- On a small screen, the title, the buttons and the restart
+            -- button are in one compact row. On a small screen that is wider
+            -- than tall, they are in a narrow column at the left of the ring,
+            -- so the ring can be as tall as the screen. On a large screen,
+            -- the row is not a box (`contents`), so its items are in the
+            -- column of the panel.
+            [ div [ class "flex items-center gap-1 max-lg:landscape:flex-col max-lg:landscape:items-start max-lg:landscape:gap-4 lg:contents" ]
+                [ div [ class "min-w-0 flex-1 lg:order-1" ]
+                    [ div [ class "flex items-center gap-1" ]
+                        [ a
+                            [ id "echo-back"
+                            , href model.settingsUrl
+                            , class "grid size-8 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 lg:hidden dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
+                            , Html.Attributes.title "Back to the settings"
+                            ]
+                            [ span [ class "hero-arrow-left size-5" ] [] ]
+                        , h1 [ class "mr-1 truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
+                            [ a [ id "echo-title-link", href "/echo", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Echo" ] ]
+                        , viewMuteButton model.muted
+                        , viewShapesButton model.shapes
+                        ]
+                    , p [ class "hidden text-sm opacity-60 lg:block" ]
+                        [ text
+                            (if solo game then
+                                "Watch the pads light up, then tap them in the same order."
 
-                         else
-                            "Repeat the sequence, then add a pad of your choice."
-                        )
+                             else
+                                "Repeat the sequence, then add a pad of your choice."
+                            )
+                        ]
                     ]
+                , if me == Nothing then
+                    text ""
+
+                  else
+                    viewRestartButton
                 ]
             , if game.playersNeeded > 1 then
                 viewShareLink model
@@ -859,23 +893,26 @@ viewGame model me game =
               else
                 text ""
             , if me == Nothing then
-                p [ id "echo-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
+                p [ id "echo-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 lg:order-5 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
                     [ text "You are watching this game." ]
 
               else
-                viewRestartButton
+                text ""
             , a
                 [ id "echo-leaderboards-link"
                 , href model.settingsUrl
-                , class "text-sm font-medium text-octo-indigo underline-offset-4 transition hover:underline dark:text-octo-indigo-light"
+                , class "hidden text-sm font-medium text-octo-indigo underline-offset-4 transition hover:underline lg:order-6 lg:block dark:text-octo-indigo-light"
                 ]
                 [ text "Latest games and best results" ]
             ]
-        , div [ class "flex min-w-0 flex-1 flex-col items-center gap-5" ]
+
+        -- On a small screen that is wider than tall, the status line is at
+        -- the right of the ring, because the ring is as tall as the screen.
+        , div [ class "flex min-w-0 flex-1 flex-col items-center gap-2 max-lg:landscape:flex-row max-lg:landscape:gap-3 lg:gap-5" ]
             [ div
                 [ id "echo-board"
                 , class "relative w-full rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200 sm:p-5 dark:bg-white/5 dark:shadow-none dark:ring-white/10"
-                , style "max-width" "min(100%, calc(100dvh - 12rem), 34rem)"
+                , style "max-width" (boardWidth model me game)
                 ]
                 [ viewRing model me game
                 , if game.waiting then
@@ -887,10 +924,74 @@ viewGame model me game =
                   else
                     text ""
                 ]
-            , p [ id "echo-status", class "min-h-12 max-w-sm text-center text-slate-600 dark:text-slate-300", attribute "aria-live" "polite" ]
+            , p [ id "echo-status", class "min-h-12 max-w-sm text-center text-slate-600 max-lg:landscape:w-36 max-lg:landscape:shrink-0 max-lg:landscape:text-left dark:text-slate-300", attribute "aria-live" "polite" ]
                 [ text (status model me game) ]
             ]
         ]
+
+
+{-| The width of the screen from which the panel is at the left of the
+ring. On a smaller screen, the panel is a compact row above the ring.
+-}
+largeScreen : Float
+largeScreen =
+    1024
+
+
+{-| A small screen that is wider than tall. The panel is a narrow column at
+the left of the ring, as the `max-lg:landscape:` classes make it.
+-}
+sideways : Model -> Bool
+sideways model =
+    let
+        ( width, height ) =
+            model.viewport
+    in
+    width < largeScreen && width > height
+
+
+{-| The height in pixels of the screen that is not for the board. On a large
+screen, it is the 1.5rem padding of the page at the top and at the bottom,
+and the status line (3rem) under the board with the 1.25rem gap. On a small
+screen, it is the 0.5rem padding of the page at the top and at the bottom,
+the rows of the panel (the compact row, the link and the scores for a game
+with more players, and maybe the message for a watcher), the status line,
+and the 0.5rem gaps between them. The heights of the rows are approximate,
+because the scores can wrap. On a small screen that is wider than tall, the
+panel is at the left and the status line is at the right, so only the
+padding is not for the board.
+-}
+reservedHeight : Model -> Me -> Game -> Float
+reservedHeight model me game =
+    if Tuple.first model.viewport >= largeScreen then
+        48 + 20 + 48
+
+    else if sideways model then
+        16
+
+    else
+        let
+            row condition rowHeight =
+                if condition then
+                    rowHeight + 8
+
+                else
+                    0
+        in
+        16
+            + row True 40
+            + row (game.playersNeeded > 1) 40
+            + row (List.length game.players > 1) 30
+            + row (me == Nothing) 44
+            + row True 48
+
+
+{-| Make the board as wide as possible, but small enough that it is all on
+the screen. The board is square, so its width is also its height.
+-}
+boardWidth : Model -> Me -> Game -> String
+boardWidth model me game =
+    "min(100%, calc(100dvh - " ++ String.fromFloat (reservedHeight model me game) ++ "px))"
 
 
 viewMuteButton : Bool -> Html Msg
@@ -940,28 +1041,31 @@ iconButton buttonId msg title icon =
         [ span [ class (icon ++ " size-5") ] [] ]
 
 
-{-| Starts a new game for all players, also during a game.
+{-| Starts a new game for all players, also during a game. On a small
+screen, only the icon shows, but not in the column of a screen that is wider
+than tall.
 -}
 viewRestartButton : Html Msg
 viewRestartButton =
     button
         [ id "echo-restart"
-        , class "group flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:self-start dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
+        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
+        , Html.Attributes.title "Restart game"
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , text "Restart game"
+        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text "Restart game" ]
         ]
 
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:order-3 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "echo-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1 dark:text-slate-100"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none max-lg:landscape:px-2 max-lg:landscape:py-1 lg:px-2 lg:py-1 dark:text-slate-100"
             ]
             []
         , button
@@ -987,7 +1091,7 @@ crossed out.
 -}
 viewScores : Model -> Me -> Game -> Html Msg
 viewScores model me game =
-    ul [ id "echo-scores", class "flex flex-wrap gap-2 lg:flex-col" ]
+    ul [ id "echo-scores", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:order-4 lg:flex-col" ]
         (List.map
             (\player ->
                 let
@@ -1003,7 +1107,7 @@ viewScores model me game =
                     , attribute "style" ("--player-color: " ++ player.color)
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "lg:flex-1", classList [ ( "line-through", player.out /= Nothing ) ] ] [ text (playerName me player) ]
+                    , span [ class "max-lg:landscape:flex-1 lg:flex-1", classList [ ( "line-through", player.out /= Nothing ) ] ] [ text (playerName me player) ]
                     , if current then
                         span [ class "text-xs font-medium tracking-wide uppercase", style "color" player.color ] [ text "turn" ]
 

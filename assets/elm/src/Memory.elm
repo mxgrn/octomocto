@@ -622,8 +622,7 @@ viewGame model me game =
 
 
 {-| The width of the screen from which the panel is at the left of the
-field. On a smaller screen, the panel is a compact row above the field, and
-the page has no header and no footer.
+field. On a smaller screen, the panel is a compact row above the field.
 -}
 largeScreen : Float
 largeScreen =
@@ -704,9 +703,10 @@ cardSize (( width, height ) as space) layout =
         ((height - gap * toFloat (layout.rows - 1)) / toFloat layout.rows)
 
 
-{-| The height in pixels of the screen that is not for the field. On a large
-screen, it is the 4rem header, the 1.5rem bottom padding of the page and the
-4rem footer, and the 0.5rem padding of the board on each side. On a small
+{-| The height in pixels of the screen that is not for the field. The page
+of a game has no header and no footer. On a large screen, it is the 1.5rem
+padding of the page at the top and at the bottom, and the 0.5rem padding of
+the board on each side. On a small
 screen, it is the 0.5rem padding of the page at the top and at the bottom,
 and the rows of the panel with the 0.5rem gaps between them. The heights of
 the rows are approximate, because the scores can wrap. On a small screen
@@ -716,7 +716,7 @@ not for the field.
 reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
     if Tuple.first model.viewport >= largeScreen then
-        168
+        64
 
     else if sideways model then
         16
