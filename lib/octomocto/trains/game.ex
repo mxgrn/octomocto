@@ -21,8 +21,8 @@ defmodule Octomocto.Trains.Game do
   only watches. Each player has a slot (from 0 to `needed` - 1), and the
   clients give the switches to the players by their slots.
 
-  A round starts when a player clicks start, after a countdown. Restart
-  starts a new round with a new board. The clients tell when the round
+  A round starts after a countdown when the game has all its players.
+  Restart starts a new round with a new board, also after a countdown. The clients tell when the round
   ends and how many trains got home (see `Octomocto.Trains.finish/4`).
   The first report of the round is the score of the round. When all
   players are still in the game, the game saves it as the result of each
@@ -30,7 +30,7 @@ defmodule Octomocto.Trains.Game do
 
   A public game is in the lists of the settings page (see
   `Octomocto.Lobby`): in the open games until it has all its players for
-  the first time, then in the ongoing games after a player clicks start. A
+  the first time, then in the ongoing games. A
   game for one player is only in the ongoing games. The game sends its new
   row after each change, and nil when its node stops. A process can also
   join only to watch (see `Octomocto.Trains.watch/1`).
@@ -143,7 +143,7 @@ defmodule Octomocto.Trains.Game do
           trains: trains(state)
         })
 
-      # Nobody clicked start yet
+      # The round did not start yet
       true ->
         nil
     end
@@ -234,22 +234,12 @@ defmodule Octomocto.Trains.Game do
     state = put_in(state.players[player_id], player)
     # The game leaves the open games when it is full for the first time
     state = %{state | listed: state.listed and map_size(state.players) < state.needed}
+    state = start_round(state)
     publish(state)
     {:reply, {:ok, player_id, public(state)}, state}
   end
 
   @impl true
-  def handle_cast({:start, player_id}, state)
-      when is_map_key(state.players, player_id) and state.started_at == nil and
-             map_size(state.players) == state.needed do
-    Process.send_after(self(), :countdown_over, @countdown_ms)
-    state = %{state | started_at: now() + @countdown_ms, opened: false}
-    publish(state)
-    {:noreply, state}
-  end
-
-  def handle_cast({:start, _player_id}, state), do: {:noreply, state}
-
   def handle_cast({:flip, player_id, cell, value}, state)
       when is_map_key(state.players, player_id) and on_board(cell) and value in [0, 1] do
     state = put_in(state.switches[cell], value)
@@ -293,7 +283,7 @@ defmodule Octomocto.Trains.Game do
   end
 
   def handle_cast({:restart, player_id}, state) when is_map_key(state.players, player_id) do
-    state = new_round(state)
+    state = state |> new_round() |> start_round()
     publish(state)
     {:noreply, state}
   end
@@ -352,7 +342,7 @@ defmodule Octomocto.Trains.Game do
       round_id: Ecto.UUID.generate(),
       # The number of trains that got home, nil until the round ends
       score: nil,
-      # Nil until a player clicks start
+      # Nil until the game has all its players
       started_at: nil,
       # The positions of the flipped switches, by cell
       switches: %{},
@@ -360,6 +350,14 @@ defmodule Octomocto.Trains.Game do
       decisions: %{}
     })
   end
+
+  # The round starts after the countdown, when the game has all its players
+  defp start_round(%{started_at: nil} = state) when map_size(state.players) == state.needed do
+    Process.send_after(self(), :countdown_over, @countdown_ms)
+    %{state | started_at: now() + @countdown_ms, opened: false}
+  end
+
+  defp start_round(state), do: state
 
   defp save_results(state, correct) when map_size(state.players) == state.needed do
     settings = %{

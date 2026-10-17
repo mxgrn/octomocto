@@ -60,9 +60,6 @@ import Time
 port playTrainSound : String -> Cmd msg
 
 
-port trainsStart : () -> Cmd msg
-
-
 {-| `{cell: [x, y], value: 0 or 1}`
 -}
 port trainsFlip : Encode.Value -> Cmd msg
@@ -305,7 +302,7 @@ type alias Player =
     }
 
 
-{-| `started` is True after a player clicked start.
+{-| `started` is True after the game has all its players.
 -}
 type alias Game =
     { players : List Player
@@ -409,7 +406,6 @@ type Msg
     | GotJoinFailed String
     | SyncClock Int Time.Posix
     | Tick Time.Posix
-    | Start
     | Toggle Cell
     | Restart
     | CopyLink
@@ -542,9 +538,6 @@ update msg model =
 
                 _ ->
                     ( { model | now = ms }, Cmd.none )
-
-        Start ->
-            ( model, trainsStart () )
 
         Toggle cell ->
             case model.connection of
@@ -1666,7 +1659,6 @@ subscriptions model =
 
 type Phase
     = Waiting
-    | Ready
     | Countdown Int
     | Playing
     | Over
@@ -1675,11 +1667,7 @@ type Phase
 phase : Model -> Game -> Phase
 phase model game =
     if not game.started then
-        if List.length game.players < game.needed then
-            Waiting
-
-        else
-            Ready
+        Waiting
 
     else if over game.round then
         Over
@@ -1735,11 +1723,6 @@ viewGame model me game =
                     ]
                 ]
             , viewStats game.round
-            , if phase model game == Ready then
-                viewReady me game
-
-              else
-                text ""
             , if solo then
                 text ""
 
@@ -1759,7 +1742,12 @@ viewGame model me game =
             ]
         , div [ class "min-w-0 flex-1" ]
             [ div [ class "relative mx-auto", style "width" (boardWidth game.round.layout.board) ]
-                [ viewBoard me game owned
+                [ if phase model game == Waiting then
+                    -- The players see the board only when all can see it
+                    viewEmptyBoard game.round.layout.board
+
+                  else
+                    viewBoard me game owned
                 , viewOverlay model me game
                 ]
             ]
@@ -1773,39 +1761,6 @@ bottom padding of the page and the 4rem footer).
 boardWidth : Board -> String
 boardWidth board =
     "min(100%, calc((100dvh - 9.5rem) * " ++ String.fromFloat (toFloat board.cols / toFloat board.rows) ++ "))"
-
-
-{-| Shows in the panel before the start.
--}
-viewReady : Me -> Game -> Html Msg
-viewReady me game =
-    div
-        [ id "trains-ready"
-        , class "flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-2xl bg-slate-900 px-4 py-3 text-white shadow-lg lg:flex-col lg:items-stretch dark:bg-white/5 dark:shadow-none dark:ring-1 dark:ring-white/10"
-        ]
-        [ div []
-            [ p [ class "font-semibold" ] [ text (String.fromInt (trainCount game.round.layout.board) ++ " trains are ready") ]
-            , p [ class "text-sm opacity-75" ]
-                [ text
-                    (if game.needed == 1 then
-                        "Look at the tracks, then start."
-
-                     else
-                        "Look at the tracks and find your switches, then start."
-                    )
-                ]
-            ]
-        , if me == Nothing then
-            span [ class "text-sm opacity-60" ] [ text "Waiting for a player to start." ]
-
-          else
-            button
-                [ id "trains-start"
-                , class "rounded-full bg-octo-indigo px-6 py-2 font-medium text-white shadow-lg shadow-octo-indigo/30 transition hover:-translate-y-0.5 hover:bg-octo-indigo/90 active:translate-y-0"
-                , onClick Start
-                ]
-                [ text "Start" ]
-        ]
 
 
 viewStats : Round -> Html Msg
@@ -1922,10 +1877,6 @@ viewOverlay model me game =
                 , span [ class "text-sm opacity-70" ] [ text "Send the link to the other players." ]
                 ]
 
-        Ready ->
-            -- The ready card is in the panel, so that the players can look at the whole board.
-            text ""
-
         Countdown seconds ->
             -- No dark layer, so that the players can still look at the board
             div
@@ -1989,6 +1940,25 @@ overlayButton buttonId msg label =
         , onClick msg
         ]
         [ text label ]
+
+
+{-| Only the ground, with the same size as the board
+-}
+viewEmptyBoard : Board -> Html Msg
+viewEmptyBoard board =
+    let
+        width =
+            toFloat board.cols * cellSize
+
+        height =
+            toFloat board.rows * cellSize
+    in
+    Svg.svg
+        [ SA.id "trains-board-hidden"
+        , SA.viewBox ("0 0 " ++ String.fromFloat width ++ " " ++ String.fromFloat height)
+        , SA.class "block h-auto w-full"
+        ]
+        [ Svg.rect [ SA.width (String.fromFloat width), SA.height (String.fromFloat height), SA.rx "16", SA.fill "#ecfccb", SA.class "trains-ground" ] [] ]
 
 
 viewBoard : Me -> Game -> Dict Cell Player -> Html Msg

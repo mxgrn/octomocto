@@ -18,11 +18,6 @@ defmodule OctomoctoWeb.TrainsChannel do
   end
 
   @impl true
-  def handle_in("start", _params, socket) do
-    Trains.start(socket.assigns.game_id, socket.assigns.player_id)
-    {:noreply, socket}
-  end
-
   def handle_in("flip", %{"cell" => cell, "value" => value}, socket)
       when value in [0, 1] do
     if cell?(cell), do: Trains.flip(socket.assigns.game_id, socket.assigns.player_id, cell, value)

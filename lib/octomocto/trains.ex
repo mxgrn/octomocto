@@ -100,11 +100,6 @@ defmodule Octomocto.Trains do
     GameProcess.watch(Game, Store, Octomocto.Trains.GameSupervisor, id)
   end
 
-  @doc "Starts the round after a countdown, when the game has all its players."
-  def start(id, player_id) do
-    GenServer.cast(Game.via(id), {:start, player_id})
-  end
-
   @doc "The player sets a switch at `cell` (`[x, y]`) to the position `value` (0 or 1)."
   def flip(id, player_id, cell, value) do
     GenServer.cast(Game.via(id), {:flip, player_id, cell, value})

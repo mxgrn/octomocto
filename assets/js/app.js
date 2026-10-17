@@ -94,7 +94,7 @@ if (astronautNode) {
 // Start the trains game and connect its ports to the game channel. The
 // token gets the same player back after a reload, as in the Schulte race
 // below. Audio can start only after a click, so the first click on the
-// page (normally on Start) unlocks it.
+// page (normally on "Start game") unlocks it.
 const trainsNode = document.getElementById("trains-main")
 if (trainsNode) {
   if (navigator.userActivation?.hasBeenActive) unlockAudio()
@@ -132,7 +132,6 @@ if (trainsNode) {
       trains.ports.trainsJoinFailed.send(reason)
     })
 
-  trains.ports.trainsStart.subscribe(() => channel.push("start", {}))
   trains.ports.trainsFlip.subscribe(flip => channel.push("flip", flip))
   trains.ports.trainsDecision.subscribe(decision => channel.push("decision", decision))
   trains.ports.trainsRestart.subscribe(() => channel.push("restart", {}))
