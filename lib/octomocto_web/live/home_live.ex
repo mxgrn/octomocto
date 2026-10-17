@@ -75,15 +75,16 @@ defmodule OctomoctoWeb.HomeLive do
         "Remove pairs of free tiles from the Turtle. With friends, the first to take a pair gets the point.",
       path: "/mahjong",
       icon_class: "bg-emerald-500/10 dark:bg-emerald-400/15"
-    },
-    %{
-      id: "astronaut",
-      name: "Station Escape",
-      description:
-        "Race your friends to the escape pod on a space station that spins while you play.",
-      path: "/astronaut",
-      icon_class: "bg-octo-navy dark:bg-black/30 dark:ring-1 dark:ring-white/10"
     }
+    # Station Escape is hidden from the front page for now:
+    # %{
+    #   id: "astronaut",
+    #   name: "Station Escape",
+    #   description:
+    #     "Race your friends to the escape pod on a space station that spins while you play.",
+    #   path: "/astronaut",
+    #   icon_class: "bg-octo-navy dark:bg-black/30 dark:ring-1 dark:ring-white/10"
+    # }
   ]
 
   @doc """

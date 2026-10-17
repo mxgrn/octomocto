@@ -18,8 +18,7 @@ defmodule OctomoctoWeb.PageControllerTest do
              "/set",
              "/sudoku",
              "/echo",
-             "/mahjong",
-             "/astronaut"
+             "/mahjong"
            ]
   end
 
