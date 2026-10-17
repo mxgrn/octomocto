@@ -564,12 +564,15 @@ viewGame model me game =
         tall =
             isTall model me game
     in
-    div [ id "schulte-root", class "flex w-full flex-col gap-2 select-none lg:flex-row lg:items-start lg:gap-8" ]
-        [ aside [ id "schulte-panel", class "flex flex-col gap-2 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
+    div [ id "schulte-root", class "flex w-full flex-col gap-2 select-none max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:gap-3 lg:flex-row lg:items-start lg:gap-8" ]
+        [ aside [ id "schulte-panel", class "flex flex-col gap-2 max-lg:landscape:w-48 max-lg:landscape:shrink-0 max-lg:landscape:gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
             -- On a small screen, the title, the stats and the restart button
-            -- are in one compact row. On a large screen, the row is not a
-            -- box (`contents`), so its items are in the column of the panel.
-            [ div [ class "flex items-center gap-1 lg:contents" ]
+            -- are in one compact row. On a small screen that is wider than
+            -- tall, they are in a narrow column at the left of the board, so
+            -- the board can be as tall as the screen. On a large screen, the
+            -- row is not a box (`contents`), so its items are in the column
+            -- of the panel.
+            [ div [ class "flex items-center gap-1 max-lg:landscape:flex-col max-lg:landscape:items-start max-lg:landscape:gap-4 lg:contents" ]
                 [ div [ class "min-w-0 lg:order-1" ]
                     [ div [ class "flex items-center gap-1 lg:gap-2" ]
                         [ a
@@ -616,21 +619,54 @@ viewGame model me game =
                 text ""
             ]
         , div [ class "min-w-0 flex-1" ]
-            [ div [ class "relative mx-auto", style "width" (fieldWidth model me tall game) ]
-                [ viewField model tall game
-                , if game.waiting then
+            [ if upright model then
+                viewTurnRequest model me game
+
+              else
+                viewBoard model me tall game
+            ]
+        ]
+
+
+{-| The board, with the message of the game over it.
+-}
+viewBoard : Model -> Me -> Bool -> Game -> Html Msg
+viewBoard model me tall game =
+    div [ class "relative mx-auto", style "width" (fieldWidth model me tall game) ]
+        [ viewField model tall game
+        , if game.waiting then
                     viewWaiting game
 
-                  else if Maybe.withDefault 0 (countdownStep model) > 0 then
-                    viewCountdown (Maybe.withDefault 0 (countdownStep model))
+          else if Maybe.withDefault 0 (countdownStep model) > 0 then
+            viewCountdown (Maybe.withDefault 0 (countdownStep model))
 
-                  else if finished game then
-                    viewResult model.settingsUrl model.guest me game
+          else if finished game then
+            viewResult model.settingsUrl model.guest me game
 
-                  else
-                    text ""
-                ]
-            ]
+          else
+            text ""
+        ]
+
+
+{-| On a small screen that is taller than wide, the board is too small, so
+the request to turn the screen is in its place. It fills the free height,
+so that the result of a game that ends shows over it.
+-}
+viewTurnRequest : Model -> Me -> Game -> Html Msg
+viewTurnRequest model me game =
+    div
+        [ id "schulte-turn"
+        , class "relative flex flex-col items-center justify-center gap-3 rounded-2xl bg-octo-mist p-6 text-center ring-1 ring-octo-indigo/15 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25"
+        , style "height" ("calc(100dvh - " ++ String.fromFloat (reservedHeight model me game) ++ "px)")
+        ]
+        [ span [ class "schulte-turn-phone hero-device-phone-mobile size-14 text-octo-indigo dark:text-octo-indigo-light" ] []
+        , p [ class "mt-2 text-xl font-semibold text-octo-navy dark:text-slate-100" ] [ text "Turn your screen" ]
+        , p [ class "max-w-60 text-sm text-slate-500 dark:text-slate-400" ] [ text "The board needs a screen that is wider than tall." ]
+        , if finished game then
+            viewResult model.settingsUrl model.guest me game
+
+          else
+            text ""
         ]
 
 
@@ -643,8 +679,33 @@ largeScreen =
     1024
 
 
+{-| A small screen that is wider than tall. The panel is a narrow column at
+the left of the board, as the `max-lg:landscape:` classes make it.
+-}
+sideways : Model -> Bool
+sideways model =
+    let
+        ( width, height ) =
+            model.viewport
+    in
+    width < largeScreen && width > height
+
+
+{-| A small screen that is taller than wide. The board is too small on it, so
+the player gets a request to turn the screen.
+-}
+upright : Model -> Bool
+upright model =
+    let
+        ( width, height ) =
+            model.viewport
+    in
+    width < largeScreen && width <= height
+
+
 {-| The width and the height in pixels of the space for the board. On a
-large screen, the panel is at the left of the board.
+large screen, the panel is at the left of the board. On a small screen that
+is wider than tall, the 12rem panel is at the left with a 0.75rem gap.
 -}
 boardSpace : Model -> Me -> Game -> ( Float, Float )
 boardSpace model me game =
@@ -654,6 +715,9 @@ boardSpace model me game =
     in
     ( if width >= largeScreen then
         width - 384
+
+      else if sideways model then
+        width - 220
 
       else
         width - 16
@@ -666,12 +730,17 @@ screen, it is the 4rem header, the 1.5rem bottom padding of the page and the
 4rem footer. On a small screen, it is the 0.5rem padding of the page at the
 top and at the bottom, and the rows of the panel (the compact row, the link
 and the scores for a game with more players, and maybe the message for a
-watcher) with the 0.5rem gaps between them. The heights of the rows are approximate, because the scores can wrap.
+watcher) with the 0.5rem gaps between them. The heights of the rows are approximate, because the scores can wrap. On a small screen that is wider
+than tall, the panel is at the left, so only the padding is not for the
+board.
 -}
 reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
     if Tuple.first model.viewport >= largeScreen then
         152
+
+    else if sideways model then
+        16
 
     else
         16
@@ -691,8 +760,8 @@ reservedHeight model me game =
 
 
 {-| True when the board is larger turned 90 degrees, so that it is taller
-than wide. This is on a screen that is taller than wide, for example a
-phone. The player turns the phone to read the numbers.
+than wide. This is on a large screen that is taller than wide, for example
+a tablet. The player turns the tablet to read the numbers.
 -}
 isTall : Model -> Me -> Game -> Bool
 isTall model me game =
@@ -751,18 +820,19 @@ viewMuteButton muted =
 
 
 {-| Starts a new field for all players, also during a race. On a small
-screen, only the icon shows.
+screen, only the icon shows, but not in the column of a screen that is wider
+than tall.
 -}
 viewRestartButton : Html Msg
 viewRestartButton =
     button
         [ id "schulte-restart"
-        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
+        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
         , Html.Attributes.title "Restart game"
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , span [ class "hidden lg:inline" ] [ text "Restart game" ]
+        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text "Restart game" ]
         ]
 
 
@@ -777,12 +847,12 @@ nextText game =
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm lg:order-3 ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm lg:order-3 ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "schulte-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1 dark:text-slate-100"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none max-lg:landscape:px-2 max-lg:landscape:py-1 lg:px-2 lg:py-1 dark:text-slate-100"
             ]
             []
         , button
@@ -807,7 +877,7 @@ is made again and the flash starts again.
 -}
 viewScores : Model -> Me -> List Player -> Html Msg
 viewScores model me players =
-    Html.Keyed.ul [ id "schulte-scores", class "flex flex-wrap gap-2 lg:order-4 lg:flex-col" ]
+    Html.Keyed.ul [ id "schulte-scores", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:order-4 lg:flex-col" ]
         (List.map
             (\player ->
                 let
@@ -831,7 +901,7 @@ viewScores model me players =
                         )
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "lg:flex-1" ] [ text (playerName me player) ]
+                    , span [ class "max-lg:landscape:flex-1 lg:flex-1" ] [ text (playerName me player) ]
                     , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
                     ]
                 )
@@ -943,12 +1013,12 @@ viewClock model game =
             else
                 max 0 (model.now - model.clockStart)
     in
-    div [ id "schulte-clock", class "ml-auto flex gap-4 pr-2 lg:order-2 lg:ml-0 lg:grid lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10" ]
-        [ div [ class "flex flex-col items-center justify-center" ]
+    div [ id "schulte-clock", class "ml-auto flex gap-4 pr-2 max-lg:landscape:ml-0 max-lg:landscape:gap-6 max-lg:landscape:pr-0 max-lg:landscape:pl-2 lg:order-2 lg:ml-0 lg:grid lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10" ]
+        [ div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
             [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text "time" ]
             , span [ id "schulte-time", class "text-lg leading-tight font-light text-slate-700 tabular-nums lg:text-3xl dark:text-slate-100" ] [ text (formatTime elapsedMs) ]
             ]
-        , div [ class "flex flex-col items-center justify-center" ]
+        , div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
             [ span [ class "text-[0.625rem] font-medium tracking-wide whitespace-nowrap text-slate-400 uppercase lg:text-xs" ] [ text "looking for" ]
             , Html.Keyed.node "span"
                 [ class "text-xl leading-tight font-bold text-[#d9534f] tabular-nums lg:text-4xl lg:leading-none dark:text-[#f0807b]" ]
