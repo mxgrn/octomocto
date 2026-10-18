@@ -328,12 +328,22 @@ type Connection
     | Failed String
 
 
+{-| The game to try next, on the end screen
+-}
+type alias NextGame =
+    { name : String
+    , path : String
+    }
+
+
 {-| `clockStart` is the local time (in ms) at the start of the round. It is
 Nothing until the round starts and the clock is in sync.
 -}
 type alias Model =
     { gameUrl : String
     , settingsUrl : String
+    , nextGame : NextGame
+    , guest : Bool
     , connection : Connection
     , copied : Bool
     , clockStart : Maybe Int
@@ -346,6 +356,8 @@ type alias Model =
 type alias Flags =
     { gameUrl : String
     , settingsUrl : String
+    , nextGame : NextGame
+    , guest : Bool
     , muted : Bool
     }
 
@@ -354,6 +366,8 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { gameUrl = flags.gameUrl
       , settingsUrl = flags.settingsUrl
+      , nextGame = flags.nextGame
+      , guest = flags.guest
       , connection = Connecting
       , copied = False
       , clockStart = Nothing
@@ -2096,6 +2110,28 @@ viewOverlay model me game =
 
                   else
                     overlayButton "trains-again" Restart "Play again"
+                , a
+                    [ id "trains-next-game"
+                    , href model.nextGame.path
+                    , class "group mt-2 text-sm font-medium text-white underline-offset-4 transition hover:underline"
+                    ]
+                    [ text ("Or try " ++ model.nextGame.name ++ " ")
+                    , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
+                    ]
+
+                -- Only a guest who played gets the call to sign in, not a spectator
+                , if model.guest && me /= Nothing then
+                    p [ id "trains-sign-in", class "text-sm text-white/70" ]
+                        [ a
+                            [ href "/signin"
+                            , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
+                            ]
+                            [ text "Sign in" ]
+                        , text " to keep your scores."
+                        ]
+
+                  else
+                    text ""
                 ]
 
 

@@ -2,7 +2,7 @@ defmodule OctomoctoWeb.SudokuController do
   use OctomoctoWeb, :controller
 
   alias Octomocto.Sudoku.Store
-  alias OctomoctoWeb.SudokuLive
+  alias OctomoctoWeb.{SudokuLive, HomeLive}
 
   plug :put_seo
 
@@ -12,6 +12,8 @@ defmodule OctomoctoWeb.SudokuController do
         id: id,
         settings_path: SudokuLive.settings_path(state),
         user_token: user_token(conn.assigns.current_scope),
+        # The end screen invites the player to try this game
+        next_game: HomeLive.games() |> Enum.reject(&(&1.id == "sudoku")) |> Enum.random(),
         noindex: true
       )
     else

@@ -110,7 +110,7 @@ if (trainsNode) {
   let muted = false
   try { muted = localStorage.getItem("trains-muted") === "true" } catch (_e) {}
 
-  const trains = window.Elm.Trains.init({node: trainsNode, flags: {gameUrl: window.location.href, settingsUrl: trainsNode.dataset.settingsUrl, muted}})
+  const trains = window.Elm.Trains.init({node: trainsNode, flags: {gameUrl: window.location.href, settingsUrl: trainsNode.dataset.settingsUrl, nextGame: {name: trainsNode.dataset.nextGameName, path: trainsNode.dataset.nextGamePath}, guest: !trainsNode.dataset.userToken, muted}})
   const socket = new Socket("/socket", {params: {user_token: trainsNode.dataset.userToken}})
   socket.connect()
 
@@ -170,7 +170,7 @@ if (schulteNode) {
   let muted = false
   try { muted = localStorage.getItem("schulte-muted") === "true" } catch (_e) {}
 
-  const schulte = window.Elm.Schulte.init({node: schulteNode, flags: {gameUrl: window.location.href, settingsUrl: schulteNode.dataset.settingsUrl, guest: !schulteNode.dataset.userToken, muted}})
+  const schulte = window.Elm.Schulte.init({node: schulteNode, flags: {gameUrl: window.location.href, settingsUrl: schulteNode.dataset.settingsUrl, nextGame: {name: schulteNode.dataset.nextGameName, path: schulteNode.dataset.nextGamePath}, guest: !schulteNode.dataset.userToken, muted}})
   const socket = new Socket("/socket", {params: {user_token: schulteNode.dataset.userToken}})
   socket.connect()
 
@@ -291,7 +291,7 @@ if (setNode) {
   let muted = false
   try { muted = localStorage.getItem("set-muted") === "true" } catch (_e) {}
 
-  const setGame = window.Elm.SetGame.init({node: setNode, flags: {gameUrl: window.location.href, settingsUrl: setNode.dataset.settingsUrl, guest: !setNode.dataset.userToken, muted}})
+  const setGame = window.Elm.SetGame.init({node: setNode, flags: {gameUrl: window.location.href, settingsUrl: setNode.dataset.settingsUrl, nextGame: {name: setNode.dataset.nextGameName, path: setNode.dataset.nextGamePath}, guest: !setNode.dataset.userToken, muted}})
   const socket = new Socket("/socket", {params: {user_token: setNode.dataset.userToken}})
   socket.connect()
 
@@ -341,7 +341,7 @@ if (sudokuNode) {
   let muted = false
   try { muted = localStorage.getItem("sudoku-muted") === "true" } catch (_e) {}
 
-  const sudoku = window.Elm.Sudoku.init({node: sudokuNode, flags: {gameUrl: window.location.href, settingsUrl: sudokuNode.dataset.settingsUrl, guest: !sudokuNode.dataset.userToken, muted}})
+  const sudoku = window.Elm.Sudoku.init({node: sudokuNode, flags: {gameUrl: window.location.href, settingsUrl: sudokuNode.dataset.settingsUrl, nextGame: {name: sudokuNode.dataset.nextGameName, path: sudokuNode.dataset.nextGamePath}, guest: !sudokuNode.dataset.userToken, muted}})
   const socket = new Socket("/socket", {params: {user_token: sudokuNode.dataset.userToken}})
   socket.connect()
 

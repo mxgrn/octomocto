@@ -140,9 +140,18 @@ type Connection
     | Failed String
 
 
+{-| The game to try next, on the end screen
+-}
+type alias NextGame =
+    { name : String
+    , path : String
+    }
+
+
 type alias Model =
     { gameUrl : String
     , settingsUrl : String
+    , nextGame : NextGame
     , guest : Bool
     , connection : Connection
     , copied : Bool
@@ -174,6 +183,7 @@ type alias Model =
 type alias Flags =
     { gameUrl : String
     , settingsUrl : String
+    , nextGame : NextGame
     , guest : Bool
     , muted : Bool
     }
@@ -183,6 +193,7 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { gameUrl = flags.gameUrl
       , settingsUrl = flags.settingsUrl
+      , nextGame = flags.nextGame
       , guest = flags.guest
       , connection = Connecting
       , copied = False
@@ -645,7 +656,7 @@ viewBoard model me tall game =
             viewCountdown (Maybe.withDefault 0 (countdownStep model))
 
           else if finished game then
-            viewResult model.settingsUrl model.guest me game
+            viewResult model.settingsUrl model.nextGame model.guest me game
 
           else
             text ""
@@ -667,7 +678,7 @@ viewTurnRequest model me game =
         , p [ class "mt-2 text-xl font-semibold text-octo-navy dark:text-slate-100" ] [ text "Turn your screen" ]
         , p [ class "max-w-60 text-sm text-slate-500 dark:text-slate-400" ] [ text "The board needs a screen that is wider than tall." ]
         , if finished game then
-            viewResult model.settingsUrl model.guest me game
+            viewResult model.settingsUrl model.nextGame model.guest me game
 
           else
             text ""
@@ -1222,8 +1233,8 @@ viewCountdown seconds =
         ]
 
 
-viewResult : String -> Bool -> Me -> Game -> Html Msg
-viewResult settingsUrl guest me game =
+viewResult : String -> NextGame -> Bool -> Me -> Game -> Html Msg
+viewResult settingsUrl nextGame guest me game =
     let
         players =
             game.players
@@ -1292,6 +1303,14 @@ viewResult settingsUrl guest me game =
             , class "text-sm font-medium text-white/80 underline-offset-4 transition hover:text-white hover:underline"
             ]
             [ text "Latest games and best results" ]
+        , a
+            [ id "schulte-next-game"
+            , href nextGame.path
+            , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
+            ]
+            [ text ("Or try " ++ nextGame.name ++ " ")
+            , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
+            ]
 
         -- Only a guest who played gets the call to sign in, not a spectator
         , if guest && me /= Nothing then

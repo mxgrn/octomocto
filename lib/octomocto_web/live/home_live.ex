@@ -76,7 +76,8 @@ defmodule OctomoctoWeb.HomeLive do
       path: "/mahjong",
       icon_class: "bg-emerald-500/10 dark:bg-emerald-400/15"
     }
-    # Station Escape is hidden from the front page for now:
+    # Station Escape is archived: it is not on the front page and is not
+    # suggested on the end screens. Do not change it for now.
     # %{
     #   id: "astronaut",
     #   name: "Station Escape",
