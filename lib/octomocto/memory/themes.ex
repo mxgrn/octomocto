@@ -8,6 +8,9 @@ defmodule Octomocto.Memory.Themes do
   """
 
   @themes [
+    %{name: "sushi", title: "Sushi", cards: 50, new: true},
+    %{name: "food", title: "Food", cards: 230, new: true},
+    %{name: "desert", title: "Desert", cards: 50, new: true},
     %{name: "ocean", title: "Ocean", cards: 50, new: true},
     %{name: "monsters", title: "Monsters", cards: 100, new: true},
     %{name: "insects", title: "Insects", cards: 50, new: true},
