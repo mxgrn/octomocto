@@ -128,7 +128,9 @@ defmodule OctomoctoWeb.GamePageComponents do
   attr :multiplayer, :boolean, required: true, doc: "shows the hint about the link"
 
   @doc """
-  The Start game button. It sends `"new_game"`. It stays at the bottom of
+  The Start game button, or the Create game button for a multiplayer
+  game, because other players must join before it starts. It sends
+  `"new_game"`. It stays at the bottom of
   the screen while the settings above it do not fit, so that a new player
   sees how to start. The settings go under it into the page color. It is
   wider than the settings, so that it also covers the borders of the
@@ -145,13 +147,13 @@ defmodule OctomoctoWeb.GamePageComponents do
         id="new-game"
         type="button"
         phx-click="new_game"
-        phx-disable-with={gettext("Starting...")}
+        phx-disable-with={if(@multiplayer, do: gettext("Creating..."), else: gettext("Starting..."))}
         class={[
           "pointer-events-auto cursor-pointer rounded-full px-8 py-3 font-medium text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0",
           "bg-octo-indigo shadow-octo-indigo/25 hover:bg-octo-indigo/90"
         ]}
       >
-        {gettext("Start game")}
+        {if @multiplayer, do: gettext("Create game"), else: gettext("Start game")}
       </button>
       <p :if={@multiplayer} class="text-sm text-base-content/50">
         {gettext("You get a link to share with other players.")}
