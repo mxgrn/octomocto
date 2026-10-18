@@ -247,30 +247,64 @@ defmodule OctomoctoWeb.Layouts do
           <.icon name="hero-heart-solid" class="size-3.5 transition group-hover:scale-110" />
           {gettext("Feed Octo & Mocto")}
         </a>
+        <%!--
+          The menu opens above the button, because the footer is at the bottom of
+          the page. The links are always in the HTML, so search engines find them.
+        --%>
         <nav
           :if={@languages != []}
           id="language-switcher"
           aria-label={gettext("Language")}
-          class="flex items-center gap-1"
+          phx-click-away={close_language_menu()}
+          phx-window-keydown={close_language_menu()}
+          phx-key="Escape"
+          class="relative"
         >
-          <.icon name="hero-language" class="size-3.5" />
-          <%= for language <- @languages do %>
-            <span
-              :if={language.current}
-              class="rounded-full px-2 py-0.5 font-semibold text-base-content/70"
-            >
-              {language.name}
-            </span>
-            <a
-              :if={!language.current}
-              id={"language-#{language.locale}"}
-              href={language.path}
-              hreflang={language.locale}
-              class="rounded-full px-2 py-0.5 transition hover:bg-base-content/5 hover:text-base-content"
-            >
-              {language.name}
-            </a>
-          <% end %>
+          <button
+            id="language-menu-button"
+            type="button"
+            aria-controls="language-menu"
+            aria-expanded="false"
+            phx-click={JS.toggle_attribute({"aria-expanded", "true", "false"})}
+            class="peer group -my-1 inline-flex items-center gap-1 rounded-full px-2 py-1 transition hover:bg-base-content/5 hover:text-base-content aria-expanded:bg-base-content/5 aria-expanded:text-base-content"
+          >
+            <.icon name="hero-language" class="size-3.5" />
+            {Enum.find(@languages, & &1.current).name}
+            <.icon
+              name="hero-chevron-up-micro"
+              class="size-3.5 transition-transform group-aria-expanded:rotate-180"
+            />
+          </button>
+          <ul
+            id="language-menu"
+            class={[
+              "absolute bottom-full left-1/2 z-30 mb-2 min-w-36 -translate-x-1/2 space-y-0.5 rounded-xl border border-base-300 bg-base-100 p-1.5 text-sm shadow-lg",
+              "invisible translate-y-1 opacity-0 transition duration-150",
+              "peer-aria-expanded:visible peer-aria-expanded:translate-y-0 peer-aria-expanded:opacity-100"
+            ]}
+          >
+            <li :for={language <- @languages}>
+              <span
+                :if={language.current}
+                lang={language.locale}
+                aria-current="true"
+                class="flex items-center justify-between gap-4 rounded-lg px-3 py-1.5 font-semibold text-base-content"
+              >
+                {language.name}
+                <.icon name="hero-check-micro" class="size-4 text-octo-indigo" />
+              </span>
+              <a
+                :if={!language.current}
+                id={"language-#{language.locale}"}
+                href={language.path}
+                hreflang={language.locale}
+                lang={language.locale}
+                class="block rounded-lg px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+              >
+                {language.name}
+              </a>
+            </li>
+          </ul>
         </nav>
       </footer>
     </div>
@@ -388,6 +422,10 @@ defmodule OctomoctoWeb.Layouts do
 
   defp close_site_menu do
     JS.set_attribute({"aria-expanded", "false"}, to: "#site-menu-button")
+  end
+
+  defp close_language_menu do
+    JS.set_attribute({"aria-expanded", "false"}, to: "#language-menu-button")
   end
 
   @doc """
