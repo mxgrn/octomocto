@@ -65,7 +65,7 @@ defmodule OctomoctoWeb.GamePageComponents do
           {render_slot(@icon, game)}
           <div class="min-w-0 flex-1">
             <p class="flex items-center gap-2 text-sm font-medium">
-              <span class="truncate">{render_slot(@summary, game)}</span>
+              <span class="line-clamp-2">{render_slot(@summary, game)}</span>
             </p>
             <p class="flex flex-wrap gap-x-2.5 text-xs text-base-content/70">
               <span :for={player <- game.players} class="flex items-center gap-1">
