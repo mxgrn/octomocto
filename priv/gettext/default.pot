@@ -11,7 +11,7 @@
 msgid ""
 msgstr ""
 
-#: lib/octomocto_web/components/game_page_components.ex:92
+#: lib/octomocto_web/components/game_page_components.ex:86
 #, elixir-autogen, elixir-format
 msgid "%{joined} of %{needed}"
 msgstr ""
@@ -64,7 +64,7 @@ msgstr ""
 msgid "Feed Octo & Mocto"
 msgstr ""
 
-#: lib/octomocto_web/components/game_page_components.ex:73
+#: lib/octomocto_web/components/game_page_components.ex:107
 #, elixir-autogen, elixir-format
 msgid "Finished"
 msgstr ""
@@ -80,7 +80,7 @@ msgstr ""
 msgid "How to play"
 msgstr ""
 
-#: lib/octomocto_web/components/game_page_components.ex:105
+#: lib/octomocto_web/components/game_page_components.ex:99
 #, elixir-autogen, elixir-format
 msgid "Join"
 msgstr ""
@@ -170,7 +170,7 @@ msgstr ""
 msgid "Start game"
 msgstr ""
 
-#: lib/octomocto_web/components/game_page_components.ex:151
+#: lib/octomocto_web/components/game_page_components.ex:152
 #, elixir-autogen, elixir-format
 msgid "Starting..."
 msgstr ""
@@ -201,7 +201,7 @@ msgstr ""
 msgid "Use your heads"
 msgstr ""
 
-#: lib/octomocto_web/components/game_page_components.ex:116
+#: lib/octomocto_web/components/game_page_components.ex:118
 #, elixir-autogen, elixir-format
 msgid "Watch"
 msgstr ""
@@ -281,7 +281,7 @@ msgstr ""
 msgid "Create game"
 msgstr ""
 
-#: lib/octomocto_web/components/game_page_components.ex:151
+#: lib/octomocto_web/components/game_page_components.ex:152
 #, elixir-autogen, elixir-format
 msgid "Creating..."
 msgstr ""

@@ -91,13 +91,20 @@
               patch={settings_path(@locale, @settings, theme: theme.name)}
               aria-current={@settings.theme == theme.name && "true"}
               class={[
-                "group flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
+                "group relative flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
                 if(@settings.theme == theme.name,
                   do: "bg-octo-mist ring-2 ring-octo-indigo dark:bg-octo-indigo-light/10",
                   else: "ring-1 ring-base-content/5 hover:bg-base-200 hover:ring-base-content/15"
                 )
               ]}
             >
+              <span
+                :if={theme[:new]}
+                id={"theme-#{theme.name}-new"}
+                class="absolute -top-1.5 -right-1.5 z-10 rounded-full bg-octo-indigo px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white shadow-sm"
+              >
+                {dgettext("memory", "New")}
+              </span>
               <img
                 src={~p"/images/memory/#{theme.name}/#{Themes.cover(theme.name)}"}
                 alt=""

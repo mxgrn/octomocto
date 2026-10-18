@@ -11,7 +11,7 @@ msgstr ""
 "Language: fr\n"
 "Plural-Forms: nplurals=2; plural=(n>1);\n"
 
-#: lib/octomocto_web/components/game_page_components.ex:92
+#: lib/octomocto_web/components/game_page_components.ex:86
 #, elixir-autogen, elixir-format
 msgid "%{joined} of %{needed}"
 msgstr "%{joined} sur %{needed}"
@@ -64,7 +64,7 @@ msgstr "Recevoir un lien de connexion par e-mail"
 msgid "Feed Octo & Mocto"
 msgstr "Nourris Octo et Mocto"
 
-#: lib/octomocto_web/components/game_page_components.ex:73
+#: lib/octomocto_web/components/game_page_components.ex:107
 #, elixir-autogen, elixir-format
 msgid "Finished"
 msgstr "Terminée"
@@ -80,7 +80,7 @@ msgstr "Invité"
 msgid "How to play"
 msgstr "Comment jouer"
 
-#: lib/octomocto_web/components/game_page_components.ex:105
+#: lib/octomocto_web/components/game_page_components.ex:99
 #, elixir-autogen, elixir-format
 msgid "Join"
 msgstr "Rejoindre"
@@ -170,7 +170,7 @@ msgstr "Une erreur s’est produite !"
 msgid "Start game"
 msgstr "Lancer la partie"
 
-#: lib/octomocto_web/components/game_page_components.ex:151
+#: lib/octomocto_web/components/game_page_components.ex:152
 #, elixir-autogen, elixir-format
 msgid "Starting..."
 msgstr "Lancement..."
@@ -201,7 +201,7 @@ msgstr "Cette partie n’existe pas (ou plus). Lances-en une nouvelle."
 msgid "Use your heads"
 msgstr "Faites marcher vos têtes"
 
-#: lib/octomocto_web/components/game_page_components.ex:116
+#: lib/octomocto_web/components/game_page_components.ex:118
 #, elixir-autogen, elixir-format
 msgid "Watch"
 msgstr "Regarder"
@@ -281,7 +281,7 @@ msgstr "Menu"
 msgid "Create game"
 msgstr "Créer la partie"
 
-#: lib/octomocto_web/components/game_page_components.ex:151
+#: lib/octomocto_web/components/game_page_components.ex:152
 #, elixir-autogen, elixir-format
 msgid "Creating..."
 msgstr "Création..."

@@ -11,7 +11,7 @@ msgstr ""
 "Language: ru\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100 != 11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10||n%100>=20) ? 1 : 2);\n"
 
-#: lib/octomocto_web/components/game_page_components.ex:92
+#: lib/octomocto_web/components/game_page_components.ex:86
 #, elixir-autogen, elixir-format
 msgid "%{joined} of %{needed}"
 msgstr "%{joined} из %{needed}"
@@ -64,7 +64,7 @@ msgstr "Прислать ссылку для входа"
 msgid "Feed Octo & Mocto"
 msgstr "Покорми Octo и Mocto"
 
-#: lib/octomocto_web/components/game_page_components.ex:73
+#: lib/octomocto_web/components/game_page_components.ex:107
 #, elixir-autogen, elixir-format
 msgid "Finished"
 msgstr "Закончена"
@@ -80,7 +80,7 @@ msgstr "Гость"
 msgid "How to play"
 msgstr "Как играть"
 
-#: lib/octomocto_web/components/game_page_components.ex:105
+#: lib/octomocto_web/components/game_page_components.ex:99
 #, elixir-autogen, elixir-format
 msgid "Join"
 msgstr "Войти"
@@ -170,7 +170,7 @@ msgstr "Что-то пошло не так!"
 msgid "Start game"
 msgstr "Начать игру"
 
-#: lib/octomocto_web/components/game_page_components.ex:151
+#: lib/octomocto_web/components/game_page_components.ex:152
 #, elixir-autogen, elixir-format
 msgid "Starting..."
 msgstr "Начинаем..."
@@ -201,7 +201,7 @@ msgstr "Этой игры нет (больше нет). Начни новую."
 msgid "Use your heads"
 msgstr "Включайте головы"
 
-#: lib/octomocto_web/components/game_page_components.ex:116
+#: lib/octomocto_web/components/game_page_components.ex:118
 #, elixir-autogen, elixir-format
 msgid "Watch"
 msgstr "Смотреть"
@@ -281,7 +281,7 @@ msgstr "Меню"
 msgid "Create game"
 msgstr "Создать игру"
 
-#: lib/octomocto_web/components/game_page_components.ex:151
+#: lib/octomocto_web/components/game_page_components.ex:152
 #, elixir-autogen, elixir-format
 msgid "Creating..."
 msgstr "Создаём..."
