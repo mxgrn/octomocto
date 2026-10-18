@@ -19,6 +19,10 @@ defmodule OctomoctoWeb.Router do
     plug OctomoctoWeb.Locale, "pt"
   end
 
+  pipeline :german do
+    plug OctomoctoWeb.Locale, "de"
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -65,6 +69,20 @@ defmodule OctomoctoWeb.Router do
 
     live_session :portuguese,
       on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "pt"}] do
+      live "/memory", MemoryLive
+    end
+
+    get "/*path", LocaleController, :english
+  end
+
+  # The pages in German, the same as the pages in Portuguese
+  scope "/de", OctomoctoWeb do
+    pipe_through [:browser, :german]
+
+    get "/memory/:id", MemoryController, :show
+
+    live_session :german,
+      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "de"}] do
       live "/memory", MemoryLive
     end
 
