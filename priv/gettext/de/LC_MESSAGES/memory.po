@@ -31,7 +31,7 @@ msgstr "Genauigkeit"
 msgid "Accuracy {accuracy}"
 msgstr "Genauigkeit {accuracy}"
 
-#: lib/octomocto_web/live/memory_live.ex:252
+#: lib/octomocto_web/live/memory_live.ex:253
 #, elixir-autogen, elixir-format
 msgid "Animals"
 msgstr "Tiere"
@@ -51,7 +51,7 @@ msgstr "Bestwert"
 msgid "Best results"
 msgstr "Beste Ergebnisse"
 
-#: lib/octomocto_web/live/memory_live.ex:249
+#: lib/octomocto_web/live/memory_live.ex:250
 #, elixir-autogen, elixir-format
 msgid "Birds"
 msgstr "Vögel"
@@ -87,17 +87,17 @@ msgstr "Beitritt zum Spiel fehlgeschlagen: {reason}"
 msgid "Done!"
 msgstr "Geschafft!"
 
-#: lib/octomocto_web/live/memory_live.ex:254
+#: lib/octomocto_web/live/memory_live.ex:255
 #, elixir-autogen, elixir-format
 msgid "Ecology"
 msgstr "Ökologie"
 
-#: lib/octomocto_web/live/memory_live.ex:246
+#: lib/octomocto_web/live/memory_live.ex:247
 #, elixir-autogen, elixir-format
 msgid "Eighties"
 msgstr "Achtziger"
 
-#: lib/octomocto_web/live/memory_live.ex:253
+#: lib/octomocto_web/live/memory_live.ex:254
 #, elixir-autogen, elixir-format
 msgid "Fairy Tales"
 msgstr "Märchen"
@@ -127,17 +127,17 @@ msgstr "Finde die Paare von Karten mit demselben Bild."
 msgid "Find the triplets of cards with the same image."
 msgstr "Finde die Dreiergruppen von Karten mit demselben Bild."
 
-#: lib/octomocto_web/live/memory_live.ex:257
+#: lib/octomocto_web/live/memory_live.ex:258
 #, elixir-autogen, elixir-format
 msgid "Flags"
 msgstr "Flaggen"
 
-#: lib/octomocto_web/live/memory_live.ex:248
+#: lib/octomocto_web/live/memory_live.ex:249
 #, elixir-autogen, elixir-format
 msgid "Flowers"
 msgstr "Blumen"
 
-#: lib/octomocto_web/live/memory_live.ex:256
+#: lib/octomocto_web/live/memory_live.ex:257
 #, elixir-autogen, elixir-format
 msgid "Halloween"
 msgstr "Halloween"
@@ -188,7 +188,7 @@ msgstr "Memory-Spiel online"
 msgid "More cards"
 msgstr "Mehr Karten"
 
-#: lib/octomocto_web/live/memory_live.ex:255
+#: lib/octomocto_web/live/memory_live.ex:256
 #, elixir-autogen, elixir-format
 msgid "Music"
 msgstr "Musik"
@@ -214,7 +214,7 @@ msgstr "Paare"
 msgid "Pairs One found its pair! The game is moving to Octomocto."
 msgstr "Pairs One hat sein Paar gefunden! Das Spiel zieht zu Octomocto um."
 
-#: lib/octomocto_web/live/memory_live.ex:250
+#: lib/octomocto_web/live/memory_live.ex:251
 #, elixir-autogen, elixir-format
 msgid "Pets"
 msgstr "Haustiere"
@@ -260,7 +260,7 @@ msgstr "Schick den Link an die anderen Spieler. Das Spiel beginnt, wenn alle da 
 msgid "Sign in"
 msgstr "Anmelden"
 
-#: lib/octomocto_web/live/memory_live.ex:247
+#: lib/octomocto_web/live/memory_live.ex:248
 #, elixir-autogen, elixir-format
 msgid "Spring"
 msgstr "Frühling"
@@ -326,7 +326,7 @@ msgstr "Warten auf Spieler"
 msgid "Whoever has the most points wins. Alone, clear the field as fast as you can."
 msgstr "Wer die meisten Punkte hat, gewinnt. Allein räumst du das Feld so schnell wie möglich ab."
 
-#: lib/octomocto_web/live/memory_live.ex:251
+#: lib/octomocto_web/live/memory_live.ex:252
 #, elixir-autogen, elixir-format
 msgid "Workout"
 msgstr "Training"
@@ -381,7 +381,7 @@ msgstr "{players} von {needed} Spielern sind da"
 msgid "{sign_in} to keep your scores."
 msgstr "{sign_in} und deine Ergebnisse speichern."
 
-#: lib/octomocto_web/live/memory_live.ex:245
+#: lib/octomocto_web/live/memory_live.ex:246
 #, elixir-autogen, elixir-format
 msgid "Insects"
 msgstr "Insekten"
@@ -390,3 +390,8 @@ msgstr "Insekten"
 #, elixir-autogen, elixir-format
 msgid "New"
 msgstr "Neu"
+
+#: lib/octomocto_web/live/memory_live.ex:245
+#, elixir-autogen, elixir-format
+msgid "Monsters"
+msgstr "Monster"

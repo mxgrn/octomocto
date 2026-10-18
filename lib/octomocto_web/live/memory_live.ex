@@ -242,6 +242,7 @@ defmodule OctomoctoWeb.MemoryLive do
   # The titles of the themes in `Themes`, for `mix gettext.extract`. A new
   # theme must be in the list too.
   @theme_titles [
+    dgettext_noop("memory", "Monsters"),
     dgettext_noop("memory", "Insects"),
     dgettext_noop("memory", "Eighties"),
     dgettext_noop("memory", "Spring"),
