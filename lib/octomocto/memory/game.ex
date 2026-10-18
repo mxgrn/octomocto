@@ -469,7 +469,8 @@ defmodule Octomocto.Memory.Game do
        when state.finished_at != nil and map_size(state.players) == state.needed do
     settings = %{"set" => state.set, "cards" => state.size, "players" => state.needed}
     players = Map.values(state.players)
-    Memory.save_results(state.field_id, settings, state.finished_at - state.started_at, players)
+    elapsed_ms = state.finished_at - state.started_at
+    Memory.save_results(state.field_id, settings, state.theme, elapsed_ms, players)
     state
   end
 

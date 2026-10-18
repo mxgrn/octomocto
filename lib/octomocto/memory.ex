@@ -71,10 +71,10 @@ defmodule Octomocto.Memory do
   end
 
   @doc """
-  Saves one finished field. Each player is a map with `:user_id` (nil for a
-  guest), `:score`, `:correct` and `:errors`.
+  Saves one finished field with its theme. Each player is a map with
+  `:user_id` (nil for a guest), `:score`, `:correct` and `:errors`.
   """
-  def save_results(game_id, settings, elapsed_ms, players) do
+  def save_results(game_id, settings, theme, elapsed_ms, players) do
     now = DateTime.utc_now()
 
     rows =
@@ -82,6 +82,7 @@ defmodule Octomocto.Memory do
         %{
           game_id: game_id,
           settings: settings,
+          theme: theme,
           elapsed_ms: elapsed_ms,
           user_id: player.user_id,
           score: player.score,
