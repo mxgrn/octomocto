@@ -14,14 +14,14 @@ defmodule OctomoctoWeb.Locale do
   """
   import Plug.Conn
 
-  @names %{"en" => "English", "pt" => "Português", "de" => "Deutsch"}
+  @names %{"en" => "English", "pt" => "Português", "de" => "Deutsch", "ru" => "Русский"}
 
   # The value of the `lang` and `hreflang` attributes. The Portuguese
   # translations are Brazilian.
-  @html_langs %{"en" => "en", "pt" => "pt-BR", "de" => "de"}
+  @html_langs %{"en" => "en", "pt" => "pt-BR", "de" => "de", "ru" => "ru"}
 
   # The games with translations, by language
-  @games %{"pt" => ["memory"], "de" => ["memory"]}
+  @games %{"pt" => ["memory"], "de" => ["memory"], "ru" => ["memory"]}
 
   def init(locale), do: locale
 
@@ -77,7 +77,9 @@ defmodule OctomoctoWeb.Locale do
 
   @de_months ~w(Jan. Feb. März Apr. Mai Juni Juli Aug. Sept. Okt. Nov. Dez.)
 
-  @doc "A short date in the language of the process, for example \"Oct 17\", \"17 de out.\" or \"17. Okt.\"."
+  @ru_months ~w(янв. февр. марта апр. мая июня июля авг. сент. окт. нояб. дек.)
+
+  @doc "A short date in the language of the process, for example \"Oct 17\", \"17 de out.\", \"17. Okt.\" or \"17 окт.\"."
   def short_date(date) do
     case Gettext.get_locale(OctomoctoWeb.Gettext) do
       "pt" ->
@@ -87,6 +89,9 @@ defmodule OctomoctoWeb.Locale do
 
       "de" ->
         Calendar.strftime(date, "%-d. %b", abbreviated_month_names: &Enum.at(@de_months, &1 - 1))
+
+      "ru" ->
+        Calendar.strftime(date, "%-d %b", abbreviated_month_names: &Enum.at(@ru_months, &1 - 1))
 
       _ ->
         Calendar.strftime(date, "%b %-d")

@@ -1,0 +1,277 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ru\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100 != 11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10||n%100>=20) ? 1 : 2);\n"
+
+#: lib/octomocto_web/components/game_page_components.ex:92
+#, elixir-autogen, elixir-format
+msgid "%{joined} of %{needed}"
+msgstr "%{joined} из %{needed}"
+
+#: lib/octomocto_web/controllers/schulte_html.ex:105
+#, elixir-autogen, elixir-format
+msgid "%{score} pts"
+msgstr "%{score} очк."
+
+#: lib/octomocto_web/components/core_components.ex:375
+#, elixir-autogen, elixir-format
+msgid "Actions"
+msgstr "Действия"
+
+#: lib/octomocto_web/components/layouts.ex:463
+#: lib/octomocto_web/components/layouts.ex:478
+#, elixir-autogen, elixir-format
+msgid "Attempting to reconnect"
+msgstr "Пробуем подключиться снова"
+
+#: lib/octomocto_web/components/layouts.ex:369
+#: lib/octomocto_web/components/layouts/root.html.heex:32
+#, elixir-autogen, elixir-format
+msgid "Brain Games to Play Solo or with Friends"
+msgstr "Игры для ума — одному или с друзьями"
+
+#: lib/octomocto_web/components/game_page_components.ex:210
+#: lib/octomocto_web/components/layouts.ex:73
+#, elixir-autogen, elixir-format
+msgid "Close"
+msgstr "Закрыть"
+
+#: lib/octomocto_web/components/layouts.ex:415
+#, elixir-autogen, elixir-format
+msgid "Dark theme"
+msgstr "Тёмная тема"
+
+#: lib/octomocto_web/controllers/user_session_html.ex:122
+#, elixir-autogen, elixir-format
+msgid "Email"
+msgstr "Эл. почта"
+
+#: lib/octomocto_web/controllers/user_session_html.ex:107
+#, elixir-autogen, elixir-format
+msgid "Email me a sign-in link"
+msgstr "Прислать ссылку для входа"
+
+#: lib/octomocto_web/components/layouts.ex:248
+#, elixir-autogen, elixir-format
+msgid "Feed Octo & Mocto"
+msgstr "Покорми Octo и Mocto"
+
+#: lib/octomocto_web/components/game_page_components.ex:73
+#, elixir-autogen, elixir-format
+msgid "Finished"
+msgstr "Закончена"
+
+#: lib/octomocto_web/controllers/schulte_html.ex:122
+#, elixir-autogen, elixir-format
+msgid "Guest"
+msgstr "Гость"
+
+#: lib/octomocto_web/components/game_page_components.ex:175
+#: lib/octomocto_web/components/game_page_components.ex:205
+#, elixir-autogen, elixir-format
+msgid "How to play"
+msgstr "Как играть"
+
+#: lib/octomocto_web/components/game_page_components.ex:105
+#, elixir-autogen, elixir-format
+msgid "Join"
+msgstr "Войти"
+
+#: lib/octomocto_web/components/layouts.ex:253
+#, elixir-autogen, elixir-format
+msgid "Language"
+msgstr "Язык"
+
+#: lib/octomocto_web/components/layouts.ex:413
+#, elixir-autogen, elixir-format
+msgid "Light theme"
+msgstr "Светлая тема"
+
+#: lib/octomocto_web/components/game_page_components.ex:51
+#, elixir-autogen, elixir-format
+msgid "No games now. Make a public one."
+msgstr "Сейчас игр нет. Создай открытую."
+
+#: lib/octomocto_web/controllers/schulte_html.ex:86
+#, elixir-autogen, elixir-format
+msgid "No games yet — be the first."
+msgstr "Игр пока нет — создай первую."
+
+#: lib/octomocto_web/components/layouts.ex:355
+#, elixir-autogen, elixir-format
+msgid "Octomocto: Use your heads. Play solo or with friends."
+msgstr "Octomocto: Включайте головы. Играй один или с друзьями."
+
+#: lib/octomocto_web/components/game_page_components.ex:244
+#, elixir-autogen, elixir-format
+msgid "Only players with the link can join."
+msgstr "Войти могут только те, у кого есть ссылка."
+
+#: lib/octomocto_web/components/game_page_components.ex:239
+#, elixir-autogen, elixir-format
+msgid "Only players with the link can watch."
+msgstr "Смотреть могут только те, у кого есть ссылка."
+
+#: lib/octomocto_web/components/game_page_components.ex:236
+#, elixir-autogen, elixir-format
+msgid "Other players can watch this game in Ongoing games."
+msgstr "Другие игроки могут смотреть эту игру в разделе «Текущие игры»."
+
+#: lib/octomocto_web/components/game_page_components.ex:242
+#, elixir-autogen, elixir-format
+msgid "Other players see this game in Ongoing games."
+msgstr "Другие игроки видят эту игру в разделе «Текущие игры»."
+
+#: lib/octomocto_web/components/layouts.ex:231
+#, elixir-autogen, elixir-format
+msgid "Privacy Policy"
+msgstr "Политика конфиденциальности"
+
+#: lib/octomocto_web/components/game_page_components.ex:40
+#, elixir-autogen, elixir-format
+msgid "Ongoing games"
+msgstr "Текущие игры"
+
+#: lib/octomocto_web/components/layouts.ex:363
+#, elixir-autogen, elixir-format
+msgid "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
+msgstr "Быстрые игры на память, логику и скорость. Играй один или соревнуйся с друзьями."
+
+#: lib/octomocto_web/controllers/user_session_html.ex:130
+#, elixir-autogen, elixir-format
+msgid "Send"
+msgstr "Отправить"
+
+#: lib/octomocto_web/components/layouts.ex:185
+#, elixir-autogen, elixir-format
+msgid "Settings"
+msgstr "Настройки"
+
+#: lib/octomocto_web/components/layouts.ex:193
+#, elixir-autogen, elixir-format
+msgid "Sign out"
+msgstr "Выйти"
+
+#: lib/octomocto_web/components/layouts.ex:470
+#, elixir-autogen, elixir-format
+msgid "Something went wrong!"
+msgstr "Что-то пошло не так!"
+
+#: lib/octomocto_web/components/game_page_components.ex:154
+#, elixir-autogen, elixir-format
+msgid "Start game"
+msgstr "Начать игру"
+
+#: lib/octomocto_web/components/game_page_components.ex:148
+#, elixir-autogen, elixir-format
+msgid "Starting..."
+msgstr "Начинаем..."
+
+#: lib/octomocto_web/components/layouts.ex:411
+#, elixir-autogen, elixir-format
+msgid "System theme"
+msgstr "Как в системе"
+
+#: lib/octomocto_web/components/layouts.ex:234
+#, elixir-autogen, elixir-format
+msgid "Terms of Service"
+msgstr "Условия использования"
+
+#: lib/octomocto_web/components/layouts.ex:151
+#: lib/octomocto_web/components/layouts.ex:177
+#, elixir-autogen, elixir-format
+msgid "Theme"
+msgstr "Тема"
+
+#: lib/octomocto_web/controllers/memory_controller.ex:25
+#, elixir-autogen, elixir-format
+msgid "This game does not exist (any more). Start a new one."
+msgstr "Этой игры нет (больше нет). Начни новую."
+
+#: lib/octomocto_web/components/layouts.ex:99
+#, elixir-autogen, elixir-format
+msgid "Use your heads"
+msgstr "Включайте головы"
+
+#: lib/octomocto_web/components/game_page_components.ex:116
+#, elixir-autogen, elixir-format
+msgid "Watch"
+msgstr "Смотреть"
+
+#: lib/octomocto_web/components/layouts.ex:455
+#, elixir-autogen, elixir-format
+msgid "We can't find the internet"
+msgstr "Нет подключения к интернету"
+
+#: lib/octomocto_web/components/game_page_components.ex:157
+#, elixir-autogen, elixir-format
+msgid "You get a link to share with other players."
+msgstr "Ты получишь ссылку, чтобы отправить её другим игрокам."
+
+#: lib/octomocto_web/components/game_page_components.ex:261
+#, elixir-autogen, elixir-format
+msgid "amber"
+msgstr "Янтарный"
+
+#: lib/octomocto_web/components/core_components.ex:81
+#, elixir-autogen, elixir-format
+msgid "close"
+msgstr "закрыть"
+
+#: lib/octomocto_web/components/game_page_components.ex:265
+#, elixir-autogen, elixir-format
+msgid "indigo"
+msgstr "Индиго"
+
+#: lib/octomocto_web/components/game_page_components.ex:260
+#, elixir-autogen, elixir-format
+msgid "lime"
+msgstr "Лаймовый"
+
+#: lib/octomocto_web/controllers/user_session_html.ex:94
+#, elixir-autogen, elixir-format
+msgid "or"
+msgstr "или"
+
+#: lib/octomocto_web/components/game_page_components.ex:258
+#, elixir-autogen, elixir-format
+msgid "pink"
+msgstr "Розовый"
+
+#: lib/octomocto_web/components/game_page_components.ex:263
+#, elixir-autogen, elixir-format
+msgid "red"
+msgstr "Красный"
+
+#: lib/octomocto_web/components/game_page_components.ex:259
+#, elixir-autogen, elixir-format
+msgid "sky"
+msgstr "Небесный"
+
+#: lib/octomocto_web/components/game_page_components.ex:264
+#, elixir-autogen, elixir-format
+msgid "teal"
+msgstr "Бирюзовый"
+
+#: lib/octomocto_web/components/game_page_components.ex:262
+#, elixir-autogen, elixir-format
+msgid "violet"
+msgstr "Фиолетовый"
+
+#: lib/octomocto_web/controllers/user_session_html.ex:119
+#, elixir-autogen, elixir-format
+msgid "you@example.com"
+msgstr "you@example.com"
+
+#: lib/octomocto_web/components/layouts.ex:116
+#, elixir-autogen, elixir-format
+msgid "Menu"
+msgstr "Меню"

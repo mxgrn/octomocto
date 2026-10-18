@@ -11,6 +11,7 @@ defmodule OctomoctoWeb.SitemapController do
       url(~p"/memory"),
       url(~p"/pt/memory"),
       url(~p"/de/memory"),
+      url(~p"/ru/memory"),
       url(~p"/set"),
       url(~p"/sudoku"),
       url(~p"/echo"),
