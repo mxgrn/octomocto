@@ -286,6 +286,36 @@ html:has(.is-playing) body {
   .memory-card-inner { transition: none; }
 }
 
+/* The theme picker shows 2.5 rows and scrolls, so that the cut row and
+   the scroll bar show that there are more themes. A card is as high as
+   its column is wide, plus 1.25rem for the label and the gaps in it.
+   The padding keeps the rings and the "New" badges in the scroll box. */
+.memory-themes-box { container-type: inline-size; }
+.memory-themes {
+  --cols: 4;
+  --gap: 0.75rem;
+  --pad: 0.375rem;
+  --bar: 8px;
+  --col: calc((100cqw - 2 * var(--pad) - var(--bar) - (var(--cols) - 1) * var(--gap)) / var(--cols));
+  max-height: calc(2.5 * (var(--col) + 1.25rem) + 2 * var(--gap) + var(--pad));
+  overflow-y: auto;
+  padding: var(--pad);
+  margin: calc(0.75rem - var(--pad)) calc(-1 * var(--pad)) calc(-1 * var(--pad));
+}
+@media (width >= 80rem) {
+  .memory-themes { --cols: 6; }
+}
+/* A styled WebKit scroll bar is always visible, also on macOS */
+.memory-themes::-webkit-scrollbar { width: var(--bar); }
+.memory-themes::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--color-base-content) 25%, transparent);
+}
+.memory-themes::-webkit-scrollbar-track { background: transparent; }
+@supports not selector(::-webkit-scrollbar) {
+  .memory-themes { scrollbar-width: thin; }
+}
+
 /* Set. A new card comes with a short deal animation. The shake of a
    wrong set is on the face, so that the end of the shake does not start
    the deal animation of the card again. */
