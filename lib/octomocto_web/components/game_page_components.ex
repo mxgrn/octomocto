@@ -66,12 +66,6 @@ defmodule OctomoctoWeb.GamePageComponents do
           <div class="min-w-0 flex-1">
             <p class="flex items-center gap-2 text-sm font-medium">
               <span class="truncate">{render_slot(@summary, game)}</span>
-              <span
-                :if={game[:finished]}
-                class="shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400"
-              >
-                {gettext("Finished")}
-              </span>
             </p>
             <p class="flex flex-wrap gap-x-2.5 text-xs text-base-content/70">
               <span :for={player <- game.players} class="flex items-center gap-1">
@@ -105,7 +99,15 @@ defmodule OctomoctoWeb.GamePageComponents do
               {gettext("Join")}
             </.link>
           <% else %>
+            <span
+              :if={game[:finished]}
+              id={"finished-#{game.id}"}
+              class="shrink-0 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400"
+            >
+              {gettext("Finished")}
+            </span>
             <.link
+              :if={!game[:finished]}
               id={"watch-#{game.id}"}
               href={@path.(game) <> "?watch=1"}
               class={[
