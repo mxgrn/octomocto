@@ -61,7 +61,7 @@ defmodule Octomocto.Sudoku.Game do
   ]
 
   def start_link({id, %{players: needed, public: public, difficulty: difficulty} = config})
-      when needed in 1..5 and is_boolean(public) and difficulty in ~w(easy medium hard) do
+      when needed in 1..4 and is_boolean(public) and difficulty in ~w(easy medium hard) do
     GenServer.start_link(__MODULE__, {id, config}, name: via(id))
   end
 

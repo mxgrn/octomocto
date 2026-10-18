@@ -72,7 +72,7 @@ defmodule Octomocto.Memory.Game do
   def start_link(
         {id, %{theme: theme, set: set, cards: cards, players: needed, public: public} = config}
       )
-      when set in [2, 3] and needed in 1..5 and is_boolean(public) do
+      when set in [2, 3] and needed in 1..4 and is_boolean(public) do
     true = cards in Board.sizes(theme, set)
     GenServer.start_link(__MODULE__, {id, config}, name: via(id))
   end

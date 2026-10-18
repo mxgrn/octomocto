@@ -43,7 +43,7 @@
       <div id="echo-settings" class="flex w-full flex-col gap-4">
         <.setting label="Players" icon="hero-users" hint={players_hint(@settings.players)}>
           <.option
-            :for={n <- 1..3}
+            :for={n <- 1..4}
             id={"players-#{n}"}
             selected={@settings.players == n}
             patch={~p"/echo?#{query(@settings, players: n)}"}

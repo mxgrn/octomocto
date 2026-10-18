@@ -66,7 +66,7 @@ defmodule Octomocto.SetGame.Game do
   ]
 
   def start_link({id, %{players: needed, public: public, mode: mode} = config})
-      when needed in 1..5 and is_boolean(public) and mode in ~w(easy normal) do
+      when needed in 1..4 and is_boolean(public) and mode in ~w(easy normal) do
     GenServer.start_link(__MODULE__, {id, config}, name: via(id))
   end
 

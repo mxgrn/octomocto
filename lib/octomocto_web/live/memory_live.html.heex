@@ -74,7 +74,7 @@
           }
         >
           <.option
-            :for={n <- 1..5}
+            :for={n <- 1..4}
             id={"players-#{n}"}
             selected={@settings.players == n}
             patch={settings_path(@locale, @settings, players: n)}

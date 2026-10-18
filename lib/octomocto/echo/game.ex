@@ -10,7 +10,7 @@ defmodule Octomocto.Echo.Game do
   When the player repeats all of it, the game adds one more random pad. A
   wrong pad ends the game.
 
-  With 2 or 3 players, the game has no playback. In a turn, the player
+  With 2 to 4 players, the game has no playback. In a turn, the player
   repeats the sequence and then adds a pad of their choice. Then the turn
   goes to the next player. The first player of a game only adds a pad. A
   player who taps a wrong pad is out. When only one player is still in,
@@ -56,7 +56,7 @@ defmodule Octomocto.Echo.Game do
   ]
 
   def start_link({id, %{pads: pads, players: needed, public: public} = config})
-      when pads in 2..8 and needed in 1..3 and is_boolean(public) do
+      when pads in 2..8 and needed in 1..4 and is_boolean(public) do
     GenServer.start_link(__MODULE__, {id, config}, name: via(id))
   end
 

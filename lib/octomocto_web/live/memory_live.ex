@@ -105,7 +105,7 @@ defmodule OctomoctoWeb.MemoryLive do
 
     players =
       case Integer.parse(params["players"] || "") do
-        {n, ""} when n in 1..5 -> n
+        {n, ""} when n in 1..4 -> n
         _ -> 1
       end
 

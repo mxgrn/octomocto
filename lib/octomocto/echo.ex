@@ -2,7 +2,7 @@ defmodule Octomocto.Echo do
   @moduledoc """
   Echo: a ring of colored pads lights up in a sequence, and the players
   repeat it. The sequence gets one pad longer in each round. Alone, the
-  game adds a random pad. With 2 or 3 players, each player adds a pad of
+  game adds a random pad. With 2 to 4 players, each player adds a pad of
   their choice in their turn.
 
   Each game is a `Octomocto.Echo.Game` process on one node of the
