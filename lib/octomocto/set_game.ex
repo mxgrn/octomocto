@@ -125,7 +125,10 @@ defmodule Octomocto.SetGame do
       end)
 
     best =
-      from(r in user_query, order_by: [asc: r.elapsed_ms, asc: r.inserted_at], limit: 1)
+      from(r in without_guests(user_query),
+        order_by: [asc: r.elapsed_ms, asc: r.inserted_at],
+        limit: 1
+      )
       |> Repo.one()
 
     %{latest: latest, best: best}
@@ -164,7 +167,7 @@ defmodule Octomocto.SetGame do
 
   defp best_results(settings) do
     best_of_each_user =
-      from(r in Result,
+      from(r in without_guests(Result),
         where: r.settings == type(^settings, :map) and not is_nil(r.user_id),
         distinct: r.user_id,
         order_by: [asc: r.user_id, asc: r.elapsed_ms, asc: r.inserted_at]
@@ -176,5 +179,18 @@ defmodule Octomocto.SetGame do
       preload: :user
     )
     |> Repo.all()
+  end
+
+  # Keeps the results of the fields where all players were signed in. The
+  # rows of one field have the same game id and time (see `save_results`).
+  defp without_guests(query) do
+    guests =
+      from(g in Result,
+        where:
+          g.game_id == parent_as(:result).game_id and
+            g.inserted_at == parent_as(:result).inserted_at and is_nil(g.user_id)
+      )
+
+    from(r in query, as: :result, where: not exists(guests))
   end
 end
