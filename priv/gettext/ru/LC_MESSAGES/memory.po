@@ -21,8 +21,8 @@ msgstr[2] "%{count} карт"
 
 #: lib/octomocto_web/controllers/memory_html.ex:34
 #: lib/octomocto_web/live/memory_live.html.heex:246
-#: lib/octomocto_web/live/memory_live.html.heex:285
-#: lib/octomocto_web/live/memory_live.html.heex:310
+#: lib/octomocto_web/live/memory_live.html.heex:297
+#: lib/octomocto_web/live/memory_live.html.heex:322
 #, elixir-autogen, elixir-format
 msgid "Accuracy"
 msgstr "Точность"
@@ -158,7 +158,7 @@ msgstr "Ничья!"
 msgid "Joining the game…"
 msgstr "Входим в игру…"
 
-#: lib/octomocto_web/live/memory_live.html.heex:296
+#: lib/octomocto_web/live/memory_live.html.heex:308
 #, elixir-autogen, elixir-format
 msgid "Latest games"
 msgstr "Последние игры"
@@ -257,6 +257,7 @@ msgstr "Отправь ссылку другим игрокам. Игра нач
 
 #: lib/octomocto_web/controllers/memory_html.ex:54
 #: lib/octomocto_web/live/memory_live.html.heex:264
+#: lib/octomocto_web/live/memory_live.html.heex:284
 #, elixir-autogen, elixir-format
 msgid "Sign in"
 msgstr "Войди"
@@ -416,3 +417,8 @@ msgstr "Еда"
 #, elixir-autogen, elixir-format
 msgid "Sushi"
 msgstr "Суши"
+
+#: lib/octomocto_web/live/memory_live.html.heex:286
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "и попади в список"

@@ -184,6 +184,18 @@
         title="Best results"
         empty={@leaderboard.best == []}
       >
+        <:aside :if={!@user_results}>
+          <span class="text-sm text-base-content/60">
+            <.link
+              id="best-results-sign-in"
+              href={~p"/signin"}
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
+            >
+              Sign in
+            </.link>
+            to get listed
+          </span>
+        </:aside>
         <li
           :for={{result, place} <- Enum.with_index(@leaderboard.best, 1)}
           class="flex items-baseline gap-3 py-2"

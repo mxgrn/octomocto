@@ -74,11 +74,12 @@ defmodule OctomoctoWeb.SchulteHTML do
   def score_list(assigns) do
     ~H"""
     <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
-      <div class="mb-3 flex items-center justify-between gap-3">
-        <h3 class="flex items-center gap-2 font-semibold">
+      <%!-- When the aside does not fit next to the title, it goes below it --%>
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <h3 class="flex items-center gap-2 whitespace-nowrap font-semibold">
           <.icon name={@icon} class={["size-4", @icon_class]} /> {@title}
         </h3>
-        {render_slot(@aside)}
+        <div :if={@aside != []} class="whitespace-nowrap">{render_slot(@aside)}</div>
       </div>
       <ol id={@id} class="divide-y divide-base-content/5 text-sm">
         {render_slot(@inner_block)}

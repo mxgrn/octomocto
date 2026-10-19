@@ -20,8 +20,8 @@ msgstr[1] ""
 
 #: lib/octomocto_web/controllers/memory_html.ex:34
 #: lib/octomocto_web/live/memory_live.html.heex:246
-#: lib/octomocto_web/live/memory_live.html.heex:285
-#: lib/octomocto_web/live/memory_live.html.heex:310
+#: lib/octomocto_web/live/memory_live.html.heex:297
+#: lib/octomocto_web/live/memory_live.html.heex:322
 #, elixir-autogen, elixir-format
 msgid "Accuracy"
 msgstr ""
@@ -157,7 +157,7 @@ msgstr ""
 msgid "Joining the game…"
 msgstr ""
 
-#: lib/octomocto_web/live/memory_live.html.heex:296
+#: lib/octomocto_web/live/memory_live.html.heex:308
 #, elixir-autogen, elixir-format
 msgid "Latest games"
 msgstr ""
@@ -256,6 +256,7 @@ msgstr ""
 
 #: lib/octomocto_web/controllers/memory_html.ex:54
 #: lib/octomocto_web/live/memory_live.html.heex:264
+#: lib/octomocto_web/live/memory_live.html.heex:284
 #, elixir-autogen, elixir-format
 msgid "Sign in"
 msgstr ""
@@ -414,4 +415,9 @@ msgstr ""
 #: lib/octomocto_web/live/memory_live.ex:245
 #, elixir-autogen, elixir-format
 msgid "Sushi"
+msgstr ""
+
+#: lib/octomocto_web/live/memory_live.html.heex:286
+#, elixir-autogen, elixir-format
+msgid "to get listed"
 msgstr ""

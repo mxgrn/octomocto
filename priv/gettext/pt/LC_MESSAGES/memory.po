@@ -20,8 +20,8 @@ msgstr[1] "%{count} cartas"
 
 #: lib/octomocto_web/controllers/memory_html.ex:34
 #: lib/octomocto_web/live/memory_live.html.heex:246
-#: lib/octomocto_web/live/memory_live.html.heex:285
-#: lib/octomocto_web/live/memory_live.html.heex:310
+#: lib/octomocto_web/live/memory_live.html.heex:297
+#: lib/octomocto_web/live/memory_live.html.heex:322
 #, elixir-autogen, elixir-format
 msgid "Accuracy"
 msgstr "Precisão"
@@ -157,7 +157,7 @@ msgstr "Empate!"
 msgid "Joining the game…"
 msgstr "Entrando no jogo…"
 
-#: lib/octomocto_web/live/memory_live.html.heex:296
+#: lib/octomocto_web/live/memory_live.html.heex:308
 #, elixir-autogen, elixir-format
 msgid "Latest games"
 msgstr "Últimos jogos"
@@ -256,6 +256,7 @@ msgstr "Envie o link para os outros jogadores. O jogo começa quando todos entra
 
 #: lib/octomocto_web/controllers/memory_html.ex:54
 #: lib/octomocto_web/live/memory_live.html.heex:264
+#: lib/octomocto_web/live/memory_live.html.heex:284
 #, elixir-autogen, elixir-format
 msgid "Sign in"
 msgstr "Entre"
@@ -415,3 +416,8 @@ msgstr "Comida"
 #, elixir-autogen, elixir-format
 msgid "Sushi"
 msgstr "Sushi"
+
+#: lib/octomocto_web/live/memory_live.html.heex:286
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "para aparecer aqui"
