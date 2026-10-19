@@ -46,7 +46,11 @@ defmodule OctomoctoWeb.MemoryLive do
 
   @doc "The message for the people who come from the links on Pairs One, the old site of the game."
   def banner(%{"utm_source" => "pairs.one"}),
-    do: dgettext("memory", "Pairs One found its pair! The game is moving to Octomocto.")
+    do:
+      dgettext(
+        "memory",
+        "Pairs One is now Octomocto. Your favorite Memory game (improved!) plus more games to play."
+      )
 
   def banner(_params), do: nil
 

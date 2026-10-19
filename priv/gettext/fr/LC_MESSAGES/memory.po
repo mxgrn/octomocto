@@ -211,8 +211,8 @@ msgstr "Paires"
 
 #: lib/octomocto_web/live/memory_live.ex:49
 #, elixir-autogen, elixir-format
-msgid "Pairs One found its pair! The game is moving to Octomocto."
-msgstr "Pairs One a trouvé sa paire ! Le jeu déménage sur Octomocto."
+msgid "Pairs One is now Octomocto. Your favorite Memory game (improved!) plus more games to play."
+msgstr "Pairs One devient Octomocto. Ton jeu de Memory préféré (amélioré !) et bien d’autres jeux en plus."
 
 #: lib/octomocto_web/live/memory_live.ex:255
 #, elixir-autogen, elixir-format
