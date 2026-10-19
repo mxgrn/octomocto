@@ -56,12 +56,12 @@ defmodule OctomoctoWeb.TrainsLive do
     {:noreply, redirect(socket, to: ~p"/trains/#{id}")}
   end
 
-  # One player, 12 switches, 2 trains for each house, the normal pace and a
+  # One player, 6 switches, 2 trains for each house, the normal pace and a
   # public game, when the params do not say otherwise. The switches must
   # divide equally between the players.
   defp settings(params) do
     players = int_param(params["players"], 1..4, 1)
-    switches = int_param(params["switches"], 1..12, 12)
+    switches = int_param(params["switches"], 1..12, 6)
 
     %{
       players: players,
