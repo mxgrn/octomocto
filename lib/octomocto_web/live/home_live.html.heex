@@ -72,7 +72,9 @@
           <:icon :let={game}><.game_icon game={@kinds[game.kind]} small /></:icon>
           <:summary :let={game}>
             <span class="font-semibold">{@kinds[game.kind].name}</span>
-            <span class="text-base-content/60">· {game_summary(game)}</span>
+            <span :if={game_summary(game)} class="text-base-content/60">
+              · {game_summary(game)}
+            </span>
           </:summary>
         </.lobby_games>
       </div>

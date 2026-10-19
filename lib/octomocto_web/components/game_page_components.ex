@@ -20,7 +20,11 @@ defmodule OctomoctoWeb.GamePageComponents do
 
   attr :path, :any, required: true, doc: "a function that gives the path of a game"
   slot :icon, required: true, doc: "the image of a game, with the game as the argument"
-  slot :summary, required: true, doc: "the settings of a game, with the game as the argument"
+
+  slot :summary,
+    doc:
+      "the settings of a game, with the game as the argument. Leave it out for a game with no settings to show: then the row has only the players."
+
   slot :action, doc: "an optional button at the right of the title"
 
   @doc """
@@ -64,10 +68,13 @@ defmodule OctomoctoWeb.GamePageComponents do
         >
           {render_slot(@icon, game)}
           <div class="min-w-0 flex-1">
-            <p class="flex items-center gap-2 text-sm font-medium">
+            <p :if={@summary != []} class="flex items-center gap-2 text-sm font-medium">
               <span class="line-clamp-2">{render_slot(@summary, game)}</span>
             </p>
-            <p class="flex flex-wrap gap-x-2.5 text-xs text-base-content/70">
+            <p class={[
+              "flex flex-wrap gap-x-2.5 text-base-content/70",
+              if(@summary == [], do: "text-sm", else: "text-xs")
+            ]}>
               <span :for={player <- game.players} class="flex items-center gap-1">
                 <.presence away={player.away} />
                 <span class={[

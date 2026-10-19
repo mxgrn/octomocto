@@ -158,7 +158,8 @@ defmodule OctomoctoWeb.HomeLive do
 
   defp game_path(game), do: "/#{game.kind}/#{game.id}"
 
-  # The settings of a row, as on the settings page of its kind of game
+  # The settings of a row, as on the settings page of its kind of game. Nil
+  # for a kind of game whose settings never change.
   defp game_summary(game) do
     {_game, _store, page} = Map.fetch!(@lobbies, game.kind)
     page.game_summary(game)

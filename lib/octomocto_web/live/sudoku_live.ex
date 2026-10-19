@@ -164,5 +164,5 @@ defmodule OctomoctoWeb.SudokuLive do
   end
 
   @doc "The settings of a game in the list of public games."
-  def game_summary(game), do: "#{String.capitalize(game.settings.difficulty)} · 9×9"
+  def game_summary(game), do: String.capitalize(game.settings.difficulty)
 end

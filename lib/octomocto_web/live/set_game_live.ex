@@ -161,6 +161,6 @@ defmodule OctomoctoWeb.SetGameLive do
   defp mode_hint("normal"), do: "All 81 cards."
 
   @doc "The settings of a game in the list of public games."
-  def game_summary(%{settings: %{mode: "easy"}}), do: "Easy · 27 cards"
-  def game_summary(_game), do: "Normal · 81 cards"
+  def game_summary(%{settings: %{mode: "easy"}}), do: "Easy"
+  def game_summary(_game), do: "Normal"
 end

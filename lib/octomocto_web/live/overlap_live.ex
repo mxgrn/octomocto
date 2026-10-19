@@ -104,6 +104,6 @@ defmodule OctomoctoWeb.OverlapLive do
   # True when the open game has the same settings as the new game
   defp same_settings?(game, settings), do: game.players_needed == settings.players
 
-  @doc "The settings of a game in the list of public games."
-  def game_summary(_game), do: "57 cards · 8 symbols"
+  @doc "The settings of a game in the list of public games: none, because they never change."
+  def game_summary(_game), do: nil
 end
