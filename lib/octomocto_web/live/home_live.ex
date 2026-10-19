@@ -8,6 +8,7 @@ defmodule OctomoctoWeb.HomeLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.Lobby
+  alias Octomocto.Memory.Themes
 
   alias OctomoctoWeb.{
     EchoLive,
