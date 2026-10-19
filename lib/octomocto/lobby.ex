@@ -20,7 +20,8 @@ defmodule Octomocto.Lobby do
       game,
     * `:players_needed` - the number of players of the game,
     * `:players` - the players in the order of the game, see `player/1`,
-    * `:seats_left` and `:created_at` - for an open game,
+    * `:created_at` - the time when the game was made,
+    * `:seats_left` - for an open game,
     * `:started_at` and `:finished` - for an ongoing game. The
       `:started_at` is the start of the current field (or round).
   """
@@ -62,10 +63,10 @@ defmodule Octomocto.Lobby do
 
   @doc """
   The public games in one list. First the open games, with the fewest free
-  seats first, and the oldest game first when the free seats are the same.
+  seats first, and the newest game first when the free seats are the same.
   Then the #{@ongoing_size} games with the newest fields that have started:
   first the games that go on, then the finished ones that the players did
-  not start again.
+  not start again. In each of these two groups, the newest game is first.
   """
   def games(entries) do
     {open, started} = Enum.split_with(entries, &(&1.status == :open))
@@ -74,8 +75,8 @@ defmodule Octomocto.Lobby do
       started
       |> Enum.sort_by(& &1.started_at, :desc)
       |> Enum.take(@ongoing_size)
-      |> Enum.sort_by(& &1.finished)
+      |> Enum.sort_by(&{&1.finished, -&1.created_at})
 
-    Enum.sort_by(open, &{&1.seats_left, &1.created_at}) ++ started
+    Enum.sort_by(open, &{&1.seats_left, -&1.created_at}) ++ started
   end
 end

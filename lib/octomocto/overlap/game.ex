@@ -100,15 +100,15 @@ defmodule Octomocto.Overlap.Game do
       id: state.id,
       settings: %{},
       players_needed: state.needed,
-      players: players
+      players: players,
+      created_at: state.created_at
     }
 
     cond do
       state.listed ->
         Map.merge(entry, %{
           status: :open,
-          seats_left: state.needed - map_size(state.players),
-          created_at: state.created_at
+          seats_left: state.needed - map_size(state.players)
         })
 
       state.started_at != nil ->
