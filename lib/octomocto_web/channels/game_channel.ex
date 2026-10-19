@@ -106,8 +106,12 @@ defmodule OctomoctoWeb.GameChannel do
 
   defp join_or_watch(%{game_id: game_id, player_id: player_id} = assigns, opts) do
     user_id = assigns[:user_id]
-    opts[:context].join(game_id, user_id, Accounts.display_name(user_id), player_id)
+    opts[:context].join(game_id, user_id, player_name(user_id, assigns[:guest_name]), player_id)
   end
+
+  # A guest without a guest name is known by the color
+  defp player_name(nil, guest_name), do: guest_name
+  defp player_name(user_id, _guest_name), do: Accounts.display_name(user_id)
 
   defp monitor_game(game_id, opts) do
     case GenServer.whereis(opts[:game].via(game_id)) do

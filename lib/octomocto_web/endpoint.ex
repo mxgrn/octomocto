@@ -9,7 +9,10 @@ defmodule OctomoctoWeb.Endpoint do
     store: :cookie,
     key: "_octomocto_key",
     signing_salt: "KCXwk7iz",
-    same_site: "Lax"
+    same_site: "Lax",
+    # Keeps the guest name (see `OctomoctoWeb.GuestName`) after the browser
+    # closes. Browsers limit cookies to 400 days.
+    max_age: 400 * 24 * 60 * 60
   ]
 
   socket "/live", Phoenix.LiveView.Socket,
@@ -17,7 +20,7 @@ defmodule OctomoctoWeb.Endpoint do
     longpoll: [connect_info: [session: @session_options]]
 
   socket "/socket", OctomoctoWeb.UserSocket,
-    websocket: true,
+    websocket: [connect_info: [session: @session_options]],
     longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.

@@ -31,6 +31,10 @@ defmodule OctomoctoWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
+  attr :guest_name, :string,
+    default: nil,
+    doc: "the name of a guest (see `OctomoctoWeb.GuestName`), for the menu of a guest"
+
   attr :home, :boolean,
     default: false,
     doc: "shows the octopi, a larger wordmark and the slogan in the header"
@@ -150,14 +154,23 @@ defmodule OctomoctoWeb.Layouts do
             <span :if={@header != []} class="text-sm text-base-content/70 lg:hidden">
               {gettext("Theme")}
             </span>
-            <.theme_toggle :if={!@current_scope} />
+            <.theme_toggle :if={!@current_scope && !@guest_name} />
 
-            <nav :if={@current_scope} id="user-menu" class="group relative text-sm">
-              <button
-                id="user-menu-button"
-                type="button"
-                class="flex cursor-default items-center gap-2 text-base-content/70 transition group-hover:text-base-content group-focus-within:text-base-content"
-              >
+            <.account_menu :if={!@current_scope && @guest_name} id="guest-menu" theme_last>
+              <:label>
+                <.icon name="hero-user-circle" class="size-6" />
+                {@guest_name}
+              </:label>
+              <div id="guest-sign-in" class="space-y-3 px-3 pt-1 pb-3">
+                <p class="text-center text-base-content/70">
+                  {gettext("Sign in to change your name")}
+                </p>
+                <OctomoctoWeb.UserSessionHTML.sign_in_bar />
+              </div>
+            </.account_menu>
+
+            <.account_menu :if={@current_scope} id="user-menu">
+              <:label>
                 <img
                   :if={@current_scope.user.avatar_url}
                   src={@current_scope.user.avatar_url}
@@ -166,35 +179,23 @@ defmodule OctomoctoWeb.Layouts do
                 />
                 {@current_scope.user.display_name || @current_scope.user.name ||
                   @current_scope.user.email}
-              </button>
-              <%!-- pt-2 instead of a margin keeps the hover area unbroken between button and menu --%>
-              <div
-                id="user-menu-dropdown"
-                class="invisible absolute right-0 z-10 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+              </:label>
+              <.link
+                id="settings-link"
+                href={~p"/settings"}
+                class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
               >
-                <div class="min-w-36 space-y-1 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg">
-                  <div class="flex items-center justify-between gap-6 px-3 py-2">
-                    <span class="text-base-content/70">{gettext("Theme")}</span>
-                    <.theme_toggle />
-                  </div>
-                  <.link
-                    id="settings-link"
-                    href={~p"/settings"}
-                    class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
-                  >
-                    {gettext("Settings")}
-                  </.link>
-                  <.link
-                    id="sign-out-link"
-                    href={~p"/signout"}
-                    method="delete"
-                    class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
-                  >
-                    {gettext("Sign out")}
-                  </.link>
-                </div>
-              </div>
-            </nav>
+                {gettext("Settings")}
+              </.link>
+              <.link
+                id="sign-out-link"
+                href={~p"/signout"}
+                method="delete"
+                class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+              >
+                {gettext("Sign out")}
+              </.link>
+            </.account_menu>
           </div>
         </div>
       </header>
@@ -424,6 +425,48 @@ defmodule OctomoctoWeb.Layouts do
 
       gtag('config', 'G-95LZEBCCVE');
     </script>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :theme_last, :boolean, default: false, doc: "shows the theme toggle below the links"
+  slot :label, required: true, doc: "the content of the button"
+  slot :inner_block, required: true, doc: "the links below the theme toggle"
+
+  # The menu of the user or the guest in the header. It opens on hover and on focus.
+  defp account_menu(assigns) do
+    ~H"""
+    <nav id={@id} class="group relative text-sm">
+      <button
+        id={"#{@id}-button"}
+        type="button"
+        class="flex cursor-default items-center gap-2 text-base-content/70 transition group-hover:text-base-content group-focus-within:text-base-content"
+      >
+        {render_slot(@label)}
+      </button>
+      <%!-- pt-2 instead of a margin keeps the hover area unbroken between button and menu --%>
+      <div
+        id={"#{@id}-dropdown"}
+        class="invisible absolute right-0 z-10 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+      >
+        <div class="min-w-36 space-y-1 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg">
+          <.theme_row :if={!@theme_last} />
+          {render_slot(@inner_block)}
+          <.theme_row :if={@theme_last} class="border-t border-base-300 pt-3" />
+        </div>
+      </div>
+    </nav>
+    """
+  end
+
+  attr :class, :string, default: nil
+
+  defp theme_row(assigns) do
+    ~H"""
+    <div class={["flex items-center justify-between gap-6 px-3 py-2", @class]}>
+      <span class="text-base-content/70">{gettext("Theme")}</span>
+      <.theme_toggle />
+    </div>
     """
   end
 

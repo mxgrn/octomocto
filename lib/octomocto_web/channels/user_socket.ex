@@ -12,8 +12,13 @@ defmodule OctomoctoWeb.UserSocket do
   channel "trains:*", OctomoctoWeb.TrainsChannel
 
   @impl true
-  def connect(params, socket, _connect_info) do
-    {:ok, assign(socket, :user_id, verify_user_token(params["user_token"]))}
+  # The session is nil when the browser does not send the `_csrf_token` param
+  def connect(params, socket, connect_info) do
+    {:ok,
+     assign(socket,
+       user_id: verify_user_token(params["user_token"]),
+       guest_name: OctomoctoWeb.GuestName.from_session(connect_info[:session])
+     )}
   end
 
   @salt "user socket"

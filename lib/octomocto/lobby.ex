@@ -37,7 +37,7 @@ defmodule Octomocto.Lobby do
   end
 
   @doc """
-  The row of a player. The `:name` is nil for a guest, and `:away` is true
+  The row of a player. The `:name` is nil for a player that is known by the color, and `:away` is true
   during the grace time. A game can add more, such as `:score` and
   `:turn` (true for the player of the turn).
   """

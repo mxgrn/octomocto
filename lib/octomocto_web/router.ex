@@ -12,6 +12,7 @@ defmodule OctomoctoWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_scope_for_user
+    plug OctomoctoWeb.GuestName
     plug OctomoctoWeb.Locale, "en"
   end
 
@@ -72,7 +73,11 @@ defmodule OctomoctoWeb.Router do
     # settings of a new game: a LiveView changes the settings without a page
     # load, so the page does not scroll to the top on each click.
     live_session :default,
-      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "en"}] do
+      on_mount: [
+        {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GuestName,
+        {OctomoctoWeb.Locale, "en"}
+      ] do
       live "/", HomeLive
       live "/trains", TrainsLive
       live "/schulte", SchulteLive
@@ -94,7 +99,11 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     live_session :portuguese,
-      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "pt"}] do
+      on_mount: [
+        {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GuestName,
+        {OctomoctoWeb.Locale, "pt"}
+      ] do
       live "/memory", MemoryLive
     end
 
@@ -108,7 +117,11 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     live_session :german,
-      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "de"}] do
+      on_mount: [
+        {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GuestName,
+        {OctomoctoWeb.Locale, "de"}
+      ] do
       live "/memory", MemoryLive
     end
 
@@ -122,7 +135,11 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     live_session :russian,
-      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "ru"}] do
+      on_mount: [
+        {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GuestName,
+        {OctomoctoWeb.Locale, "ru"}
+      ] do
       live "/memory", MemoryLive
     end
 
@@ -136,7 +153,11 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     live_session :french,
-      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "fr"}] do
+      on_mount: [
+        {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GuestName,
+        {OctomoctoWeb.Locale, "fr"}
+      ] do
       live "/memory", MemoryLive
     end
 
@@ -150,7 +171,11 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     live_session :ukrainian,
-      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "uk"}] do
+      on_mount: [
+        {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GuestName,
+        {OctomoctoWeb.Locale, "uk"}
+      ] do
       live "/memory", MemoryLive
     end
 
@@ -164,7 +189,11 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     live_session :polish,
-      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "pl"}] do
+      on_mount: [
+        {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GuestName,
+        {OctomoctoWeb.Locale, "pl"}
+      ] do
       live "/memory", MemoryLive
     end
 
@@ -178,7 +207,11 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     live_session :italian,
-      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "it"}] do
+      on_mount: [
+        {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GuestName,
+        {OctomoctoWeb.Locale, "it"}
+      ] do
       live "/memory", MemoryLive
     end
 
@@ -192,7 +225,11 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     live_session :spanish,
-      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "es"}] do
+      on_mount: [
+        {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GuestName,
+        {OctomoctoWeb.Locale, "es"}
+      ] do
       live "/memory", MemoryLive
     end
 

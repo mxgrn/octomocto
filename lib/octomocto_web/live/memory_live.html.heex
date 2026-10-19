@@ -1,15 +1,10 @@
 <Layouts.app
   flash={@flash}
   current_scope={@current_scope}
+  guest_name={@guest_name}
   banner={@banner}
   languages={@languages}
 >
-  <:header :if={!@current_scope}>
-    <section id="sign-in-header" class="flex justify-center lg:justify-end">
-      <OctomoctoWeb.UserSessionHTML.sign_in_bar />
-    </section>
-  </:header>
-
   <%!--
     Wider than the app container, so that the columns have room. One column
     on a small screen: the title, the public games, the settings and the
@@ -263,7 +258,7 @@
             >
               {dgettext("memory", "Sign in")}
             </.link>
-            {dgettext("memory", "to see your results.")}
+            {dgettext("memory", "to start saving your results.")}
           </li>
         <% end %>
       </.score_list>

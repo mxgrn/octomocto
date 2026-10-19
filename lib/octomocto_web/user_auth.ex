@@ -122,10 +122,12 @@ defmodule OctomoctoWeb.UserAuth do
   #
   defp renew_session(conn, _user) do
     delete_csrf_token()
+    guest_name = get_session(conn, OctomoctoWeb.GuestName.key())
 
     conn
     |> configure_session(renew: true)
     |> clear_session()
+    |> put_session(OctomoctoWeb.GuestName.key(), guest_name)
   end
 
   defp maybe_write_remember_me_cookie(conn, token, %{"remember_me" => "true"}, _),

@@ -65,8 +65,8 @@ defmodule OctomoctoWeb.UserSessionHTML do
   end
 
   @doc """
-  Renders the sign-in forms of a guest in one row: the Telegram Login Widget
-  and the magic link form. For the top of the front page.
+  Renders the sign-in forms of a guest in one column: the Telegram Login
+  Widget and the magic link form. For the guest menu in the header.
   """
   def sign_in_bar(assigns) do
     assigns =
@@ -78,9 +78,9 @@ defmodule OctomoctoWeb.UserSessionHTML do
     ~H"""
     <div
       id="sign-in-bar"
-      class="flex w-full max-w-xl flex-col items-center gap-2 lg:w-auto lg:max-w-none lg:items-end"
+      class="flex w-64 flex-col items-center gap-2"
     >
-      <div class="flex w-full flex-col items-center gap-3 lg:w-auto lg:flex-row">
+      <div class="flex w-full flex-col items-center gap-3">
         <.telegram_widget
           :if={@telegram?}
           id="telegram-sign-in"
@@ -93,7 +93,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
         >
           {gettext("or")}
         </span>
-        <%!-- The form shows only after a click, so that the bar stays short --%>
+        <%!-- The form shows only after a click, so that the menu stays short --%>
         <button
           id="sign-in-email-toggle"
           type="button"
@@ -102,7 +102,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
             |> JS.show(to: "#sign-in-form", display: "flex")
             |> JS.focus(to: "#sign-in-email")
           }
-          class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
+          class="w-full shrink-0 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
         >
           {gettext("Email me a sign-in link")}
         </button>
@@ -110,7 +110,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
           for={@form}
           id="sign-in-form"
           action={~p"/signin"}
-          class="hidden w-full min-w-0 flex-1 gap-2 lg:w-auto lg:flex-none rounded-2xl bg-base-100 p-1.5 shadow-sm ring-1 ring-base-content/10 transition focus-within:ring-2 focus-within:ring-indigo-500"
+          class="hidden w-full min-w-0 gap-2 rounded-2xl bg-base-100 p-1.5 shadow-sm ring-1 ring-base-content/10 transition focus-within:ring-2 focus-within:ring-indigo-500"
         >
           <input
             type="email"
@@ -121,7 +121,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
             spellcheck="false"
             aria-label={gettext("Email")}
             required
-            class="min-w-0 flex-1 lg:w-52 lg:flex-none border-0 bg-transparent px-3 text-sm placeholder:text-base-content/30 focus:outline-none"
+            class="min-w-0 flex-1 border-0 bg-transparent px-3 text-sm placeholder:text-base-content/30 focus:outline-none"
           />
           <button
             id="sign-in-submit"

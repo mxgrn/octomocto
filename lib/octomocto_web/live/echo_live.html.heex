@@ -1,10 +1,4 @@
-<Layouts.app flash={@flash} current_scope={@current_scope}>
-  <:header :if={!@current_scope}>
-    <section id="sign-in-header" class="flex justify-center lg:justify-end">
-      <OctomoctoWeb.UserSessionHTML.sign_in_bar />
-    </section>
-  </:header>
-
+<Layouts.app flash={@flash} current_scope={@current_scope} guest_name={@guest_name}>
   <%!-- The same columns as on the Memory page --%>
   <div
     id="echo-index"
@@ -130,7 +124,7 @@
             >
               Sign in
             </.link>
-            to see your results.
+            to start saving your results.
           </li>
         <% end %>
       </.score_list>
