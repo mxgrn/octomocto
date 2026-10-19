@@ -43,6 +43,8 @@ const TelegramLogin = {
 
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
+  // Short drops and deploys show only the top bar, not the error toast
+  disconnectedTimeout: 5000,
   params: {_csrf_token: csrfToken},
   hooks: {...colocatedHooks, TelegramLogin, LobbySound},
 })
