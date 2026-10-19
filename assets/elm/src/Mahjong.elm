@@ -1481,7 +1481,7 @@ viewGhost multiplayer last tile =
                                 last.color
 
                              else
-                                "#4B4BE8"
+                                "#1A9FCB"
                             )
                         , SA.strokeWidth "3"
                         ]

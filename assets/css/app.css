@@ -95,7 +95,7 @@
 /* Octomocto brand colors, from the logo. */
 @theme {
   --color-octo-orange: #F26A1B;
-  --color-octo-indigo: #4B4BE8;
+  --color-octo-indigo: #1A9FCB;
   --color-octo-navy: #171532;
   --color-octo-mist: #EEF0FA;
   /* Lighter versions for dark backgrounds, from the "on-dark" logos */
@@ -240,14 +240,14 @@ html:has(.is-playing) body {
 .memory-card-back, .memory-card-face {
   position: absolute;
   inset: 0;
-  border-radius: 0.5rem;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
 }
-/* The back has the brand indigo with a faded double-octo mark */
+/* The back is light blue with a faded double-octo mark. The mark is
+   stronger than on the dark back, so that it shows on the light color. */
 .memory-card-back {
-  background: url("/images/card-back.svg") center / auto 72% no-repeat, #5e5ec9;
+  background: url("/images/card-back-light.svg") center / auto 72% no-repeat, #c6e4ee;
   transition: filter 150ms, transform 150ms;
 }
 .memory-card-face {
@@ -267,7 +267,9 @@ html:has(.is-playing) body {
    does not show the turn of the card correctly. */
 .memory-card.is-clickable { cursor: pointer; }
 @media (hover: hover) and (pointer: fine) {
-  .memory-card.is-clickable:hover .memory-card-back { filter: brightness(1.1); transform: translateY(-2px); }
+  /* Only a small change on the light blue back, a larger one on the dark back */
+  .memory-card.is-clickable:hover .memory-card-back { filter: brightness(1.04); }
+  [data-theme=dark] .memory-card.is-clickable:hover .memory-card-back { filter: brightness(1.1); }
   .memory-card.is-clickable:active .memory-card-back { transform: scale(0.96); }
 }
 
@@ -284,6 +286,8 @@ html:has(.is-playing) body {
 [data-theme=dark] .memory-card-back,
 [data-theme=dark] .memory-card-face { box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 2px 6px rgb(0 0 0 / 0.3); }
 [data-theme=dark] .memory-card-face { background: #3a4252; }
+/* The dark theme keeps the brand indigo back */
+[data-theme=dark] .memory-card-back { background: url("/images/card-back.svg") center / auto 72% no-repeat, #5e5ec9; }
 /* The Cats and Space images are black line art. They show white on dark faces. */
 [data-theme=dark] :is(img[src*="/images/memory/cats/"], img[src*="/images/memory/space/"]) { filter: invert(1); }
 
@@ -343,7 +347,7 @@ html:has(.is-playing) body {
 .set-card.is-selected:hover {
   background: var(--color-octo-mist);
   transform: translateY(-3px);
-  box-shadow: 0 0 0 3px var(--color-octo-indigo), 0 6px 14px rgb(75 75 232 / 0.25);
+  box-shadow: 0 0 0 3px var(--color-octo-indigo), 0 6px 14px rgb(26 159 203 / 0.25);
 }
 .set-card.is-wrong { box-shadow: 0 0 0 3px #ef4444; }
 .set-card.is-wrong .set-card-face { animation: set-shake 220ms ease-in-out; }
@@ -557,7 +561,7 @@ place. The `translate` adds to the `transform` of the place. */
 .mahjong-tile.is-free:hover .mahjong-tile-body { transform: translate(-1px, -2px); }
 .mahjong-tile.is-free:hover .mahjong-face { stroke: var(--color-octo-indigo-light); stroke-width: 2; }
 .mahjong-tile.is-selected .mahjong-tile-body { transform: translate(-1px, -3px); }
-.mahjong-tile.is-selected .mahjong-face { fill: #E4E4FD; stroke: var(--color-octo-indigo); stroke-width: 3; }
+.mahjong-tile.is-selected .mahjong-face { fill: #DBF2FA; stroke: var(--color-octo-indigo); stroke-width: 3; }
 /* A free pair from the Hint button: amber, as the button, and it lifts
 three times */
 .mahjong-tile.is-hinted .mahjong-face { fill: #FDF3D7; stroke: #F59E0B; stroke-width: 3; }
@@ -618,9 +622,9 @@ three times */
 .sudoku-cell.is-playable { cursor: pointer; }
 .sudoku-cell.is-playable:hover { background: var(--color-octo-mist); }
 .sudoku-cell.is-peer { background: #f8fafc; }
-.sudoku-cell.is-same { background: rgb(75 75 232 / 0.12); }
+.sudoku-cell.is-same { background: rgb(26 159 203 / 0.12); }
 .sudoku-cell.is-selected,
-.sudoku-cell.is-selected:hover { background: rgb(75 75 232 / 0.25); }
+.sudoku-cell.is-selected:hover { background: rgb(26 159 203 / 0.25); }
 .sudoku-cell.is-conflict { background: #fee2e2; color: #dc2626; }
 .sudoku-cell.is-wrong { background: #fee2e2; }
 .sudoku-cell.is-wrong .sudoku-digit { color: #dc2626; animation: schulte-shake 220ms ease-in-out; }

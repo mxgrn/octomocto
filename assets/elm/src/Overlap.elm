@@ -1058,7 +1058,7 @@ viewTable model me game =
 
 lastColor : Game -> String
 lastColor game =
-    Maybe.map .color game.last |> Maybe.withDefault "#4b4be8"
+    Maybe.map .color game.last |> Maybe.withDefault "#1a9fcb"
 
 
 {-| The room of the place of a symbol, as a part of the radius of the card,
