@@ -20,7 +20,10 @@ defmodule OctomoctoWeb.Locale do
     "de" => "Deutsch",
     "ru" => "Русский",
     "fr" => "Français",
-    "uk" => "Українська"
+    "uk" => "Українська",
+    "pl" => "Polski",
+    "it" => "Italiano",
+    "es" => "Español"
   }
 
   # The value of the `lang` and `hreflang` attributes. The Portuguese
@@ -31,7 +34,10 @@ defmodule OctomoctoWeb.Locale do
     "de" => "de",
     "ru" => "ru",
     "fr" => "fr",
-    "uk" => "uk"
+    "uk" => "uk",
+    "pl" => "pl",
+    "it" => "it",
+    "es" => "es"
   }
 
   # The games with translations, by language
@@ -40,7 +46,10 @@ defmodule OctomoctoWeb.Locale do
     "de" => ["memory"],
     "ru" => ["memory"],
     "fr" => ["memory"],
-    "uk" => ["memory"]
+    "uk" => ["memory"],
+    "pl" => ["memory"],
+    "it" => ["memory"],
+    "es" => ["memory"]
   }
 
   def init(locale), do: locale
@@ -103,7 +112,13 @@ defmodule OctomoctoWeb.Locale do
 
   @uk_months ~w(січ. лют. берез. квіт. трав. черв. лип. серп. верес. жовт. листоп. груд.)
 
-  @doc "A short date in the language of the process, for example \"Oct 17\", \"17 de out.\", \"17. Okt.\", \"17 окт.\", \"17 oct.\" or \"17 жовт.\"."
+  @pl_months ~w(sty. lut. mar. kwi. maj cze. lip. sie. wrz. paź. lis. gru.)
+
+  @it_months ~w(gen. feb. mar. apr. mag. giu. lug. ago. set. ott. nov. dic.)
+
+  @es_months ~w(ene. feb. mar. abr. may. jun. jul. ago. sept. oct. nov. dic.)
+
+  @doc "A short date in the language of the process, for example \"Oct 17\", \"17 de out.\", \"17. Okt.\", \"17 окт.\", \"17 oct.\", \"17 жовт.\", \"17 paź.\", \"17 ott.\" or \"17 oct.\"."
   def short_date(date) do
     case Gettext.get_locale(OctomoctoWeb.Gettext) do
       "pt" ->
@@ -122,6 +137,15 @@ defmodule OctomoctoWeb.Locale do
 
       "uk" ->
         Calendar.strftime(date, "%-d %b", abbreviated_month_names: &Enum.at(@uk_months, &1 - 1))
+
+      "pl" ->
+        Calendar.strftime(date, "%-d %b", abbreviated_month_names: &Enum.at(@pl_months, &1 - 1))
+
+      "it" ->
+        Calendar.strftime(date, "%-d %b", abbreviated_month_names: &Enum.at(@it_months, &1 - 1))
+
+      "es" ->
+        Calendar.strftime(date, "%-d %b", abbreviated_month_names: &Enum.at(@es_months, &1 - 1))
 
       _ ->
         Calendar.strftime(date, "%b %-d")

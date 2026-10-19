@@ -35,6 +35,18 @@ defmodule OctomoctoWeb.Router do
     plug OctomoctoWeb.Locale, "uk"
   end
 
+  pipeline :polish do
+    plug OctomoctoWeb.Locale, "pl"
+  end
+
+  pipeline :italian do
+    plug OctomoctoWeb.Locale, "it"
+  end
+
+  pipeline :spanish do
+    plug OctomoctoWeb.Locale, "es"
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -137,6 +149,48 @@ defmodule OctomoctoWeb.Router do
 
     live_session :ukrainian,
       on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "uk"}] do
+      live "/memory", MemoryLive
+    end
+
+    get "/*path", LocaleController, :english
+  end
+
+  # The pages in Polish, the same as the pages in Portuguese
+  scope "/pl", OctomoctoWeb do
+    pipe_through [:browser, :polish]
+
+    get "/memory/:id", MemoryController, :show
+
+    live_session :polish,
+      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "pl"}] do
+      live "/memory", MemoryLive
+    end
+
+    get "/*path", LocaleController, :english
+  end
+
+  # The pages in Italian, the same as the pages in Portuguese
+  scope "/it", OctomoctoWeb do
+    pipe_through [:browser, :italian]
+
+    get "/memory/:id", MemoryController, :show
+
+    live_session :italian,
+      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "it"}] do
+      live "/memory", MemoryLive
+    end
+
+    get "/*path", LocaleController, :english
+  end
+
+  # The pages in Spanish, the same as the pages in Portuguese
+  scope "/es", OctomoctoWeb do
+    pipe_through [:browser, :spanish]
+
+    get "/memory/:id", MemoryController, :show
+
+    live_session :spanish,
+      on_mount: [{OctomoctoWeb.UserAuth, :mount_current_scope}, {OctomoctoWeb.Locale, "es"}] do
       live "/memory", MemoryLive
     end
 
