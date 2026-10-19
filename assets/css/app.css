@@ -284,6 +284,8 @@ html:has(.is-playing) body {
 [data-theme=dark] .memory-card-back,
 [data-theme=dark] .memory-card-face { box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 2px 6px rgb(0 0 0 / 0.3); }
 [data-theme=dark] .memory-card-face { background: #3a4252; }
+/* The Cats and Space images are black line art. They show white on dark faces. */
+[data-theme=dark] :is(img[src*="/images/memory/cats/"], img[src*="/images/memory/space/"]) { filter: invert(1); }
 
 @media (prefers-reduced-motion: reduce) {
   .memory-card-inner { transition: none; }

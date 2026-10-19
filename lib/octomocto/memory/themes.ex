@@ -25,7 +25,9 @@ defmodule Octomocto.Memory.Themes do
     %{name: "ecology", title: "Ecology", cards: 50},
     %{name: "music", title: "Music", cards: 50},
     %{name: "halloween", title: "Halloween", cards: 48},
-    %{name: "flags", title: "Flags", cards: 50, cover: 49}
+    %{name: "flags", title: "Flags", cards: 50, cover: 49},
+    %{name: "cats", title: "Cats", cards: 50},
+    %{name: "space", title: "Space", cards: 50}
   ]
 
   def list, do: @themes

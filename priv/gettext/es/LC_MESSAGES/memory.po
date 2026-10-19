@@ -421,3 +421,13 @@ msgstr "Sushi"
 #, elixir-autogen, elixir-format
 msgid "to get listed"
 msgstr "para aparecer en la lista"
+
+#: lib/octomocto_web/live/memory_live.ex:276
+#, elixir-autogen, elixir-format
+msgid "Cats"
+msgstr "Gatos"
+
+#: lib/octomocto_web/live/memory_live.ex:277
+#, elixir-autogen, elixir-format
+msgid "Space"
+msgstr "Espacio"

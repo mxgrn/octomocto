@@ -272,7 +272,9 @@ defmodule OctomoctoWeb.MemoryLive do
     dgettext_noop("memory", "Ecology"),
     dgettext_noop("memory", "Music"),
     dgettext_noop("memory", "Halloween"),
-    dgettext_noop("memory", "Flags")
+    dgettext_noop("memory", "Flags"),
+    dgettext_noop("memory", "Cats"),
+    dgettext_noop("memory", "Space")
   ]
 
   @doc "The title of a theme in the language of the page."

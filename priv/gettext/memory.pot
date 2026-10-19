@@ -421,3 +421,13 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "to get listed"
 msgstr ""
+
+#: lib/octomocto_web/live/memory_live.ex:276
+#, elixir-autogen, elixir-format
+msgid "Cats"
+msgstr ""
+
+#: lib/octomocto_web/live/memory_live.ex:277
+#, elixir-autogen, elixir-format
+msgid "Space"
+msgstr ""
