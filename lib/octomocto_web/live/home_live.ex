@@ -81,7 +81,7 @@ defmodule OctomoctoWeb.HomeLive do
       id: "overlap",
       name: "Overlap",
       description:
-        "Any two cards have exactly one symbol in common. Spot it first to win the card.",
+        "A Dobble-like game: any two cards have exactly one symbol in common. Spot it first.",
       path: "/overlap",
       icon_class: "bg-pink-500/10 dark:bg-pink-400/15"
     }

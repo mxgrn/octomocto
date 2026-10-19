@@ -22,9 +22,9 @@ defmodule OctomoctoWeb.OverlapLive do
   @doc "The title and the description of the overlap pages, for search engines."
   def seo do
     [
-      page_title: "Overlap: Spot the Common Symbol",
+      page_title: "Overlap: a Dobble-Like Game Online",
       page_description:
-        "Any two cards have exactly one symbol in common. Spot it first! Play solo against the clock or race up to 3 friends. Free, instant, no sign-up."
+        "A free game like Dobble or Spot It!: spot the one symbol that two cards share. Play solo against the clock or race up to 3 friends. No sign-up."
     ]
   end
 
@@ -76,7 +76,8 @@ defmodule OctomoctoWeb.OverlapLive do
       "A wrong symbol blocks your clicks for 1 second. Do not click at random!",
       "All players look at the same cards. The first player who finds the symbol wins the card.",
       "The game ends when the deck is empty. Alone, clear it as fast as you can. With other players, win the most cards.",
-      "The images are Twemoji by Twitter, Inc. and other contributors (CC-BY 4.0)."
+      "The images are Twemoji by Twitter, Inc. and other contributors (CC-BY 4.0).",
+      "Overlap is a Dobble-like game. Dobble and Spot It! are trademarks of Asmodee. Octomocto is not affiliated with Asmodee."
     ]
   end
 
