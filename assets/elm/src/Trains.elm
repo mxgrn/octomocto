@@ -492,7 +492,12 @@ update msg model =
                                 game.round
                         in
                         ( { model | connection = Joined me { game | round = { round | switches = Dict.insert flip.cell flip.value round.switches } } }
-                        , Cmd.none
+                          -- A watcher hears the switches of the players
+                        , if me == Nothing && not model.muted then
+                            playTrainSound "switch"
+
+                          else
+                            Cmd.none
                         )
 
                 _ ->
