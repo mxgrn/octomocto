@@ -14,6 +14,9 @@ face. The pair goes to the server, which checks it again: another player
 can take one of the tiles first. A click on a tile that is not free shakes
 it. A click on a free tile with another face selects that tile instead.
 
+The Hint button shows a free pair for a short time. Each click shows the
+next free pair. Hints are free, also with other players.
+
 All players race on the same board. Before all of them are in, the tiles
 show no faces. A countdown with beeps comes before each board. When no pair
 is free, any player can shuffle the faces of the tiles that are left. A
@@ -179,6 +182,12 @@ type alias Model =
     , blocked : Maybe Int
     , blockedCount : Int
 
+    -- The free pair from the Hint button, while it shows. The number goes
+    -- up with each hint: it picks the next pair, and tells the hints apart,
+    -- so that the end of an old hint does not stop a new one.
+    , hint : Maybe ( Int, Int )
+    , hintCount : Int
+
     -- The local time (in ms) when the board started, and the local time
     -- now. The clock ticks between the server updates.
     , clockStart : Int
@@ -223,6 +232,8 @@ init flags =
       , pending = Nothing
       , blocked = Nothing
       , blockedCount = 0
+      , hint = Nothing
+      , hintCount = 0
       , clockStart = 0
       , now = 0
       , shuffling = Nothing
@@ -247,6 +258,8 @@ type Msg
     | ClickTile Int
     | KeyDown String
     | BlockedDone Int
+    | Hint
+    | HintDone Int
     | Shuffle
     | Restart
     | CopyLink
@@ -265,7 +278,7 @@ update msg model =
         GotJoined value ->
             case Decode.decodeValue joinedDecoder value of
                 Ok ( me, game ) ->
-                    ( { model | connection = Joined me game, selected = Nothing, pending = Nothing }, syncClock game )
+                    ( { model | connection = Joined me game, selected = Nothing, pending = Nothing, hint = Nothing }, syncClock game )
 
                 Err err ->
                     ( { model | connection = Failed (Decode.errorToString err) }, Cmd.none )
@@ -292,6 +305,7 @@ update msg model =
                         | connection = Joined me game
                         , selected = model.selected |> Maybe.andThen (keepIf keep)
                         , pending = model.pending |> Maybe.andThen (keepIf (\( a, b ) -> onBoard a && onBoard b))
+                        , hint = model.hint |> Maybe.andThen (keepIf (\( a, b ) -> keep a && keep b))
                         , shuffling =
                             if shuffled then
                                 Just (Dict.fromList (List.map (\tile -> ( tile.id, ( tileX tile, tileY tile ) )) old.tiles))
@@ -351,11 +365,35 @@ update msg model =
             else
                 ( model, Cmd.none )
 
+        Hint ->
+            case model.connection of
+                Joined _ game ->
+                    let
+                        pairs =
+                            freePairs game.tiles
+                    in
+                    ( { model
+                        | hint = List.head (List.drop (modBy (max 1 (List.length pairs)) model.hintCount) pairs)
+                        , hintCount = model.hintCount + 1
+                      }
+                    , Process.sleep hintMs |> Task.perform (\_ -> HintDone (model.hintCount + 1))
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        HintDone count ->
+            if count == model.hintCount then
+                ( { model | hint = Nothing }, Cmd.none )
+
+            else
+                ( model, Cmd.none )
+
         Shuffle ->
             ( { model | selected = Nothing }, mahjongShuffle () )
 
         Restart ->
-            ( { model | selected = Nothing, pending = Nothing }, mahjongRestart () )
+            ( { model | selected = Nothing, pending = Nothing, hint = Nothing }, mahjongRestart () )
 
         CopyLink ->
             ( { model | copied = True }
@@ -480,6 +518,41 @@ isFree tiles tile =
             List.any (\o -> o.layer == tile.layer && o.col == tile.col + dc && abs (o.row - tile.row) < 2) tiles
     in
     not covered && not (side -2 && side 2)
+
+
+{-| The pairs of free tiles with the same face, by tile ids
+-}
+freePairs : List Tile -> List ( Int, Int )
+freePairs tiles =
+    let
+        free =
+            List.filter (isFree tiles) tiles
+
+        pairsOf rest =
+            case rest of
+                tile :: others ->
+                    List.filterMap
+                        (\other ->
+                            if pair tile other then
+                                Just ( tile.id, other.id )
+
+                            else
+                                Nothing
+                        )
+                        others
+                        ++ pairsOf others
+
+                [] ->
+                    []
+    in
+    pairsOf free
+
+
+{-| How long a hint shows
+-}
+hintMs : Float
+hintMs =
+    3000
 
 
 pair : Tile -> Tile -> Bool
@@ -763,6 +836,11 @@ viewGame model me game =
                     , p [ class "hidden text-sm opacity-60 lg:block" ] [ text "Remove pairs of free tiles with the same face." ]
                     ]
                 , viewClock model game
+                , if canPlay me game then
+                    viewHintButton game.stuck
+
+                  else
+                    text ""
                 , if me == Nothing then
                     text ""
 
@@ -957,6 +1035,24 @@ viewMuteButton muted =
                 )
             ]
             []
+        ]
+
+
+{-| Shows a free pair. It is off when no pair is free: then the player
+must shuffle. On a small screen, only the icon shows, but not in the column
+of a screen that is wider than tall.
+-}
+viewHintButton : Bool -> Html Msg
+viewHintButton stuck =
+    button
+        [ id "mahjong-hint"
+        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-amber-700 ring-1 ring-amber-200 transition enabled:hover:bg-amber-50 enabled:hover:ring-amber-300 enabled:active:scale-95 disabled:opacity-50 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-amber-300 dark:ring-amber-400/30 dark:enabled:hover:bg-amber-400/10 dark:enabled:hover:ring-amber-400/50"
+        , Html.Attributes.disabled stuck
+        , onClick Hint
+        , Html.Attributes.title "Show a free pair"
+        ]
+        [ span [ class "hero-light-bulb size-4 transition-transform group-enabled:group-hover:-rotate-12" ] []
+        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text "Hint" ]
         ]
 
 
@@ -1245,7 +1341,9 @@ moves the nodes for the new draw order, and a moved node stops its
 transition.
 
 The shake is on an inner node, keyed by the shake, so that each click on a
-tile that is not free shakes it again.
+tile that is not free shakes it again. The pulse of a hint is there too, so
+that each hint pulses again.
+
 -}
 viewTile : Model -> Game -> Bool -> Tile -> ( String, Svg Msg )
 viewTile model game playable tile =
@@ -1259,9 +1357,19 @@ viewTile model game playable tile =
         blocked =
             model.blocked == Just tile.id
 
+        hinted =
+            model.hint |> Maybe.map (\( a, b ) -> a == tile.id || b == tile.id) |> Maybe.withDefault False
+
         shakeKey =
             if blocked then
                 String.fromInt model.blockedCount
+
+            else
+                ""
+
+        hintKey =
+            if hinted then
+                "h" ++ String.fromInt model.hintCount
 
             else
                 ""
@@ -1300,6 +1408,7 @@ viewTile model game playable tile =
             , ( "is-playable", playable )
             , ( "is-free", free )
             , ( "is-selected", picked )
+            , ( "is-hinted", hinted )
             , ( "is-shuffling", from /= Nothing )
             ]
         , Svg.Events.onClick (ClickTile tile.id)
@@ -1314,8 +1423,8 @@ viewTile model game playable tile =
             ]
             [ Svg.Keyed.node "g"
                 []
-                [ ( shakeKey
-                  , Svg.g [ classes [ ( "mahjong-shake", blocked ) ] ]
+                [ ( shakeKey ++ hintKey
+                  , Svg.g [ classes [ ( "mahjong-shake", blocked ), ( "mahjong-pulse", hinted ) ] ]
                         (tileShape ++ [ viewFace tile.face, viewShade tile ])
                   )
                 ]
@@ -1510,7 +1619,9 @@ viewFace face =
                 ]
 
         Just [ "wind", w ] ->
-            glyph 29 54 40
+            glyph 29
+                54
+                40
                 blue
                 (case w of
                     "e" ->

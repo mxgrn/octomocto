@@ -464,6 +464,14 @@ place. The `translate` adds to the `transform` of the place. */
 .mahjong-tile.is-free:hover .mahjong-face { stroke: var(--color-octo-indigo-light); stroke-width: 2; }
 .mahjong-tile.is-selected .mahjong-tile-body { transform: translate(-1px, -3px); }
 .mahjong-tile.is-selected .mahjong-face { fill: #E4E4FD; stroke: var(--color-octo-indigo); stroke-width: 3; }
+/* A free pair from the Hint button: amber, as the button, and it lifts
+three times */
+.mahjong-tile.is-hinted .mahjong-face { fill: #FDF3D7; stroke: #F59E0B; stroke-width: 3; }
+.mahjong-pulse { animation: mahjong-pulse 600ms ease-in-out 3; }
+@keyframes mahjong-pulse {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
 .mahjong-flip { transform-box: fill-box; transform-origin: center; animation: mahjong-flip 260ms ease-out; }
 @keyframes mahjong-flip {
   from { transform: scaleX(0.2); opacity: 0.4; }
@@ -486,7 +494,7 @@ place. The `translate` adds to the `transform` of the place. */
   to { transform: translateY(0); opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mahjong-flip, .mahjong-shake, .mahjong-notice { animation: none; }
+  .mahjong-flip, .mahjong-shake, .mahjong-pulse, .mahjong-notice { animation: none; }
   .mahjong-tile.is-shuffling { animation: none; }
   .mahjong-ghost { animation: none; opacity: 0; }
 }
