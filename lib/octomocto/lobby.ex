@@ -75,8 +75,11 @@ defmodule Octomocto.Lobby do
       started
       |> Enum.sort_by(& &1.started_at, :desc)
       |> Enum.take(@ongoing_size)
-      |> Enum.sort_by(&{&1.finished, -&1.created_at})
+      |> Enum.sort_by(&{&1.finished, -created_at(&1)})
 
-    Enum.sort_by(open, &{&1.seats_left, -&1.created_at}) ++ started
+    Enum.sort_by(open, &{&1.seats_left, -created_at(&1)}) ++ started
   end
+
+  # A row from a node with older code can have no `:created_at`
+  defp created_at(entry), do: Map.get(entry, :created_at, 0)
 end
