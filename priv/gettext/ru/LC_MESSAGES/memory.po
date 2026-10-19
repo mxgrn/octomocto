@@ -11,7 +11,7 @@ msgstr ""
 "Language: ru\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100 != 11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10||n%100>=20) ? 1 : 2);\n"
 
-#: lib/octomocto_web/live/memory_live.ex:238
+#: lib/octomocto_web/live/memory_live.ex:242
 #, elixir-autogen, elixir-format
 msgid "%{count} card"
 msgid_plural "%{count} cards"
@@ -32,7 +32,7 @@ msgstr "Точность"
 msgid "Accuracy {accuracy}"
 msgstr "Точность {accuracy}"
 
-#: lib/octomocto_web/live/memory_live.ex:257
+#: lib/octomocto_web/live/memory_live.ex:261
 #, elixir-autogen, elixir-format
 msgid "Animals"
 msgstr "Животные"
@@ -52,7 +52,7 @@ msgstr "Рекорд"
 msgid "Best results"
 msgstr "Лучшие результаты"
 
-#: lib/octomocto_web/live/memory_live.ex:254
+#: lib/octomocto_web/live/memory_live.ex:258
 #, elixir-autogen, elixir-format
 msgid "Birds"
 msgstr "Птицы"
@@ -88,17 +88,17 @@ msgstr "Не удалось войти в игру: {reason}"
 msgid "Done!"
 msgstr "Готово!"
 
-#: lib/octomocto_web/live/memory_live.ex:259
+#: lib/octomocto_web/live/memory_live.ex:263
 #, elixir-autogen, elixir-format
 msgid "Ecology"
 msgstr "Экология"
 
-#: lib/octomocto_web/live/memory_live.ex:251
+#: lib/octomocto_web/live/memory_live.ex:255
 #, elixir-autogen, elixir-format
 msgid "Eighties"
 msgstr "Восьмидесятые"
 
-#: lib/octomocto_web/live/memory_live.ex:258
+#: lib/octomocto_web/live/memory_live.ex:262
 #, elixir-autogen, elixir-format
 msgid "Fairy Tales"
 msgstr "Сказки"
@@ -128,22 +128,22 @@ msgstr "Найди пары карт с одинаковыми картинка�
 msgid "Find the triplets of cards with the same image."
 msgstr "Найди тройки карт с одинаковыми картинками."
 
-#: lib/octomocto_web/live/memory_live.ex:262
+#: lib/octomocto_web/live/memory_live.ex:266
 #, elixir-autogen, elixir-format
 msgid "Flags"
 msgstr "Флаги"
 
-#: lib/octomocto_web/live/memory_live.ex:253
+#: lib/octomocto_web/live/memory_live.ex:257
 #, elixir-autogen, elixir-format
 msgid "Flowers"
 msgstr "Цветы"
 
-#: lib/octomocto_web/live/memory_live.ex:261
+#: lib/octomocto_web/live/memory_live.ex:265
 #, elixir-autogen, elixir-format
 msgid "Halloween"
 msgstr "Хеллоуин"
 
-#: lib/octomocto_web/live/memory_live.ex:131
+#: lib/octomocto_web/live/memory_live.ex:135
 #, elixir-autogen, elixir-format
 msgid "If they match, you get a point for each card, and you go again. If not, the next player goes."
 msgstr "Если картинки совпали, ты получаешь очко за каждую карту и ходишь ещё раз. Если нет, ходит следующий игрок."
@@ -189,7 +189,7 @@ msgstr "Игра Мемори онлайн"
 msgid "More cards"
 msgstr "Больше карт"
 
-#: lib/octomocto_web/live/memory_live.ex:260
+#: lib/octomocto_web/live/memory_live.ex:264
 #, elixir-autogen, elixir-format
 msgid "Music"
 msgstr "Музыка"
@@ -204,18 +204,18 @@ msgstr "Игр пока нет."
 msgid "Or try {game}"
 msgstr "Или попробуй {game}"
 
-#: lib/octomocto_web/live/memory_live.ex:236
+#: lib/octomocto_web/live/memory_live.ex:240
 #: lib/octomocto_web/live/memory_live.html.heex:133
 #, elixir-autogen, elixir-format
 msgid "Pairs"
 msgstr "Пары"
 
-#: lib/octomocto_web/live/memory_live.ex:49
+#: lib/octomocto_web/live/memory_live.ex:50
 #, elixir-autogen, elixir-format
 msgid "Pairs One is now Octomocto. Your favorite Memory game (improved!) plus more games to play."
 msgstr "Pairs One теперь Octomocto. Твоя любимая игра Мемори (стала ещё лучше!) и другие игры."
 
-#: lib/octomocto_web/live/memory_live.ex:255
+#: lib/octomocto_web/live/memory_live.ex:259
 #, elixir-autogen, elixir-format
 msgid "Pets"
 msgstr "Питомцы"
@@ -262,7 +262,7 @@ msgstr "Отправь ссылку другим игрокам. Игра нач
 msgid "Sign in"
 msgstr "Войди"
 
-#: lib/octomocto_web/live/memory_live.ex:252
+#: lib/octomocto_web/live/memory_live.ex:256
 #, elixir-autogen, elixir-format
 msgid "Spring"
 msgstr "Весна"
@@ -292,13 +292,13 @@ msgstr "В этой игре нет мест, поэтому ты можешь �
 msgid "Time {time}"
 msgstr "Время {time}"
 
-#: lib/octomocto_web/live/memory_live.ex:236
+#: lib/octomocto_web/live/memory_live.ex:240
 #: lib/octomocto_web/live/memory_live.html.heex:134
 #, elixir-autogen, elixir-format
 msgid "Triplets"
 msgstr "Тройки"
 
-#: lib/octomocto_web/live/memory_live.ex:127
+#: lib/octomocto_web/live/memory_live.ex:131
 #, elixir-autogen, elixir-format
 msgid "Turn over 2 cards at a time (3 for triplets) to find the cards with the same image."
 msgstr "Открывай по 2 карты (по 3 в тройках), чтобы найти карты с одинаковой картинкой."
@@ -323,12 +323,12 @@ msgstr "Доступ"
 msgid "Waiting for players"
 msgstr "Ждём игроков"
 
-#: lib/octomocto_web/live/memory_live.ex:135
+#: lib/octomocto_web/live/memory_live.ex:139
 #, elixir-autogen, elixir-format
 msgid "Whoever has the most points wins. Alone, clear the field as fast as you can."
 msgstr "Побеждает тот, у кого больше очков. В одиночку очисти поле как можно быстрее."
 
-#: lib/octomocto_web/live/memory_live.ex:256
+#: lib/octomocto_web/live/memory_live.ex:260
 #, elixir-autogen, elixir-format
 msgid "Workout"
 msgstr "Спорт"
@@ -383,7 +383,7 @@ msgstr "Игроков в игре: {players} из {needed}"
 msgid "{sign_in} to keep your scores."
 msgstr "{sign_in} и сохраняй свои результаты."
 
-#: lib/octomocto_web/live/memory_live.ex:250
+#: lib/octomocto_web/live/memory_live.ex:254
 #, elixir-autogen, elixir-format
 msgid "Insects"
 msgstr "Насекомые"
@@ -393,27 +393,27 @@ msgstr "Насекомые"
 msgid "New"
 msgstr "Новая"
 
-#: lib/octomocto_web/live/memory_live.ex:249
+#: lib/octomocto_web/live/memory_live.ex:253
 #, elixir-autogen, elixir-format
 msgid "Monsters"
 msgstr "Монстры"
 
-#: lib/octomocto_web/live/memory_live.ex:248
+#: lib/octomocto_web/live/memory_live.ex:252
 #, elixir-autogen, elixir-format
 msgid "Ocean"
 msgstr "Океан"
 
-#: lib/octomocto_web/live/memory_live.ex:247
+#: lib/octomocto_web/live/memory_live.ex:251
 #, elixir-autogen, elixir-format
 msgid "Desert"
 msgstr "Пустыня"
 
-#: lib/octomocto_web/live/memory_live.ex:246
+#: lib/octomocto_web/live/memory_live.ex:250
 #, elixir-autogen, elixir-format
 msgid "Food"
 msgstr "Еда"
 
-#: lib/octomocto_web/live/memory_live.ex:245
+#: lib/octomocto_web/live/memory_live.ex:249
 #, elixir-autogen, elixir-format
 msgid "Sushi"
 msgstr "Суши"

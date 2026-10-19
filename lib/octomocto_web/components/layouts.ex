@@ -234,6 +234,13 @@ defmodule OctomoctoWeb.Layouts do
           {gettext("Terms of Service")}
         </.link>
         <a
+          id="suggest-game-link"
+          href="mailto:hi@octomocto.com"
+          class="transition hover:text-base-content"
+        >
+          {gettext("Suggest a game")}
+        </a>
+        <a
           id="patreon-link"
           href="https://patreon.com/mxgrn"
           class={[
