@@ -43,11 +43,27 @@ const TelegramLogin = {
 
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  // Short drops and deploys show only the top bar, not the error toast
-  disconnectedTimeout: 5000,
   params: {_csrf_token: csrfToken},
   hooks: {...colocatedHooks, TelegramLogin, LobbySound},
 })
+
+// The socket often drops while the tab is in the background, and the error
+// toast then shows before the user returns. Thus the toast stays hidden
+// (see app.css) while the tab is hidden, and for some time after the tab is
+// visible again, which is when the socket reconnects.
+const RESUME_GRACE_MS = 5000
+let resumeTimer
+const markResuming = () => {
+  clearTimeout(resumeTimer)
+  const root = document.documentElement
+  if (document.hidden) {
+    root.dataset.resuming = ""
+  } else {
+    resumeTimer = setTimeout(() => delete root.dataset.resuming, RESUME_GRACE_MS)
+  }
+}
+markResuming()
+document.addEventListener("visibilitychange", markResuming)
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})

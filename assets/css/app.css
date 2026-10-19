@@ -114,6 +114,9 @@
 /* Make LiveView wrapper divs transparent for layout */
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
+/* No reconnect error toast while the tab comes back from the background (see app.js) */
+[data-resuming] #client-error, [data-resuming] #server-error { display: none !important }
+
 /* This file is for your main application CSS */
 
 /* Schulte Race. The board is an SVG, so the shake distance is in board units. */
