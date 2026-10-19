@@ -44,6 +44,15 @@ defmodule OctomoctoWeb.OverlapLive do
     {:noreply, assign_lobby(socket, Lobby.put_entry(socket.assigns.lobby, id, entry))}
   end
 
+  @doc """
+  Starts a game in the default settings for the number of players, and
+  gives its id. See `OctomoctoWeb.NextGame`.
+  """
+  def create_default_game(players, public) do
+    %{settings(%{"players" => Integer.to_string(players)}) | public: public}
+    |> Overlap.create_game()
+  end
+
   def handle_event("new_game", _params, socket) do
     id = Overlap.create_game(socket.assigns.settings)
     {:noreply, redirect(socket, to: ~p"/overlap/#{id}")}

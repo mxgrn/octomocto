@@ -117,6 +117,14 @@ if (astronautNode) {
   astronaut.ports.playAstronautSound.subscribe(playAstronautSound)
 }
 
+// A player of a finished game can start the next game for all players (see
+// OctomoctoWeb.NextGame). The port of the game sends the request, and the
+// browsers of the players get the id of the new game.
+const connectNextGame = (port, channel, node) => {
+  port.subscribe(() => channel.push("next_game", {}))
+  channel.on("next_game", ({id}) => window.location.assign(`${node.dataset.nextGamePath}/${id}`))
+}
+
 // Start the trains game and connect its ports to the game channel. The
 // token gets the same player back after a reload, as in the Schulte race
 // below. The browser remembers if the player muted the sounds. Audio can
@@ -165,6 +173,7 @@ if (trainsNode) {
   trains.ports.trainsFlip.subscribe(flip => channel.push("flip", flip))
   trains.ports.trainsDecision.subscribe(decision => channel.push("decision", decision))
   trains.ports.trainsRestart.subscribe(() => channel.push("restart", {}))
+  connectNextGame(trains.ports.trainsNextGame, channel, trainsNode)
   trains.ports.trainsFinished.subscribe(result => channel.push("finished", result))
   trains.ports.trainsCopyText.subscribe(text => navigator.clipboard.writeText(text))
   trains.ports.playTrainSound.subscribe(playTrainSound)
@@ -226,6 +235,7 @@ if (schulteNode) {
 
   schulte.ports.schultePick.subscribe(number => channel.push("pick", {number}))
   schulte.ports.schulteRestart.subscribe(() => channel.push("restart", {}))
+  connectNextGame(schulte.ports.schulteNextGame, channel, schulteNode)
   schulte.ports.schulteCopyText.subscribe(text => navigator.clipboard.writeText(text))
   schulte.ports.schultePlaySound.subscribe(playSchulteSound)
   schulte.ports.schulteSaveMuted.subscribe(value => {
@@ -293,6 +303,7 @@ if (memoryNode) {
 
   memory.ports.memoryFlip.subscribe(card => channel.push("flip", {card}))
   memory.ports.memoryRestart.subscribe(() => channel.push("restart", {}))
+  connectNextGame(memory.ports.memoryNextGame, channel, memoryNode)
   memory.ports.memoryCopyText.subscribe(text => navigator.clipboard.writeText(text))
   memory.ports.memoryPlaySound.subscribe(playMemorySound)
   memory.ports.memorySaveMuted.subscribe(value => {
@@ -343,6 +354,7 @@ if (setNode) {
 
   setGame.ports.setGameClaim.subscribe(cards => channel.push("claim", {cards}))
   setGame.ports.setGameRestart.subscribe(() => channel.push("restart", {}))
+  connectNextGame(setGame.ports.setGameNextGame, channel, setNode)
   setGame.ports.setGameCopyText.subscribe(text => navigator.clipboard.writeText(text))
   setGame.ports.setGamePlaySound.subscribe(playSetSound)
   setGame.ports.setGameSaveMuted.subscribe(value => {
@@ -399,6 +411,7 @@ if (sudokuNode) {
       .receive("timeout", () => placed("ignored"))
   })
   sudoku.ports.sudokuRestart.subscribe(() => channel.push("restart", {}))
+  connectNextGame(sudoku.ports.sudokuNextGame, channel, sudokuNode)
   sudoku.ports.sudokuCopyText.subscribe(text => navigator.clipboard.writeText(text))
   sudoku.ports.sudokuPlaySound.subscribe(playSudokuSound)
   sudoku.ports.sudokuSaveMuted.subscribe(value => {
@@ -455,6 +468,7 @@ if (echoNode) {
   echo.ports.echoStart.subscribe(() => channel.push("start", {}))
   echo.ports.echoPress.subscribe(pad => channel.push("press", {pad}))
   echo.ports.echoRestart.subscribe(() => channel.push("restart", {}))
+  connectNextGame(echo.ports.echoNextGame, channel, echoNode)
   echo.ports.echoCopyText.subscribe(text => navigator.clipboard.writeText(text))
   echo.ports.echoPlaySound.subscribe(playEchoSound)
   echo.ports.echoSaveMuted.subscribe(value => {
@@ -515,6 +529,7 @@ if (mahjongNode) {
   })
   mahjong.ports.mahjongShuffle.subscribe(() => channel.push("shuffle", {}))
   mahjong.ports.mahjongRestart.subscribe(() => channel.push("restart", {}))
+  connectNextGame(mahjong.ports.mahjongNextGame, channel, mahjongNode)
   mahjong.ports.mahjongCopyText.subscribe(text => navigator.clipboard.writeText(text))
   mahjong.ports.mahjongPlaySound.subscribe(playMahjongSound)
   mahjong.ports.mahjongSaveMuted.subscribe(value => {
@@ -571,6 +586,7 @@ if (overlapNode) {
 
   overlap.ports.overlapTap.subscribe(tap => channel.push("tap", tap))
   overlap.ports.overlapRestart.subscribe(() => channel.push("restart", {}))
+  connectNextGame(overlap.ports.overlapNextGame, channel, overlapNode)
   overlap.ports.overlapCopyText.subscribe(text => navigator.clipboard.writeText(text))
   overlap.ports.overlapPlaySound.subscribe(playOverlapSound)
   overlap.ports.overlapSaveMuted.subscribe(value => {

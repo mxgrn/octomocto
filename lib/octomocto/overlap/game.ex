@@ -172,6 +172,12 @@ defmodule Octomocto.Overlap.Game do
     {:reply, {:ok, player_id, public(state)}, state}
   end
 
+  # The next game for all players, see `OctomoctoWeb.NextGame`
+  def handle_call({:next_game, player_id, page}, _from, state) do
+    {id, state} = Octomocto.GameProcess.next_game(state, player_id, page)
+    {:reply, id, state}
+  end
+
   def handle_call(:watch, _from, state) do
     {:reply, {:ok, nil, public(state)}, state}
   end
@@ -245,7 +251,7 @@ defmodule Octomocto.Overlap.Game do
   # saved.
   def handle_cast({:restart, player_id}, state) when is_map_key(state.players, player_id) do
     players = Map.new(state.players, fn {id, p} -> {id, %{p | score: 0, frozen_until: 0}} end)
-    state = %{state | players: players} |> new_deck() |> start_clock()
+    state = %{state | players: players} |> Map.delete(:next_game) |> new_deck() |> start_clock()
     publish(state)
     {:noreply, state}
   end

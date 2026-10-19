@@ -53,6 +53,11 @@ port overlapTap : Encode.Value -> Cmd msg
 port overlapRestart : () -> Cmd msg
 
 
+{-| Starts the next game for all players, see OctomoctoWeb.NextGame
+-}
+port overlapNextGame : () -> Cmd msg
+
+
 port overlapCopyText : String -> Cmd msg
 
 
@@ -245,6 +250,7 @@ type Msg
     | ShakeDone Int
     | Unfreeze Int
     | Restart
+    | StartNextGame
     | CopyLink
     | CopiedTimeout
     | SyncClock Int Time.Posix
@@ -317,6 +323,9 @@ update msg model =
 
         Restart ->
             ( model, overlapRestart () )
+
+        StartNextGame ->
+            ( model, overlapNextGame () )
 
         CopyLink ->
             ( { model | copied = True }
@@ -1263,9 +1272,18 @@ viewResult settingsUrl nextGame guest me game =
             , class "text-sm font-medium text-white/80 underline-offset-4 transition hover:text-white hover:underline"
             ]
             [ text "Latest games and best results" ]
-        , a
+        , let
+            -- In a game with other players, a player starts the next game for all of them
+            ( element, action ) =
+                if me /= Nothing && List.length game.players > 1 then
+                    ( button, onClick StartNextGame )
+
+                else
+                    ( a, href nextGame.path )
+          in
+          element
             [ id "overlap-next-game"
-            , href nextGame.path
+            , action
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]
             [ text ("Or try " ++ nextGame.name ++ " ")

@@ -2,7 +2,7 @@ defmodule OctomoctoWeb.MahjongController do
   use OctomoctoWeb, :controller
 
   alias Octomocto.Mahjong.Store
-  alias OctomoctoWeb.{MahjongLive, HomeLive}
+  alias OctomoctoWeb.{MahjongLive, NextGame}
 
   plug :put_seo
 
@@ -13,7 +13,7 @@ defmodule OctomoctoWeb.MahjongController do
         settings_path: MahjongLive.settings_path(state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
-        next_game: HomeLive.games() |> Enum.reject(&(&1.id == "mahjong")) |> Enum.random(),
+        next_game: NextGame.pick("mahjong", id),
         noindex: true
       )
     else

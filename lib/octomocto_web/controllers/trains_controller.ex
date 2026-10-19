@@ -2,7 +2,7 @@ defmodule OctomoctoWeb.TrainsController do
   use OctomoctoWeb, :controller
 
   alias Octomocto.Trains.Store
-  alias OctomoctoWeb.{TrainsLive, HomeLive}
+  alias OctomoctoWeb.{NextGame, TrainsLive}
 
   plug :put_seo
 
@@ -13,7 +13,7 @@ defmodule OctomoctoWeb.TrainsController do
         settings_path: TrainsLive.settings_path(state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
-        next_game: HomeLive.games() |> Enum.reject(&(&1.id == "trains")) |> Enum.random(),
+        next_game: NextGame.pick("trains", id),
         noindex: true
       )
     else

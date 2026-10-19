@@ -8,9 +8,9 @@ defmodule OctomoctoWeb.OverlapChannel do
   use Phoenix.Channel
 
   alias Octomocto.Overlap
-  alias OctomoctoWeb.GameChannel
+  alias OctomoctoWeb.{GameChannel, NextGame}
 
-  @game [context: Overlap, game: Overlap.Game, salt: "overlap player"]
+  @game [context: Overlap, game: Overlap.Game, salt: "overlap player", kind: "overlap"]
 
   @impl true
   def join("overlap:" <> game_id, params, socket) do
@@ -26,6 +26,11 @@ defmodule OctomoctoWeb.OverlapChannel do
 
   def handle_in("restart", _params, socket) do
     Overlap.restart(socket.assigns.game_id, socket.assigns.player_id)
+    {:noreply, socket}
+  end
+
+  def handle_in("next_game", _params, socket) do
+    NextGame.start(socket, @game)
     {:noreply, socket}
   end
 

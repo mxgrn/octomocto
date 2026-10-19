@@ -204,6 +204,12 @@ defmodule Octomocto.Trains.Game do
     {:reply, {:ok, player_id, public(state)}, state}
   end
 
+  # The next game for all players, see `OctomoctoWeb.NextGame`
+  def handle_call({:next_game, player_id, page}, _from, state) do
+    {id, state} = Octomocto.GameProcess.next_game(state, player_id, page)
+    {:reply, id, state}
+  end
+
   def handle_call(:watch, _from, state) do
     {:reply, {:ok, nil, public(state)}, state}
   end
@@ -283,7 +289,7 @@ defmodule Octomocto.Trains.Game do
   end
 
   def handle_cast({:restart, player_id}, state) when is_map_key(state.players, player_id) do
-    state = state |> new_round() |> start_round()
+    state = state |> Map.delete(:next_game) |> new_round() |> start_round()
     publish(state)
     {:noreply, state}
   end

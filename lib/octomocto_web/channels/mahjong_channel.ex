@@ -8,9 +8,9 @@ defmodule OctomoctoWeb.MahjongChannel do
   use Phoenix.Channel
 
   alias Octomocto.Mahjong
-  alias OctomoctoWeb.GameChannel
+  alias OctomoctoWeb.{GameChannel, NextGame}
 
-  @game [context: Mahjong, game: Mahjong.Game, salt: "mahjong player"]
+  @game [context: Mahjong, game: Mahjong.Game, salt: "mahjong player", kind: "mahjong"]
 
   @impl true
   def join("mahjong:" <> game_id, params, socket) do
@@ -30,6 +30,11 @@ defmodule OctomoctoWeb.MahjongChannel do
 
   def handle_in("restart", _params, socket) do
     Mahjong.restart(socket.assigns.game_id, socket.assigns.player_id)
+    {:noreply, socket}
+  end
+
+  def handle_in("next_game", _params, socket) do
+    NextGame.start(socket, @game)
     {:noreply, socket}
   end
 

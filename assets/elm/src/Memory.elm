@@ -46,6 +46,11 @@ port memoryFlip : Int -> Cmd msg
 port memoryRestart : () -> Cmd msg
 
 
+{-| Starts the next game for all players, see OctomoctoWeb.NextGame
+-}
+port memoryNextGame : () -> Cmd msg
+
+
 port memoryCopyText : String -> Cmd msg
 
 
@@ -230,6 +235,7 @@ type Msg
     | GotJoinFailed String
     | Flip Int
     | Restart
+    | StartNextGame
     | CopyLink
     | CopiedTimeout
     | SyncClock Game Time.Posix
@@ -276,6 +282,9 @@ update msg model =
 
         Restart ->
             ( model, memoryRestart () )
+
+        StartNextGame ->
+            ( model, memoryNextGame () )
 
         CopyLink ->
             ( { model | copied = True }
@@ -1185,9 +1194,18 @@ viewResult model me game =
                 , onClick Restart
                 ]
                 [ text (t texts "Play again") ]
-        , a
+        , let
+            -- In a game with other players, a player starts the next game for all of them
+            ( element, action ) =
+                if me /= Nothing && List.length game.players > 1 then
+                    ( button, onClick StartNextGame )
+
+                else
+                    ( a, href model.nextGame.path )
+          in
+          element
             [ id "memory-next-game"
-            , href model.nextGame.path
+            , action
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]
             [ text (tf texts "Or try {game}" [ ( "game", model.nextGame.name ) ] ++ " ")

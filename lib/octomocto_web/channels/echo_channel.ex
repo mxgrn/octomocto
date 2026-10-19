@@ -7,9 +7,9 @@ defmodule OctomoctoWeb.EchoChannel do
   use Phoenix.Channel
 
   alias Octomocto.Echo
-  alias OctomoctoWeb.GameChannel
+  alias OctomoctoWeb.{GameChannel, NextGame}
 
-  @game [context: Echo, game: Echo.Game, salt: "echo player"]
+  @game [context: Echo, game: Echo.Game, salt: "echo player", kind: "echo"]
 
   @impl true
   def join("echo:" <> game_id, params, socket) do
@@ -29,6 +29,11 @@ defmodule OctomoctoWeb.EchoChannel do
 
   def handle_in("restart", _params, socket) do
     Echo.restart(socket.assigns.game_id, socket.assigns.player_id)
+    {:noreply, socket}
+  end
+
+  def handle_in("next_game", _params, socket) do
+    NextGame.start(socket, @game)
     {:noreply, socket}
   end
 

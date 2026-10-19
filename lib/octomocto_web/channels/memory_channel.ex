@@ -7,9 +7,9 @@ defmodule OctomoctoWeb.MemoryChannel do
   use Phoenix.Channel
 
   alias Octomocto.Memory
-  alias OctomoctoWeb.GameChannel
+  alias OctomoctoWeb.{GameChannel, NextGame}
 
-  @game [context: Memory, game: Memory.Game, salt: "memory player"]
+  @game [context: Memory, game: Memory.Game, salt: "memory player", kind: "memory"]
 
   @impl true
   def join("memory:" <> game_id, params, socket) do
@@ -24,6 +24,11 @@ defmodule OctomoctoWeb.MemoryChannel do
 
   def handle_in("restart", _params, socket) do
     Memory.restart(socket.assigns.game_id, socket.assigns.player_id)
+    {:noreply, socket}
+  end
+
+  def handle_in("next_game", _params, socket) do
+    NextGame.start(socket, @game)
     {:noreply, socket}
   end
 

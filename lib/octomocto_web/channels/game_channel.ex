@@ -22,7 +22,11 @@ defmodule OctomoctoWeb.GameChannel do
     * `:context` - the module with `join/4`, for example `Octomocto.Schulte`,
       and `watch/1` when its browsers can only watch,
     * `:game` - the game process module, with `via/1` and `topic/1`,
-    * `:salt` - the salt of the player tokens of this game.
+    * `:salt` - the salt of the player tokens of this game,
+    * `:kind` - the id of the game in `OctomoctoWeb.HomeLive.games/0`.
+
+  When a player starts the next game (see `OctomoctoWeb.NextGame`), the
+  channels of the players push its id as a `"next_game"` event.
   """
   import Phoenix.Channel, only: [push: 3]
   import Phoenix.Socket, only: [assign: 2]
@@ -63,6 +67,12 @@ defmodule OctomoctoWeb.GameChannel do
         _opts
       ) do
     send(self(), :rejoin)
+    {:noreply, socket}
+  end
+
+  # A browser that only watches does not go to the next game
+  def handle_info({:next_game, id}, socket, _opts) do
+    if socket.assigns.player_id, do: push(socket, "next_game", %{id: id})
     {:noreply, socket}
   end
 

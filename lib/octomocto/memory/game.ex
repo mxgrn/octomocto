@@ -190,6 +190,12 @@ defmodule Octomocto.Memory.Game do
     {:reply, {:ok, player_id, public(state)}, state}
   end
 
+  # The next game for all players, see `OctomoctoWeb.NextGame`
+  def handle_call({:next_game, player_id, page}, _from, state) do
+    {id, state} = Octomocto.GameProcess.next_game(state, player_id, page)
+    {:reply, id, state}
+  end
+
   def handle_call(:watch, _from, state) do
     {:reply, {:ok, nil, public(state)}, state}
   end
@@ -264,6 +270,7 @@ defmodule Octomocto.Memory.Game do
 
     state =
       %{state | players: players}
+      |> Map.delete(:next_game)
       |> new_field()
       |> Map.put(:turn, first_player(players))
       |> make_ready()

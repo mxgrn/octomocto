@@ -74,6 +74,11 @@ port trainsDecision : Encode.Value -> Cmd msg
 port trainsRestart : () -> Cmd msg
 
 
+{-| Starts the next game for all players, see OctomoctoWeb.NextGame
+-}
+port trainsNextGame : () -> Cmd msg
+
+
 {-| `{seed, correct}`: the round with the seed ended, and `correct` trains
 got home.
 -}
@@ -435,6 +440,7 @@ type Msg
     | Tick Time.Posix
     | Toggle Cell
     | Restart
+    | StartNextGame
     | CopyLink
     | ToggleMuted
     | Resized Float Float
@@ -603,6 +609,9 @@ update msg model =
 
         Restart ->
             ( model, trainsRestart () )
+
+        StartNextGame ->
+            ( model, trainsNextGame () )
 
         CopyLink ->
             ( { model | copied = True }, trainsCopyText model.gameUrl )
@@ -2115,9 +2124,18 @@ viewOverlay model me game =
 
                   else
                     overlayButton "trains-again" Restart "Play again"
-                , a
+                , let
+                    -- In a game with other players, a player starts the next game for all of them
+                    ( element, action ) =
+                        if me /= Nothing && List.length game.players > 1 then
+                            ( button, onClick StartNextGame )
+
+                        else
+                            ( a, href model.nextGame.path )
+                  in
+                  element
                     [ id "trains-next-game"
-                    , href model.nextGame.path
+                    , action
                     , class "group mt-2 text-sm font-medium text-white underline-offset-4 transition hover:underline"
                     ]
                     [ text ("Or try " ++ model.nextGame.name ++ " ")

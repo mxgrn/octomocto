@@ -58,6 +58,11 @@ port mahjongShuffle : () -> Cmd msg
 port mahjongRestart : () -> Cmd msg
 
 
+{-| Starts the next game for all players, see OctomoctoWeb.NextGame
+-}
+port mahjongNextGame : () -> Cmd msg
+
+
 port mahjongCopyText : String -> Cmd msg
 
 
@@ -262,6 +267,7 @@ type Msg
     | HintDone Int
     | Shuffle
     | Restart
+    | StartNextGame
     | CopyLink
     | CopiedTimeout
     | ShuffleDone Int
@@ -394,6 +400,9 @@ update msg model =
 
         Restart ->
             ( { model | selected = Nothing, pending = Nothing, hint = Nothing }, mahjongRestart () )
+
+        StartNextGame ->
+            ( model, mahjongNextGame () )
 
         CopyLink ->
             ( { model | copied = True }
@@ -2052,9 +2061,18 @@ viewResult nextGame guest me game =
                 , onClick Restart
                 ]
                 [ text "Play again" ]
-        , a
+        , let
+            -- In a game with other players, a player starts the next game for all of them
+            ( element, action ) =
+                if me /= Nothing && List.length game.players > 1 then
+                    ( button, onClick StartNextGame )
+
+                else
+                    ( a, href nextGame.path )
+          in
+          element
             [ id "mahjong-next-game"
-            , href nextGame.path
+            , action
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]
             [ text ("Or try " ++ nextGame.name ++ " ")

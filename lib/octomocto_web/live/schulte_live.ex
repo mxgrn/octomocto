@@ -41,14 +41,25 @@ defmodule OctomoctoWeb.SchulteLive do
     {:noreply, assign_lobby(socket, Lobby.put_entry(socket.assigns.lobby, id, entry))}
   end
 
+  @doc """
+  Starts a game in the default settings for the number of players, and
+  gives its id. See `OctomoctoWeb.NextGame`.
+  """
+  def create_default_game(players, public) do
+    create_game(%{settings(%{"players" => Integer.to_string(players)}) | public: public})
+  end
+
   def handle_event("new_game", _params, socket) do
-    %{board: board, mode: mode, players: players, public: public} = socket.assigns.settings
+    id = create_game(socket.assigns.settings)
+    {:noreply, redirect(socket, to: ~p"/schulte/#{id}")}
+  end
+
+  defp create_game(%{board: board, mode: mode, players: players, public: public}) do
     # Not String.to_existing_atom/1: in dev, the atom can be missing until
     # the Schulte.Game module is loaded
     layout = if board == "random", do: :random, else: :classic
     mode = if mode == "normal", do: :normal, else: :easy
-    id = Schulte.create_game(layout, mode, players, public)
-    {:noreply, redirect(socket, to: ~p"/schulte/#{id}")}
+    Schulte.create_game(layout, mode, players, public)
   end
 
   # The classic board in the easy mode for one player, and a public game,

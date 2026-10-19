@@ -2,7 +2,7 @@ defmodule OctomoctoWeb.EchoController do
   use OctomoctoWeb, :controller
 
   alias Octomocto.Echo.Store
-  alias OctomoctoWeb.{EchoLive, HomeLive}
+  alias OctomoctoWeb.{EchoLive, NextGame}
 
   plug :put_seo
 
@@ -13,7 +13,7 @@ defmodule OctomoctoWeb.EchoController do
         settings_path: EchoLive.settings_path(state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
-        next_game: HomeLive.games() |> Enum.reject(&(&1.id == "echo")) |> Enum.random(),
+        next_game: NextGame.pick("echo", id),
         noindex: true
       )
     else

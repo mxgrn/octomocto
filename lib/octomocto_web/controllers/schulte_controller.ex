@@ -2,7 +2,7 @@ defmodule OctomoctoWeb.SchulteController do
   use OctomoctoWeb, :controller
 
   alias Octomocto.Schulte.Store
-  alias OctomoctoWeb.{SchulteLive, HomeLive}
+  alias OctomoctoWeb.{NextGame, SchulteLive}
 
   plug :put_seo
 
@@ -13,7 +13,7 @@ defmodule OctomoctoWeb.SchulteController do
         settings_path: SchulteLive.settings_path(state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
-        next_game: HomeLive.games() |> Enum.reject(&(&1.id == "schulte")) |> Enum.random(),
+        next_game: NextGame.pick("schulte", id),
         noindex: true
       )
     else

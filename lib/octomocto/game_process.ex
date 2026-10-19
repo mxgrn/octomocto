@@ -26,6 +26,25 @@ defmodule Octomocto.GameProcess do
     call(game, store, supervisor, id, :watch)
   end
 
+  @doc """
+  The reply of a game process to a `{:next_game, player_id, page}` call
+  (see `OctomoctoWeb.NextGame`): the id of the next game and the new state.
+  The first call creates the game with `page.create_default_game/2`, for
+  the number of players and with the visibility of the game. The next
+  calls give the same id. A restart must delete `:next_game` from the
+  state. The id is nil for a player who is not in the game.
+  """
+  def next_game(state, player_id, page) when is_map_key(state.players, player_id) do
+    state =
+      Map.put_new_lazy(state, :next_game, fn ->
+        page.create_default_game(map_size(state.players), state.public)
+      end)
+
+    {state.next_game, state}
+  end
+
+  def next_game(state, _player_id, _page), do: {nil, state}
+
   defp call(game, store, supervisor, id, request) do
     case whereis(game, store, supervisor, id) do
       nil -> {:error, :not_found}

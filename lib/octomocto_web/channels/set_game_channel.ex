@@ -7,9 +7,9 @@ defmodule OctomoctoWeb.SetGameChannel do
   use Phoenix.Channel
 
   alias Octomocto.SetGame
-  alias OctomoctoWeb.GameChannel
+  alias OctomoctoWeb.{GameChannel, NextGame}
 
-  @game [context: SetGame, game: SetGame.Game, salt: "set player"]
+  @game [context: SetGame, game: SetGame.Game, salt: "set player", kind: "set"]
 
   @impl true
   def join("set:" <> game_id, params, socket) do
@@ -25,6 +25,11 @@ defmodule OctomoctoWeb.SetGameChannel do
 
   def handle_in("restart", _params, socket) do
     SetGame.restart(socket.assigns.game_id, socket.assigns.player_id)
+    {:noreply, socket}
+  end
+
+  def handle_in("next_game", _params, socket) do
+    NextGame.start(socket, @game)
     {:noreply, socket}
   end
 

@@ -2,7 +2,7 @@ defmodule OctomoctoWeb.OverlapController do
   use OctomoctoWeb, :controller
 
   alias Octomocto.Overlap.{Deck, Store}
-  alias OctomoctoWeb.{OverlapLive, HomeLive}
+  alias OctomoctoWeb.{NextGame, OverlapLive}
 
   plug :put_seo
 
@@ -13,7 +13,7 @@ defmodule OctomoctoWeb.OverlapController do
         settings_path: OverlapLive.settings_path(state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
-        next_game: HomeLive.games() |> Enum.reject(&(&1.id == "overlap")) |> Enum.random(),
+        next_game: NextGame.pick("overlap", id),
         # The names of the symbols, for the screen readers
         symbols: Deck.names(),
         noindex: true

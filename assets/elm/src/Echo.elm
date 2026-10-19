@@ -50,6 +50,11 @@ port echoPress : Int -> Cmd msg
 port echoRestart : () -> Cmd msg
 
 
+{-| Starts the next game for all players, see OctomoctoWeb.NextGame
+-}
+port echoNextGame : () -> Cmd msg
+
+
 port echoCopyText : String -> Cmd msg
 
 
@@ -305,6 +310,7 @@ type Msg
     | Start
     | Press Int
     | Restart
+    | StartNextGame
     | StartPlayback (List Int) Int Time.Posix
     | Frame Time.Posix
     | Unflash Int
@@ -379,6 +385,9 @@ update msg model =
 
         Restart ->
             ( model, echoRestart () )
+
+        StartNextGame ->
+            ( model, echoNextGame () )
 
         StartPlayback sequence delay time ->
             ( { model
@@ -1611,9 +1620,18 @@ viewResult nextGame guest me game =
                 , onClick Restart
                 ]
                 [ text "Play again" ]
-        , a
+        , let
+            -- In a game with other players, a player starts the next game for all of them
+            ( element, action ) =
+                if me /= Nothing && List.length game.players > 1 then
+                    ( button, onClick StartNextGame )
+
+                else
+                    ( a, href nextGame.path )
+          in
+          element
             [ id "echo-next-game"
-            , href nextGame.path
+            , action
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]
             [ text ("Or try " ++ nextGame.name ++ " ")
