@@ -132,7 +132,7 @@
             </span>
             <span class={[
               "w-16 text-right font-medium tabular-nums",
-              result.id == @user_results.best.id && "text-amber-600"
+              @user_results.best && result.id == @user_results.best.id && "text-amber-600"
             ]}>
               {format_time(result.elapsed_ms)}
             </span>
