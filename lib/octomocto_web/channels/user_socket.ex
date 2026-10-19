@@ -5,6 +5,7 @@ defmodule OctomoctoWeb.UserSocket do
   channel "echo:*", OctomoctoWeb.EchoChannel
   channel "mahjong:*", OctomoctoWeb.MahjongChannel
   channel "memory:*", OctomoctoWeb.MemoryChannel
+  channel "overlap:*", OctomoctoWeb.OverlapChannel
   channel "schulte:*", OctomoctoWeb.SchulteChannel
   channel "set:*", OctomoctoWeb.SetGameChannel
   channel "sudoku:*", OctomoctoWeb.SudokuChannel

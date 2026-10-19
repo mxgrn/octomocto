@@ -62,3 +62,6 @@ config :octomocto, echo_rejoin_grace_ms: 0
 
 # The same for the Mahjong games
 config :octomocto, mahjong_countdown_ms: 0, mahjong_rejoin_grace_ms: 0
+
+# The same for the Overlap games
+config :octomocto, overlap_countdown_ms: 0, overlap_rejoin_grace_ms: 0

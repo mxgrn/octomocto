@@ -33,7 +33,8 @@ config :mnesiac,
     Octomocto.SetGame.Store,
     Octomocto.Sudoku.Store,
     Octomocto.Echo.Store,
-    Octomocto.Mahjong.Store
+    Octomocto.Mahjong.Store,
+    Octomocto.Overlap.Store
   ]
 
 # Configure the endpoint

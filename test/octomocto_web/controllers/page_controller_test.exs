@@ -18,7 +18,8 @@ defmodule OctomoctoWeb.PageControllerTest do
              "/set",
              "/sudoku",
              "/echo",
-             "/mahjong"
+             "/mahjong",
+             "/overlap"
            ]
   end
 

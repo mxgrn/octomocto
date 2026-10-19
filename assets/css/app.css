@@ -403,6 +403,98 @@ html:has(.is-playing) body {
   .set-card, .set-card.is-wrong .set-card-face, .set-last-pop { animation: none; }
 }
 
+/* Overlap. The cards are round, with the symbols at their places (see
+viewSymbol in Overlap.elm). The turn of a symbol is on its button, and the
+shake of a wrong symbol is on its image, so that the two do not clash. A
+won card slides from its place onto the pile, and a new card is dealt. */
+.overlap-card {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background: white;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.06), 0 2px 4px rgb(0 0 0 / 0.06), 0 10px 24px rgb(23 21 50 / 0.08);
+  transition: opacity 150ms, filter 150ms;
+  animation: overlap-deal 320ms cubic-bezier(0.2, 0.8, 0.3, 1.2);
+}
+.overlap-card.is-empty { background: rgb(0 0 0 / 0.04); box-shadow: none; animation: none; }
+/* Over the new card, which is dealt at the old place of the won card */
+.overlap-card.overlap-to-pile { z-index: 1; animation: overlap-to-pile 300ms cubic-bezier(0.4, 0, 0.2, 1); }
+#overlap-table.is-stacked .overlap-card.overlap-to-pile { animation-name: overlap-to-pile-up; }
+#overlap-table.is-frozen .overlap-card { opacity: 0.55; filter: grayscale(0.6); }
+#overlap-table.is-frozen { cursor: not-allowed; }
+.overlap-symbol {
+  position: absolute;
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: 9999px;
+  -webkit-tap-highlight-color: transparent;
+  translate: -50% -50%;
+  rotate: var(--turn);
+  transition: scale 120ms ease;
+}
+.overlap-symbol img { width: 100%; height: 100%; pointer-events: none; }
+.overlap-symbol:disabled { cursor: inherit; }
+.overlap-card.is-playable .overlap-symbol { cursor: pointer; }
+.overlap-card.is-playable .overlap-symbol:hover { scale: 1.1; }
+.overlap-card.is-playable .overlap-symbol:active { scale: 0.92; }
+.overlap-symbol.is-wrong img { animation: overlap-shake 360ms ease-in-out; }
+.overlap-symbol.is-wrong::after {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 3px #ef4444;
+  animation: overlap-fade 400ms ease-out forwards;
+}
+/* The ring around the symbol that a player found, in the color of the player */
+.overlap-found {
+  position: absolute;
+  inset: -12%;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 3px var(--found);
+  background: color-mix(in srgb, var(--found) 15%, transparent);
+  animation: overlap-found 900ms ease-out forwards;
+  pointer-events: none;
+}
+.overlap-freeze { animation: overlap-freeze 1000ms linear forwards; }
+
+/* Overlap in the dark theme: dark cards, as in Set */
+[data-theme=dark] .overlap-card { background: #3a4252; box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 2px 10px rgb(0 0 0 / 0.35); }
+[data-theme=dark] .overlap-card.is-empty { background: rgb(255 255 255 / 0.04); box-shadow: none; }
+
+@keyframes overlap-deal {
+  from { opacity: 0; transform: scale(0.8) rotate(-20deg); }
+}
+/* From the place of the card: one card and one gap to the right (or down) */
+@keyframes overlap-to-pile {
+  from { transform: translateX(calc(100% + var(--gap))); }
+}
+@keyframes overlap-to-pile-up {
+  from { transform: translateY(calc(100% + var(--gap))); }
+}
+@keyframes overlap-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-12%); }
+  40%, 80% { transform: translateX(12%); }
+}
+@keyframes overlap-fade {
+  to { opacity: 0; }
+}
+@keyframes overlap-found {
+  0% { opacity: 0; transform: scale(1.4); }
+  25% { opacity: 1; transform: scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes overlap-freeze {
+  from { width: 100%; }
+  to { width: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlap-card, .overlap-card.overlap-to-pile, .overlap-symbol.is-wrong img { animation: none; }
+}
+
 /* Echo. A shade over each pad makes it pale (light theme) or dark (dark
 theme) until it lights up. The backing under the pads shows in the gaps
 between the pads: white in the light theme, and dark in the dark theme. */

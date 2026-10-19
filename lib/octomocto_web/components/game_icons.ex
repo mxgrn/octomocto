@@ -144,6 +144,45 @@ defmodule OctomoctoWeb.GameIcons do
     """
   end
 
+  # Two round cards, one on the other. Each card has 3 symbols, and the
+  # star is on both cards.
+  def game_icon(%{game: "overlap"} = assigns) do
+    ~H"""
+    <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
+      <circle
+        cx="17"
+        cy="17"
+        r="14.5"
+        fill="#fff"
+        stroke="#EC4899"
+        stroke-opacity="0.35"
+        stroke-width="1.5"
+      />
+      <path
+        d="M11.5 11.4 L12.7 14.4 L15.9 14.6 L13.4 16.6 L14.2 19.7 L11.5 18.0 L8.8 19.7 L9.6 16.6 L7.1 14.6 L10.3 14.4Z"
+        fill="#F59E0B"
+      />
+      <circle cx="21.5" cy="10.5" r="3.2" fill="#DC2626" />
+      <rect x="17" y="20" width="6" height="6" rx="1.2" fill="#4B4BE8" transform="rotate(20 20 23)" />
+      <circle
+        cx="31"
+        cy="31"
+        r="14.5"
+        fill="#fff"
+        stroke="#EC4899"
+        stroke-opacity="0.35"
+        stroke-width="1.5"
+      />
+      <path
+        d="M34.5 29.4 L35.7 32.4 L38.9 32.6 L36.4 34.6 L37.2 37.7 L34.5 36.0 L31.8 37.7 L32.6 34.6 L30.1 32.6 L33.3 32.4Z"
+        fill="#F59E0B"
+      />
+      <path d="M26.5 22.5c2.4 2.6 3 4.2 3 5.4a3 3 0 0 1-6 0c0-1.2.6-2.8 3-5.4z" fill="#0EA5E9" />
+      <circle cx="26" cy="37.5" r="3" fill="#16A34A" />
+    </svg>
+    """
+  end
+
   def game_icon(%{game: "sudoku"} = assigns) do
     ~H"""
     <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">

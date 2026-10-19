@@ -14,6 +14,7 @@ defmodule OctomoctoWeb.HomeLive do
     GameIcons,
     MahjongLive,
     MemoryLive,
+    OverlapLive,
     SchulteLive,
     SetGameLive,
     SudokuLive,
@@ -75,6 +76,14 @@ defmodule OctomoctoWeb.HomeLive do
         "Remove pairs of free tiles from the Turtle. With friends, the first to take a pair gets the point.",
       path: "/mahjong",
       icon_class: "bg-emerald-500/10 dark:bg-emerald-400/15"
+    },
+    %{
+      id: "overlap",
+      name: "Overlap",
+      description:
+        "Any two cards have exactly one symbol in common. Spot it first to win the card.",
+      path: "/overlap",
+      icon_class: "bg-pink-500/10 dark:bg-pink-400/15"
     }
     # Station Escape is archived: it is not on the front page and is not
     # suggested on the end screens. Do not change it for now.
@@ -103,7 +112,8 @@ defmodule OctomoctoWeb.HomeLive do
     "sudoku" => {Octomocto.Sudoku.Game, Octomocto.Sudoku.Store, SudokuLive},
     "schulte" => {Octomocto.Schulte.Game, Octomocto.Schulte.Store, SchulteLive},
     "echo" => {Octomocto.Echo.Game, Octomocto.Echo.Store, EchoLive},
-    "mahjong" => {Octomocto.Mahjong.Game, Octomocto.Mahjong.Store, MahjongLive}
+    "mahjong" => {Octomocto.Mahjong.Game, Octomocto.Mahjong.Store, MahjongLive},
+    "overlap" => {Octomocto.Overlap.Game, Octomocto.Overlap.Store, OverlapLive}
   }
 
   @kinds_by_game Map.new(@lobbies, fn {kind, {game, _store, _page}} -> {game, kind} end)

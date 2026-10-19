@@ -33,6 +33,7 @@ import {playSetSound} from "./set_sounds"
 import {playSudokuSound} from "./sudoku_sounds"
 import {playEchoSound} from "./echo_sounds"
 import {playMahjongSound} from "./mahjong_sounds"
+import {playOverlapSound} from "./overlap_sounds"
 import {LobbySound} from "./lobby_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
@@ -518,6 +519,62 @@ if (mahjongNode) {
   mahjong.ports.mahjongPlaySound.subscribe(playMahjongSound)
   mahjong.ports.mahjongSaveMuted.subscribe(value => {
     try { localStorage.setItem("mahjong-muted", String(value)) } catch (_e) {}
+  })
+}
+
+// Start the Overlap game and connect its ports to the game channel. It works
+// as the Set game above. The images of all symbols load at the start, so
+// that a new card does not come in with empty places.
+const overlapNode = document.getElementById("overlap-main")
+if (overlapNode) {
+  if (navigator.userActivation?.hasBeenActive) unlockAudio()
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  let muted = false
+  try { muted = localStorage.getItem("overlap-muted") === "true" } catch (_e) {}
+
+  const symbols = JSON.parse(overlapNode.dataset.symbols)
+  symbols.forEach((_name, symbol) => {
+    const img = new Image()
+    img.src = `/images/overlap/${symbol}.svg`
+  })
+
+  const overlap = window.Elm.Overlap.init({node: overlapNode, flags: {gameUrl: window.location.href, settingsUrl: overlapNode.dataset.settingsUrl, nextGame: {name: overlapNode.dataset.nextGameName, path: overlapNode.dataset.nextGamePath}, guest: !overlapNode.dataset.userToken, muted, symbols}})
+  const socket = new Socket("/socket", {params: {user_token: overlapNode.dataset.userToken}})
+  socket.connect()
+
+  const tokenKey = `overlap-token:${overlapNode.dataset.gameId}`
+  let token = null
+  try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
+  const joined = reply => {
+    token = reply.token
+    try {
+      if (token) sessionStorage.setItem(tokenKey, token)
+      else sessionStorage.removeItem(tokenKey)
+    } catch (_e) {}
+    overlap.ports.overlapJoined.send(reply)
+  }
+  // A link with ?watch=1 only watches the game. The token of a player wins.
+  const watch = new URLSearchParams(window.location.search).has("watch")
+  const channel = socket.channel(`overlap:${overlapNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  channel.on("state", state => overlap.ports.overlapState.send(state))
+  channel.on("joined", joined)
+  channel.join()
+    .receive("ok", joined)
+    .receive("error", ({reason}) => {
+      // The server of the game stopped a moment ago. The channel tries again.
+      if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
+      channel.leave()
+      overlap.ports.overlapJoinFailed.send(reason)
+    })
+
+  overlap.ports.overlapTap.subscribe(tap => channel.push("tap", tap))
+  overlap.ports.overlapRestart.subscribe(() => channel.push("restart", {}))
+  overlap.ports.overlapCopyText.subscribe(text => navigator.clipboard.writeText(text))
+  overlap.ports.overlapPlaySound.subscribe(playOverlapSound)
+  overlap.ports.overlapSaveMuted.subscribe(value => {
+    try { localStorage.setItem("overlap-muted", String(value)) } catch (_e) {}
   })
 }
 
