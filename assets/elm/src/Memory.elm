@@ -593,12 +593,13 @@ viewGame model me game =
                 [ div [ class "min-w-0 lg:order-1" ]
                     [ div [ class "flex items-center gap-1 lg:gap-2" ]
                         [ a
-                            [ id "memory-back"
-                            , href model.settingsUrl
-                            , class "grid size-8 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 lg:hidden dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
-                            , Html.Attributes.title (t model.texts "Back to the settings")
+                            [ id "memory-home"
+                            , href "/"
+                            , class "mr-1 shrink-0 transition hover:-translate-y-0.5 active:translate-y-0 lg:mr-0"
                             ]
-                            [ span [ class "hero-arrow-left size-5" ] [] ]
+                            [ img [ src "/images/mark.svg", alt "octomocto", class "h-8 w-auto dark:hidden lg:h-9" ] []
+                            , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block lg:h-9" ] []
+                            ]
                         , h1 [ class "text-xl font-semibold tracking-tight lg:text-2xl" ]
                             [ a [ id "memory-title-link", href model.indexUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text (t model.texts "Memory") ] ]
                         , viewMuteButton model.texts model.muted

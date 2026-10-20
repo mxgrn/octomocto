@@ -73,7 +73,13 @@
             <.game_icon :if={game.kind != "memory"} game={@kinds[game.kind]} small />
           </:icon>
           <:summary :let={game}>
-            <span class="font-semibold">{@kinds[game.kind].name}</span>
+            <.link
+              id={"lobby-game-name-#{game.id}"}
+              navigate={@kinds[game.kind].path}
+              class="font-semibold transition hover:text-octo-indigo dark:hover:text-octo-indigo-light"
+            >
+              {@kinds[game.kind].name}
+            </.link>
             <span :if={game_summary(game)} class="text-base-content/60">
               · {game_summary(game)}
             </span>

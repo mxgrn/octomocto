@@ -15,7 +15,6 @@ defmodule OctomoctoWeb.MemoryHTML do
       "Joining the game…" => dgettext("memory", "Joining the game…"),
       "Could not join the game: {reason}" =>
         dgettext("memory", "Could not join the game: {reason}"),
-      "Back to the settings" => dgettext("memory", "Back to the settings"),
       "Memory" => dgettext("memory", "Memory"),
       "Find the pairs of cards with the same image." =>
         dgettext("memory", "Find the pairs of cards with the same image."),
