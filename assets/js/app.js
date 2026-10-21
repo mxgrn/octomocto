@@ -42,9 +42,17 @@ const TelegramLogin = {
   mounted() { showTelegramLogin(this.el) },
 }
 
+// The settings page of a match (?match=<game id>) holds the seat of the
+// player in the game, so it sends the token of the player in this tab
+const matchToken = () => {
+  const match = new URLSearchParams(window.location.search).get("match")
+  if (!match) return {}
+  try { return {match_token: sessionStorage.getItem(`memory-token:${match}`)} } catch (_e) { return {} }
+}
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken},
+  params: () => ({_csrf_token: csrfToken, ...matchToken()}),
   hooks: {...colocatedHooks, TelegramLogin, LobbySound},
 })
 
@@ -267,7 +275,7 @@ if (memoryNode) {
   let muted = false
   try { muted = localStorage.getItem("memory-muted") === "true" } catch (_e) {}
 
-  const memory = window.Elm.Memory.init({node: memoryNode, flags: {gameUrl: window.location.href, indexUrl: memoryNode.dataset.indexUrl, settingsUrl: memoryNode.dataset.settingsUrl, nextGame: {name: memoryNode.dataset.nextGameName, path: memoryNode.dataset.nextGamePath}, guest: !memoryNode.dataset.userToken, muted, texts: JSON.parse(memoryNode.dataset.texts)}})
+  const memory = window.Elm.Memory.init({node: memoryNode, flags: {gameUrl: window.location.href, indexUrl: memoryNode.dataset.indexUrl, settingsUrl: memoryNode.dataset.settingsUrl, changeSettingsUrl: memoryNode.dataset.changeSettingsUrl, nextGame: {name: memoryNode.dataset.nextGameName, path: memoryNode.dataset.nextGamePath}, guest: !memoryNode.dataset.userToken, muted, texts: JSON.parse(memoryNode.dataset.texts)}})
   const socket = new Socket("/socket", {params: {user_token: memoryNode.dataset.userToken, _csrf_token: csrfToken}})
   socket.connect()
 

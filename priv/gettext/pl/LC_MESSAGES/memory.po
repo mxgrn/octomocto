@@ -11,7 +11,7 @@ msgstr ""
 "Language: pl\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10||n%100>=20) ? 1 : 2);\n"
 
-#: lib/octomocto_web/live/memory_live.ex:251
+#: lib/octomocto_web/live/memory_live.ex:320
 #, elixir-autogen, elixir-format
 msgid "%{count} card"
 msgid_plural "%{count} cards"
@@ -20,9 +20,9 @@ msgstr[1] "%{count} karty"
 msgstr[2] "%{count} kart"
 
 #: lib/octomocto_web/controllers/memory_html.ex:33
-#: lib/octomocto_web/live/memory_live.html.heex:241
-#: lib/octomocto_web/live/memory_live.html.heex:292
-#: lib/octomocto_web/live/memory_live.html.heex:317
+#: lib/octomocto_web/live/memory_live.html.heex:252
+#: lib/octomocto_web/live/memory_live.html.heex:303
+#: lib/octomocto_web/live/memory_live.html.heex:328
 #, elixir-autogen, elixir-format
 msgid "Accuracy"
 msgstr "Celność"
@@ -32,33 +32,33 @@ msgstr "Celność"
 msgid "Accuracy {accuracy}"
 msgstr "Celność {accuracy}"
 
-#: lib/octomocto_web/live/memory_live.ex:270
+#: lib/octomocto_web/live/memory_live.ex:339
 #, elixir-autogen, elixir-format
 msgid "Animals"
 msgstr "Zwierzęta"
 
-#: lib/octomocto_web/live/memory_live.html.heex:221
+#: lib/octomocto_web/live/memory_live.html.heex:232
 #, elixir-autogen, elixir-format
 msgid "Best"
 msgstr "Rekord"
 
-#: lib/octomocto_web/live/memory_live.html.heex:269
+#: lib/octomocto_web/live/memory_live.html.heex:280
 #, elixir-autogen, elixir-format
 msgid "Best results"
 msgstr "Najlepsze wyniki"
 
-#: lib/octomocto_web/live/memory_live.ex:267
+#: lib/octomocto_web/live/memory_live.ex:336
 #, elixir-autogen, elixir-format
 msgid "Birds"
 msgstr "Ptaki"
 
-#: lib/octomocto_web/live/memory_live.html.heex:139
-#: lib/octomocto_web/live/memory_live.html.heex:156
+#: lib/octomocto_web/live/memory_live.html.heex:149
+#: lib/octomocto_web/live/memory_live.html.heex:166
 #, elixir-autogen, elixir-format
 msgid "Cards"
 msgstr "Karty"
 
-#: lib/octomocto_web/live/memory_live.html.heex:31
+#: lib/octomocto_web/live/memory_live.html.heex:33
 #, elixir-autogen, elixir-format
 msgid "Choose the settings and start a new game."
 msgstr "Wybierz ustawienia i zacznij nową grę."
@@ -83,32 +83,32 @@ msgstr "Nie udało się dołączyć do gry: {reason}"
 msgid "Done!"
 msgstr "Gotowe!"
 
-#: lib/octomocto_web/live/memory_live.ex:272
+#: lib/octomocto_web/live/memory_live.ex:341
 #, elixir-autogen, elixir-format
 msgid "Ecology"
 msgstr "Ekologia"
 
-#: lib/octomocto_web/live/memory_live.ex:264
+#: lib/octomocto_web/live/memory_live.ex:333
 #, elixir-autogen, elixir-format
 msgid "Eighties"
 msgstr "Lata 80."
 
-#: lib/octomocto_web/live/memory_live.ex:271
+#: lib/octomocto_web/live/memory_live.ex:340
 #, elixir-autogen, elixir-format
 msgid "Fairy Tales"
 msgstr "Bajki"
 
-#: lib/octomocto_web/live/memory_live.html.heex:143
+#: lib/octomocto_web/live/memory_live.html.heex:153
 #, elixir-autogen, elixir-format
 msgid "Fewer cards"
 msgstr "Mniej kart"
 
-#: lib/octomocto_web/live/memory_live.html.heex:120
+#: lib/octomocto_web/live/memory_live.html.heex:130
 #, elixir-autogen, elixir-format
 msgid "Find 2 cards with the same image."
 msgstr "Znajdź 2 karty z tym samym obrazkiem."
 
-#: lib/octomocto_web/live/memory_live.html.heex:121
+#: lib/octomocto_web/live/memory_live.html.heex:131
 #, elixir-autogen, elixir-format
 msgid "Find 3 cards with the same image."
 msgstr "Znajdź 3 karty z tym samym obrazkiem."
@@ -123,22 +123,22 @@ msgstr "Znajdź pary kart z tym samym obrazkiem."
 msgid "Find the triplets of cards with the same image."
 msgstr "Znajdź trójki kart z tym samym obrazkiem."
 
-#: lib/octomocto_web/live/memory_live.ex:275
+#: lib/octomocto_web/live/memory_live.ex:344
 #, elixir-autogen, elixir-format
 msgid "Flags"
 msgstr "Flagi"
 
-#: lib/octomocto_web/live/memory_live.ex:266
+#: lib/octomocto_web/live/memory_live.ex:335
 #, elixir-autogen, elixir-format
 msgid "Flowers"
 msgstr "Kwiaty"
 
-#: lib/octomocto_web/live/memory_live.ex:274
+#: lib/octomocto_web/live/memory_live.ex:343
 #, elixir-autogen, elixir-format
 msgid "Halloween"
 msgstr "Halloween"
 
-#: lib/octomocto_web/live/memory_live.ex:144
+#: lib/octomocto_web/live/memory_live.ex:200
 #, elixir-autogen, elixir-format
 msgid "If they match, you get a point for each card, and you go again. If not, the next player goes."
 msgstr "Jeśli pasują, dostajesz punkt za każdą kartę i grasz dalej. Jeśli nie, kolej na następnego gracza."
@@ -153,7 +153,7 @@ msgstr "Remis!"
 msgid "Joining the game…"
 msgstr "Dołączanie do gry…"
 
-#: lib/octomocto_web/live/memory_live.html.heex:303
+#: lib/octomocto_web/live/memory_live.html.heex:314
 #, elixir-autogen, elixir-format
 msgid "Latest games"
 msgstr "Ostatnie gry"
@@ -163,7 +163,7 @@ msgstr "Ostatnie gry"
 msgid "Latest games and best results"
 msgstr "Ostatnie gry i najlepsze wyniki"
 
-#: lib/octomocto_web/live/memory_live.html.heex:116
+#: lib/octomocto_web/live/memory_live.html.heex:126
 #, elixir-autogen, elixir-format
 msgid "Look for"
 msgstr "Szukaj"
@@ -174,48 +174,48 @@ msgstr "Szukaj"
 msgid "Memory"
 msgstr "Memory"
 
-#: lib/octomocto_web/live/memory_live.ex:41
+#: lib/octomocto_web/live/memory_live.ex:47
 #, elixir-autogen, elixir-format
 msgid "Memory Card Game"
 msgstr "Gra Memory online"
 
-#: lib/octomocto_web/live/memory_live.html.heex:172
+#: lib/octomocto_web/live/memory_live.html.heex:182
 #, elixir-autogen, elixir-format
 msgid "More cards"
 msgstr "Więcej kart"
 
-#: lib/octomocto_web/live/memory_live.ex:273
+#: lib/octomocto_web/live/memory_live.ex:342
 #, elixir-autogen, elixir-format
 msgid "Music"
 msgstr "Muzyka"
 
-#: lib/octomocto_web/live/memory_live.html.heex:213
+#: lib/octomocto_web/live/memory_live.html.heex:224
 #, elixir-autogen, elixir-format
 msgid "No games yet."
 msgstr "Na razie nie ma gier."
 
-#: lib/octomocto_web/controllers/memory_html.ex:52
+#: lib/octomocto_web/controllers/memory_html.ex:56
 #, elixir-autogen, elixir-format
 msgid "Or try {game}"
 msgstr "Albo zagraj w {game}"
 
-#: lib/octomocto_web/live/memory_live.ex:249
-#: lib/octomocto_web/live/memory_live.html.heex:128
+#: lib/octomocto_web/live/memory_live.ex:318
+#: lib/octomocto_web/live/memory_live.html.heex:138
 #, elixir-autogen, elixir-format
 msgid "Pairs"
 msgstr "Pary"
 
-#: lib/octomocto_web/live/memory_live.ex:50
+#: lib/octomocto_web/live/memory_live.ex:56
 #, elixir-autogen, elixir-format
 msgid "Pairs One is now Octomocto. Your favorite Memory game (improved!) plus more games to play."
 msgstr "Pairs One to teraz Octomocto. Twoja ulubiona gra Memory (jeszcze lepsza!) i więcej innych gier."
 
-#: lib/octomocto_web/live/memory_live.ex:268
+#: lib/octomocto_web/live/memory_live.ex:337
 #, elixir-autogen, elixir-format
 msgid "Pets"
 msgstr "Zwierzęta domowe"
 
-#: lib/octomocto_web/live/memory_live.ex:43
+#: lib/octomocto_web/live/memory_live.ex:49
 #, elixir-autogen, elixir-format
 msgid "Play Memory online solo or with friends. Free, instant, no sign-up."
 msgstr "Graj w Memory online solo lub ze znajomymi. Za darmo, od razu, bez rejestracji."
@@ -225,17 +225,17 @@ msgstr "Graj w Memory online solo lub ze znajomymi. Za darmo, od razu, bez rejes
 msgid "Play again"
 msgstr "Zagraj jeszcze raz"
 
-#: lib/octomocto_web/live/memory_live.html.heex:59
+#: lib/octomocto_web/live/memory_live.html.heex:69
 #, elixir-autogen, elixir-format
 msgid "Players"
 msgstr "Gracze"
 
-#: lib/octomocto_web/live/memory_live.html.heex:188
+#: lib/octomocto_web/live/memory_live.html.heex:199
 #, elixir-autogen, elixir-format
 msgid "Private"
 msgstr "Prywatna"
 
-#: lib/octomocto_web/live/memory_live.html.heex:187
+#: lib/octomocto_web/live/memory_live.html.heex:198
 #, elixir-autogen, elixir-format
 msgid "Public"
 msgstr "Publiczna"
@@ -250,19 +250,19 @@ msgstr "Zacznij grę od nowa"
 msgid "Send the link to the other players. The game starts when all of them are in."
 msgstr "Wyślij link innym graczom. Gra zacznie się, gdy wszyscy dołączą."
 
-#: lib/octomocto_web/controllers/memory_html.ex:53
-#: lib/octomocto_web/live/memory_live.html.heex:259
-#: lib/octomocto_web/live/memory_live.html.heex:279
+#: lib/octomocto_web/controllers/memory_html.ex:57
+#: lib/octomocto_web/live/memory_live.html.heex:270
+#: lib/octomocto_web/live/memory_live.html.heex:290
 #, elixir-autogen, elixir-format
 msgid "Sign in"
 msgstr "Zaloguj się"
 
-#: lib/octomocto_web/live/memory_live.ex:265
+#: lib/octomocto_web/live/memory_live.ex:334
 #, elixir-autogen, elixir-format
 msgid "Spring"
 msgstr "Wiosna"
 
-#: lib/octomocto_web/live/memory_live.html.heex:64
+#: lib/octomocto_web/live/memory_live.html.heex:74
 #, elixir-autogen, elixir-format
 msgid "The players take turns. The game starts when all players are in."
 msgstr "Gracze grają po kolei. Gra zacznie się, gdy wszyscy dołączą."
@@ -272,7 +272,7 @@ msgstr "Gracze grają po kolei. Gra zacznie się, gdy wszyscy dołączą."
 msgid "The {color} player wins!"
 msgstr "Wygrywa gracz {color}!"
 
-#: lib/octomocto_web/live/memory_live.html.heex:81
+#: lib/octomocto_web/live/memory_live.html.heex:91
 #, elixir-autogen, elixir-format
 msgid "Theme"
 msgstr "Motyw"
@@ -287,13 +287,13 @@ msgstr "Ta gra jest pełna, więc możesz ją tylko oglądać."
 msgid "Time {time}"
 msgstr "Czas {time}"
 
-#: lib/octomocto_web/live/memory_live.ex:249
-#: lib/octomocto_web/live/memory_live.html.heex:129
+#: lib/octomocto_web/live/memory_live.ex:318
+#: lib/octomocto_web/live/memory_live.html.heex:139
 #, elixir-autogen, elixir-format
 msgid "Triplets"
 msgstr "Trójki"
 
-#: lib/octomocto_web/live/memory_live.ex:140
+#: lib/octomocto_web/live/memory_live.ex:196
 #, elixir-autogen, elixir-format
 msgid "Turn over 2 cards at a time (3 for triplets) to find the cards with the same image."
 msgstr "Odkrywaj po 2 karty naraz (3 w trójkach), aby znaleźć karty z tym samym obrazkiem."
@@ -308,7 +308,7 @@ msgstr "Wyłącz dźwięk"
 msgid "Turn the sounds on"
 msgstr "Włącz dźwięk"
 
-#: lib/octomocto_web/live/memory_live.html.heex:180
+#: lib/octomocto_web/live/memory_live.html.heex:191
 #, elixir-autogen, elixir-format
 msgid "Visibility"
 msgstr "Widoczność"
@@ -318,12 +318,12 @@ msgstr "Widoczność"
 msgid "Waiting for players"
 msgstr "Czekamy na graczy"
 
-#: lib/octomocto_web/live/memory_live.ex:148
+#: lib/octomocto_web/live/memory_live.ex:204
 #, elixir-autogen, elixir-format
 msgid "Whoever has the most points wins. Alone, clear the field as fast as you can."
 msgstr "Wygrywa ten, kto ma najwięcej punktów. W grze solo odkryj całą planszę jak najszybciej."
 
-#: lib/octomocto_web/live/memory_live.ex:269
+#: lib/octomocto_web/live/memory_live.ex:338
 #, elixir-autogen, elixir-format
 msgid "Workout"
 msgstr "Sport"
@@ -333,7 +333,7 @@ msgstr "Sport"
 msgid "You win!"
 msgstr "Wygrywasz!"
 
-#: lib/octomocto_web/live/memory_live.html.heex:211
+#: lib/octomocto_web/live/memory_live.html.heex:222
 #, elixir-autogen, elixir-format
 msgid "Your results"
 msgstr "Twoje wyniki"
@@ -348,7 +348,7 @@ msgstr "celność"
 msgid "time"
 msgstr "czas"
 
-#: lib/octomocto_web/live/memory_live.html.heex:261
+#: lib/octomocto_web/live/memory_live.html.heex:272
 #, elixir-autogen, elixir-format
 msgid "to start saving your results."
 msgstr "i zacznij zapisywać swoje wyniki."
@@ -373,57 +373,77 @@ msgstr "{name} wygrywa!"
 msgid "{players} of {needed} players are in"
 msgstr "Dołączyło graczy: {players} z {needed}"
 
-#: lib/octomocto_web/controllers/memory_html.ex:54
+#: lib/octomocto_web/controllers/memory_html.ex:58
 #, elixir-autogen, elixir-format
 msgid "{sign_in} to keep your scores."
 msgstr "{sign_in} i zachowaj swoje wyniki."
 
-#: lib/octomocto_web/live/memory_live.ex:263
+#: lib/octomocto_web/live/memory_live.ex:332
 #, elixir-autogen, elixir-format
 msgid "Insects"
 msgstr "Owady"
 
-#: lib/octomocto_web/live/memory_live.html.heex:103
+#: lib/octomocto_web/live/memory_live.html.heex:113
 #, elixir-autogen, elixir-format
 msgid "New"
 msgstr "Nowość"
 
-#: lib/octomocto_web/live/memory_live.ex:262
+#: lib/octomocto_web/live/memory_live.ex:331
 #, elixir-autogen, elixir-format
 msgid "Monsters"
 msgstr "Potwory"
 
-#: lib/octomocto_web/live/memory_live.ex:261
+#: lib/octomocto_web/live/memory_live.ex:330
 #, elixir-autogen, elixir-format
 msgid "Ocean"
 msgstr "Ocean"
 
-#: lib/octomocto_web/live/memory_live.ex:260
+#: lib/octomocto_web/live/memory_live.ex:329
 #, elixir-autogen, elixir-format
 msgid "Desert"
 msgstr "Pustynia"
 
-#: lib/octomocto_web/live/memory_live.ex:259
+#: lib/octomocto_web/live/memory_live.ex:328
 #, elixir-autogen, elixir-format
 msgid "Food"
 msgstr "Jedzenie"
 
-#: lib/octomocto_web/live/memory_live.ex:258
+#: lib/octomocto_web/live/memory_live.ex:327
 #, elixir-autogen, elixir-format
 msgid "Sushi"
 msgstr "Sushi"
 
-#: lib/octomocto_web/live/memory_live.html.heex:281
+#: lib/octomocto_web/live/memory_live.html.heex:292
 #, elixir-autogen, elixir-format
 msgid "to get listed"
 msgstr "i trafisz na listę"
 
-#: lib/octomocto_web/live/memory_live.ex:276
+#: lib/octomocto_web/live/memory_live.ex:345
 #, elixir-autogen, elixir-format
 msgid "Cats"
 msgstr "Koty"
 
-#: lib/octomocto_web/live/memory_live.ex:277
+#: lib/octomocto_web/live/memory_live.ex:346
 #, elixir-autogen, elixir-format
 msgid "Space"
 msgstr "Kosmos"
+
+#: lib/octomocto_web/controllers/memory_html.ex:52
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "Zmień ustawienia"
+
+#: lib/octomocto_web/live/memory_live.html.heex:32
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "Wybierz ustawienia następnej gry."
+
+#: lib/octomocto_web/controllers/memory_html.ex:55
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "Gracz {color} zmienia ustawienia…"
+
+#: lib/octomocto_web/controllers/memory_html.ex:53
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name} zmienia ustawienia…"

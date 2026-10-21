@@ -16,10 +16,15 @@ defmodule OctomoctoWeb.MemoryLive do
 
   alias Octomocto.{Lobby, Memory}
   alias Octomocto.Memory.{Board, Game, Store, Themes}
+  alias OctomoctoWeb.MemoryChannel
 
   def mount(params, _session, socket) do
-    if connected?(socket), do: Lobby.subscribe(Game)
     locale = socket.assigns.locale
+    match = match(params["match"], socket)
+    if connected?(socket) and !match, do: Lobby.subscribe(Game)
+
+    if match && connected?(socket),
+      do: Phoenix.PubSub.subscribe(Octomocto.PubSub, Game.topic(match.id))
 
     {:ok,
      socket
@@ -29,7 +34,8 @@ defmodule OctomoctoWeb.MemoryLive do
          alternate_urls: Locale.alternate_urls("memory", ~p"/memory"),
          themes: Themes.list(),
          rules: rules(),
-         banner: banner(params)
+         banner: banner(params),
+         match: match
        ] ++ seo()
      )
      |> assign_lobby(Lobby.entries(Game, Store))}
@@ -55,7 +61,8 @@ defmodule OctomoctoWeb.MemoryLive do
   def banner(_params), do: nil
 
   def handle_params(params, _uri, socket) do
-    settings = settings(params)
+    match = socket.assigns.match
+    settings = params |> match_params(match) |> settings() |> match_settings(match)
     filter = %{"set" => settings.set, "cards" => settings.cards, "players" => settings.players}
 
     {:noreply,
@@ -74,6 +81,11 @@ defmodule OctomoctoWeb.MemoryLive do
     {:noreply, assign_lobby(socket, Lobby.put_entry(socket.assigns.lobby, id, entry))}
   end
 
+  # The score of the match shows the changes of the players
+  def handle_info({:memory_state, state}, socket) do
+    {:noreply, update(socket, :match, &%{&1 | state: state})}
+  end
+
   @doc """
   Starts a game in the default settings for the number of players, and
   gives its id. See `OctomoctoWeb.NextGame`.
@@ -81,6 +93,16 @@ defmodule OctomoctoWeb.MemoryLive do
   def create_default_game(players, public) do
     %{settings(%{"players" => Integer.to_string(players)}) | public: public}
     |> Memory.create_game()
+  end
+
+  # The next field of the match, in the same game
+  def handle_event("new_game", _params, %{assigns: %{match: %{player_id: player_id}}} = socket)
+      when is_binary(player_id) do
+    %{match: match, settings: settings, locale: locale} = socket.assigns
+    # When the settings do not change (for example, the game stopped), the
+    # game page shows the end screen again
+    Memory.change_settings(match.id, player_id, Map.take(settings, [:theme, :set, :cards]))
+    {:noreply, redirect(socket, to: Locale.path(locale, ~p"/memory/#{match.id}"))}
   end
 
   def handle_event("new_game", _params, socket) do
@@ -124,8 +146,58 @@ defmodule OctomoctoWeb.MemoryLive do
 
     public = params["visibility"] != "private"
 
-    %{theme: theme, set: set, cards: cards, players: players, public: public}
+    %{theme: theme, set: set, cards: cards, players: players, public: public, match: nil}
   end
+
+  # The match of the page (`?match=<game id>`, see `Octomocto.Memory.Game`),
+  # or nil: the `:id` of the game, the `:state` that its clients see, and
+  # the `:player_id` of the player who changes the settings. The token of
+  # the player is in the connect params (see app.js), so the page holds the
+  # seat of the player only after the connect. Before the connect, the page
+  # only shows the score.
+  defp match(id, socket) when is_binary(id) do
+    if connected?(socket) do
+      token = get_connect_params(socket)["match_token"]
+
+      with player_id when is_binary(player_id) <- MemoryChannel.player_id(id, token),
+           {:ok, state} <- Memory.edit_settings(id, player_id) do
+        %{id: id, player_id: player_id, state: state}
+      else
+        _ -> nil
+      end
+    else
+      case Store.read(id) do
+        %{needed: needed} = state when needed > 1 ->
+          %{id: id, player_id: nil, state: Game.public(state)}
+
+        _ ->
+          nil
+      end
+    end
+  end
+
+  defp match(_id, _socket), do: nil
+
+  # The settings of the game are the defaults of the match page, because
+  # the link to the page has only the match
+  defp match_params(params, nil), do: params
+
+  defp match_params(params, %{state: state}) do
+    Map.merge(
+      %{
+        "theme" => state.theme,
+        "set" => if(state.set == 3, do: "triplets", else: "pairs"),
+        "cards" => Integer.to_string(length(state.cards))
+      },
+      params
+    )
+  end
+
+  # A match keeps its players and its visibility
+  defp match_settings(settings, nil), do: settings
+
+  defp match_settings(settings, %{id: id, state: state}),
+    do: %{settings | players: state.players_needed, public: state.public, match: id}
 
   defp assign_lobby(socket, entries) do
     assign(socket, lobby: entries, lobby_games: Lobby.games(entries))
@@ -205,16 +277,28 @@ defmodule OctomoctoWeb.MemoryLive do
   end
 
   @doc "The path of this page in the language with the settings of the game in the given state."
-  def settings_path(locale, state) do
-    settings = %{
+  def settings_path(locale, state), do: settings_path(locale, state_settings(state), [])
+
+  @doc """
+  The path of the Change settings button of the game in the given state.
+  With 2 or more players, the page changes the settings of the next field
+  of the match (see `Octomocto.Memory.Game`). The path has only the match,
+  because the settings of the game can change after the page load.
+  """
+  def match_path(locale, %{needed: needed} = state) when needed > 1,
+    do: Locale.path(locale, ~p"/memory?#{[match: state.id]}")
+
+  def match_path(locale, state), do: settings_path(locale, state)
+
+  defp state_settings(state) do
+    %{
       theme: state.theme,
       set: state.set,
       cards: state.size,
       players: state.needed,
-      public: state.public
+      public: state.public,
+      match: nil
     }
-
-    settings_path(locale, settings, [])
   end
 
   # The path of this page in the language for the settings, with some of them changed
@@ -234,7 +318,8 @@ defmodule OctomoctoWeb.MemoryLive do
     ]
 
     # A public game has no param, so that most links stay short
-    if settings.public, do: query, else: query ++ [visibility: "private"]
+    query = if settings.public, do: query, else: query ++ [visibility: "private"]
+    if settings.match, do: query ++ [match: settings.match], else: query
   end
 
   # True when the open game has the same settings as the new game

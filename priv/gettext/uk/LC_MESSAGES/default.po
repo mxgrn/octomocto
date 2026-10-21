@@ -38,7 +38,7 @@ msgstr "Пробуємо підключитися знову"
 msgid "Brain Games to Play Solo or with Friends"
 msgstr "Ігри для розуму — самому або з друзями"
 
-#: lib/octomocto_web/components/game_page_components.ex:221
+#: lib/octomocto_web/components/game_page_components.ex:296
 #: lib/octomocto_web/components/layouts.ex:77
 #, elixir-autogen, elixir-format
 msgid "Close"
@@ -74,8 +74,8 @@ msgstr "Закінчена"
 msgid "Guest"
 msgstr "Гість"
 
-#: lib/octomocto_web/components/game_page_components.ex:186
-#: lib/octomocto_web/components/game_page_components.ex:216
+#: lib/octomocto_web/components/game_page_components.ex:261
+#: lib/octomocto_web/components/game_page_components.ex:291
 #, elixir-autogen, elixir-format
 msgid "How to play"
 msgstr "Як грати"
@@ -110,22 +110,22 @@ msgstr "Ігор поки немає — створи першу."
 msgid "Octomocto: Use your heads. Play solo or with friends."
 msgstr "Octomocto: Вмикайте голови. Грай сам або з друзями."
 
-#: lib/octomocto_web/components/game_page_components.ex:255
+#: lib/octomocto_web/components/game_page_components.ex:330
 #, elixir-autogen, elixir-format
 msgid "Only players with the link can join."
 msgstr "Увійти можуть лише ті, хто має посилання."
 
-#: lib/octomocto_web/components/game_page_components.ex:250
+#: lib/octomocto_web/components/game_page_components.ex:325
 #, elixir-autogen, elixir-format
 msgid "Only players with the link can watch."
 msgstr "Дивитися можуть лише ті, хто має посилання."
 
-#: lib/octomocto_web/components/game_page_components.ex:247
+#: lib/octomocto_web/components/game_page_components.ex:322
 #, elixir-autogen, elixir-format
 msgid "Other players can watch this game in Ongoing games."
 msgstr "Інші гравці можуть дивитися цю гру в розділі «Поточні ігри»."
 
-#: lib/octomocto_web/components/game_page_components.ex:253
+#: lib/octomocto_web/components/game_page_components.ex:328
 #, elixir-autogen, elixir-format
 msgid "Other players see this game in Ongoing games."
 msgstr "Інші гравці бачать цю гру в розділі «Поточні ігри»."
@@ -165,12 +165,12 @@ msgstr "Вийти"
 msgid "Something went wrong!"
 msgstr "Щось пішло не так!"
 
-#: lib/octomocto_web/components/game_page_components.ex:165
+#: lib/octomocto_web/components/game_page_components.ex:239
 #, elixir-autogen, elixir-format
 msgid "Start game"
 msgstr "Почати гру"
 
-#: lib/octomocto_web/components/game_page_components.ex:159
+#: lib/octomocto_web/components/game_page_components.ex:226
 #, elixir-autogen, elixir-format
 msgid "Starting..."
 msgstr "Починаємо..."
@@ -191,7 +191,7 @@ msgstr "Умови використання"
 msgid "Theme"
 msgstr "Тема"
 
-#: lib/octomocto_web/controllers/memory_controller.ex:25
+#: lib/octomocto_web/controllers/memory_controller.ex:26
 #, elixir-autogen, elixir-format
 msgid "This game does not exist (any more). Start a new one."
 msgstr "Цієї гри немає (вже немає). Почни нову."
@@ -211,12 +211,12 @@ msgstr "Дивитися"
 msgid "We can't find the internet"
 msgstr "Немає підключення до інтернету"
 
-#: lib/octomocto_web/components/game_page_components.ex:168
+#: lib/octomocto_web/components/game_page_components.ex:243
 #, elixir-autogen, elixir-format
 msgid "You get a link to share with other players."
 msgstr "Ти отримаєш посилання, щоб надіслати його іншим гравцям."
 
-#: lib/octomocto_web/components/game_page_components.ex:272
+#: lib/octomocto_web/components/game_page_components.ex:347
 #, elixir-autogen, elixir-format
 msgid "amber"
 msgstr "Бурштиновий"
@@ -226,12 +226,12 @@ msgstr "Бурштиновий"
 msgid "close"
 msgstr "закрити"
 
-#: lib/octomocto_web/components/game_page_components.ex:276
+#: lib/octomocto_web/components/game_page_components.ex:351
 #, elixir-autogen, elixir-format
 msgid "indigo"
 msgstr "Індиго"
 
-#: lib/octomocto_web/components/game_page_components.ex:271
+#: lib/octomocto_web/components/game_page_components.ex:346
 #, elixir-autogen, elixir-format
 msgid "lime"
 msgstr "Лаймовий"
@@ -241,27 +241,27 @@ msgstr "Лаймовий"
 msgid "or"
 msgstr "або"
 
-#: lib/octomocto_web/components/game_page_components.ex:269
+#: lib/octomocto_web/components/game_page_components.ex:344
 #, elixir-autogen, elixir-format
 msgid "pink"
 msgstr "Рожевий"
 
-#: lib/octomocto_web/components/game_page_components.ex:274
+#: lib/octomocto_web/components/game_page_components.ex:349
 #, elixir-autogen, elixir-format
 msgid "red"
 msgstr "Червоний"
 
-#: lib/octomocto_web/components/game_page_components.ex:270
+#: lib/octomocto_web/components/game_page_components.ex:345
 #, elixir-autogen, elixir-format
 msgid "sky"
 msgstr "Небесний"
 
-#: lib/octomocto_web/components/game_page_components.ex:275
+#: lib/octomocto_web/components/game_page_components.ex:350
 #, elixir-autogen, elixir-format
 msgid "teal"
 msgstr "Бірюзовий"
 
-#: lib/octomocto_web/components/game_page_components.ex:273
+#: lib/octomocto_web/components/game_page_components.ex:348
 #, elixir-autogen, elixir-format
 msgid "violet"
 msgstr "Фіолетовий"
@@ -276,12 +276,12 @@ msgstr "you@example.com"
 msgid "Menu"
 msgstr "Меню"
 
-#: lib/octomocto_web/components/game_page_components.ex:165
+#: lib/octomocto_web/components/game_page_components.ex:237
 #, elixir-autogen, elixir-format
 msgid "Create game"
 msgstr "Створити гру"
 
-#: lib/octomocto_web/components/game_page_components.ex:159
+#: lib/octomocto_web/components/game_page_components.ex:226
 #, elixir-autogen, elixir-format
 msgid "Creating..."
 msgstr "Створюємо..."
@@ -295,3 +295,41 @@ msgstr "Запропонувати гру"
 #, elixir-autogen, elixir-format
 msgid "Sign in to change your name"
 msgstr "Увійди, щоб змінити імʼя"
+
+#: lib/octomocto_web/components/game_page_components.ex:193
+#, elixir-autogen, elixir-format
+msgid "%{count} tie"
+msgid_plural "%{count} ties"
+msgstr[0] "%{count} нічия"
+msgstr[1] "%{count} нічиї"
+msgstr[2] "%{count} нічиїх"
+
+#: lib/octomocto_web/components/game_page_components.ex:172
+#, elixir-autogen, elixir-format
+msgid "Back to the game"
+msgstr "Повернутися до гри"
+
+#: lib/octomocto_web/components/game_page_components.ex:161
+#, elixir-autogen, elixir-format
+msgid "Match"
+msgstr "Матч"
+
+#: lib/octomocto_web/components/game_page_components.ex:235
+#, elixir-autogen, elixir-format
+msgid "Start next game"
+msgstr "Почати наступну гру"
+
+#: lib/octomocto_web/components/game_page_components.ex:196
+#, elixir-autogen, elixir-format
+msgid "The other players wait until you start the next game."
+msgstr "Інші гравці чекають, коли ти почнеш наступну гру."
+
+#: lib/octomocto_web/components/game_page_components.ex:176
+#, elixir-autogen, elixir-format
+msgid "Wins"
+msgstr "Перемоги"
+
+#: lib/octomocto_web/components/game_page_components.ex:187
+#, elixir-autogen, elixir-format
+msgid "you"
+msgstr "ти"

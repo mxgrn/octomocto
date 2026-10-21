@@ -71,6 +71,31 @@ defmodule Octomocto.Memory do
   end
 
   @doc """
+  The player goes to the settings page between two fields of a match (see
+  `Octomocto.Memory.Game`). The calling process holds the seat of the
+  player, and the other players wait until the player changes the settings
+  (`change_settings/3`) or joins the game again. Gives `{:ok, state}` with
+  the state that clients see, or `{:error, reason}` when the game is not
+  finished, has one player, or another player changes the settings.
+  """
+  def edit_settings(id, player_id, pid \\ self()) do
+    GenServer.call(Game.via(id), {:edit_settings, pid, player_id})
+  catch
+    :exit, _reason -> {:error, :not_found}
+  end
+
+  @doc """
+  Starts a new field of the match with the new `settings` (`:theme`,
+  `:set` and `:cards`). Only the player of `edit_settings/3` can. Gives
+  `:ok` or `{:error, reason}`.
+  """
+  def change_settings(id, player_id, settings) do
+    GenServer.call(Game.via(id), {:change_settings, player_id, settings})
+  catch
+    :exit, _reason -> {:error, :not_found}
+  end
+
+  @doc """
   Saves one finished field with its theme. Each player is a map with
   `:user_id` (nil for a guest), `:score`, `:correct` and `:errors`.
   """

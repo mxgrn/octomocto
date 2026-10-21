@@ -11,6 +11,9 @@ defmodule OctomoctoWeb.MemoryChannel do
 
   @game [context: Memory, game: Memory.Game, salt: "memory player", kind: "memory"]
 
+  @doc "The player id in the token of a player of the game, or nil."
+  def player_id(game_id, token), do: GameChannel.verify_token(game_id, token, @game)
+
   @impl true
   def join("memory:" <> game_id, params, socket) do
     GameChannel.join(game_id, params, socket, @game)

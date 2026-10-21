@@ -49,6 +49,10 @@ defmodule OctomoctoWeb.MemoryHTML do
       "Time {time}" => dgettext("memory", "Time {time}"),
       "Accuracy {accuracy}" => dgettext("memory", "Accuracy {accuracy}"),
       "Play again" => dgettext("memory", "Play again"),
+      "Change settings" => dgettext("memory", "Change settings"),
+      "{name} changes the settings…" => dgettext("memory", "{name} changes the settings…"),
+      "The {color} player changes the settings…" =>
+        dgettext("memory", "The {color} player changes the settings…"),
       "Or try {game}" => dgettext("memory", "Or try {game}"),
       "Sign in" => dgettext("memory", "Sign in"),
       "{sign_in} to keep your scores." => dgettext("memory", "{sign_in} to keep your scores.")

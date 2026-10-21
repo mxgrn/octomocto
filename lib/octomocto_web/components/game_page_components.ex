@@ -134,7 +134,73 @@ defmodule OctomoctoWeb.GamePageComponents do
   @doc false
   def no_match(_game), do: false
 
+  attr :players, :list,
+    required: true,
+    doc: "the players of the match, each with `:id`, `:name`, `:color`, `:color_name` and `:wins`"
+
+  attr :ties, :integer, required: true
+  attr :me, :string, default: nil, doc: "the id of the player on the page"
+  attr :back, :string, required: true, doc: "the path of the game"
+
+  @doc """
+  The score of a match on the settings page, in place of the Players
+  setting: the wins of each player, the most wins first, and the ties. The
+  player on the page changes the settings of the next field, and the
+  other players wait.
+  """
+  def match_score(assigns) do
+    assigns = assign(assigns, :players, Enum.sort_by(assigns.players, & &1.wins, :desc))
+
+    ~H"""
+    <section
+      id="match-score"
+      class="rounded-2xl bg-base-100 p-5 text-left shadow-sm ring-1 ring-base-content/10"
+    >
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="flex items-center gap-2 font-semibold">
+          <.icon name="hero-trophy" class="size-4 text-octo-indigo" /> {gettext("Match")}
+        </h3>
+        <a
+          id="match-back"
+          href={@back}
+          class="group flex items-center gap-1 text-sm font-medium text-octo-indigo transition hover:text-octo-indigo/80 dark:text-octo-indigo-light"
+        >
+          <.icon
+            name="hero-arrow-uturn-left"
+            class="size-3.5 transition group-hover:-translate-x-0.5"
+          />
+          {gettext("Back to the game")}
+        </a>
+      </div>
+      <div class="mt-3 flex justify-end text-xs font-medium tracking-wide text-base-content/50 uppercase">
+        {gettext("Wins")}
+      </div>
+      <ul id="match-players" class="divide-y divide-base-content/5">
+        <li
+          :for={player <- @players}
+          id={"match-player-#{player.id}"}
+          class="flex items-center gap-3 py-2"
+        >
+          <span class="size-3 shrink-0 rounded-full" style={"background: #{player.color}"} />
+          <span class="min-w-0 flex-1 truncate">
+            {player_name(player)}
+            <span :if={player.id == @me} class="text-base-content/50">({gettext("you")})</span>
+          </span>
+          <span class="text-xl font-semibold tabular-nums">{player.wins}</span>
+        </li>
+      </ul>
+      <p :if={@ties > 0} id="match-ties" class="mt-1 text-right text-sm text-base-content/60">
+        {ngettext("%{count} tie", "%{count} ties", @ties)}
+      </p>
+      <p class="mt-2 text-xs text-base-content/50">
+        {gettext("The other players wait until you start the next game.")}
+      </p>
+    </section>
+    """
+  end
+
   attr :multiplayer, :boolean, required: true, doc: "shows the hint about the link"
+  attr :match, :boolean, default: false, doc: "starts the next game of a match"
 
   @doc """
   The Start game button, or the Create game button for a multiplayer
@@ -156,15 +222,24 @@ defmodule OctomoctoWeb.GamePageComponents do
         id="new-game"
         type="button"
         phx-click="new_game"
-        phx-disable-with={if(@multiplayer, do: gettext("Creating..."), else: gettext("Starting..."))}
+        phx-disable-with={
+          if(@multiplayer and not @match, do: gettext("Creating..."), else: gettext("Starting..."))
+        }
         class={[
           "pointer-events-auto cursor-pointer rounded-full px-8 py-3 font-medium text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0",
           "bg-octo-indigo shadow-octo-indigo/25 hover:bg-octo-indigo/90"
         ]}
       >
-        {if @multiplayer, do: gettext("Create game"), else: gettext("Start game")}
+        <%= cond do %>
+          <% @match -> %>
+            {gettext("Start next game")}
+          <% @multiplayer -> %>
+            {gettext("Create game")}
+          <% true -> %>
+            {gettext("Start game")}
+        <% end %>
       </button>
-      <p :if={@multiplayer} class="text-sm text-base-content/50">
+      <p :if={@multiplayer and not @match} class="text-sm text-base-content/50">
         {gettext("You get a link to share with other players.")}
       </p>
     </div>

@@ -36,6 +36,13 @@ defmodule Octomocto.Memory.Game do
 
   A process can also join only to watch (see `Octomocto.Memory.watch/1`).
 
+  The players of a game with 2 or more players play a match: each finished
+  field gives a win to its winner (`wins` of the player), or a tie
+  (`ties`). Between two fields, one player can change the settings of the
+  game on the settings page (see `Octomocto.Memory.edit_settings/3`). The
+  player is in `editing` while the page is open, and the other players
+  cannot start a field until the player is back.
+
   The game is registered in the whole cluster, and it writes its state to
   `Octomocto.Memory.Store` after each change. When its node stops, the game
   starts again on another node from that state. Thus the clock uses the
@@ -148,6 +155,10 @@ defmodule Octomocto.Memory.Game do
         players: %{},
         public: config.public,
         created_at: now(),
+        # The fields of the match that ended with no single winner
+        ties: 0,
+        # The id of the player on the settings page, see edit_settings/3
+        editing: nil,
         # True while the game is in the list of open games. A game with one
         # player is never in it.
         listed: config.public and config.players > 1
@@ -174,8 +185,11 @@ defmodule Octomocto.Memory.Game do
       # A state from before the accuracy
       |> Map.put_new(:seen, MapSet.new())
       |> Map.update!(:players, fn players ->
-        Map.new(players, fn {id, p} -> {id, Map.merge(%{correct: 0, errors: 0}, p)} end)
+        Map.new(players, fn {id, p} -> {id, Map.merge(%{correct: 0, errors: 0, wins: 0}, p)} end)
       end)
+      # A state from before the matches
+      |> Map.put_new(:ties, 0)
+      |> Map.put(:editing, nil)
 
     store(state)
     {:ok, state}
@@ -186,15 +200,65 @@ defmodule Octomocto.Memory.Game do
       when is_map_key(state.players, player_id) do
     Process.monitor(pid)
     state = update_in(state.players[player_id], &%{&1 | pid: pid, left: nil})
-    store(state)
-    {:reply, {:ok, player_id, public(state)}, state}
+
+    # The player is back from the settings page
+    if state.editing == player_id do
+      state = %{state | editing: nil}
+      publish(state)
+      {:reply, {:ok, player_id, public(state)}, state}
+    else
+      store(state)
+      {:reply, {:ok, player_id, public(state)}, state}
+    end
   end
 
-  # The next game for all players, see `OctomoctoWeb.NextGame`
-  def handle_call({:next_game, player_id, page}, _from, state) do
+  # The next game for all players, see `OctomoctoWeb.NextGame`. Not while a
+  # player changes the settings.
+  def handle_call({:next_game, player_id, page}, _from, %{editing: nil} = state) do
     {id, state} = Octomocto.GameProcess.next_game(state, player_id, page)
     {:reply, id, state}
   end
+
+  def handle_call({:next_game, _player_id, _page}, _from, state), do: {:reply, nil, state}
+
+  # The process of the settings page holds the seat of the player, see
+  # `Octomocto.Memory.edit_settings/3`
+  def handle_call({:edit_settings, pid, player_id}, _from, state)
+      when is_map_key(state.players, player_id) and state.needed > 1 and
+             state.finished_at != nil and state.editing in [nil, player_id] do
+    Process.monitor(pid)
+
+    state =
+      update_in(state.players[player_id], &%{&1 | pid: pid, left: nil})
+      |> Map.put(:editing, player_id)
+
+    publish(state)
+    {:reply, {:ok, public(state)}, state}
+  end
+
+  def handle_call({:edit_settings, _pid, _player_id}, _from, state),
+    do: {:reply, {:error, :not_allowed}, state}
+
+  # A new field with the new settings, the same players and the same
+  # match. Only the player on the settings page can.
+  def handle_call({:change_settings, player_id, settings}, _from, %{editing: player_id} = state)
+      when is_binary(player_id) do
+    %{theme: theme, set: set, cards: cards} = settings
+
+    if Themes.get(theme) && set in [2, 3] && cards in Board.sizes(theme, set) do
+      state =
+        %{state | theme: theme, set: set, size: cards, editing: nil}
+        |> new_round()
+
+      publish(state)
+      {:reply, :ok, state}
+    else
+      {:reply, {:error, :not_allowed}, state}
+    end
+  end
+
+  def handle_call({:change_settings, _player_id, _settings}, _from, state),
+    do: {:reply, {:error, :not_allowed}, state}
 
   def handle_call(:watch, _from, state) do
     {:reply, {:ok, nil, public(state)}, state}
@@ -220,6 +284,8 @@ defmodule Octomocto.Memory.Game do
       score: 0,
       correct: 0,
       errors: 0,
+      # The fields of the match that the player won
+      wins: 0,
       joined_at: System.system_time(),
       # A reference while the player is away, see leave/2
       left: nil
@@ -249,6 +315,7 @@ defmodule Octomocto.Memory.Game do
           |> Map.update!(:started_at, &(&1 || now()))
           |> end_turn()
           |> stop_clock()
+          |> count_win()
           |> save_results()
           |> restart_turn_timer()
 
@@ -262,19 +329,11 @@ defmodule Octomocto.Memory.Game do
 
   def handle_cast({:flip, _player_id, _card_id}, state), do: {:noreply, state}
 
-  # A player can restart at any time. A field that is not finished is not
-  # saved.
-  def handle_cast({:restart, player_id}, state) when is_map_key(state.players, player_id) do
-    players =
-      Map.new(state.players, fn {id, p} -> {id, %{p | score: 0, correct: 0, errors: 0}} end)
-
-    state =
-      %{state | players: players}
-      |> Map.delete(:next_game)
-      |> new_field()
-      |> Map.put(:turn, first_player(players))
-      |> make_ready()
-
+  # A player can restart at any time, but not while a player changes the
+  # settings. A field that is not finished is not saved.
+  def handle_cast({:restart, player_id}, %{editing: nil} = state)
+      when is_map_key(state.players, player_id) do
+    state = new_round(state)
     publish(state)
     {:noreply, state}
   end
@@ -286,8 +345,16 @@ defmodule Octomocto.Memory.Game do
     case Enum.find(state.players, fn {_id, p} -> p.pid == pid end) do
       {player_id, _player} ->
         state = leave(state, player_id)
-        store(state)
-        {:noreply, state}
+
+        # The other players wait for the player on the settings page
+        if state.editing == player_id do
+          state = %{state | editing: nil}
+          publish(state)
+          {:noreply, state}
+        else
+          store(state)
+          {:noreply, state}
+        end
 
       nil ->
         {:noreply, state}
@@ -338,6 +405,18 @@ defmodule Octomocto.Memory.Game do
   @impl true
   def terminate(_reason, state) do
     if in_lobby?(state), do: Lobby.broadcast(__MODULE__, state.id, nil)
+  end
+
+  # A new field with zero scores for the same players
+  defp new_round(state) do
+    players =
+      Map.new(state.players, fn {id, p} -> {id, %{p | score: 0, correct: 0, errors: 0}} end)
+
+    %{state | players: players}
+    |> Map.delete(:next_game)
+    |> new_field()
+    |> Map.put(:turn, first_player(players))
+    |> make_ready()
   end
 
   defp new_field(state) do
@@ -472,6 +551,19 @@ defmodule Octomocto.Memory.Game do
       else: state
   end
 
+  # A finished field of a match gives a win to the player with the most
+  # points, or a tie when more players have the most points
+  defp count_win(state) when state.finished_at != nil and state.needed > 1 do
+    top = state.players |> Map.values() |> Enum.map(& &1.score) |> Enum.max(fn -> 0 end)
+
+    case Enum.filter(state.players, fn {_id, p} -> p.score == top end) do
+      [{id, _p}] -> update_in(state.players[id].wins, &(&1 + 1))
+      _ -> Map.update!(state, :ties, &(&1 + 1))
+    end
+  end
+
+  defp count_win(state), do: state
+
   defp save_results(state)
        when state.finished_at != nil and map_size(state.players) == state.needed do
     settings = %{"set" => state.set, "cards" => state.size, "players" => state.needed}
@@ -534,11 +626,13 @@ defmodule Octomocto.Memory.Game do
     Phoenix.PubSub.broadcast(Octomocto.PubSub, topic(state.id), {:memory_state, public(state)})
   end
 
-  # The state that clients see, ready to encode as JSON. The images of the
-  # face-down cards are not in it, so that nobody can look at them. The
-  # `images` are all images of the field in order, so that the browser can
-  # load them before the cards turn. They do not show where an image is.
-  defp public(state) do
+  @doc """
+  The state that clients see, ready to encode as JSON. The images of the
+  face-down cards are not in it, so that nobody can look at them. The
+  `images` are all images of the field in order, so that the browser can
+  load them before the cards turn. They do not show where an image is.
+  """
+  def public(state) do
     players =
       state.players
       |> Enum.sort_by(fn {_id, p} -> p.joined_at end)
@@ -551,7 +645,8 @@ defmodule Octomocto.Memory.Game do
           score: p.score,
           # In percent, nil when no flip was counted
           accuracy: Memory.accuracy(p),
-          away: p.left != nil
+          away: p.left != nil,
+          wins: p.wins
         }
       end)
 
@@ -581,7 +676,11 @@ defmodule Octomocto.Memory.Game do
       turn_ms: if(state.turn_since, do: now() - state.turn_since, else: 0),
       turn_limit_ms: if(state.needed > 1, do: @turn_timeout_ms),
       players: players,
-      players_needed: state.needed
+      players_needed: state.needed,
+      ties: state.ties,
+      # The id of the player on the settings page, or nil
+      editing: state.editing,
+      public: state.public
     }
   end
 end

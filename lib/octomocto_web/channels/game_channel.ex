@@ -131,12 +131,16 @@ defmodule OctomoctoWeb.GameChannel do
     Phoenix.Token.sign(OctomoctoWeb.Endpoint, opts[:salt], {game_id, player_id})
   end
 
-  defp verify_token(game_id, token, opts) when is_binary(token) do
+  @doc """
+  Gives the player id in the token of a player of the game, or nil. The
+  settings page uses it too, see `OctomoctoWeb.MemoryLive`.
+  """
+  def verify_token(game_id, token, opts) when is_binary(token) do
     case Phoenix.Token.verify(OctomoctoWeb.Endpoint, opts[:salt], token, max_age: @token_max_age) do
       {:ok, {^game_id, player_id}} -> player_id
       _ -> nil
     end
   end
 
-  defp verify_token(_game_id, _token, _opts), do: nil
+  def verify_token(_game_id, _token, _opts), do: nil
 end

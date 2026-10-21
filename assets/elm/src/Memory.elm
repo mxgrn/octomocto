@@ -28,7 +28,7 @@ import Browser.Dom
 import Browser.Events
 import Dict exposing (Dict)
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
-import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, src, style, value)
+import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, src, style, value)
 import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (Decoder)
 import Process
@@ -136,6 +136,10 @@ type alias Game =
     , turnLimitMs : Maybe Int
     , players : List Player
     , playersNeeded : Int
+
+    -- The id of the player who changes the settings of the next field of
+    -- the match (see `OctomoctoWeb.MemoryLive`). The other players wait.
+    , editing : Maybe String
     }
 
 
@@ -155,6 +159,7 @@ type alias Model =
     { gameUrl : String
     , indexUrl : String
     , settingsUrl : String
+    , changeSettingsUrl : String
     , nextGame : NextGame
     , guest : Bool
     , connection : Connection
@@ -197,6 +202,7 @@ type alias Flags =
     { gameUrl : String
     , indexUrl : String
     , settingsUrl : String
+    , changeSettingsUrl : String
     , nextGame : NextGame
     , guest : Bool
     , muted : Bool
@@ -209,6 +215,7 @@ init flags =
     ( { gameUrl = flags.gameUrl
       , indexUrl = flags.indexUrl
       , settingsUrl = flags.settingsUrl
+      , changeSettingsUrl = flags.changeSettingsUrl
       , nextGame = flags.nextGame
       , guest = flags.guest
       , connection = Connecting
@@ -477,6 +484,7 @@ gameDecoder =
         |> andMap (Decode.field "turn_limit_ms" (Decode.nullable Decode.int))
         |> andMap (Decode.field "players" (Decode.list playerDecoder))
         |> andMap (Decode.field "players_needed" Decode.int)
+        |> andMap (Decode.field "editing" (Decode.nullable Decode.string))
 
 
 andMap : Decoder a -> Decoder (a -> b) -> Decoder b
@@ -621,7 +629,7 @@ viewGame model me game =
                     text ""
 
                   else
-                    viewRestartButton model.texts
+                    viewRestartButton model.texts (game.editing /= Nothing)
                 ]
             , if game.playersNeeded > 1 then
                 viewShareLink model
@@ -836,14 +844,15 @@ viewMuteButton texts muted =
 
 {-| Starts a new field for all players, also during a game. On a small
 screen, only the icon shows, but not in the column of a screen that is wider
-than tall.
+than tall. It is disabled while a player changes the settings.
 -}
-viewRestartButton : Texts -> Html Msg
-viewRestartButton texts =
+viewRestartButton : Texts -> Bool -> Html Msg
+viewRestartButton texts locked =
     button
         [ id "memory-restart"
-        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
+        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 disabled:pointer-events-none disabled:opacity-50 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
+        , disabled locked
         , Html.Attributes.title (t texts "Restart game")
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
@@ -1152,6 +1161,15 @@ viewResult model me game =
 
         ranked =
             List.reverse (List.sortBy .score players)
+
+        -- The player on the settings page. Nobody can start a field until
+        -- that player is back.
+        editor =
+            game.editing
+                |> Maybe.andThen (\editing -> List.head (List.filter (\player -> player.id == editing) players))
+
+        locked =
+            editor /= Nothing
     in
     div
         [ id "memory-result"
@@ -1185,16 +1203,49 @@ viewResult model me game =
                     )
                     ranked
                 )
+        , case editor of
+            Just player ->
+                p [ id "memory-editing", class "animate-pulse text-sm text-white/80" ]
+                    [ text
+                        (case player.name of
+                            Just name ->
+                                tf texts "{name} changes the settings…" [ ( "name", name ) ]
+
+                            Nothing ->
+                                tf texts "The {color} player changes the settings…" [ ( "color", t texts player.colorName ) ]
+                        )
+                    ]
+
+            Nothing ->
+                text ""
         , if me == Nothing then
             text ""
 
           else
-            button
-                [ id "memory-play-again"
-                , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:-translate-y-0.5 hover:bg-octo-mist active:translate-y-0"
-                , onClick Restart
+            div [ class "flex flex-wrap items-center justify-center gap-3" ]
+                [ button
+                    [ id "memory-play-again"
+                    , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:-translate-y-0.5 hover:bg-octo-mist active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:bg-white"
+                    , onClick Restart
+                    , disabled locked
+                    ]
+                    [ text (t texts "Play again") ]
+                , if locked then
+                    span
+                        [ id "memory-change-settings"
+                        , attribute "aria-disabled" "true"
+                        , class "cursor-not-allowed rounded-full px-5 py-2.5 font-medium text-white opacity-50 ring-1 ring-white/40"
+                        ]
+                        [ text (t texts "Change settings") ]
+
+                  else
+                    a
+                        [ id "memory-change-settings"
+                        , href model.changeSettingsUrl
+                        , class "rounded-full px-5 py-2.5 font-medium text-white ring-1 ring-white/40 transition hover:-translate-y-0.5 hover:bg-white/10 active:translate-y-0"
+                        ]
+                        [ text (t texts "Change settings") ]
                 ]
-                [ text (t texts "Play again") ]
         , let
             -- In a game with other players, a player starts the next game for all of them
             ( element, action ) =
@@ -1207,22 +1258,16 @@ viewResult model me game =
           element
             [ id "memory-next-game"
             , action
+            , disabled locked
             , attribute "data-ga-link" "or_try"
             , attribute "data-ga-from" "Memory"
             , attribute "data-ga-to" model.nextGame.name
-            , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
+            , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:no-underline"
             ]
             [ text (tf texts "Or try {game}" [ ( "game", model.nextGame.name ) ] ++ " ")
             , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
             ]
 
-        -- On a large screen, the link is in the panel
-        , a
-            [ id "memory-result-leaderboards-link"
-            , href model.settingsUrl
-            , class "text-sm font-medium text-white underline-offset-4 transition hover:underline lg:hidden"
-            ]
-            [ text (t texts "Latest games and best results") ]
 
         -- Only a guest who played gets the call to sign in, not a spectator
         , if model.guest && me /= Nothing then
