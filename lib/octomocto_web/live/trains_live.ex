@@ -32,7 +32,7 @@ defmodule OctomoctoWeb.TrainsLive do
     [
       page_title: "Right on Track: Train Switching Puzzle",
       page_description:
-        "Click the switches to send each train to the house with its colors. Play solo or with up to 3 friends. Free, in your browser."
+        "Click the switches to send each train to the house with its colors. Similar to Train of Thought on Lumosity. Free, in your browser."
     ]
   end
 
