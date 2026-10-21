@@ -447,7 +447,7 @@ defmodule OctomoctoWeb.Layouts do
       <%!-- pt-2 instead of a margin keeps the hover area unbroken between button and menu --%>
       <div
         id={"#{@id}-dropdown"}
-        class="invisible absolute right-0 z-10 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+        class="invisible absolute right-0 z-30 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
       >
         <div class="min-w-36 space-y-1 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg">
           <.theme_row :if={!@theme_last} />
