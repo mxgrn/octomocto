@@ -87,6 +87,7 @@ defmodule OctomoctoWeb.Router do
       live "/echo", EchoLive
       live "/mahjong", MahjongLive
       live "/overlap", OverlapLive
+      live "/stats", StatsLive
     end
   end
 

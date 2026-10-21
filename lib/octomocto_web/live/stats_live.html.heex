@@ -1,0 +1,135 @@
+<Layouts.app flash={@flash} current_scope={@current_scope} guest_name={@guest_name}>
+  <% busiest = Enum.max_by(@days, & &1.total) %>
+  <% most = @by_game |> Enum.map(& &1.count) |> Enum.max(fn -> 0 end) %>
+
+  <div id="stats" class="flex flex-col gap-6 pt-2 pb-4">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
+        Stats
+      </h1>
+      <p class="mt-1 text-sm text-base-content/60">
+        Finished games in the last {length(@days)} days. The days are in UTC.
+      </p>
+    </div>
+
+    <section
+      id="games-per-day"
+      class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10 sm:p-6"
+    >
+      <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+        <div>
+          <p class="text-sm font-medium text-base-content/60">Games played</p>
+          <p id="games-total" class="text-5xl font-semibold text-octo-navy dark:text-base-content">
+            {@total}
+          </p>
+        </div>
+        <dl class="flex gap-8 text-sm">
+          <div>
+            <dt class="text-base-content/60">Today</dt>
+            <dd class="mt-0.5 text-lg font-semibold text-octo-navy dark:text-base-content">
+              {List.last(@days).total}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-base-content/60">Daily average</dt>
+            <dd class="mt-0.5 text-lg font-semibold text-octo-navy dark:text-base-content">
+              {Float.round(@total / length(@days), 1)}
+            </dd>
+          </div>
+          <div :if={busiest.total > 0}>
+            <dt class="text-base-content/60">Busiest day</dt>
+            <dd class="mt-0.5 text-lg font-semibold text-octo-navy dark:text-base-content">
+              {busiest.total}
+              <span class="text-sm font-normal text-base-content/60">
+                on {Calendar.strftime(busiest.date, "%b %-d")}
+              </span>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <.games_chart days={@days} games={@games} hidden={@hidden} />
+    </section>
+
+    <section
+      id="games-by-game"
+      class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10 sm:p-6"
+    >
+      <h2 class="mb-4 font-semibold text-octo-navy dark:text-base-content">By game</h2>
+      <ul class="flex flex-col gap-3">
+        <li :for={game <- @by_game} id={"stats-#{game.id}"} class="flex items-center gap-3">
+          <div class={[
+            "flex size-9 shrink-0 items-center justify-center rounded-xl",
+            game.icon_class
+          ]}>
+            <GameIcons.game_icon game={game.id} class="size-7" />
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-baseline justify-between gap-4 text-sm">
+              <.link
+                navigate={game.path}
+                class="font-medium text-octo-navy transition hover:text-octo-indigo dark:text-base-content dark:hover:text-octo-indigo-light"
+              >
+                {game.name}
+              </.link>
+              <span class="font-semibold text-octo-navy tabular-nums dark:text-base-content">
+                {game.count}
+              </span>
+            </div>
+            <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-base-content/5">
+              <div
+                class="h-full rounded-full bg-octo-indigo dark:bg-octo-indigo-light"
+                style={"width: #{if most > 0, do: game.count / most * 100, else: 0}%"}
+              >
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <details
+      id="games-table"
+      class="group rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10 sm:p-6"
+    >
+      <summary class="flex cursor-pointer list-none items-center justify-between font-semibold text-octo-navy dark:text-base-content">
+        Games per day as a table
+        <.icon
+          name="hero-chevron-down"
+          class="size-5 text-base-content/50 transition group-open:rotate-180"
+        />
+      </summary>
+      <div class="mt-4 overflow-x-auto">
+        <table class="w-full text-sm whitespace-nowrap">
+          <thead>
+            <tr class="text-left text-base-content/60">
+              <th class="pr-4 pb-2 font-medium">Day</th>
+              <th class="px-2 pb-2 text-right font-medium">All games</th>
+              <th
+                :for={{game, n} <- Enum.with_index(@games, 1)}
+                class="px-2 pb-2 text-right font-medium"
+              >
+                <span class="inline-flex items-center gap-1.5">
+                  <span
+                    class="h-0.5 w-3 rounded-full"
+                    style={"background-color: var(--series-#{n})"}
+                  ></span>
+                  {game.name}
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr :for={day <- Enum.reverse(@days)} class="border-t border-base-content/5">
+              <td class="py-1.5 pr-4">{Calendar.strftime(day.date, "%a, %b %-d")}</td>
+              <td class="px-2 py-1.5 text-right font-semibold tabular-nums">{day.total}</td>
+              <td :for={game <- @games} class="px-2 py-1.5 text-right tabular-nums">
+                {games_in(day, game)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+</Layouts.app>
