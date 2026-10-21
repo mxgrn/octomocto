@@ -3,7 +3,15 @@ defmodule OctomoctoWeb.TrainsLive do
 
   # The same settings and result lists as on the Schulte page
   import OctomoctoWeb.SchulteHTML,
-    only: [setting: 1, option: 1, score_list: 1, player_list: 1, player_name: 1]
+    only: [
+      setting: 1,
+      option: 1,
+      score_list: 1,
+      player_list: 1,
+      result_row: 1,
+      result_pill: 1,
+      player_name: 1
+    ]
 
   import OctomoctoWeb.GamePageComponents
 
@@ -158,8 +166,8 @@ defmodule OctomoctoWeb.TrainsLive do
   # The number of trains of a round with the settings
   defp trains(settings), do: settings.trains_per_house * (settings.switch_count + 1)
 
-  # For example "92% · 11 of 12"
-  defp format_score(score, trains), do: "#{round(score * 100 / trains)}% · #{score} of #{trains}"
+  # The part of the trains that got home, for example "92%"
+  defp format_score(score, trains), do: "#{round(score * 100 / trains)}%"
 
   # Tells what a number of switches gives: there is one more house than switches
   defp switches_hint(switches, 1), do: "#{switches + 1} houses."

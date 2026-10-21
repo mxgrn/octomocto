@@ -3,7 +3,15 @@ defmodule OctomoctoWeb.SudokuLive do
 
   # The same settings and result lists as on the Schulte page
   import OctomoctoWeb.SchulteHTML,
-    only: [setting: 1, score_list: 1, player_list: 1, format_time: 1, player_name: 1]
+    only: [
+      setting: 1,
+      score_list: 1,
+      player_list: 1,
+      result_row: 1,
+      result_pill: 1,
+      format_time: 1,
+      player_name: 1
+    ]
 
   import OctomoctoWeb.GamePageComponents
 

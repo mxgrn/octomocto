@@ -81,13 +81,46 @@ defmodule OctomoctoWeb.SchulteHTML do
         </h3>
         <div :if={@aside != []} class="whitespace-nowrap">{render_slot(@aside)}</div>
       </div>
-      <ol id={@id} class="divide-y divide-base-content/5 text-sm">
+      <ol id={@id} class="-mx-2 space-y-1 text-sm">
         {render_slot(@inner_block)}
-        <li :if={@empty} class="py-2 text-center text-base-content/40">
+        <li :if={@empty} class="px-2 py-2 text-center text-base-content/40">
           {@empty_text || gettext("No games yet — be the first.")}
         </li>
       </ol>
     </div>
+    """
+  end
+
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  @doc "A row of a `score_list/1`, as a row of the list of public games."
+  def result_row(assigns) do
+    ~H"""
+    <li
+      class="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-base-200/60"
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </li>
+    """
+  end
+
+  attr :best, :boolean, default: false, doc: "the best result of the user, in amber"
+  slot :inner_block, required: true
+
+  @doc "The time or the score of a result in a pill, as the Finished label in the list of public games."
+  def result_pill(assigns) do
+    ~H"""
+    <span class={[
+      "min-w-16 shrink-0 rounded-full px-3 py-1 text-center text-xs font-semibold tabular-nums",
+      if(@best,
+        do: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+        else: "bg-base-content/5"
+      )
+    ]}>
+      {render_slot(@inner_block)}
+    </span>
     """
   end
 

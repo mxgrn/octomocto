@@ -120,23 +120,17 @@
           </span>
         </:aside>
         <%= if @user_results do %>
-          <li
-            :for={%{result: result, players: players} <- @user_results.latest}
-            class="flex items-baseline gap-3 py-2"
-          >
-            <span :if={@settings.players == 1} class="flex-1 text-base-content/60">
+          <.result_row :for={%{result: result, players: players} <- @user_results.latest}>
+            <span :if={@settings.players == 1} class="flex-1 font-medium">
               {Calendar.strftime(result.inserted_at, "%b %-d")}
             </span>
-            <span :if={@settings.players > 1} class="flex-1 truncate">
+            <span :if={@settings.players > 1} class="min-w-0 flex-1 truncate font-medium">
               <.player_list players={players} scores />
             </span>
-            <span class={[
-              "w-16 text-right font-medium tabular-nums",
-              @user_results.best && result.id == @user_results.best.id && "text-amber-600"
-            ]}>
+            <.result_pill best={@user_results.best != nil and result.id == @user_results.best.id}>
               {format_time(result.elapsed_ms)}
-            </span>
-          </li>
+            </.result_pill>
+          </.result_row>
         <% else %>
           <li class="py-2 text-center text-base-content/60">
             <.link
@@ -169,14 +163,11 @@
             to get listed
           </span>
         </:aside>
-        <li
-          :for={{result, place} <- Enum.with_index(@leaderboard.best, 1)}
-          class="flex items-baseline gap-3 py-2"
-        >
-          <span class="w-5 text-right tabular-nums text-base-content/40">{place}</span>
-          <span class="flex-1 truncate">{player_name(result.user)}</span>
-          <span class="font-medium tabular-nums">{format_time(result.elapsed_ms)}</span>
-        </li>
+        <.result_row :for={{result, place} <- Enum.with_index(@leaderboard.best, 1)}>
+          <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+          <span class="min-w-0 flex-1 truncate font-medium">{player_name(result.user)}</span>
+          <.result_pill>{format_time(result.elapsed_ms)}</.result_pill>
+        </.result_row>
       </.score_list>
       <.score_list
         id="latest-games"
@@ -185,12 +176,12 @@
         title="Latest games"
         empty={@leaderboard.latest == []}
       >
-        <li :for={game <- @leaderboard.latest} class="flex items-baseline gap-3 py-2">
-          <span class="flex-1 truncate">
+        <.result_row :for={game <- @leaderboard.latest}>
+          <span class="min-w-0 flex-1 truncate font-medium">
             <.player_list players={game.players} scores={@settings.players > 1} />
           </span>
-          <span class="font-medium tabular-nums">{format_time(game.elapsed_ms)}</span>
-        </li>
+          <.result_pill>{format_time(game.elapsed_ms)}</.result_pill>
+        </.result_row>
       </.score_list>
     </div>
   </div>

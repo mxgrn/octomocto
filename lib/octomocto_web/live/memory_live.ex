@@ -8,6 +8,8 @@ defmodule OctomoctoWeb.MemoryLive do
       setting_header: 1,
       score_list: 1,
       player_list: 1,
+      result_row: 1,
+      result_pill: 1,
       format_time: 1,
       player_name: 1
     ]
@@ -272,6 +274,29 @@ defmodule OctomoctoWeb.MemoryLive do
       class="grid size-9 place-items-center rounded-full text-base-content/20"
     >
       <.icon name={@icon} class="size-4" />
+    </span>
+    """
+  end
+
+  attr :theme, :string, required: true, doc: "nil in the results from before the theme"
+
+  # The cover card of the theme of a result, as in the list of public games
+  defp result_theme(assigns) do
+    assigns = assign(assigns, :theme, Themes.get(assigns.theme))
+
+    ~H"""
+    <img
+      :if={@theme}
+      src={~p"/images/memory/#{@theme.name}/#{Themes.cover(@theme.name)}"}
+      alt=""
+      title={theme_title(@theme)}
+      class="size-9 shrink-0"
+    />
+    <span
+      :if={!@theme}
+      class="grid size-9 shrink-0 place-items-center rounded-lg bg-base-200 text-base-content/30"
+    >
+      <.icon name="hero-square-2-stack" class="size-5" />
     </span>
     """
   end
