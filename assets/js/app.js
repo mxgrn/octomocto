@@ -631,6 +631,8 @@ function showTelegramLogin(node) {
   script.src = "https://telegram.org/js/telegram-widget.js?22"
   script.dataset.telegramLogin = node.dataset.telegramLogin
   script.dataset.size = "large"
+  // Telegram shows a checkbox that lets the bot send messages to the user
+  script.dataset.requestAccess = "write"
   script.dataset.authUrl = new URL(node.dataset.authPath, window.location.href).href
   node.appendChild(script)
 }
