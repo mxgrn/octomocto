@@ -475,8 +475,11 @@ defmodule OctomoctoWeb.MemoryLive do
       {Map.take(settings, [:theme, :set, :cards]), settings.players}
   end
 
-  @doc "The settings of a game in the list of public games."
-  def game_summary(%{settings: settings}) do
+  @doc """
+  The settings of a game in the list of public games. In a campaign game,
+  the word "Campaign" is a link to the campaign page.
+  """
+  def game_summary(%{id: id, settings: settings}) do
     set =
       if settings.set == 3, do: dgettext("memory", "Triplets"), else: dgettext("memory", "Pairs")
 
@@ -485,8 +488,21 @@ defmodule OctomoctoWeb.MemoryLive do
 
     case settings do
       %{campaign: level} ->
-        campaign = dgettext("memory", "Campaign")
-        "#{campaign} · #{dgettext("memory", "Level %{level}", level: level)} · #{summary}"
+        assigns = %{
+          id: id,
+          level: dgettext("memory", "Level %{level}", level: level),
+          summary: summary,
+          path: Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/memory/campaign")
+        }
+
+        ~H"""
+        <.link
+          id={"lobby-campaign-#{@id}"}
+          navigate={@path}
+          class="text-octo-indigo transition hover:underline dark:text-octo-indigo-light"
+        >{dgettext("memory", "Campaign")}</.link>
+        · {@level} · {@summary}
+        """
 
       _ ->
         summary
