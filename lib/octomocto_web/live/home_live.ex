@@ -36,6 +36,7 @@ defmodule OctomoctoWeb.HomeLive do
       name: "Right on Track",
       description: "Click the switches to send each train to the house with its colors.",
       path: "/trains",
+      badge: {"Trending this week", "hero-fire-mini"},
       icon_class: "bg-octo-orange/10 dark:bg-octo-orange-light/15"
     },
     %{
@@ -44,6 +45,7 @@ defmodule OctomoctoWeb.HomeLive do
       description:
         "Find the cards with the same image. Play alone against the clock, or take turns.",
       path: "/memory",
+      badge: {"Most popular", "hero-star-mini"},
       icon_class: "bg-sky-500/10 dark:bg-sky-400/15"
     },
     %{
@@ -84,6 +86,7 @@ defmodule OctomoctoWeb.HomeLive do
       description:
         "A Dobble-like game: any two cards have exactly one symbol in common. Spot it first.",
       path: "/overlap",
+      badge: {"New", "hero-sparkles-mini"},
       icon_class: "bg-pink-500/10 dark:bg-pink-400/15"
     }
     # Station Escape is archived: it is not on the front page and is not
