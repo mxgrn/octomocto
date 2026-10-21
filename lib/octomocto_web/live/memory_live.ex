@@ -761,7 +761,7 @@ defmodule OctomoctoWeb.MemoryLive do
           <.icon :if={@level.status == :locked} name="hero-lock-closed-mini" class="mt-0.5 size-3" />
           <span
             :if={@level.status == :current and @percent > 0}
-            class="mt-0.5 text-[10px] tabular-nums text-base-content/60"
+            class="-mt-0.5 text-[10px] tabular-nums text-base-content/60"
           >
             {@percent}%
           </span>
@@ -770,10 +770,10 @@ defmodule OctomoctoWeb.MemoryLive do
           :if={@level.set == 3}
           title={dgettext("memory", "Triplets")}
           class={[
-            "absolute -top-0.5 -right-0.5 grid size-5 place-items-center rounded-full bg-base-100 text-[11px] font-semibold ring-1",
+            "absolute grid size-5 place-items-center rounded-full bg-base-100 text-[11px] font-semibold ring-1",
             if(@level.status == :locked,
-              do: "text-base-content/40 ring-base-content/15",
-              else: "text-octo-indigo ring-octo-indigo"
+              do: "top-1.5 right-1.5 text-base-content/40 ring-base-content/15",
+              else: "-top-0.5 -right-0.5 text-octo-indigo ring-octo-indigo"
             )
           ]}
         >
@@ -864,13 +864,19 @@ defmodule OctomoctoWeb.MemoryLive do
           <.form for={%{}} id="campaign-theme-form" phx-change="campaign_theme">
             <label class="flex items-center gap-2 text-sm text-base-content/60">
               {dgettext("memory", "Theme")}
-              <select
-                id="campaign-theme"
-                name="theme"
-                class="cursor-pointer rounded-full border-0 bg-base-200 py-1.5 pr-8 pl-3 text-sm font-medium text-base-content ring-1 ring-base-content/10 transition hover:ring-base-content/20 focus:ring-2 focus:ring-octo-indigo focus:outline-none"
-              >
-                {Phoenix.HTML.Form.options_for_select(@theme_options, @theme_value)}
-              </select>
+              <span class="relative">
+                <select
+                  id="campaign-theme"
+                  name="theme"
+                  class="cursor-pointer appearance-none rounded-full border-0 bg-base-200 py-1.5 pr-9 pl-4 text-sm font-medium text-base-content ring-1 ring-base-content/10 transition hover:ring-base-content/20 focus:ring-2 focus:ring-octo-indigo focus:outline-none"
+                >
+                  {Phoenix.HTML.Form.options_for_select(@theme_options, @theme_value)}
+                </select>
+                <.icon
+                  name="hero-chevron-down-mini"
+                  class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-base-content/60"
+                />
+              </span>
             </label>
           </.form>
           <button
