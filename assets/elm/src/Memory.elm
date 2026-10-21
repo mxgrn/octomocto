@@ -28,7 +28,7 @@ import Browser.Dom
 import Browser.Events
 import Dict exposing (Dict)
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
-import Html.Attributes exposing (alt, class, classList, href, id, readonly, src, style, value)
+import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, src, style, value)
 import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (Decoder)
 import Process
@@ -1207,6 +1207,9 @@ viewResult model me game =
           element
             [ id "memory-next-game"
             , action
+            , attribute "data-ga-link" "or_try"
+            , attribute "data-ga-from" "Memory"
+            , attribute "data-ga-to" model.nextGame.name
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]
             [ text (tf texts "Or try {game}" [ ( "game", model.nextGame.name ) ] ++ " ")

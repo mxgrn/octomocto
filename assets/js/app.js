@@ -86,6 +86,20 @@ document.addEventListener("touchmove", e => {
   if (document.querySelector(".is-playing")) e.preventDefault()
 }, {passive: false})
 
+// Send a Google Analytics event when a player clicks an internal link with a
+// data-ga-link attribute. In a game with 2 or more players, the "Or try" link
+// is a button that starts the next game for all players. gtag is only in prod.
+document.addEventListener("click", e => {
+  const link = e.target.closest("[data-ga-link]")
+  if (!link || !window.gtag) return
+
+  window.gtag("event", "internal_link_click", {
+    link: link.dataset.gaLink,
+    from_game: link.dataset.gaFrom,
+    to_game: link.dataset.gaTo
+  })
+})
+
 // Start the astronaut maze and connect its ports to the game channel.
 // Stop the arrow keys from scrolling the page. The player can use only the
 // keys, so a key press also unlocks the audio.

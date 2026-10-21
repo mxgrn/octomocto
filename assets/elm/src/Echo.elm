@@ -1633,6 +1633,9 @@ viewResult nextGame guest me game =
           element
             [ id "echo-next-game"
             , action
+            , attribute "data-ga-link" "or_try"
+            , attribute "data-ga-from" "Echo"
+            , attribute "data-ga-to" nextGame.name
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]
             [ text ("Or try " ++ nextGame.name ++ " ")

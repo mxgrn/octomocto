@@ -33,7 +33,7 @@ import Browser
 import Browser.Dom
 import Browser.Events
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
-import Html.Attributes exposing (alt, class, classList, href, id, readonly, src, style, value)
+import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, src, style, value)
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
@@ -1285,6 +1285,9 @@ viewResult settingsUrl nextGame guest me game =
           element
             [ id "overlap-next-game"
             , action
+            , attribute "data-ga-link" "or_try"
+            , attribute "data-ga-from" "Overlap"
+            , attribute "data-ga-to" nextGame.name
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]
             [ text ("Or try " ++ nextGame.name ++ " ")

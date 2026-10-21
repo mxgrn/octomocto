@@ -38,7 +38,7 @@ import Browser.Dom
 import Browser.Events
 import Dict exposing (Dict)
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, p, span, text, ul)
-import Html.Attributes exposing (alt, class, classList, href, id, readonly, src, style, value)
+import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, src, style, value)
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
@@ -2137,6 +2137,9 @@ viewOverlay model me game =
                   element
                     [ id "trains-next-game"
                     , action
+                    , attribute "data-ga-link" "or_try"
+                    , attribute "data-ga-from" "Right on Track"
+                    , attribute "data-ga-to" model.nextGame.name
                     , class "group mt-2 text-sm font-medium text-white underline-offset-4 transition hover:underline"
                     ]
                     [ text ("Or try " ++ model.nextGame.name ++ " ")
