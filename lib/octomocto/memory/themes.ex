@@ -8,11 +8,11 @@ defmodule Octomocto.Memory.Themes do
   """
 
   @themes [
-    %{name: "sushi", title: "Sushi", cards: 50, new: true},
-    %{name: "food", title: "Food", cards: 230, new: true},
+    %{name: "sushi", title: "Sushi", cards: 50, new: true, cover: 2},
+    %{name: "food", title: "Food", cards: 230, new: true, cover: 31},
     %{name: "desert", title: "Desert", cards: 50, new: true},
-    %{name: "ocean", title: "Ocean", cards: 50, new: true},
-    %{name: "monsters", title: "Monsters", cards: 100, new: true},
+    %{name: "ocean", title: "Ocean", cards: 50, new: true, cover: 11},
+    %{name: "monsters", title: "Monsters", cards: 100, new: true, cover: 4},
     %{name: "insects", title: "Insects", cards: 50, new: true},
     %{name: "eighties", title: "Eighties", cards: 40},
     %{name: "spring", title: "Spring", cards: 38},
