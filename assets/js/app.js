@@ -225,6 +225,10 @@ if (trainsNode) {
   trains.ports.trainsDecision.subscribe(decision => channel.push("decision", decision))
   trains.ports.trainsRestart.subscribe(() => channel.push("restart", {}))
   connectNextGame(trains.ports.trainsNextGame, channel, trainsNode)
+  trains.ports.trainsNextLevel.subscribe(() => {
+    channel.push("next_level", {})
+      .receive("ok", ({id}) => window.location.assign(`/trains/${id}`))
+  })
   trains.ports.trainsFinished.subscribe(result => channel.push("finished", result))
   trains.ports.trainsCopyText.subscribe(text => navigator.clipboard.writeText(text))
   trains.ports.playTrainSound.subscribe(playTrainSound)

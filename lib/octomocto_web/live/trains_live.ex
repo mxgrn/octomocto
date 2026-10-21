@@ -7,6 +7,7 @@ defmodule OctomoctoWeb.TrainsLive do
   import OctomoctoWeb.SchulteHTML,
     only: [
       setting: 1,
+      setting_header: 1,
       option: 1,
       score_list: 1,
       player_list: 1,
@@ -16,9 +17,10 @@ defmodule OctomoctoWeb.TrainsLive do
     ]
 
   import OctomoctoWeb.GamePageComponents
+  import OctomoctoWeb.CampaignComponents
 
-  alias Octomocto.{Lobby, Trains}
-  alias Octomocto.Trains.{Game, Store}
+  alias Octomocto.{Accounts, Lobby, Trains}
+  alias Octomocto.Trains.{Campaign, Game, Store}
 
   def mount(_params, _session, socket) do
     if connected?(socket), do: Lobby.subscribe(Game)
@@ -38,7 +40,42 @@ defmodule OctomoctoWeb.TrainsLive do
     ]
   end
 
+  # The params of the Free play tab. Without them, a signed-in user goes to
+  # the tab that the user used last.
+  @settings_params ["players", "switches", "trains", "pace", "visibility"]
+
+  def handle_params(params, _uri, %{assigns: %{live_action: :campaign}} = socket) do
+    {:noreply,
+     socket
+     |> remember_tab("campaign")
+     |> assign(settings: settings(%{}), canonical_url: url(~p"/trains/campaign"))
+     |> assign_campaign(params)}
+  end
+
   def handle_params(params, _uri, socket) do
+    if campaign_tab?(socket.assigns.current_scope) and
+         not Enum.any?(@settings_params, &Map.has_key?(params, &1)) do
+      {:noreply, push_patch(socket, to: ~p"/trains/campaign")}
+    else
+      {:noreply, socket |> remember_tab("free") |> assign_free_play(params)}
+    end
+  end
+
+  defp campaign_tab?(%{user: %{trains_tab: "campaign"}}), do: true
+  defp campaign_tab?(_scope), do: false
+
+  # Saves the tab for a signed-in user, once the page is connected
+  defp remember_tab(%{assigns: %{current_scope: %{user: user} = scope}} = socket, tab) do
+    if connected?(socket) and (user.trains_tab || "free") != tab do
+      assign(socket, current_scope: %{scope | user: Accounts.update_user_trains_tab(user, tab)})
+    else
+      socket
+    end
+  end
+
+  defp remember_tab(socket, _tab), do: socket
+
+  defp assign_free_play(socket, params) do
     settings = settings(params)
 
     filter = %{
@@ -48,13 +85,61 @@ defmodule OctomoctoWeb.TrainsLive do
       "players" => settings.players
     }
 
-    {:noreply,
-     assign(socket,
-       settings: settings,
-       switch_counts: Trains.switch_counts(settings.players),
-       leaderboard: Trains.leaderboard(filter),
-       user_results: user_results(socket.assigns.current_scope, filter)
-     )}
+    assign(socket,
+      settings: settings,
+      canonical_url: url(~p"/trains"),
+      switch_counts: Trains.switch_counts(settings.players),
+      leaderboard: Trains.leaderboard(filter),
+      user_results: user_results(socket.assigns.current_scope, filter)
+    )
+  end
+
+  # The levels of the campaign with the progress of the user, and the
+  # selected level (`?level=`, else the next level to play). A guest sees
+  # the levels of a new player.
+  defp assign_campaign(socket, params) do
+    progress =
+      case socket.assigns.current_scope do
+        %{user: user} -> Campaign.progress(user.id)
+        nil -> %{}
+      end
+
+    highest = Campaign.highest(progress)
+
+    levels =
+      Enum.map(Campaign.levels(), fn level ->
+        run = progress[level.level]
+
+        status =
+          cond do
+            run && run.completed_at -> :done
+            level.level == highest + 1 -> :current
+            true -> :locked
+          end
+
+        correct = if run, do: run.best_correct, else: 0
+
+        Map.merge(level, %{
+          status: status,
+          correct: correct,
+          percent: div(100 * correct, level.trains)
+        })
+      end)
+
+    selected =
+      case Integer.parse(params["level"] || "") do
+        {n, ""} when n in 1..length(levels)//1 -> n
+        _ -> min(highest + 1, length(levels))
+      end
+
+    assign(socket,
+      campaign: %{
+        levels: levels,
+        selected: Enum.at(levels, selected - 1),
+        highest: highest,
+        leaderboard: Campaign.leaderboard()
+      }
+    )
   end
 
   def handle_info({:lobby_changed, _game, id, entry}, socket) do
@@ -69,6 +154,21 @@ defmodule OctomoctoWeb.TrainsLive do
     %{settings(%{"players" => Integer.to_string(players)}) | public: public}
     |> Trains.create_game()
   end
+
+  def handle_event(
+        "play_level",
+        %{"level" => level},
+        %{assigns: %{current_scope: %{user: user}}} = socket
+      ) do
+    with {n, ""} <- Integer.parse(level),
+         {:ok, id} <- Campaign.start(user.id, n) do
+      {:noreply, redirect(socket, to: ~p"/trains/#{id}")}
+    else
+      _ -> {:noreply, socket}
+    end
+  end
+
+  def handle_event("play_level", _params, socket), do: {:noreply, socket}
 
   def handle_event("new_game", _params, socket) do
     id = Trains.create_game(socket.assigns.settings)
@@ -117,7 +217,12 @@ defmodule OctomoctoWeb.TrainsLive do
     end
   end
 
-  @doc "The path of this page with the settings of the game in the given state."
+  @doc """
+  The path of this page with the settings of the game in the given state.
+  For a game of the campaign, the map with its level.
+  """
+  def settings_path(%{campaign: %{level: level}}), do: campaign_path(level)
+
   def settings_path(state) do
     settings = %{
       players: state.needed,
@@ -129,6 +234,9 @@ defmodule OctomoctoWeb.TrainsLive do
 
     settings_path(settings, %{})
   end
+
+  @doc "The path of the Campaign tab with the level selected."
+  def campaign_path(level), do: ~p"/trains/campaign?#{[level: level]}"
 
   # The start page with the settings, and with the given changes
   defp settings_path(settings, changes) do
@@ -156,13 +264,34 @@ defmodule OctomoctoWeb.TrainsLive do
 
   @doc """
   The settings of a game in the list of public games, and the score when
-  the round ended.
+  the round ended. In a campaign game, the word "Campaign" is a link to the
+  campaign page.
   """
-  def game_summary(%{settings: settings} = game) do
+  def game_summary(%{id: id, settings: settings} = game) do
     summary =
       "#{settings.switch_count} switches · #{settings.trains_per_house} per house · #{String.capitalize(settings.pace)}"
 
-    if game[:score], do: summary <> " · " <> format_score(game.score, game.trains), else: summary
+    summary =
+      if game[:score],
+        do: summary <> " · " <> format_score(game.score, game.trains),
+        else: summary
+
+    case settings do
+      %{campaign: level} ->
+        assigns = %{id: id, level: level, summary: summary}
+
+        ~H"""
+        <.link
+          id={"lobby-campaign-#{@id}"}
+          navigate={~p"/trains/campaign"}
+          class="text-octo-indigo transition hover:underline dark:text-octo-indigo-light"
+        >Campaign</.link>
+        · Level {@level} · {@summary}
+        """
+
+      _ ->
+        summary
+    end
   end
 
   # The number of trains of a round with the settings
@@ -188,4 +317,75 @@ defmodule OctomoctoWeb.TrainsLive do
 
   defp pace_hint("hard"), do: "The trains get fast early in the game."
   defp pace_hint("expert"), do: "The trains get very fast very early in the game."
+
+  attr :level, :map, required: true
+  attr :highest, :integer, required: true
+
+  # The selected level: its settings, the trains that must get home and the
+  # Play button. It stays at the bottom of the screen while the map does
+  # not fit, so that the Play button is always in view.
+  defp level_card(assigns) do
+    assigns = assign(assigns, pass: Campaign.pass_count(assigns.level.trains))
+
+    ~H"""
+    <div
+      id="level-card"
+      class="sticky bottom-3 z-10 flex w-full flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl bg-base-100 p-5 text-left shadow-lg ring-1 ring-base-content/10"
+    >
+      <div class={[
+        "grid size-12 shrink-0 place-items-center rounded-2xl",
+        if(@level.status == :locked,
+          do: "bg-base-200 grayscale opacity-50",
+          else: "bg-octo-indigo/10"
+        )
+      ]}>
+        <OctomoctoWeb.GameIcons.game_icon game="trains" class="size-9" />
+      </div>
+      <div class="min-w-40 flex-1">
+        <h3 id="level-card-title" class="flex items-center gap-1.5 font-semibold">
+          Level {@level.level}
+          <.icon
+            :if={@level.status == :done}
+            name="hero-check-circle-mini"
+            class="size-5 text-octo-indigo"
+          />
+        </h3>
+        <p class="text-sm text-base-content/60">
+          {@level.switch_count} switches · {@level.trains} trains · {String.capitalize(@level.pace)}
+        </p>
+        <p class="text-sm text-base-content/60">
+          <%= if @level.status != :locked and @level.correct > 0 do %>
+            Best: {@level.correct} of {@level.trains} home · {@pass} to pass
+          <% else %>
+            Get {@pass} of {@level.trains} trains home to pass.
+          <% end %>
+        </p>
+      </div>
+      <%= if @level.status == :locked do %>
+        <p id="level-locked" class="flex items-center gap-1.5 text-sm text-base-content/60">
+          <.icon name="hero-lock-closed-mini" class="size-4" /> Pass level {@highest + 1} first.
+        </p>
+      <% else %>
+        <button
+          id="play-level"
+          type="button"
+          phx-click="play_level"
+          phx-value-level={@level.level}
+          phx-disable-with="Starting..."
+          class="flex cursor-pointer items-center gap-1.5 rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/25 transition hover:-translate-y-0.5 hover:bg-octo-indigo/90 hover:shadow-xl active:translate-y-0"
+        >
+          <%= cond do %>
+            <% @level.status == :done -> %>
+              Play again
+            <% @level.correct > 0 -> %>
+              Try again
+            <% true -> %>
+              Play
+          <% end %>
+          <.icon name="hero-play-mini" class="size-4" />
+        </button>
+      <% end %>
+    </div>
+    """
+  end
 end

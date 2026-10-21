@@ -15,6 +15,8 @@ defmodule Octomocto.Accounts.User do
     # The tab of the Memory page that the user used last: "free" or
     # "campaign". Nil means Free play.
     field :memory_tab, :string
+    # The same for the Trains page
+    field :trains_tab, :string
     # Only admins can open the /admin pages. Set it in the database.
     field :role, Ecto.Enum, values: [:user, :admin], default: :user
     # Copied from the session token (see `UserToken`). Nothing reads it now.

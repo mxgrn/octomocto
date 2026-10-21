@@ -28,6 +28,13 @@ defmodule Octomocto.Trains.Game do
   players are still in the game, the game saves it as the result of each
   player (see `Octomocto.Trains.save_results/4`).
 
+  A game of the campaign (see `Octomocto.Trains.Campaign`) has one player:
+  the signed-in user who started it. Other processes only watch, for
+  example from the ongoing games of the settings page. The game saves each
+  finished round as a run of the level (see
+  `Octomocto.Trains.Campaign.save_run/3`) and as a result with the level in
+  its settings. Restart starts a new round of the same level.
+
   A public game is in the lists of the settings page (see
   `Octomocto.Lobby`): in the open games until it has all its players for
   the first time, then in the ongoing games. A
@@ -53,7 +60,7 @@ defmodule Octomocto.Trains.Game do
   use GenServer, restart: :temporary
 
   alias Octomocto.{Lobby, Trains}
-  alias Octomocto.Trains.Store
+  alias Octomocto.Trains.{Campaign, Store}
 
   @idle_timeout_ms :timer.minutes(5)
   # Test config turns the countdown off.
@@ -115,13 +122,18 @@ defmodule Octomocto.Trains.Game do
       |> Enum.sort_by(& &1.slot)
       |> Enum.map(&Lobby.player/1)
 
+    settings = %{
+      switch_count: state.switch_count,
+      trains_per_house: state.trains_per_house,
+      pace: state.pace
+    }
+
     entry = %{
       id: state.id,
-      settings: %{
-        switch_count: state.switch_count,
-        trains_per_house: state.trains_per_house,
-        pace: state.pace
-      },
+      # A game of the campaign has its level. Thus it never has the
+      # settings of a new game of the settings page.
+      settings:
+        if(state.campaign, do: Map.put(settings, :campaign, state.campaign.level), else: settings),
       players_needed: state.needed,
       players: players,
       created_at: state.created_at
@@ -170,7 +182,10 @@ defmodule Octomocto.Trains.Game do
         created_at: now(),
         # True while the game is in the list of open games. A game with one
         # player is never in it.
-        listed: settings.public and settings.players > 1
+        listed: settings.public and settings.players > 1,
+        # The `:level` and the `:user_id` of the player of a game of the
+        # campaign, else nil
+        campaign: Map.get(settings, :campaign)
       })
 
     store(state)
@@ -189,6 +204,8 @@ defmodule Octomocto.Trains.Game do
         %{round_id: Ecto.UUID.generate(), score: nil, public: false, listed: false},
         state
       )
+      # A state from before the campaign
+      |> Map.put_new(:campaign, nil)
 
     state = Enum.reduce(Map.keys(state.players), state, &leave(&2, &1))
     store(state)
@@ -216,6 +233,16 @@ defmodule Octomocto.Trains.Game do
 
   def handle_call({:join, _pid, _user_id, _name, _player_id}, _from, state)
       when map_size(state.players) >= state.needed or not state.opened do
+    {:reply, {:ok, nil, public(state)}, state}
+  end
+
+  # Only the user who started a game of the campaign can play it
+  def handle_call(
+        {:join, _pid, user_id, _name, _player_id},
+        _from,
+        %{campaign: %{} = campaign} = state
+      )
+      when user_id != campaign.user_id do
     {:reply, {:ok, nil, public(state)}, state}
   end
 
@@ -365,6 +392,23 @@ defmodule Octomocto.Trains.Game do
 
   defp start_round(state), do: state
 
+  # A round of the campaign is a run of the level, and also a result. The
+  # level in the settings keeps it out of the lists of the settings page,
+  # which look for the exact settings.
+  defp save_results(%{campaign: %{} = campaign} = state, correct) do
+    Campaign.save_run(campaign.user_id, campaign.level, correct)
+
+    settings = %{
+      "switch_count" => state.switch_count,
+      "trains_per_house" => state.trains_per_house,
+      "pace" => state.pace,
+      "players" => state.needed,
+      "campaign" => campaign.level
+    }
+
+    Trains.save_results(state.round_id, settings, correct, Map.values(state.players))
+  end
+
   defp save_results(state, correct) when map_size(state.players) == state.needed do
     settings = %{
       "switch_count" => state.switch_count,
@@ -440,7 +484,17 @@ defmodule Octomocto.Trains.Game do
       decisions:
         Enum.map(state.decisions, fn {{train, cell}, exit} ->
           %{train: train, cell: cell, exit: exit}
-        end)
+        end),
+      # The level of a game of the campaign, the number of levels and the
+      # trains that must get home to pass the level
+      campaign:
+        if(state.campaign,
+          do: %{
+            level: state.campaign.level,
+            levels: Campaign.count(),
+            pass: Campaign.pass_count(trains(state))
+          }
+        )
     }
   end
 end

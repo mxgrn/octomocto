@@ -79,6 +79,11 @@ port trainsRestart : () -> Cmd msg
 port trainsNextGame : () -> Cmd msg
 
 
+{-| Starts the next level of the campaign, see OctomoctoWeb.TrainsChannel
+-}
+port trainsNextLevel : () -> Cmd msg
+
+
 {-| `{seed, correct}`: the round with the seed ended, and `correct` trains
 got home.
 -}
@@ -318,6 +323,19 @@ type alias Game =
     , needed : Int
     , started : Bool
     , round : Round
+
+    -- The level of a game of the campaign, Nothing for other games
+    , campaign : Maybe Campaign
+    }
+
+
+{-| The level of a game of the campaign (from 1), the number of levels,
+and the number of trains that must get home to pass the level
+-}
+type alias Campaign =
+    { level : Int
+    , levels : Int
+    , pass : Int
     }
 
 
@@ -441,6 +459,7 @@ type Msg
     | Toggle Cell
     | Restart
     | StartNextGame
+    | StartNextLevel
     | CopyLink
     | ToggleMuted
     | Resized Float Float
@@ -613,6 +632,9 @@ update msg model =
         StartNextGame ->
             ( model, trainsNextGame () )
 
+        StartNextLevel ->
+            ( model, trainsNextLevel () )
+
         CopyLink ->
             ( { model | copied = True }, trainsCopyText model.gameUrl )
 
@@ -641,6 +663,7 @@ gameFromState state =
     , needed = state.needed
     , started = state.elapsedMs /= Nothing
     , round = { round | switches = switches, decisions = Dict.fromList state.decisions }
+    , campaign = state.campaign
     }
 
 
@@ -1092,6 +1115,7 @@ type alias ServerState =
     , elapsedMs : Maybe Int
     , switches : List ( Cell, Int )
     , decisions : List ( ( Int, Cell ), Cell )
+    , campaign : Maybe Campaign
     }
 
 
@@ -1119,7 +1143,7 @@ joinedDecoder =
 
 stateDecoder : Decoder ServerState
 stateDecoder =
-    Decode.map7 ServerState
+    Decode.map8 ServerState
         (Decode.field "seed" Decode.int)
         (Decode.map3 boardFor
             (Decode.field "switch_count" Decode.int)
@@ -1146,6 +1170,15 @@ stateDecoder =
                 )
             )
         )
+        (Decode.field "campaign" (Decode.nullable campaignDecoder))
+
+
+campaignDecoder : Decoder Campaign
+campaignDecoder =
+    Decode.map3 Campaign
+        (Decode.field "level" Decode.int)
+        (Decode.field "levels" Decode.int)
+        (Decode.field "pass" Decode.int)
 
 
 playerDecoder : Decoder Player
@@ -1786,6 +1819,17 @@ viewGame model me game =
                             ]
                         , h1 [ class "truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
                             [ a [ id "trains-title-link", href "/trains", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Right on Track" ] ]
+                        , case game.campaign of
+                            Just campaign ->
+                                a
+                                    [ id "trains-level"
+                                    , href model.settingsUrl
+                                    , class "shrink-0 rounded-full bg-octo-mist px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-octo-indigo transition hover:bg-octo-indigo/15 dark:bg-octo-indigo/15 dark:text-octo-indigo-light"
+                                    ]
+                                    [ text ("Level " ++ String.fromInt campaign.level) ]
+
+                            Nothing ->
+                                text ""
                         , viewMuteButton model.muted
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
@@ -2116,50 +2160,126 @@ viewOverlay model me game =
             text ""
 
         Over ->
-            overlay "trains-over"
-                [ p [ id "trains-result", class "text-2xl font-semibold" ]
-                    [ text (String.fromInt game.round.correct ++ " of " ++ String.fromInt (trainCount game.round.layout.board) ++ " trains got home") ]
-                , span [ class "text-sm opacity-80" ] [ text (verdict game.round) ]
-                , if me == Nothing then
-                    text ""
+            case game.campaign of
+                Just campaign ->
+                    viewCampaignResult model me game campaign
 
-                  else
-                    overlayButton "trains-again" Restart "Play again"
-                , let
-                    -- In a game with other players, a player starts the next game for all of them
-                    ( element, action ) =
-                        if me /= Nothing && List.length game.players > 1 then
-                            ( button, onClick StartNextGame )
+                Nothing ->
+                    viewResult model me game
 
-                        else
-                            ( a, href model.nextGame.path )
-                  in
-                  element
-                    [ id "trains-next-game"
-                    , action
-                    , attribute "data-ga-link" "or_try"
-                    , attribute "data-ga-from" "Right on Track"
-                    , attribute "data-ga-to" model.nextGame.name
-                    , class "group mt-2 text-sm font-medium text-white underline-offset-4 transition hover:underline"
+
+{-| The end of a round of a game that is not in the campaign
+-}
+viewResult : Model -> Me -> Game -> Html Msg
+viewResult model me game =
+    overlay "trains-over"
+        [ p [ id "trains-result", class "text-2xl font-semibold" ]
+            [ text (String.fromInt game.round.correct ++ " of " ++ String.fromInt (trainCount game.round.layout.board) ++ " trains got home") ]
+        , span [ class "text-sm opacity-80" ] [ text (verdict game.round) ]
+        , if me == Nothing then
+            text ""
+
+          else
+            overlayButton "trains-again" Restart "Play again"
+        , let
+            -- In a game with other players, a player starts the next game for all of them
+            ( element, action ) =
+                if me /= Nothing && List.length game.players > 1 then
+                    ( button, onClick StartNextGame )
+
+                else
+                    ( a, href model.nextGame.path )
+          in
+          element
+            [ id "trains-next-game"
+            , action
+            , attribute "data-ga-link" "or_try"
+            , attribute "data-ga-from" "Right on Track"
+            , attribute "data-ga-to" model.nextGame.name
+            , class "group mt-2 text-sm font-medium text-white underline-offset-4 transition hover:underline"
+            ]
+            [ text ("Or try " ++ model.nextGame.name ++ " ")
+            , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
+            ]
+
+        -- Only a guest who played gets the call to sign in, not a spectator
+        , if model.guest && me /= Nothing then
+            p [ id "trains-sign-in", class "text-sm text-white/70" ]
+                [ a
+                    [ href "/signin"
+                    , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
                     ]
-                    [ text ("Or try " ++ model.nextGame.name ++ " ")
-                    , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
-                    ]
-
-                -- Only a guest who played gets the call to sign in, not a spectator
-                , if model.guest && me /= Nothing then
-                    p [ id "trains-sign-in", class "text-sm text-white/70" ]
-                        [ a
-                            [ href "/signin"
-                            , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
-                            ]
-                            [ text "Sign in" ]
-                        , text " to keep your scores."
-                        ]
-
-                  else
-                    text ""
+                    [ text "Sign in" ]
+                , text " to keep your scores."
                 ]
+
+          else
+            text ""
+        ]
+
+
+{-| The end of a round of the campaign: when enough trains got home, the
+player goes to the next level. Else the player tries the level again with
+a new layout.
+-}
+viewCampaignResult : Model -> Me -> Game -> Campaign -> Html Msg
+viewCampaignResult model me game campaign =
+    let
+        round =
+            game.round
+
+        total =
+            trainCount round.layout.board
+
+        passed =
+            round.correct >= campaign.pass
+
+        last =
+            campaign.level >= campaign.levels
+
+        ( message, details ) =
+            if not passed then
+                ( "Not enough trains got home"
+                , String.fromInt round.correct ++ " of " ++ String.fromInt total ++ " trains got home. " ++ String.fromInt campaign.pass ++ " are needed."
+                )
+
+            else if last then
+                ( "You finished the campaign!", String.fromInt round.correct ++ " of " ++ String.fromInt total ++ " trains got home." )
+
+            else
+                ( verdict round
+                , "Level " ++ String.fromInt campaign.level ++ " done · " ++ String.fromInt round.correct ++ " of " ++ String.fromInt total ++ " trains got home."
+                )
+    in
+    overlay "trains-over"
+        [ p [ id "trains-result", class "text-2xl font-semibold" ] [ text message ]
+        , span [ id "trains-result-details", class "text-sm opacity-80" ] [ text details ]
+        , if me == Nothing then
+            text ""
+
+          else
+            div [ class "mt-3 flex flex-wrap items-center justify-center gap-3" ]
+                [ if not passed then
+                    button [ id "trains-again", class campaignButton, onClick Restart ] [ text "Try again" ]
+
+                  else if last then
+                    text ""
+
+                  else
+                    button [ id "trains-next-level", class campaignButton, onClick StartNextLevel ] [ text "Next level" ]
+                , a
+                    [ id "trains-campaign-map"
+                    , href model.settingsUrl
+                    , class "rounded-full px-5 py-2.5 font-medium text-white ring-1 ring-white/40 transition hover:-translate-y-0.5 hover:bg-white/10 active:translate-y-0"
+                    ]
+                    [ text "Back to the map" ]
+                ]
+        ]
+
+
+campaignButton : String
+campaignButton =
+    "rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/30 transition hover:-translate-y-0.5 hover:bg-octo-indigo/90 active:translate-y-0"
 
 
 verdict : Round -> String

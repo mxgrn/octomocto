@@ -10,7 +10,7 @@ defmodule Octomocto.Trains do
 
   alias Octomocto.GameProcess
   alias Octomocto.Repo
-  alias Octomocto.Trains.{Game, Result, Store}
+  alias Octomocto.Trains.{Campaign, Game, Result, Store}
 
   @switch_counts [4, 6, 8, 12]
   @paces ~w(easy normal hard expert)
@@ -48,8 +48,24 @@ defmodule Octomocto.Trains do
     * `:switch_count` - see `switch_counts/1`,
     * `:trains_per_house` - from 1 to 7,
     * `:pace` - see `paces/0`,
-    * `:public` - true when the game is in the lists of the settings page.
+    * `:public` - true when the game is in the lists of the settings page,
+    * `:campaign` (optional) - the `:level` and the `:user_id` of the player
+      of a game of the campaign (see `Octomocto.Trains.Campaign.start/2`).
   """
+  # A level of the campaign has its own settings. Its number of switches
+  # can be one that the settings page does not have.
+  def create_game(%{campaign: %{level: level, user_id: _}} = settings) do
+    %{switch_count: switches, trains_per_house: trains, pace: pace} = Campaign.get(level)
+
+    true =
+      match?(
+        %{players: 1, switch_count: ^switches, trains_per_house: ^trains, pace: ^pace},
+        settings
+      )
+
+    start_game(settings)
+  end
+
   def create_game(
         %{
           players: players,
@@ -61,6 +77,10 @@ defmodule Octomocto.Trains do
       )
       when players in 1..4 and switches in @switch_counts and rem(switches, players) == 0 and
              trains in 1..7 and pace in @paces and is_boolean(public) do
+    start_game(settings)
+  end
+
+  defp start_game(settings) do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
 
     {:ok, _pid} =

@@ -4,8 +4,9 @@ defmodule Octomocto.Trains.Result do
   round have the same `game_id`, `settings` and `score`, because the
   players play together. The `settings` tell which results can be
   compared, for example `%{"switch_count" => 6, "trains_per_house" => 2,
-  "pace" => "normal", "players" => 2}`. The `score` is the number of
-  trains that got to the correct house.
+  "pace" => "normal", "players" => 2}`. A round of the campaign also has
+  its `"campaign"` level. The `score` is the number of trains that got to
+  the correct house.
   """
   use Ecto.Schema
 

@@ -43,7 +43,10 @@
         <.mode_tabs
           tab={if(@live_action == :campaign, do: :campaign, else: :free)}
           free_path={settings_path(@locale, @settings, [])}
-          locale={@locale}
+          campaign_path={Locale.path(@locale, ~p"/memory/campaign")}
+          free_label={dgettext("memory", "Free play")}
+          campaign_label={dgettext("memory", "Campaign")}
+          new_label={dgettext("memory", "New")}
         />
       </div>
     </div>
@@ -69,9 +72,22 @@
           <.campaign_map
             levels={@campaign.levels}
             selected={@campaign.selected.level}
-            theme={@campaign.theme}
-            locale={@locale}
-          />
+            path={&campaign_path(@locale, &1, @campaign.theme)}
+            label={&dgettext("memory", "Level %{level}", level: &1)}
+          >
+            <:caption :let={level}>
+              {dngettext("memory", "%{count} card", "%{count} cards", level.cards)}
+            </:caption>
+            <:badge :let={level}>
+              <.level_badge
+                :if={level.set == 3}
+                locked={level.status == :locked}
+                title={dgettext("memory", "Triplets")}
+              >
+                3
+              </.level_badge>
+            </:badge>
+          </.campaign_map>
         </div>
         <.level_card
           :if={@current_scope}
@@ -79,28 +95,12 @@
           theme={@campaign.theme}
           highest={@campaign.highest}
         />
-        <div
+        <.sign_in_overlay
           :if={!@current_scope}
-          id="campaign-sign-in"
-          class="absolute inset-0 z-10 flex items-start justify-center rounded-2xl bg-base-100/60 p-4 pt-24 backdrop-blur-[2px]"
-        >
-          <div class="max-w-xs rounded-2xl bg-base-100 p-6 text-center shadow-xl ring-1 ring-base-content/10">
-            <.icon name="hero-lock-closed" class="size-7 text-octo-indigo" />
-            <p class="mt-2 text-lg font-semibold">
-              {dgettext("memory", "Sign in to enable campaigns")}
-            </p>
-            <p class="mt-1 text-sm text-base-content/60">
-              {dgettext("memory", "Your progress is saved to your account.")}
-            </p>
-            <.link
-              id="campaign-sign-in-link"
-              href={~p"/signin"}
-              class="mt-4 inline-block rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/25 transition hover:-translate-y-0.5 hover:bg-octo-indigo/90 active:translate-y-0"
-            >
-              {dgettext("memory", "Sign in")}
-            </.link>
-          </div>
-        </div>
+          title={dgettext("memory", "Sign in to enable campaigns")}
+          text={dgettext("memory", "Your progress is saved to your account.")}
+          button={dgettext("memory", "Sign in")}
+        />
       </div>
 
       <div

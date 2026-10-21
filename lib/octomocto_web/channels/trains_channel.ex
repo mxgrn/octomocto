@@ -3,11 +3,14 @@ defmodule OctomoctoWeb.TrainsChannel do
   Connects one browser to a trains game (see `OctomoctoWeb.GameChannel` for
   the join and the rejoin). A browser only watches when the game is full
   or started, or with `"watch": true` in the join params. Changes are
-  pushed as `"state"`, `"flip"` and `"decision"` events.
+  pushed as `"state"`, `"flip"` and `"decision"` events. After a round of
+  the campaign that passed its level, the player starts the next level with
+  `"next_level"`: the reply has the id of its game.
   """
   use Phoenix.Channel
 
   alias Octomocto.Trains
+  alias Octomocto.Trains.{Campaign, Store}
   alias OctomoctoWeb.{GameChannel, NextGame}
 
   @game [context: Trains, game: Trains.Game, salt: "trains player", kind: "trains"]
@@ -41,6 +44,19 @@ defmodule OctomoctoWeb.TrainsChannel do
   def handle_in("restart", _params, socket) do
     Trains.restart(socket.assigns.game_id, socket.assigns.player_id)
     {:noreply, socket}
+  end
+
+  def handle_in("next_level", _params, socket) do
+    user_id = socket.assigns.user_id
+
+    with %{campaign: %{user_id: ^user_id} = campaign, score: score} when is_integer(score) <-
+           Store.read(socket.assigns.game_id),
+         true <- score >= Campaign.pass_count(Campaign.get(campaign.level).trains),
+         {:ok, id} <- Campaign.start(user_id, campaign.level + 1) do
+      {:reply, {:ok, %{id: id}}, socket}
+    else
+      _ -> {:reply, {:error, %{}}, socket}
+    end
   end
 
   def handle_in("next_game", _params, socket) do

@@ -60,7 +60,6 @@ defmodule OctomoctoWeb.Router do
     get "/astronaut", AstronautController, :index
     post "/astronaut", AstronautController, :create
     get "/astronaut/:id", AstronautController, :show
-    get "/trains/:id", TrainsController, :show
     get "/schulte/:id", SchulteController, :show
     get "/set/:id", SetGameController, :show
     get "/sudoku/:id", SudokuController, :show
@@ -78,7 +77,8 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.Locale, "en"}
       ] do
       live "/", HomeLive
-      live "/trains", TrainsLive
+      live "/trains", TrainsLive, :index
+      live "/trains/campaign", TrainsLive, :campaign
       live "/schulte", SchulteLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
@@ -92,6 +92,7 @@ defmodule OctomoctoWeb.Router do
 
     # After the live routes, so that "campaign" is not a game id
     get "/memory/:id", MemoryController, :show
+    get "/trains/:id", TrainsController, :show
   end
 
   # The pages in Portuguese, in the same pipeline as the English pages. Only

@@ -183,6 +183,14 @@ defmodule Octomocto.Accounts do
   end
 
   @doc """
+  Remembers the tab of the Trains page that the user used last, "free" or
+  "campaign". Gives the user with the new tab.
+  """
+  def update_user_trains_tab(user, tab) when tab in ["free", "campaign"] do
+    user |> Ecto.Changeset.change(trains_tab: tab) |> Repo.update!()
+  end
+
+  @doc """
   Gives the name that other players see for the user with the id (see
   `public_name/1`), or nil for a guest.
   """

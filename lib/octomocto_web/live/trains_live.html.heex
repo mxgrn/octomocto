@@ -25,195 +25,279 @@
         <h1 class="text-3xl font-semibold tracking-tight">Right on Track</h1>
       </div>
       <p class="text-base-content/70">
-        Click the switches to send each train to the house with its colors.
+        <%= if @live_action == :campaign do %>
+          Get 90% of the trains home to unlock the next level.
+        <% else %>
+          Click the switches to send each train to the house with its colors.
+        <% end %>
       </p>
       <.how_to_play />
+      <div class="pt-2">
+        <.mode_tabs
+          tab={if(@live_action == :campaign, do: :campaign, else: :free)}
+          free_path={settings_path(@settings, %{})}
+          campaign_path={~p"/trains/campaign"}
+          free_label="Free play"
+          campaign_label="Campaign"
+          new_label="New"
+        />
+      </div>
     </div>
 
-    <div
-      id="trains-lobby"
-      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
-    >
-      <.lobby_games
-        games={@lobby_games}
-        matches={&same_settings?(&1, @settings)}
-        path={&~p"/trains/#{&1.id}"}
+    <%= if @live_action == :campaign do %>
+      <div
+        id="campaign"
+        class="relative mx-auto flex w-full max-w-md flex-col gap-4 lg:col-start-1 lg:row-span-2 lg:row-start-2 xl:col-start-2 xl:row-start-2 xl:max-w-none"
       >
-        <:icon :let={_game}>
-          <OctomoctoWeb.GameIcons.game_icon game="trains" class="size-9 shrink-0" />
-        </:icon>
-        <:summary :let={game}>{game_summary(game)}</:summary>
-      </.lobby_games>
-    </div>
-
-    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
-      <div id="trains-settings" class="flex w-full flex-col gap-4">
-        <.setting
-          label="Players"
-          icon="hero-users"
-          hint={
-            if(@settings.players > 1,
-              do: "Play together. Each player owns some of the switches.",
-              else: "You own all the switches."
-            )
-          }
-        >
-          <.option
-            :for={n <- 1..4}
-            id={"players-#{n}"}
-            selected={@settings.players == n}
-            patch={settings_path(@settings, %{players: n})}
+        <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
+          <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <.setting_header label="Levels" icon="hero-map" />
+            <span
+              :if={@current_scope}
+              id="campaign-highest"
+              class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
+            >
+              <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
+              <span class="text-base-content/60">Highest level</span>
+              <span class="font-semibold tabular-nums">{@campaign.highest}</span>
+            </span>
+          </div>
+          <.campaign_map
+            levels={@campaign.levels}
+            selected={@campaign.selected.level}
+            path={&campaign_path/1}
+            label={&"Level #{&1}"}
           >
-            {n}
-          </.option>
-        </.setting>
-        <.setting
-          label="Switches"
-          icon="hero-arrows-right-left"
-          hint={switches_hint(@settings.switch_count, @settings.players)}
-        >
-          <.option
-            :for={n <- @switch_counts}
-            id={"switches-#{n}"}
-            selected={@settings.switch_count == n}
-            patch={settings_path(@settings, %{switch_count: n})}
-          >
-            {n}
-          </.option>
-        </.setting>
-        <.setting label="Trains per house" icon="hero-home" hint={trains_hint(@settings)}>
-          <.option
-            :for={n <- 1..7}
-            id={"trains-#{n}"}
-            selected={@settings.trains_per_house == n}
-            patch={settings_path(@settings, %{trains_per_house: n})}
-          >
-            {n}
-          </.option>
-        </.setting>
-        <.setting label="Pace" icon="hero-bolt" hint={pace_hint(@settings.pace)}>
-          <.option
-            :for={pace <- Octomocto.Trains.paces()}
-            id={"pace-#{pace}"}
-            selected={@settings.pace == pace}
-            patch={settings_path(@settings, %{pace: pace})}
-          >
-            {String.capitalize(pace)}
-          </.option>
-        </.setting>
-        <.setting label="Visibility" icon="hero-eye" hint={visibility_hint(@settings)}>
-          <.option
-            :for={
-              {value, public, label} <- [
-                {"public", true, "Public"},
-                {"private", false, "Private"}
-              ]
-            }
-            id={"visibility-#{value}"}
-            selected={@settings.public == public}
-            patch={settings_path(@settings, %{public: public})}
-          >
-            {label}
-          </.option>
-        </.setting>
+            <:caption :let={level}>
+              {level.switch_count} switches
+              <span class="block text-[10px] leading-tight text-base-content/50">
+                {String.capitalize(level.pace)}
+              </span>
+            </:caption>
+          </.campaign_map>
+        </div>
+        <.level_card
+          :if={@current_scope}
+          level={@campaign.selected}
+          highest={@campaign.highest}
+        />
+        <.sign_in_overlay
+          :if={!@current_scope}
+          title="Sign in to enable campaigns"
+          text="Your progress is saved to your account."
+          button="Sign in"
+        />
       </div>
 
-      <.start_bar multiplayer={@settings.players > 1} />
-    </div>
-
-    <div
-      id="trains-leaderboard"
-      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
-    >
-      <.score_list
-        id="your-results"
-        icon="hero-user"
-        icon_class="text-octo-indigo"
-        title="Your results"
-        empty={@user_results != nil and @user_results.latest == []}
-        empty_text="No games yet."
+      <div
+        id="campaign-results"
+        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
       >
-        <:aside :if={@user_results && @user_results.best}>
-          <span
-            id="your-best"
-            class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
+        <.score_list
+          id="campaign-leaderboard"
+          icon="hero-trophy"
+          icon_class="text-amber-500"
+          title="Highest levels"
+          empty={@campaign.leaderboard == []}
+          empty_text="Nobody has passed a level yet."
+        >
+          <.result_row :for={{row, place} <- Enum.with_index(@campaign.leaderboard, 1)}>
+            <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+            <span class="min-w-0 flex-1 truncate font-medium">{player_name(row.user)}</span>
+            <.result_pill best={@current_scope != nil and row.user_id == @current_scope.user.id}>
+              Level {row.level}
+            </.result_pill>
+          </.result_row>
+        </.score_list>
+      </div>
+    <% else %>
+      <div
+        id="trains-lobby"
+        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
+      >
+        <.lobby_games
+          games={@lobby_games}
+          matches={&same_settings?(&1, @settings)}
+          path={&~p"/trains/#{&1.id}"}
+        >
+          <:icon :let={_game}>
+            <OctomoctoWeb.GameIcons.game_icon game="trains" class="size-9 shrink-0" />
+          </:icon>
+          <:summary :let={game}>{game_summary(game)}</:summary>
+        </.lobby_games>
+      </div>
+
+      <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
+        <div id="trains-settings" class="flex w-full flex-col gap-4">
+          <.setting
+            label="Players"
+            icon="hero-users"
+            hint={
+              if(@settings.players > 1,
+                do: "Play together. Each player owns some of the switches.",
+                else: "You own all the switches."
+              )
+            }
           >
-            <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
-            <span class="text-base-content/60">Best</span>
-            <span class="font-semibold tabular-nums">
-              {format_score(@user_results.best.score, trains(@settings))}
+            <.option
+              :for={n <- 1..4}
+              id={"players-#{n}"}
+              selected={@settings.players == n}
+              patch={settings_path(@settings, %{players: n})}
+            >
+              {n}
+            </.option>
+          </.setting>
+          <.setting
+            label="Switches"
+            icon="hero-arrows-right-left"
+            hint={switches_hint(@settings.switch_count, @settings.players)}
+          >
+            <.option
+              :for={n <- @switch_counts}
+              id={"switches-#{n}"}
+              selected={@settings.switch_count == n}
+              patch={settings_path(@settings, %{switch_count: n})}
+            >
+              {n}
+            </.option>
+          </.setting>
+          <.setting label="Trains per house" icon="hero-home" hint={trains_hint(@settings)}>
+            <.option
+              :for={n <- 1..7}
+              id={"trains-#{n}"}
+              selected={@settings.trains_per_house == n}
+              patch={settings_path(@settings, %{trains_per_house: n})}
+            >
+              {n}
+            </.option>
+          </.setting>
+          <.setting label="Pace" icon="hero-bolt" hint={pace_hint(@settings.pace)}>
+            <.option
+              :for={pace <- Octomocto.Trains.paces()}
+              id={"pace-#{pace}"}
+              selected={@settings.pace == pace}
+              patch={settings_path(@settings, %{pace: pace})}
+            >
+              {String.capitalize(pace)}
+            </.option>
+          </.setting>
+          <.setting label="Visibility" icon="hero-eye" hint={visibility_hint(@settings)}>
+            <.option
+              :for={
+                {value, public, label} <- [
+                  {"public", true, "Public"},
+                  {"private", false, "Private"}
+                ]
+              }
+              id={"visibility-#{value}"}
+              selected={@settings.public == public}
+              patch={settings_path(@settings, %{public: public})}
+            >
+              {label}
+            </.option>
+          </.setting>
+        </div>
+
+        <.start_bar multiplayer={@settings.players > 1} />
+      </div>
+
+      <div
+        id="trains-leaderboard"
+        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
+      >
+        <.score_list
+          id="your-results"
+          icon="hero-user"
+          icon_class="text-octo-indigo"
+          title="Your results"
+          empty={@user_results != nil and @user_results.latest == []}
+          empty_text="No games yet."
+        >
+          <:aside :if={@user_results && @user_results.best}>
+            <span
+              id="your-best"
+              class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
+            >
+              <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
+              <span class="text-base-content/60">Best</span>
+              <span class="font-semibold tabular-nums">
+                {format_score(@user_results.best.score, trains(@settings))}
+              </span>
             </span>
-          </span>
-        </:aside>
-        <%= if @user_results do %>
-          <.result_row :for={%{result: result, players: players} <- @user_results.latest}>
-            <span :if={@settings.players == 1} class="flex-1 font-medium">
-              {Calendar.strftime(result.inserted_at, "%b %-d")}
+          </:aside>
+          <%= if @user_results do %>
+            <.result_row :for={%{result: result, players: players} <- @user_results.latest}>
+              <span :if={@settings.players == 1} class="flex-1 font-medium">
+                {Calendar.strftime(result.inserted_at, "%b %-d")}
+              </span>
+              <span :if={@settings.players > 1} class="min-w-0 flex-1 truncate font-medium">
+                <.player_list players={players} scores={false} />
+              </span>
+              <.result_pill best={
+                @user_results.best != nil and result.id == @user_results.best.id
+              }>
+                {format_score(result.score, trains(@settings))}
+              </.result_pill>
+            </.result_row>
+          <% else %>
+            <li class="py-2 text-center text-base-content/60">
+              <.link
+                id="your-results-sign-in"
+                href={~p"/signin"}
+                class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
+              >
+                Sign in
+              </.link>
+              to start saving your results.
+            </li>
+          <% end %>
+        </.score_list>
+        <.score_list
+          id="best-results"
+          icon="hero-trophy"
+          icon_class="text-amber-500"
+          title="Best results"
+          empty={@leaderboard.best == []}
+        >
+          <:aside :if={!@user_results}>
+            <span class="text-sm text-base-content/60">
+              <.link
+                id="best-results-sign-in"
+                href={~p"/signin"}
+                class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
+              >
+                Sign in
+              </.link>
+              to get listed
             </span>
-            <span :if={@settings.players > 1} class="min-w-0 flex-1 truncate font-medium">
-              <.player_list players={players} scores={false} />
-            </span>
-            <.result_pill best={@user_results.best != nil and result.id == @user_results.best.id}>
+          </:aside>
+          <.result_row :for={{result, place} <- Enum.with_index(@leaderboard.best, 1)}>
+            <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+            <span class="min-w-0 flex-1 truncate font-medium">{player_name(result.user)}</span>
+            <.result_pill>
               {format_score(result.score, trains(@settings))}
             </.result_pill>
           </.result_row>
-        <% else %>
-          <li class="py-2 text-center text-base-content/60">
-            <.link
-              id="your-results-sign-in"
-              href={~p"/signin"}
-              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
-            >
-              Sign in
-            </.link>
-            to start saving your results.
-          </li>
-        <% end %>
-      </.score_list>
-      <.score_list
-        id="best-results"
-        icon="hero-trophy"
-        icon_class="text-amber-500"
-        title="Best results"
-        empty={@leaderboard.best == []}
-      >
-        <:aside :if={!@user_results}>
-          <span class="text-sm text-base-content/60">
-            <.link
-              id="best-results-sign-in"
-              href={~p"/signin"}
-              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
-            >
-              Sign in
-            </.link>
-            to get listed
-          </span>
-        </:aside>
-        <.result_row :for={{result, place} <- Enum.with_index(@leaderboard.best, 1)}>
-          <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
-          <span class="min-w-0 flex-1 truncate font-medium">{player_name(result.user)}</span>
-          <.result_pill>
-            {format_score(result.score, trains(@settings))}
-          </.result_pill>
-        </.result_row>
-      </.score_list>
-      <.score_list
-        id="latest-games"
-        icon="hero-clock"
-        icon_class="text-octo-indigo"
-        title="Latest games"
-        empty={@leaderboard.latest == []}
-      >
-        <.result_row :for={game <- @leaderboard.latest}>
-          <span class="min-w-0 flex-1 truncate font-medium">
-            <.player_list players={game.players} scores={false} />
-          </span>
-          <.result_pill>
-            {format_score(game.score, trains(@settings))}
-          </.result_pill>
-        </.result_row>
-      </.score_list>
-    </div>
+        </.score_list>
+        <.score_list
+          id="latest-games"
+          icon="hero-clock"
+          icon_class="text-octo-indigo"
+          title="Latest games"
+          empty={@leaderboard.latest == []}
+        >
+          <.result_row :for={game <- @leaderboard.latest}>
+            <span class="min-w-0 flex-1 truncate font-medium">
+              <.player_list players={game.players} scores={false} />
+            </span>
+            <.result_pill>
+              {format_score(game.score, trains(@settings))}
+            </.result_pill>
+          </.result_row>
+        </.score_list>
+      </div>
+    <% end %>
   </div>
 
   <.rules rules={@rules} />
