@@ -51,6 +51,11 @@ port memoryRestart : () -> Cmd msg
 port memoryNextGame : () -> Cmd msg
 
 
+{-| Starts the next level of the campaign, see OctomoctoWeb.MemoryChannel
+-}
+port memoryNextLevel : () -> Cmd msg
+
+
 port memoryCopyText : String -> Cmd msg
 
 
@@ -140,6 +145,20 @@ type alias Game =
     -- The id of the player who changes the settings of the next field of
     -- the match (see `OctomoctoWeb.MemoryLive`). The other players wait.
     , editing : Maybe String
+
+    -- The level of a game of the campaign, Nothing for other games
+    , campaign : Maybe Campaign
+
+    -- True when a field of the campaign stopped at an error
+    , failed : Bool
+    }
+
+
+{-| The level of a game of the campaign (from 1), and the number of levels
+-}
+type alias Campaign =
+    { level : Int
+    , levels : Int
     }
 
 
@@ -243,6 +262,7 @@ type Msg
     | Flip Int
     | Restart
     | StartNextGame
+    | StartNextLevel
     | CopyLink
     | CopiedTimeout
     | SyncClock Game Time.Posix
@@ -292,6 +312,9 @@ update msg model =
 
         StartNextGame ->
             ( model, memoryNextGame () )
+
+        StartNextLevel ->
+            ( model, memoryNextLevel () )
 
         CopyLink ->
             ( { model | copied = True }
@@ -402,7 +425,10 @@ stateSounds me old new =
             List.length new.players > 1 && myTurn me new && not (myTurn me old) && not new.finished
 
         endSound =
-            if new.finished && not old.finished then
+            if new.failed && not old.failed then
+                [ "lose" ]
+
+            else if new.finished && not old.finished then
                 case winners new.players of
                     [ winner ] ->
                         if isMe me winner || List.length new.players == 1 then
@@ -485,6 +511,15 @@ gameDecoder =
         |> andMap (Decode.field "players" (Decode.list playerDecoder))
         |> andMap (Decode.field "players_needed" Decode.int)
         |> andMap (Decode.field "editing" (Decode.nullable Decode.string))
+        |> andMap (Decode.field "campaign" (Decode.nullable campaignDecoder))
+        |> andMap (Decode.field "failed" Decode.bool)
+
+
+campaignDecoder : Decoder Campaign
+campaignDecoder =
+    Decode.map2 Campaign
+        (Decode.field "level" Decode.int)
+        (Decode.field "levels" Decode.int)
 
 
 andMap : Decoder a -> Decoder (a -> b) -> Decoder b
@@ -610,6 +645,13 @@ viewGame model me game =
                             ]
                         , h1 [ class "text-xl font-semibold tracking-tight lg:text-2xl" ]
                             [ a [ id "memory-title-link", href model.indexUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text (t model.texts "Memory") ] ]
+                        , case game.campaign of
+                            Just campaign ->
+                                span [ id "memory-level", class "shrink-0 rounded-full bg-octo-mist px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-octo-indigo dark:bg-octo-indigo/15 dark:text-octo-indigo-light" ]
+                                    [ text (tf model.texts "Level {level}" [ ( "level", String.fromInt campaign.level ) ]) ]
+
+                            Nothing ->
+                                text ""
                         , viewMuteButton model.texts model.muted
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
@@ -652,7 +694,16 @@ viewGame model me game =
                 , href model.settingsUrl
                 , class "hidden text-sm font-medium text-octo-indigo underline-offset-4 transition hover:underline lg:order-6 lg:block dark:text-octo-indigo-light"
                 ]
-                [ text (t model.texts "Latest games and best results") ]
+                [ text
+                    (t model.texts
+                        (if game.campaign /= Nothing then
+                            "Back to the map"
+
+                         else
+                            "Latest games and best results"
+                        )
+                    )
+                ]
             ]
         , div [ class "min-w-0 flex-1" ]
             [ div [ id "memory-board", class "relative mx-auto lg:rounded-2xl lg:bg-white lg:p-2 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10", style "width" (fieldWidth model me game layout gap) ]
@@ -661,7 +712,12 @@ viewGame model me game =
                     viewWaiting model.texts game
 
                   else if game.finished then
-                    viewResult model me game
+                    case game.campaign of
+                        Just campaign ->
+                            viewCampaignResult model me game campaign
+
+                        Nothing ->
+                            viewResult model me game
 
                   else
                     text ""
@@ -1293,6 +1349,71 @@ viewResult model me game =
 
           else
             text ""
+        ]
+
+
+
+{-| The end of a field of the campaign: after an error, the player tries
+the level again. After a field with no errors, the player goes to the next
+level.
+-}
+viewCampaignResult : Model -> Me -> Game -> Campaign -> Html Msg
+viewCampaignResult model me game campaign =
+    let
+        texts =
+            model.texts
+
+        cleared =
+            List.length (List.filter (\card -> card.state == "cleared") game.cards)
+
+        last =
+            campaign.level >= campaign.levels
+
+        ( message, details ) =
+            if game.failed then
+                ( t texts "Wrong card!"
+                , tf texts "You cleared {cleared} of {cards} cards." [ ( "cleared", String.fromInt cleared ), ( "cards", String.fromInt (List.length game.cards) ) ]
+                )
+
+            else if last then
+                ( t texts "You finished the campaign!", tf texts "Time {time}" [ ( "time", formatTime game.elapsedMs ) ] )
+
+            else
+                ( t texts "Perfect!"
+                , tf texts "Level {level} done" [ ( "level", String.fromInt campaign.level ) ]
+                    ++ " · "
+                    ++ tf texts "Time {time}" [ ( "time", formatTime game.elapsedMs ) ]
+                )
+
+        primary =
+            "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:-translate-y-0.5 hover:bg-octo-mist active:translate-y-0"
+    in
+    div
+        [ id "memory-result"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl bg-octo-navy/70 p-4 text-center text-white backdrop-blur-sm"
+        ]
+        [ p [ class "text-3xl font-semibold" ] [ text message ]
+        , p [ id "memory-final-time", class "text-lg tabular-nums opacity-80" ] [ text details ]
+        , if me == Nothing then
+            text ""
+
+          else
+            div [ class "flex flex-wrap items-center justify-center gap-3" ]
+                [ if game.failed then
+                    button [ id "memory-retry", class primary, onClick Restart ] [ text (t texts "Try again") ]
+
+                  else if last then
+                    text ""
+
+                  else
+                    button [ id "memory-next-level", class primary, onClick StartNextLevel ] [ text (t texts "Next level") ]
+                , a
+                    [ id "memory-campaign-map"
+                    , href model.settingsUrl
+                    , class "rounded-full px-5 py-2.5 font-medium text-white ring-1 ring-white/40 transition hover:-translate-y-0.5 hover:bg-white/10 active:translate-y-0"
+                    ]
+                    [ text (t texts "Back to the map") ]
+                ]
         ]
 
 

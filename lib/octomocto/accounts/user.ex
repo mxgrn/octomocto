@@ -8,9 +8,13 @@ defmodule Octomocto.Accounts.User do
     field :telegram_id, :integer
     field :telegram_username, :string
     field :name, :string
-    # The name that other players see in games. Blank means a color name.
+    # The name that other players see in games. A random ocean name until
+    # the user changes it (see `Octomocto.GuestName`), never blank.
     field :display_name, :string
     field :avatar_url, :string
+    # The tab of the Memory page that the user used last: "free" or
+    # "campaign". Nil means Free play.
+    field :memory_tab, :string
     # Copied from the session token (see `UserToken`). Nothing reads it now.
     field :authenticated_at, :utc_datetime, virtual: true
 
@@ -66,7 +70,8 @@ defmodule Octomocto.Accounts.User do
 
   The Telegram username and photo can change, so we update them on each
   sign-in. The name is set only when it is empty. The display name gets the
-  Telegram first name only when it is empty, so a custom name stays.
+  Telegram first name only when it is empty, so a custom name stays. With
+  no first name, it gets a random ocean name.
   """
   def telegram_changeset(user, attrs) do
     user
@@ -75,18 +80,34 @@ defmodule Octomocto.Accounts.User do
     |> unique_constraint(:telegram_id)
     |> put_name_if_empty(attrs)
     |> put_display_name_if_empty(attrs)
+    |> put_random_display_name_if_empty()
+  end
+
+  @doc "A changeset for a new user that signs in with the email. The display name is a random ocean name."
+  def registration_changeset(user, attrs) do
+    user
+    |> email_changeset(attrs)
+    |> put_random_display_name_if_empty()
   end
 
   @display_name_max 30
 
   @doc """
-  A user changeset for changing the display name. A blank name is stored as nil.
+  A user changeset for changing the display name. A blank name changes to a
+  new random ocean name, so that other players never see the email.
   """
   def display_name_changeset(user, attrs) do
     user
-    |> cast(attrs, [:display_name])
+    |> cast(attrs, [:display_name], empty_values: [])
     |> update_change(:display_name, &(&1 && String.trim(&1)))
+    |> put_random_display_name_if_empty()
     |> validate_length(:display_name, max: @display_name_max)
+  end
+
+  defp put_random_display_name_if_empty(changeset) do
+    if get_field(changeset, :display_name) in [nil, ""],
+      do: put_change(changeset, :display_name, Octomocto.GuestName.random_name()),
+      else: changeset
   end
 
   defp put_name_if_empty(changeset, attrs) do

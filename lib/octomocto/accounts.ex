@@ -65,7 +65,7 @@ defmodule Octomocto.Accounts do
   """
   def register_user(attrs) do
     %User{}
-    |> User.email_changeset(attrs)
+    |> User.registration_changeset(attrs)
     |> Repo.insert()
   end
 
@@ -175,14 +175,38 @@ defmodule Octomocto.Accounts do
   end
 
   @doc """
-  Gives the display name of the user with the id, or nil for a guest or a
-  user with no display name.
+  Remembers the tab of the Memory page that the user used last, "free" or
+  "campaign". Gives the user with the new tab.
+  """
+  def update_user_memory_tab(user, tab) when tab in ["free", "campaign"] do
+    user |> Ecto.Changeset.change(memory_tab: tab) |> Repo.update!()
+  end
+
+  @doc """
+  Gives the name that other players see for the user with the id (see
+  `public_name/1`), or nil for a guest.
   """
   def display_name(nil), do: nil
 
   def display_name(user_id) do
-    Repo.one(from u in User, where: u.id == ^user_id, select: u.display_name)
+    case Repo.get(User, user_id) do
+      nil -> nil
+      user -> public_name(user)
+    end
   end
+
+  @doc """
+  The name that other players see: the display name. Each user has one
+  (see `Octomocto.Accounts.User`), but for safety, a user without one has
+  the name or the Telegram username, else nil. Never the email.
+  """
+  def public_name(%{display_name: display_name})
+      when is_binary(display_name) and display_name != "",
+      do: display_name
+
+  def public_name(%{name: name}) when is_binary(name) and name != "", do: name
+  def public_name(%{telegram_username: username}) when is_binary(username), do: "@" <> username
+  def public_name(_user), do: nil
 
   @doc """
   Returns an `%Ecto.Changeset{}` for changing the user email.

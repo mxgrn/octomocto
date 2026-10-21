@@ -36,6 +36,13 @@ defmodule Octomocto.Memory.Game do
 
   A process can also join only to watch (see `Octomocto.Memory.watch/1`).
 
+  A game of the campaign (see `Octomocto.Memory.Campaign`) has one player:
+  the signed-in user who started it. Other processes only watch, for
+  example from the ongoing games of the settings page. The
+  field stops at the first error of the player (`failed`), and the game
+  saves the run of the level (see `Octomocto.Memory.Campaign.save_run/3`)
+  and a result with the level in its settings.
+
   The players of a game with 2 or more players play a match: each finished
   field gives a win to its winner (`wins` of the player), or a tie
   (`ties`). Between two fields, one player can change the settings of the
@@ -52,7 +59,7 @@ defmodule Octomocto.Memory.Game do
   use GenServer, restart: :temporary
 
   alias Octomocto.{Lobby, Memory}
-  alias Octomocto.Memory.{Board, Store, Themes}
+  alias Octomocto.Memory.{Board, Campaign, Store, Themes}
 
   @idle_timeout_ms :timer.minutes(5)
   # How long a player stays after its process stops
@@ -80,7 +87,7 @@ defmodule Octomocto.Memory.Game do
         {id, %{theme: theme, set: set, cards: cards, players: needed, public: public} = config}
       )
       when set in [2, 3] and needed in 1..4 and is_boolean(public) do
-    true = cards in Board.sizes(theme, set)
+    true = valid_size?(config, theme, set, cards)
     GenServer.start_link(__MODULE__, {id, config}, name: via(id))
   end
 
@@ -88,6 +95,13 @@ defmodule Octomocto.Memory.Game do
   def start_link(%{id: id} = state) do
     GenServer.start_link(__MODULE__, state, name: via(id))
   end
+
+  # A level of the campaign has its own size, which can be smaller than
+  # the sizes of the settings page
+  defp valid_size?(%{campaign: %{level: level}}, _theme, set, cards),
+    do: match?(%{set: ^set, cards: ^cards}, Campaign.get(level))
+
+  defp valid_size?(_config, theme, set, cards), do: cards in Board.sizes(theme, set)
 
   def via(id), do: {:via, :global, {__MODULE__, id}}
 
@@ -109,9 +123,14 @@ defmodule Octomocto.Memory.Game do
         p |> Lobby.player() |> Map.merge(%{score: p.score, turn: id == state.turn})
       end)
 
+    settings = %{theme: state.theme, set: state.set, cards: state.size}
+
     entry = %{
       id: state.id,
-      settings: %{theme: state.theme, set: state.set, cards: state.size},
+      # A game of the campaign has its level. Thus it never has the
+      # settings of a new game of the settings page.
+      settings:
+        if(state.campaign, do: Map.put(settings, :campaign, state.campaign.level), else: settings),
       players_needed: state.needed,
       players: players,
       created_at: state.created_at
@@ -161,7 +180,10 @@ defmodule Octomocto.Memory.Game do
         editing: nil,
         # True while the game is in the list of open games. A game with one
         # player is never in it.
-        listed: config.public and config.players > 1
+        listed: config.public and config.players > 1,
+        # The `:level`, the `:user_id` of the player and the `:theme` choice
+        # of a game of the campaign, else nil
+        campaign: Map.get(config, :campaign)
       })
 
     store(state)
@@ -190,6 +212,9 @@ defmodule Octomocto.Memory.Game do
       # A state from before the matches
       |> Map.put_new(:ties, 0)
       |> Map.put(:editing, nil)
+      # A state from before the campaign
+      |> Map.put_new(:campaign, nil)
+      |> Map.put_new(:failed, false)
 
     store(state)
     {:ok, state}
@@ -269,6 +294,16 @@ defmodule Octomocto.Memory.Game do
     {:reply, {:ok, nil, public(state)}, state}
   end
 
+  # Only the user who started a game of the campaign can play it
+  def handle_call(
+        {:join, _pid, user_id, _name, _player_id},
+        _from,
+        %{campaign: %{} = campaign} = state
+      )
+      when user_id != campaign.user_id do
+    {:reply, {:ok, nil, public(state)}, state}
+  end
+
   def handle_call({:join, pid, user_id, name, _player_id}, _from, state) do
     Process.monitor(pid)
     # Unique in the cluster, because the game can move to another node
@@ -308,13 +343,14 @@ defmodule Octomocto.Memory.Game do
 
     case Enum.at(cards, card_id) do
       %{state: :down} = card ->
+        flip = check_flip(cards, state.seen, card_id)
+
         state =
           %{state | cards: List.replace_at(cards, card_id, %{card | state: :up}), ongoing: true}
-          |> count_flip(player_id, check_flip(cards, state.seen, card_id))
+          |> count_flip(player_id, flip)
           |> Map.update!(:seen, &MapSet.put(&1, card_id))
           |> Map.update!(:started_at, &(&1 || now()))
-          |> end_turn()
-          |> stop_clock()
+          |> end_turn_or_fail(flip)
           |> count_win()
           |> save_results()
           |> restart_turn_timer()
@@ -454,6 +490,8 @@ defmodule Octomocto.Memory.Game do
       # The clock starts with the first card
       started_at: nil,
       finished_at: nil,
+      # True when a field of the campaign stopped at an error
+      failed: false,
       # The time of the last card, or of the start of the turn
       turn_since: nil,
       turn_ref: nil
@@ -467,6 +505,13 @@ defmodule Octomocto.Memory.Game do
   end
 
   defp make_ready(state), do: state
+
+  # The first error stops a field of the campaign. The cards of the turn
+  # stay face up, so that the player sees the error.
+  defp end_turn_or_fail(%{campaign: %{}} = state, :error),
+    do: %{state | failed: true, ongoing: false, finished_at: now()}
+
+  defp end_turn_or_fail(state, _flip), do: state |> end_turn() |> stop_clock()
 
   # When the face-up cards make a full set, the turn ends: a set goes off
   # the field and the player turns again, and a miss gives the turn to the
@@ -570,6 +615,34 @@ defmodule Octomocto.Memory.Game do
   end
 
   defp count_win(state), do: state
+
+  # A run of the campaign is also a result, also when it stopped at an
+  # error: the score is the cleared cards. The level in the settings keeps
+  # it out of the lists of the settings page, which look for the exact
+  # settings.
+  defp save_results(%{campaign: %{} = campaign} = state) when state.finished_at != nil do
+    cleared = Enum.count(state.cards, &(&1.state == :cleared))
+    Campaign.save_run(campaign.user_id, campaign.level, cleared)
+
+    settings = %{
+      "set" => state.set,
+      "cards" => state.size,
+      "players" => state.needed,
+      "campaign" => campaign.level
+    }
+
+    elapsed_ms = state.finished_at - state.started_at
+
+    Memory.save_results(
+      state.field_id,
+      settings,
+      state.theme,
+      elapsed_ms,
+      Map.values(state.players)
+    )
+
+    state
+  end
 
   defp save_results(state)
        when state.finished_at != nil and map_size(state.players) == state.needed do
@@ -687,7 +760,10 @@ defmodule Octomocto.Memory.Game do
       ties: state.ties,
       # The id of the player on the settings page, or nil
       editing: state.editing,
-      public: state.public
+      public: state.public,
+      # The level of a game of the campaign, and the number of levels
+      campaign: if(state.campaign, do: %{level: state.campaign.level, levels: Campaign.count()}),
+      failed: state.failed
     }
   end
 end

@@ -55,7 +55,17 @@ defmodule OctomoctoWeb.MemoryHTML do
         dgettext("memory", "The {color} player changes the settings…"),
       "Or try {game}" => dgettext("memory", "Or try {game}"),
       "Sign in" => dgettext("memory", "Sign in"),
-      "{sign_in} to keep your scores." => dgettext("memory", "{sign_in} to keep your scores.")
+      "{sign_in} to keep your scores." => dgettext("memory", "{sign_in} to keep your scores."),
+      "Level {level}" => dgettext("memory", "Level {level}"),
+      "Back to the map" => dgettext("memory", "Back to the map"),
+      "Wrong card!" => dgettext("memory", "Wrong card!"),
+      "You cleared {cleared} of {cards} cards." =>
+        dgettext("memory", "You cleared {cleared} of {cards} cards."),
+      "You finished the campaign!" => dgettext("memory", "You finished the campaign!"),
+      "Perfect!" => dgettext("memory", "Perfect!"),
+      "Level {level} done" => dgettext("memory", "Level {level} done"),
+      "Try again" => dgettext("memory", "Try again"),
+      "Next level" => dgettext("memory", "Next level")
     }
     |> Map.merge(
       Map.new(GamePageComponents.color_names(), &{&1, GamePageComponents.color_name(&1)})

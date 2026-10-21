@@ -2,11 +2,14 @@ defmodule OctomoctoWeb.MemoryChannel do
   @moduledoc """
   Connects one browser to a Memory game (see `OctomoctoWeb.GameChannel` for
   the join and the rejoin). Each change of the game is pushed as a
-  `"state"` event.
+  `"state"` event. After a level of the campaign with no slip, the player
+  starts the next level with `"next_level"`: the reply has the id of its
+  game.
   """
   use Phoenix.Channel
 
   alias Octomocto.Memory
+  alias Octomocto.Memory.{Campaign, Store}
   alias OctomoctoWeb.{GameChannel, NextGame}
 
   @game [context: Memory, game: Memory.Game, salt: "memory player", kind: "memory"]
@@ -28,6 +31,20 @@ defmodule OctomoctoWeb.MemoryChannel do
   def handle_in("restart", _params, socket) do
     Memory.restart(socket.assigns.game_id, socket.assigns.player_id)
     {:noreply, socket}
+  end
+
+  # The next level has the same theme choice
+  def handle_in("next_level", _params, socket) do
+    user_id = socket.assigns.user_id
+
+    with %{campaign: %{user_id: ^user_id} = campaign, failed: false} = state <-
+           Store.read(socket.assigns.game_id),
+         true <- state.finished_at != nil,
+         {:ok, id} <- Campaign.start(user_id, campaign.level + 1, campaign.theme) do
+      {:reply, {:ok, %{id: id}}, socket}
+    else
+      _ -> {:reply, {:error, %{}}, socket}
+    end
   end
 
   def handle_in("next_game", _params, socket) do

@@ -62,7 +62,6 @@ defmodule OctomoctoWeb.Router do
     get "/astronaut/:id", AstronautController, :show
     get "/trains/:id", TrainsController, :show
     get "/schulte/:id", SchulteController, :show
-    get "/memory/:id", MemoryController, :show
     get "/set/:id", SetGameController, :show
     get "/sudoku/:id", SudokuController, :show
     get "/echo/:id", EchoController, :show
@@ -81,7 +80,8 @@ defmodule OctomoctoWeb.Router do
       live "/", HomeLive
       live "/trains", TrainsLive
       live "/schulte", SchulteLive
-      live "/memory", MemoryLive
+      live "/memory", MemoryLive, :index
+      live "/memory/campaign", MemoryLive, :campaign
       live "/set", SetGameLive
       live "/sudoku", SudokuLive
       live "/echo", EchoLive
@@ -89,6 +89,9 @@ defmodule OctomoctoWeb.Router do
       live "/overlap", OverlapLive
       live "/stats", StatsLive
     end
+
+    # After the live routes, so that "campaign" is not a game id
+    get "/memory/:id", MemoryController, :show
   end
 
   # The pages in Portuguese, in the same pipeline as the English pages. Only
@@ -97,16 +100,18 @@ defmodule OctomoctoWeb.Router do
   scope "/pt", OctomoctoWeb do
     pipe_through [:browser, :portuguese]
 
-    get "/memory/:id", MemoryController, :show
-
     live_session :portuguese,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         {OctomoctoWeb.Locale, "pt"}
       ] do
-      live "/memory", MemoryLive
+      live "/memory", MemoryLive, :index
+      live "/memory/campaign", MemoryLive, :campaign
     end
+
+    # After the live routes, so that "campaign" is not a game id
+    get "/memory/:id", MemoryController, :show
 
     get "/*path", LocaleController, :english
   end
@@ -115,16 +120,18 @@ defmodule OctomoctoWeb.Router do
   scope "/de", OctomoctoWeb do
     pipe_through [:browser, :german]
 
-    get "/memory/:id", MemoryController, :show
-
     live_session :german,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         {OctomoctoWeb.Locale, "de"}
       ] do
-      live "/memory", MemoryLive
+      live "/memory", MemoryLive, :index
+      live "/memory/campaign", MemoryLive, :campaign
     end
+
+    # After the live routes, so that "campaign" is not a game id
+    get "/memory/:id", MemoryController, :show
 
     get "/*path", LocaleController, :english
   end
@@ -133,16 +140,18 @@ defmodule OctomoctoWeb.Router do
   scope "/ru", OctomoctoWeb do
     pipe_through [:browser, :russian]
 
-    get "/memory/:id", MemoryController, :show
-
     live_session :russian,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         {OctomoctoWeb.Locale, "ru"}
       ] do
-      live "/memory", MemoryLive
+      live "/memory", MemoryLive, :index
+      live "/memory/campaign", MemoryLive, :campaign
     end
+
+    # After the live routes, so that "campaign" is not a game id
+    get "/memory/:id", MemoryController, :show
 
     get "/*path", LocaleController, :english
   end
@@ -151,16 +160,18 @@ defmodule OctomoctoWeb.Router do
   scope "/fr", OctomoctoWeb do
     pipe_through [:browser, :french]
 
-    get "/memory/:id", MemoryController, :show
-
     live_session :french,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         {OctomoctoWeb.Locale, "fr"}
       ] do
-      live "/memory", MemoryLive
+      live "/memory", MemoryLive, :index
+      live "/memory/campaign", MemoryLive, :campaign
     end
+
+    # After the live routes, so that "campaign" is not a game id
+    get "/memory/:id", MemoryController, :show
 
     get "/*path", LocaleController, :english
   end
@@ -169,16 +180,18 @@ defmodule OctomoctoWeb.Router do
   scope "/uk", OctomoctoWeb do
     pipe_through [:browser, :ukrainian]
 
-    get "/memory/:id", MemoryController, :show
-
     live_session :ukrainian,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         {OctomoctoWeb.Locale, "uk"}
       ] do
-      live "/memory", MemoryLive
+      live "/memory", MemoryLive, :index
+      live "/memory/campaign", MemoryLive, :campaign
     end
+
+    # After the live routes, so that "campaign" is not a game id
+    get "/memory/:id", MemoryController, :show
 
     get "/*path", LocaleController, :english
   end
@@ -187,16 +200,18 @@ defmodule OctomoctoWeb.Router do
   scope "/pl", OctomoctoWeb do
     pipe_through [:browser, :polish]
 
-    get "/memory/:id", MemoryController, :show
-
     live_session :polish,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         {OctomoctoWeb.Locale, "pl"}
       ] do
-      live "/memory", MemoryLive
+      live "/memory", MemoryLive, :index
+      live "/memory/campaign", MemoryLive, :campaign
     end
+
+    # After the live routes, so that "campaign" is not a game id
+    get "/memory/:id", MemoryController, :show
 
     get "/*path", LocaleController, :english
   end
@@ -205,16 +220,18 @@ defmodule OctomoctoWeb.Router do
   scope "/it", OctomoctoWeb do
     pipe_through [:browser, :italian]
 
-    get "/memory/:id", MemoryController, :show
-
     live_session :italian,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         {OctomoctoWeb.Locale, "it"}
       ] do
-      live "/memory", MemoryLive
+      live "/memory", MemoryLive, :index
+      live "/memory/campaign", MemoryLive, :campaign
     end
+
+    # After the live routes, so that "campaign" is not a game id
+    get "/memory/:id", MemoryController, :show
 
     get "/*path", LocaleController, :english
   end
@@ -223,16 +240,18 @@ defmodule OctomoctoWeb.Router do
   scope "/es", OctomoctoWeb do
     pipe_through [:browser, :spanish]
 
-    get "/memory/:id", MemoryController, :show
-
     live_session :spanish,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         {OctomoctoWeb.Locale, "es"}
       ] do
-      live "/memory", MemoryLive
+      live "/memory", MemoryLive, :index
+      live "/memory/campaign", MemoryLive, :campaign
     end
+
+    # After the live routes, so that "campaign" is not a game id
+    get "/memory/:id", MemoryController, :show
 
     get "/*path", LocaleController, :english
   end

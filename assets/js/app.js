@@ -326,6 +326,10 @@ if (memoryNode) {
   memory.ports.memoryFlip.subscribe(card => channel.push("flip", {card}))
   memory.ports.memoryRestart.subscribe(() => channel.push("restart", {}))
   connectNextGame(memory.ports.memoryNextGame, channel, memoryNode)
+  memory.ports.memoryNextLevel.subscribe(() => {
+    channel.push("next_level", {})
+      .receive("ok", ({id}) => window.location.assign(`${memoryNode.dataset.indexUrl}/${id}`))
+  })
   memory.ports.memoryCopyText.subscribe(text => navigator.clipboard.writeText(text))
   memory.ports.memoryPlaySound.subscribe(playMemorySound)
   memory.ports.memorySaveMuted.subscribe(value => {

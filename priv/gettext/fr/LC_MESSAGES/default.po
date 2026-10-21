@@ -16,7 +16,7 @@ msgstr ""
 msgid "%{joined} of %{needed}"
 msgstr "%{joined} sur %{needed}"
 
-#: lib/octomocto_web/controllers/schulte_html.ex:106
+#: lib/octomocto_web/controllers/schulte_html.ex:139
 #, elixir-autogen, elixir-format
 msgid "%{score} pts"
 msgstr "%{score} pts"
@@ -69,7 +69,7 @@ msgstr "Nourris Octo et Mocto"
 msgid "Finished"
 msgstr "Terminée"
 
-#: lib/octomocto_web/controllers/schulte_html.ex:123
+#: lib/octomocto_web/controllers/schulte_html.ex:156
 #, elixir-autogen, elixir-format
 msgid "Guest"
 msgstr "Invité"

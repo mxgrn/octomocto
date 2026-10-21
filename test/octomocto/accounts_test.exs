@@ -338,11 +338,13 @@ defmodule Octomocto.AccountsTest do
                Accounts.update_user_display_name(user_fixture(), %{display_name: " Ada "})
     end
 
-    test "stores a blank name as nil" do
+    test "changes a blank name to a random ocean name" do
       user = telegram_user_fixture(%{"first_name" => "Ada"})
 
-      assert {:ok, %User{display_name: nil}} =
+      assert {:ok, %User{display_name: name}} =
                Accounts.update_user_display_name(user, %{display_name: " "})
+
+      assert name =~ ~r/^\w+ \w+$/
     end
 
     test "rejects a name longer than 30 characters" do

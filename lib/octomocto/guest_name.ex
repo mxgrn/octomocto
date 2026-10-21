@@ -2,7 +2,8 @@ defmodule Octomocto.GuestName do
   @moduledoc """
   The random ocean names of guests, such as "Salty Squid". The session keeps
   only the indices of the two words (see `OctomoctoWeb.GuestName`), thus a
-  guest cannot set any other text.
+  guest cannot set any other text. A new user gets such a name as the
+  display name too (see `Octomocto.Accounts.User`).
 
   Add new words only at the end of the lists. A change of the order or a
   removed word changes the names of the guests that have it.
@@ -19,6 +20,9 @@ defmodule Octomocto.GuestName do
     Starfish Lobster Crab Clam Oyster Barnacle Dolphin Orca Whale Manta
     Seahorse Turtle Anchovy Sardine Plankton Coral Sponge Pelican Albatross
   )
+
+  @doc "A random name."
+  def random_name, do: name(random())
 
   @doc "Random indices of a name."
   def random do

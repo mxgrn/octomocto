@@ -152,14 +152,7 @@ defmodule OctomoctoWeb.SchulteHTML do
     "#{div(seconds, 60)}:#{String.pad_leading("#{rem(seconds, 60)}", 2, "0")}.#{tenths}"
   end
 
-  # Do not show the full email of a user to other players.
+  # The same name as in the games
   def player_name(nil), do: gettext("Guest")
-
-  def player_name(%{display_name: display_name})
-      when is_binary(display_name) and display_name != "",
-      do: display_name
-
-  def player_name(%{name: name}) when is_binary(name) and name != "", do: name
-  def player_name(%{telegram_username: username}) when is_binary(username), do: "@" <> username
-  def player_name(%{email: email}), do: email |> String.split("@") |> hd()
+  def player_name(user), do: Octomocto.Accounts.public_name(user) || gettext("Guest")
 end

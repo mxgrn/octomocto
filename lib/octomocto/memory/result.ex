@@ -3,7 +3,9 @@ defmodule Octomocto.Memory.Result do
   The result of one player in one finished Memory field. All rows of a field
   have the same `game_id`, `settings` and `elapsed_ms`. The `settings` tell
   which results can be compared, for example
-  `%{"set" => 2, "cards" => 16, "players" => 1}`. The theme is not in the
+  `%{"set" => 2, "cards" => 16, "players" => 1}`. A run of the campaign
+  also has its `"campaign"` level, and it can stop at an error: then the
+  score is the cards that the player cleared. The theme is not in the
   settings: it does not change how hard the game is. It is in `theme`, to
   see which themes are popular. It is nil in the results from before the
   theme.
