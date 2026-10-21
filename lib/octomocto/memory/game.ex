@@ -407,15 +407,24 @@ defmodule Octomocto.Memory.Game do
     if in_lobby?(state), do: Lobby.broadcast(__MODULE__, state.id, nil)
   end
 
-  # A new field with zero scores for the same players
+  # A new field with zero scores for the same players. The winner of a
+  # finished field starts (of the tied players, the one who joined first).
+  # After an unfinished field, the player who joined first starts.
   defp new_round(state) do
+    order = player_order(state.players)
+
+    turn =
+      if state.finished_at,
+        do: Enum.max_by(order, &state.players[&1].score),
+        else: List.first(order)
+
     players =
       Map.new(state.players, fn {id, p} -> {id, %{p | score: 0, correct: 0, errors: 0}} end)
 
     %{state | players: players}
     |> Map.delete(:next_game)
     |> new_field()
-    |> Map.put(:turn, first_player(players))
+    |> Map.put(:turn, turn)
     |> make_ready()
   end
 
@@ -538,8 +547,6 @@ defmodule Octomocto.Memory.Game do
       _ -> List.first(order)
     end
   end
-
-  defp first_player(players), do: players |> player_order() |> List.first()
 
   defp player_order(players) do
     players |> Enum.sort_by(fn {_id, p} -> p.joined_at end) |> Enum.map(&elem(&1, 0))
