@@ -770,10 +770,10 @@ defmodule OctomoctoWeb.MemoryLive do
           :if={@level.set == 3}
           title={dgettext("memory", "Triplets")}
           class={[
-            "absolute grid size-5 place-items-center rounded-full bg-base-100 text-[11px] font-semibold ring-1",
+            "absolute grid size-4 place-items-center rounded-full bg-base-100 text-[10px] font-semibold ring-1",
             if(@level.status == :locked,
-              do: "top-1.5 right-1.5 text-base-content/40 ring-base-content/15",
-              else: "-top-0.5 -right-0.5 text-octo-indigo ring-octo-indigo"
+              do: "top-2 right-2 text-base-content/40 ring-base-content/15",
+              else: "top-0 right-0 text-octo-indigo ring-octo-indigo"
             )
           ]}
         >
