@@ -1,6 +1,8 @@
 defmodule OctomoctoWeb.SchulteLive do
   use OctomoctoWeb, :live_view
 
+  on_mount {OctomoctoWeb.SiteNotifications, "schulte"}
+
   import OctomoctoWeb.SchulteHTML
   import OctomoctoWeb.GamePageComponents
 

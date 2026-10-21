@@ -174,6 +174,14 @@ defmodule OctomoctoWeb.UserAuth do
      end)}
   end
 
+  # Gives a 404 page to all users who are not admins, also to guests. Use it
+  # in a `live_session` after `:mount_current_scope`, for live navigation.
+  def on_mount(:require_admin, _params, _session, socket) do
+    if admin?(socket.assigns.current_scope),
+      do: {:cont, socket},
+      else: raise(OctomoctoWeb.NotFoundError)
+  end
+
   @doc """
   Plug for routes that require the user to not be authenticated.
   """
@@ -203,6 +211,16 @@ defmodule OctomoctoWeb.UserAuth do
       |> halt()
     end
   end
+
+  @doc """
+  Plug for the routes of admins. Gives a 404 page to all other users, also
+  to guests, so that they do not know that the page exists.
+  """
+  def require_admin(conn, _opts) do
+    if admin?(conn.assigns.current_scope), do: conn, else: raise(OctomoctoWeb.NotFoundError)
+  end
+
+  defp admin?(scope), do: match?(%{user: %{role: :admin}}, scope)
 
   defp maybe_store_return_to(%{method: "GET"} = conn) do
     put_session(conn, :user_return_to, current_path(conn))

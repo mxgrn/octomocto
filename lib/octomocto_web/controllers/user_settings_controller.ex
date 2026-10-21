@@ -9,6 +9,7 @@ defmodule OctomoctoWeb.UserSettingsController do
 
   plug :assign_email_form
   plug :assign_display_name_form
+  plug OctomoctoWeb.SiteNotifications when action in [:edit, :update]
 
   def edit(conn, _params) do
     render(conn, :edit)

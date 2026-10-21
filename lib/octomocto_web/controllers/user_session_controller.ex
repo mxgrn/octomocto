@@ -5,6 +5,8 @@ defmodule OctomoctoWeb.UserSessionController do
   alias Octomocto.Accounts.TelegramAuth
   alias OctomoctoWeb.UserAuth
 
+  plug OctomoctoWeb.SiteNotifications when action in [:new, :confirm]
+
   # The home page has the same sign-in forms. This page is for the redirects
   # from pages that need a (recent) sign-in.
   def new(conn, _params) do

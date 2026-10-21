@@ -42,6 +42,35 @@ const TelegramLogin = {
   mounted() { showTelegramLogin(this.el) },
 }
 
+// The bar of notifications above the header (see `site_notifications` in
+// layouts.ex). It shows the first notification that the user did not close,
+// in the order the notifications were added. After the user closes it, the
+// next one shows on the next page load.
+const CLOSED_NOTIFICATIONS_KEY = "closed-notifications"
+const closedNotifications = () => {
+  try { return JSON.parse(localStorage.getItem(CLOSED_NOTIFICATIONS_KEY)) || [] } catch (_e) { return [] }
+}
+const closeNotification = (notification) => {
+  const closed = new Set([...closedNotifications(), notification.dataset.notificationId])
+  try { localStorage.setItem(CLOSED_NOTIFICATIONS_KEY, JSON.stringify([...closed])) } catch (_e) {}
+  notification.classList.add("closing")
+  setTimeout(() => { notification.hidden = true }, 150)
+}
+function showSiteNotification(container) {
+  const closed = closedNotifications()
+  const notification = [...container.querySelectorAll("[data-notification-id]")]
+    .find(el => !closed.includes(el.dataset.notificationId))
+  if (notification) notification.hidden = false
+}
+document.addEventListener("click", e => {
+  const button = e.target.closest("[data-close-notification]")
+  if (button) closeNotification(button.closest("[data-notification-id]"))
+})
+// On a LiveView page, also after live navigation
+const SiteNotifications = {
+  mounted() { showSiteNotification(this.el) },
+}
+
 // The settings page of a match (?match=<game id>) holds the seat of the
 // player in the game, so it sends the token of the player in this tab
 const matchToken = () => {
@@ -53,7 +82,7 @@ const matchToken = () => {
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: () => ({_csrf_token: csrfToken, ...matchToken()}),
-  hooks: {...colocatedHooks, TelegramLogin, LobbySound},
+  hooks: {...colocatedHooks, TelegramLogin, LobbySound, SiteNotifications},
 })
 
 // The socket often drops while the tab is in the background, and the error
@@ -639,6 +668,8 @@ function showTelegramLogin(node) {
 
 // On a page without a LiveView
 document.querySelectorAll("[data-telegram-login]").forEach(showTelegramLogin)
+// On a page without a LiveView
+document.querySelectorAll("#site-notifications").forEach(showSiteNotification)
 
 // connect if there are any LiveViews on the page
 liveSocket.connect()

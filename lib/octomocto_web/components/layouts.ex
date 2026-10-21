@@ -51,6 +51,13 @@ defmodule OctomoctoWeb.Layouts do
     default: nil,
     doc: "a message in a bar above the header, which the user can close"
 
+  attr :notifications, :list,
+    default: [],
+    doc: """
+    the notifications for the bar above the header (see `OctomoctoWeb.SiteNotifications`).
+    The bar does not show on a game page or below a banner.
+    """
+
   attr :languages, :list,
     default: [],
     doc: "the links to the page in each language (see `OctomoctoWeb.Locale.languages/3`)"
@@ -81,6 +88,10 @@ defmodule OctomoctoWeb.Layouts do
           <.icon name="hero-x-mark" class="size-4" />
         </button>
       </div>
+      <.site_notifications
+        :if={!@game && !@banner && @notifications != []}
+        notifications={@notifications}
+      />
       <header
         :if={!@game}
         id="site-header"
@@ -318,6 +329,36 @@ defmodule OctomoctoWeb.Layouts do
     </div>
 
     <.flash_group flash={@flash} />
+    """
+  end
+
+  attr :notifications, :list, required: true
+
+  # All notifications are hidden. The `SiteNotifications` hook in `app.js`
+  # shows the first one that the user did not close.
+  defp site_notifications(assigns) do
+    ~H"""
+    <div id="site-notifications" phx-hook="SiteNotifications" phx-update="ignore">
+      <div
+        :for={notification <- @notifications}
+        id={"site-notification-#{notification.id}"}
+        data-notification-id={notification.id}
+        hidden
+        class="site-notification relative flex items-center justify-center bg-octo-indigo px-10 py-2 text-center text-sm font-medium text-white"
+      >
+        <span class="[&_a]:font-semibold [&_a]:underline [&_a]:decoration-white/40 [&_a]:underline-offset-2 [&_a]:transition [&_a:hover]:decoration-white">
+          {Phoenix.HTML.raw(OctomoctoWeb.SiteNotifications.to_html(notification.text))}
+        </span>
+        <button
+          type="button"
+          data-close-notification
+          aria-label={gettext("Close")}
+          class="absolute right-2 rounded-full p-1 text-white/70 transition hover:bg-white/10 hover:text-white active:scale-90"
+        >
+          <.icon name="hero-x-mark" class="size-4" />
+        </button>
+      </div>
+    </div>
     """
   end
 

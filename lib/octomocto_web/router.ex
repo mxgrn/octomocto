@@ -257,6 +257,22 @@ defmodule OctomoctoWeb.Router do
   end
 
   # For deploys to check that the app is up
+  # Only for admins. All other users, also guests, get a 404 page.
+  scope "/admin", OctomoctoWeb.Admin do
+    pipe_through [:browser, :require_admin]
+
+    live_session :admin,
+      on_mount: [
+        {OctomoctoWeb.UserAuth, :mount_current_scope},
+        {OctomoctoWeb.UserAuth, :require_admin}
+      ] do
+      live "/", DashboardLive
+      live "/notifications", NotificationsLive
+      live "/notifications/new", NotificationFormLive, :new
+      live "/notifications/:id/edit", NotificationFormLive, :edit
+    end
+  end
+
   scope "/", OctomoctoWeb do
     get "/health", HealthController, :show
   end

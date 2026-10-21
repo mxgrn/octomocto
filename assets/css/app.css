@@ -717,3 +717,13 @@ three times */
 @media (prefers-reduced-motion: reduce) {
   .games-played-bump { animation: none; }
 }
+
+/* The bar of notifications above the header (see `site_notifications` in layouts.ex) */
+@keyframes site-notification-in {
+  from { opacity: 0; transform: translateY(-100%); }
+}
+.site-notification:not([hidden]) { animation: site-notification-in 250ms ease-out; }
+.site-notification.closing { opacity: 0; transition: opacity 150ms ease-in; }
+@media (prefers-reduced-motion: reduce) {
+  .site-notification:not([hidden]) { animation: none; }
+}

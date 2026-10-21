@@ -1,6 +1,8 @@
 defmodule OctomoctoWeb.TrainsLive do
   use OctomoctoWeb, :live_view
 
+  on_mount {OctomoctoWeb.SiteNotifications, "trains"}
+
   # The same settings and result lists as on the Schulte page
   import OctomoctoWeb.SchulteHTML,
     only: [

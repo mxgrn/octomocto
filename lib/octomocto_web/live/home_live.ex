@@ -5,6 +5,8 @@ defmodule OctomoctoWeb.HomeLive do
   """
   use OctomoctoWeb, :live_view
 
+  on_mount {OctomoctoWeb.SiteNotifications, nil}
+
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Lobby, Stats}

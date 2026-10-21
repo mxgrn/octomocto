@@ -1,4 +1,9 @@
-<Layouts.app flash={@flash} current_scope={@current_scope} guest_name={@guest_name}>
+<Layouts.app
+  flash={@flash}
+  notifications={@notifications}
+  current_scope={@current_scope}
+  guest_name={@guest_name}
+>
   <% busiest = Enum.max_by(@days, & &1.total) %>
   <% most = @by_game |> Enum.map(& &1.count) |> Enum.max(fn -> 0 end) %>
 

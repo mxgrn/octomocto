@@ -1,6 +1,8 @@
 defmodule OctomoctoWeb.SudokuLive do
   use OctomoctoWeb, :live_view
 
+  on_mount {OctomoctoWeb.SiteNotifications, "sudoku"}
+
   # The same settings and result lists as on the Schulte page
   import OctomoctoWeb.SchulteHTML,
     only: [

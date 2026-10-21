@@ -52,6 +52,20 @@ defmodule OctomoctoWeb.ConnCase do
   end
 
   @doc """
+  Setup helper that registers and logs in an admin.
+
+      setup :register_and_log_in_admin
+  """
+  def register_and_log_in_admin(%{conn: conn}) do
+    user =
+      Octomocto.AccountsFixtures.user_fixture()
+      |> Ecto.Changeset.change(role: :admin)
+      |> Octomocto.Repo.update!()
+
+    %{conn: log_in_user(conn, user), user: user}
+  end
+
+  @doc """
   Logs the given `user` into the `conn`.
 
   It returns an updated `conn`.

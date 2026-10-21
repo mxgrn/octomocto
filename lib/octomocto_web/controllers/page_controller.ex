@@ -1,6 +1,8 @@
 defmodule OctomoctoWeb.PageController do
   use OctomoctoWeb, :controller
 
+  plug OctomoctoWeb.SiteNotifications
+
   def privacy(conn, _params) do
     render(conn, :privacy, page_title: "Privacy Policy")
   end

@@ -30,6 +30,12 @@ defmodule Octomocto.AccountsTest do
     end
   end
 
+  describe "role" do
+    test "is user for a new user" do
+      assert user_fixture().role == :user
+    end
+  end
+
   describe "register_user/1" do
     test "requires email to be set" do
       {:error, changeset} = Accounts.register_user(%{})

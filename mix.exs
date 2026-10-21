@@ -67,6 +67,8 @@ defmodule Octomocto.MixProject do
        depth: 1},
       {:swoosh, "~> 1.16"},
       {:req, "~> 0.5"},
+      {:mdex, "~> 0.14.2"},
+      {:ecto_enum_migration, "~> 0.4.0"},
       {:sentry, "~> 14.0"},
       {:finch, "~> 0.21"},
       {:telemetry_metrics, "~> 1.0"},
