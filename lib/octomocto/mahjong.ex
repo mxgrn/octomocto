@@ -104,6 +104,7 @@ defmodule Octomocto.Mahjong do
       end)
 
     Repo.insert_all(Result, rows)
+    Octomocto.Stats.broadcast_game_finished()
   end
 
   @doc """

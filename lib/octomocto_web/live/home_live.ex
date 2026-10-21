@@ -7,7 +7,7 @@ defmodule OctomoctoWeb.HomeLive do
 
   import OctomoctoWeb.GamePageComponents
 
-  alias Octomocto.Lobby
+  alias Octomocto.{Lobby, Stats}
   alias Octomocto.Memory.Themes
 
   alias OctomoctoWeb.{
@@ -125,6 +125,7 @@ defmodule OctomoctoWeb.HomeLive do
   def mount(_params, _session, socket) do
     if connected?(socket) do
       for {_kind, {game, _store, _page}} <- @lobbies, do: Lobby.subscribe(game)
+      Stats.subscribe()
     end
 
     entries =
@@ -135,6 +136,7 @@ defmodule OctomoctoWeb.HomeLive do
     {:ok,
      socket
      |> assign(canonical_url: url(~p"/"), games: @games, kinds: Map.new(@games, &{&1.id, &1}))
+     |> assign(games_played: Stats.games_played())
      |> assign_lobby(entries)}
   end
 
@@ -145,6 +147,11 @@ defmodule OctomoctoWeb.HomeLive do
      socket
      |> maybe_push_new_game(id, entry)
      |> assign_lobby(Lobby.put_entry(socket.assigns.lobby, id, entry))}
+  end
+
+  # Each finished round adds one, so the page does not count all games again
+  def handle_info({:game_finished}, socket) do
+    {:noreply, update(socket, :games_played, &(&1 + 1))}
   end
 
   # Tells the page to play a sound when a new open game enters the list
@@ -158,6 +165,15 @@ defmodule OctomoctoWeb.HomeLive do
 
   defp assign_lobby(socket, entries) do
     assign(socket, lobby: entries, lobby_games: Lobby.games(entries))
+  end
+
+  # A number with a comma between each 3 digits, for example 5,195
+  defp delimit(n) do
+    n
+    |> Integer.to_string()
+    |> String.reverse()
+    |> String.replace(~r/(\d{3})(?=\d)/, "\\1,")
+    |> String.reverse()
   end
 
   defp game_path(game), do: "/#{game.kind}/#{game.id}"

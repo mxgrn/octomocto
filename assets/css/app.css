@@ -706,3 +706,14 @@ three times */
   --series-7: #9085e9;
   --series-8: #e66767;
 }
+
+/* The count of games played on the front page: a new number lifts in. The
+   number has a new id for each count, so the animation runs on each change. */
+@keyframes games-played-bump {
+  from { opacity: 0; transform: translateY(40%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.games-played-bump { display: inline-block; animation: games-played-bump 0.35s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .games-played-bump { animation: none; }
+}

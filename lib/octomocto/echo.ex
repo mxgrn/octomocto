@@ -83,6 +83,7 @@ defmodule Octomocto.Echo do
       end)
 
     Repo.insert_all(Result, rows)
+    Octomocto.Stats.broadcast_game_finished()
   end
 
   @doc """

@@ -21,6 +21,33 @@ defmodule Octomocto.Stats do
     "overlap" => Octomocto.Overlap.Result
   }
 
+  @topic "stats"
+
+  @doc """
+  Gives the number of all games played since the first results.
+  """
+  def games_played do
+    @results
+    |> Map.values()
+    |> Enum.map(fn schema ->
+      from r in schema, select: count(fragment("DISTINCT (?, ?)", r.game_id, r.inserted_at))
+    end)
+    |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
+    |> Repo.all()
+    |> Enum.sum()
+  end
+
+  @doc """
+  Subscribes the caller to `{:game_finished}`, sent once for each finished
+  round of any game.
+  """
+  def subscribe, do: Phoenix.PubSub.subscribe(Octomocto.PubSub, @topic)
+
+  @doc "Tells the subscribers that one more round is finished, on all nodes."
+  def broadcast_game_finished do
+    Phoenix.PubSub.broadcast(Octomocto.PubSub, @topic, {:game_finished})
+  end
+
   @doc """
   Gives the games played in each of the last `days` days, today included.
   Each day is `%{date: date, total: n, by_game: %{game_id => n}}`, oldest
