@@ -94,8 +94,9 @@ type alias Player =
     }
 
 
-{-| The state is "down", "up" or "cleared". The image is a number of an
-image of the theme. A face-down card has no image.
+{-| The state is "down", "up", "cleared" or "revealed" (a card that the
+player had to turn, shown after an error in the campaign). The image is a
+number of an image of the theme. A face-down card has no image.
 -}
 type alias Card =
     { state : String

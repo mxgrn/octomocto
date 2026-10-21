@@ -343,14 +343,15 @@ defmodule Octomocto.Memory.Game do
 
     case Enum.at(cards, card_id) do
       %{state: :down} = card ->
-        flip = check_flip(cards, state.seen, card_id)
+        known = known_matches(cards, state.seen)
+        flip = check_flip(known, state.seen, card_id)
 
         state =
           %{state | cards: List.replace_at(cards, card_id, %{card | state: :up}), ongoing: true}
           |> count_flip(player_id, flip)
           |> Map.update!(:seen, &MapSet.put(&1, card_id))
           |> Map.update!(:started_at, &(&1 || now()))
-          |> end_turn_or_fail(flip)
+          |> end_turn_or_fail(flip, known)
           |> count_win()
           |> save_results()
           |> restart_turn_timer()
@@ -507,11 +508,18 @@ defmodule Octomocto.Memory.Game do
   defp make_ready(state), do: state
 
   # The first error stops a field of the campaign. The cards of the turn
-  # stay face up, so that the player sees the error.
-  defp end_turn_or_fail(%{campaign: %{}} = state, :error),
-    do: %{state | failed: true, ongoing: false, finished_at: now()}
+  # stay face up, so that the player sees the error. The `known` cards that
+  # the player had to turn are shown too (as :revealed).
+  defp end_turn_or_fail(%{campaign: %{}} = state, :error, known) do
+    cards =
+      state.cards
+      |> Enum.with_index()
+      |> Enum.map(fn {card, i} -> if i in known, do: %{card | state: :revealed}, else: card end)
 
-  defp end_turn_or_fail(state, _flip), do: state |> end_turn() |> stop_clock()
+    %{state | cards: cards, failed: true, ongoing: false, finished_at: now()}
+  end
+
+  defp end_turn_or_fail(state, _flip, _known), do: state |> end_turn() |> stop_clock()
 
   # When the face-up cards make a full set, the turn ends: a set goes off
   # the field and the player turns again, and a miss gives the turn to the
@@ -534,34 +542,36 @@ defmodule Octomocto.Memory.Game do
     end
   end
 
-  # Tells if the flip of the card is :correct, an :error, or not counted
-  # (nil). The `cards` are the cards before the flip.
-  #
-  # A flip is counted only when the face-up cards of the turn can still make
-  # a set (thus never the first flip of a turn, and never a flip after a
-  # miss of a triplet). Then, when a card that completes the set was seen
-  # before, the player must turn such a card. When no such card was seen,
-  # the player must not turn a card that was seen: it cannot complete the
-  # set.
-  defp check_flip(cards, seen, card_id) do
-    up = cards |> Enum.filter(&(&1.state == :up)) |> Enum.map(& &1.image) |> Enum.uniq()
-
-    case up do
+  # The positions of the face-down cards that were seen and complete the
+  # set of the face-up cards of the turn. nil when the face-up cards cannot
+  # make a set (thus before the first flip of a turn, and after a miss of a
+  # triplet). The `cards` are the cards before the flip.
+  defp known_matches(cards, seen) do
+    case cards |> Enum.filter(&(&1.state == :up)) |> Enum.map(& &1.image) |> Enum.uniq() do
       [image] ->
-        known =
-          for {%{state: :down, image: ^image}, i} <- Enum.with_index(cards),
-              MapSet.member?(seen, i),
-              do: i
-
-        cond do
-          known != [] and card_id in known -> :correct
-          known != [] -> :error
-          MapSet.member?(seen, card_id) -> :error
-          true -> nil
-        end
+        for {%{state: :down, image: ^image}, i} <- Enum.with_index(cards),
+            MapSet.member?(seen, i),
+            do: i
 
       _ ->
         nil
+    end
+  end
+
+  # Tells if the flip of the card is :correct, an :error, or not counted
+  # (nil), from the `known` matches (see `known_matches/2`).
+  #
+  # A flip is counted only when the face-up cards of the turn can still make
+  # a set. Then, when a card that completes the set was seen before, the
+  # player must turn such a card. When no such card was seen, the player
+  # must not turn a card that was seen: it cannot complete the set.
+  defp check_flip(known, seen, card_id) do
+    cond do
+      known == nil -> nil
+      known != [] and card_id in known -> :correct
+      known != [] -> :error
+      MapSet.member?(seen, card_id) -> :error
+      true -> nil
     end
   end
 
