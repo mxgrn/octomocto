@@ -370,12 +370,19 @@ defmodule Octomocto.Memory.Game do
   # settings. A field that is not finished is not saved.
   def handle_cast({:restart, player_id}, %{editing: nil} = state)
       when is_map_key(state.players, player_id) do
-    state = new_round(state)
+    state = state |> pick_campaign_theme() |> new_round()
     publish(state)
     {:noreply, state}
   end
 
   def handle_cast({:restart, _player_id}, state), do: {:noreply, state}
+
+  # A new field of the campaign uses the theme choice of the player again:
+  # with "random", the theme can change
+  defp pick_campaign_theme(%{campaign: %{level: level, theme: choice}} = state),
+    do: %{state | theme: Campaign.pick_theme(Campaign.get(level), choice)}
+
+  defp pick_campaign_theme(state), do: state
 
   @impl true
   def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
