@@ -115,7 +115,8 @@ defmodule OctomoctoWeb.Layouts do
             </p>
           </div>
         </.link>
-        <.link :if={!@home} id="home-link" navigate={~p"/"} class="group block">
+        <.link :if={!@home} id="home-link" navigate={~p"/"} class="group flex items-center gap-2">
+          <OctomoctoWeb.PageHTML.octopi class="h-10 shrink-0 drop-shadow-sm" />
           <.wordmark class="h-6 -translate-y-0.5" />
         </.link>
 
