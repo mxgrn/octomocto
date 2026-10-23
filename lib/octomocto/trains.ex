@@ -181,6 +181,7 @@ defmodule Octomocto.Trains do
 
     Octomocto.Guests.save(players, now)
     Repo.insert_all(Result, rows)
+    Octomocto.Locales.broadcast_saved(players)
     Octomocto.Stats.broadcast_game_finished()
   end
 

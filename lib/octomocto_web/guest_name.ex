@@ -4,8 +4,8 @@ defmodule OctomoctoWeb.GuestName do
   random guest id in the session, and assigns the name as `:guest_name`.
   Each visitor gets a name and an id, so a user that signs out keeps the
   same guest name and id. The session also keeps the first language of
-  the browser (`Accept-Language`), for the locale of the guest (see
-  `Octomocto.Guests.put_locale/2`).
+  the browser (`Accept-Language`), for the locale of the user or guest
+  (see `Octomocto.Locales`).
 
   The guest id is only for statistics and for the names in the results
   (see `Octomocto.Guests.Guest`). Never use it for authentication or
@@ -21,7 +21,7 @@ defmodule OctomoctoWeb.GuestName do
 
   @key "guest_name"
   @id_key "guest_id"
-  @locale_key "guest_locale"
+  @locale_key "browser_locale"
 
   def init(opts), do: opts
 

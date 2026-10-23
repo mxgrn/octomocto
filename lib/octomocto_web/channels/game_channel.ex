@@ -30,13 +30,13 @@ defmodule OctomoctoWeb.GameChannel do
   When a player starts the next game (see `OctomoctoWeb.NextGame`), the
   channels of the players push its id as a `"next_game"` event.
 
-  The channel of a guest writes the browser locale of the guest when a game
-  saves the guest (see `Octomocto.Guests.subscribe/1`).
+  The channel writes the browser locale of its user or guest when a game
+  saves the results (see `Octomocto.Locales`).
   """
   import Phoenix.Channel, only: [push: 3]
   import Phoenix.Socket, only: [assign: 2]
 
-  alias Octomocto.{Accounts, Guests, Lobby}
+  alias Octomocto.{Accounts, Lobby, Locales}
 
   # In seconds
   @token_max_age 24 * 60 * 60
@@ -45,7 +45,7 @@ defmodule OctomoctoWeb.GameChannel do
   def join(game_id, params, socket, opts) do
     Phoenix.PubSub.subscribe(Octomocto.PubSub, opts[:game].topic(game_id))
     Lobby.subscribe_watchers(opts[:game])
-    subscribe_guest(socket.assigns)
+    Locales.subscribe(socket.assigns[:user_id], socket.assigns[:guest_id])
 
     player_id = verify_token(game_id, params["token"], opts)
 
@@ -83,9 +83,11 @@ defmodule OctomoctoWeb.GameChannel do
     {:noreply, socket}
   end
 
-  # A game saved the guest of this browser
-  def handle_info({:guest_saved, id}, socket, _opts) do
-    if locale = socket.assigns[:guest_locale], do: Guests.put_locale(id, locale)
+  # A game saved the results of the user or guest of this browser
+  def handle_info({:results_saved}, %{assigns: assigns} = socket, _opts) do
+    if assigns[:browser_locale],
+      do: Locales.put(assigns[:user_id], assigns[:guest_id], assigns[:browser_locale])
+
     {:noreply, socket}
   end
 
@@ -140,9 +142,6 @@ defmodule OctomoctoWeb.GameChannel do
     name = player_name(user_id, assigns[:guest_name])
     opts[:context].join(game_id, user_id, name, player_id, guest_id(user_id, assigns[:guest_id]))
   end
-
-  defp subscribe_guest(%{user_id: nil, guest_id: id}) when id != nil, do: Guests.subscribe(id)
-  defp subscribe_guest(_assigns), do: :ok
 
   # Only a guest has a guest id in the game
   defp guest_id(nil, guest_id), do: guest_id

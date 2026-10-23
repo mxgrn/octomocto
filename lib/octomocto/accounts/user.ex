@@ -17,6 +17,9 @@ defmodule Octomocto.Accounts.User do
     field :memory_tab, :string
     # The same for the Trains page
     field :trains_tab, :string
+    # The first language of the browser in the last finished game, for
+    # example "pt-BR" (see `Octomocto.Locales`). Only for statistics.
+    field :locale, :string
     # Only admins can open the /admin pages. Set it in the database.
     field :role, Ecto.Enum, values: [:user, :admin], default: :user
     # Copied from the session token (see `UserToken`). Nothing reads it now.
