@@ -510,10 +510,8 @@ between the pads: white in the light theme, and dark in the dark theme. */
 .echo-pad.is-playable { cursor: pointer; }
 /* A dark layer over each pad, see viewPad in Echo.elm */
 .echo-pad-shade { fill: #fff; opacity: 0.6; transition: opacity 140ms ease; }
-.echo-pad.is-playable:hover + .echo-pad-shade { opacity: 0.42; }
 [data-theme=dark] .echo-pad-shade { fill: #000; opacity: 0.42; }
-[data-theme=dark] .echo-pad.is-playable:hover + .echo-pad-shade { opacity: 0.28; }
-.echo-pad-shade.is-lit, .echo-pad.is-playable:hover + .echo-pad-shade.is-lit { opacity: 0; }
+.echo-pad-shade.is-lit { opacity: 0; }
 .echo-glyph { stroke: rgb(20 21 31 / 0.5); }
 [data-theme=dark] .echo-glyph { stroke: rgb(20 21 31 / 0.72); }
 .echo-no-shapes .echo-glyph { display: none; }
