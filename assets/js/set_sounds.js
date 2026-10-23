@@ -1,8 +1,11 @@
 // Sounds for the Set game.
 
-import {audioReady, noise, tone} from "./sounds"
+import {audioReady, gameStart, noise, tone} from "./sounds"
 
 const sounds = {
+  // The same sound in all games when all players are ready
+  start: gameStart,
+
   // A soft short tick when you select a card
   select() {
     tone({type: "triangle", freq: 660, duration: 0.05, gain: 0.05})

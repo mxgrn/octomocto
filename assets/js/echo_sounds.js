@@ -1,11 +1,14 @@
 // Sounds for the Echo game.
 
-import {audioReady, tone} from "./sounds"
+import {audioReady, gameStart, tone} from "./sounds"
 
 // The tone of each pad: the C major pentatonic scale over two octaves
 const PAD_FREQS = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33, 659.25]
 
 const sounds = {
+  // The same sound in all games when all players are ready
+  start: gameStart,
+
   // A triangle wave with a short attack, so that it does not click
   pad({pad, ms}) {
     tone({type: "triangle", freq: PAD_FREQS[pad], duration: ms / 1000, gain: 0.22, attack: 0.02})

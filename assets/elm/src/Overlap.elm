@@ -487,12 +487,21 @@ playSounds model names =
         Cmd.batch (List.map overlapPlaySound names)
 
 
-{-| The sounds for the change from the old state to the new one: a card that
-I won or that another player won, and the end of the game.
+{-| The sounds for the change from the old state to the new one: the start
+of the game, a card that I won or that another player won, and the end of
+the game.
 -}
 stateSounds : Me -> Game -> Game -> List String
 stateSounds me old new =
     let
+        -- All players are ready, and the game starts
+        startSound =
+            if old.waiting && not new.waiting && List.length new.players > 1 then
+                [ "start" ]
+
+            else
+                []
+
         foundSound =
             case new.last of
                 Just found ->
@@ -524,7 +533,7 @@ stateSounds me old new =
             else
                 []
     in
-    foundSound ++ endSound
+    startSound ++ foundSound ++ endSound
 
 
 isMe : Me -> Player -> Bool

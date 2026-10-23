@@ -714,8 +714,8 @@ playSounds model sounds =
         Cmd.batch (List.map echoPlaySound sounds)
 
 
-{-| With 2 or more players: the start of my turn, and the end of the
-game. The taps have their own sounds.
+{-| With 2 or more players: the start of the game, the start of my turn,
+and the end of the game. The taps have their own sounds.
 -}
 stateSounds : Me -> Game -> Game -> List Sound
 stateSounds me old new =
@@ -729,11 +729,20 @@ stateSounds me old new =
         else
             [ sound "lose" ]
 
-    else if myTurn me new && not (myTurn me old) && not new.finished && not new.waiting then
-        [ sound "turn" ]
-
     else
-        []
+        List.concat
+            [ -- All players are ready, and the game starts
+              if old.waiting && not new.waiting then
+                [ sound "start" ]
+
+              else
+                []
+            , if myTurn me new && not (myTurn me old) && not new.finished && not new.waiting then
+                [ sound "turn" ]
+
+              else
+                []
+            ]
 
 
 

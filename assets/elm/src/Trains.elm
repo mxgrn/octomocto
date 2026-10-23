@@ -497,6 +497,11 @@ update msg model =
                         )
 
                     else
+                        let
+                            -- All players are ready, and the game starts
+                            starts =
+                                not game.started && state.elapsedMs /= Nothing && List.length state.players > 1
+                        in
                         -- The switches and the decisions come through their own
                         -- events. The state can be older than my last flip.
                         ( { model
@@ -508,7 +513,14 @@ update msg model =
                                         , started = state.elapsedMs /= Nothing
                                     }
                           }
-                        , syncClock state
+                        , Cmd.batch
+                            [ syncClock state
+                            , if starts && not model.muted then
+                                playTrainSound "start"
+
+                              else
+                                Cmd.none
+                            ]
                         )
 
                 _ ->

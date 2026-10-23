@@ -1,8 +1,11 @@
 // Sounds for the Schulte race.
 
-import {audioReady, noise, tone} from "./sounds"
+import {audioReady, gameStart, noise, tone} from "./sounds"
 
 const sounds = {
+  // The same sound in all games when all players are ready
+  start: gameStart,
+
   // A short beep on each step of the countdown. Laptop speakers are weak
   // in low tones, so the beeps are high and a little louder than the others.
   countdown() {

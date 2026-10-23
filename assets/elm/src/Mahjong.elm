@@ -651,13 +651,21 @@ playSounds model names =
         Cmd.batch (List.map mahjongPlaySound names)
 
 
-{-| The sounds for the change from the old state to the new one: a pair
-that I removed or that another player removed, a shuffle, and the end of
-the game.
+{-| The sounds for the change from the old state to the new one: the start
+of the game, a pair that I removed or that another player removed, a
+shuffle, and the end of the game.
 -}
 stateSounds : Me -> Game -> Game -> List String
 stateSounds me old new =
     let
+        -- All players are ready, and the game starts
+        startSound =
+            if old.waiting && not new.waiting && List.length new.players > 1 then
+                [ "start" ]
+
+            else
+                []
+
         pairSound =
             case new.last of
                 Just last ->
@@ -696,7 +704,7 @@ stateSounds me old new =
             else
                 []
     in
-    pairSound ++ shuffleSound ++ endSound
+    startSound ++ pairSound ++ shuffleSound ++ endSound
 
 
 isMe : Me -> Player -> Bool

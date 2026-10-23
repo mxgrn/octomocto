@@ -55,3 +55,14 @@ export function noise({start = 0, duration, gain, attack = 0.005, filter, filter
   source.buffer = buffer
   play(source, {start, duration, gain, attack, filter, filterEnd, filterType})
 }
+
+// The sound of all multiplayer games when all players are ready and the
+// game starts: 3 quick rising notes and a bright chord. In the games with a
+// countdown, it plays with the first beep, so the first note makes a
+// sweet interval with that beep (C and A).
+export function gameStart() {
+  ;[523, 659, 784].forEach((freq, i) => tone({type: "triangle", freq, start: i * 0.08, duration: 0.12, gain: 0.14}))
+  for (const freq of [659, 784, 1047]) {
+    tone({type: "triangle", freq, start: 0.24, duration: 0.5, gain: 0.07, attack: 0.01})
+  }
+}

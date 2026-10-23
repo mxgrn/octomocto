@@ -1,8 +1,11 @@
 // Sounds for the Memory game.
 
-import {audioReady, noise, tone} from "./sounds"
+import {audioReady, gameStart, noise, tone} from "./sounds"
 
 const sounds = {
+  // The same sound in all games when all players are ready
+  start: gameStart,
+
   // A soft short swish when a card turns over
   flip() {
     noise({duration: 0.06, gain: 0.05, filter: 3000, filterEnd: 1200, filterType: "bandpass"})

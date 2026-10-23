@@ -414,13 +414,21 @@ playSounds model names =
         Cmd.batch (List.map memoryPlaySound names)
 
 
-{-| The sounds for the change from the old state to the new one: a card
-that turns face up, a found set, the start of my turn, and the end of
-the game. A miss has no sound of its own.
+{-| The sounds for the change from the old state to the new one: the start
+of the game, a card that turns face up, a found set, the start of my turn,
+and the end of the game. A miss has no sound of its own.
 -}
 stateSounds : Me -> Game -> Game -> List String
 stateSounds me old new =
     let
+        -- All players are ready, and the game starts
+        startSound =
+            if old.waiting && not new.waiting && List.length new.players > 1 then
+                [ "start" ]
+
+            else
+                []
+
         count state game =
             List.length (List.filter (\card -> card.state == state) game.cards)
 
@@ -457,7 +465,8 @@ stateSounds me old new =
                 []
     in
     List.concat
-        [ if flipped then
+        [ startSound
+        , if flipped then
             [ "flip" ]
 
           else
@@ -1355,7 +1364,6 @@ viewResult model me game =
             , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
             ]
 
-
         -- Only a guest who played gets the call to sign in, not a spectator
         , if model.guest && me /= Nothing then
             let
@@ -1381,7 +1389,6 @@ viewResult model me game =
           else
             text ""
         ]
-
 
 
 {-| The end of a field of the campaign: after an error, the player tries

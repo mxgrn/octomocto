@@ -1,8 +1,11 @@
 // Sounds for the train game.
 
-import {audioReady, tone} from "./sounds"
+import {audioReady, gameStart, tone} from "./sounds"
 
 const sounds = {
+  // The same sound in all games when all players are ready
+  start: gameStart,
+
   // A short mechanical click
   switch() {
     tone({type: "square", freq: 2200, freqEnd: 700, duration: 0.04, gain: 0.05, filter: 3000})

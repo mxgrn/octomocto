@@ -412,14 +412,33 @@ playSounds model names =
         Cmd.batch (List.map schultePlaySound names)
 
 
-{-| The sounds for the change from the old state to the new one: a found
-number (by this player or by another one), and the end of the game.
+{-| The sounds for the change from the old state to the new one: the start
+of the game, a found number (by this player or by another one), and the end
+of the game.
 -}
 stateSounds : Me -> Game -> Game -> List String
 stateSounds me old new =
     let
+        -- All players are ready, and the game starts
+        startSound =
+            if old.waiting && not new.waiting && List.length new.players > 1 then
+                [ "start" ]
+
+            else
+                []
+
         finders =
             newFinders old new
+
+        foundSound =
+            if List.any (\id -> me == Just id) finders then
+                [ "found" ]
+
+            else if finders /= [] then
+                [ "other_found" ]
+
+            else
+                []
 
         endSound =
             if finished new && not (finished old) then
@@ -437,16 +456,7 @@ stateSounds me old new =
             else
                 []
     in
-    (if List.any (\id -> me == Just id) finders then
-        [ "found" ]
-
-     else if finders /= [] then
-        [ "other_found" ]
-
-     else
-        []
-    )
-        ++ endSound
+    startSound ++ foundSound ++ endSound
 
 
 {-| The ids of the players who found numbers between the old state and the
@@ -674,7 +684,7 @@ viewBoard model me tall game =
     div [ class "relative mx-auto", style "width" (fieldWidth model me tall game) ]
         [ viewField model tall game
         , if game.waiting then
-                    viewWaiting game
+            viewWaiting game
 
           else if Maybe.withDefault 0 (countdownStep model) > 0 then
             viewCountdown (Maybe.withDefault 0 (countdownStep model))

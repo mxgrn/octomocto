@@ -1,6 +1,6 @@
 // Sounds for the mahjong game. The tiles click like stone or bone.
 
-import {audioReady, noise, tone} from "./sounds"
+import {audioReady, gameStart, noise, tone} from "./sounds"
 
 // A short hard click of a tile
 function clack({start = 0, gain = 0.12, filter = 3200} = {}) {
@@ -9,6 +9,9 @@ function clack({start = 0, gain = 0.12, filter = 3200} = {}) {
 }
 
 const sounds = {
+  // The same sound in all games when all players are ready
+  start: gameStart,
+
   // The countdown beeps, the same as in the Schulte race
   countdown() {
     tone({freq: 880, duration: 0.15, gain: 0.2})

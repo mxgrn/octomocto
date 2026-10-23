@@ -619,12 +619,21 @@ playSounds model names =
         Cmd.batch (List.map sudokuPlaySound names)
 
 
-{-| The sounds for the change from the old state to the new one: a cell
-that I filled or that another player filled, and the end of the game.
+{-| The sounds for the change from the old state to the new one: the start
+of the game, a cell that I filled or that another player filled, and the end
+of the game.
 -}
 stateSounds : Me -> Game -> Game -> List String
 stateSounds me old new =
     let
+        -- All players are ready, and the game starts
+        startSound =
+            if old.waiting && not new.waiting && List.length new.players > 1 then
+                [ "start" ]
+
+            else
+                []
+
         filledSound =
             case new.last of
                 Just last ->
@@ -656,7 +665,7 @@ stateSounds me old new =
             else
                 []
     in
-    filledSound ++ endSound
+    startSound ++ filledSound ++ endSound
 
 
 isMe : Me -> Player -> Bool
@@ -900,6 +909,7 @@ are at the sides of the grid, so only the padding is not for the grid.
 The pad shows only during a puzzle, but there is always space for it, so
 that the grid does not change its size when the puzzle starts. A watcher
 has no pad.
+
 -}
 reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
