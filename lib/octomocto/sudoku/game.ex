@@ -157,7 +157,7 @@ defmodule Octomocto.Sudoku.Game do
   end
 
   @impl true
-  def handle_call({:join, pid, _user_id, _name, player_id}, _from, state)
+  def handle_call({:join, pid, _user_id, _name, player_id, _guest_id}, _from, state)
       when is_map_key(state.players, player_id) do
     Process.monitor(pid)
     state = update_in(state.players[player_id], &%{&1 | pid: pid, left: nil})
@@ -175,12 +175,12 @@ defmodule Octomocto.Sudoku.Game do
     {:reply, {:ok, nil, public(state)}, state}
   end
 
-  def handle_call({:join, _pid, _user_id, _name, _player_id}, _from, state)
+  def handle_call({:join, _pid, _user_id, _name, _player_id, _guest_id}, _from, state)
       when map_size(state.players) >= state.needed do
     {:reply, {:ok, nil, public(state)}, state}
   end
 
-  def handle_call({:join, pid, user_id, name, _player_id}, _from, state) do
+  def handle_call({:join, pid, user_id, name, _player_id, guest_id}, _from, state) do
     Process.monitor(pid)
     # Unique in the cluster, because the game can move to another node
     player_id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
@@ -189,6 +189,7 @@ defmodule Octomocto.Sudoku.Game do
     player = %{
       pid: pid,
       user_id: user_id,
+      guest_id: guest_id,
       name: name,
       color: color,
       color_name: color_name,

@@ -39,7 +39,8 @@ defmodule Octomocto.Overlap do
   Adds a player for the calling process. The player is removed some time
   after the process stops. Subscribe to `Game.topic(id)` first to get all
   updates. The `user_id` is nil for a guest. The `name` is the display
-  name, or nil for a color name. When the game has all its players, the
+  name, or nil for a color name. The `guest_id` is nil for a user (see
+  `Octomocto.Guests`). When the game has all its players, the
   new process only watches, and the player id is nil.
 
   Give the `player_id` of a player that is still in the game to bind that
@@ -49,8 +50,17 @@ defmodule Octomocto.Overlap do
   Gives `{:error, :unavailable}` when the node of the game stopped a
   moment ago. Try again soon.
   """
-  def join(id, user_id \\ nil, name \\ nil, player_id \\ nil) do
-    GameProcess.join(Game, Store, Octomocto.Overlap.GameSupervisor, id, user_id, name, player_id)
+  def join(id, user_id \\ nil, name \\ nil, player_id \\ nil, guest_id \\ nil) do
+    GameProcess.join(
+      Game,
+      Store,
+      Octomocto.Overlap.GameSupervisor,
+      id,
+      user_id,
+      name,
+      player_id,
+      guest_id
+    )
   end
 
   @doc """
@@ -80,7 +90,7 @@ defmodule Octomocto.Overlap do
 
   @doc """
   Saves one finished deck. Each player is a map with `:user_id` (nil for a
-  guest) and `:score`.
+  guest), `:name`, `:guest_id` (see `Octomocto.Guests`) and `:score`.
   """
   def save_results(game_id, settings, elapsed_ms, players) do
     now = DateTime.utc_now()
@@ -92,11 +102,13 @@ defmodule Octomocto.Overlap do
           settings: settings,
           elapsed_ms: elapsed_ms,
           user_id: player.user_id,
+          guest_id: Octomocto.Guests.guest_id(player),
           score: player.score,
           inserted_at: now
         }
       end)
 
+    Octomocto.Guests.save(players, now)
     Repo.insert_all(Result, rows)
     Octomocto.Stats.broadcast_game_finished()
   end
@@ -167,7 +179,7 @@ defmodule Octomocto.Overlap do
     from(r in Result,
       where: r.game_id in ^game_ids,
       order_by: [desc: r.score],
-      preload: :user
+      preload: [:user, :guest]
     )
     |> Repo.all()
     |> Enum.group_by(& &1.game_id)

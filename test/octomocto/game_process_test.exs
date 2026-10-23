@@ -4,18 +4,20 @@ defmodule Octomocto.GameProcessTest do
   alias Octomocto.GameProcess
   alias Octomocto.Schulte.{Game, GameSupervisor, Store}
 
-  test "join/7 adds a player to a running game" do
+  test "join/8 adds a player to a running game" do
     id = "game-#{System.unique_integer([:positive])}"
     start_supervised!({Game, {id, :random, :easy, 1, false}})
 
     assert {:ok, player_id, %{players: [%{id: player_id}]}} =
-             GameProcess.join(Game, Store, GameSupervisor, id, nil, nil, nil)
+             GameProcess.join(Game, Store, GameSupervisor, id, nil, nil, nil, nil)
   end
 
-  test "join/7 starts a stopped game again from its copy in the store" do
+  test "join/8 starts a stopped game again from its copy in the store" do
     id = "game-#{System.unique_integer([:positive])}"
     pid = start_supervised!({Game, {id, :random, :easy, 1, false}})
-    {:ok, _player_id, before} = GameProcess.join(Game, Store, GameSupervisor, id, nil, nil, nil)
+
+    {:ok, _player_id, before} =
+      GameProcess.join(Game, Store, GameSupervisor, id, nil, nil, nil, nil)
 
     # As when the node of the game stops
     ref = Process.monitor(pid)
@@ -23,14 +25,14 @@ defmodule Octomocto.GameProcessTest do
     assert_receive {:DOWN, ^ref, :process, ^pid, :killed}
 
     assert {:ok, _player_id, state} =
-             GameProcess.join(Game, Store, GameSupervisor, id, nil, nil, nil)
+             GameProcess.join(Game, Store, GameSupervisor, id, nil, nil, nil, nil)
 
     assert state.cells == before.cells
     assert GenServer.whereis(Game.via(id)) not in [nil, pid]
   end
 
-  test "join/7 fails for an unknown game" do
-    assert GameProcess.join(Game, Store, GameSupervisor, "unknown", nil, nil, nil) ==
+  test "join/8 fails for an unknown game" do
+    assert GameProcess.join(Game, Store, GameSupervisor, "unknown", nil, nil, nil, nil) ==
              {:error, :not_found}
   end
 end

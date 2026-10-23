@@ -134,8 +134,8 @@ defmodule OctomoctoWeb.SchulteHTML do
   @doc "The names of the players of one game, separated by commas."
   def player_list(assigns) do
     ~H"""
-    <span :for={{player, index} <- Enum.with_index(@players)}>{if index > 0, do: ", "}{player_name(
-      player.user
+    <span :for={{player, index} <- Enum.with_index(@players)}>{if index > 0, do: ", "}{result_name(
+      player
     )}<span :if={@scores} class="ml-1 tabular-nums text-base-content/60">{gettext("%{score} pts",
       score: player.score
     )}</span><span
@@ -155,4 +155,8 @@ defmodule OctomoctoWeb.SchulteHTML do
   # The same name as in the games
   def player_name(nil), do: gettext("Guest")
   def player_name(user), do: Octomocto.Accounts.public_name(user) || gettext("Guest")
+
+  # A guest from before the guest names is "Guest"
+  defp result_name(%{user: nil, guest: %{name: name}}), do: name
+  defp result_name(result), do: player_name(result.user)
 end

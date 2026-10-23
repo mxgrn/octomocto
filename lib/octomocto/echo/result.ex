@@ -12,6 +12,7 @@ defmodule Octomocto.Echo.Result do
     field :settings, :map
     field :score, :integer
     belongs_to :user, Octomocto.Accounts.User
+    belongs_to :guest, Octomocto.Guests.Guest, type: :binary_id
 
     timestamps(type: :utc_datetime_usec, updated_at: false)
   end

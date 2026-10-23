@@ -10,7 +10,7 @@ defmodule OctomoctoWeb.Endpoint do
     key: "_octomocto_key",
     signing_salt: "KCXwk7iz",
     same_site: "Lax",
-    # Keeps the guest name (see `OctomoctoWeb.GuestName`) after the browser
+    # Keeps the guest name and id (see `OctomoctoWeb.GuestName`) after the browser
     # closes. Browsers limit cookies to 400 days.
     max_age: 400 * 24 * 60 * 60
   ]

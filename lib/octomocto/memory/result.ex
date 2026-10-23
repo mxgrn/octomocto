@@ -25,6 +25,7 @@ defmodule Octomocto.Memory.Result do
     field :correct, :integer
     field :errors, :integer
     belongs_to :user, Octomocto.Accounts.User
+    belongs_to :guest, Octomocto.Guests.Guest, type: :binary_id
 
     timestamps(type: :utc_datetime_usec, updated_at: false)
   end

@@ -97,7 +97,8 @@ defmodule Octomocto.Trains do
   Adds a player for the calling process. The player is removed some time
   after the process stops. Subscribe to `Game.topic(id)` first to get all
   updates. The `user_id` is nil for a guest. The `name` is the display
-  name, or nil for a color name. When the game has all its players or
+  name, or nil for a color name. The `guest_id` is nil for a user (see
+  `Octomocto.Guests`). When the game has all its players or
   started, the new process only watches, and the player id is nil.
 
   Give the `player_id` of a player that is still in the game to bind that
@@ -107,8 +108,17 @@ defmodule Octomocto.Trains do
   Gives `{:error, :unavailable}` when the node of the game stopped a
   moment ago. Try again soon.
   """
-  def join(id, user_id \\ nil, name \\ nil, player_id \\ nil) do
-    GameProcess.join(Game, Store, Octomocto.Trains.GameSupervisor, id, user_id, name, player_id)
+  def join(id, user_id \\ nil, name \\ nil, player_id \\ nil, guest_id \\ nil) do
+    GameProcess.join(
+      Game,
+      Store,
+      Octomocto.Trains.GameSupervisor,
+      id,
+      user_id,
+      name,
+      player_id,
+      guest_id
+    )
   end
 
   @doc """
@@ -151,7 +161,8 @@ defmodule Octomocto.Trains do
 
   @doc """
   Saves one finished round. All players get the same `score`. Each player
-  is a map with `:user_id` (nil for a guest).
+  is a map with `:user_id` (nil for a guest), `:name` and `:guest_id`
+  (see `Octomocto.Guests`).
   """
   def save_results(game_id, settings, score, players) do
     now = DateTime.utc_now()
@@ -163,10 +174,12 @@ defmodule Octomocto.Trains do
           settings: settings,
           score: score,
           user_id: player.user_id,
+          guest_id: Octomocto.Guests.guest_id(player),
           inserted_at: now
         }
       end)
 
+    Octomocto.Guests.save(players, now)
     Repo.insert_all(Result, rows)
     Octomocto.Stats.broadcast_game_finished()
   end
@@ -233,7 +246,7 @@ defmodule Octomocto.Trains do
 
   # Gives the results of all players of the rounds, by game id
   defp game_players(game_ids) do
-    from(r in Result, where: r.game_id in ^game_ids, order_by: r.id, preload: :user)
+    from(r in Result, where: r.game_id in ^game_ids, order_by: r.id, preload: [:user, :guest])
     |> Repo.all()
     |> Enum.group_by(& &1.game_id)
   end

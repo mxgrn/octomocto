@@ -34,11 +34,20 @@ defmodule Octomocto.Echo do
   end
 
   @doc """
-  Adds a player for the calling process, as `Octomocto.Memory.join/4`
+  Adds a player for the calling process, as `Octomocto.Memory.join/5`
   does.
   """
-  def join(id, user_id \\ nil, name \\ nil, player_id \\ nil) do
-    GameProcess.join(Game, Store, Octomocto.Echo.GameSupervisor, id, user_id, name, player_id)
+  def join(id, user_id \\ nil, name \\ nil, player_id \\ nil, guest_id \\ nil) do
+    GameProcess.join(
+      Game,
+      Store,
+      Octomocto.Echo.GameSupervisor,
+      id,
+      user_id,
+      name,
+      player_id,
+      guest_id
+    )
   end
 
   @doc """
@@ -66,7 +75,7 @@ defmodule Octomocto.Echo do
 
   @doc """
   Saves one finished game. Each player is a map with `:user_id` (nil for a
-  guest) and `:score`.
+  guest), `:name`, `:guest_id` (see `Octomocto.Guests`) and `:score`.
   """
   def save_results(game_id, settings, players) do
     now = DateTime.utc_now()
@@ -77,11 +86,13 @@ defmodule Octomocto.Echo do
           game_id: game_id,
           settings: settings,
           user_id: player.user_id,
+          guest_id: Octomocto.Guests.guest_id(player),
           score: player.score,
           inserted_at: now
         }
       end)
 
+    Octomocto.Guests.save(players, now)
     Repo.insert_all(Result, rows)
     Octomocto.Stats.broadcast_game_finished()
   end
@@ -152,7 +163,7 @@ defmodule Octomocto.Echo do
     from(r in Result,
       where: r.game_id in ^game_ids,
       order_by: [desc: r.score],
-      preload: :user
+      preload: [:user, :guest]
     )
     |> Repo.all()
     |> Enum.group_by(& &1.game_id)

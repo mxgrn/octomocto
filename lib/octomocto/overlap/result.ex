@@ -14,6 +14,7 @@ defmodule Octomocto.Overlap.Result do
     field :score, :integer
     field :elapsed_ms, :integer
     belongs_to :user, Octomocto.Accounts.User
+    belongs_to :guest, Octomocto.Guests.Guest, type: :binary_id
 
     timestamps(type: :utc_datetime_usec, updated_at: false)
   end

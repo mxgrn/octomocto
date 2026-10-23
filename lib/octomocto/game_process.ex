@@ -9,18 +9,19 @@ defmodule Octomocto.GameProcess do
 
   @doc """
   Adds a player for the calling process with a `{:join, pid, user_id, name,
-  player_id}` call to the game, and gives the reply of the game. Gives
+  player_id, guest_id}` call to the game, and gives the reply of the game.
+  The `guest_id` is nil for a user (see `Octomocto.Guests`). Gives
   `{:error, :not_found}` when the game does not exist, and
   `{:error, :unavailable}` when the node of the game stopped a moment ago
   (try again soon).
   """
-  def join(game, store, supervisor, id, user_id, name, player_id) do
-    call(game, store, supervisor, id, {:join, self(), user_id, name, player_id})
+  def join(game, store, supervisor, id, user_id, name, player_id, guest_id) do
+    call(game, store, supervisor, id, {:join, self(), user_id, name, player_id, guest_id})
   end
 
   @doc """
   Gives the reply of a `:watch` call to the game: the state for a process
-  that only watches. Gives the same errors as `join/7`.
+  that only watches. Gives the same errors as `join/8`.
   """
   def watch(game, store, supervisor, id) do
     call(game, store, supervisor, id, :watch)

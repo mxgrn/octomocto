@@ -17,7 +17,8 @@ defmodule OctomoctoWeb.UserSocket do
     {:ok,
      assign(socket,
        user_id: verify_user_token(params["user_token"]),
-       guest_name: OctomoctoWeb.GuestName.from_session(connect_info[:session])
+       guest_name: OctomoctoWeb.GuestName.from_session(connect_info[:session]),
+       guest_id: OctomoctoWeb.GuestName.id_from_session(connect_info[:session])
      )}
   end
 
