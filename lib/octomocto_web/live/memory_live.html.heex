@@ -184,6 +184,35 @@
             <.setting_header label={dgettext("memory", "Theme")} icon="hero-swatch" />
             <div class="memory-themes-box">
               <div id="memory-themes" class="memory-themes grid grid-cols-4 gap-3 xl:grid-cols-6">
+                <%!-- The game picks the theme when it starts, and again for each new field --%>
+                <.link
+                  id="theme-random"
+                  patch={settings_path(@locale, @settings, theme: "random")}
+                  aria-current={@settings.theme == "random" && "true"}
+                  class={[
+                    "group relative flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
+                    if(@settings.theme == "random",
+                      do: "bg-octo-mist ring-2 ring-octo-indigo dark:bg-octo-indigo-light/10",
+                      else:
+                        "outline-1 -outline-offset-1 outline-dashed outline-base-content/20 hover:bg-base-200 hover:outline-base-content/35"
+                    )
+                  ]}
+                >
+                  <span
+                    id="theme-random-new"
+                    class="absolute -top-1.5 -right-1.5 z-10 rounded-full bg-octo-indigo px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white shadow-sm"
+                  >
+                    {dgettext("memory", "New")}
+                  </span>
+                  <img
+                    src={~p"/images/memory/random.svg"}
+                    alt=""
+                    class="aspect-square w-full p-1 transition duration-300 group-hover:scale-105 group-hover:-rotate-6"
+                  />
+                  <span class="w-full truncate text-xs text-base-content/70">
+                    {dgettext("memory", "Random")}
+                  </span>
+                </.link>
                 <.link
                   :for={theme <- @themes}
                   id={"theme-#{theme.name}"}

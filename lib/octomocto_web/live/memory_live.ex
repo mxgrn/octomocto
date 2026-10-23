@@ -252,11 +252,12 @@ defmodule OctomoctoWeb.MemoryLive do
     end
   end
 
-  # The first theme, pairs, one player and a public game, when the params
+  # A random theme, pairs, one player and a public game, when the params
   # do not say otherwise. A number of cards that is not possible changes to the
   # nearest possible one.
   defp settings(params) do
-    theme = if Themes.get(params["theme"] || ""), do: params["theme"], else: Themes.default()
+    theme = if Themes.get(params["theme"] || ""), do: params["theme"], else: "random"
+
     set = if params["set"] == "triplets", do: 3, else: 2
 
     cards =
@@ -312,7 +313,7 @@ defmodule OctomoctoWeb.MemoryLive do
   defp match_params(params, %{state: state}) do
     Map.merge(
       %{
-        "theme" => state.theme,
+        "theme" => theme_choice(state),
         "set" => if(state.set == 3, do: "triplets", else: "pairs"),
         "cards" => Integer.to_string(length(state.cards))
       },
@@ -454,7 +455,7 @@ defmodule OctomoctoWeb.MemoryLive do
 
   defp state_settings(state) do
     %{
-      theme: state.theme,
+      theme: theme_choice(state),
       set: state.set,
       cards: state.size,
       players: state.needed,
@@ -484,10 +485,18 @@ defmodule OctomoctoWeb.MemoryLive do
     if settings.match, do: query ++ [match: settings.match], else: query
   end
 
-  # True when the open game has the same settings as the new game
+  # The theme choice of the game in the state: "random" when each new
+  # field gets a random theme
+  defp theme_choice(%{random_theme: true}), do: "random"
+  defp theme_choice(state), do: state.theme
+
+  # True when the open game has the same settings as the new game. The
+  # theme "random" matches all themes.
   defp same_settings?(game, settings) do
+    theme = if settings.theme == "random", do: game.settings.theme, else: settings.theme
+
     {game.settings, game.players_needed} ==
-      {Map.take(settings, [:theme, :set, :cards]), settings.players}
+      {%{theme: theme, set: settings.set, cards: settings.cards}, settings.players}
   end
 
   @doc """

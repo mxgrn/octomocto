@@ -8,12 +8,12 @@ defmodule Octomocto.Memory.Themes do
   """
 
   @themes [
-    %{name: "sushi", title: "Sushi", cards: 50, new: true, cover: 2},
-    %{name: "food", title: "Food", cards: 230, new: true, cover: 31},
-    %{name: "desert", title: "Desert", cards: 50, new: true},
-    %{name: "ocean", title: "Ocean", cards: 50, new: true, cover: 11},
-    %{name: "monsters", title: "Monsters", cards: 100, new: true, cover: 4},
-    %{name: "insects", title: "Insects", cards: 50, new: true},
+    %{name: "sushi", title: "Sushi", cards: 50, cover: 2},
+    %{name: "food", title: "Food", cards: 230, cover: 31},
+    %{name: "desert", title: "Desert", cards: 50},
+    %{name: "ocean", title: "Ocean", cards: 50, cover: 11},
+    %{name: "monsters", title: "Monsters", cards: 100, cover: 4},
+    %{name: "insects", title: "Insects", cards: 50},
     %{name: "eighties", title: "Eighties", cards: 40},
     %{name: "spring", title: "Spring", cards: 38},
     %{name: "flowers", title: "Flowers", cards: 50},
@@ -32,10 +32,24 @@ defmodule Octomocto.Memory.Themes do
 
   def list, do: @themes
 
-  def default, do: "eighties"
-
   @doc "Gives the theme with the name, or nil."
   def get(name), do: Enum.find(@themes, &(&1.name == name))
+
+  @doc """
+  The themes that have enough images for a field of `cards` cards in sets
+  of `set` cards: each image can be in only one set of a field.
+  """
+  def for_field(set, cards), do: Enum.filter(@themes, &(&1.cards * set >= cards))
+
+  @doc """
+  The theme for a new field: the `choice` when it has enough images, else
+  a random theme with enough images. The choice "random" always gives a
+  random theme.
+  """
+  def pick(choice, set, cards) do
+    names = set |> for_field(cards) |> Enum.map(& &1.name)
+    if choice in names, do: choice, else: Enum.random(names)
+  end
 
   @doc "Gives the file name of the cover card of the theme with the name."
   def cover(name), do: "#{name |> get() |> Map.get(:cover, 1)}.svg"

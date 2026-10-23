@@ -167,7 +167,9 @@ defmodule Octomocto.Memory.Game do
     state =
       new_field(%{
         id: id,
-        theme: config.theme,
+        # With the theme "random", each new field gets a random theme
+        theme: Themes.pick(config.theme, config.set, config.cards),
+        random_theme: config.theme == "random",
         set: config.set,
         size: config.cards,
         needed: config.players,
@@ -270,9 +272,12 @@ defmodule Octomocto.Memory.Game do
       when is_binary(player_id) do
     %{theme: theme, set: set, cards: cards} = settings
 
-    if Themes.get(theme) && set in [2, 3] && cards in Board.sizes(theme, set) do
+    if (theme == "random" or Themes.get(theme) != nil) and set in [2, 3] and
+         cards in Board.sizes(theme, set) do
       state =
-        %{state | theme: theme, set: set, size: cards, editing: nil}
+        %{state | theme: Themes.pick(theme, set, cards), set: set, size: cards, editing: nil}
+        # A state from before the random theme has no `:random_theme`
+        |> Map.put(:random_theme, theme == "random")
         |> new_round()
 
       publish(state)
@@ -371,19 +376,22 @@ defmodule Octomocto.Memory.Game do
   # settings. A field that is not finished is not saved.
   def handle_cast({:restart, player_id}, %{editing: nil} = state)
       when is_map_key(state.players, player_id) do
-    state = state |> pick_campaign_theme() |> new_round()
+    state = state |> pick_theme() |> new_round()
     publish(state)
     {:noreply, state}
   end
 
   def handle_cast({:restart, _player_id}, state), do: {:noreply, state}
 
-  # A new field of the campaign uses the theme choice of the player again:
-  # with "random", the theme can change
-  defp pick_campaign_theme(%{campaign: %{level: level, theme: choice}} = state),
+  # A new field uses the theme choice of the player again: with "random",
+  # the theme can change
+  defp pick_theme(%{campaign: %{level: level, theme: choice}} = state),
     do: %{state | theme: Campaign.pick_theme(Campaign.get(level), choice)}
 
-  defp pick_campaign_theme(state), do: state
+  defp pick_theme(%{random_theme: true} = state),
+    do: %{state | theme: Themes.pick("random", state.set, state.size)}
+
+  defp pick_theme(state), do: state
 
   @impl true
   def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
@@ -758,6 +766,9 @@ defmodule Octomocto.Memory.Game do
 
     %{
       theme: state.theme,
+      # True when each new field gets a random theme. A state from before
+      # the random theme has no `:random_theme`.
+      random_theme: Map.get(state, :random_theme, false),
       set: state.set,
       cards: cards,
       images: state.cards |> Enum.map(& &1.image) |> Enum.uniq() |> Enum.sort(),

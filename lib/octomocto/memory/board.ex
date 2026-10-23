@@ -19,14 +19,18 @@ defmodule Octomocto.Memory.Board do
   @doc """
   Gives the possible numbers of cards for the theme and the set size, the
   smallest first. A theme has a limit, because each card image can be in
-  only one set.
+  only one set. The theme "random" has the limit of the theme with the
+  most images (see `Themes.pick/3`).
   """
   def sizes(theme_name, set_size) do
-    max_cards = min(Themes.get(theme_name).cards * set_size, @max_cards)
+    max_cards = min(images(theme_name) * set_size, @max_cards)
 
     @min_cards..max_cards//1
     |> Enum.filter(&(rem(&1, set_size) == 0 and layouts(&1) != []))
   end
+
+  defp images("random"), do: Themes.list() |> Enum.map(& &1.cards) |> Enum.max()
+  defp images(theme_name), do: Themes.get(theme_name).cards
 
   @doc """
   Gives the grids for the number of cards as `{columns, rows, gaps}`. The

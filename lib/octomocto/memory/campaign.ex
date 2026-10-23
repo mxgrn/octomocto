@@ -62,23 +62,11 @@ defmodule Octomocto.Memory.Campaign do
   @doc "The level with the number, or nil."
   def get(level) when is_integer(level), do: Enum.at(levels(), level - 1)
 
-  @doc """
-  The themes that have enough images for the level: each image can be in
-  only one set of a field.
-  """
-  def themes(%{set: set, cards: cards}) do
-    Enum.filter(Themes.list(), &(&1.cards * set >= cards))
-  end
+  @doc "The themes that have enough images for the level, see `Themes.for_field/2`."
+  def themes(%{set: set, cards: cards}), do: Themes.for_field(set, cards)
 
-  @doc """
-  The theme for a new field of the level: the `choice` when it has enough
-  images, else a random theme. The choice "random" always gives a random
-  theme.
-  """
-  def pick_theme(level, choice) do
-    names = level |> themes() |> Enum.map(& &1.name)
-    if choice in names, do: choice, else: Enum.random(names)
-  end
+  @doc "The theme for a new field of the level, see `Themes.pick/3`."
+  def pick_theme(%{set: set, cards: cards}, choice), do: Themes.pick(choice, set, cards)
 
   @doc "The best runs of the user, by level number."
   def progress(user_id) do
