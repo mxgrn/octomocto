@@ -39,3 +39,6 @@ npm-debug.log
 
 # Mnesia directories of the dev and test nodes
 /Mnesia.*/
+
+# Local files of Claude Code (for example, the dev server config of the preview pane)
+/.claude/
