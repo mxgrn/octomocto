@@ -142,7 +142,8 @@ defmodule OctomoctoWeb.HomeLive do
      socket
      |> assign(canonical_url: url(~p"/"), games: @games, kinds: Map.new(@games, &{&1.id, &1}))
      |> assign(games_played: Stats.games_played())
-     |> assign_lobby(entries)}
+     |> assign_lobby(entries)
+     |> assign(watchers: watchers())}
   end
 
   def handle_info({:lobby_changed, game, id, entry}, socket) do
@@ -152,6 +153,11 @@ defmodule OctomoctoWeb.HomeLive do
      socket
      |> maybe_push_new_game(id, entry)
      |> assign_lobby(Lobby.put_entry(socket.assigns.lobby, id, entry))}
+  end
+
+  # A watcher came or left, see `Octomocto.Lobby.watch/3`
+  def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff"}, socket) do
+    {:noreply, assign(socket, watchers: watchers())}
   end
 
   # Each finished round adds one, so the page does not count all games again
@@ -167,6 +173,13 @@ defmodule OctomoctoWeb.HomeLive do
   end
 
   defp maybe_push_new_game(socket, _id, _entry), do: socket
+
+  # The game ids are random, so two kinds of games do not have the same id
+  defp watchers do
+    for {_kind, {game, _store, _page}} <- @lobbies, reduce: %{} do
+      watchers -> Map.merge(watchers, Lobby.watchers(game))
+    end
+  end
 
   defp assign_lobby(socket, entries) do
     assign(socket, lobby: entries, lobby_games: Lobby.games(entries))

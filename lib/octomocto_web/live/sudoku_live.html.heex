@@ -38,6 +38,7 @@
     >
       <.lobby_games
         games={@lobby_games}
+        watchers={@watchers}
         matches={&same_settings?(&1, @settings)}
         path={&~p"/sudoku/#{&1.id}"}
       >

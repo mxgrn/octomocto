@@ -111,6 +111,12 @@ port trainsDecided : (Decode.Value -> msg) -> Sub msg
 port trainsJoinFailed : (String -> msg) -> Sub msg
 
 
+{-| The number of browsers that only watch the game, after the join and
+after each change.
+-}
+port trainsWatchers : (Int -> msg) -> Sub msg
+
+
 
 -- CONSTANTS
 
@@ -372,6 +378,7 @@ type alias Model =
     , clockStart : Maybe Int
     , now : Int
     , muted : Bool
+    , watchers : Int
     , viewport : ( Float, Float )
     }
 
@@ -396,6 +403,7 @@ init flags =
       , clockStart = Nothing
       , now = 0
       , muted = flags.muted
+      , watchers = 0
       , viewport = ( 1024, 768 )
       }
     , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
@@ -454,6 +462,7 @@ type Msg
     | GotFlip Decode.Value
     | GotDecision Decode.Value
     | GotJoinFailed String
+    | GotWatchers Int
     | SyncClock Int Time.Posix
     | Tick Time.Posix
     | Toggle Cell
@@ -546,6 +555,9 @@ update msg model =
 
         GotJoinFailed reason ->
             ( { model | connection = Failed reason }, Cmd.none )
+
+        GotWatchers count ->
+            ( { model | watchers = count }, Cmd.none )
 
         SyncClock elapsedMs time ->
             let
@@ -1726,6 +1738,7 @@ subscriptions model =
         , trainsFlipped GotFlip
         , trainsDecided GotDecision
         , trainsJoinFailed GotJoinFailed
+        , trainsWatchers GotWatchers
         , Browser.Events.onResize (\w h -> Resized (toFloat w) (toFloat h))
         , case model.connection of
             Joined _ game ->
@@ -1831,6 +1844,7 @@ viewGame model me game =
                             Nothing ->
                                 text ""
                         , viewMuteButton model.muted
+                        , viewWatchers model.watchers
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
                         [ text
@@ -1986,6 +2000,22 @@ viewTurnRequest model me game =
           else
             text ""
         ]
+
+
+{-| The number of browsers that only watch the game, when there are any.
+-}
+viewWatchers : Int -> Html Msg
+viewWatchers count =
+    if count > 0 then
+        span
+            [ id "trains-watchers"
+            , class "flex shrink-0 items-center gap-1 text-sm tabular-nums text-slate-500 dark:text-slate-400"
+            , Html.Attributes.title ("Watchers: " ++ String.fromInt count)
+            ]
+            [ span [ class "hero-eye size-4" ] [], text (String.fromInt count) ]
+
+    else
+        text ""
 
 
 viewMuteButton : Bool -> Html Msg

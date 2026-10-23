@@ -78,7 +78,7 @@
       </section>
 
       <div id="lobby" class="grid grid-cols-1 gap-4 lg:col-start-1 lg:row-start-1">
-        <.lobby_games games={@lobby_games} path={&game_path/1}>
+        <.lobby_games games={@lobby_games} watchers={@watchers} path={&game_path/1}>
           <:action>
             <%!-- The hook plays a sound for a new open game, see lobby_sounds.js --%>
             <button

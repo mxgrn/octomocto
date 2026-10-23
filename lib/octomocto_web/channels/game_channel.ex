@@ -5,9 +5,11 @@ defmodule OctomoctoWeb.GameChannel do
   gives the messages that it does not handle itself to `handle_info/3`.
 
   Each join adds a new player (a guest when the socket has no user). The
-  join reply has the player id, a token of the player, and the full game
-  state. The player id and the token are nil when the game does not take
-  more players: then the browser only watches.
+  join reply has the player id, a token of the player, the full game
+  state, and the number of watchers. The player id and the token are nil
+  when the game does not take more players: then the browser only watches,
+  and it is in the watchers of the game (see `Octomocto.Lobby.watch/3`).
+  Each change of the number of watchers is pushed as a `"watchers"` event.
 
   The browser sends the token in the join params when it joins again (for
   example, after a reload or a reconnect to another node in a deploy), and
@@ -31,7 +33,7 @@ defmodule OctomoctoWeb.GameChannel do
   import Phoenix.Channel, only: [push: 3]
   import Phoenix.Socket, only: [assign: 2]
 
-  alias Octomocto.Accounts
+  alias Octomocto.{Accounts, Lobby}
 
   # In seconds
   @token_max_age 24 * 60 * 60
@@ -39,6 +41,7 @@ defmodule OctomoctoWeb.GameChannel do
 
   def join(game_id, params, socket, opts) do
     Phoenix.PubSub.subscribe(Octomocto.PubSub, opts[:game].topic(game_id))
+    Lobby.subscribe_watchers(opts[:game])
 
     player_id = verify_token(game_id, params["token"], opts)
 
@@ -76,6 +79,16 @@ defmodule OctomoctoWeb.GameChannel do
     {:noreply, socket}
   end
 
+  # A watcher of a game of this kind came or left
+  def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff}, socket, opts) do
+    id = socket.assigns.game_id
+
+    if is_map_key(diff.joins, id) or is_map_key(diff.leaves, id),
+      do: push(socket, "watchers", %{count: Lobby.watcher_count(opts[:game], id)})
+
+    {:noreply, socket}
+  end
+
   def handle_info(:rejoin, socket, opts) do
     case join_game(socket, opts) do
       {:ok, reply, socket} ->
@@ -95,7 +108,15 @@ defmodule OctomoctoWeb.GameChannel do
     with {:ok, player_id, state} <- join_or_watch(socket.assigns, opts) do
       game_id = socket.assigns.game_id
       socket = assign(socket, player_id: player_id, game_ref: monitor_game(game_id, opts))
-      reply = %{player_id: player_id, token: sign_token(game_id, player_id, opts), state: state}
+      Lobby.watch(opts[:game], game_id, player_id == nil)
+
+      reply = %{
+        player_id: player_id,
+        token: sign_token(game_id, player_id, opts),
+        state: state,
+        watchers: Lobby.watcher_count(opts[:game], game_id)
+      }
+
       {:ok, reply, socket}
     end
   end

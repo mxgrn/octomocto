@@ -25,6 +25,7 @@ defmodule OctomoctoWeb.MemoryHTML do
       "Latest games and best results" => dgettext("memory", "Latest games and best results"),
       "Turn the sounds on" => dgettext("memory", "Turn the sounds on"),
       "Turn the sounds off" => dgettext("memory", "Turn the sounds off"),
+      "Watchers: {count}" => dgettext("memory", "Watchers: {count}"),
       "Restart game" => dgettext("memory", "Restart game"),
       "Copied!" => dgettext("memory", "Copied!"),
       "Copy link" => dgettext("memory", "Copy link"),

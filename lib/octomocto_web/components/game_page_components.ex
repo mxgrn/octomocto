@@ -19,6 +19,11 @@ defmodule OctomoctoWeb.GamePageComponents do
     doc: "a function that is true for a game with the settings of the new game"
 
   attr :path, :any, required: true, doc: "a function that gives the path of a game"
+
+  attr :watchers, :map,
+    default: %{},
+    doc: "the number of watchers of each game by its id, see `Octomocto.Lobby.watchers/1`"
+
   slot :icon, required: true, doc: "the image of a game, with the game as the argument"
 
   slot :summary,
@@ -31,7 +36,8 @@ defmodule OctomoctoWeb.GamePageComponents do
   The public games: the open games that wait for players, then the games
   that have started. An open game with the same settings as the new game
   has a green background. In a started game, the player of the turn is in
-  bold, and the points show when the game has them.
+  bold, and the points show when the game has them. The Watch button of a
+  game with watchers shows their number.
   """
   def lobby_games(assigns) do
     ~H"""
@@ -123,6 +129,13 @@ defmodule OctomoctoWeb.GamePageComponents do
               ]}
             >
               {gettext("Watch")}
+              <span
+                :if={@watchers[game.id]}
+                id={"watchers-#{game.id}"}
+                class="tabular-nums opacity-70"
+              >
+                · {@watchers[game.id]}
+              </span>
             </.link>
           <% end %>
         </li>

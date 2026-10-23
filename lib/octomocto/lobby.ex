@@ -24,13 +24,54 @@ defmodule Octomocto.Lobby do
     * `:seats_left` - for an open game,
     * `:started_at` and `:finished` - for an ongoing game. The
       `:started_at` is the start of the current field (or round).
+
+  The lobby also counts the processes that only watch each game (see
+  `watch/3`). A page gets a `%Phoenix.Socket.Broadcast{event:
+  "presence_diff"}` message when a watcher comes or leaves, and reads the
+  new counts with `watchers/1`.
   """
+
+  alias Octomocto.Lobby.Watchers
 
   @ongoing_size 10
 
   def topic(game), do: game.lobby_topic()
 
-  def subscribe(game), do: Phoenix.PubSub.subscribe(Octomocto.PubSub, topic(game))
+  def subscribe(game) do
+    Phoenix.PubSub.subscribe(Octomocto.PubSub, topic(game))
+    subscribe_watchers(game)
+  end
+
+  @doc "Subscribes only to the changes of the watchers of the games of the `game` module."
+  def subscribe_watchers(game),
+    do: Phoenix.PubSub.subscribe(Octomocto.PubSub, watchers_topic(game))
+
+  @doc """
+  Adds the calling process to the watchers of the game `id` when `watching`
+  is true, else removes it. A watcher is removed when its process stops.
+  """
+  def watch(game, id, true), do: Watchers.track(self(), watchers_topic(game), id, %{})
+  def watch(game, id, false), do: Watchers.untrack(self(), watchers_topic(game), id)
+
+  @doc """
+  The number of watchers of each game of the `game` module, by the game id.
+  A game with no watchers is not in the map.
+  """
+  def watchers(game) do
+    Map.new(Watchers.list(watchers_topic(game)), fn {id, %{metas: metas}} ->
+      {id, length(metas)}
+    end)
+  end
+
+  @doc "The number of watchers of the game `id`."
+  def watcher_count(game, id) do
+    case Watchers.get_by_key(watchers_topic(game), id) do
+      %{metas: metas} -> length(metas)
+      [] -> 0
+    end
+  end
+
+  defp watchers_topic(game), do: "watchers:" <> topic(game)
 
   @doc "Sends the new row of a game. The `entry` is nil when the game is in no list."
   def broadcast(game, id, entry) do

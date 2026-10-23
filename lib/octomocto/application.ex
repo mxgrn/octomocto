@@ -24,6 +24,7 @@ defmodule Octomocto.Application do
       # serves requests.
       {Mnesiac.Supervisor, [hosts, [name: Octomocto.MnesiacSupervisor]]},
       {Phoenix.PubSub, name: Octomocto.PubSub},
+      Octomocto.Lobby.Watchers,
       {DynamicSupervisor, name: Octomocto.Astronaut.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Echo.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Mahjong.GameSupervisor},

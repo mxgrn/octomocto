@@ -133,6 +133,7 @@
       >
         <.lobby_games
           games={@lobby_games}
+          watchers={@watchers}
           matches={&same_settings?(&1, @settings)}
           path={&Locale.path(@locale, ~p"/memory/#{&1.id}")}
         >

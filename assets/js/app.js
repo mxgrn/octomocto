@@ -202,6 +202,7 @@ if (trainsNode) {
       else sessionStorage.removeItem(tokenKey)
     } catch (_e) {}
     trains.ports.trainsJoined.send(reply)
+    trains.ports.trainsWatchers.send(reply.watchers ?? 0)
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
@@ -210,6 +211,7 @@ if (trainsNode) {
   channel.on("flip", flip => trains.ports.trainsFlipped.send(flip))
   channel.on("decision", decision => trains.ports.trainsDecided.send(decision))
   channel.on("joined", joined)
+  channel.on("watchers", ({count}) => trains.ports.trainsWatchers.send(count))
   channel.join()
     .receive("ok", joined)
     .receive("error", ({reason}) => {
@@ -271,12 +273,14 @@ if (schulteNode) {
       else sessionStorage.removeItem(tokenKey)
     } catch (_e) {}
     schulte.ports.schulteJoined.send(reply)
+    schulte.ports.schulteWatchers.send(reply.watchers ?? 0)
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
   const channel = socket.channel(`schulte:${schulteNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
   channel.on("state", state => schulte.ports.schulteState.send(state))
   channel.on("joined", joined)
+  channel.on("watchers", ({count}) => schulte.ports.schulteWatchers.send(count))
   channel.join()
     .receive("ok", joined)
     .receive("error", ({reason}) => {
@@ -323,6 +327,7 @@ if (memoryNode) {
       else sessionStorage.removeItem(tokenKey)
     } catch (_e) {}
     memory.ports.memoryJoined.send(reply)
+    memory.ports.memoryWatchers.send(reply.watchers ?? 0)
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
@@ -345,6 +350,7 @@ if (memoryNode) {
     memory.ports.memoryState.send(state)
   })
   channel.on("joined", joined)
+  channel.on("watchers", ({count}) => memory.ports.memoryWatchers.send(count))
   channel.join()
     .receive("ok", joined)
     .receive("error", ({reason}) => {
@@ -394,12 +400,14 @@ if (setNode) {
       else sessionStorage.removeItem(tokenKey)
     } catch (_e) {}
     setGame.ports.setGameJoined.send(reply)
+    setGame.ports.setGameWatchers.send(reply.watchers ?? 0)
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
   const channel = socket.channel(`set:${setNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
   channel.on("state", state => setGame.ports.setGameState.send(state))
   channel.on("joined", joined)
+  channel.on("watchers", ({count}) => setGame.ports.setGameWatchers.send(count))
   channel.join()
     .receive("ok", joined)
     .receive("error", ({reason}) => {
@@ -445,12 +453,14 @@ if (sudokuNode) {
       else sessionStorage.removeItem(tokenKey)
     } catch (_e) {}
     sudoku.ports.sudokuJoined.send(reply)
+    sudoku.ports.sudokuWatchers.send(reply.watchers ?? 0)
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
   const channel = socket.channel(`sudoku:${sudokuNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
   channel.on("state", state => sudoku.ports.sudokuState.send(state))
   channel.on("joined", joined)
+  channel.on("watchers", ({count}) => sudoku.ports.sudokuWatchers.send(count))
   channel.join()
     .receive("ok", joined)
     .receive("error", ({reason}) => {
@@ -507,12 +517,14 @@ if (echoNode) {
       else sessionStorage.removeItem(tokenKey)
     } catch (_e) {}
     echo.ports.echoJoined.send(reply)
+    echo.ports.echoWatchers.send(reply.watchers ?? 0)
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
   const channel = socket.channel(`echo:${echoNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
   channel.on("state", state => echo.ports.echoState.send(state))
   channel.on("joined", joined)
+  channel.on("watchers", ({count}) => echo.ports.echoWatchers.send(count))
   channel.join()
     .receive("ok", joined)
     .receive("error", ({reason}) => {
@@ -562,12 +574,14 @@ if (mahjongNode) {
       else sessionStorage.removeItem(tokenKey)
     } catch (_e) {}
     mahjong.ports.mahjongJoined.send(reply)
+    mahjong.ports.mahjongWatchers.send(reply.watchers ?? 0)
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
   const channel = socket.channel(`mahjong:${mahjongNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
   channel.on("state", state => mahjong.ports.mahjongState.send(state))
   channel.on("joined", joined)
+  channel.on("watchers", ({count}) => mahjong.ports.mahjongWatchers.send(count))
   channel.join()
     .receive("ok", joined)
     .receive("error", ({reason}) => {
@@ -626,12 +640,14 @@ if (overlapNode) {
       else sessionStorage.removeItem(tokenKey)
     } catch (_e) {}
     overlap.ports.overlapJoined.send(reply)
+    overlap.ports.overlapWatchers.send(reply.watchers ?? 0)
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
   const channel = socket.channel(`overlap:${overlapNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
   channel.on("state", state => overlap.ports.overlapState.send(state))
   channel.on("joined", joined)
+  channel.on("watchers", ({count}) => overlap.ports.overlapWatchers.send(count))
   channel.join()
     .receive("ok", joined)
     .receive("error", ({reason}) => {

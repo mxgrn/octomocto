@@ -71,6 +71,12 @@ port setGameState : (Decode.Value -> msg) -> Sub msg
 port setGameJoinFailed : (String -> msg) -> Sub msg
 
 
+{-| The number of browsers that only watch the game, after the join and
+after each change.
+-}
+port setGameWatchers : (Int -> msg) -> Sub msg
+
+
 port setGamePlaySound : String -> Cmd msg
 
 
@@ -181,6 +187,7 @@ type alias Model =
     -- The size of the window, to pick the shape of the table
     , viewport : ( Float, Float )
     , muted : Bool
+    , watchers : Int
     }
 
 
@@ -221,6 +228,7 @@ init flags =
       , beepedStep = Nothing
       , viewport = ( 1024, 768 )
       , muted = flags.muted
+      , watchers = 0
       }
     , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
     )
@@ -234,6 +242,7 @@ type Msg
     = GotJoined Decode.Value
     | GotState Decode.Value
     | GotJoinFailed String
+    | GotWatchers Int
     | Pick Card
     | WrongDone Int
     | GotHint Int String
@@ -287,6 +296,9 @@ update msg model =
 
         GotJoinFailed reason ->
             ( { model | connection = Failed reason }, Cmd.none )
+
+        GotWatchers count ->
+            ( { model | watchers = count }, Cmd.none )
 
         Pick card ->
             case model.connection of
@@ -750,6 +762,7 @@ subscriptions model =
         [ setGameJoined GotJoined
         , setGameState GotState
         , setGameJoinFailed GotJoinFailed
+        , setGameWatchers GotWatchers
         , Browser.Events.onResize (\w h -> Resized (toFloat w) (toFloat h))
         , case model.connection of
             Joined _ game ->
@@ -826,6 +839,7 @@ viewGame model me game =
                         , h1 [ class "text-xl font-semibold tracking-tight lg:text-2xl" ]
                             [ a [ id "set-title-link", href "/set", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Set" ] ]
                         , viewMuteButton model.muted
+                        , viewWatchers model.watchers
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
                         [ text "Find 3 cards where each feature is all the same or all different." ]
@@ -1091,6 +1105,22 @@ tableWidth model me game layout =
         ++ " + "
         ++ gaps
         ++ "))"
+
+
+{-| The number of browsers that only watch the game, when there are any.
+-}
+viewWatchers : Int -> Html Msg
+viewWatchers count =
+    if count > 0 then
+        span
+            [ id "set-watchers"
+            , class "flex shrink-0 items-center gap-1 text-sm tabular-nums text-slate-500 dark:text-slate-400"
+            , Html.Attributes.title ("Watchers: " ++ String.fromInt count)
+            ]
+            [ span [ class "hero-eye size-4" ] [], text (String.fromInt count) ]
+
+    else
+        text ""
 
 
 viewMuteButton : Bool -> Html Msg

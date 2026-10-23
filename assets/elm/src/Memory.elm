@@ -68,6 +68,12 @@ port memoryState : (Decode.Value -> msg) -> Sub msg
 port memoryJoinFailed : (String -> msg) -> Sub msg
 
 
+{-| The number of browsers that only watch the game, after the join and
+after each change.
+-}
+port memoryWatchers : (Int -> msg) -> Sub msg
+
+
 port memoryPlaySound : String -> Cmd msg
 
 
@@ -199,6 +205,7 @@ type alias Model =
     -- The size of the window, to pick the grid that fits best
     , viewport : ( Float, Float )
     , muted : Bool
+    , watchers : Int
     , texts : Texts
     }
 
@@ -246,6 +253,7 @@ init flags =
       , now = 0
       , viewport = ( 1024, 768 )
       , muted = flags.muted
+      , watchers = 0
       , texts = Decode.decodeValue (Decode.dict Decode.string) flags.texts |> Result.withDefault Dict.empty
       }
     , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
@@ -260,6 +268,7 @@ type Msg
     = GotJoined Decode.Value
     | GotState Decode.Value
     | GotJoinFailed String
+    | GotWatchers Int
     | Flip Int
     | Restart
     | StartNextGame
@@ -295,6 +304,9 @@ update msg model =
 
         GotJoinFailed reason ->
             ( { model | connection = Failed reason }, Cmd.none )
+
+        GotWatchers count ->
+            ( { model | watchers = count }, Cmd.none )
 
         Flip index ->
             case model.connection of
@@ -565,6 +577,7 @@ subscriptions model =
         [ memoryJoined GotJoined
         , memoryState GotState
         , memoryJoinFailed GotJoinFailed
+        , memoryWatchers GotWatchers
         , Browser.Events.onResize (\w h -> Resized (toFloat w) (toFloat h))
         , case model.connection of
             Joined _ game ->
@@ -654,6 +667,7 @@ viewGame model me game =
                             Nothing ->
                                 text ""
                         , viewMuteButton model.texts model.muted
+                        , viewWatchers model.texts model.watchers
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
                         [ text
@@ -868,6 +882,22 @@ fieldWidth model me game layout gap =
         ++ px (gap * toFloat (layout.columns - 1))
         ++ padding
         ++ "))"
+
+
+{-| The number of browsers that only watch the game, when there are any.
+-}
+viewWatchers : Texts -> Int -> Html Msg
+viewWatchers texts count =
+    if count > 0 then
+        span
+            [ id "memory-watchers"
+            , class "flex shrink-0 items-center gap-1 text-sm tabular-nums text-slate-500 dark:text-slate-400"
+            , Html.Attributes.title (tf texts "Watchers: {count}" [ ( "count", String.fromInt count ) ])
+            ]
+            [ span [ class "hero-eye size-4" ] [], text (String.fromInt count) ]
+
+    else
+        text ""
 
 
 viewMuteButton : Texts -> Bool -> Html Msg

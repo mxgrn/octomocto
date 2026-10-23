@@ -75,6 +75,12 @@ port mahjongState : (Decode.Value -> msg) -> Sub msg
 port mahjongJoinFailed : (String -> msg) -> Sub msg
 
 
+{-| The number of browsers that only watch the game, after the join and
+after each change.
+-}
+port mahjongWatchers : (Int -> msg) -> Sub msg
+
+
 {-| The reply of the server to a pair: "ok" or "ignored"
 -}
 port mahjongRemoved : ({ a : Int, b : Int, result : String } -> msg) -> Sub msg
@@ -210,6 +216,7 @@ type alias Model =
     -- The countdown step that last played its beep (see `countdownStep`)
     , beepedStep : Maybe Int
     , muted : Bool
+    , watchers : Int
 
     -- The width and the height of the browser window
     , viewport : ( Float, Float )
@@ -245,6 +252,7 @@ init flags =
       , revealing = False
       , beepedStep = Nothing
       , muted = flags.muted
+      , watchers = 0
       , viewport = ( 1024, 768 )
       }
     , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
@@ -259,6 +267,7 @@ type Msg
     = GotJoined Decode.Value
     | GotState Decode.Value
     | GotJoinFailed String
+    | GotWatchers Int
     | GotRemoved { a : Int, b : Int, result : String }
     | ClickTile Int
     | KeyDown String
@@ -341,6 +350,9 @@ update msg model =
 
         GotJoinFailed reason ->
             ( { model | connection = Failed reason }, Cmd.none )
+
+        GotWatchers count ->
+            ( { model | watchers = count }, Cmd.none )
 
         GotRemoved removed ->
             if model.pending /= Just ( removed.a, removed.b ) then
@@ -775,6 +787,7 @@ subscriptions model =
         [ mahjongJoined GotJoined
         , mahjongState GotState
         , mahjongJoinFailed GotJoinFailed
+        , mahjongWatchers GotWatchers
         , mahjongRemoved GotRemoved
         , Browser.Events.onKeyDown (Decode.map KeyDown (Decode.field "key" Decode.string))
         , Browser.Events.onResize (\w h -> Resized (toFloat w) (toFloat h))
@@ -842,6 +855,7 @@ viewGame model me game =
                         , h1 [ class "truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
                             [ a [ id "mahjong-title-link", href "/mahjong", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Mahjong" ] ]
                         , viewMuteButton model.muted
+                        , viewWatchers model.watchers
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ] [ text "Remove pairs of free tiles with the same face." ]
                     ]
@@ -1019,6 +1033,22 @@ fieldWidth model me game =
         ++ "px) * "
         ++ String.fromFloat (toFloat boardWidth / toFloat boardHeight)
         ++ "))"
+
+
+{-| The number of browsers that only watch the game, when there are any.
+-}
+viewWatchers : Int -> Html Msg
+viewWatchers count =
+    if count > 0 then
+        span
+            [ id "mahjong-watchers"
+            , class "flex shrink-0 items-center gap-1 text-sm tabular-nums text-slate-500 dark:text-slate-400"
+            , Html.Attributes.title ("Watchers: " ++ String.fromInt count)
+            ]
+            [ span [ class "hero-eye size-4" ] [], text (String.fromInt count) ]
+
+    else
+        text ""
 
 
 viewMuteButton : Bool -> Html Msg

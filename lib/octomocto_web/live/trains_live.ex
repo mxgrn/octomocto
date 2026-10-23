@@ -28,7 +28,8 @@ defmodule OctomoctoWeb.TrainsLive do
     {:ok,
      socket
      |> assign([canonical_url: url(~p"/trains"), rules: rules()] ++ seo())
-     |> assign_lobby(Lobby.entries(Game, Store))}
+     |> assign_lobby(Lobby.entries(Game, Store))
+     |> assign(watchers: Lobby.watchers(Game))}
   end
 
   @doc "The title and the description of the Right on Track pages, for search engines."
@@ -144,6 +145,11 @@ defmodule OctomoctoWeb.TrainsLive do
 
   def handle_info({:lobby_changed, _game, id, entry}, socket) do
     {:noreply, assign_lobby(socket, Lobby.put_entry(socket.assigns.lobby, id, entry))}
+  end
+
+  # A watcher came or left, see `Octomocto.Lobby.watch/3`
+  def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff"}, socket) do
+    {:noreply, assign(socket, watchers: Lobby.watchers(Game))}
   end
 
   @doc """

@@ -67,6 +67,12 @@ port echoState : (Decode.Value -> msg) -> Sub msg
 port echoJoinFailed : (String -> msg) -> Sub msg
 
 
+{-| The number of browsers that only watch the game, after the join and
+after each change.
+-}
+port echoWatchers : (Int -> msg) -> Sub msg
+
+
 {-| The `name` is "pad" (the tone of the `pad` for `ms`), "buzz", "turn",
 "win" or "lose".
 -}
@@ -201,6 +207,7 @@ type alias Model =
     , connection : Connection
     , copied : Bool
     , muted : Bool
+    , watchers : Int
     , shapes : Bool
 
     -- The local time now, and when the turn started
@@ -251,6 +258,7 @@ init flags =
       , connection = Connecting
       , copied = False
       , muted = flags.muted
+      , watchers = 0
       , shapes = flags.shapes
       , now = 0
       , turnStart = 0
@@ -307,6 +315,7 @@ type Msg
     = GotJoined Decode.Value
     | GotState Decode.Value
     | GotJoinFailed String
+    | GotWatchers Int
     | Start
     | Press Int
     | Restart
@@ -358,6 +367,9 @@ update msg model =
 
         GotJoinFailed reason ->
             ( { model | connection = Failed reason }, Cmd.none )
+
+        GotWatchers count ->
+            ( { model | watchers = count }, Cmd.none )
 
         Start ->
             case model.connection of
@@ -789,6 +801,7 @@ subscriptions model =
         [ echoJoined GotJoined
         , echoState GotState
         , echoJoinFailed GotJoinFailed
+        , echoWatchers GotWatchers
         , Browser.Events.onKeyDown keyDecoder
         , Browser.Events.onResize (\w h -> Resized (toFloat w) (toFloat h))
         , if model.playback /= Nothing then
@@ -874,6 +887,7 @@ viewGame model me game =
                         , h1 [ class "mr-1 truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
                             [ a [ id "echo-title-link", href "/echo", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Echo" ] ]
                         , viewMuteButton model.muted
+                        , viewWatchers model.watchers
                         , viewShapesButton model.shapes
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
@@ -1002,6 +1016,22 @@ the screen. The board is square, so its width is also its height.
 boardWidth : Model -> Me -> Game -> String
 boardWidth model me game =
     "min(100%, calc(100dvh - " ++ String.fromFloat (reservedHeight model me game) ++ "px))"
+
+
+{-| The number of browsers that only watch the game, when there are any.
+-}
+viewWatchers : Int -> Html Msg
+viewWatchers count =
+    if count > 0 then
+        span
+            [ id "echo-watchers"
+            , class "flex shrink-0 items-center gap-1 text-sm tabular-nums text-slate-500 dark:text-slate-400"
+            , Html.Attributes.title ("Watchers: " ++ String.fromInt count)
+            ]
+            [ span [ class "hero-eye size-4" ] [], text (String.fromInt count) ]
+
+    else
+        text ""
 
 
 viewMuteButton : Bool -> Html Msg
