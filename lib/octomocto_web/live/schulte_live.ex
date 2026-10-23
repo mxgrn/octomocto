@@ -35,7 +35,7 @@ defmodule OctomoctoWeb.SchulteLive do
     {:noreply,
      assign(socket,
        settings: settings,
-       leaderboard: Schulte.leaderboard(filter),
+       best_results: Schulte.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
   end

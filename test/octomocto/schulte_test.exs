@@ -129,7 +129,7 @@ defmodule Octomocto.SchulteTest do
     assert Repo.all(Result) == []
   end
 
-  describe "leaderboard/1" do
+  describe "best_results/1" do
     @solo %{"type" => "classic", "mode" => "easy", "players" => 1}
     @duo %{"type" => "classic", "mode" => "easy", "players" => 2}
 
@@ -138,23 +138,7 @@ defmodule Octomocto.SchulteTest do
       Schulte.save_results("a", @solo, 1000, [%{user_id: user.id, score: 90}])
       Schulte.save_results("b", @duo, 2000, [%{user_id: user.id, score: 90}])
 
-      assert %{latest: [%{game_id: "a"}], best: [%{game_id: "a"}]} = Schulte.leaderboard(@solo)
-    end
-
-    test "latest games show all players of a field, the newest field first" do
-      user = user_fixture()
-      Schulte.save_results("old", @duo, 1000, [%{user_id: user.id, score: 90}])
-
-      Schulte.save_results("new", @duo, 2000, [
-        %{user_id: nil, score: 30},
-        %{user_id: user.id, score: 60}
-      ])
-
-      assert %{latest: [new, old]} = Schulte.leaderboard(@duo)
-      assert %{game_id: "new", elapsed_ms: 2000} = new
-      assert [%{score: 60, user: %{id: user_id}}, %{score: 30, user: nil}] = new.players
-      assert user_id == user.id
-      assert old.game_id == "old"
+      assert [%{game_id: "a"}] = Schulte.best_results(@solo)
     end
 
     test "best results show the best time of each user, the fastest first, without guests" do
@@ -164,7 +148,7 @@ defmodule Octomocto.SchulteTest do
       Schulte.save_results("c", @solo, 2000, [%{user_id: slow.id, score: 90}])
       Schulte.save_results("d", @solo, 500, [%{user_id: nil, score: 90}])
 
-      assert %{best: best} = Schulte.leaderboard(@solo)
+      best = Schulte.best_results(@solo)
       assert Enum.map(best, &{&1.user.id, &1.elapsed_ms}) == [{fast.id, 1000}, {slow.id, 2000}]
     end
   end

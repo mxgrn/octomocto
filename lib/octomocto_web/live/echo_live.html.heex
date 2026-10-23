@@ -133,7 +133,7 @@
         icon="hero-trophy"
         icon_class="text-amber-500"
         title="Best results"
-        empty={@leaderboard.best == []}
+        empty={@best_results == []}
       >
         <:aside :if={!@user_results}>
           <span class="text-sm text-base-content/60">
@@ -147,24 +147,10 @@
             to get listed
           </span>
         </:aside>
-        <.result_row :for={{result, place} <- Enum.with_index(@leaderboard.best, 1)}>
+        <.result_row :for={{result, place} <- Enum.with_index(@best_results, 1)}>
           <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
           <span class="min-w-0 flex-1 truncate font-medium">{player_name(result.user)}</span>
           <.result_pill>{result.score}</.result_pill>
-        </.result_row>
-      </.score_list>
-      <.score_list
-        id="latest-games"
-        icon="hero-clock"
-        icon_class="text-octo-indigo"
-        title="Latest games"
-        empty={@leaderboard.latest == []}
-      >
-        <.result_row :for={game <- @leaderboard.latest}>
-          <span class="min-w-0 flex-1 truncate font-medium">
-            <.player_list players={game.players} scores={false} />
-          </span>
-          <.result_pill>{game.score}</.result_pill>
         </.result_row>
       </.score_list>
     </div>

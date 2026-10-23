@@ -724,7 +724,7 @@ viewGame model me game =
                             "Back to the map"
 
                          else
-                            "Latest games and best results"
+                            "Best results"
                         )
                     )
                 ]

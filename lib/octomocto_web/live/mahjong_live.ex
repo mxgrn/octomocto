@@ -47,7 +47,7 @@ defmodule OctomoctoWeb.MahjongLive do
     {:noreply,
      assign(socket,
        settings: settings,
-       leaderboard: Mahjong.leaderboard(filter),
+       best_results: Mahjong.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
   end

@@ -48,7 +48,7 @@ defmodule OctomoctoWeb.EchoLive do
     {:noreply,
      assign(socket,
        settings: settings,
-       leaderboard: Echo.leaderboard(filter),
+       best_results: Echo.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
   end

@@ -31,14 +31,12 @@ defmodule OctomoctoWeb.SchulteLiveTest do
 
     {:ok, view, _html} = live(conn, ~p"/schulte?board=random&players=2")
 
-    assert view |> element("#latest-games li") |> render() =~ "0:01.0"
     assert view |> element("#best-results li") |> render() =~ "0:01.0"
   end
 
   test "shows an empty-state text in an empty list", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/schulte")
 
-    assert view |> element("#latest-games li") |> render() =~ "No games yet — be the first."
     assert view |> element("#best-results li") |> render() =~ "No games yet — be the first."
   end
 

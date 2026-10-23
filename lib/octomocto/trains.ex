@@ -186,16 +186,6 @@ defmodule Octomocto.Trains do
   end
 
   @doc """
-  Gives the leaderboard for the settings, for example
-  `%{"switch_count" => 6, "trains_per_house" => 2, "pace" => "normal",
-  "players" => 2}`: the latest rounds (with all players) and the best
-  result of each signed-in user (the most trains first).
-  """
-  def leaderboard(settings) do
-    %{latest: latest_games(settings), best: best_results(settings)}
-  end
-
-  @doc """
   Gives the results of the scope's user for the settings: the latest
   results (the newest first, each with all players of its round, the user
   first) and the best result (nil when there are no results).
@@ -226,25 +216,6 @@ defmodule Octomocto.Trains do
     %{latest: latest, best: best}
   end
 
-  defp latest_games(settings) do
-    game_ids =
-      from(r in Result,
-        where: r.settings == type(^settings, :map),
-        group_by: r.game_id,
-        order_by: [desc: max(r.inserted_at)],
-        limit: @list_size,
-        select: r.game_id
-      )
-      |> Repo.all()
-
-    players = game_players(game_ids)
-
-    Enum.map(game_ids, fn game_id ->
-      [first | _] = players[game_id]
-      %{game_id: game_id, score: first.score, players: players[game_id]}
-    end)
-  end
-
   # Gives the results of all players of the rounds, by game id
   defp game_players(game_ids) do
     from(r in Result, where: r.game_id in ^game_ids, order_by: r.id, preload: [:user, :guest])
@@ -252,7 +223,11 @@ defmodule Octomocto.Trains do
     |> Enum.group_by(& &1.game_id)
   end
 
-  defp best_results(settings) do
+  @doc """
+  Gives the best result of each signed-in user for the settings
+  (the most trains first).
+  """
+  def best_results(settings) do
     best_of_each_user =
       from(r in without_guests(Result),
         where: r.settings == type(^settings, :map) and not is_nil(r.user_id),

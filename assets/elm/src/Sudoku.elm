@@ -1425,7 +1425,7 @@ viewResult settingsUrl nextGame guest me game =
             , href settingsUrl
             , class "text-sm font-medium text-white/80 underline-offset-4 transition hover:text-white hover:underline"
             ]
-            [ text "Latest games and best results" ]
+            [ text "Best results" ]
         , let
             -- In a game with other players, a player starts the next game for all of them
             ( element, action ) =

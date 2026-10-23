@@ -123,7 +123,7 @@ defmodule OctomoctoWeb.MemoryLive do
       languages:
         Locale.languages("memory", socket.assigns.locale, ~p"/memory?#{query(settings, [])}"),
       sizes: Board.sizes(settings.theme, settings.set),
-      leaderboard: Memory.leaderboard(filter),
+      best_results: Memory.best_results(filter),
       user_results: user_results(socket.assigns.current_scope, filter)
     )
   end

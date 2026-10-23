@@ -46,7 +46,7 @@ defmodule OctomoctoWeb.SudokuLive do
     {:noreply,
      assign(socket,
        settings: settings,
-       leaderboard: Sudoku.leaderboard(filter),
+       best_results: Sudoku.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
   end

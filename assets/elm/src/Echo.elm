@@ -936,7 +936,7 @@ viewGame model me game =
                 , href model.settingsUrl
                 , class "hidden text-sm font-medium text-octo-indigo underline-offset-4 transition hover:underline lg:order-6 lg:block dark:text-octo-indigo-light"
                 ]
-                [ text "Latest games and best results" ]
+                [ text "Best results" ]
             ]
 
         -- On a small screen that is wider than tall, the status line is at

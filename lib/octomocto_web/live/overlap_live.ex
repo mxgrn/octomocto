@@ -47,7 +47,7 @@ defmodule OctomoctoWeb.OverlapLive do
     {:noreply,
      assign(socket,
        settings: settings,
-       leaderboard: Overlap.leaderboard(filter),
+       best_results: Overlap.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
   end

@@ -90,7 +90,7 @@ defmodule OctomoctoWeb.TrainsLive do
       settings: settings,
       canonical_url: url(~p"/trains"),
       switch_counts: Trains.switch_counts(settings.players),
-      leaderboard: Trains.leaderboard(filter),
+      best_results: Trains.best_results(filter),
       user_results: user_results(socket.assigns.current_scope, filter)
     )
   end

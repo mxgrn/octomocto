@@ -46,7 +46,7 @@ defmodule OctomoctoWeb.SetGameLive do
     {:noreply,
      assign(socket,
        settings: settings,
-       leaderboard: SetGame.leaderboard(filter),
+       best_results: SetGame.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
   end

@@ -23,8 +23,7 @@ msgstr[2] "%{count} kart"
 
 #: lib/octomocto_web/controllers/memory_html.ex:34
 #: lib/octomocto_web/live/memory_live.html.heex:343
-#: lib/octomocto_web/live/memory_live.html.heex:391
-#: lib/octomocto_web/live/memory_live.html.heex:417
+#: lib/octomocto_web/live/memory_live.html.heex:390
 #, elixir-autogen, elixir-format
 msgid "Accuracy"
 msgstr "Celność"
@@ -44,6 +43,7 @@ msgstr "Zwierzęta"
 msgid "Best"
 msgstr "Rekord"
 
+#: lib/octomocto_web/controllers/memory_html.ex:25
 #: lib/octomocto_web/live/memory_live.html.heex:370
 #, elixir-autogen, elixir-format
 msgid "Best results"
@@ -154,16 +154,6 @@ msgstr "Remis!"
 #, elixir-autogen, elixir-format
 msgid "Joining the game…"
 msgstr "Dołączanie do gry…"
-
-#: lib/octomocto_web/live/memory_live.html.heex:402
-#, elixir-autogen, elixir-format
-msgid "Latest games"
-msgstr "Ostatnie gry"
-
-#: lib/octomocto_web/controllers/memory_html.ex:25
-#, elixir-autogen, elixir-format
-msgid "Latest games and best results"
-msgstr "Ostatnie gry i najlepsze wyniki"
 
 #: lib/octomocto_web/live/memory_live.html.heex:219
 #, elixir-autogen, elixir-format
