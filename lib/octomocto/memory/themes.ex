@@ -4,7 +4,9 @@ defmodule Octomocto.Memory.Themes do
   `priv/static/images/memory/<name>/`, with the names `1.svg` to `<cards>.svg`.
   The cover card shows the theme in the theme picker and the lobby. It is
   card 1, unless the theme sets a different `cover`. The theme picker
-  marks a theme with `new: true` as new.
+  marks a theme with `new: true` as new. A theme with `hidden: true` is
+  not in the theme picker and no new game gets it. It stays here for the
+  games and the results that have it.
   """
 
   @themes [
@@ -19,10 +21,10 @@ defmodule Octomocto.Memory.Themes do
     %{name: "flowers", title: "Flowers", cards: 50},
     %{name: "birds", title: "Birds", cards: 49},
     %{name: "pets", title: "Pets", cards: 50},
-    %{name: "workout", title: "Workout", cards: 50},
+    %{name: "workout", title: "Workout", cards: 50, hidden: true},
     %{name: "animals", title: "Animals", cards: 50},
     %{name: "fairy_tales", title: "Fairy Tales", cards: 50},
-    %{name: "ecology", title: "Ecology", cards: 50},
+    %{name: "ecology", title: "Ecology", cards: 50, hidden: true},
     %{name: "music", title: "Music", cards: 50},
     %{name: "halloween", title: "Halloween", cards: 48},
     %{name: "flags", title: "Flags", cards: 50, cover: 49},
@@ -30,16 +32,20 @@ defmodule Octomocto.Memory.Themes do
     %{name: "space", title: "Space", cards: 50}
   ]
 
-  def list, do: @themes
+  @doc "The themes that a new game can get, in the order of the theme picker."
+  def list, do: Enum.reject(@themes, & &1[:hidden])
 
-  @doc "Gives the theme with the name, or nil."
+  @doc "Gives the theme with the name, also a hidden theme, or nil."
   def get(name), do: Enum.find(@themes, &(&1.name == name))
+
+  @doc "True when a new game can get the theme with the name."
+  def visible?(name), do: Enum.any?(list(), &(&1.name == name))
 
   @doc """
   The themes that have enough images for a field of `cards` cards in sets
   of `set` cards: each image can be in only one set of a field.
   """
-  def for_field(set, cards), do: Enum.filter(@themes, &(&1.cards * set >= cards))
+  def for_field(set, cards), do: Enum.filter(list(), &(&1.cards * set >= cards))
 
   @doc """
   The theme for a new field: the `choice` when it has enough images, else

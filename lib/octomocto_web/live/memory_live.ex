@@ -166,7 +166,7 @@ defmodule OctomoctoWeb.MemoryLive do
         _ -> min(highest + 1, length(levels))
       end
 
-    theme = if Themes.get(params["theme"] || ""), do: params["theme"], else: "random"
+    theme = if Themes.visible?(params["theme"]), do: params["theme"], else: "random"
 
     assign(socket,
       campaign: %{
@@ -256,7 +256,7 @@ defmodule OctomoctoWeb.MemoryLive do
   # do not say otherwise. A number of cards that is not possible changes to the
   # nearest possible one.
   defp settings(params) do
-    theme = if Themes.get(params["theme"] || ""), do: params["theme"], else: "random"
+    theme = if Themes.visible?(params["theme"]), do: params["theme"], else: "random"
 
     set = if params["set"] == "triplets", do: 3, else: 2
 
