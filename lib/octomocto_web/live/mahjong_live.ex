@@ -4,7 +4,7 @@ defmodule OctomoctoWeb.MahjongLive do
   on_mount {OctomoctoWeb.SiteNotifications, "mahjong"}
 
   # The same settings and result lists as on the Schulte page
-  import OctomoctoWeb.SchulteHTML,
+  import OctomoctoWeb.SettingsComponents,
     only: [
       setting: 1,
       option: 1,

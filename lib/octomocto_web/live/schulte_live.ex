@@ -3,7 +3,7 @@ defmodule OctomoctoWeb.SchulteLive do
 
   on_mount {OctomoctoWeb.SiteNotifications, "schulte"}
 
-  import OctomoctoWeb.SchulteHTML
+  import OctomoctoWeb.SettingsComponents
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Lobby, Schulte}

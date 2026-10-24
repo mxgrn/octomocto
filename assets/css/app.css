@@ -238,6 +238,38 @@ html:has(.is-playing) body {
   }
 }
 
+/* The options of a setting with one pill that slides to the selected
+   option (see `OctomoctoWeb.SettingsComponents.setting/1`). The pill is anchored
+   to the option with aria-current. A row with no selected option, such as
+   the Cards slider of Memory, has no pill. A browser without anchor
+   positioning shows the pill of the selected option. */
+@supports (anchor-name: --a) {
+  .option-slider {
+    position: relative;
+    isolation: isolate;
+  }
+  .option-slider [aria-current] {
+    anchor-name: --selected-option;
+    background-color: transparent;
+    box-shadow: none;
+  }
+  .option-slider:has([aria-current])::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    position-anchor: --selected-option;
+    inset: anchor(top) anchor(right) anchor(bottom) anchor(left);
+    border-radius: 9999px;
+    background-color: var(--color-octo-indigo);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1), 0 1px 2px rgb(0 0 0 / 0.1);
+    transition: inset 300ms cubic-bezier(0.3, 1.3, 0.5, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option-slider:has([aria-current])::before { transition: none; }
+}
+
 /* Memory. A card turns over in 3D: the back is in front when the card is
    face down, and the face is in front when it is face up. */
 .memory-card {

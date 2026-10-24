@@ -4,7 +4,7 @@ defmodule OctomoctoWeb.EchoLive do
   on_mount {OctomoctoWeb.SiteNotifications, "echo"}
 
   # The same settings and result lists as on the Schulte page
-  import OctomoctoWeb.SchulteHTML,
+  import OctomoctoWeb.SettingsComponents,
     only: [
       setting: 1,
       option: 1,

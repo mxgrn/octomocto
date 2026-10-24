@@ -4,9 +4,10 @@ defmodule OctomoctoWeb.MemoryLive do
   on_mount {OctomoctoWeb.SiteNotifications, "memory"}
 
   # The same settings and result lists as on the Schulte page
-  import OctomoctoWeb.SchulteHTML,
+  import OctomoctoWeb.SettingsComponents,
     only: [
       setting: 1,
+      option: 1,
       setting_header: 1,
       score_list: 1,
       player_list: 1,
@@ -374,30 +375,6 @@ defmodule OctomoctoWeb.MemoryLive do
         "Whoever has the most points wins. Alone, clear the field as fast as you can."
       )
     ]
-  end
-
-  attr :id, :string, required: true
-  attr :patch, :string, required: true
-  attr :selected, :boolean, required: true
-  slot :inner_block, required: true
-
-  defp option(assigns) do
-    ~H"""
-    <.link
-      id={@id}
-      patch={@patch}
-      aria-current={@selected && "true"}
-      class={[
-        "min-w-10 rounded-full px-4 py-1.5 text-sm font-medium transition",
-        if(@selected,
-          do: "bg-octo-indigo text-white shadow-sm",
-          else: "text-base-content/70 hover:bg-base-100 hover:text-base-content"
-        )
-      ]}
-    >
-      {render_slot(@inner_block)}
-    </.link>
-    """
   end
 
   attr :id, :string, required: true

@@ -4,9 +4,10 @@ defmodule OctomoctoWeb.SetGameLive do
   on_mount {OctomoctoWeb.SiteNotifications, "set"}
 
   # The same settings and result lists as on the Schulte page
-  import OctomoctoWeb.SchulteHTML,
+  import OctomoctoWeb.SettingsComponents,
     only: [
       setting: 1,
+      option: 1,
       score_list: 1,
       player_list: 1,
       result_row: 1,
@@ -107,30 +108,6 @@ defmodule OctomoctoWeb.SetGameLive do
       "The game ends when the deck is empty and the table has no set. Alone, find all sets as fast as you can. With other players, find the most sets.",
       "In the easy mode, the deck has only the 27 solid cards."
     ]
-  end
-
-  attr :id, :string, required: true
-  attr :patch, :string, required: true
-  attr :selected, :boolean, required: true
-  slot :inner_block, required: true
-
-  defp option(assigns) do
-    ~H"""
-    <.link
-      id={@id}
-      patch={@patch}
-      aria-current={@selected && "true"}
-      class={[
-        "min-w-10 rounded-full px-4 py-1.5 text-sm font-medium transition",
-        if(@selected,
-          do: "bg-octo-indigo text-white shadow-sm",
-          else: "text-base-content/70 hover:bg-base-100 hover:text-base-content"
-        )
-      ]}
-    >
-      {render_slot(@inner_block)}
-    </.link>
-    """
   end
 
   attr :class, :string, default: nil

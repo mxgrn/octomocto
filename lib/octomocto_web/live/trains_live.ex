@@ -4,7 +4,7 @@ defmodule OctomoctoWeb.TrainsLive do
   on_mount {OctomoctoWeb.SiteNotifications, "trains"}
 
   # The same settings and result lists as on the Schulte page
-  import OctomoctoWeb.SchulteHTML,
+  import OctomoctoWeb.SettingsComponents,
     only: [
       setting: 1,
       setting_header: 1,
