@@ -123,6 +123,14 @@ document.addEventListener("touchmove", e => {
   if (document.querySelector(".is-playing")) e.preventDefault()
 }, {passive: false})
 
+// Hide the button of a form with a data-hide-on-submit attribute, so that the
+// user cannot send the form twice.
+document.addEventListener("submit", e => {
+  if (e.target.matches("[data-hide-on-submit]")) {
+    e.target.querySelectorAll("button").forEach(button => { button.hidden = true })
+  }
+})
+
 // Send a Google Analytics event when a player clicks an internal link with a
 // data-ga-link attribute. In a game with 2 or more players, the "Or try" link
 // is a button that starts the next game for all players. gtag is only in prod.

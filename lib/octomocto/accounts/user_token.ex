@@ -6,9 +6,9 @@ defmodule Octomocto.Accounts.UserToken do
   @hash_algorithm :sha256
   @rand_size 32
 
-  # It is very important to keep the magic link token expiry short,
-  # since someone with access to the email may take over the account.
-  @magic_link_validity_in_minutes 15
+  # Someone with access to the email may take over the account with the magic link.
+  # But many users find the link in the spam folder only later, so it is valid for a day.
+  @magic_link_validity_in_hours 24
   @change_email_validity_in_days 7
 
   schema "users_tokens" do
@@ -112,9 +112,33 @@ defmodule Octomocto.Accounts.UserToken do
         query =
           from token in by_token_and_context_query(hashed_token, "login"),
             join: user in assoc(token, :user),
-            where: token.inserted_at > ago(^@magic_link_validity_in_minutes, "minute"),
+            where: token.inserted_at > ago(^@magic_link_validity_in_hours, "hour"),
             where: token.sent_to == user.email,
             select: {user, token}
+
+        {:ok, query}
+
+      :error ->
+        :error
+    end
+  end
+
+  @doc """
+  Returns the lookup query for the email that a magic link token was sent to.
+
+  Unlike `verify_magic_link_token_query/1`, it also finds expired tokens.
+  It finds nothing if the user changed the email after the token was sent.
+  """
+  def magic_link_token_email_query(token) do
+    case Base.url_decode64(token, padding: false) do
+      {:ok, decoded_token} ->
+        hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
+
+        query =
+          from token in by_token_and_context_query(hashed_token, "login"),
+            join: user in assoc(token, :user),
+            where: token.sent_to == user.email,
+            select: user.email
 
         {:ok, query}
 

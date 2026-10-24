@@ -7,6 +7,12 @@ defmodule OctomoctoWeb.UserSessionController do
 
   plug OctomoctoWeb.SiteNotifications when action in [:new, :confirm]
 
+  # Marks the browser that asked for a magic link. When the link opens in the same
+  # browser, we sign the user in at once. Email link scanners do not have this cookie,
+  # so they get the confirmation page and cannot use up the token.
+  @magic_link_cookie "_octomocto_web_magic_link_email"
+  @magic_link_cookie_options [sign: true, max_age: 24 * 60 * 60, same_site: "Lax"]
+
   # The home page has the same sign-in forms. This page is for the redirects
   # from pages that need a (recent) sign-in.
   def new(conn, _params) do
@@ -21,17 +27,7 @@ defmodule OctomoctoWeb.UserSessionController do
         _ -> "Welcome back!"
       end
 
-    case Accounts.login_user_by_magic_link(token) do
-      {:ok, {user, _expired_tokens}} ->
-        conn
-        |> put_flash(:info, info)
-        |> UserAuth.log_in_user(user, user_params)
-
-      {:error, :not_found} ->
-        conn
-        |> put_flash(:error, "The link is invalid or it has expired.")
-        |> redirect(to: ~p"/signin")
-    end
+    log_in_by_magic_link(conn, token, user_params, info)
   end
 
   # magic link request
@@ -41,7 +37,11 @@ defmodule OctomoctoWeb.UserSessionController do
         Accounts.deliver_login_instructions(user, &url(~p"/signin/#{&1}"))
 
         conn
-        |> put_flash(:info, "We sent a sign-in link to #{user.email}.")
+        |> put_resp_cookie(@magic_link_cookie, user.email, @magic_link_cookie_options)
+        |> put_flash(
+          :info,
+          "We sent a sign-in link to #{user.email}. If you do not see it, look in your spam folder."
+        )
         |> redirect(to: return_path(conn))
 
       {:error, _changeset} ->
@@ -52,17 +52,36 @@ defmodule OctomoctoWeb.UserSessionController do
   end
 
   def confirm(conn, %{"token" => token}) do
-    if user = Accounts.get_user_by_magic_link_token(token) do
-      form = Phoenix.Component.to_form(%{"token" => token}, as: "user")
+    conn = fetch_cookies(conn, signed: [@magic_link_cookie])
+    user = Accounts.get_user_by_magic_link_token(token)
 
-      conn
-      |> assign(:user, user)
-      |> assign(:form, form)
-      |> render(:confirm)
-    else
-      conn
-      |> put_flash(:error, "Magic link is invalid or it has expired.")
-      |> redirect(to: ~p"/signin")
+    cond do
+      user && conn.cookies[@magic_link_cookie] == user.email ->
+        info = if user.confirmed_at, do: "Welcome back!", else: "Email confirmed successfully."
+        log_in_by_magic_link(conn, token, %{"remember_me" => "true"}, info)
+
+      user ->
+        form = Phoenix.Component.to_form(%{"token" => token}, as: "user")
+
+        conn
+        |> assign(:user, user)
+        |> assign(:form, form)
+        |> render(:confirm)
+
+      # Probably a link that was already used
+      conn.assigns.current_scope ->
+        conn
+        |> put_flash(:info, "You are already signed in.")
+        |> redirect(to: ~p"/")
+
+      email = Accounts.get_magic_link_token_email(token) ->
+        form = Phoenix.Component.to_form(%{"email" => email}, as: "user")
+        render(conn, :expired, form: form)
+
+      true ->
+        conn
+        |> put_flash(:error, "Magic link is invalid or it has expired.")
+        |> redirect(to: ~p"/signin")
     end
   end
 
@@ -85,6 +104,21 @@ defmodule OctomoctoWeb.UserSessionController do
     conn
     |> put_flash(:info, "Signed out successfully.")
     |> UserAuth.log_out_user()
+  end
+
+  defp log_in_by_magic_link(conn, token, user_params, info) do
+    case Accounts.login_user_by_magic_link(token) do
+      {:ok, {user, _expired_tokens}} ->
+        conn
+        |> delete_resp_cookie(@magic_link_cookie, @magic_link_cookie_options)
+        |> put_flash(:info, info)
+        |> UserAuth.log_in_user(user, user_params)
+
+      {:error, :not_found} ->
+        conn
+        |> put_flash(:error, "The link is invalid or it has expired.")
+        |> redirect(to: ~p"/signin")
+    end
   end
 
   # A signed-in user can open /signin to sign in again

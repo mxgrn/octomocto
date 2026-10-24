@@ -309,6 +309,16 @@ defmodule Octomocto.Accounts do
   end
 
   @doc """
+  Gets the email that the given magic link token was sent to, also when the token has expired.
+  """
+  def get_magic_link_token_email(token) do
+    case UserToken.magic_link_token_email_query(token) do
+      {:ok, query} -> Repo.one(query)
+      :error -> nil
+    end
+  end
+
+  @doc """
   Logs the user in by magic link.
 
   There are two cases to consider:
