@@ -11,6 +11,10 @@ defmodule Octomocto.Accounts.UserToken do
   @magic_link_validity_in_hours 24
   @change_email_validity_in_days 7
 
+  # The notifier tells the user how long a link works
+  def magic_link_validity_in_hours, do: @magic_link_validity_in_hours
+  def change_email_validity_in_days, do: @change_email_validity_in_days
+
   schema "users_tokens" do
     field :token, :binary
     field :context, :string

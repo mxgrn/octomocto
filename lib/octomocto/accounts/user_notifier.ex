@@ -2,16 +2,18 @@ defmodule Octomocto.Accounts.UserNotifier do
   import Swoosh.Email
 
   alias Octomocto.Mailer
-  alias Octomocto.Accounts.User
+  alias Octomocto.Accounts.{User, UserToken}
 
-  # Delivers the email using the application mailer.
-  defp deliver(recipient, subject, body) do
+  # Delivers the email using the application mailer. Each email has an HTML body
+  # with a button, and a text body for mail apps that do not show HTML.
+  defp deliver(recipient, subject, content) do
     email =
       new()
       |> to(recipient)
       |> from({"Octomocto", "noreply@octomocto.com"})
       |> subject(subject)
-      |> text_body(body)
+      |> html_body(html(content))
+      |> text_body(text(content))
 
     with {:ok, _metadata} <- Mailer.deliver(email) do
       {:ok, email}
@@ -22,20 +24,14 @@ defmodule Octomocto.Accounts.UserNotifier do
   Deliver instructions to update a user email.
   """
   def deliver_update_email_instructions(user, url) do
-    deliver(user.email, "Update email instructions", """
-
-    ==============================
-
-    Hi #{user.email},
-
-    You can change your email by visiting the URL below:
-
-    #{url}
-
-    If you didn't request this change, please ignore this.
-
-    ==============================
-    """)
+    deliver(user.email, "Update email instructions", %{
+      heading: "Confirm your new email",
+      message: "Click the button to change your Octomocto email to #{user.email}.",
+      button: "Change email",
+      url: url,
+      validity: "#{UserToken.change_email_validity_in_days()} days",
+      ignore: "If you did not ask for this change, you can ignore this email."
+    })
   end
 
   @doc """
@@ -49,36 +45,85 @@ defmodule Octomocto.Accounts.UserNotifier do
   end
 
   defp deliver_magic_link_instructions(user, url) do
-    deliver(user.email, "Sign in to Octomocto", """
-
-    ==============================
-
-    Hi #{user.email},
-
-    You can sign in to your account by visiting the URL below:
-
-    #{url}
-
-    If you didn't request this email, please ignore this.
-
-    ==============================
-    """)
+    deliver(user.email, "Sign in to Octomocto", %{
+      heading: "Sign in to Octomocto",
+      message: "Click the button to sign in.",
+      button: "Sign in",
+      url: url,
+      validity: "#{UserToken.magic_link_validity_in_hours()} hours",
+      ignore: "If you did not ask for this email, you can ignore it."
+    })
   end
 
   defp deliver_confirmation_instructions(user, url) do
-    deliver(user.email, "Sign in to Octomocto", """
-
-    ==============================
-
-    Hi #{user.email},
-
-    You can confirm your email and sign in by visiting the URL below:
-
-    #{url}
-
-    If you didn't create an account with us, please ignore this.
-
-    ==============================
-    """)
+    deliver(user.email, "Sign in to Octomocto", %{
+      heading: "Welcome to Octomocto",
+      message: "Click the button to confirm your email and sign in.",
+      button: "Confirm and sign in",
+      url: url,
+      validity: "#{UserToken.magic_link_validity_in_hours()} hours",
+      ignore: "If you did not create an account with us, you can ignore this email."
+    })
   end
+
+  defp text(content) do
+    """
+    #{content.heading}
+
+    #{content.message}
+
+    #{content.button}:
+    #{content.url}
+
+    The link works for #{content.validity}.
+    #{content.ignore}
+    """
+  end
+
+  # Mail apps support only simple HTML: tables for the layout and inline styles.
+  # Gmail does not show SVG images, so the logo is a PNG.
+  defp html(content) do
+    c = Map.new(content, fn {key, value} -> {key, escape(value)} end)
+    logo_url = escape(OctomoctoWeb.Endpoint.static_url() <> "/images/email-logo.png")
+    font = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+
+    """
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+      </head>
+      <body style="margin:0;padding:0;background-color:#EEF0FA;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#EEF0FA;">
+          <tr>
+            <td align="center" style="padding:40px 16px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background-color:#ffffff;border-radius:16px;">
+                <tr>
+                  <td style="padding:40px 32px;font-family:#{font};color:#171532;">
+                    <img src="#{logo_url}" width="209" height="33" alt="Octomocto" style="display:block;border:0;margin:0 0 32px;">
+                    <h1 style="margin:0 0 12px;font-size:24px;line-height:32px;font-weight:600;">#{c.heading}</h1>
+                    <p style="margin:0 0 28px;font-size:16px;line-height:24px;color:#4a4866;">#{c.message}</p>
+                    <table role="presentation" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="border-radius:12px;background-color:#1A9FCB;">
+                          <a href="#{c.url}" style="display:inline-block;padding:14px 28px;font-size:16px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:12px;">#{c.button}</a>
+                        </td>
+                      </tr>
+                    </table>
+                    <p style="margin:28px 0 0;font-size:14px;line-height:20px;color:#4a4866;">The link works for #{c.validity}.</p>
+                    <p style="margin:16px 0 0;font-size:13px;line-height:20px;color:#8a88a3;">Or copy this link:<br><a href="#{c.url}" style="color:#8a88a3;word-break:break-all;">#{c.url}</a></p>
+                  </td>
+                </tr>
+              </table>
+              <p style="max-width:480px;margin:20px auto 0;font-family:#{font};font-size:13px;line-height:20px;color:#8a88a3;">#{c.ignore}</p>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+    """
+  end
+
+  defp escape(value), do: value |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 end
