@@ -183,6 +183,9 @@ type alias Game =
     -- player demines the field, and while the player demines it
     , offer : Bool
     , demining : Bool
+
+    -- True when the players can demine a field with bombs (off for now)
+    , deminingEnabled : Bool
     }
 
 
@@ -579,6 +582,7 @@ gameDecoder =
         |> andMap (Decode.field "bombs_seen" Decode.int)
         |> andMap (Decode.field "offer" Decode.bool)
         |> andMap (Decode.field "demining" Decode.bool)
+        |> andMap (Decode.field "demining_enabled" Decode.bool)
 
 
 campaignDecoder : Decoder Campaign
@@ -1503,7 +1507,7 @@ viewResult model me game =
             p [ id "memory-deminer", class "flex items-center gap-1.5 text-sm font-medium text-amber-300" ]
                 [ span [ class "hero-shield-check-solid size-5" ] [], text (t texts "You demined the field!") ]
 
-          else if game.bombs > 0 && not (List.any .deminer players) then
+          else if game.deminingEnabled && game.bombs > 0 && not (List.any .deminer players) then
             p [ id "memory-not-demined", class "flex items-center gap-1.5 text-sm text-white/80" ]
                 [ img [ src bombImage, alt "", class "size-5" ] [], text (t texts "The field wasn't demined.") ]
 

@@ -21,8 +21,8 @@ msgstr[0] "%{count} carta"
 msgstr[1] "%{count} cartas"
 
 #: lib/octomocto_web/controllers/memory_html.ex:34
-#: lib/octomocto_web/live/memory_live.html.heex:401
-#: lib/octomocto_web/live/memory_live.html.heex:448
+#: lib/octomocto_web/live/memory_live.html.heex:407
+#: lib/octomocto_web/live/memory_live.html.heex:454
 #, elixir-autogen, elixir-format
 msgid "Accuracy"
 msgstr "Precisión"
@@ -37,13 +37,13 @@ msgstr "Precisión {accuracy}"
 msgid "Animals"
 msgstr "Animales"
 
-#: lib/octomocto_web/live/memory_live.html.heex:383
+#: lib/octomocto_web/live/memory_live.html.heex:389
 #, elixir-autogen, elixir-format
 msgid "Best"
 msgstr "Récord"
 
 #: lib/octomocto_web/controllers/memory_html.ex:25
-#: lib/octomocto_web/live/memory_live.html.heex:428
+#: lib/octomocto_web/live/memory_live.html.heex:434
 #, elixir-autogen, elixir-format
 msgid "Best results"
 msgstr "Mejores resultados"
@@ -180,7 +180,7 @@ msgstr "Más cartas"
 msgid "Music"
 msgstr "Música"
 
-#: lib/octomocto_web/live/memory_live.html.heex:375
+#: lib/octomocto_web/live/memory_live.html.heex:381
 #, elixir-autogen, elixir-format
 msgid "No games yet."
 msgstr "Todavía no hay partidas."
@@ -223,12 +223,12 @@ msgstr "Jugar de nuevo"
 msgid "Players"
 msgstr "Jugadores"
 
-#: lib/octomocto_web/live/memory_live.html.heex:350
+#: lib/octomocto_web/live/memory_live.html.heex:356
 #, elixir-autogen, elixir-format
 msgid "Private"
 msgstr "Privada"
 
-#: lib/octomocto_web/live/memory_live.html.heex:349
+#: lib/octomocto_web/live/memory_live.html.heex:355
 #, elixir-autogen, elixir-format
 msgid "Public"
 msgstr "Pública"
@@ -245,8 +245,8 @@ msgstr "Envía el enlace a los demás jugadores. La partida empieza cuando todos
 
 #: lib/octomocto_web/controllers/memory_html.ex:58
 #: lib/octomocto_web/live/memory_live.html.heex:102
-#: lib/octomocto_web/live/memory_live.html.heex:418
-#: lib/octomocto_web/live/memory_live.html.heex:438
+#: lib/octomocto_web/live/memory_live.html.heex:424
+#: lib/octomocto_web/live/memory_live.html.heex:444
 #, elixir-autogen, elixir-format
 msgid "Sign in"
 msgstr "Inicia sesión"
@@ -305,7 +305,7 @@ msgstr "Desactivar sonidos"
 msgid "Turn the sounds on"
 msgstr "Activar sonidos"
 
-#: lib/octomocto_web/live/memory_live.html.heex:342
+#: lib/octomocto_web/live/memory_live.html.heex:348
 #, elixir-autogen, elixir-format
 msgid "Visibility"
 msgstr "Visibilidad"
@@ -330,7 +330,7 @@ msgstr "Deporte"
 msgid "You win!"
 msgstr "¡Ganaste!"
 
-#: lib/octomocto_web/live/memory_live.html.heex:373
+#: lib/octomocto_web/live/memory_live.html.heex:379
 #, elixir-autogen, elixir-format
 msgid "Your results"
 msgstr "Tus resultados"
@@ -345,7 +345,7 @@ msgstr "precisión"
 msgid "time"
 msgstr "tiempo"
 
-#: lib/octomocto_web/live/memory_live.html.heex:420
+#: lib/octomocto_web/live/memory_live.html.heex:426
 #, elixir-autogen, elixir-format
 msgid "to start saving your results."
 msgstr "para empezar a guardar tus resultados."
@@ -405,7 +405,7 @@ msgstr "Comida"
 msgid "Sushi"
 msgstr "Sushi"
 
-#: lib/octomocto_web/live/memory_live.html.heex:440
+#: lib/octomocto_web/live/memory_live.html.heex:446
 #, elixir-autogen, elixir-format
 msgid "to get listed"
 msgstr "para aparecer en la lista"
@@ -598,7 +598,7 @@ msgstr "Desactiva el tablero: voltea todas las demás bombas. Con una carta equi
 msgid "Deminer"
 msgstr "Experto en bombas"
 
-#: lib/octomocto_web/live/memory_live.html.heex:337
+#: lib/octomocto_web/live/memory_live.html.heex:343
 #, elixir-autogen, elixir-format
 msgid "None"
 msgstr "Ninguna"
@@ -628,7 +628,7 @@ msgstr "{color} está desactivando el tablero…"
 msgid "The {color} player found the last bomb and can demine the field…"
 msgstr "{color} encontró la última bomba y puede desactivar el tablero…"
 
-#: lib/octomocto_web/live/memory_live.html.heex:324
+#: lib/octomocto_web/live/memory_live.html.heex:327
 #, elixir-autogen, elixir-format
 msgid "Turn a bomb that was seen, and you are out. Turn all bombs in one go to demine the field."
 msgstr "Si volteas una bomba que ya se vio, quedas fuera. Voltea todas las bombas seguidas para desactivar el tablero."
@@ -677,3 +677,8 @@ msgstr "¿Te gusta Octomocto? {feed} para que siga sin anuncios."
 #, elixir-autogen, elixir-format
 msgid "Feed Octo & Mocto"
 msgstr "Alimenta a Octo y Mocto"
+
+#: lib/octomocto_web/live/memory_live.html.heex:333
+#, elixir-autogen, elixir-format
+msgid "Turn a bomb that was seen, and you are out."
+msgstr "Si volteas una bomba que ya se vio, quedas fuera."

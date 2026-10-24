@@ -67,7 +67,8 @@ defmodule Octomocto.Memory.Game do
   the field. During the demining (`demining`), the player turns all other
   bombs. A card that is not a bomb puts the player out. When all bombs are
   face up, they go off the field as a set: the player gets the points of a
-  set, is a `deminer`, and turns again.
+  set, is a `deminer`, and turns again. The demining is off for now (see
+  `demining?/0`): a bomb that was seen always puts the player out.
 
   The game is registered in the whole cluster, and it writes its state to
   `Octomocto.Memory.Store` after each change. When its node stops, the game
@@ -122,6 +123,12 @@ defmodule Octomocto.Memory.Game do
     do: match?(%{set: ^set, cards: ^cards}, Campaign.get(level))
 
   defp valid_size?(_config, theme, set, cards), do: cards in Board.sizes(theme, set)
+
+  @doc """
+  True when the players can demine a field with bombs. Off for now (the
+  `:memory_demining` config), it becomes a setting later.
+  """
+  def demining?, do: Application.get_env(:octomocto, :memory_demining, false)
 
   def via(id), do: {:via, :global, {__MODULE__, id}}
 
@@ -630,13 +637,13 @@ defmodule Octomocto.Memory.Game do
       state.demining ->
         if all_bombs_up?(state), do: demine(state), else: state
 
-      card.bomb and seen and first and all_bombs_seen?(before) ->
+      demining?() and card.bomb and seen and first and all_bombs_seen?(before) ->
         %{state | demining: true}
 
       card.bomb and seen ->
         explode(state)
 
-      card.bomb and first and all_bombs_seen?(state) ->
+      demining?() and card.bomb and first and all_bombs_seen?(state) ->
         %{state | offer: true}
 
       true ->
@@ -976,7 +983,9 @@ defmodule Octomocto.Memory.Game do
       public: state.public,
       # The level of a game of the campaign, and the number of levels
       campaign: if(state.campaign, do: %{level: state.campaign.level, levels: Campaign.count()}),
-      failed: state.failed
+      failed: state.failed,
+      # True when the players can demine a field with bombs, see demining?/0
+      demining_enabled: demining?()
     }
   end
 end

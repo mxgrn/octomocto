@@ -319,13 +319,19 @@
             badge="New"
             badge_id="bombs-new"
             hint={
-              if(@settings.bombs > 0,
-                do:
+              cond do
+                @settings.bombs == 0 ->
+                  nil
+
+                Game.demining?() ->
                   dgettext(
                     "memory",
                     "Turn a bomb that was seen, and you are out. Turn all bombs in one go to demine the field."
                   )
-              )
+
+                true ->
+                  dgettext("memory", "Turn a bomb that was seen, and you are out.")
+              end
             }
           >
             <.option
