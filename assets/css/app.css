@@ -221,6 +221,23 @@ html:has(.is-playing) body {
   .turn-phone { animation: none; }
 }
 
+/* Icons that Heroicons does not have, in the style of its outline icons
+   (24px, 1.5px stroke). They work as the "hero-*" classes, see
+   `OctomoctoWeb.CoreComponents.icon/1`. */
+@layer components {
+  .icon-bomb {
+    --icon-bomb: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="black" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.25" cy="14.75" r="6.25"/><rect x="12.82" y="7.78" width="3.4" height="3.4" rx=".75" transform="rotate(45 14.52 9.48)"/><path d="M16.2 7.8c.4-1.2 1.2-1.8 2.1-1.9M18.75 2.75V1.5M20.52 3.48l.88-.88M21.25 5.25h1.25M6.1 13a3.25 3.25 0 0 1 2.4-2.4"/></svg>');
+    -webkit-mask: var(--icon-bomb);
+    mask: var(--icon-bomb);
+    mask-repeat: no-repeat;
+    background-color: currentColor;
+    vertical-align: middle;
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
 /* Memory. A card turns over in 3D: the back is in front when the card is
    face down, and the face is in front when it is face up. */
 .memory-card {

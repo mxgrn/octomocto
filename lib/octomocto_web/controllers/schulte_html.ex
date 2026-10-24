@@ -4,16 +4,18 @@ defmodule OctomoctoWeb.SchulteHTML do
   embed_templates "schulte_html/*"
 
   attr :label, :string, required: true
-  attr :icon, :string, required: true, doc: "a hero icon name, such as `hero-users`"
+  attr :icon, :string, required: true, doc: "an icon name, such as `hero-users` (see `icon/1`)"
   attr :hint, :string, default: nil, doc: "a short explanation of the selected option"
   attr :wide, :boolean, default: false, doc: "true when the options use the full width"
+  attr :badge, :string, default: nil, doc: "a text such as \"New\" next to the label"
+  attr :badge_id, :string, default: nil
   slot :inner_block, required: true
 
   @doc "One setting of a new game: the header, and the options in a row below it."
   def setting(assigns) do
     ~H"""
     <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
-      <.setting_header label={@label} icon={@icon} />
+      <.setting_header label={@label} icon={@icon} badge={@badge} badge_id={@badge_id} />
       <div class="mt-3 flex justify-center">
         <div class={["flex gap-1 rounded-full bg-base-200 p-1", @wide && "w-full"]}>
           {render_slot(@inner_block)}
@@ -26,12 +28,22 @@ defmodule OctomoctoWeb.SchulteHTML do
 
   attr :label, :string, required: true
   attr :icon, :string, required: true
+  attr :badge, :string, default: nil, doc: "a text such as \"New\" next to the label"
+  attr :badge_id, :string, default: nil
 
   @doc "The header of a setting: an icon and the label, as in the results lists."
   def setting_header(assigns) do
     ~H"""
     <h3 class="flex items-center gap-2 text-left font-semibold">
       <.icon name={@icon} class="size-4 text-octo-indigo" /> {@label}
+      <%!-- In the brand orange, as on the Campaign tab --%>
+      <span
+        :if={@badge}
+        id={@badge_id}
+        class="rounded-full bg-octo-orange px-1.5 py-0.5 text-[10px] leading-none font-semibold tracking-wide text-white uppercase shadow-sm"
+      >
+        {@badge}
+      </span>
     </h3>
     """
   end

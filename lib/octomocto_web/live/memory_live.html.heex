@@ -200,7 +200,7 @@
                 >
                   <span
                     id="theme-random-new"
-                    class="absolute -top-1.5 -right-1.5 z-10 rounded-full bg-octo-indigo px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white shadow-sm"
+                    class="absolute -top-1.5 -right-1.5 z-10 rounded-full bg-octo-orange px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white shadow-sm"
                   >
                     {dgettext("memory", "New")}
                   </span>
@@ -315,7 +315,9 @@
           </.setting>
           <.setting
             label={dgettext("memory", "Bombs")}
-            icon="hero-fire"
+            icon="icon-bomb"
+            badge={dgettext("memory", "New")}
+            badge_id="bombs-new"
             hint={
               if(@settings.bombs > 0,
                 do:

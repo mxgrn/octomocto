@@ -438,6 +438,9 @@ defmodule OctomoctoWeb.CoreComponents do
   Icons are extracted from the `deps/heroicons` directory and bundled within
   your compiled app.css by the plugin in `assets/vendor/heroicons.js`.
 
+  A few icons that Heroicons does not have are in app.css, with the
+  `icon-` prefix, for example `icon-bomb`.
+
   ## Examples
 
       <.icon name="hero-x-mark" />
@@ -447,6 +450,12 @@ defmodule OctomoctoWeb.CoreComponents do
   attr :class, :any, default: "size-4"
 
   def icon(%{name: "hero-" <> _} = assigns) do
+    ~H"""
+    <span class={[@name, @class]} />
+    """
+  end
+
+  def icon(%{name: "icon-" <> _} = assigns) do
     ~H"""
     <span class={[@name, @class]} />
     """
