@@ -28,7 +28,7 @@ import Browser.Dom
 import Browser.Events
 import Dict exposing (Dict)
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
-import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, src, style, value)
+import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (Decoder)
 import Process
@@ -1615,6 +1615,37 @@ viewResult model me game =
 
           else
             text ""
+        , viewFeed texts
+        ]
+
+
+{-| The call to support Octomocto on Patreon, at the bottom of a result.
+The link opens in a new tab, so that the player stays in the game.
+-}
+viewFeed : Texts -> Html msg
+viewFeed texts =
+    let
+        -- The text around the link, which can be at any place of the text
+        ( before, after ) =
+            case String.split "{feed}" (t texts "Enjoying Octomocto? {feed} to keep it ad-free.") of
+                [ b, c ] ->
+                    ( b, c )
+
+                _ ->
+                    ( "", "" )
+    in
+    p [ id "memory-feed", class "mt-2 max-w-sm border-t border-white/15 pt-4 text-center text-sm leading-10 text-balance text-white/80" ]
+        [ text before
+        , a
+            [ href "https://patreon.com/mxgrn"
+            , target "_blank"
+            , rel "noopener"
+            , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:-translate-y-0.5 hover:bg-octo-orange-light active:translate-y-0"
+            ]
+            [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
+            , text (t texts "Feed Octo & Mocto")
+            ]
+        , text after
         ]
 
 
@@ -1679,6 +1710,7 @@ viewCampaignResult model me game campaign =
                     ]
                     [ text (t texts "Back to the map") ]
                 ]
+        , viewFeed texts
         ]
 
 

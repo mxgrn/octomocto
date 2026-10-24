@@ -440,7 +440,7 @@ msgstr "{color} change les paramètres…"
 msgid "{name} changes the settings…"
 msgstr "{name} change les paramètres…"
 
-#: lib/octomocto_web/controllers/memory_html.ex:61
+#: lib/octomocto_web/controllers/memory_html.ex:64
 #, elixir-autogen, elixir-format
 msgid "Back to the map"
 msgstr "Retour aux niveaux"
@@ -484,12 +484,12 @@ msgstr "Niveaux les plus hauts"
 msgid "Level %{level}"
 msgstr "Niveau %{level}"
 
-#: lib/octomocto_web/controllers/memory_html.ex:60
+#: lib/octomocto_web/controllers/memory_html.ex:63
 #, elixir-autogen, elixir-format
 msgid "Level {level}"
 msgstr "Niveau {level}"
 
-#: lib/octomocto_web/controllers/memory_html.ex:67
+#: lib/octomocto_web/controllers/memory_html.ex:70
 #, elixir-autogen, elixir-format
 msgid "Level {level} done"
 msgstr "Niveau {level} réussi"
@@ -499,7 +499,7 @@ msgstr "Niveau {level} réussi"
 msgid "Levels"
 msgstr "Niveaux"
 
-#: lib/octomocto_web/controllers/memory_html.ex:69
+#: lib/octomocto_web/controllers/memory_html.ex:72
 #, elixir-autogen, elixir-format
 msgid "Next level"
 msgstr "Niveau suivant"
@@ -509,7 +509,7 @@ msgstr "Niveau suivant"
 msgid "Nobody has finished a level yet."
 msgstr "Personne n'a encore réussi de niveau."
 
-#: lib/octomocto_web/controllers/memory_html.ex:66
+#: lib/octomocto_web/controllers/memory_html.ex:69
 #, elixir-autogen, elixir-format
 msgid "Perfect!"
 msgstr "Parfait !"
@@ -535,23 +535,23 @@ msgstr "Connecte-toi pour jouer aux campagnes"
 msgid "Starting..."
 msgstr "Lancement..."
 
-#: lib/octomocto_web/controllers/memory_html.ex:68
+#: lib/octomocto_web/controllers/memory_html.ex:71
 #: lib/octomocto_web/live/memory_live.ex:691
 #, elixir-autogen, elixir-format
 msgid "Try again"
 msgstr "Réessayer"
 
-#: lib/octomocto_web/controllers/memory_html.ex:62
+#: lib/octomocto_web/controllers/memory_html.ex:65
 #, elixir-autogen, elixir-format
 msgid "Wrong card!"
 msgstr "Mauvaise carte !"
 
-#: lib/octomocto_web/controllers/memory_html.ex:64
+#: lib/octomocto_web/controllers/memory_html.ex:67
 #, elixir-autogen, elixir-format
 msgid "You cleared {cleared} of {cards} cards."
 msgstr "Tu as retiré {cleared} cartes sur {cards}."
 
-#: lib/octomocto_web/controllers/memory_html.ex:65
+#: lib/octomocto_web/controllers/memory_html.ex:68
 #, elixir-autogen, elixir-format
 msgid "You finished the campaign!"
 msgstr "Tu as terminé la campagne !"
@@ -583,17 +583,17 @@ msgstr[1] "%{count} bombes"
 msgid "Bombs"
 msgstr "Bombes"
 
-#: lib/octomocto_web/controllers/memory_html.ex:91
+#: lib/octomocto_web/controllers/memory_html.ex:94
 #, elixir-autogen, elixir-format
 msgid "Boom!"
 msgstr "Boum !"
 
-#: lib/octomocto_web/controllers/memory_html.ex:84
+#: lib/octomocto_web/controllers/memory_html.ex:87
 #, elixir-autogen, elixir-format
 msgid "Demine the field now: turn all other bombs. A wrong card puts you out."
 msgstr "Démine le plateau : retourne toutes les autres bombes. Une mauvaise carte, et tu es hors jeu."
 
-#: lib/octomocto_web/controllers/memory_html.ex:72
+#: lib/octomocto_web/controllers/memory_html.ex:75
 #, elixir-autogen, elixir-format
 msgid "Deminer"
 msgstr "Démineur"
@@ -603,27 +603,27 @@ msgstr "Démineur"
 msgid "None"
 msgstr "Aucune"
 
-#: lib/octomocto_web/controllers/memory_html.ex:73
+#: lib/octomocto_web/controllers/memory_html.ex:76
 #, elixir-autogen, elixir-format
 msgid "Out"
 msgstr "Hors jeu"
 
-#: lib/octomocto_web/controllers/memory_html.ex:95
+#: lib/octomocto_web/controllers/memory_html.ex:98
 #, elixir-autogen, elixir-format
 msgid "The demining failed: the last card was not a bomb."
 msgstr "Le déminage a échoué : la dernière carte n’était pas une bombe."
 
-#: lib/octomocto_web/controllers/memory_html.ex:97
+#: lib/octomocto_web/controllers/memory_html.ex:100
 #, elixir-autogen, elixir-format
 msgid "The field wasn't demined."
 msgstr "Le plateau n’a pas été déminé."
 
-#: lib/octomocto_web/controllers/memory_html.ex:90
+#: lib/octomocto_web/controllers/memory_html.ex:93
 #, elixir-autogen, elixir-format
 msgid "The {color} player demines the field…"
 msgstr "{color} démine le plateau…"
 
-#: lib/octomocto_web/controllers/memory_html.ex:82
+#: lib/octomocto_web/controllers/memory_html.ex:85
 #, elixir-autogen, elixir-format
 msgid "The {color} player found the last bomb and can demine the field…"
 msgstr "{color} a trouvé la dernière bombe et peut déminer le plateau…"
@@ -633,37 +633,47 @@ msgstr "{color} a trouvé la dernière bombe et peut déminer le plateau…"
 msgid "Turn a bomb that was seen, and you are out. Turn all bombs in one go to demine the field."
 msgstr "Retourne une bombe déjà vue, et tu es hors jeu. Retourne toutes les bombes d’un coup pour déminer le plateau."
 
-#: lib/octomocto_web/controllers/memory_html.ex:96
+#: lib/octomocto_web/controllers/memory_html.ex:99
 #, elixir-autogen, elixir-format
 msgid "You demined the field!"
 msgstr "Tu as déminé le plateau !"
 
-#: lib/octomocto_web/controllers/memory_html.ex:75
+#: lib/octomocto_web/controllers/memory_html.ex:78
 #, elixir-autogen, elixir-format
 msgid "You found the last bomb! Turn another bomb now to demine the field, or any other card to play on."
 msgstr "Tu as trouvé la dernière bombe ! Retourne maintenant une autre bombe pour déminer le plateau, ou n’importe quelle autre carte pour continuer."
 
-#: lib/octomocto_web/controllers/memory_html.ex:93
+#: lib/octomocto_web/controllers/memory_html.ex:96
 #, elixir-autogen, elixir-format
 msgid "You turned a bomb that was seen."
 msgstr "Tu as retourné une bombe déjà vue."
 
-#: lib/octomocto_web/controllers/memory_html.ex:70
+#: lib/octomocto_web/controllers/memory_html.ex:73
 #, elixir-autogen, elixir-format
 msgid "bombs"
 msgstr "bombes"
 
-#: lib/octomocto_web/controllers/memory_html.ex:71
+#: lib/octomocto_web/controllers/memory_html.ex:74
 #, elixir-autogen, elixir-format
 msgid "demining"
 msgstr "déminage"
 
-#: lib/octomocto_web/controllers/memory_html.ex:88
+#: lib/octomocto_web/controllers/memory_html.ex:91
 #, elixir-autogen, elixir-format
 msgid "{name} demines the field…"
 msgstr "{name} démine le plateau…"
 
-#: lib/octomocto_web/controllers/memory_html.ex:80
+#: lib/octomocto_web/controllers/memory_html.ex:83
 #, elixir-autogen, elixir-format
 msgid "{name} found the last bomb and can demine the field…"
 msgstr "{name} a trouvé la dernière bombe et peut déminer le plateau…"
+
+#: lib/octomocto_web/controllers/memory_html.ex:61
+#, elixir-autogen, elixir-format
+msgid "Enjoying Octomocto? {feed} to keep it ad-free."
+msgstr "Tu aimes Octomocto ? {feed} pour qu'il reste sans pub."
+
+#: lib/octomocto_web/controllers/memory_html.ex:62
+#, elixir-autogen, elixir-format
+msgid "Feed Octo & Mocto"
+msgstr "Nourris Octo et Mocto"

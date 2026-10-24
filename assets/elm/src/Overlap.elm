@@ -33,7 +33,7 @@ import Browser
 import Browser.Dom
 import Browser.Events
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
-import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, src, style, value)
+import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
@@ -1346,6 +1346,27 @@ viewResult settingsUrl nextGame guest me game =
 
           else
             text ""
+        , viewFeed
+        ]
+
+
+{-| The call to support Octomocto on Patreon, at the bottom of a result.
+The link opens in a new tab, so that the player stays in the game.
+-}
+viewFeed : Html msg
+viewFeed =
+    p [ id "overlap-feed", class "mt-2 max-w-sm border-t border-white/15 pt-4 text-center text-sm leading-10 text-balance text-white/80" ]
+        [ text "Enjoying Octomocto? "
+        , a
+            [ href "https://patreon.com/mxgrn"
+            , target "_blank"
+            , rel "noopener"
+            , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:-translate-y-0.5 hover:bg-octo-orange-light active:translate-y-0"
+            ]
+            [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
+            , text "Feed Octo & Mocto"
+            ]
+        , text " to keep it ad-free."
         ]
 
 
