@@ -767,6 +767,27 @@ three times */
   --series-8: #e66767;
 }
 
+/* A pointer on a shown game in the legend of the stats chart (or the
+   keyboard focus) makes the lines of the other games pale. One rule for each
+   color above, because CSS cannot compare the values of two attributes. */
+#games-chart path[data-series] {
+  transition: opacity 150ms ease, stroke-width 150ms ease;
+}
+#games-chart:has([data-legend][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series] {
+  opacity: 0.15;
+}
+#games-chart:has([data-legend="1"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="1"],
+#games-chart:has([data-legend="2"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="2"],
+#games-chart:has([data-legend="3"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="3"],
+#games-chart:has([data-legend="4"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="4"],
+#games-chart:has([data-legend="5"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="5"],
+#games-chart:has([data-legend="6"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="6"],
+#games-chart:has([data-legend="7"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="7"],
+#games-chart:has([data-legend="8"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="8"] {
+  opacity: 1;
+  stroke-width: 3;
+}
+
 /* The count of games played on the front page: a new number lifts in. The
    number has a new id for each count, so the animation runs on each change. */
 @keyframes games-played-bump {

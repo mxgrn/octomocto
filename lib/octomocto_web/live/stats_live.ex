@@ -62,7 +62,9 @@ defmodule OctomoctoWeb.StatsLive do
   Each game has a fixed color (see `--series-1` to `--series-8` in
   `app.css`), in the order of the games on the front page. A click on a
   game in the legend sends `toggle_game` with the id of the game. The
-  hidden games have no line, and the y-axis fits the other games.
+  hidden games have no line, and the y-axis fits the other games. A pointer
+  on a shown game in the legend (or the keyboard focus) makes the lines of
+  the other games pale (see `#games-chart` in `app.css`).
   """
   attr :days, :list, required: true, doc: "the days of `Octomocto.Stats.games_per_day/2`"
   attr :games, :list, required: true, doc: "the games of the front page, in their order"
@@ -87,7 +89,7 @@ defmodule OctomoctoWeb.StatsLive do
             {(i + 0.5) * @width / count, @height - games_in(day, game) / max * @height}
           end)
 
-        %{game: game, color: "var(--series-#{n})", line: line_path(points)}
+        %{game: game, n: n, color: "var(--series-#{n})", line: line_path(points)}
       end)
 
     assigns =
@@ -109,6 +111,7 @@ defmodule OctomoctoWeb.StatsLive do
             type="button"
             phx-click="toggle_game"
             phx-value-id={game.id}
+            data-legend={n}
             aria-pressed={to_string(not MapSet.member?(@hidden, game.id))}
             class={[
               "flex items-center gap-1.5 rounded-full px-2 py-1 transition",
@@ -149,6 +152,7 @@ defmodule OctomoctoWeb.StatsLive do
           <path
             :for={s <- @series}
             d={s.line}
+            data-series={s.n}
             fill="none"
             stroke={s.color}
             stroke-width="2"
