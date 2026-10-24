@@ -143,7 +143,13 @@ defmodule Octomocto.Memory.Game do
         p |> Lobby.player() |> Map.merge(%{score: p.score, turn: id == state.turn})
       end)
 
-    settings = %{theme: state.theme, set: state.set, cards: state.size, bombs: state.bombs}
+    settings = %{
+      theme: state.theme,
+      set: state.set,
+      cards: state.size,
+      # A stored state from before the bombs has no `:bombs`
+      bombs: Map.get(state, :bombs, 0)
+    }
 
     entry = %{
       id: state.id,
