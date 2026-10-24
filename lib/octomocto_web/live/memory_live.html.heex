@@ -46,7 +46,7 @@
           campaign_path={Locale.path(@locale, ~p"/memory/campaign")}
           free_label={dgettext("memory", "Free play")}
           campaign_label={dgettext("memory", "Campaign")}
-          new_label={dgettext("memory", "New")}
+          new_label="New"
         />
       </div>
     </div>
@@ -202,7 +202,7 @@
                     id="theme-random-new"
                     class="absolute -top-1.5 -right-1.5 z-10 rounded-full bg-octo-orange px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white shadow-sm"
                   >
-                    {dgettext("memory", "New")}
+                    New
                   </span>
                   <img
                     src={~p"/images/memory/random.svg"}
@@ -232,7 +232,7 @@
                     id={"theme-#{theme.name}-new"}
                     class="absolute -top-1.5 -right-1.5 z-10 rounded-full bg-octo-indigo px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white shadow-sm"
                   >
-                    {dgettext("memory", "New")}
+                    New
                   </span>
                   <img
                     src={~p"/images/memory/#{theme.name}/#{Themes.cover(theme.name)}"}
@@ -316,7 +316,7 @@
           <.setting
             label={dgettext("memory", "Bombs")}
             icon="icon-bomb"
-            badge={dgettext("memory", "New")}
+            badge="New"
             badge_id="bombs-new"
             hint={
               if(@settings.bombs > 0,

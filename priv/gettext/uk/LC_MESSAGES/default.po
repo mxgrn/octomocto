@@ -16,7 +16,7 @@ msgstr ""
 msgid "%{joined} of %{needed}"
 msgstr "%{joined} з %{needed}"
 
-#: lib/octomocto_web/controllers/schulte_html.ex:139
+#: lib/octomocto_web/components/settings_components.ex:153
 #, elixir-autogen, elixir-format
 msgid "%{score} pts"
 msgstr "%{score} оч."
@@ -70,8 +70,8 @@ msgstr "Нагодуй Octo і Mocto"
 msgid "Finished"
 msgstr "Закінчена"
 
-#: lib/octomocto_web/controllers/schulte_html.ex:156
-#: lib/octomocto_web/controllers/schulte_html.ex:157
+#: lib/octomocto_web/components/settings_components.ex:170
+#: lib/octomocto_web/components/settings_components.ex:171
 #, elixir-autogen, elixir-format
 msgid "Guest"
 msgstr "Гість"
@@ -102,7 +102,7 @@ msgstr "Світла тема"
 msgid "No games now. Make a public one."
 msgstr "Зараз ігор немає. Створи відкриту."
 
-#: lib/octomocto_web/controllers/schulte_html.ex:87
+#: lib/octomocto_web/components/settings_components.ex:101
 #, elixir-autogen, elixir-format
 msgid "No games yet — be the first."
 msgstr "Ігор поки немає — створи першу."

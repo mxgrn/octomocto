@@ -16,7 +16,7 @@ msgstr ""
 msgid "%{joined} of %{needed}"
 msgstr ""
 
-#: lib/octomocto_web/controllers/schulte_html.ex:139
+#: lib/octomocto_web/components/settings_components.ex:153
 #, elixir-autogen, elixir-format
 msgid "%{score} pts"
 msgstr ""
@@ -70,8 +70,8 @@ msgstr ""
 msgid "Finished"
 msgstr ""
 
-#: lib/octomocto_web/controllers/schulte_html.ex:156
-#: lib/octomocto_web/controllers/schulte_html.ex:157
+#: lib/octomocto_web/components/settings_components.ex:170
+#: lib/octomocto_web/components/settings_components.ex:171
 #, elixir-autogen, elixir-format
 msgid "Guest"
 msgstr ""
@@ -102,7 +102,7 @@ msgstr ""
 msgid "No games now. Make a public one."
 msgstr ""
 
-#: lib/octomocto_web/controllers/schulte_html.ex:87
+#: lib/octomocto_web/components/settings_components.ex:101
 #, elixir-autogen, elixir-format
 msgid "No games yet — be the first."
 msgstr ""
