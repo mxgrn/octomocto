@@ -68,7 +68,7 @@ defmodule OctomoctoWeb.MemoryLive do
 
   # The params of the Free play tab. Without them, a signed-in user goes to
   # the tab that the user used last.
-  @settings_params ["theme", "set", "cards", "players", "visibility", "match"]
+  @settings_params ["theme", "set", "cards", "bombs", "players", "visibility", "match"]
 
   def handle_params(params, _uri, %{assigns: %{live_action: :campaign}} = socket) do
     locale = socket.assigns.locale
@@ -113,6 +113,8 @@ defmodule OctomoctoWeb.MemoryLive do
     match = socket.assigns.match
     settings = params |> match_params(match) |> settings() |> match_settings(match)
     filter = %{"set" => settings.set, "cards" => settings.cards, "players" => settings.players}
+    # The results of the fields with bombs have them in the settings
+    filter = if settings.bombs > 0, do: Map.put(filter, "bombs", settings.bombs), else: filter
 
     assign(socket,
       settings: settings,
@@ -123,6 +125,7 @@ defmodule OctomoctoWeb.MemoryLive do
       languages:
         Locale.languages("memory", socket.assigns.locale, ~p"/memory?#{query(settings, [])}"),
       sizes: Board.sizes(settings.theme, settings.set),
+      bomb_counts: Board.bomb_counts(settings.set, settings.cards),
       best_results: Memory.best_results(filter),
       user_results: user_results(socket.assigns.current_scope, filter)
     )
@@ -208,7 +211,12 @@ defmodule OctomoctoWeb.MemoryLive do
     %{match: match, settings: settings, locale: locale} = socket.assigns
     # When the settings do not change (for example, the game stopped), the
     # game page shows the end screen again
-    Memory.change_settings(match.id, player_id, Map.take(settings, [:theme, :set, :cards]))
+    Memory.change_settings(
+      match.id,
+      player_id,
+      Map.take(settings, [:theme, :set, :cards, :bombs])
+    )
+
     {:noreply, redirect(socket, to: Locale.path(locale, ~p"/memory/#{match.id}"))}
   end
 
@@ -252,9 +260,10 @@ defmodule OctomoctoWeb.MemoryLive do
     end
   end
 
-  # A random theme, pairs, one player and a public game, when the params
-  # do not say otherwise. A number of cards that is not possible changes to the
-  # nearest possible one.
+  # A random theme, pairs, no bombs, one player and a public game, when
+  # the params do not say otherwise. A number of cards that is not possible
+  # changes to the nearest possible one, and a number of bombs to the
+  # nearest smaller possible one.
   defp settings(params) do
     theme = if Themes.visible?(params["theme"]), do: params["theme"], else: "random"
 
@@ -266,6 +275,12 @@ defmodule OctomoctoWeb.MemoryLive do
         _ -> Board.nearest_size(theme, set, Board.default_cards(set))
       end
 
+    bombs =
+      case Integer.parse(params["bombs"] || "") do
+        {n, ""} -> Board.bomb_counts(set, cards) |> Enum.filter(&(&1 <= n)) |> List.last(0)
+        _ -> 0
+      end
+
     players =
       case Integer.parse(params["players"] || "") do
         {n, ""} when n in 1..4 -> n
@@ -274,7 +289,15 @@ defmodule OctomoctoWeb.MemoryLive do
 
     public = params["visibility"] != "private"
 
-    %{theme: theme, set: set, cards: cards, players: players, public: public, match: nil}
+    %{
+      theme: theme,
+      set: set,
+      cards: cards,
+      bombs: bombs,
+      players: players,
+      public: public,
+      match: nil
+    }
   end
 
   # The match of the page (`?match=<game id>`, see `Octomocto.Memory.Game`),
@@ -315,7 +338,8 @@ defmodule OctomoctoWeb.MemoryLive do
       %{
         "theme" => theme_choice(state),
         "set" => if(state.set == 3, do: "triplets", else: "pairs"),
-        "cards" => Integer.to_string(length(state.cards))
+        "cards" => Integer.to_string(length(state.cards)),
+        "bombs" => Integer.to_string(state.bombs)
       },
       params
     )
@@ -458,6 +482,8 @@ defmodule OctomoctoWeb.MemoryLive do
       theme: theme_choice(state),
       set: state.set,
       cards: state.size,
+      # A state from before the bombs has no `:bombs`
+      bombs: Map.get(state, :bombs, 0),
       players: state.needed,
       public: state.public,
       match: nil
@@ -480,6 +506,9 @@ defmodule OctomoctoWeb.MemoryLive do
       players: settings.players
     ]
 
+    # A field with no bombs has no param
+    query = if settings.bombs > 0, do: query ++ [bombs: settings.bombs], else: query
+
     # A public game has no param, so that most links stay short
     query = if settings.public, do: query, else: query ++ [visibility: "private"]
     if settings.match, do: query ++ [match: settings.match], else: query
@@ -496,7 +525,8 @@ defmodule OctomoctoWeb.MemoryLive do
     theme = if settings.theme == "random", do: game.settings.theme, else: settings.theme
 
     {game.settings, game.players_needed} ==
-      {%{theme: theme, set: settings.set, cards: settings.cards}, settings.players}
+      {%{theme: theme, set: settings.set, cards: settings.cards, bombs: settings.bombs},
+       settings.players}
   end
 
   @doc """
@@ -509,6 +539,13 @@ defmodule OctomoctoWeb.MemoryLive do
 
     cards = dngettext("memory", "%{count} card", "%{count} cards", settings.cards)
     summary = "#{theme_title(Themes.get(settings.theme))} · #{set} · #{cards}"
+
+    summary =
+      if settings.bombs > 0,
+        do:
+          summary <>
+            " · " <> dngettext("memory", "%{count} bomb", "%{count} bombs", settings.bombs),
+        else: summary
 
     case settings do
       %{campaign: level} ->

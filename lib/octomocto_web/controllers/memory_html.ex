@@ -66,7 +66,35 @@ defmodule OctomoctoWeb.MemoryHTML do
       "Perfect!" => dgettext("memory", "Perfect!"),
       "Level {level} done" => dgettext("memory", "Level {level} done"),
       "Try again" => dgettext("memory", "Try again"),
-      "Next level" => dgettext("memory", "Next level")
+      "Next level" => dgettext("memory", "Next level"),
+      "bombs" => dgettext("memory", "bombs"),
+      "demining" => dgettext("memory", "demining"),
+      "Deminer" => dgettext("memory", "Deminer"),
+      "Out" => dgettext("memory", "Out"),
+      "You found the last bomb! Turn another bomb now to demine the field, or any other card to play on." =>
+        dgettext(
+          "memory",
+          "You found the last bomb! Turn another bomb now to demine the field, or any other card to play on."
+        ),
+      "{name} found the last bomb and can demine the field…" =>
+        dgettext("memory", "{name} found the last bomb and can demine the field…"),
+      "The {color} player found the last bomb and can demine the field…" =>
+        dgettext("memory", "The {color} player found the last bomb and can demine the field…"),
+      "Demine the field now: turn all other bombs. A wrong card puts you out." =>
+        dgettext(
+          "memory",
+          "Demine the field now: turn all other bombs. A wrong card puts you out."
+        ),
+      "{name} demines the field…" => dgettext("memory", "{name} demines the field…"),
+      "The {color} player demines the field…" =>
+        dgettext("memory", "The {color} player demines the field…"),
+      "Boom!" => dgettext("memory", "Boom!"),
+      "You turned a bomb that was seen." =>
+        dgettext("memory", "You turned a bomb that was seen."),
+      "The demining failed: the last card was not a bomb." =>
+        dgettext("memory", "The demining failed: the last card was not a bomb."),
+      "You demined the field!" => dgettext("memory", "You demined the field!"),
+      "The field wasn't demined." => dgettext("memory", "The field wasn't demined.")
     }
     |> Map.merge(
       Map.new(GamePageComponents.color_names(), &{&1, GamePageComponents.color_name(&1)})

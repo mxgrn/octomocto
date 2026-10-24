@@ -50,6 +50,25 @@ defmodule Octomocto.Memory.Game do
   player is in `editing` while the page is open, and the other players
   cannot start a field until the player is back.
 
+  A field can have bombs (`bombs`): single cards that take the places of 1
+  to 3 sets. A bomb is never part of a set. The first player who turns a
+  bomb is safe, and the bomb counts as one card of the turn. A player who
+  turns a bomb that was seen is out (`dead`): the player keeps the score,
+  but has no more turns. The last player who is not out plays alone. The
+  field ends when all sets are off the field or all players are out. When
+  the only player of a game is out, the field ends (`failed`), and the game
+  does not save it.
+
+  When a player turns the last bomb that was not seen as the first card of
+  a try, the player can demine the field (`offer`): the next card decides.
+  A bomb starts the demining, and another card continues the try as usual.
+  When all bombs were
+  seen, a player who turns a bomb as the first card of a try must demine
+  the field. During the demining (`demining`), the player turns all other
+  bombs. A card that is not a bomb puts the player out. When all bombs are
+  face up, they go off the field as a set: the player gets the points of a
+  set, is a `deminer`, and turns again.
+
   The game is registered in the whole cluster, and it writes its state to
   `Octomocto.Memory.Store` after each change. When its node stops, the game
   starts again on another node from that state. Thus the clock uses the
@@ -88,6 +107,7 @@ defmodule Octomocto.Memory.Game do
       )
       when set in [2, 3] and needed in 1..4 and is_boolean(public) do
     true = valid_size?(config, theme, set, cards)
+    true = Map.get(config, :bombs, 0) in Board.bomb_counts(set, cards)
     GenServer.start_link(__MODULE__, {id, config}, name: via(id))
   end
 
@@ -123,7 +143,7 @@ defmodule Octomocto.Memory.Game do
         p |> Lobby.player() |> Map.merge(%{score: p.score, turn: id == state.turn})
       end)
 
-    settings = %{theme: state.theme, set: state.set, cards: state.size}
+    settings = %{theme: state.theme, set: state.set, cards: state.size, bombs: state.bombs}
 
     entry = %{
       id: state.id,
@@ -172,6 +192,7 @@ defmodule Octomocto.Memory.Game do
         random_theme: config.theme == "random",
         set: config.set,
         size: config.cards,
+        bombs: Map.get(config, :bombs, 0),
         needed: config.players,
         players: %{},
         public: config.public,
@@ -209,7 +230,18 @@ defmodule Octomocto.Memory.Game do
       # A state from before the accuracy
       |> Map.put_new(:seen, MapSet.new())
       |> Map.update!(:players, fn players ->
-        Map.new(players, fn {id, p} -> {id, Map.merge(%{correct: 0, errors: 0, wins: 0}, p)} end)
+        Map.new(players, fn {id, p} ->
+          defaults = %{
+            correct: 0,
+            errors: 0,
+            wins: 0,
+            dead: false,
+            failed_demining: false,
+            deminer: false
+          }
+
+          {id, Map.merge(defaults, p)}
+        end)
       end)
       # A state from before the matches
       |> Map.put_new(:ties, 0)
@@ -217,6 +249,11 @@ defmodule Octomocto.Memory.Game do
       # A state from before the campaign
       |> Map.put_new(:campaign, nil)
       |> Map.put_new(:failed, false)
+      # A state from before the bombs
+      |> Map.put_new(:bombs, 0)
+      |> Map.put_new(:offer, false)
+      |> Map.put_new(:demining, false)
+      |> Map.update!(:cards, fn cards -> Enum.map(cards, &Map.put_new(&1, :bomb, false)) end)
 
     store(state)
     {:ok, state}
@@ -271,11 +308,13 @@ defmodule Octomocto.Memory.Game do
   def handle_call({:change_settings, player_id, settings}, _from, %{editing: player_id} = state)
       when is_binary(player_id) do
     %{theme: theme, set: set, cards: cards} = settings
+    bombs = Map.get(settings, :bombs, 0)
 
     if (theme == "random" or Themes.get(theme) != nil) and set in [2, 3] and
-         cards in Board.sizes(theme, set) do
+         cards in Board.sizes(theme, set) and bombs in Board.bomb_counts(set, cards) do
       state =
         %{state | theme: Themes.pick(theme, set, cards), set: set, size: cards, editing: nil}
+        |> Map.put(:bombs, bombs)
         # A state from before the random theme has no `:random_theme`
         |> Map.put(:random_theme, theme == "random")
         |> new_round()
@@ -327,6 +366,12 @@ defmodule Octomocto.Memory.Game do
       errors: 0,
       # The fields of the match that the player won
       wins: 0,
+      # True when the player turned a bomb that was seen, or a card that is
+      # not a bomb during a demining (`failed_demining`), see explode/1
+      dead: false,
+      failed_demining: false,
+      # True when the player demined the field
+      deminer: false,
       joined_at: System.system_time(),
       # A reference while the player is away, see leave/2
       left: nil
@@ -351,13 +396,15 @@ defmodule Octomocto.Memory.Game do
       %{state: :down} = card ->
         known = known_matches(cards, state.seen)
         flip = check_flip(known, state.seen, card_id)
+        # The state before the flip, for the rules of the bombs
+        before = state
 
         state =
           %{state | cards: List.replace_at(cards, card_id, %{card | state: :up}), ongoing: true}
           |> count_flip(player_id, flip)
           |> Map.update!(:seen, &MapSet.put(&1, card_id))
           |> Map.update!(:started_at, &(&1 || now()))
-          |> end_turn_or_fail(flip, known)
+          |> after_flip(before, card_id, card, flip, known)
           |> count_win()
           |> save_results()
           |> restart_turn_timer()
@@ -472,7 +519,18 @@ defmodule Octomocto.Memory.Game do
         else: List.first(order)
 
     players =
-      Map.new(state.players, fn {id, p} -> {id, %{p | score: 0, correct: 0, errors: 0}} end)
+      Map.new(state.players, fn {id, p} ->
+        {id,
+         %{
+           p
+           | score: 0,
+             correct: 0,
+             errors: 0,
+             dead: false,
+             failed_demining: false,
+             deminer: false
+         }}
+      end)
 
     %{state | players: players}
     |> Map.delete(:next_game)
@@ -484,11 +542,14 @@ defmodule Octomocto.Memory.Game do
   defp new_field(state) do
     theme = Themes.get(state.theme)
 
+    bombs = List.duplicate(%{image: nil, bomb: true, state: :down}, state.bombs)
+
     cards =
-      Enum.take_random(1..theme.cards, div(state.size, state.set))
+      Enum.take_random(1..theme.cards, div(state.size - state.bombs, state.set))
       |> Enum.flat_map(&List.duplicate(&1, state.set))
+      |> Enum.map(&%{image: &1, bomb: false, state: :down})
+      |> Kernel.++(bombs)
       |> Enum.shuffle()
-      |> Enum.map(&%{image: &1, state: :down})
 
     Map.merge(state, %{
       # Groups the saved results of this field
@@ -507,8 +568,14 @@ defmodule Octomocto.Memory.Game do
       # The clock starts with the first card
       started_at: nil,
       finished_at: nil,
-      # True when a field of the campaign stopped at an error
+      # True when a field of the campaign stopped at an error, or when the
+      # only player of the game is out
       failed: false,
+      # True while the next card of the player of the turn decides if the
+      # player demines the field
+      offer: false,
+      # True while the player of the turn demines the field
+      demining: false,
       # The time of the last card, or of the start of the turn
       turn_since: nil,
       turn_ref: nil
@@ -537,9 +604,75 @@ defmodule Octomocto.Memory.Game do
 
   defp end_turn_or_fail(state, _flip, _known), do: state |> end_turn() |> stop_clock()
 
+  # The rules of the bombs for the turned card. `before` is the state
+  # before the flip. A try starts when no card of the turn is face up.
+  defp after_flip(state, before, card_id, card, flip, known) do
+    first = not before.ongoing
+    seen = MapSet.member?(before.seen, card_id)
+
+    cond do
+      before.offer and card.bomb ->
+        state = %{state | offer: false, demining: true}
+        if all_bombs_up?(state), do: demine(state), else: state
+
+      before.offer ->
+        end_turn_or_fail(%{state | offer: false}, flip, known)
+
+      state.demining and not card.bomb ->
+        explode(state)
+
+      state.demining ->
+        if all_bombs_up?(state), do: demine(state), else: state
+
+      card.bomb and seen and first and all_bombs_seen?(before) ->
+        %{state | demining: true}
+
+      card.bomb and seen ->
+        explode(state)
+
+      card.bomb and first and all_bombs_seen?(state) ->
+        %{state | offer: true}
+
+      true ->
+        end_turn_or_fail(state, flip, known)
+    end
+  end
+
+  defp all_bombs_seen?(state) do
+    state.cards
+    |> Enum.with_index()
+    |> Enum.all?(fn {card, i} -> not card.bomb or MapSet.member?(state.seen, i) end)
+  end
+
+  defp all_bombs_up?(state), do: Enum.all?(state.cards, &(not &1.bomb or &1.state == :up))
+
+  # The player of the turn is out, and the next player who is not out
+  # turns. The cards of the turn stay face up, so that all players see the
+  # bomb. The field ends when no player is left.
+  defp explode(state) do
+    state =
+      update_in(state.players[state.turn], &%{&1 | dead: true, failed_demining: state.demining})
+      |> Map.merge(%{ongoing: false, offer: false, demining: false})
+
+    cond do
+      state.needed == 1 -> %{state | failed: true, finished_at: now()}
+      Enum.all?(state.players, fn {_id, p} -> p.dead end) -> %{state | finished_at: now()}
+      true -> %{state | turn: next_player(state)}
+    end
+  end
+
+  # All bombs go off the field as a set
+  defp demine(state) do
+    cards = Enum.map(state.cards, &if(&1.bomb, do: %{&1 | state: :cleared}, else: &1))
+
+    %{state | cards: cards, ongoing: false, demining: false}
+    |> update_in([:players, state.turn], &%{&1 | score: &1.score + state.set, deminer: true})
+    |> stop_clock()
+  end
+
   # When the face-up cards make a full set, the turn ends: a set goes off
   # the field and the player turns again, and a miss gives the turn to the
-  # next player.
+  # next player. A bomb is never part of a set.
   defp end_turn(state) do
     up = Enum.filter(state.cards, &(&1.state == :up))
 
@@ -547,7 +680,7 @@ defmodule Octomocto.Memory.Game do
       length(up) < state.set ->
         state
 
-      up |> Enum.map(& &1.image) |> Enum.uniq() |> length() == 1 ->
+      not Enum.any?(up, & &1.bomb) and up |> Enum.map(& &1.image) |> Enum.uniq() |> length() == 1 ->
         cards = Enum.map(state.cards, &if(&1.state == :up, do: %{&1 | state: :cleared}, else: &1))
 
         %{state | cards: cards, ongoing: false}
@@ -560,11 +693,13 @@ defmodule Octomocto.Memory.Game do
 
   # The positions of the face-down cards that were seen and complete the
   # set of the face-up cards of the turn. nil when the face-up cards cannot
-  # make a set (thus before the first flip of a turn, and after a miss of a
-  # triplet). The `cards` are the cards before the flip.
+  # make a set (thus before the first flip of a turn, after a miss of a
+  # triplet, and with a bomb). The `cards` are the cards before the flip.
   defp known_matches(cards, seen) do
-    case cards |> Enum.filter(&(&1.state == :up)) |> Enum.map(& &1.image) |> Enum.uniq() do
-      [image] ->
+    up = Enum.filter(cards, &(&1.state == :up))
+
+    case up |> Enum.map(& &1.image) |> Enum.uniq() do
+      [image] when image != nil ->
         for {%{state: :down, image: ^image}, i} <- Enum.with_index(cards),
             MapSet.member?(seen, i),
             do: i
@@ -603,28 +738,38 @@ defmodule Octomocto.Memory.Game do
   # face down again.
   defp pass_turn(state) do
     cards = if state.ongoing, do: Enum.map(state.cards, &turn_down/1), else: state.cards
-    %{state | cards: cards, ongoing: false, turn: next_player(state)}
+
+    %{
+      state
+      | cards: cards,
+        ongoing: false,
+        offer: false,
+        demining: false,
+        turn: next_player(state)
+    }
   end
 
   defp turn_down(%{state: :up} = card), do: %{card | state: :down}
   defp turn_down(card), do: card
 
-  # The players have their turns in the order in which they joined
+  # The players have their turns in the order in which they joined. A
+  # player who is out has no turns. When all others are out, the player of
+  # the turn turns again.
   defp next_player(state) do
     order = player_order(state.players)
+    {before, rest} = Enum.split_while(order, &(&1 != state.turn))
 
-    case Enum.drop_while(order, &(&1 != state.turn)) do
-      [_current, next | _] -> next
-      _ -> List.first(order)
-    end
+    (Enum.drop(rest, 1) ++ before ++ Enum.take(rest, 1))
+    |> Enum.find(List.first(order), &(not state.players[&1].dead))
   end
 
   defp player_order(players) do
     players |> Enum.sort_by(fn {_id, p} -> p.joined_at end) |> Enum.map(&elem(&1, 0))
   end
 
+  # The field ends when all sets are off the field. Bombs can stay.
   defp stop_clock(state) do
-    if Enum.all?(state.cards, &(&1.state == :cleared)),
+    if Enum.all?(state.cards, &(&1.state == :cleared or &1.bomb)),
       do: %{state | finished_at: now()},
       else: state
   end
@@ -670,9 +815,13 @@ defmodule Octomocto.Memory.Game do
     state
   end
 
+  # A field with bombs has them in the settings, so that its results are
+  # not in the lists of the fields with no bombs
   defp save_results(state)
-       when state.finished_at != nil and map_size(state.players) == state.needed do
+       when state.finished_at != nil and map_size(state.players) == state.needed and
+              not state.failed do
     settings = %{"set" => state.set, "cards" => state.size, "players" => state.needed}
+    settings = if state.bombs > 0, do: Map.put(settings, "bombs", state.bombs), else: settings
     players = Map.values(state.players)
     elapsed_ms = state.finished_at - state.started_at
     Memory.save_results(state.field_id, settings, state.theme, elapsed_ms, players)
@@ -681,14 +830,16 @@ defmodule Octomocto.Memory.Game do
 
   defp save_results(state), do: state
 
-  # The timer runs only in a game with 2 or more players
+  # The timer runs only in a game with 2 or more players. A demining has no
+  # time limit.
   defp restart_turn_timer(state) when state.ready and state.finished_at == nil do
-    if state.needed > 1 do
+    if state.needed > 1 and not state.demining do
       ref = make_ref()
       Process.send_after(self(), {:turn_timeout, ref}, @turn_timeout_ms)
       %{state | turn_since: now(), turn_ref: ref}
     else
-      %{state | turn_since: now()}
+      # The timer of an earlier turn does not count
+      %{state | turn_since: now(), turn_ref: nil}
     end
   end
 
@@ -752,13 +903,26 @@ defmodule Octomocto.Memory.Game do
           # In percent, nil when no flip was counted
           accuracy: Memory.accuracy(p),
           away: p.left != nil,
-          wins: p.wins
+          wins: p.wins,
+          dead: p.dead,
+          failed_demining: p.failed_demining,
+          deminer: p.deminer
         }
       end)
 
+    # At the end of the field, the bombs that stay show where they were
     cards =
       Enum.map(state.cards, fn card ->
-        %{state: card.state, image: if(card.state != :down, do: card.image)}
+        card_state =
+          if card.bomb and card.state == :down and state.finished_at,
+            do: :revealed,
+            else: card.state
+
+        %{
+          state: card_state,
+          image: if(card_state != :down and not card.bomb, do: card.image),
+          bomb: card_state != :down and card.bomb
+        }
       end)
 
     elapsed_ms =
@@ -771,7 +935,21 @@ defmodule Octomocto.Memory.Game do
       random_theme: Map.get(state, :random_theme, false),
       set: state.set,
       cards: cards,
-      images: state.cards |> Enum.map(& &1.image) |> Enum.uniq() |> Enum.sort(),
+      images:
+        state.cards
+        |> Enum.map(& &1.image)
+        |> Enum.reject(&is_nil/1)
+        |> Enum.uniq()
+        |> Enum.sort(),
+      bombs: state.bombs,
+      # The bombs that were face up at some time. When all were, a bomb as
+      # the first card of a try starts a demining.
+      bombs_seen:
+        state.cards
+        |> Enum.with_index()
+        |> Enum.count(fn {card, i} -> card.bomb and MapSet.member?(state.seen, i) end),
+      offer: state.offer,
+      demining: state.demining,
       layouts: Enum.map(Board.layouts(state.size), &Tuple.to_list/1),
       waiting: not state.ready,
       # The clock runs from the first card
@@ -783,7 +961,7 @@ defmodule Octomocto.Memory.Game do
       # The time since the last card of the turn, and the time limit (nil
       # when there is none)
       turn_ms: if(state.turn_since, do: now() - state.turn_since, else: 0),
-      turn_limit_ms: if(state.needed > 1, do: @turn_timeout_ms),
+      turn_limit_ms: if(state.needed > 1 and not state.demining, do: @turn_timeout_ms),
       players: players,
       players_needed: state.needed,
       ties: state.ties,

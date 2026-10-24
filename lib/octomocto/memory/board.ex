@@ -48,6 +48,15 @@ defmodule Octomocto.Memory.Board do
         do: {columns, rows, gaps}
   end
 
+  @doc """
+  Gives the possible numbers of bombs for the set size and the number of
+  cards, the smallest first. Bombs take the places of 1 to 3 sets, so that
+  the field keeps its size. At least 2 sets stay on the field.
+  """
+  def bomb_counts(set_size, cards) do
+    for sets <- 0..3, div(cards, set_size) - sets >= 2, do: sets * set_size
+  end
+
   @doc "Gives the possible size that is the nearest to the number of cards."
   def nearest_size(theme_name, set_size, cards) do
     Enum.min_by(sizes(theme_name, set_size), &abs(&1 - cards))

@@ -262,6 +262,10 @@ html:has(.is-playing) body {
   box-shadow: 0 0 0 1px #cbd5e1, 0 1px 2px rgb(0 0 0 / 0.08);
 }
 
+/* A bomb has a light red face */
+.memory-card.is-bomb .memory-card-face { background: #fee2e2; box-shadow: 0 0 0 1px #fca5a5, 0 1px 2px rgb(0 0 0 / 0.08); }
+[data-theme=dark] .memory-card.is-bomb .memory-card-face { background: #5b2a33; }
+
 /* The player of the turn sees which cards can be turned. Only with a
    mouse: on a touch screen a tap also starts the hover, and WebKit then
    does not show the turn of the card correctly. */
@@ -279,6 +283,14 @@ html:has(.is-playing) body {
 .memory-card.is-cleared { pointer-events: none; opacity: 0; scale: 0.85; }
 
 
+/* On a small screen, the message about the bombs slides down from the
+   top of the screen */
+@keyframes memory-slide-in {
+  from { transform: translateY(-120%); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.memory-slide-in { animation: memory-slide-in 300ms ease-out; }
+
 /* The score row of the player of the turn has a ring in the player's color */
 .memory-current { box-shadow: 0 0 0 2px var(--player-color); }
 
@@ -293,6 +305,7 @@ html:has(.is-playing) body {
 
 @media (prefers-reduced-motion: reduce) {
   .memory-card-inner { transition: none; }
+  .memory-slide-in { animation: none; }
 }
 
 /* The theme picker shows 2.5 rows and scrolls, so that the cut row and

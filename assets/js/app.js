@@ -336,8 +336,9 @@ if (memoryNode) {
   // does not come in empty during the turn (slow on phones and tablets)
   const preloaded = new Map()
   const preload = state => {
-    for (const image of state.images) {
-      const url = `/images/memory/${state.theme}/${image}.svg`
+    const urls = state.images.map(image => `/images/memory/${state.theme}/${image}.svg`)
+    if (state.bombs > 0) urls.push("/images/memory/bomb.svg")
+    for (const url of urls) {
       if (preloaded.has(url)) continue
       const img = new Image()
       img.src = url

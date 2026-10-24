@@ -263,7 +263,12 @@
               }
               id={"set-#{value}"}
               selected={@settings.set == set}
-              patch={settings_path(@locale, @settings, set: set)}
+              patch={
+                settings_path(@locale, @settings,
+                  set: set,
+                  bombs: div(@settings.bombs, @settings.set) * set
+                )
+              }
             >
               {label}
             </.option>
@@ -307,6 +312,28 @@
                   do: settings_path(@locale, @settings, cards: size)
               }
             />
+          </.setting>
+          <.setting
+            label={dgettext("memory", "Bombs")}
+            icon="hero-fire"
+            hint={
+              if(@settings.bombs > 0,
+                do:
+                  dgettext(
+                    "memory",
+                    "Turn a bomb that was seen, and you are out. Turn all bombs in one go to demine the field."
+                  )
+              )
+            }
+          >
+            <.option
+              :for={n <- @bomb_counts}
+              id={"bombs-#{n}"}
+              selected={@settings.bombs == n}
+              patch={settings_path(@locale, @settings, bombs: n)}
+            >
+              {if n == 0, do: dgettext("memory", "None"), else: n}
+            </.option>
           </.setting>
           <.setting
             :if={!@match}

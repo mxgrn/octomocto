@@ -17,6 +17,12 @@ const sounds = {
     tone({freq: 990, duration: 0.2, gain: 0.12, start: 0.25})
   },
 
+  // A low rumble when a player turns a bomb that was seen
+  boom() {
+    noise({duration: 0.6, gain: 0.25, filter: 900, filterEnd: 80, filterType: "lowpass"})
+    tone({freq: 110, freqEnd: 40, duration: 0.5, gain: 0.15})
+  },
+
   // Two quick notes when the turn comes to you
   turn() {
     tone({freq: 784, duration: 0.1, gain: 0.08, start: 0.3})

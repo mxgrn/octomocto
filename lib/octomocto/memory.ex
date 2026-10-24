@@ -18,7 +18,8 @@ defmodule Octomocto.Memory do
   @doc """
   Starts a new game and returns its id. The `config` has the `:theme`, the
   `:set` size (2 or 3), the number of `:cards`, the number of `:players`
-  and `:public` (a public game is in `open_games/0`).
+  and `:public` (a public game is in `open_games/0`). It can have a number
+  of `:bombs` (see `Octomocto.Memory.Board.bomb_counts/2`).
   """
   def create_game(config) do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
@@ -96,7 +97,7 @@ defmodule Octomocto.Memory do
 
   @doc """
   Starts a new field of the match with the new `settings` (`:theme`,
-  `:set` and `:cards`). Only the player of `edit_settings/3` can. Gives
+  `:set`, `:cards` and `:bombs`). Only the player of `edit_settings/3` can. Gives
   `:ok` or `{:error, reason}`.
   """
   def change_settings(id, player_id, settings) do

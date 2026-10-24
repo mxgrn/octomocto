@@ -87,7 +87,10 @@ port memorySaveMuted : Bool -> Cmd msg
 {-| The `name` is the display name of a signed-in player, or Nothing for a
 guest. Then the player is known by the `colorName`. An `away` player lost
 the connection, and can come back for a short time. The `accuracy` is in
-percent, Nothing until the server counts a flip of the player.
+percent, Nothing until the server counts a flip of the player. A `dead`
+player turned a bomb that was seen, or a card that is not a bomb during a
+demining (`failedDemining`), and has no more turns. A `deminer` demined
+the field.
 -}
 type alias Player =
     { id : String
@@ -97,17 +100,29 @@ type alias Player =
     , score : Int
     , accuracy : Maybe Int
     , away : Bool
+    , dead : Bool
+    , failedDemining : Bool
+    , deminer : Bool
     }
 
 
 {-| The state is "down", "up", "cleared" or "revealed" (a card that the
-player had to turn, shown after an error in the campaign). The image is a
-number of an image of the theme. A face-down card has no image.
+player had to turn, shown after an error in the campaign, or a bomb at the
+end of the field). The image is a number of an image of the theme. A
+face-down card has no image, and is not shown as a bomb.
 -}
 type alias Card =
     { state : String
     , image : Maybe Int
+    , bomb : Bool
     }
+
+
+{-| The face of a card: an image of the theme, or a bomb
+-}
+type Face
+    = Picture Int
+    | Bomb
 
 
 {-| A grid for the cards: the columns, the rows and the number of empty
@@ -156,8 +171,18 @@ type alias Game =
     -- The level of a game of the campaign, Nothing for other games
     , campaign : Maybe Campaign
 
-    -- True when a field of the campaign stopped at an error
+    -- True when a field of the campaign stopped at an error, or when the
+    -- only player turned a bomb that was seen
     , failed : Bool
+
+    -- The number of bombs, and the bombs that were face up at some time
+    , bombs : Int
+    , bombsSeen : Int
+
+    -- True while the next card of the player of the turn decides if the
+    -- player demines the field, and while the player demines it
+    , offer : Bool
+    , demining : Bool
     }
 
 
@@ -191,9 +216,9 @@ type alias Model =
     , connection : Connection
     , copied : Bool
 
-    -- The last image of each card, by its position. A card that turns face
-    -- down keeps its image until it is turned over.
-    , images : Dict Int Int
+    -- The last face of each card, by its position. A card that turns face
+    -- down keeps its face until it is turned over.
+    , images : Dict Int Face
 
     -- The local time (in ms) when the field started, when the turn
     -- started, and the local time now. The clock ticks between the server
@@ -360,7 +385,7 @@ update msg model =
 {-| A field with no face-up and no cleared cards is new, so the old images
 are not needed any more.
 -}
-rememberImages : Game -> Dict Int Int -> Dict Int Int
+rememberImages : Game -> Dict Int Face -> Dict Int Face
 rememberImages game images =
     let
         start =
@@ -374,11 +399,14 @@ rememberImages game images =
         |> List.indexedMap Tuple.pair
         |> List.foldl
             (\( index, card ) dict ->
-                case card.image of
-                    Just image ->
-                        Dict.insert index image dict
+                case ( card.image, card.bomb ) of
+                    ( Just image, _ ) ->
+                        Dict.insert index (Picture image) dict
 
-                    Nothing ->
+                    ( Nothing, True ) ->
+                        Dict.insert index Bomb dict
+
+                    ( Nothing, False ) ->
                         dict
             )
             start
@@ -415,8 +443,9 @@ playSounds model names =
 
 
 {-| The sounds for the change from the old state to the new one: the start
-of the game, a card that turns face up, a found set, the start of my turn,
-and the end of the game. A miss has no sound of its own.
+of the game, a card that turns face up, a found set, a player who is out,
+the start of my turn, and the end of the game. A miss has no sound of its
+own.
 -}
 stateSounds : Me -> Game -> Game -> List String
 stateSounds me old new =
@@ -441,6 +470,12 @@ stateSounds me old new =
 
         found =
             count "cleared" new > count "cleared" old
+
+        dead game =
+            List.length (List.filter .dead game.players)
+
+        exploded =
+            dead new > dead old
 
         myNewTurn =
             List.length new.players > 1 && myTurn me new && not (myTurn me old) && not new.finished
@@ -473,6 +508,11 @@ stateSounds me old new =
             []
         , if found && not new.finished then
             [ "match" ]
+
+          else
+            []
+        , if exploded then
+            [ "boom" ]
 
           else
             []
@@ -535,6 +575,10 @@ gameDecoder =
         |> andMap (Decode.field "editing" (Decode.nullable Decode.string))
         |> andMap (Decode.field "campaign" (Decode.nullable campaignDecoder))
         |> andMap (Decode.field "failed" Decode.bool)
+        |> andMap (Decode.field "bombs" Decode.int)
+        |> andMap (Decode.field "bombs_seen" Decode.int)
+        |> andMap (Decode.field "offer" Decode.bool)
+        |> andMap (Decode.field "demining" Decode.bool)
 
 
 campaignDecoder : Decoder Campaign
@@ -551,9 +595,10 @@ andMap =
 
 cardDecoder : Decoder Card
 cardDecoder =
-    Decode.map2 Card
+    Decode.map3 Card
         (Decode.field "state" Decode.string)
         (Decode.field "image" (Decode.nullable Decode.int))
+        (Decode.field "bomb" Decode.bool)
 
 
 layoutDecoder : Decoder Layout
@@ -566,14 +611,17 @@ layoutDecoder =
 
 playerDecoder : Decoder Player
 playerDecoder =
-    Decode.map7 Player
-        (Decode.field "id" Decode.string)
-        (Decode.field "name" (Decode.nullable Decode.string))
-        (Decode.field "color" Decode.string)
-        (Decode.field "color_name" Decode.string)
-        (Decode.field "score" Decode.int)
-        (Decode.field "accuracy" (Decode.nullable Decode.int))
-        (Decode.field "away" Decode.bool)
+    Decode.succeed Player
+        |> andMap (Decode.field "id" Decode.string)
+        |> andMap (Decode.field "name" (Decode.nullable Decode.string))
+        |> andMap (Decode.field "color" Decode.string)
+        |> andMap (Decode.field "color_name" Decode.string)
+        |> andMap (Decode.field "score" Decode.int)
+        |> andMap (Decode.field "accuracy" (Decode.nullable Decode.int))
+        |> andMap (Decode.field "away" Decode.bool)
+        |> andMap (Decode.field "dead" Decode.bool)
+        |> andMap (Decode.field "failed_demining" Decode.bool)
+        |> andMap (Decode.field "deminer" Decode.bool)
 
 
 
@@ -645,17 +693,16 @@ viewGame model me game =
     in
     div
         [ id "memory-root"
-        , class "flex w-full flex-col gap-2 select-none max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:gap-3 lg:flex-row lg:items-start lg:gap-8"
+        , class "flex w-full flex-col gap-2 select-none lg:flex-row lg:items-start lg:gap-8"
         , classList [ ( "is-playing", not game.waiting && not game.finished ) ]
         ]
-        [ aside [ id "memory-panel", class "flex flex-col gap-2 max-lg:landscape:w-44 max-lg:landscape:shrink-0 max-lg:landscape:gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
+        [ aside [ id "memory-panel", class "flex flex-col gap-2 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
             -- On a small screen, the title, the stats and the restart button
-            -- are in one compact row. On a small screen that is wider than
-            -- tall, they are in a narrow column at the left of the field, so
-            -- the field can be as tall as the screen. On a large screen, the
-            -- row is not a box (`contents`), so its items are in the column
-            -- of the panel.
-            [ div [ class "flex items-center gap-1 max-lg:landscape:flex-col max-lg:landscape:items-start max-lg:landscape:gap-4 lg:contents" ]
+            -- are in one compact row. A message about the bombs slides in
+            -- from the top of the screen over the row, so that the field
+            -- does not move. On a large screen, the row is not a box
+            -- (`contents`), so its items are in the column of the panel.
+            [ div [ class "flex items-center gap-1 lg:contents" ]
                 [ div [ class "min-w-0 lg:order-1" ]
                     [ div [ class "flex items-center gap-1 lg:gap-2" ]
                         [ a
@@ -691,12 +738,22 @@ viewGame model me game =
                         ]
                     ]
                 , viewClock model game
+                , if bombMessageShown game then
+                    viewBombMessage model.texts me game True
+
+                  else
+                    text ""
                 , if me == Nothing then
                     text ""
 
                   else
                     viewRestartButton model.texts (game.editing /= Nothing)
                 ]
+            , if bombMessageShown game then
+                viewBombMessage model.texts me game False
+
+              else
+                text ""
             , if game.playersNeeded > 1 then
                 viewShareLink model
 
@@ -758,18 +815,6 @@ largeScreen =
     1024
 
 
-{-| A small screen that is wider than tall. The panel is a narrow column at
-the left of the field, as the `max-lg:landscape:` classes make it.
--}
-sideways : Model -> Bool
-sideways model =
-    let
-        ( width, height ) =
-            model.viewport
-    in
-    width < largeScreen && width > height
-
-
 {-| The grid with the largest cards in the space for the field. With the
 same size of the cards, the grid with fewer empty places.
 -}
@@ -786,10 +831,8 @@ bestLayout model me game =
 
 
 {-| The width and the height in pixels of the space for the field. On a
-large screen, the panel is at the left of the field. On a small screen that
-is wider than tall, the 11rem panel is at the left with a 0.75rem gap. On
-other small screens, it is above the field, so the field can be as tall as
-the screen.
+large screen, the panel is at the left of the field. On a small screen, it
+is above the field, so the field can be as wide as the screen.
 -}
 fieldSpace : Model -> Me -> Game -> ( Float, Float )
 fieldSpace model me game =
@@ -799,9 +842,6 @@ fieldSpace model me game =
     in
     ( if width >= largeScreen then
         width - 416
-
-      else if sideways model then
-        width - 204
 
       else
         width - 16
@@ -838,17 +878,12 @@ padding of the page at the top and at the bottom, and the 0.5rem padding of
 the board on each side. On a small
 screen, it is the 0.5rem padding of the page at the top and at the bottom,
 and the rows of the panel with the 0.5rem gaps between them. The heights of
-the rows are approximate, because the scores can wrap. On a small screen
-that is wider than tall, the panel is at the left, so only the padding is
-not for the field.
+the rows are approximate, because the scores can wrap.
 -}
 reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
     if Tuple.first model.viewport >= largeScreen then
         64
-
-    else if sideways model then
-        16
 
     else
         let
@@ -939,31 +974,31 @@ viewMuteButton texts muted =
 
 
 {-| Starts a new field for all players, also during a game. On a small
-screen, only the icon shows, but not in the column of a screen that is wider
-than tall. It is disabled while a player changes the settings.
+screen, only the icon shows. It is disabled while a player changes the
+settings.
 -}
 viewRestartButton : Texts -> Bool -> Html Msg
 viewRestartButton texts locked =
     button
         [ id "memory-restart"
-        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 disabled:pointer-events-none disabled:opacity-50 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
+        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 disabled:pointer-events-none disabled:opacity-50 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
         , disabled locked
         , Html.Attributes.title (t texts "Restart game")
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text (t texts "Restart game") ]
+        , span [ class "hidden lg:inline" ] [ text (t texts "Restart game") ]
         ]
 
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 lg:order-3 text-sm ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 lg:order-3 text-sm ring-1 ring-octo-indigo/20 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "memory-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none max-lg:landscape:px-2 max-lg:landscape:py-1 lg:px-2 lg:py-1 dark:text-slate-100"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none lg:px-2 lg:py-1 dark:text-slate-100"
             ]
             []
         , button
@@ -985,9 +1020,9 @@ viewShareLink model =
 
 
 {-| The time, and for one player, the accuracy (with more players, it is
-next to each score). On a small screen, they are small and without a box,
-at the right of the compact row of the panel, or under the title in the
-column of a screen that is wider than tall.
+next to each score). In a field with bombs, the bombs that were seen, or
+during a demining, the bombs that are face up. On a small screen, they are
+small and without a box, at the right of the compact row of the panel.
 -}
 viewClock : Model -> Game -> Html Msg
 viewClock model game =
@@ -1005,16 +1040,37 @@ viewClock model game =
         solo =
             List.length game.players == 1
 
+        bombsUp =
+            List.length (List.filter (\card -> card.bomb && card.state == "up") game.cards)
+
+        columns =
+            (if solo then
+                2
+
+             else
+                1
+            )
+                + (if game.bombs > 0 then
+                    1
+
+                   else
+                    0
+                  )
+
         stat label valueId value =
-            div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
+            div [ class "flex flex-col items-center justify-center" ]
                 [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text (t model.texts label) ]
                 , span [ id valueId, class "text-lg leading-tight font-light text-slate-700 tabular-nums lg:text-3xl dark:text-slate-100" ] [ text value ]
                 ]
     in
     div
         [ id "memory-clock"
-        , class "ml-auto flex gap-4 pr-2 max-lg:landscape:ml-0 max-lg:landscape:gap-6 max-lg:landscape:pr-0 max-lg:landscape:pl-2 lg:order-2 lg:ml-0 lg:grid lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10"
-        , classList [ ( "lg:grid-cols-2", solo ), ( "lg:grid-cols-1", not solo ) ]
+        , class "ml-auto flex gap-4 pr-2 lg:order-2 lg:ml-0 lg:grid lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10"
+        , classList
+            [ ( "lg:grid-cols-1", columns == 1 )
+            , ( "lg:grid-cols-2", columns == 2 )
+            , ( "lg:grid-cols-3", columns == 3 )
+            ]
         ]
         [ stat "time" "memory-time" (formatTime elapsedMs)
         , if solo then
@@ -1022,6 +1078,14 @@ viewClock model game =
 
           else
             text ""
+        , if game.bombs == 0 then
+            text ""
+
+          else if game.demining then
+            stat "demining" "memory-bombs" (String.fromInt bombsUp ++ "/" ++ String.fromInt game.bombs)
+
+          else
+            stat "bombs" "memory-bombs" (String.fromInt game.bombsSeen ++ "/" ++ String.fromInt game.bombs)
         ]
 
 
@@ -1055,7 +1119,7 @@ time that is left in the last seconds of the turn.
 -}
 viewScores : Model -> Me -> Game -> Html Msg
 viewScores model me game =
-    ul [ id "memory-scores", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:order-4 lg:flex-col" ]
+    ul [ id "memory-scores", class "flex flex-wrap gap-2 lg:order-4 lg:flex-col" ]
         (List.map
             (\player ->
                 let
@@ -1065,15 +1129,26 @@ viewScores model me game =
                 li
                     [ id ("memory-score-" ++ player.id)
                     , class "relative flex items-center gap-2 overflow-hidden rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200 transition dark:bg-white/5 dark:text-slate-100 dark:shadow-none dark:ring-white/10"
-                    , classList [ ( "opacity-50", player.away ), ( "memory-current", current ) ]
+                    , classList [ ( "opacity-50", player.away || player.dead ), ( "memory-current", current ) ]
 
                     -- Elm's `style` cannot set a CSS variable
                     , Html.Attributes.attribute "style" ("--player-color: " ++ player.color)
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "max-lg:landscape:flex-1 lg:flex-1" ] [ text (playerName model.texts me player) ]
+                    , span [ class "lg:flex-1", classList [ ( "line-through", player.dead ) ] ] [ text (playerName model.texts me player) ]
+                    , viewBadges model.texts player
                     , if current then
-                        span [ class "text-xs font-medium tracking-wide uppercase", style "color" player.color ] [ text (t model.texts "turn") ]
+                        span [ class "text-xs font-medium tracking-wide uppercase", style "color" player.color ]
+                            [ text
+                                (t model.texts
+                                    (if game.demining then
+                                        "demining"
+
+                                     else
+                                        "turn"
+                                    )
+                                )
+                            ]
 
                       else
                         text ""
@@ -1117,6 +1192,30 @@ viewTurnTimer model game =
 
         Nothing ->
             text ""
+
+
+{-| A shield for a player who demined the field, and a bomb for a player
+who is out
+-}
+viewBadges : Texts -> Player -> Html Msg
+viewBadges texts player =
+    span [ class "flex shrink-0 items-center gap-1 empty:hidden" ]
+        [ if player.deminer then
+            span [ class "hero-shield-check-solid size-4 text-amber-500", Html.Attributes.title (t texts "Deminer") ] []
+
+          else
+            text ""
+        , if player.dead then
+            img [ src bombImage, alt (t texts "Out"), Html.Attributes.title (t texts "Out"), class "size-4" ] []
+
+          else
+            text ""
+        ]
+
+
+bombImage : String
+bombImage =
+    "/images/memory/bomb.svg"
 
 
 {-| A guest has the name of the color.
@@ -1164,12 +1263,15 @@ viewField model me game layout gap =
 viewCard : Model -> Me -> Game -> Int -> Card -> Html Msg
 viewCard model me game index card =
     let
-        image =
-            case card.image of
-                Just i ->
-                    Just i
+        face =
+            case ( card.image, card.bomb ) of
+                ( Just i, _ ) ->
+                    Just (Picture i)
 
-                Nothing ->
+                ( Nothing, True ) ->
+                    Just Bomb
+
+                ( Nothing, False ) ->
                     Dict.get index model.images
     in
     button
@@ -1178,6 +1280,7 @@ viewCard model me game index card =
         , classList
             [ ( "is-up", card.state /= "down" )
             , ( "is-cleared", card.state == "cleared" )
+            , ( "is-bomb", face == Just Bomb )
             , ( "is-clickable", canFlip me game (Just card) )
             ]
         , onClick (Flip index)
@@ -1185,8 +1288,8 @@ viewCard model me game index card =
         [ div [ class "memory-card-inner" ]
             [ div [ class "memory-card-back" ] []
             , div [ class "memory-card-face" ]
-                [ case image of
-                    Just i ->
+                [ case face of
+                    Just (Picture i) ->
                         img
                             [ src ("/images/memory/" ++ game.theme ++ "/" ++ String.fromInt i ++ ".svg")
                             , alt ""
@@ -1194,10 +1297,106 @@ viewCard model me game index card =
                             ]
                             []
 
+                    Just Bomb ->
+                        img [ src bombImage, alt "", class "size-3/4 object-contain" ] []
+
                     Nothing ->
                         text ""
                 ]
             ]
+        ]
+
+
+{-| True while the player of the turn can demine the field or demines it
+-}
+bombMessageShown : Game -> Bool
+bombMessageShown game =
+    (game.offer || game.demining) && not game.finished
+
+
+{-| The player of the turn turned the last bomb that was not seen, and can
+demine the field: the next card decides. Or the player demines the field,
+and the message shows the bombs that are face up. The message does not
+cover the cards: on a small screen, it hangs from the top of the screen
+over the compact row (`inRow`), else it is in the panel.
+-}
+viewBombMessage : Texts -> Me -> Game -> Bool -> Html Msg
+viewBombMessage texts me game inRow =
+    let
+        bombsUp =
+            List.length (List.filter (\card -> card.bomb && card.state == "up") game.cards)
+
+        player =
+            List.head (List.filter (\p -> Just p.id == game.turn) game.players)
+
+        -- The text for the other players, with the name or the color
+        ( named, colored ) =
+            if game.demining then
+                ( "{name} demines the field…", "The {color} player demines the field…" )
+
+            else
+                ( "{name} found the last bomb and can demine the field…", "The {color} player found the last bomb and can demine the field…" )
+
+        message =
+            if myTurn me game then
+                if game.demining then
+                    t texts "Demine the field now: turn all other bombs. A wrong card puts you out."
+
+                else
+                    t texts "You found the last bomb! Turn another bomb now to demine the field, or any other card to play on."
+
+            else
+                case player of
+                    Just { name, colorName } ->
+                        case name of
+                            Just n ->
+                                tf texts named [ ( "name", n ) ]
+
+                            Nothing ->
+                                tf texts colored [ ( "color", t texts colorName ) ]
+
+                    Nothing ->
+                        ""
+    in
+    div
+        (if inRow then
+            [ id "memory-bomb-message-row"
+            -- It hangs from the top of the screen over the compact row, with
+            -- the 0.5rem side padding of the page. It is at least as tall as
+            -- the 0.5rem padding and the row, and taller only for a long text
+            , class "memory-slide-in fixed inset-x-2 top-0 z-30 flex min-h-12 items-center gap-2 rounded-b-2xl bg-octo-indigo px-4 py-2 text-xs leading-tight font-medium text-white shadow-lg lg:hidden"
+            ]
+
+         else
+            [ id "memory-bomb-message"
+            , class "hidden items-center gap-3 rounded-2xl bg-octo-indigo px-4 py-2.5 text-sm font-medium text-white shadow-sm lg:order-2 lg:flex lg:py-3"
+            ]
+        )
+        [ img
+            [ src bombImage
+            , alt ""
+            , class "shrink-0 animate-bounce"
+            , classList [ ( "size-6", inRow ), ( "size-8", not inRow ) ]
+            ]
+            []
+        , p [ class "flex-1" ] [ text message ]
+        , if game.demining then
+            span
+                [ id
+                    ("memory-bomb-progress"
+                        ++ (if inRow then
+                                "-row"
+
+                            else
+                                ""
+                           )
+                    )
+                , class "shrink-0 rounded-full bg-white/20 px-2 py-0.5 font-semibold tabular-nums"
+                ]
+                [ text (String.fromInt bombsUp ++ "/" ++ String.fromInt game.bombs) ]
+
+          else
+            text ""
         ]
 
 
@@ -1238,7 +1437,11 @@ viewResult model me game =
         message =
             case ( solo, winners players ) of
                 ( True, _ ) ->
-                    t texts "Done!"
+                    if game.failed then
+                        t texts "Boom!"
+
+                    else
+                        t texts "Done!"
 
                 ( False, [ winner ] ) ->
                     if isMe me winner then
@@ -1283,6 +1486,29 @@ viewResult model me game =
                        )
                 )
             ]
+        , if solo && game.failed then
+            p [ id "memory-exploded", class "text-sm text-white/80" ]
+                [ text
+                    (t texts
+                        (if List.any .failedDemining players then
+                            "The demining failed: the last card was not a bomb."
+
+                         else
+                            "You turned a bomb that was seen."
+                        )
+                    )
+                ]
+
+          else if solo && List.any .deminer players then
+            p [ id "memory-deminer", class "flex items-center gap-1.5 text-sm font-medium text-amber-300" ]
+                [ span [ class "hero-shield-check-solid size-5" ] [], text (t texts "You demined the field!") ]
+
+          else if game.bombs > 0 && not (List.any .deminer players) then
+            p [ id "memory-not-demined", class "flex items-center gap-1.5 text-sm text-white/80" ]
+                [ img [ src bombImage, alt "", class "size-5" ] [], text (t texts "The field wasn't demined.") ]
+
+          else
+            text ""
         , if solo then
             text ""
 
@@ -1293,6 +1519,7 @@ viewResult model me game =
                         li [ class "flex items-center gap-2" ]
                             [ span [ class "size-3 rounded-full", style "background" player.color ] []
                             , span [ class "flex-1" ] [ text (playerName texts me player) ]
+                            , viewBadges texts player
                             , span [ class "pl-6 font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
                             , span [ class "w-10 text-right tabular-nums opacity-70", Html.Attributes.title (t texts "Accuracy") ] [ text (formatAccuracy player.accuracy) ]
                             ]
