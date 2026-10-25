@@ -150,9 +150,20 @@ defmodule Octomocto.Mahjong.Game do
     end
 
     state = Enum.reduce(Map.keys(state.players), state, &leave(&2, &1))
+    state = %{state | tiles: Map.new(state.tiles, &season_to_card/1)}
     store(state)
     {:ok, state}
   end
+
+  # A stored board from before the card suits has seasons in their places
+  @cards %{
+    "season-1" => "card-spades",
+    "season-2" => "card-hearts",
+    "season-3" => "card-diamonds",
+    "season-4" => "card-clubs"
+  }
+
+  defp season_to_card({id, tile}), do: {id, Map.update!(tile, :face, &Map.get(@cards, &1, &1))}
 
   @impl true
   def handle_call({:join, pid, _user_id, _name, player_id, _guest_id}, _from, state)
