@@ -2,7 +2,7 @@ port module Mahjong exposing (main)
 
 {-| Mahjong solitaire on the Turtle layout: remove the 144 tiles two at a
 time. Two tiles make a pair when they have the same face (any flower
-matches any flower, and any season matches any season). A tile is free
+matches any flower, and any card suit matches any card suit). A tile is free
 when no tile lies on it, and its left or its right side is open.
 
 The server owns the game: the tiles, the scores and the clock. This module
@@ -586,8 +586,8 @@ matchKey face =
     if String.startsWith "flower-" face then
         "flower"
 
-    else if String.startsWith "season-" face then
-        "season"
+    else if String.startsWith "card-" face then
+        "card"
 
     else
         face
@@ -865,7 +865,7 @@ viewGame model me game =
                         , viewMuteButton model.muted
                         , viewWatchers model.watchers
                         ]
-                    , p [ class "hidden text-sm opacity-60 lg:block" ] [ text "Remove pairs of free tiles with the same face." ]
+                    , p [ class "hidden text-sm opacity-60 lg:block" ] [ text "Remove pairs of free tiles with the same picture. Any two flowers make a pair, and any two card suits make a pair." ]
                     ]
                 , viewClock model game
                 , if canPlay me game then
@@ -1620,11 +1620,11 @@ faceName face =
             )
                 ++ " dragon"
 
-        Just [ "flower", n ] ->
-            "Flower " ++ n
+        Just [ "flower", _ ] ->
+            "Flower"
 
-        Just [ "season", n ] ->
-            "Season " ++ n
+        Just [ "card", suit ] ->
+            "Card suit: " ++ suit
 
         _ ->
             "Tile"
@@ -1698,25 +1698,10 @@ viewFace face =
                 ]
 
         Just [ "flower", n ] ->
-            Svg.g [] (flower (Maybe.withDefault 1 (String.toInt n)) ++ [ corner n ])
+            Svg.g [] (flower (Maybe.withDefault 1 (String.toInt n)))
 
-        Just [ "season", n ] ->
-            let
-                ( char, color ) =
-                    case n of
-                        "1" ->
-                            ( "春", green )
-
-                        "2" ->
-                            ( "夏", red )
-
-                        "3" ->
-                            ( "秋", "#C2581B" )
-
-                        _ ->
-                            ( "冬", blue )
-            in
-            Svg.g [] [ glyph 29 55 38 color char, corner n ]
+        Just [ "card", suit ] ->
+            Svg.g [] (cardSuit suit)
 
         _ ->
             Svg.g [] []
@@ -1735,20 +1720,6 @@ glyph x y size color char =
         , SA.class "mahjong-glyph"
         ]
         [ Svg.text char ]
-
-
-{-| The number of a flower or a season, in the top left corner
--}
-corner : String -> Svg msg
-corner n =
-    Svg.text_
-        [ SA.x "7"
-        , SA.y "15"
-        , SA.fontSize "11"
-        , SA.fontWeight "700"
-        , SA.fill "#8A8270"
-        ]
-        [ Svg.text n ]
 
 
 numeral : Int -> String
@@ -1984,6 +1955,30 @@ flower n =
                             []
                     )
                     [ -50, 50, -25, 25, 0 ]
+
+
+
+{-| A playing card suit: spades, hearts, diamonds or clubs
+-}
+cardSuit : String -> List (Svg msg)
+cardSuit suit =
+    case suit of
+        "spades" ->
+            [ Svg.path [ SA.d "M29 20 C17 30 12 36 12 43 C12 49 16 52 21 52 C24.5 52 27 50 28 48 C27.5 52 26 55 23 58 L35 58 C32 55 30.5 52 30 48 C31 50 33.5 52 37 52 C42 52 46 49 46 43 C46 36 41 30 29 20 Z", SA.fill blue ] [] ]
+
+        "hearts" ->
+            [ Svg.path [ SA.d "M29 56 C17 47 12 40 12 33 C12 27 16 23 21 23 C25 23 27.5 25.5 29 29 C30.5 25.5 33 23 37 23 C42 23 46 27 46 33 C46 40 41 47 29 56 Z", SA.fill red ] [] ]
+
+        "diamonds" ->
+            [ Svg.path [ SA.d "M29 20 L44 39 L29 58 L14 39 Z", SA.fill red ] [] ]
+
+        _ ->
+            [ Svg.circle [ SA.cx "29", SA.cy "28", SA.r "7.5", SA.fill blue ] []
+            , Svg.circle [ SA.cx "20.5", SA.cy "41", SA.r "7.5", SA.fill blue ] []
+            , Svg.circle [ SA.cx "37.5", SA.cy "41", SA.r "7.5", SA.fill blue ] []
+            , Svg.circle [ SA.cx "29", SA.cy "37", SA.r "5", SA.fill blue ] []
+            , Svg.path [ SA.d "M29 37 C29 47 27 53 23 58 L35 58 C31 53 29 47 29 37 Z", SA.fill blue ] []
+            ]
 
 
 

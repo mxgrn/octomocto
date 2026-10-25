@@ -97,8 +97,8 @@ defmodule OctomoctoWeb.MahjongLive do
   defp rules do
     [
       "The board has 144 tiles in layers. Remove all of them, two at a time.",
-      "Click two free tiles with the same face. A tile is free when no tile lies on it, and its left or its right side is open.",
-      "Any flower matches any flower, and any season matches any season.",
+      "Click two free tiles with the same picture. A tile is free when no tile lies on it, and its left or its right side is open.",
+      "Flowers and card suits are different: any two flowers make a pair, and any two of ♠ ♥ ♦ ♣ make a pair, also when their pictures are different.",
       "When no pair is free, click Shuffle to mix the faces of the tiles that are left.",
       "All players play on the same board. The first player who removes a pair gets the point.",
       "The game ends when the board is empty. Alone, clear it as fast as you can. With other players, remove the most pairs."

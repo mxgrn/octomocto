@@ -10,7 +10,7 @@ defmodule Octomocto.Mahjong.Board do
   A tile is free when no tile lies on it, and its left side or its right
   side touches no tile of the same layer. Two free tiles with the same
   face go off the board as a pair. Any flower matches any flower, and any
-  season matches any season.
+  card suit (spades, hearts, diamonds, clubs) matches any card suit.
 
   The deal always has a solution: it takes free positions of the full
   layout two by two, and gives each two the faces of a pair. The players
@@ -22,7 +22,8 @@ defmodule Octomocto.Mahjong.Board do
 
   @suits for suit <- ~w(dots bamboo chars), n <- 1..9, do: "#{suit}-#{n}"
   @honors ~w(wind-e wind-s wind-w wind-n dragon-r dragon-g dragon-w)
-  @bonus for kind <- ~w(flower season), n <- 1..4, do: "#{kind}-#{n}"
+  @bonus for(n <- 1..4, do: "flower-#{n}") ++
+           for(suit <- ~w(spades hearts diamonds clubs), do: "card-#{suit}")
 
   # 4 tiles of each suit and honor face, and 1 tile of each bonus face
   @faces Enum.flat_map(@suits ++ @honors, &List.duplicate(&1, 4)) ++ @bonus
@@ -162,7 +163,7 @@ defmodule Octomocto.Mahjong.Board do
   def pair?(a, b), do: match_key(a) == match_key(b)
 
   defp match_key("flower-" <> _), do: "flower"
-  defp match_key("season-" <> _), do: "season"
+  defp match_key("card-" <> _), do: "card"
   defp match_key(face), do: face
 
   @doc "True when at least one pair of free tiles has the same face"
