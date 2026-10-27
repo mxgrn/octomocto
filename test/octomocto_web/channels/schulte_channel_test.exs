@@ -50,6 +50,20 @@ defmodule OctomoctoWeb.SchulteChannelTest do
     assert_push "state", %{next: 2}
   end
 
+  test "restart pushes a new field with zero scores", %{id: id} do
+    {:ok, _reply, socket} =
+      OctomoctoWeb.UserSocket
+      |> socket()
+      |> subscribe_and_join(OctomoctoWeb.SchulteChannel, "schulte:" <> id)
+
+    push(socket, "pick", %{"number" => 1})
+    assert_push "state", %{next: 2}
+
+    push(socket, "restart", %{})
+
+    assert_push "state", %{next: 1, players: [%{score: 0}]}
+  end
+
   test "connect gives the user id from a valid token, and nil for a guest" do
     {:ok, socket} = connect(OctomoctoWeb.UserSocket, %{"user_token" => UserSocket.user_token(42)})
     assert socket.assigns.user_id == 42

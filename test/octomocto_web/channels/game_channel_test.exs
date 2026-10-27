@@ -29,6 +29,37 @@ defmodule OctomoctoWeb.GameChannelTest do
     assert other_id != player_id
   end
 
+  test "a join with watch: true only watches, also when the game has a free seat", %{id: id} do
+    assert {:ok, %{player_id: nil, token: nil, state: %{players: []}}, _socket} =
+             join_game(id, %{"watch" => true})
+  end
+
+  test "a join of a full game only watches", %{id: id} do
+    {:ok, _reply, _socket} = join_game(id)
+    {:ok, _reply, _socket} = join_game(id)
+
+    assert {:ok, %{player_id: nil, token: nil}, _socket} = join_game(id)
+  end
+
+  test "a watcher is counted, and the channels get the new count", %{id: id} do
+    {:ok, %{watchers: 0}, _socket} = join_game(id)
+
+    assert {:ok, %{watchers: 1}, _socket} = join_game(id, %{"watch" => true})
+    assert_push "watchers", %{count: 1}
+  end
+
+  test "next_game sends all players, but not the watchers, to the same next game", %{id: id} do
+    {:ok, _reply, socket} = join_game(id)
+    {:ok, _reply, _socket} = join_game(id)
+    {:ok, _reply, _socket} = join_game(id, %{"watch" => true})
+
+    push(socket, "next_game", %{})
+
+    assert_push "next_game", %{id: next_id}
+    assert_push "next_game", %{id: ^next_id}
+    refute_push "next_game", _
+  end
+
   test "the channel joins again when the game process stops", %{id: id, pid: pid} do
     {:ok, _reply, _socket} = join_game(id)
 
