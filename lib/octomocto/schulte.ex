@@ -27,7 +27,7 @@ defmodule Octomocto.Schulte do
     {:ok, _pid} =
       DynamicSupervisor.start_child(
         Octomocto.Schulte.GameSupervisor,
-        {Game, {id, layout, mode, players, public}}
+        {Game, {id, %{layout: layout, mode: mode, players: players, public: public}}}
       )
 
     id

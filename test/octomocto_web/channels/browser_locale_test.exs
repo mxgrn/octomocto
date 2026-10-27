@@ -3,17 +3,18 @@ defmodule OctomoctoWeb.BrowserLocaleTest do
   # browser locale when a game saves its results
   use OctomoctoWeb.ChannelCase, async: true
 
+  import Octomocto.GameHelpers
+
   import Octomocto.AccountsFixtures
 
   alias Octomocto.Accounts.User
   alias Octomocto.Guests.Guest
   alias Octomocto.Repo
-  alias Octomocto.Schulte.Game
   alias OctomoctoWeb.{SchulteChannel, UserSocket}
 
   setup do
     id = "game-#{System.unique_integer([:positive])}"
-    pid = start_supervised!({Game, {id, :random, :easy, 1, false}})
+    pid = start_supervised!(schulte_game(id))
     Ecto.Adapters.SQL.Sandbox.allow(Repo, self(), pid)
     %{id: id}
   end

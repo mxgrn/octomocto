@@ -1,18 +1,19 @@
 defmodule Octomocto.SchulteTest do
   use Octomocto.DataCase, async: true
 
+  import Octomocto.GameHelpers
+
   import Octomocto.AccountsFixtures
 
   alias Octomocto.{Lobby, Schulte}
   alias Octomocto.Schulte.{Game, Result, Store}
 
   # One player and a private game, if the test has no `@tag players: n` or
-  # `@tag public: true`
+  # `@tag public: true`. A `@tag config: [...]` changes more of the config.
   setup tags do
     id = "game-#{System.unique_integer([:positive])}"
-
-    pid =
-      start_supervised!({Game, {id, :random, :easy, tags[:players] || 1, tags[:public] || false}})
+    config = [players: tags[:players] || 1, public: tags[:public] || false]
+    pid = start_supervised!(schulte_game(id, config ++ (tags[:config] || [])))
 
     Ecto.Adapters.SQL.Sandbox.allow(Repo, self(), pid)
     Phoenix.PubSub.subscribe(Octomocto.PubSub, Game.topic(id))
@@ -61,6 +62,16 @@ defmodule Octomocto.SchulteTest do
     assert length(state.cells) == 90
   end
 
+  @tag config: [countdown_ms: :timer.minutes(1)]
+  test "nobody sees or picks the numbers during the countdown", %{id: id} do
+    {:ok, player_id, state} = Schulte.join(id)
+    assert %{waiting: false, cells: []} = state
+
+    Schulte.pick(id, player_id, 1)
+
+    assert {:ok, nil, %{next: 1, cells: []}} = Schulte.watch(id)
+  end
+
   test "a process that joins a full game only watches", %{id: id} do
     {:ok, _player_id, _} = Schulte.join(id)
 
@@ -97,7 +108,7 @@ defmodule Octomocto.SchulteTest do
     Schulte.restart(id, player_id)
 
     assert_receive {:schulte_state, %{next: 91, players: [%{score: 90}]}}
-    assert_receive {:schulte_state, %{next: 1, players: [%{score: 0}]}}
+    assert {:ok, nil, %{next: 1, players: [%{score: 0}]}} = Schulte.watch(id)
   end
 
   @tag players: 2
@@ -155,6 +166,20 @@ defmodule Octomocto.SchulteTest do
       Schulte.pick(id, player_id, 1)
 
       assert {:ok, ^player_id, %{players: [%{id: ^player_id, score: 1}]}} =
+               Schulte.join(id, nil, nil, player_id)
+    end
+
+    @tag config: [rejoin_grace_ms: :timer.minutes(1)]
+    test "a player is away during the grace time, and can join again", %{id: id, pid: pid} do
+      task = Task.async(fn -> Schulte.join(id) end)
+      {:ok, player_id, _} = Task.await(task)
+      ref = Process.monitor(task.pid)
+      assert_receive {:DOWN, ^ref, :process, _, _}
+      _ = :sys.get_state(pid)
+
+      assert {:ok, nil, %{players: [%{away: true}]}} = Schulte.watch(id)
+
+      assert {:ok, ^player_id, %{players: [%{away: false}]}} =
                Schulte.join(id, nil, nil, player_id)
     end
 

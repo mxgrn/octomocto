@@ -1,8 +1,10 @@
 defmodule Octomocto.Schulte.ClassicTest do
   use ExUnit.Case, async: true
 
+  import Octomocto.GameHelpers
+
   alias Octomocto.Schulte
-  alias Octomocto.Schulte.{Classic, Game}
+  alias Octomocto.Schulte.Classic
 
   test "regions/0 has 90 regions with labels on the board" do
     {width, height} = Classic.size()
@@ -29,7 +31,7 @@ defmodule Octomocto.Schulte.ClassicTest do
 
   test "a classic game puts the numbers into the same shapes in a random order" do
     id = "game-#{System.unique_integer([:positive])}"
-    start_supervised!({Game, {id, :classic, :easy, 1, false}})
+    start_supervised!(schulte_game(id, layout: :classic))
 
     {:ok, _player_id, state} = Schulte.join(id)
 

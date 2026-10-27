@@ -3,12 +3,13 @@ defmodule OctomoctoWeb.GameChannelTest do
   # rejoin
   use OctomoctoWeb.ChannelCase, async: true
 
-  alias Octomocto.Schulte.Game
+  import Octomocto.GameHelpers
+
   alias OctomoctoWeb.{SchulteChannel, UserSocket}
 
   setup do
     id = "game-#{System.unique_integer([:positive])}"
-    pid = start_supervised!({Game, {id, :random, :easy, 2, false}})
+    pid = start_supervised!(schulte_game(id, players: 2))
     %{id: id, pid: pid}
   end
 

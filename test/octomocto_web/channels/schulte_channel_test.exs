@@ -1,12 +1,13 @@
 defmodule OctomoctoWeb.SchulteChannelTest do
   use OctomoctoWeb.ChannelCase, async: true
 
-  alias Octomocto.Schulte.Game
+  import Octomocto.GameHelpers
+
   alias OctomoctoWeb.UserSocket
 
   setup do
     id = "game-#{System.unique_integer([:positive])}"
-    start_supervised!({Game, {id, :random, :easy, 1, false}})
+    start_supervised!(schulte_game(id))
     %{id: id}
   end
 
