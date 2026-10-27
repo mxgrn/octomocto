@@ -5,8 +5,15 @@
       <p class="text-base-content/60">{@form[:email].value}</p>
     </div>
 
-    <.form for={@form} id="resend_link_form" action={~p"/signin"} data-hide-on-submit>
+    <.form
+      for={@form}
+      id="resend_link_form"
+      action={~p"/signin"}
+      data-hide-on-submit
+      class="space-y-3"
+    >
       <input type="hidden" name={@form[:email].name} value={@form[:email].value} />
+      <.turnstile_widget id="resend-link-turnstile" />
       <button
         id="resend-link-button"
         class="w-full rounded-xl bg-indigo-600 px-4 py-3 font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"

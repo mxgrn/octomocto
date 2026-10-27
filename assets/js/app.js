@@ -42,6 +42,11 @@ const TelegramLogin = {
   mounted() { showTelegramLogin(this.el) },
 }
 
+const Turnstile = {
+  mounted() { showTurnstile(this.el) },
+  destroyed() { hideTurnstile(this.el) },
+}
+
 // The bar of notifications above the header (see `site_notifications` in
 // layouts.ex). It shows the first notification that the user did not close,
 // in the order the notifications were added. After the user closes it, the
@@ -82,7 +87,7 @@ const matchToken = () => {
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: () => ({_csrf_token: csrfToken, ...matchToken()}),
-  hooks: {...colocatedHooks, TelegramLogin, LobbySound, SiteNotifications},
+  hooks: {...colocatedHooks, TelegramLogin, Turnstile, LobbySound, SiteNotifications},
 })
 
 // The socket often drops while the tab is in the background, and the error
@@ -695,8 +700,46 @@ function showTelegramLogin(node) {
   node.appendChild(script)
 }
 
+// Show the Cloudflare Turnstile widget ("I'm not a robot") in a form that
+// sends a sign-in link. The widget adds a hidden input with its token to the
+// form. A widget cannot start in a closed menu, so each widget shows when its
+// container is visible for the first time. The script loads only then too.
+let turnstileScript
+function loadTurnstile() {
+  turnstileScript ||= new Promise((resolve, reject) => {
+    const script = document.createElement("script")
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+    script.onload = () => resolve(window.turnstile)
+    script.onerror = reject
+    document.head.appendChild(script)
+  })
+  return turnstileScript
+}
+function showTurnstile(node) {
+  if (node.turnstileObserver) return
+  node.turnstileObserver = new IntersectionObserver(entries => {
+    if (!entries.some(entry => entry.isIntersecting)) return
+    node.turnstileObserver.disconnect()
+    loadTurnstile().then(turnstile => {
+      if (!node.isConnected) return
+      node.turnstileWidgetId = turnstile.render(node, {
+        sitekey: node.dataset.turnstileSitekey,
+        size: "flexible",
+        theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+      })
+    })
+  })
+  node.turnstileObserver.observe(node)
+}
+// After live navigation, the old widget must go, or it keeps refreshing its token
+function hideTurnstile(node) {
+  node.turnstileObserver?.disconnect()
+  if (node.turnstileWidgetId) window.turnstile.remove(node.turnstileWidgetId)
+}
+
 // On a page without a LiveView
 document.querySelectorAll("[data-telegram-login]").forEach(showTelegramLogin)
+document.querySelectorAll("[data-turnstile-sitekey]").forEach(showTurnstile)
 // On a page without a LiveView
 document.querySelectorAll("#site-notifications").forEach(showSiteNotification)
 

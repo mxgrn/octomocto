@@ -2,6 +2,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
   use OctomoctoWeb, :html
 
   alias Octomocto.Accounts.TelegramAuth
+  alias OctomoctoWeb.Turnstile
 
   embed_templates "user_session_html/*"
 
@@ -49,6 +50,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
           required
           class="w-full rounded-xl border-0 bg-slate-50 px-4 py-3 ring-1 ring-slate-200 transition placeholder:text-base-content/30 focus:bg-white focus:outline-none dark:bg-base-300 dark:ring-white/10 dark:focus:bg-base-300 focus:ring-2 focus:ring-indigo-500 read-only:text-base-content/60"
         />
+        <.turnstile_widget id="sign-in-panel-turnstile" />
         <button
           id="sign-in-submit"
           class="w-full rounded-xl bg-indigo-600 px-4 py-3 font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
@@ -72,13 +74,15 @@ defmodule OctomoctoWeb.UserSessionHTML do
     assigns =
       assign(assigns,
         form: to_form(%{}, as: "user"),
-        telegram?: TelegramAuth.bot_username() != nil
+        telegram?: TelegramAuth.bot_username() != nil,
+        turnstile?: Turnstile.enabled?()
       )
 
     ~H"""
+    <%!-- The Turnstile widget needs a width of at least 300px --%>
     <div
       id="sign-in-bar"
-      class="flex w-64 flex-col items-center gap-2"
+      class={["flex flex-col items-center gap-2", if(@turnstile?, do: "w-76", else: "w-64")]}
     >
       <div class="flex w-full flex-col items-center gap-3">
         <.telegram_widget
@@ -110,25 +114,28 @@ defmodule OctomoctoWeb.UserSessionHTML do
           for={@form}
           id="sign-in-form"
           action={~p"/signin"}
-          class="hidden w-full min-w-0 gap-2 rounded-2xl bg-base-100 p-1.5 shadow-sm ring-1 ring-base-content/10 transition focus-within:ring-2 focus-within:ring-indigo-500"
+          class="hidden w-full min-w-0 flex-col gap-2"
         >
-          <input
-            type="email"
-            name={@form[:email].name}
-            id="sign-in-email"
-            placeholder={gettext("you@example.com")}
-            autocomplete="username"
-            spellcheck="false"
-            aria-label={gettext("Email")}
-            required
-            class="min-w-0 flex-1 border-0 bg-transparent px-3 text-sm placeholder:text-base-content/30 focus:outline-none"
-          />
-          <button
-            id="sign-in-submit"
-            class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
-          >
-            {gettext("Send")}
-          </button>
+          <div class="flex min-w-0 gap-2 rounded-2xl bg-base-100 p-1.5 shadow-sm ring-1 ring-base-content/10 transition focus-within:ring-2 focus-within:ring-indigo-500">
+            <input
+              type="email"
+              name={@form[:email].name}
+              id="sign-in-email"
+              placeholder={gettext("you@example.com")}
+              autocomplete="username"
+              spellcheck="false"
+              aria-label={gettext("Email")}
+              required
+              class="min-w-0 flex-1 border-0 bg-transparent px-3 text-sm placeholder:text-base-content/30 focus:outline-none"
+            />
+            <button
+              id="sign-in-submit"
+              class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
+            >
+              {gettext("Send")}
+            </button>
+          </div>
+          <.turnstile_widget id="sign-in-bar-turnstile" />
         </.form>
       </div>
       <p :if={local_mail_adapter?()} class="text-xs text-base-content/50">
@@ -159,6 +166,30 @@ defmodule OctomoctoWeb.UserSessionHTML do
       phx-update="ignore"
       data-telegram-login={@bot_username}
       data-auth-path={@auth_path}
+    >
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a container for the Cloudflare Turnstile widget ("I'm not a robot").
+  Put it in a form that sends a sign-in link.
+
+  The widget is added by app.js. Nothing is shown if the check is off.
+  """
+  attr :id, :string, required: true
+
+  def turnstile_widget(assigns) do
+    assigns = assign(assigns, :site_key, Turnstile.enabled?() && Turnstile.site_key())
+
+    ~H"""
+    <div
+      :if={@site_key}
+      id={@id}
+      class="min-h-[65px]"
+      phx-hook="Turnstile"
+      phx-update="ignore"
+      data-turnstile-sitekey={@site_key}
     >
     </div>
     """

@@ -60,6 +60,12 @@ if config_env() == :prod do
     dsn: System.get_env("SENTRY_DSN"),
     environment_name: prod_env
 
+  # Cloudflare Turnstile ("I'm not a robot") on the forms that send a sign-in
+  # link. Without the keys, the forms have no check.
+  config :octomocto, :turnstile,
+    site_key: System.get_env("TURNSTILE_SITE_KEY"),
+    secret_key: System.get_env("TURNSTILE_SECRET_KEY")
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """

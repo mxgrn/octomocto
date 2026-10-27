@@ -3,6 +3,7 @@ defmodule OctomoctoWeb.UserSessionController do
 
   alias Octomocto.Accounts
   alias Octomocto.Accounts.TelegramAuth
+  alias OctomoctoWeb.Turnstile
   alias OctomoctoWeb.UserAuth
 
   plug OctomoctoWeb.SiteNotifications when action in [:new, :confirm]
@@ -27,17 +28,22 @@ defmodule OctomoctoWeb.UserSessionController do
   end
 
   # magic link request
-  def create(conn, %{"user" => %{"email" => email}}) do
-    case Accounts.get_or_register_user(email) do
-      {:ok, user} ->
-        Accounts.deliver_login_instructions(user, &url(~p"/signin/#{&1}"))
+  def create(conn, %{"user" => %{"email" => email}} = params) do
+    with :ok <- Turnstile.verify(params),
+         {:ok, user} <- Accounts.get_or_register_user(email) do
+      Accounts.deliver_login_instructions(user, &url(~p"/signin/#{&1}"))
 
+      conn
+      |> put_resp_cookie(@magic_link_cookie, user.email, @magic_link_cookie_options)
+      |> put_flash(
+        :info,
+        "We sent a sign-in link to #{user.email}. If you do not see it, look in your spam folder."
+      )
+      |> redirect(to: return_path(conn))
+    else
+      {:error, :turnstile} ->
         conn
-        |> put_resp_cookie(@magic_link_cookie, user.email, @magic_link_cookie_options)
-        |> put_flash(
-          :info,
-          "We sent a sign-in link to #{user.email}. If you do not see it, look in your spam folder."
-        )
+        |> put_flash(:error, "Please confirm that you are not a robot.")
         |> redirect(to: return_path(conn))
 
       {:error, _changeset} ->

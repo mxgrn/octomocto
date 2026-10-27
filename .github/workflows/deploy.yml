@@ -79,6 +79,8 @@ jobs:
               -e RESEND_API_KEY=${{secrets.RESEND_API_KEY}} \
               -e TELEGRAM_BOT_TOKEN=${{secrets.TELEGRAM_BOT_TOKEN}} \
               -e SENTRY_DSN=${{secrets.SENTRY_DSN}} \
+              -e TURNSTILE_SITE_KEY=${{secrets.TURNSTILE_SITE_KEY}} \
+              -e TURNSTILE_SECRET_KEY=${{secrets.TURNSTILE_SECRET_KEY}} \
               -e TELEGRAM_BOT_USERNAME=octomoctobot \
               ghcr.io/mxgrn/${{matrix.app}}_${{matrix.env}}
             for i in {1..60}; do curl localhost:${{matrix.port}}/health && break || { [ $i -eq 60 ] && echo "Failed after 60 attempts" && exit 1 || sleep 1; }; done
