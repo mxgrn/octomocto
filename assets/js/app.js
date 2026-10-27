@@ -731,10 +731,14 @@ function showTurnstile(node) {
   })
   node.turnstileObserver.observe(node)
 }
-// After live navigation, the old widget must go, or it keeps refreshing its token
+// After live navigation, the old widget must go, or it keeps refreshing its token.
+// LiveView also destroys the hooks when a form sends, before the browser reads
+// the form. Thus the widget goes later, and only when its container is gone.
 function hideTurnstile(node) {
   node.turnstileObserver?.disconnect()
-  if (node.turnstileWidgetId) window.turnstile.remove(node.turnstileWidgetId)
+  setTimeout(() => {
+    if (node.turnstileWidgetId && !node.isConnected) window.turnstile.remove(node.turnstileWidgetId)
+  })
 }
 
 // On a page without a LiveView
