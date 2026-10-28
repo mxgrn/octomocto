@@ -35,7 +35,7 @@ defmodule OctomoctoWeb.TrainsLive do
   @doc "The title and the description of the Right on Track pages, for search engines."
   def seo do
     [
-      page_title: "Right on Track: a Train of Thought-Like Puzzle",
+      page_title: "Right on Track: a Train of Thought-Like Game",
       page_description:
         "Click the switches to send each train to the house with its colors. Similar to Train of Thought on Lumosity. Free, in your browser."
     ]
