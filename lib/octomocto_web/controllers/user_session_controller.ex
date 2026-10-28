@@ -4,6 +4,7 @@ defmodule OctomoctoWeb.UserSessionController do
   alias Octomocto.Accounts
   alias Octomocto.Accounts.TelegramAuth
   alias OctomoctoWeb.Turnstile
+  alias OctomoctoWeb.UserAgent
   alias OctomoctoWeb.UserAuth
 
   plug OctomoctoWeb.SiteNotifications when action in [:new, :confirm]
@@ -31,7 +32,8 @@ defmodule OctomoctoWeb.UserSessionController do
   def create(conn, %{"user" => %{"email" => email}} = params) do
     with :ok <- Turnstile.verify(params),
          {:ok, user} <- Accounts.get_or_register_user(email) do
-      Accounts.deliver_login_instructions(user, &url(~p"/signin/#{&1}"))
+      device = conn |> get_req_header("user-agent") |> List.first() |> UserAgent.describe()
+      Accounts.deliver_login_instructions(user, &url(~p"/signin/#{&1}"), device)
 
       conn
       |> put_resp_cookie(@magic_link_cookie, user.email, @magic_link_cookie_options)
