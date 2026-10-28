@@ -35,9 +35,9 @@ defmodule OctomoctoWeb.EchoLive do
   @doc "The title and the description of the Echo pages, for search engines."
   def seo do
     [
-      page_title: "Echo Memory Game",
+      page_title: "Echo: a Simon-Like Memory Game Online",
       page_description:
-        "Repeat the sequence of colored pads, alone or with friends. Free, instant, no sign-up."
+        "A free game like Simon: repeat the sequence of colored pads. Play alone or with up to 3 friends. No sign-up."
     ]
   end
 
@@ -107,7 +107,8 @@ defmodule OctomoctoWeb.EchoLive do
       "The pads light up one by one. Tap them in the same order.",
       "Each round, the sequence gets one pad longer. One wrong pad, and the game ends.",
       "With friends, there is no playback: watch the taps of the others. In your turn, repeat the sequence, then add a pad of your choice.",
-      "A player who taps a wrong pad is out. The last player who is in wins."
+      "A player who taps a wrong pad is out. The last player who is in wins.",
+      "Echo is a Simon-like game. Simon is a trademark of Hasbro. Octomocto is not affiliated with Hasbro."
     ]
   end
 

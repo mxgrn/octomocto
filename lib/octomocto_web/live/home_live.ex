@@ -70,7 +70,7 @@ defmodule OctomoctoWeb.HomeLive do
       id: "echo",
       name: "Echo",
       description:
-        "Repeat the sequence of colored pads. With friends, each player adds a pad of their choice.",
+        "A Simon-like game: repeat the sequence of colored pads. With friends, each player adds a pad.",
       path: "/echo",
       icon_class: "bg-amber-500/10 dark:bg-amber-400/15"
     },
