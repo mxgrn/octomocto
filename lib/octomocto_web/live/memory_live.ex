@@ -51,9 +51,12 @@ defmodule OctomoctoWeb.MemoryLive do
   @doc "The title and the description of the Memory pages, for search engines."
   def seo do
     [
-      page_title: dgettext("memory", "Memory Card Game"),
+      page_title: dgettext("memory", "Multiplayer Memory Card Game"),
       page_description:
-        dgettext("memory", "Play Memory online solo or with friends. Free, instant, no sign-up.")
+        dgettext(
+          "memory",
+          "Play multiplayer Memory online with friends, or solo. Free, instant, no sign-up."
+        )
     ]
   end
 

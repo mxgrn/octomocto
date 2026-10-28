@@ -167,8 +167,8 @@ msgstr "Memory"
 
 #: lib/octomocto_web/live/memory_live.ex:54
 #, elixir-autogen, elixir-format
-msgid "Memory Card Game"
-msgstr "Memory-Spiel online"
+msgid "Multiplayer Memory Card Game"
+msgstr "Mehrspieler-Memory online"
 
 #: lib/octomocto_web/live/memory_live.html.heex:309
 #, elixir-autogen, elixir-format
@@ -209,8 +209,8 @@ msgstr "Haustiere"
 
 #: lib/octomocto_web/live/memory_live.ex:56
 #, elixir-autogen, elixir-format
-msgid "Play Memory online solo or with friends. Free, instant, no sign-up."
-msgstr "Spiel Memory online allein oder mit Freunden. Kostenlos, sofort, ohne Anmeldung."
+msgid "Play multiplayer Memory online with friends, or solo. Free, instant, no sign-up."
+msgstr "Spiel Memory online mit Freunden im Mehrspielermodus oder allein. Kostenlos, sofort, ohne Anmeldung."
 
 #: lib/octomocto_web/controllers/memory_html.ex:52
 #: lib/octomocto_web/live/memory_live.ex:689
