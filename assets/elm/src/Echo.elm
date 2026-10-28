@@ -278,16 +278,23 @@ init flags =
 -- TIMING
 
 
-{-| A longer sequence plays faster
+{-| A longer sequence plays faster, in three steps as in the Simon game
 -}
 flashMs : Int -> Int
 flashMs length =
-    max 220 (520 - length * 25)
+    if length <= 5 then
+        420
+
+    else if length <= 13 then
+        320
+
+    else
+        220
 
 
-gapMs : Int -> Int
-gapMs length =
-    round (toFloat (flashMs length) * 0.45)
+gapMs : Int
+gapMs =
+    50
 
 
 {-| The wait before the playback, and the extra wait after a round
@@ -499,12 +506,12 @@ stepPlayback model =
                     List.length playback.sequence
 
                 slot =
-                    flashMs length + gapMs length
+                    flashMs length + gapMs
 
                 t =
                     model.now - playback.start
             in
-            if t >= length * slot - gapMs length then
+            if t >= length * slot - gapMs then
                 ( { model | playback = Nothing }, Cmd.none )
 
             else
@@ -537,7 +544,7 @@ playbackPad model =
                     List.length playback.sequence
 
                 slot =
-                    flashMs length + gapMs length
+                    flashMs length + gapMs
 
                 t =
                     model.now - playback.start
