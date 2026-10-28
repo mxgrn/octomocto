@@ -62,10 +62,6 @@ config :phoenix_live_view,
 # at the `config/runtime.exs`.
 config :octomocto, Octomocto.Mailer, adapter: Swoosh.Adapters.Local
 
-# Shows the forms that send a sign-in link. Off for now, because we reached
-# the daily email limit of Resend. Telegram sign-in stays.
-config :octomocto, email_sign_in: false
-
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",

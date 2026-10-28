@@ -1,7 +1,6 @@
 import Config
 
 config :octomocto, :telegram, bot_token: "test-bot-token", bot_username: "test_bot"
-config :octomocto, email_sign_in: true
 
 # Configure your database
 #

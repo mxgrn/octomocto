@@ -20,7 +20,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
       assigns
       |> assign(:user, user)
       |> assign(:form, to_form(%{"email" => user && user.email}, as: "user"))
-      |> assign(:show_email?, email_sign_in?() && (is_nil(user) || !!user.email))
+      |> assign(:show_email?, is_nil(user) || !!user.email)
       |> assign(:show_telegram?, is_nil(user) || !!user.telegram_id)
 
     ~H"""
@@ -59,7 +59,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
         </button>
       </.form>
 
-      <p :if={@show_email? && local_mail_adapter?()} class="text-center text-xs text-base-content/50">
+      <p :if={local_mail_adapter?()} class="text-center text-xs text-base-content/50">
         Dev: see sent emails in <.link href="/dev/mailbox" class="underline">the mailbox</.link>.
       </p>
     </div>
@@ -75,7 +75,6 @@ defmodule OctomoctoWeb.UserSessionHTML do
       assign(assigns,
         form: to_form(%{}, as: "user"),
         telegram?: TelegramAuth.bot_username() != nil,
-        email?: email_sign_in?(),
         turnstile?: Turnstile.enabled?()
       )
 
@@ -83,10 +82,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
     <%!-- The Turnstile widget needs a width of at least 300px --%>
     <div
       id="sign-in-bar"
-      class={[
-        "flex flex-col items-center gap-2",
-        if(@email? && @turnstile?, do: "w-76", else: "w-64")
-      ]}
+      class={["flex flex-col items-center gap-2", if(@turnstile?, do: "w-76", else: "w-64")]}
     >
       <div class="flex w-full flex-col items-center gap-3">
         <.telegram_widget
@@ -96,14 +92,13 @@ defmodule OctomoctoWeb.UserSessionHTML do
           class="shrink-0 justify-center"
         />
         <span
-          :if={@telegram? && @email?}
+          :if={@telegram?}
           class="text-xs font-medium uppercase tracking-wider text-base-content/40"
         >
           {gettext("or")}
         </span>
         <%!-- The form shows only after a click, so that the menu stays short --%>
         <button
-          :if={@email?}
           id="sign-in-email-toggle"
           type="button"
           phx-click={
@@ -116,7 +111,6 @@ defmodule OctomoctoWeb.UserSessionHTML do
           {gettext("Email me a sign-in link")}
         </button>
         <.form
-          :if={@email?}
           for={@form}
           id="sign-in-form"
           action={~p"/signin"}
@@ -144,7 +138,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
           <.turnstile_widget id="sign-in-bar-turnstile" />
         </.form>
       </div>
-      <p :if={@email? && local_mail_adapter?()} class="text-xs text-base-content/50">
+      <p :if={local_mail_adapter?()} class="text-xs text-base-content/50">
         Dev: see sent emails in <.link href="/dev/mailbox" class="underline">the mailbox</.link>.
       </p>
     </div>
@@ -200,8 +194,6 @@ defmodule OctomoctoWeb.UserSessionHTML do
     </div>
     """
   end
-
-  defp email_sign_in?, do: Application.fetch_env!(:octomocto, :email_sign_in)
 
   defp local_mail_adapter? do
     Application.get_env(:octomocto, Octomocto.Mailer)[:adapter] == Swoosh.Adapters.Local
