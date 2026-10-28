@@ -110,6 +110,15 @@ defmodule Octomocto.Accounts.UserNotifier do
     logo_url = escape(OctomoctoWeb.Endpoint.static_url() <> "/images/email-logo.png")
     site = escape(site())
     site_url = escape(OctomoctoWeb.Endpoint.url())
+
+    # Mail apps make a blue link from a site name in the text, so we give it our own style
+    message =
+      String.replace(
+        c.message,
+        site,
+        ~s(<a href="#{site_url}" style="color:#4a4866;text-decoration:none;">#{site}</a>)
+      )
+
     font = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
 
     """
@@ -128,7 +137,7 @@ defmodule Octomocto.Accounts.UserNotifier do
                   <td style="padding:40px 32px;font-family:#{font};color:#171532;">
                     <img src="#{logo_url}" width="209" height="33" alt="Octomocto" style="display:block;border:0;margin:0 0 32px;">
                     <h1 style="margin:0 0 12px;font-size:24px;line-height:32px;font-weight:600;">#{c.heading}</h1>
-                    <p style="margin:0 0 28px;font-size:16px;line-height:24px;color:#4a4866;">#{c.message}</p>
+                    <p style="margin:0 0 28px;font-size:16px;line-height:24px;color:#4a4866;">#{message}</p>
                     <table role="presentation" cellpadding="0" cellspacing="0">
                       <tr>
                         <td style="border-radius:12px;background-color:#1A9FCB;">
