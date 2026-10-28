@@ -32,6 +32,7 @@ defmodule OctomoctoWeb.StatsLive do
        total: days |> Enum.map(& &1.total) |> Enum.sum(),
        games: HomeLive.games(),
        by_game: games_by_count(days),
+       by_locale: Stats.games_by_locale(@days),
        hidden: MapSet.new()
      )}
   end

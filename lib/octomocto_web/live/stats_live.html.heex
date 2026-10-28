@@ -93,48 +93,35 @@
       </ul>
     </section>
 
-    <details
-      id="games-table"
-      class="group rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10 sm:p-6"
+    <section
+      id="games-by-locale"
+      class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10 sm:p-6"
     >
-      <summary class="flex cursor-pointer list-none items-center justify-between font-semibold text-octo-navy dark:text-base-content">
-        Games per day as a table
-        <.icon
-          name="hero-chevron-down"
-          class="size-5 text-base-content/50 transition group-open:rotate-180"
-        />
-      </summary>
-      <div class="mt-4 overflow-x-auto">
-        <table class="w-full text-sm whitespace-nowrap">
-          <thead>
-            <tr class="text-left text-base-content/60">
-              <th class="pr-4 pb-2 font-medium">Day</th>
-              <th class="px-2 pb-2 text-right font-medium">All games</th>
-              <th
-                :for={{game, n} <- Enum.with_index(@games, 1)}
-                class="px-2 pb-2 text-right font-medium"
-              >
-                <span class="inline-flex items-center gap-1.5">
-                  <span
-                    class="h-0.5 w-3 rounded-full"
-                    style={"background-color: var(--series-#{n})"}
-                  ></span>
-                  {game.name}
-                </span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr :for={day <- Enum.reverse(@days)} class="border-t border-base-content/5">
-              <td class="py-1.5 pr-4">{Calendar.strftime(day.date, "%a, %b %-d")}</td>
-              <td class="px-2 py-1.5 text-right font-semibold tabular-nums">{day.total}</td>
-              <td :for={game <- @games} class="px-2 py-1.5 text-right tabular-nums">
-                {games_in(day, game)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </details>
+      <% most_locale = @by_locale |> Enum.map(& &1.count) |> Enum.max(fn -> 0 end) %>
+      <h2 class="font-semibold text-octo-navy dark:text-base-content">By language</h2>
+      <p class="mt-1 mb-4 text-sm text-base-content/60">
+        The browser language of the players. A game with players of two languages counts for each.
+      </p>
+      <p :if={@by_locale == []} class="text-sm text-base-content/60">No games yet.</p>
+      <ul :if={@by_locale != []} class="flex flex-col gap-3">
+        <li :for={item <- @by_locale} id={"stats-locale-#{item.locale}"} class="text-sm">
+          <div class="flex items-baseline justify-between gap-4">
+            <span class="font-medium text-octo-navy dark:text-base-content">
+              {item.locale}
+            </span>
+            <span class="font-semibold text-octo-navy tabular-nums dark:text-base-content">
+              {item.count}
+            </span>
+          </div>
+          <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-base-content/5">
+            <div
+              class="h-full rounded-full bg-octo-indigo dark:bg-octo-indigo-light"
+              style={"width: #{if most_locale > 0, do: item.count / most_locale * 100, else: 0}%"}
+            >
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
   </div>
 </Layouts.app>

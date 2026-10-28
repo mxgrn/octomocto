@@ -7,6 +7,8 @@ defmodule Octomocto.Stats do
   """
   import Ecto.Query
 
+  alias Octomocto.Accounts.User
+  alias Octomocto.Guests.Guest
   alias Octomocto.Repo
 
   # The result schema of each game, by the game id of the front page
@@ -55,7 +57,7 @@ defmodule Octomocto.Stats do
   """
   def games_per_day(days, today \\ Date.utc_today()) do
     first = Date.add(today, 1 - days)
-    since = DateTime.new!(first, ~T[00:00:00], "Etc/UTC")
+    since = since(first)
 
     counts =
       @results
@@ -80,4 +82,40 @@ defmodule Octomocto.Stats do
         count: count(fragment("DISTINCT (?, ?)", r.game_id, r.inserted_at))
       }
   end
+
+  @doc """
+  Gives the games played in the last `days` days, today included, for each
+  browser locale of the players, the most played first. Each item is
+  `%{locale: locale, count: n}`. A game with players of two locales counts
+  once for each locale. The players without a known locale are not counted.
+  """
+  def games_by_locale(days, today \\ Date.utc_today()) do
+    since = since(Date.add(today, 1 - days))
+
+    @results
+    |> Map.values()
+    |> Enum.map(&locale_counts(&1, since))
+    |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
+    |> Repo.all()
+    |> Enum.group_by(& &1.locale, & &1.count)
+    |> Enum.map(fn {locale, counts} -> %{locale: locale, count: Enum.sum(counts)} end)
+    |> Enum.sort_by(& &1.count, :desc)
+  end
+
+  defp locale_counts(schema, since) do
+    from r in schema,
+      left_join: u in User,
+      on: u.id == r.user_id,
+      left_join: g in Guest,
+      on: g.id == r.guest_id,
+      where: r.inserted_at >= ^since,
+      where: not is_nil(fragment("coalesce(?, ?)", u.locale, g.locale)),
+      group_by: fragment("coalesce(?, ?)", u.locale, g.locale),
+      select: %{
+        locale: fragment("coalesce(?, ?)", u.locale, g.locale),
+        count: count(fragment("DISTINCT (?, ?)", r.game_id, r.inserted_at))
+      }
+  end
+
+  defp since(first), do: DateTime.new!(first, ~T[00:00:00], "Etc/UTC")
 end
