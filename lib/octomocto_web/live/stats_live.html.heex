@@ -94,20 +94,20 @@
     </section>
 
     <section
-      id="games-by-locale"
+      id="games-by-language"
       class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10 sm:p-6"
     >
-      <% most_locale = @by_locale |> Enum.map(& &1.count) |> Enum.max(fn -> 0 end) %>
+      <% most_language = @by_language |> Enum.map(& &1.count) |> Enum.max(fn -> 0 end) %>
       <h2 class="font-semibold text-octo-navy dark:text-base-content">By language</h2>
       <p class="mt-1 mb-4 text-sm text-base-content/60">
         The browser language of the players. A game with players of two languages counts for each.
       </p>
-      <p :if={@by_locale == []} class="text-sm text-base-content/60">No games yet.</p>
-      <ul :if={@by_locale != []} class="flex flex-col gap-3">
-        <li :for={item <- @by_locale} id={"stats-locale-#{item.locale}"} class="text-sm">
+      <p :if={@by_language == []} class="text-sm text-base-content/60">No games yet.</p>
+      <ul :if={@by_language != []} class="flex flex-col gap-3">
+        <li :for={item <- @by_language} id={"stats-language-#{item.language}"} class="text-sm">
           <div class="flex items-baseline justify-between gap-4">
             <span class="font-medium text-octo-navy dark:text-base-content">
-              {item.locale}
+              {item.language}
             </span>
             <span class="font-semibold text-octo-navy tabular-nums dark:text-base-content">
               {item.count}
@@ -116,7 +116,7 @@
           <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-base-content/5">
             <div
               class="h-full rounded-full bg-octo-indigo dark:bg-octo-indigo-light"
-              style={"width: #{if most_locale > 0, do: item.count / most_locale * 100, else: 0}%"}
+              style={"width: #{if most_language > 0, do: item.count / most_language * 100, else: 0}%"}
             >
             </div>
           </div>
