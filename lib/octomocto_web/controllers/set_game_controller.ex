@@ -13,7 +13,7 @@ defmodule OctomoctoWeb.SetGameController do
         settings_path: SetGameLive.settings_path(state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
-        next_game: NextGame.pick("set", id),
+        next_game: NextGame.pick("set", id, state.needed > 1),
         noindex: true
       )
     else

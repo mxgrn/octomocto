@@ -13,7 +13,7 @@ defmodule OctomoctoWeb.OverlapController do
         settings_path: OverlapLive.settings_path(state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
-        next_game: NextGame.pick("overlap", id),
+        next_game: NextGame.pick("overlap", id, state.needed > 1),
         # The names of the symbols, for the screen readers
         symbols: Deck.names(),
         noindex: true

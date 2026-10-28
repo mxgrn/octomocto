@@ -15,9 +15,15 @@ defmodule OctomoctoWeb.NextGame do
   """
   alias OctomoctoWeb.HomeLive
 
-  @doc "The next game after a game of the `kind` (an id in `HomeLive.games/0`)."
-  def pick(kind, game_id) do
-    games = Enum.reject(HomeLive.games(), &(&1.id == kind))
+  @doc """
+  The next game after a game of the `kind` (an id in `HomeLive.games/0`).
+  After a `multiplayer` game, it is never a single-player game, because
+  all players go to it together.
+  """
+  def pick(kind, game_id, multiplayer) do
+    games =
+      Enum.reject(HomeLive.games(), &(&1.id == kind or (multiplayer and &1[:single_player])))
+
     Enum.at(games, :erlang.phash2(game_id, length(games)))
   end
 
@@ -27,7 +33,7 @@ defmodule OctomoctoWeb.NextGame do
   """
   def start(socket, opts) do
     %{game_id: game_id, player_id: player_id} = socket.assigns
-    page = HomeLive.settings_page(pick(opts[:kind], game_id).id)
+    page = HomeLive.settings_page(pick(opts[:kind], game_id, true).id)
 
     if id = GenServer.call(opts[:game].via(game_id), {:next_game, player_id, page}) do
       Phoenix.PubSub.broadcast(Octomocto.PubSub, opts[:game].topic(game_id), {:next_game, id})

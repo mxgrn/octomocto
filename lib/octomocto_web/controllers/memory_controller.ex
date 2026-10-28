@@ -17,7 +17,7 @@ defmodule OctomoctoWeb.MemoryController do
         change_settings_path: MemoryLive.match_path(locale, state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
-        next_game: NextGame.pick("memory", id),
+        next_game: NextGame.pick("memory", id, state.needed > 1),
         banner: MemoryLive.banner(conn.query_params),
         noindex: true
       )

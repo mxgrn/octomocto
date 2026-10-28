@@ -13,7 +13,7 @@ defmodule OctomoctoWeb.MahjongController do
         settings_path: MahjongLive.settings_path(state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
-        next_game: NextGame.pick("mahjong", id),
+        next_game: NextGame.pick("mahjong", id, state.needed > 1),
         noindex: true
       )
     else

@@ -90,6 +90,17 @@ defmodule OctomoctoWeb.HomeLive do
       path: "/overlap",
       badge: {"New", "hero-sparkles-mini"},
       icon_class: "bg-pink-500/10 dark:bg-pink-400/15"
+    },
+    %{
+      id: "snap",
+      name: "Snap",
+      description:
+        "Is the new card the same as the card before it? Answer fast for 45 seconds to build a multiplier.",
+      path: "/snap",
+      badge: {"New", "hero-sparkles-mini"},
+      icon_class: "bg-teal-500/10 dark:bg-teal-400/15",
+      # Not suggested at the end of a multiplayer game, see `OctomoctoWeb.NextGame`
+      single_player: true
     }
     # Station Escape is archived: it is not on the front page and is not
     # suggested on the end screens. Do not change it for now.

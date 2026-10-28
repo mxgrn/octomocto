@@ -34,6 +34,7 @@ import {playSudokuSound} from "./sudoku_sounds"
 import {playEchoSound} from "./echo_sounds"
 import {playMahjongSound} from "./mahjong_sounds"
 import {playOverlapSound} from "./overlap_sounds"
+import {playSnapSound} from "./snap_sounds"
 import {LobbySound} from "./lobby_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
@@ -680,6 +681,55 @@ if (overlapNode) {
   overlap.ports.overlapPlaySound.subscribe(playOverlapSound)
   overlap.ports.overlapSaveMuted.subscribe(value => {
     try { localStorage.setItem("overlap-muted", String(value)) } catch (_e) {}
+  })
+}
+
+// Start the Snap game and connect its ports to the game channel. It works
+// as the Overlap game above, without the link and the next game for all
+// players, because Snap has one player.
+const snapNode = document.getElementById("snap-main")
+if (snapNode) {
+  if (navigator.userActivation?.hasBeenActive) unlockAudio()
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  document.addEventListener("keydown", unlockAudio, {once: true})
+  let muted = false
+  try { muted = localStorage.getItem("snap-muted") === "true" } catch (_e) {}
+
+  const snap = window.Elm.Snap.init({node: snapNode, flags: {settingsUrl: snapNode.dataset.settingsUrl, nextGame: {name: snapNode.dataset.nextGameName, path: snapNode.dataset.nextGamePath}, guest: !snapNode.dataset.userToken, muted}})
+  const socket = new Socket("/socket", {params: {user_token: snapNode.dataset.userToken, _csrf_token: csrfToken}})
+  socket.connect()
+
+  const tokenKey = `snap-token:${snapNode.dataset.gameId}`
+  let token = null
+  try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
+  const joined = reply => {
+    token = reply.token
+    try {
+      if (token) sessionStorage.setItem(tokenKey, token)
+      else sessionStorage.removeItem(tokenKey)
+    } catch (_e) {}
+    snap.ports.snapJoined.send(reply)
+  }
+  const channel = socket.channel(`snap:${snapNode.dataset.gameId}`, () => token ? {token} : {})
+  channel.on("state", state => snap.ports.snapState.send(state))
+  channel.on("joined", joined)
+  channel.join()
+    .receive("ok", joined)
+    .receive("error", ({reason}) => {
+      // The server of the game stopped a moment ago. The channel tries again.
+      if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
+      channel.leave()
+      snap.ports.snapJoinFailed.send(reason)
+    })
+
+  snap.ports.snapAnswer.subscribe(answer => channel.push("answer", answer))
+  snap.ports.snapTimeUp.subscribe(() => channel.push("time_up", {}))
+  snap.ports.snapRestart.subscribe(() => channel.push("restart", {}))
+  snap.ports.snapPlaySound.subscribe(playSnapSound)
+  snap.ports.snapSaveMuted.subscribe(value => {
+    try { localStorage.setItem("snap-muted", String(value)) } catch (_e) {}
   })
 }
 

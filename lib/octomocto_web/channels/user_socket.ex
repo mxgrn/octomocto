@@ -8,6 +8,7 @@ defmodule OctomoctoWeb.UserSocket do
   channel "overlap:*", OctomoctoWeb.OverlapChannel
   channel "schulte:*", OctomoctoWeb.SchulteChannel
   channel "set:*", OctomoctoWeb.SetGameChannel
+  channel "snap:*", OctomoctoWeb.SnapChannel
   channel "sudoku:*", OctomoctoWeb.SudokuChannel
   channel "trains:*", OctomoctoWeb.TrainsChannel
 

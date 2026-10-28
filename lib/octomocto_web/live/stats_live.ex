@@ -60,7 +60,7 @@ defmodule OctomoctoWeb.StatsLive do
   Renders a line chart with one line for each game, as in Google Analytics.
   A pointer on a day (or the keyboard focus) shows a vertical line, a dot on
   each game with games in the day, and the counts of all games in the day.
-  Each game has a fixed color (see `--series-1` to `--series-8` in
+  Each game has a fixed color (see `--series-1` to `--series-9` in
   `app.css`), in the order of the games on the front page. A click on a
   game in the legend sends `toggle_game` with the id of the game. The
   hidden games have no line, and the y-axis fits the other games. A pointer

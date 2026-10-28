@@ -183,6 +183,37 @@ defmodule OctomoctoWeb.GameIcons do
     """
   end
 
+  # Two cards with the same shape, the new card on the old one, and a check
+  def game_icon(%{game: "snap"} = assigns) do
+    ~H"""
+    <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
+      <g :for={{x, angle} <- [{6, -12}, {19, 6}]} transform={"rotate(#{angle} #{x + 11} 25)"}>
+        <rect
+          x={x}
+          y="10"
+          width="22"
+          height="30"
+          rx="3.5"
+          fill="#fff"
+          stroke="#14B8A6"
+          stroke-opacity="0.4"
+          stroke-width="1.5"
+        />
+        <path transform={"translate(#{x + 11} 25)"} d="M0-6.5 7 5.5h-14z" fill="#1A9FCB" />
+      </g>
+      <circle cx="38" cy="10" r="7" fill="#16A34A" />
+      <path
+        d="m34.8 10.2 2.2 2.2 4.2-4.6"
+        fill="none"
+        stroke="#fff"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+    """
+  end
+
   def game_icon(%{game: "sudoku"} = assigns) do
     ~H"""
     <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">

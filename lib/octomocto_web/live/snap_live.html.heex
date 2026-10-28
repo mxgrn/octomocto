@@ -1,0 +1,122 @@
+<Layouts.app
+  flash={@flash}
+  notifications={@notifications}
+  current_scope={@current_scope}
+  guest_name={@guest_name}
+>
+  <%!--
+    One column on a small screen: the title, the settings and the results.
+    Two columns on a large screen: the results go to the right.
+  --%>
+  <div
+    id="snap-index"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16"
+  >
+    <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1">
+      <div class="flex items-center justify-center gap-3">
+        <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
+          <OctomoctoWeb.GameIcons.game_icon game="snap" class="size-9" />
+        </div>
+        <h1 class="text-3xl font-semibold tracking-tight">Snap</h1>
+      </div>
+      <p class="text-base-content/70">
+        Is the new card the same as the one before it? Answer as fast as you can
+        for 45 seconds.
+      </p>
+      <.how_to_play />
+    </div>
+
+    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-2">
+      <div id="snap-settings" class="flex w-full flex-col gap-4">
+        <.setting label="Cards back" icon="hero-arrow-uturn-left" hint={back_hint(@settings.back)}>
+          <.option
+            :for={n <- 1..3}
+            id={"back-#{n}"}
+            selected={@settings.back == n}
+            patch={~p"/snap?#{query(%{back: n})}"}
+          >
+            {n}
+          </.option>
+        </.setting>
+      </div>
+
+      <.start_bar multiplayer={false} />
+    </div>
+
+    <div
+      id="snap-leaderboard"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1"
+    >
+      <.score_list
+        id="your-results"
+        icon="hero-user"
+        icon_class="text-octo-indigo"
+        title="Your results"
+        empty={@user_results != nil and @user_results.latest == []}
+        empty_text="No games yet."
+      >
+        <:aside :if={@user_results && @user_results.best}>
+          <span
+            id="your-best"
+            class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
+          >
+            <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
+            <span class="text-base-content/60">Best</span>
+            <span class="font-semibold tabular-nums">{@user_results.best.score}</span>
+          </span>
+        </:aside>
+        <%= if @user_results do %>
+          <.result_row :for={result <- @user_results.latest}>
+            <span class="flex-1 font-medium">
+              {Calendar.strftime(result.inserted_at, "%b %-d")}
+            </span>
+            <span class="text-xs text-base-content/50 tabular-nums" title="Correct answers">
+              {accuracy(result)}
+            </span>
+            <.result_pill best={@user_results.best != nil and result.id == @user_results.best.id}>
+              {result.score}
+            </.result_pill>
+          </.result_row>
+        <% else %>
+          <li class="py-2 text-center text-base-content/60">
+            <.link
+              id="your-results-sign-in"
+              href={~p"/signin"}
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
+            >
+              Sign in
+            </.link>
+            to start saving your results.
+          </li>
+        <% end %>
+      </.score_list>
+      <.score_list
+        id="best-results"
+        icon="hero-trophy"
+        icon_class="text-amber-500"
+        title="Best results"
+        empty={@best_results == []}
+      >
+        <:aside :if={!@user_results}>
+          <span class="text-sm text-base-content/60">
+            <.link
+              id="best-results-sign-in"
+              href={~p"/signin"}
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
+            >
+              Sign in
+            </.link>
+            to get listed
+          </span>
+        </:aside>
+        <.result_row :for={{result, place} <- Enum.with_index(@best_results, 1)}>
+          <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+          <span class="min-w-0 flex-1 truncate font-medium">{player_name(result.user)}</span>
+          <.result_pill>{result.score}</.result_pill>
+        </.result_row>
+      </.score_list>
+    </div>
+  </div>
+
+  <.rules rules={@rules} />
+</Layouts.app>
