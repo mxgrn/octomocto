@@ -4,25 +4,16 @@ defmodule Octomocto.RaceServer do
   field. The game module gives the rules (see the callbacks), and this
   module does the rest, the same for all such games.
 
-  The game is for a set number of players (`needed`). The clock of each
-  field starts when the game has all its players, after a countdown. A
-  process that joins a full game only watches. A process can also join
-  only to watch (see `Octomocto.GameProcess.watch/4`).
+  The players, the rejoin and the lists of the settings page are the same
+  as in all games, see `Octomocto.Seats`. The clock of each field starts
+  when the game has all its players, after a countdown. A process can also
+  join only to watch (see `Octomocto.GameProcess.watch/4`).
 
-  Each player is bound to the process that joined (a channel). When that
-  process stops, the player stays in the game for a short time, so that
-  the same player can join again (for example, after a reconnect). Then
-  the player is removed. A player can restart the game at any time: the
-  scores go back to zero and a new field starts. When a field is finished
-  with all players still in the game, the game saves the result of each
-  player with `save_results/4` of the game context. The game stops after
-  some time with no players.
-
-  A public game is in the lists of the settings page (see
-  `Octomocto.Lobby`): in the open games until it has all its players for
-  the first time, then in the ongoing games. A game for one player is only
-  in the ongoing games. The game sends its new row after each change, and
-  nil when its node stops.
+  A player can restart the game at any time: the scores go back to zero
+  and a new field starts. When a field is finished with all players still
+  in the game, the game saves the result of each player with
+  `save_results/4` of the game context. The game sends its row in the lists
+  after each change, and nil when its node stops.
 
   The game is registered in the whole cluster, and it writes its state to
   its store (see `Octomocto.GameStore`) after each change. When its node
@@ -53,22 +44,9 @@ defmodule Octomocto.RaceServer do
   """
   use GenServer
 
-  alias Octomocto.{GameProcess, Lobby}
+  alias Octomocto.{GameProcess, Lobby, Seats}
 
-  @idle_timeout_ms :timer.minutes(5)
   @countdown_ms 3000
-  @rejoin_grace_ms :timer.seconds(15)
-
-  @colors [
-    {"pink", "#ec4899"},
-    {"sky", "#0ea5e9"},
-    {"lime", "#65a30d"},
-    {"amber", "#d97706"},
-    {"violet", "#8b5cf6"},
-    {"red", "#dc2626"},
-    {"teal", "#0d9488"},
-    {"indigo", "#4f46e5"}
-  ]
 
   @type state :: map()
 
@@ -124,46 +102,18 @@ defmodule Octomocto.RaceServer do
   @optional_callbacks new_player: 1, reset_player: 1, restore: 1
 
   defmacro __using__(opts) do
-    quote bind_quoted: [opts: opts] do
+    quote do
       @behaviour Octomocto.RaceServer
-      @race_server Map.new(opts)
-
-      def child_spec(arg) do
-        %{id: __MODULE__, start: {__MODULE__, :start_link, [arg]}, restart: :temporary}
-      end
-
-      @doc "Starts a new game from `{id, config}`, or again from its state in the store."
-      def start_link(arg), do: Octomocto.RaceServer.start_link(__MODULE__, arg)
-
-      def via(id), do: {:via, :global, {__MODULE__, id}}
-
-      def topic(id), do: @race_server.topic <> ":" <> id
-
-      def lobby_topic, do: @race_server.lobby_topic
-
-      @doc "See `Octomocto.RaceServer.lobby_entry/2`."
-      def lobby_entry(state), do: Octomocto.RaceServer.lobby_entry(__MODULE__, state)
-
-      @doc false
-      def __race_server__, do: @race_server
+      use Octomocto.GameProcess, server: Octomocto.RaceServer, options: unquote(opts)
     end
   end
 
   def start_link(game, {id, %{players: needed, public: public} = config})
       when needed in 1..4 and is_boolean(public) do
     state =
-      Map.merge(game.init_settings(config), %{
-        id: id,
-        needed: needed,
-        players: %{},
-        public: public,
-        created_at: now(),
-        # True while the game is in the list of open games. A game with one
-        # player is never in it.
-        listed: public and needed > 1,
-        countdown_ms: Map.get(config, :countdown_ms, @countdown_ms),
-        rejoin_grace_ms: Map.get(config, :rejoin_grace_ms, @rejoin_grace_ms)
-      })
+      game.init_settings(config)
+      |> Map.merge(Seats.new(id, config))
+      |> Map.put(:countdown_ms, Map.get(config, :countdown_ms, @countdown_ms))
 
     GenServer.start_link(__MODULE__, {game, {:new, state}}, name: game.via(id))
   end
@@ -174,49 +124,16 @@ defmodule Octomocto.RaceServer do
 
   @doc """
   The row of the game in the lists of the settings page (see
-  `Octomocto.Lobby`), or nil when the game is in no list. Each player has
-  a `:score`.
+  `Octomocto.Seats.lobby_entry/4`). Each player has a `:score`.
   """
-  # A state from before the lists has no `:public`
-  def lobby_entry(game, %{public: true} = state) when map_size(state.players) > 0 do
-    players =
-      state.players
-      |> Map.values()
-      |> Enum.sort_by(& &1.joined_at)
-      |> Enum.map(&Map.put(Lobby.player(&1), :score, &1.score))
-
-    entry = %{
-      id: state.id,
-      settings: game.lobby_settings(state),
-      players_needed: state.needed,
-      players: players,
-      created_at: state.created_at
-    }
-
-    cond do
-      state.listed ->
-        Map.merge(entry, %{
-          status: :open,
-          seats_left: state.needed - map_size(state.players)
-        })
-
-      state.started_at != nil ->
-        Map.merge(entry, %{
-          status: :ongoing,
-          started_at: state.started_at,
-          finished: state.finished_at != nil
-        })
-
-      # Not all players are back after a restart
-      true ->
-        nil
-    end
+  def lobby_entry(game, state) do
+    Seats.lobby_entry(state, game.lobby_settings(state), state.started_at, fn _id, p ->
+      %{score: p.score}
+    end)
   end
 
-  def lobby_entry(_game, _state), do: nil
-
   @doc "The system time in milliseconds, the same on all nodes."
-  def now, do: System.system_time(:millisecond)
+  defdelegate now, to: Seats
 
   @doc "True when the countdown of the field is over."
   def started?(state), do: state.started_at != nil and now() >= state.started_at
@@ -228,7 +145,7 @@ defmodule Octomocto.RaceServer do
   def init({game, {:new, state}}) do
     # So that terminate/2 runs when the node stops
     Process.flag(:trap_exit, true)
-    schedule_idle_check()
+    Seats.schedule_idle_check()
 
     state = new_field(game, state)
     store(game, state)
@@ -239,24 +156,20 @@ defmodule Octomocto.RaceServer do
   # again during the grace time.
   def init({game, {:restore, state}}) do
     Process.flag(:trap_exit, true)
-    schedule_idle_check()
+    Seats.schedule_idle_check()
 
     state =
       state
-      # A state from before the lists of the settings page
-      |> Map.put_new(:public, false)
-      |> Map.put_new(:created_at, now())
-      |> Map.put_new(:listed, false)
+      |> Seats.restore()
       # A state from before the timings in the config
       |> Map.put_new(:countdown_ms, @countdown_ms)
-      |> Map.put_new(:rejoin_grace_ms, @rejoin_grace_ms)
 
     if state.started_at != nil and now() < state.started_at do
       Process.send_after(self(), {:countdown_over, state.field_id}, state.started_at - now())
     end
 
     state = if function_exported?(game, :restore, 1), do: game.restore(state), else: state
-    state = Enum.reduce(Map.keys(state.players), state, &leave(&2, &1))
+    state = Seats.leave_all(state)
     store(game, state)
     {:ok, {game, state}}
   end
@@ -264,8 +177,7 @@ defmodule Octomocto.RaceServer do
   @impl true
   def handle_call({:join, pid, _user_id, _name, player_id, _guest_id}, _from, {game, state})
       when is_map_key(state.players, player_id) do
-    Process.monitor(pid)
-    state = update_in(state.players[player_id], &%{&1 | pid: pid, left: nil})
+    state = Seats.rejoin(state, player_id, pid)
     store(game, state)
     {:reply, {:ok, player_id, public(game, state)}, {game, state}}
   end
@@ -286,28 +198,13 @@ defmodule Octomocto.RaceServer do
   end
 
   def handle_call({:join, pid, user_id, name, _player_id, guest_id}, _from, {game, state}) do
-    Process.monitor(pid)
-    # Unique in the cluster, because the game can move to another node
-    player_id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
-    {color_name, color} = pick_color(state.players)
+    fields = %{score: 0}
 
-    player = %{
-      pid: pid,
-      user_id: user_id,
-      guest_id: guest_id,
-      name: name,
-      color: color,
-      color_name: color_name,
-      score: 0,
-      joined_at: System.system_time(),
-      # A reference while the player is away, see leave/2
-      left: nil
-    }
+    fields =
+      if function_exported?(game, :new_player, 1), do: game.new_player(fields), else: fields
 
-    player =
-      if function_exported?(game, :new_player, 1), do: game.new_player(player), else: player
-
-    state = put_in(state.players[player_id], player) |> start_clock()
+    {player_id, state} = Seats.add(state, pid, user_id, name, guest_id, fields)
+    state = start_clock(state)
     publish(game, state)
     {:reply, {:ok, player_id, public(game, state)}, {game, state}}
   end
@@ -346,27 +243,23 @@ defmodule Octomocto.RaceServer do
 
   @impl true
   def handle_info({:DOWN, _ref, :process, pid, _reason}, {game, state}) do
-    case Enum.find(state.players, fn {_id, p} -> p.pid == pid end) do
-      {player_id, _player} ->
-        state = leave(state, player_id)
-        store(game, state)
-        {:noreply, {game, state}}
-
-      nil ->
-        {:noreply, {game, state}}
+    if player_id = Seats.player_id(state, pid) do
+      state = Seats.leave(state, player_id)
+      store(game, state)
+      {:noreply, {game, state}}
+    else
+      {:noreply, {game, state}}
     end
   end
 
   # The player did not join again in the grace time
   def handle_info({:remove, player_id, left}, {game, state}) do
-    case state.players do
-      %{^player_id => %{left: ^left}} ->
-        state = %{state | players: Map.delete(state.players, player_id)}
-        publish(game, state)
-        {:noreply, {game, state}}
-
-      _ ->
-        {:noreply, {game, state}}
+    if Seats.remove?(state, player_id, left) do
+      state = Seats.remove(state, player_id)
+      publish(game, state)
+      {:noreply, {game, state}}
+    else
+      {:noreply, {game, state}}
     end
   end
 
@@ -381,10 +274,10 @@ defmodule Octomocto.RaceServer do
 
   def handle_info(:idle_check, {game, state}) do
     if state.players == %{} do
-      game.__race_server__().store.delete(state.id)
+      game.__game__().store.delete(state.id)
       {:stop, :normal, {game, state}}
     else
-      schedule_idle_check()
+      Seats.schedule_idle_check()
       {:noreply, {game, state}}
     end
   end
@@ -441,7 +334,7 @@ defmodule Octomocto.RaceServer do
        when finished_at != nil and map_size(state.players) == state.needed do
     settings = Map.put(game.result_settings(state), "players", state.needed)
 
-    game.__race_server__().context.save_results(
+    game.__game__().context.save_results(
       state.field_id,
       settings,
       finished_at - state.started_at,
@@ -451,33 +344,7 @@ defmodule Octomocto.RaceServer do
 
   defp save_results(_game, _old_state, _state), do: nil
 
-  # Prefer a color that no player has. Reuse colors when all are taken.
-  defp pick_color(players) do
-    taken = players |> Map.values() |> Enum.map(& &1.color)
-
-    case Enum.reject(@colors, fn {_name, color} -> color in taken end) do
-      [] -> Enum.random(@colors)
-      free -> Enum.random(free)
-    end
-  end
-
-  defp schedule_idle_check do
-    Process.send_after(self(), :idle_check, @idle_timeout_ms)
-  end
-
-  # Removes the player after the grace time, unless the player joins again
-  defp leave(state, player_id) do
-    left = make_ref()
-    Process.send_after(self(), {:remove, player_id, left}, state.rejoin_grace_ms)
-    update_in(state.players[player_id], &%{&1 | pid: nil, left: left})
-  end
-
-  # Writes the state to the store, and sends the new row of the game to the
-  # settings pages
-  defp store(game, state) do
-    game.__race_server__().store.write(state)
-    if state.public, do: Lobby.broadcast(game, state.id, lobby_entry(game, state))
-  end
+  defp store(game, state), do: Seats.write(state, game, game.__game__().store)
 
   defp publish(game, state) do
     store(game, state)
@@ -485,26 +352,13 @@ defmodule Octomocto.RaceServer do
   end
 
   defp broadcast(game, state) do
-    message = {game.__race_server__().state_message, public(game, state)}
+    message = {game.__game__().state_message, public(game, state)}
     Phoenix.PubSub.broadcast(Octomocto.PubSub, game.topic(state.id), message)
   end
 
   # The state that clients see, ready to encode as JSON
   defp public(game, state) do
-    players =
-      state.players
-      |> Enum.sort_by(fn {_id, p} -> p.joined_at end)
-      |> Enum.map(fn {id, p} ->
-        %{
-          id: id,
-          name: p.name,
-          color: p.color,
-          color_name: p.color_name,
-          score: p.score,
-          away: p.left != nil
-        }
-      end)
-
+    players = Seats.public_players(state, fn _id, p -> %{score: p.score} end)
     waiting? = state.started_at == nil
 
     Map.merge(

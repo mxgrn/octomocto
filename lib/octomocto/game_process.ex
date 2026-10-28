@@ -5,7 +5,69 @@ defmodule Octomocto.GameProcess do
   `Octomocto.GameStore`. When no node runs the game (for example, its node
   stopped in a deploy), the game starts again on this node from that copy,
   under the `supervisor`.
+
+  A server of games (`Octomocto.RaceServer` or `Octomocto.TurnServer`)
+  uses this module in its own `__using__`, so that each game module gets
+  its name in the cluster, its topics, its child spec and its start:
+
+      use Octomocto.GameProcess,
+        server: Octomocto.RaceServer,
+        # The options of `use Octomocto.RaceServer` in the game module
+        options: [topic: "sudoku", state_message: :sudoku_state, ...]
+
+  The server must have `start_link/2` and `lobby_entry/2`, both with the
+  game module as the first argument. It reads the options with
+  `game.__game__()`.
   """
+
+  defmacro __using__(opts) do
+    quote bind_quoted: [server: Keyword.fetch!(opts, :server), options: opts[:options]] do
+      @game_server server
+      @game_options Map.new(options)
+
+      @doc """
+      The child spec of the game for a supervisor. The game is
+      `:temporary`: the supervisor does not start it again when it stops,
+      because a stopped game starts again from its store on the next join
+      (see `Octomocto.GameProcess`).
+      """
+      def child_spec(arg) do
+        %{id: __MODULE__, start: {__MODULE__, :start_link, [arg]}, restart: :temporary}
+      end
+
+      @doc """
+      Starts a new game from `{id, config}`, or again from its state in the
+      store. See `#{inspect(server)}.start_link/2`.
+      """
+      def start_link(arg), do: @game_server.start_link(__MODULE__, arg)
+
+      @doc """
+      The name of the game `id` in the whole cluster, so that a process on
+      any node finds the game.
+      """
+      def via(id), do: {:via, :global, {__MODULE__, id}}
+
+      @doc """
+      The PubSub topic of the game `id`. The game sends each change on it as
+      `{state_message, state}`, with the `:state_message` of the `use`
+      options.
+      """
+      def topic(id), do: @game_options.topic <> ":" <> id
+
+      @doc """
+      The PubSub topic where all games of this kind send their rows for the
+      lists of the settings page (see `Octomocto.Lobby`).
+      """
+      def lobby_topic, do: @game_options.lobby_topic
+
+      @doc "The row of the game in the lists, see `#{inspect(server)}.lobby_entry/2`."
+      def lobby_entry(state), do: @game_server.lobby_entry(__MODULE__, state)
+
+      # The options of `use`, for the functions of the server
+      @doc false
+      def __game__, do: @game_options
+    end
+  end
 
   @doc """
   Adds a player for the calling process with a `{:join, pid, user_id, name,

@@ -23,6 +23,9 @@ defmodule Octomocto.GameHelpers do
 
   def overlap_game(id, config \\ []), do: game(Octomocto.Overlap.Game, id, %{}, config)
 
+  @doc "An Echo game with 4 pads."
+  def echo_game(id, config \\ []), do: game(Octomocto.Echo.Game, id, %{pads: 4}, config)
+
   defp game(module, id, settings, config) do
     {module, {id, @defaults |> Map.merge(settings) |> Map.merge(Map.new(config))}}
   end

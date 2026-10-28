@@ -49,6 +49,3 @@ config :octomocto, trains_countdown_ms: 0, trains_rejoin_grace_ms: 0
 
 # The same for the Memory games
 config :octomocto, memory_rejoin_grace_ms: 0
-
-# The same for the Echo games
-config :octomocto, echo_rejoin_grace_ms: 0
