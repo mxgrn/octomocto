@@ -12,17 +12,17 @@ defmodule Octomocto.Schulte.Game do
 
   The players, the clock, the lists of the settings page and the copy in
   `Octomocto.Schulte.Store` are the same as in the other games, see
-  `Octomocto.GameServer`. Each change is broadcast on the
+  `Octomocto.RaceServer`. Each change is broadcast on the
   `"schulte_game:<id>"` PubSub topic as `{:schulte_state, state}`.
   """
-  use Octomocto.GameServer,
+  use Octomocto.RaceServer,
     topic: "schulte_game",
     state_message: :schulte_state,
     lobby_topic: "schulte_lobby",
     store: Octomocto.Schulte.Store,
     context: Octomocto.Schulte
 
-  alias Octomocto.GameServer
+  alias Octomocto.RaceServer
   alias Octomocto.Schulte.{Classic, Layout}
 
   @total 90
@@ -47,7 +47,7 @@ defmodule Octomocto.Schulte.Game do
   @impl true
   def handle_move({:pick, player_id, number}, %{next: number} = state)
       when is_map_key(state.players, player_id) and number <= @last do
-    if GameServer.started?(state) do
+    if RaceServer.started?(state) do
       state =
         state
         |> update_in([:players, player_id, :score], &(&1 + 1))
@@ -63,7 +63,7 @@ defmodule Octomocto.Schulte.Game do
 
   def handle_move({:pick, _player_id, _number}, state), do: {:ignore, :ok, state}
 
-  defp finish_after_last(state) when state.next > @last, do: GameServer.finish(state)
+  defp finish_after_last(state) when state.next > @last, do: RaceServer.finish(state)
   defp finish_after_last(state), do: state
 
   @impl true
@@ -86,7 +86,7 @@ defmodule Octomocto.Schulte.Game do
     # Do not show the numbers before the start (also during the countdown),
     # so that nobody can look for them early.
     cells =
-      if GameServer.started?(state),
+      if RaceServer.started?(state),
         do: Enum.map(state.regions, &Map.put(&1, :found_by, state.found_by[&1.number])),
         else: []
 

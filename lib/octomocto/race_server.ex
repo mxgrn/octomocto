@@ -1,4 +1,4 @@
-defmodule Octomocto.GameServer do
+defmodule Octomocto.RaceServer do
   @moduledoc """
   The process of one multiplayer game where all players race on the same
   field. The game module gives the rules (see the callbacks), and this
@@ -35,7 +35,7 @@ defmodule Octomocto.GameServer do
   A game module uses this module:
 
       defmodule Octomocto.Schulte.Game do
-        use Octomocto.GameServer,
+        use Octomocto.RaceServer,
           # Each change is sent on the "schulte_game:<id>" PubSub topic as
           # `{:schulte_state, state}`
           topic: "schulte_game",
@@ -115,31 +115,37 @@ defmodule Octomocto.GameServer do
   @doc "Resets the fields of the game of a player when the game restarts."
   @callback reset_player(player :: map()) :: map()
 
-  @optional_callbacks new_player: 1, reset_player: 1
+  @doc """
+  Changes a state from older code when the game starts again from the
+  store, for example to add a field with its default.
+  """
+  @callback restore(state()) :: state()
+
+  @optional_callbacks new_player: 1, reset_player: 1, restore: 1
 
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
-      @behaviour Octomocto.GameServer
-      @game_server Map.new(opts)
+      @behaviour Octomocto.RaceServer
+      @race_server Map.new(opts)
 
       def child_spec(arg) do
         %{id: __MODULE__, start: {__MODULE__, :start_link, [arg]}, restart: :temporary}
       end
 
       @doc "Starts a new game from `{id, config}`, or again from its state in the store."
-      def start_link(arg), do: Octomocto.GameServer.start_link(__MODULE__, arg)
+      def start_link(arg), do: Octomocto.RaceServer.start_link(__MODULE__, arg)
 
       def via(id), do: {:via, :global, {__MODULE__, id}}
 
-      def topic(id), do: @game_server.topic <> ":" <> id
+      def topic(id), do: @race_server.topic <> ":" <> id
 
-      def lobby_topic, do: @game_server.lobby_topic
+      def lobby_topic, do: @race_server.lobby_topic
 
-      @doc "See `Octomocto.GameServer.lobby_entry/2`."
-      def lobby_entry(state), do: Octomocto.GameServer.lobby_entry(__MODULE__, state)
+      @doc "See `Octomocto.RaceServer.lobby_entry/2`."
+      def lobby_entry(state), do: Octomocto.RaceServer.lobby_entry(__MODULE__, state)
 
       @doc false
-      def __game_server__, do: @game_server
+      def __race_server__, do: @race_server
     end
   end
 
@@ -249,6 +255,7 @@ defmodule Octomocto.GameServer do
       Process.send_after(self(), {:countdown_over, state.field_id}, state.started_at - now())
     end
 
+    state = if function_exported?(game, :restore, 1), do: game.restore(state), else: state
     state = Enum.reduce(Map.keys(state.players), state, &leave(&2, &1))
     store(game, state)
     {:ok, {game, state}}
@@ -374,7 +381,7 @@ defmodule Octomocto.GameServer do
 
   def handle_info(:idle_check, {game, state}) do
     if state.players == %{} do
-      game.__game_server__().store.delete(state.id)
+      game.__race_server__().store.delete(state.id)
       {:stop, :normal, {game, state}}
     else
       schedule_idle_check()
@@ -434,7 +441,7 @@ defmodule Octomocto.GameServer do
        when finished_at != nil and map_size(state.players) == state.needed do
     settings = Map.put(game.result_settings(state), "players", state.needed)
 
-    game.__game_server__().context.save_results(
+    game.__race_server__().context.save_results(
       state.field_id,
       settings,
       finished_at - state.started_at,
@@ -468,7 +475,7 @@ defmodule Octomocto.GameServer do
   # Writes the state to the store, and sends the new row of the game to the
   # settings pages
   defp store(game, state) do
-    game.__game_server__().store.write(state)
+    game.__race_server__().store.write(state)
     if state.public, do: Lobby.broadcast(game, state.id, lobby_entry(game, state))
   end
 
@@ -478,7 +485,7 @@ defmodule Octomocto.GameServer do
   end
 
   defp broadcast(game, state) do
-    message = {game.__game_server__().state_message, public(game, state)}
+    message = {game.__race_server__().state_message, public(game, state)}
     Phoenix.PubSub.broadcast(Octomocto.PubSub, game.topic(state.id), message)
   end
 

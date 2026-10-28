@@ -44,24 +44,12 @@ config :phoenix,
   sort_verified_routes_query_params: true
 
 # Start trains games without the countdown, and remove players at once when they
-# leave. The Schulte tests give these timings in the config of each game (see
-# Octomocto.GameHelpers).
+# leave. The tests of the games on Octomocto.RaceServer give these timings in
+# the config of each game (see Octomocto.GameHelpers).
 config :octomocto, trains_countdown_ms: 0, trains_rejoin_grace_ms: 0
 
 # The same for the Memory games
 config :octomocto, memory_rejoin_grace_ms: 0
 
-# The same for the Set games
-config :octomocto, set_countdown_ms: 0, set_rejoin_grace_ms: 0
-
-# The same for the sudoku games
-config :octomocto, sudoku_countdown_ms: 0, sudoku_rejoin_grace_ms: 0
-
 # The same for the Echo games
 config :octomocto, echo_rejoin_grace_ms: 0
-
-# The same for the Mahjong games
-config :octomocto, mahjong_countdown_ms: 0, mahjong_rejoin_grace_ms: 0
-
-# The same for the Overlap games
-config :octomocto, overlap_countdown_ms: 0, overlap_rejoin_grace_ms: 0
