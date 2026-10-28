@@ -35,7 +35,7 @@ defmodule OctomoctoWeb.TrainsLive do
   @doc "The title and the description of the Right on Track pages, for search engines."
   def seo do
     [
-      page_title: "Right on Track: Train Switching Puzzle",
+      page_title: "Right on Track: a Train of Thought-Like Puzzle",
       page_description:
         "Click the switches to send each train to the house with its colors. Similar to Train of Thought on Lumosity. Free, in your browser."
     ]
@@ -212,7 +212,8 @@ defmodule OctomoctoWeb.TrainsLive do
       "Send each train to the house with its colors.",
       "With more players, each player owns some of the switches and can change only those.",
       "The pace tells how fast the trains come one after another.",
-      "The round ends when all trains have arrived. The score is the number of trains that got to the correct house."
+      "The round ends when all trains have arrived. The score is the number of trains that got to the correct house.",
+      "Right on Track is a Train of Thought-like game. Lumosity and Train of Thought are trademarks of Lumos Labs. Octomocto is not affiliated with Lumos Labs."
     ]
   end
 

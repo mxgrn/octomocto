@@ -34,9 +34,9 @@ defmodule OctomoctoWeb.SetGameLive do
   @doc "The title and the description of the Set pages, for search engines."
   def seo do
     [
-      page_title: "Set: Card Game of Quick Eyes",
+      page_title: "Set Card Game Online: Solo or Multiplayer",
       page_description:
-        "Find 3 cards where each feature is all the same or all different. Play solo against the clock or race up to 4 friends. Free."
+        "Play the Set card game online: find 3 cards where each feature is all the same or all different. Solo against the clock or race up to 3 friends. Free."
     ]
   end
 

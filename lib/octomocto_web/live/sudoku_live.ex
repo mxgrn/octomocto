@@ -34,9 +34,9 @@ defmodule OctomoctoWeb.SudokuLive do
   @doc "The title and the description of the sudoku pages, for search engines."
   def seo do
     [
-      page_title: "Sudoku Race: Multiplayer Sudoku",
+      page_title: "Multiplayer Sudoku Online: Race Your Friends",
       page_description:
-        "Fill one sudoku with up to 4 friends. The first to put the correct digit in a cell gets the point. Free, in your browser."
+        "Play sudoku online alone or with up to 3 friends on the same grid. The first to put the correct digit in a cell gets the point. Free, no sign-up."
     ]
   end
 

@@ -34,7 +34,7 @@ defmodule OctomoctoWeb.MahjongLive do
   @doc "The title and the description of the mahjong pages, for search engines."
   def seo do
     [
-      page_title: "Mahjong Solitaire, Alone or with Friends",
+      page_title: "Mahjong Solitaire Online: Solo or Multiplayer",
       page_description:
         "Clear the Turtle in mahjong solitaire, alone or with up to 3 friends on the same board. Free, instant, no sign-up."
     ]
