@@ -9,6 +9,7 @@ defmodule Octomocto.Notifications do
   """
   import Ecto.Query
 
+  alias Octomocto.LlmGettext
   alias Octomocto.Notifications.Notification
   alias Octomocto.Repo
 
@@ -54,6 +55,35 @@ defmodule Octomocto.Notifications do
   end
 
   def delete_notification(%Notification{} = notification), do: Repo.delete(notification)
+
+  @doc """
+  Translates the text of a notification into all languages other than
+  English with the LLM (see `Octomocto.LlmGettext`), in a background task.
+  Call it when an admin saves a notification, so that no page waits for
+  the LLM.
+  """
+  def translate(%Notification{text: text}) do
+    if Application.get_env(:octomocto, :translate_notifications, true) do
+      Task.Supervisor.start_child(Octomocto.TaskSupervisor, fn ->
+        OctomoctoWeb.Locale.other_locales()
+        |> Task.async_stream(&Understudy.translate(LlmGettext, text, locale: &1),
+          timeout: :infinity
+        )
+        |> Stream.run()
+      end)
+    end
+
+    :ok
+  end
+
+  @doc """
+  Gives the text of a notification in the language of the process. If the
+  translation is not in the cache, it waits for the LLM. If the LLM fails,
+  it gives the English text.
+  """
+  def localized_text(%Notification{text: text}) do
+    Understudy.translate(LlmGettext, text, locale: Gettext.get_locale(OctomoctoWeb.Gettext))
+  end
 
   def change_notification(%Notification{} = notification, attrs \\ %{}) do
     Notification.changeset(notification, attrs)

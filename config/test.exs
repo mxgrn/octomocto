@@ -2,6 +2,9 @@ import Config
 
 config :octomocto, :telegram, bot_token: "test-bot-token", bot_username: "test_bot"
 
+# Do not send the notifications to the LLM
+config :octomocto, :translate_notifications, false
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used

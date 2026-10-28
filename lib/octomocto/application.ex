@@ -35,6 +35,7 @@ defmodule Octomocto.Application do
       {DynamicSupervisor, name: Octomocto.Snap.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Sudoku.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Trains.GameSupervisor},
+      {Task.Supervisor, name: Octomocto.TaskSupervisor},
       # Start a worker by calling: Octomocto.Worker.start_link(arg)
       # {Octomocto.Worker, arg},
       # Start to serve requests, typically the last entry

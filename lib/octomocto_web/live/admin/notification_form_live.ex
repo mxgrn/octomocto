@@ -46,7 +46,9 @@ defmodule OctomoctoWeb.Admin.NotificationFormLive do
 
   def handle_event("save", %{"notification" => params}, socket) do
     case save(socket.assigns.live_action, socket.assigns.notification, params) do
-      {:ok, _notification} ->
+      {:ok, notification} ->
+        Notifications.translate(notification)
+
         {:noreply,
          socket
          |> put_flash(:info, "Notification saved")

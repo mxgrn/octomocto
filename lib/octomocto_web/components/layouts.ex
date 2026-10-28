@@ -348,7 +348,11 @@ defmodule OctomoctoWeb.Layouts do
         class="site-notification relative flex items-center justify-center bg-octo-indigo px-10 py-2 text-center text-sm font-medium text-white"
       >
         <span class="[&_a]:font-semibold [&_a]:underline [&_a]:decoration-white/40 [&_a]:underline-offset-2 [&_a]:transition [&_a:hover]:decoration-white">
-          {Phoenix.HTML.raw(OctomoctoWeb.SiteNotifications.to_html(notification.text))}
+          {Phoenix.HTML.raw(
+            OctomoctoWeb.SiteNotifications.to_html(
+              Octomocto.Notifications.localized_text(notification)
+            )
+          )}
         </span>
         <button
           type="button"

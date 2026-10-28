@@ -67,6 +67,9 @@ defmodule OctomoctoWeb.Locale do
   @doc "The value of the `lang` attribute for the language of the process."
   def html_lang, do: Map.fetch!(@html_langs, Gettext.get_locale(OctomoctoWeb.Gettext))
 
+  @doc "The languages other than English."
+  def other_locales, do: Map.keys(@names) -- ["en"]
+
   @doc "The path in the language, for example `/pt/memory` for `/memory`."
   def path("en", path), do: path
   def path(locale, path), do: "/" <> locale <> path

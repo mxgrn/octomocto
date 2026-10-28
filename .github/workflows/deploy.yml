@@ -61,6 +61,7 @@ jobs:
             # Run the migrations before the new version starts. If they fail, the old version keeps running.
             docker run --rm \
               -e SECRET_KEY_BASE=${{secrets.SECRET_KEY_BASE}} \
+              -e GOOGLE_API_KEY=${{secrets.GOOGLE_API_KEY}} \
               -e DATABASE_URL=${{secrets.DATABASE_URL}} \
               ghcr.io/mxgrn/${{matrix.app}}_${{matrix.env}} /app/bin/migrate
             docker stop ${{matrix.app}}_${{matrix.env}} || true
@@ -73,6 +74,7 @@ jobs:
               -e PROD_ENV=${{matrix.env}} \
               -e PHX_SERVER=true \
               -e SECRET_KEY_BASE=${{secrets.SECRET_KEY_BASE}} \
+              -e GOOGLE_API_KEY=${{secrets.GOOGLE_API_KEY}} \
               -e DATABASE_URL=${{secrets.DATABASE_URL}} \
               -e GITHUB_SHA=${{github.sha}} \
               -e PHX_HOST=octomocto.com \

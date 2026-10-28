@@ -66,6 +66,17 @@ if config_env() == :prod do
     site_key: System.get_env("TURNSTILE_SITE_KEY"),
     secret_key: System.get_env("TURNSTILE_SECRET_KEY")
 
+  # The LLM that translates the notifications (see `Octomocto.LlmGettext`).
+  # Without the key, ReqLLM raises when a page needs a translation, so the
+  # release does not start without it.
+  config :req_llm,
+    google_api_key:
+      System.get_env("GOOGLE_API_KEY") ||
+        raise("""
+        environment variable GOOGLE_API_KEY is missing.
+        Get one at https://aistudio.google.com/apikey
+        """)
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """
