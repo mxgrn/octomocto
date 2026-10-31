@@ -182,7 +182,7 @@ defmodule OctomoctoWeb.GamePageComponents do
     ~H"""
     <section
       id="match-score"
-      class="rounded-2xl bg-base-100 p-5 text-left shadow-sm ring-1 ring-base-content/10"
+      class="rounded-2xl bg-base-100 p-5 text-start shadow-sm ring-1 ring-base-content/10"
     >
       <div class="flex items-center justify-between gap-2">
         <h3 class="flex items-center gap-2 font-semibold">
@@ -195,7 +195,7 @@ defmodule OctomoctoWeb.GamePageComponents do
         >
           <.icon
             name="hero-arrow-uturn-left"
-            class="size-3.5 transition group-hover:-translate-x-0.5"
+            class="size-3.5 transition group-hover:-translate-x-0.5 rtl:-scale-x-100 rtl:group-hover:translate-x-0.5"
           />
           {gettext("Back to the game")}
         </a>
@@ -217,7 +217,7 @@ defmodule OctomoctoWeb.GamePageComponents do
           <span class="text-xl font-semibold tabular-nums">{player.wins}</span>
         </li>
       </ul>
-      <p :if={@ties > 0} id="match-ties" class="mt-1 text-right text-sm text-base-content/60">
+      <p :if={@ties > 0} id="match-ties" class="mt-1 text-end text-sm text-base-content/60">
         {ngettext("%{count} tie", "%{count} ties", @ties)}
       </p>
       <p class="mt-2 text-xs text-base-content/50">

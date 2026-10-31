@@ -712,7 +712,7 @@ viewGame model me game =
                         [ a
                             [ id "memory-home"
                             , href "/"
-                            , class "mr-1 shrink-0 transition hover:-translate-y-0.5 active:translate-y-0 lg:mr-0"
+                            , class "me-1 shrink-0 transition hover:-translate-y-0.5 active:translate-y-0 lg:me-0"
                             ]
                             [ img [ src "/images/mark.svg", alt "octomocto", class "h-8 w-auto dark:hidden lg:h-9" ] []
                             , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block lg:h-9" ] []
@@ -1185,7 +1185,7 @@ viewTurnTimer model game =
             in
             if left < shownMs then
                 span
-                    [ class "absolute bottom-0 left-0 h-0.5 bg-current transition-[width] duration-200 ease-linear"
+                    [ class "absolute bottom-0 start-0 h-0.5 bg-current transition-[width] duration-200 ease-linear"
                     , style "width" (String.fromFloat (100 * toFloat (max 0 left) / shownMs) ++ "%")
                     , style "color" "var(--player-color)"
                     ]
@@ -1525,7 +1525,7 @@ viewResult model me game =
                             , span [ class "flex-1" ] [ text (playerName texts me player) ]
                             , viewBadges texts player
                             , span [ class "pl-6 font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
-                            , span [ class "w-10 text-right tabular-nums opacity-70", Html.Attributes.title (t texts "Accuracy") ] [ text (formatAccuracy player.accuracy) ]
+                            , span [ class "w-10 text-end tabular-nums opacity-70", Html.Attributes.title (t texts "Accuracy") ] [ text (formatAccuracy player.accuracy) ]
                             ]
                     )
                     ranked
@@ -1592,7 +1592,7 @@ viewResult model me game =
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:no-underline"
             ]
             [ text (tf texts "Or try {game}" [ ( "game", model.nextGame.name ) ] ++ " ")
-            , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
+            , span [ class "inline-block transition group-hover:translate-x-0.5 rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5" ] [ text "→" ]
             ]
 
         -- Only a guest who played gets the call to sign in, not a spectator

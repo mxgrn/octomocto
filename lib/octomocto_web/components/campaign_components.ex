@@ -145,8 +145,8 @@ defmodule OctomoctoWeb.CampaignComponents do
             "absolute",
             line.kind == :line && "h-0",
             line.kind == :turn && "w-8",
-            line.kind == :turn && line.side == :right && "left-full rounded-r-full border-l-0!",
-            line.kind == :turn && line.side == :left && "right-full rounded-l-full border-r-0!",
+            line.kind == :turn && line.side == :right && "start-full rounded-e-full border-s-0!",
+            line.kind == :turn && line.side == :left && "end-full rounded-s-full border-e-0!",
             if(line.done,
               do: "-mt-0.5 border-4 border-octo-indigo",
               else: "-mt-px border-2 border-dashed border-base-content/20"
@@ -155,7 +155,7 @@ defmodule OctomoctoWeb.CampaignComponents do
           ]}
           style={
             if(line.kind == :line,
-              do: "left: #{line.left}%; width: #{line.width}%; top: #{line.top}px",
+              do: "inset-inline-start: #{line.left}%; width: #{line.width}%; top: #{line.top}px",
               else: "top: #{line.top}px; height: #{@row_height}px"
             )
           }
@@ -169,7 +169,7 @@ defmodule OctomoctoWeb.CampaignComponents do
           label={@label.(level.level)}
           caption={@caption}
           badge={@badge}
-          style={"left: #{x}%; top: #{y}px"}
+          style={"inset-inline-start: #{x}%; top: #{y}px"}
         />
       </div>
     </div>
@@ -197,7 +197,7 @@ defmodule OctomoctoWeb.CampaignComponents do
       patch={@patch}
       aria-current={@selected && "true"}
       aria-label={@label}
-      class="group absolute flex w-20 -translate-x-1/2 -translate-y-8 flex-col items-center"
+      class="group absolute flex w-20 -translate-x-1/2 -translate-y-8 flex-col items-center rtl:translate-x-1/2"
       style={@style}
     >
       <span class="relative grid size-16 place-items-center transition group-hover:scale-105">
@@ -278,8 +278,8 @@ defmodule OctomoctoWeb.CampaignComponents do
       class={[
         "absolute grid size-4 place-items-center rounded-full bg-base-100 text-[10px] font-semibold ring-1",
         if(@locked,
-          do: "top-2 right-2 text-base-content/40 ring-base-content/15",
-          else: "top-0 right-0 text-octo-indigo ring-octo-indigo"
+          do: "top-2 end-2 text-base-content/40 ring-base-content/15",
+          else: "top-0 end-0 text-octo-indigo ring-octo-indigo"
         )
       ]}
     >

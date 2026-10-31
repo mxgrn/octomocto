@@ -23,7 +23,7 @@ defmodule OctomoctoWeb.SettingsComponents do
           {render_slot(@inner_block)}
         </div>
       </div>
-      <p :if={@hint} class="mt-1.5 text-left text-xs text-base-content/50">{@hint}</p>
+      <p :if={@hint} class="mt-1.5 text-start text-xs text-base-content/50">{@hint}</p>
     </div>
     """
   end
@@ -36,7 +36,7 @@ defmodule OctomoctoWeb.SettingsComponents do
   @doc "The header of a setting: an icon and the label, as in the results lists."
   def setting_header(assigns) do
     ~H"""
-    <h3 class="flex items-center gap-2 text-left font-semibold">
+    <h3 class="flex items-center gap-2 text-start font-semibold">
       <.icon name={@icon} class="size-4 text-octo-indigo" /> {@label}
       <%!-- In the brand orange, so that it stands out from the indigo --%>
       <span
@@ -150,7 +150,7 @@ defmodule OctomoctoWeb.SettingsComponents do
     ~H"""
     <span :for={{player, index} <- Enum.with_index(@players)}>{if index > 0, do: ", "}{result_name(
       player
-    )}<span :if={@scores} class="ml-1 tabular-nums text-base-content/60">{gettext("%{score} pts",
+    )}<span :if={@scores} class="ms-1 tabular-nums text-base-content/60">{gettext("%{score} pts",
       score: player.score
     )}</span><span
       :if={@accuracy}

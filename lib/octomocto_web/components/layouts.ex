@@ -83,7 +83,7 @@ defmodule OctomoctoWeb.Layouts do
           type="button"
           aria-label={gettext("Close")}
           phx-click={JS.hide(to: "#site-banner")}
-          class="absolute right-2 rounded-full p-1 text-white/70 transition hover:bg-white/10 hover:text-white"
+          class="absolute end-2 rounded-full p-1 text-white/70 transition hover:bg-white/10 hover:text-white"
         >
           <.icon name="hero-x-mark" class="size-4" />
         </button>
@@ -133,7 +133,7 @@ defmodule OctomoctoWeb.Layouts do
           aria-controls="site-menu"
           aria-expanded="false"
           phx-click={JS.toggle_attribute({"aria-expanded", "true", "false"})}
-          class="peer group ml-auto -mr-2 flex size-10 items-center justify-center rounded-full text-base-content/70 transition hover:bg-base-content/5 hover:text-base-content active:scale-90 lg:hidden"
+          class="peer group ms-auto -me-2 flex size-10 items-center justify-center rounded-full text-base-content/70 transition hover:bg-base-content/5 hover:text-base-content active:scale-90 lg:hidden"
         >
           <.icon name="hero-bars-3" class="size-6 group-aria-expanded:hidden" />
           <.icon name="hero-x-mark" class="hidden size-6 group-aria-expanded:block" />
@@ -159,9 +159,9 @@ defmodule OctomoctoWeb.Layouts do
           </div>
 
           <div class={[
-            "ml-auto flex items-center gap-4",
+            "ms-auto flex items-center gap-4",
             @header != [] &&
-              "max-lg:ml-0 max-lg:w-full max-lg:justify-between max-lg:border-t max-lg:border-base-content/10 max-lg:pt-4"
+              "max-lg:ms-0 max-lg:w-full max-lg:justify-between max-lg:border-t max-lg:border-base-content/10 max-lg:pt-4"
           ]}>
             <span :if={@header != []} class="text-sm text-base-content/70 lg:hidden">
               {gettext("Theme")}
@@ -358,7 +358,7 @@ defmodule OctomoctoWeb.Layouts do
           type="button"
           data-close-notification
           aria-label={gettext("Close")}
-          class="absolute right-2 rounded-full p-1 text-white/70 transition hover:bg-white/10 hover:text-white active:scale-90"
+          class="absolute end-2 rounded-full p-1 text-white/70 transition hover:bg-white/10 hover:text-white active:scale-90"
         >
           <.icon name="hero-x-mark" class="size-4" />
         </button>
@@ -493,7 +493,7 @@ defmodule OctomoctoWeb.Layouts do
       <%!-- pt-2 instead of a margin keeps the hover area unbroken between button and menu --%>
       <div
         id={"#{@id}-dropdown"}
-        class="invisible absolute right-0 z-30 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+        class="invisible absolute end-0 z-30 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
       >
         <div class="min-w-36 space-y-1 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg">
           <.theme_row :if={!@theme_last} />
@@ -536,7 +536,7 @@ defmodule OctomoctoWeb.Layouts do
       id="theme-toggle"
       class="relative flex items-center rounded-full bg-base-content/5 p-0.5 ring-1 ring-base-content/10"
     >
-      <div class="absolute top-0.5 left-0.5 size-7 rounded-full bg-base-100 shadow-sm ring-1 ring-base-content/10 transition-[left] duration-200 [[data-theme-mode=light]_&]:left-7.5 [[data-theme-mode=dark]_&]:left-14.5">
+      <div class="absolute top-0.5 start-0.5 size-7 rounded-full bg-base-100 shadow-sm ring-1 ring-base-content/10 transition-[inset-inline-start] duration-200 [[data-theme-mode=light]_&]:start-7.5 [[data-theme-mode=dark]_&]:start-14.5">
       </div>
 
       <button
@@ -595,7 +595,7 @@ defmodule OctomoctoWeb.Layouts do
         hidden
       >
         {gettext("Attempting to reconnect")}
-        <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
+        <.icon name="hero-arrow-path" class="ms-1 size-3 motion-safe:animate-spin" />
       </.flash>
 
       <.flash
@@ -610,7 +610,7 @@ defmodule OctomoctoWeb.Layouts do
         hidden
       >
         {gettext("Attempting to reconnect")}
-        <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
+        <.icon name="hero-arrow-path" class="ms-1 size-3 motion-safe:animate-spin" />
       </.flash>
     </div>
     """

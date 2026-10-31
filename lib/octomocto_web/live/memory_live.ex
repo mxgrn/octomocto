@@ -634,7 +634,7 @@ defmodule OctomoctoWeb.MemoryLive do
     ~H"""
     <div
       id="level-card"
-      class="sticky bottom-3 z-10 flex w-full flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl bg-base-100 p-5 text-left shadow-lg ring-1 ring-base-content/10"
+      class="sticky bottom-3 z-10 flex w-full flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl bg-base-100 p-5 text-start shadow-lg ring-1 ring-base-content/10"
     >
       <div
         class="grid shrink-0 gap-0.5"
@@ -685,13 +685,13 @@ defmodule OctomoctoWeb.MemoryLive do
                 <select
                   id="campaign-theme"
                   name="theme"
-                  class="cursor-pointer appearance-none rounded-full border-0 bg-base-200 py-1.5 pr-9 pl-4 text-sm font-medium text-base-content ring-1 ring-base-content/10 transition hover:ring-base-content/20 focus:ring-2 focus:ring-octo-indigo focus:outline-none"
+                  class="cursor-pointer appearance-none rounded-full border-0 bg-base-200 py-1.5 pe-9 ps-4 text-sm font-medium text-base-content ring-1 ring-base-content/10 transition hover:ring-base-content/20 focus:ring-2 focus:ring-octo-indigo focus:outline-none"
                 >
                   {Phoenix.HTML.Form.options_for_select(@theme_options, @theme_value)}
                 </select>
                 <.icon
                   name="hero-chevron-down-mini"
-                  class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-base-content/60"
+                  class="pointer-events-none absolute top-1/2 end-3 size-4 -translate-y-1/2 text-base-content/60"
                 />
               </span>
             </label>

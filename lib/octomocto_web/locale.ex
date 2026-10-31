@@ -26,7 +26,8 @@ defmodule OctomoctoWeb.Locale do
     "es" => "Español",
     "ja" => "日本語",
     "vi" => "Tiếng Việt",
-    "tr" => "Türkçe"
+    "tr" => "Türkçe",
+    "ar" => "العربية"
   }
 
   # The value of the `lang` and `hreflang` attributes. The Portuguese
@@ -43,8 +44,12 @@ defmodule OctomoctoWeb.Locale do
     "es" => "es",
     "ja" => "ja",
     "vi" => "vi",
-    "tr" => "tr"
+    "tr" => "tr",
+    "ar" => "ar"
   }
+
+  # The languages that are written from right to left
+  @rtl_locales ["ar"]
 
   # The games with translations, by language
   @games %{
@@ -58,7 +63,8 @@ defmodule OctomoctoWeb.Locale do
     "es" => ["memory"],
     "ja" => ["memory"],
     "vi" => ["memory"],
-    "tr" => ["memory"]
+    "tr" => ["memory"],
+    "ar" => ["memory"]
   }
 
   def init(locale), do: locale
@@ -75,6 +81,10 @@ defmodule OctomoctoWeb.Locale do
 
   @doc "The value of the `lang` attribute for the language of the process."
   def html_lang, do: Map.fetch!(@html_langs, Gettext.get_locale(OctomoctoWeb.Gettext))
+
+  @doc "The value of the `dir` attribute for the language of the process."
+  def html_dir,
+    do: if(Gettext.get_locale(OctomoctoWeb.Gettext) in @rtl_locales, do: "rtl", else: "ltr")
 
   @doc "The languages other than English."
   def other_locales, do: Map.keys(@names) -- ["en"]
@@ -132,7 +142,9 @@ defmodule OctomoctoWeb.Locale do
 
   @tr_months ~w(Oca Şub Mar Nis May Haz Tem Ağu Eyl Eki Kas Ara)
 
-  @doc "A short date in the language of the process, for example \"Oct 17\", \"17 de out.\", \"17. Okt.\", \"17 окт.\", \"17 oct.\", \"17 жовт.\", \"17 paź.\", \"17 ott.\", \"17 oct.\", \"10月17日\", \"17 thg 10\" or \"17 Eki\"."
+  @ar_months ~w(يناير فبراير مارس أبريل مايو يونيو يوليو أغسطس سبتمبر أكتوبر نوفمبر ديسمبر)
+
+  @doc "A short date in the language of the process, for example \"Oct 17\", \"17 de out.\", \"17. Okt.\", \"17 окт.\", \"17 oct.\", \"17 жовт.\", \"17 paź.\", \"17 ott.\", \"17 oct.\", \"10月17日\", \"17 thg 10\", \"17 Eki\" or \"17 أكتوبر\"."
   def short_date(date) do
     case Gettext.get_locale(OctomoctoWeb.Gettext) do
       "pt" ->
@@ -169,6 +181,9 @@ defmodule OctomoctoWeb.Locale do
 
       "tr" ->
         Calendar.strftime(date, "%-d %b", abbreviated_month_names: &Enum.at(@tr_months, &1 - 1))
+
+      "ar" ->
+        Calendar.strftime(date, "%-d %b", abbreviated_month_names: &Enum.at(@ar_months, &1 - 1))
 
       _ ->
         Calendar.strftime(date, "%b %-d")

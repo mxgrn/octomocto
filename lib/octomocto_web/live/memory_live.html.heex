@@ -22,7 +22,7 @@
   <div
     id="memory-index"
     class={[
-      "relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[1fr_1.4fr_1fr]",
+      "relative start-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 rtl:translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[1fr_1.4fr_1fr]",
       @live_action == :index &&
         "xl:h-[calc(100dvh-4rem)] xl:grid-rows-[auto_minmax(0,1fr)] xl:pb-6"
     ]}
@@ -126,7 +126,7 @@
           empty_text={dgettext("memory", "Nobody has finished a level yet.")}
         >
           <.result_row :for={{row, place} <- Enum.with_index(@campaign.leaderboard, 1)}>
-            <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+            <span class="w-4 shrink-0 text-end tabular-nums text-base-content/40">{place}</span>
             <span class="min-w-0 flex-1 truncate font-medium">{player_name(row.user)}</span>
             <.result_pill best={@current_scope != nil and row.user_id == @current_scope.user.id}>
               {dgettext("memory", "Level %{level}", level: row.level)}
@@ -228,8 +228,8 @@
                   )
                 ]}>
                   <span class={[
-                    "absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out group-active:scale-90",
-                    @settings.theme == "random" && "translate-x-4"
+                    "absolute top-0.5 start-0.5 size-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out group-active:scale-90",
+                    @settings.theme == "random" && "translate-x-4 rtl:-translate-x-4"
                   ]} />
                 </span>
               </.link>
@@ -237,7 +237,7 @@
             <p
               :if={@settings.theme == "random"}
               id="theme-random-hint"
-              class="mt-1.5 text-left text-xs text-base-content/50"
+              class="mt-1.5 text-start text-xs text-base-content/50"
             >
               {dgettext("memory", "A new theme for each game.")}
             </p>
@@ -260,7 +260,7 @@
                   <span
                     :if={theme[:new]}
                     id={"theme-#{theme.name}-new"}
-                    class="absolute -top-1.5 -right-1.5 z-10 rounded-full bg-octo-indigo px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white shadow-sm"
+                    class="absolute -top-1.5 -end-1.5 z-10 rounded-full bg-octo-indigo px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white shadow-sm"
                   >
                     New
                   </span>
@@ -437,7 +437,7 @@
               </span>
               <span
                 :if={@settings.players == 1}
-                class="w-12 text-right tabular-nums text-base-content/60"
+                class="w-12 text-end tabular-nums text-base-content/60"
                 title={dgettext("memory", "Accuracy")}
               >
                 {format_accuracy(result)}
@@ -481,10 +481,10 @@
             </span>
           </:aside>
           <.result_row :for={{result, place} <- Enum.with_index(@best_results, 1)}>
-            <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+            <span class="w-4 shrink-0 text-end tabular-nums text-base-content/40">{place}</span>
             <span class="min-w-0 flex-1 truncate font-medium">{player_name(result.user)}</span>
             <span
-              class="w-12 text-right tabular-nums text-base-content/60"
+              class="w-12 text-end tabular-nums text-base-content/60"
               title={dgettext("memory", "Accuracy")}
             >
               {format_accuracy(result)}
