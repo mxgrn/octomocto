@@ -8,18 +8,24 @@
 >
   <%!--
     Wider than the app container, so that the columns have room. One column
-    on a small screen: the title, the public games, the settings and the
-    results. Two columns on a large screen: the results go to the right.
-    Three columns on an extra large screen: the public games go to the left,
-    and the settings in the center are wider than the other columns. The
-    columns use the full width of the screen, with the side padding of the
-    header.
+    on a small screen: the title, the tab and the results. Two columns on a
+    large screen: the results go to the right. Three columns on an extra
+    large screen: the tab in the center is wider than the other columns, and
+    the left column is empty, so that the tabs stay in place. The columns
+    use the full width of the screen, with the side padding of the header.
     The last row takes the free height, so that the tall results column does
     not make gaps between the rows on the left.
+    In free play on an extra large screen, the columns fill the height of the
+    window below the 4rem header. Only the settings scroll, and the results
+    hide the rows that do not fit.
   --%>
   <div
     id="memory-index"
-    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[1fr_1.4fr_1fr] xl:grid-rows-[auto_1fr]"
+    class={[
+      "relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[1fr_1.4fr_1fr]",
+      @live_action == :index &&
+        "xl:h-[calc(100dvh-4rem)] xl:grid-rows-[auto_minmax(0,1fr)] xl:pb-6"
+    ]}
   >
     <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 xl:max-w-none">
       <div class="flex items-center justify-center gap-3">
@@ -34,6 +40,8 @@
             {dgettext("memory", "Choose the settings of the next game.")}
           <% @live_action == :campaign -> %>
             {dgettext("memory", "Get 100% accuracy to unlock the next level.")}
+          <% @live_action == :lobby -> %>
+            {dgettext("memory", "Join a game, or watch one.")}
           <% true -> %>
             {dgettext("memory", "Choose the settings and start a new game.")}
         <% end %>
@@ -41,12 +49,14 @@
       <.how_to_play />
       <div :if={!@match} class="pt-2">
         <.mode_tabs
-          tab={if(@live_action == :campaign, do: :campaign, else: :free)}
+          tab={if(@live_action == :index, do: :free, else: @live_action)}
           free_path={settings_path(@locale, @settings, [])}
           campaign_path={Locale.path(@locale, ~p"/memory/campaign")}
+          lobby_path={Locale.path(@locale, ~p"/memory/lobby")}
           free_label={dgettext("memory", "Free play")}
           campaign_label={dgettext("memory", "Campaign")}
-          new_label="New"
+          lobby_label={dgettext("memory", "Lobby")}
+          lobby_count={Enum.count(@lobby_games, &(&1.status == :open))}
         />
       </div>
     </div>
@@ -54,7 +64,7 @@
     <%= if @live_action == :campaign do %>
       <div
         id="campaign"
-        class="relative mx-auto flex w-full max-w-md flex-col gap-4 lg:col-start-1 lg:row-span-2 lg:row-start-2 xl:col-start-2 xl:row-start-2 xl:max-w-none"
+        class="relative mx-auto flex w-full max-w-md flex-col gap-4 lg:col-start-1 lg:row-start-2 xl:col-start-2 xl:max-w-none"
       >
         <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
           <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -105,7 +115,7 @@
 
       <div
         id="campaign-results"
-        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
+        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 xl:col-start-3 xl:max-w-none"
       >
         <.score_list
           id="campaign-leaderboard"
@@ -125,17 +135,16 @@
         </.score_list>
       </div>
     <% else %>
-      <%!-- A match plays on with the same players, so it needs no other games --%>
       <div
-        :if={!@match}
+        :if={@live_action == :lobby}
         id="memory-lobby"
-        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
+        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:col-start-2 xl:max-w-none"
       >
         <.lobby_games
           games={@lobby_games}
           watchers={@watchers}
-          matches={&same_settings?(&1, @settings)}
           path={&Locale.path(@locale, ~p"/memory/#{&1.id}")}
+          new_game_path={settings_path(@locale, @settings, [])}
         >
           <:icon :let={game}>
             <img
@@ -148,7 +157,11 @@
         </.lobby_games>
       </div>
 
-      <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
+      <%!-- The padding keeps the rings of the boxes and the wide start bar in the scroll box --%>
+      <div
+        :if={@live_action == :index}
+        class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-2 xl:static xl:col-start-2 xl:-mx-2 xl:w-[calc(100%+1rem)] xl:max-w-none xl:self-stretch xl:overflow-y-auto xl:px-2 xl:pt-1"
+      >
         <div id="memory-settings" class="flex w-full flex-col gap-4">
           <.match_score
             :if={@match}
@@ -167,7 +180,8 @@
                   dgettext(
                     "memory",
                     "The players take turns. The game starts when all players are in."
-                  )
+                  ),
+                else: dgettext("memory", "Clear the board as fast as you can.")
               )
             }
           >
@@ -181,38 +195,54 @@
             </.option>
           </.setting>
           <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
-            <.setting_header label={dgettext("memory", "Theme")} icon="hero-swatch" />
-            <div class="memory-themes-box">
+            <%!--
+              Random is a switch next to the header, out of the grid, so that
+              it does not look like a theme. The game picks the theme when it
+              starts, and again for each new field. When the switch is on, the
+              themes are hidden. Off, it goes back to the last chosen theme.
+            --%>
+            <div class="flex items-center justify-between gap-2">
+              <.setting_header label={dgettext("memory", "Theme")} icon="hero-swatch" />
+              <.link
+                id="theme-random"
+                patch={
+                  settings_path(@locale, @settings,
+                    theme: if(@settings.theme == "random", do: @last_theme, else: "random")
+                  )
+                }
+                role="switch"
+                aria-checked={to_string(@settings.theme == "random")}
+                class="group flex items-center gap-2 text-sm font-medium text-base-content/70 transition hover:text-base-content"
+              >
+                <img
+                  src={~p"/images/memory/random.svg"}
+                  alt=""
+                  class="size-6 transition duration-300 group-hover:scale-110 group-hover:-rotate-12"
+                />
+                {dgettext("memory", "Random")}
+                <span class={[
+                  "relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200",
+                  if(@settings.theme == "random",
+                    do: "bg-octo-indigo",
+                    else: "bg-base-content/20 group-hover:bg-base-content/30"
+                  )
+                ]}>
+                  <span class={[
+                    "absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out group-active:scale-90",
+                    @settings.theme == "random" && "translate-x-4"
+                  ]} />
+                </span>
+              </.link>
+            </div>
+            <p
+              :if={@settings.theme == "random"}
+              id="theme-random-hint"
+              class="mt-1.5 text-left text-xs text-base-content/50"
+            >
+              {dgettext("memory", "A new theme for each game.")}
+            </p>
+            <div :if={@settings.theme != "random"} class="memory-themes-box">
               <div id="memory-themes" class="memory-themes grid grid-cols-4 gap-3 xl:grid-cols-6">
-                <%!-- The game picks the theme when it starts, and again for each new field --%>
-                <.link
-                  id="theme-random"
-                  patch={settings_path(@locale, @settings, theme: "random")}
-                  aria-current={@settings.theme == "random" && "true"}
-                  class={[
-                    "group relative flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
-                    if(@settings.theme == "random",
-                      do: "bg-octo-mist ring-2 ring-octo-indigo dark:bg-octo-indigo-light/10",
-                      else:
-                        "outline-1 -outline-offset-1 outline-dashed outline-base-content/20 hover:bg-base-200 hover:outline-base-content/35"
-                    )
-                  ]}
-                >
-                  <span
-                    id="theme-random-new"
-                    class="absolute -top-1.5 -right-1.5 z-10 rounded-full bg-octo-orange px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white shadow-sm"
-                  >
-                    New
-                  </span>
-                  <img
-                    src={~p"/images/memory/random.svg"}
-                    alt=""
-                    class="aspect-square w-full p-1 transition duration-300 group-hover:scale-105 group-hover:-rotate-6"
-                  />
-                  <span class="w-full truncate text-xs text-base-content/70">
-                    {dgettext("memory", "Random")}
-                  </span>
-                </.link>
                 <.link
                   :for={theme <- @themes}
                   id={"theme-#{theme.name}"}
@@ -321,7 +351,7 @@
             hint={
               cond do
                 @settings.bombs == 0 ->
-                  nil
+                  dgettext("memory", "Add bombs to make the game harder.")
 
                 Game.demining?() ->
                   dgettext(
@@ -370,7 +400,11 @@
 
       <div
         id="memory-leaderboard"
-        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
+        class={[
+          "mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 xl:col-start-3 xl:max-w-none",
+          @live_action == :index &&
+            "xl:-mt-1 xl:content-start xl:self-stretch xl:overflow-y-clip xl:pt-1"
+        ]}
       >
         <.score_list
           id="your-results"

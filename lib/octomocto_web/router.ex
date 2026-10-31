@@ -83,6 +83,7 @@ defmodule OctomoctoWeb.Router do
       live "/schulte", SchulteLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
+      live "/memory/lobby", MemoryLive, :lobby
       live "/set", SetGameLive
       live "/sudoku", SudokuLive
       live "/echo", EchoLive
@@ -111,6 +112,7 @@ defmodule OctomoctoWeb.Router do
       ] do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
+      live "/memory/lobby", MemoryLive, :lobby
     end
 
     # After the live routes, so that "campaign" is not a game id
@@ -131,6 +133,7 @@ defmodule OctomoctoWeb.Router do
       ] do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
+      live "/memory/lobby", MemoryLive, :lobby
     end
 
     # After the live routes, so that "campaign" is not a game id
@@ -151,6 +154,7 @@ defmodule OctomoctoWeb.Router do
       ] do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
+      live "/memory/lobby", MemoryLive, :lobby
     end
 
     # After the live routes, so that "campaign" is not a game id
@@ -171,6 +175,7 @@ defmodule OctomoctoWeb.Router do
       ] do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
+      live "/memory/lobby", MemoryLive, :lobby
     end
 
     # After the live routes, so that "campaign" is not a game id
@@ -191,6 +196,7 @@ defmodule OctomoctoWeb.Router do
       ] do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
+      live "/memory/lobby", MemoryLive, :lobby
     end
 
     # After the live routes, so that "campaign" is not a game id
@@ -211,6 +217,7 @@ defmodule OctomoctoWeb.Router do
       ] do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
+      live "/memory/lobby", MemoryLive, :lobby
     end
 
     # After the live routes, so that "campaign" is not a game id
@@ -231,6 +238,7 @@ defmodule OctomoctoWeb.Router do
       ] do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
+      live "/memory/lobby", MemoryLive, :lobby
     end
 
     # After the live routes, so that "campaign" is not a game id
@@ -251,6 +259,7 @@ defmodule OctomoctoWeb.Router do
       ] do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
+      live "/memory/lobby", MemoryLive, :lobby
     end
 
     # After the live routes, so that "campaign" is not a game id

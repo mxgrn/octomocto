@@ -20,6 +20,10 @@ defmodule OctomoctoWeb.GamePageComponents do
 
   attr :path, :any, required: true, doc: "a function that gives the path of a game"
 
+  attr :new_game_path, :string,
+    default: nil,
+    doc: "the path of the settings of a new game, when they are on another tab"
+
   attr :watchers, :map,
     default: %{},
     doc: "the number of watchers of each game by its id, see `Octomocto.Lobby.watchers/1`"
@@ -58,7 +62,18 @@ defmodule OctomoctoWeb.GamePageComponents do
         id="lobby-games-empty"
         class="py-2 text-center text-sm text-base-content/50"
       >
-        {gettext("No games now. Make a public one.")}
+        {gettext("No games now.")}
+        <%= if @new_game_path do %>
+          <.link
+            id="lobby-games-new"
+            patch={@new_game_path}
+            class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline dark:text-octo-indigo-light"
+          >
+            {gettext("Make a public one.")}
+          </.link>
+        <% else %>
+          {gettext("Make a public one.")}
+        <% end %>
       </p>
       <ul :if={@games != []} id="lobby-games-list" class="-mx-2 space-y-1">
         <li

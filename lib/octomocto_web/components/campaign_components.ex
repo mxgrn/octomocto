@@ -9,14 +9,20 @@ defmodule OctomoctoWeb.CampaignComponents do
 
   import OctomoctoWeb.SettingsComponents, only: [option: 1]
 
-  attr :tab, :atom, required: true, doc: ":free or :campaign"
+  attr :tab, :atom, required: true, doc: ":free, :campaign or :lobby"
   attr :free_path, :string, required: true
   attr :campaign_path, :string, required: true
   attr :free_label, :string, required: true
   attr :campaign_label, :string, required: true
-  attr :new_label, :string, required: true, doc: "the text of the badge on the Campaign tab"
+  attr :lobby_path, :string, default: nil, doc: "the path of the Lobby tab, or nil for no tab"
+  attr :lobby_label, :string, default: nil
+  attr :lobby_count, :integer, default: 0, doc: "the number of games that a player can join"
 
-  @doc "The Free play and Campaign tabs, as the options of a setting."
+  @doc """
+  The Free play and Campaign tabs, and an optional Lobby tab, as the
+  options of a setting. The Lobby tab shows the number of games that a
+  player can join, when there are some.
+  """
   def mode_tabs(assigns) do
     ~H"""
     <nav id="campaign-tabs" class="flex justify-center">
@@ -24,18 +30,27 @@ defmodule OctomoctoWeb.CampaignComponents do
         <.option id="tab-free" patch={@free_path} selected={@tab == :free}>
           {@free_label}
         </.option>
-        <%!-- In the brand orange, so that it stands out from the indigo of the selected tab --%>
-        <span class="relative">
-          <.option id="tab-campaign" patch={@campaign_path} selected={@tab == :campaign}>
-            {@campaign_label}
-          </.option>
-          <span
-            id="tab-campaign-new"
-            class="pointer-events-none absolute -top-2.5 -right-2.5 z-10 rounded-full bg-octo-orange px-1.5 py-0.5 text-[10px] leading-none font-semibold tracking-wide text-white uppercase shadow-sm"
-          >
-            {@new_label}
+        <.option id="tab-campaign" patch={@campaign_path} selected={@tab == :campaign}>
+          {@campaign_label}
+        </.option>
+        <.option :if={@lobby_path} id="tab-lobby" patch={@lobby_path} selected={@tab == :lobby}>
+          <span class="flex items-center gap-1.5">
+            {@lobby_label}
+            <span
+              :if={@lobby_count > 0}
+              id="tab-lobby-count"
+              class={[
+                "min-w-5 rounded-full px-1.5 text-xs leading-5 font-semibold tabular-nums transition-colors",
+                if(@tab == :lobby,
+                  do: "bg-white/25 text-white",
+                  else: "bg-octo-indigo text-white"
+                )
+              ]}
+            >
+              {@lobby_count}
+            </span>
           </span>
-        </span>
+        </.option>
       </div>
     </nav>
     """

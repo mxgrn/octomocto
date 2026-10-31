@@ -11,7 +11,7 @@ msgstr ""
 "Language: es\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: lib/octomocto_web/components/game_page_components.ex:99
+#: lib/octomocto_web/components/game_page_components.ex:114
 #, elixir-autogen, elixir-format
 msgid "%{joined} of %{needed}"
 msgstr "%{joined} de %{needed}"
@@ -26,36 +26,36 @@ msgstr "%{score} pts"
 msgid "Actions"
 msgstr "Acciones"
 
-#: lib/octomocto_web/components/layouts.ex:593
-#: lib/octomocto_web/components/layouts.ex:608
+#: lib/octomocto_web/components/layouts.ex:597
+#: lib/octomocto_web/components/layouts.ex:612
 #, elixir-autogen, elixir-format
 msgid "Attempting to reconnect"
 msgstr "Intentando reconectar"
 
-#: lib/octomocto_web/components/layouts.ex:453
+#: lib/octomocto_web/components/layouts.ex:457
 #: lib/octomocto_web/components/layouts/root.html.heex:32
 #, elixir-autogen, elixir-format
 msgid "Brain Games to Play Solo or with Friends"
 msgstr "Juegos de ingenio para jugar solo o con amigos"
 
-#: lib/octomocto_web/components/game_page_components.ex:309
+#: lib/octomocto_web/components/game_page_components.ex:324
 #: lib/octomocto_web/components/layouts.ex:84
-#: lib/octomocto_web/components/layouts.ex:356
+#: lib/octomocto_web/components/layouts.ex:360
 #, elixir-autogen, elixir-format
 msgid "Close"
 msgstr "Cerrar"
 
-#: lib/octomocto_web/components/layouts.ex:545
+#: lib/octomocto_web/components/layouts.ex:549
 #, elixir-autogen, elixir-format
 msgid "Dark theme"
 msgstr "Tema oscuro"
 
-#: lib/octomocto_web/controllers/user_session_html.ex:122
+#: lib/octomocto_web/controllers/user_session_html.ex:127
 #, elixir-autogen, elixir-format
 msgid "Email"
 msgstr "Correo electrónico"
 
-#: lib/octomocto_web/controllers/user_session_html.ex:107
+#: lib/octomocto_web/controllers/user_session_html.ex:111
 #, elixir-autogen, elixir-format
 msgid "Email me a sign-in link"
 msgstr "Envíame un enlace para iniciar sesión"
@@ -65,7 +65,7 @@ msgstr "Envíame un enlace para iniciar sesión"
 msgid "Feed Octo & Mocto"
 msgstr "Alimenta a Octo y Mocto"
 
-#: lib/octomocto_web/components/game_page_components.ex:120
+#: lib/octomocto_web/components/game_page_components.ex:135
 #, elixir-autogen, elixir-format
 msgid "Finished"
 msgstr "Terminada"
@@ -76,13 +76,13 @@ msgstr "Terminada"
 msgid "Guest"
 msgstr "Invitado"
 
-#: lib/octomocto_web/components/game_page_components.ex:274
-#: lib/octomocto_web/components/game_page_components.ex:304
+#: lib/octomocto_web/components/game_page_components.ex:289
+#: lib/octomocto_web/components/game_page_components.ex:319
 #, elixir-autogen, elixir-format
 msgid "How to play"
 msgstr "Cómo jugar"
 
-#: lib/octomocto_web/components/game_page_components.ex:112
+#: lib/octomocto_web/components/game_page_components.ex:127
 #, elixir-autogen, elixir-format
 msgid "Join"
 msgstr "Entrar"
@@ -92,42 +92,37 @@ msgstr "Entrar"
 msgid "Language"
 msgstr "Idioma"
 
-#: lib/octomocto_web/components/layouts.ex:543
+#: lib/octomocto_web/components/layouts.ex:547
 #, elixir-autogen, elixir-format
 msgid "Light theme"
 msgstr "Tema claro"
-
-#: lib/octomocto_web/components/game_page_components.ex:61
-#, elixir-autogen, elixir-format
-msgid "No games now. Make a public one."
-msgstr "No hay partidas ahora. Crea una pública."
 
 #: lib/octomocto_web/components/settings_components.ex:101
 #, elixir-autogen, elixir-format
 msgid "No games yet — be the first."
 msgstr "Todavía no hay partidas — empieza la primera."
 
-#: lib/octomocto_web/components/layouts.ex:439
+#: lib/octomocto_web/components/layouts.ex:443
 #, elixir-autogen, elixir-format
 msgid "Octomocto: Use your heads. Play solo or with friends."
 msgstr "Octomocto: Usen la cabeza. Juega solo o con amigos."
 
-#: lib/octomocto_web/components/game_page_components.ex:343
+#: lib/octomocto_web/components/game_page_components.ex:358
 #, elixir-autogen, elixir-format
 msgid "Only players with the link can join."
 msgstr "Solo los jugadores con el enlace pueden entrar."
 
-#: lib/octomocto_web/components/game_page_components.ex:338
+#: lib/octomocto_web/components/game_page_components.ex:353
 #, elixir-autogen, elixir-format
 msgid "Only players with the link can watch."
 msgstr "Solo los jugadores con el enlace pueden verla."
 
-#: lib/octomocto_web/components/game_page_components.ex:335
+#: lib/octomocto_web/components/game_page_components.ex:350
 #, elixir-autogen, elixir-format
 msgid "Other players can watch this game in Ongoing games."
 msgstr "Otros jugadores pueden ver esta partida en Partidas en curso."
 
-#: lib/octomocto_web/components/game_page_components.ex:341
+#: lib/octomocto_web/components/game_page_components.ex:356
 #, elixir-autogen, elixir-format
 msgid "Other players see this game in Ongoing games."
 msgstr "Otros jugadores ven esta partida en Partidas en curso."
@@ -137,17 +132,17 @@ msgstr "Otros jugadores ven esta partida en Partidas en curso."
 msgid "Privacy Policy"
 msgstr "Política de privacidad"
 
-#: lib/octomocto_web/components/game_page_components.ex:50
+#: lib/octomocto_web/components/game_page_components.ex:54
 #, elixir-autogen, elixir-format
 msgid "Ongoing games"
 msgstr "Partidas en curso"
 
-#: lib/octomocto_web/components/layouts.ex:447
+#: lib/octomocto_web/components/layouts.ex:451
 #, elixir-autogen, elixir-format
 msgid "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
 msgstr "Juegos de ingenio rápidos para memoria, lógica y velocidad. Juega solo o enfréntate a tus amigos."
 
-#: lib/octomocto_web/controllers/user_session_html.ex:130
+#: lib/octomocto_web/controllers/user_session_html.ex:135
 #, elixir-autogen, elixir-format
 msgid "Send"
 msgstr "Enviar"
@@ -162,22 +157,22 @@ msgstr "Configuración"
 msgid "Sign out"
 msgstr "Cerrar sesión"
 
-#: lib/octomocto_web/components/layouts.ex:600
+#: lib/octomocto_web/components/layouts.ex:604
 #, elixir-autogen, elixir-format
 msgid "Something went wrong!"
 msgstr "¡Algo salió mal!"
 
-#: lib/octomocto_web/components/game_page_components.ex:252
+#: lib/octomocto_web/components/game_page_components.ex:267
 #, elixir-autogen, elixir-format
 msgid "Start game"
 msgstr "Empezar partida"
 
-#: lib/octomocto_web/components/game_page_components.ex:239
+#: lib/octomocto_web/components/game_page_components.ex:254
 #, elixir-autogen, elixir-format
 msgid "Starting..."
 msgstr "Empezando..."
 
-#: lib/octomocto_web/components/layouts.ex:541
+#: lib/octomocto_web/components/layouts.ex:545
 #, elixir-autogen, elixir-format
 msgid "System theme"
 msgstr "Tema del sistema"
@@ -188,7 +183,7 @@ msgid "Terms of Service"
 msgstr "Términos del servicio"
 
 #: lib/octomocto_web/components/layouts.ex:167
-#: lib/octomocto_web/components/layouts.ex:509
+#: lib/octomocto_web/components/layouts.ex:513
 #, elixir-autogen, elixir-format
 msgid "Theme"
 msgstr "Tema"
@@ -203,22 +198,22 @@ msgstr "Esta partida no existe (o ya no existe). Empieza una nueva."
 msgid "Use your heads"
 msgstr "Usen la cabeza"
 
-#: lib/octomocto_web/components/game_page_components.ex:131
+#: lib/octomocto_web/components/game_page_components.ex:146
 #, elixir-autogen, elixir-format
 msgid "Watch"
 msgstr "Ver"
 
-#: lib/octomocto_web/components/layouts.ex:585
+#: lib/octomocto_web/components/layouts.ex:589
 #, elixir-autogen, elixir-format
 msgid "We can't find the internet"
 msgstr "Sin conexión a internet"
 
-#: lib/octomocto_web/components/game_page_components.ex:256
+#: lib/octomocto_web/components/game_page_components.ex:271
 #, elixir-autogen, elixir-format
 msgid "You get a link to share with other players."
 msgstr "Recibes un enlace para compartir con los demás jugadores."
 
-#: lib/octomocto_web/components/game_page_components.ex:360
+#: lib/octomocto_web/components/game_page_components.ex:375
 #, elixir-autogen, elixir-format
 msgid "amber"
 msgstr "Ámbar"
@@ -228,47 +223,47 @@ msgstr "Ámbar"
 msgid "close"
 msgstr "cerrar"
 
-#: lib/octomocto_web/components/game_page_components.ex:364
+#: lib/octomocto_web/components/game_page_components.ex:379
 #, elixir-autogen, elixir-format
 msgid "indigo"
 msgstr "Índigo"
 
-#: lib/octomocto_web/components/game_page_components.ex:359
+#: lib/octomocto_web/components/game_page_components.ex:374
 #, elixir-autogen, elixir-format
 msgid "lime"
 msgstr "Lima"
 
-#: lib/octomocto_web/controllers/user_session_html.ex:94
+#: lib/octomocto_web/controllers/user_session_html.ex:98
 #, elixir-autogen, elixir-format
 msgid "or"
 msgstr "o"
 
-#: lib/octomocto_web/components/game_page_components.ex:357
+#: lib/octomocto_web/components/game_page_components.ex:372
 #, elixir-autogen, elixir-format
 msgid "pink"
 msgstr "Rosa"
 
-#: lib/octomocto_web/components/game_page_components.ex:362
+#: lib/octomocto_web/components/game_page_components.ex:377
 #, elixir-autogen, elixir-format
 msgid "red"
 msgstr "Rojo"
 
-#: lib/octomocto_web/components/game_page_components.ex:358
+#: lib/octomocto_web/components/game_page_components.ex:373
 #, elixir-autogen, elixir-format
 msgid "sky"
 msgstr "Cielo"
 
-#: lib/octomocto_web/components/game_page_components.ex:363
+#: lib/octomocto_web/components/game_page_components.ex:378
 #, elixir-autogen, elixir-format
 msgid "teal"
 msgstr "Turquesa"
 
-#: lib/octomocto_web/components/game_page_components.ex:361
+#: lib/octomocto_web/components/game_page_components.ex:376
 #, elixir-autogen, elixir-format
 msgid "violet"
 msgstr "Violeta"
 
-#: lib/octomocto_web/controllers/user_session_html.ex:119
+#: lib/octomocto_web/controllers/user_session_html.ex:124
 #, elixir-autogen, elixir-format
 msgid "you@example.com"
 msgstr "tu@ejemplo.com"
@@ -278,12 +273,12 @@ msgstr "tu@ejemplo.com"
 msgid "Menu"
 msgstr "Menú"
 
-#: lib/octomocto_web/components/game_page_components.ex:250
+#: lib/octomocto_web/components/game_page_components.ex:265
 #, elixir-autogen, elixir-format
 msgid "Create game"
 msgstr "Crear partida"
 
-#: lib/octomocto_web/components/game_page_components.ex:239
+#: lib/octomocto_web/components/game_page_components.ex:254
 #, elixir-autogen, elixir-format
 msgid "Creating..."
 msgstr "Creando..."
@@ -298,39 +293,50 @@ msgstr "Sugerir un juego"
 msgid "Sign in to change your name"
 msgstr "Inicia sesión para cambiar tu nombre"
 
-#: lib/octomocto_web/components/game_page_components.ex:206
+#: lib/octomocto_web/components/game_page_components.ex:221
 #, elixir-autogen, elixir-format
 msgid "%{count} tie"
 msgid_plural "%{count} ties"
 msgstr[0] "%{count} empate"
 msgstr[1] "%{count} empates"
 
-#: lib/octomocto_web/components/game_page_components.ex:185
+#: lib/octomocto_web/components/game_page_components.ex:200
 #, elixir-autogen, elixir-format
 msgid "Back to the game"
 msgstr "Volver a la partida"
 
-#: lib/octomocto_web/components/game_page_components.ex:174
+#: lib/octomocto_web/components/game_page_components.ex:189
 #, elixir-autogen, elixir-format
 msgid "Match"
 msgstr "Marcador"
 
-#: lib/octomocto_web/components/game_page_components.ex:248
+#: lib/octomocto_web/components/game_page_components.ex:263
 #, elixir-autogen, elixir-format
 msgid "Start next game"
 msgstr "Empezar la siguiente partida"
 
-#: lib/octomocto_web/components/game_page_components.ex:209
+#: lib/octomocto_web/components/game_page_components.ex:224
 #, elixir-autogen, elixir-format
 msgid "The other players wait until you start the next game."
 msgstr "Los demás jugadores esperan a que empieces la siguiente partida."
 
-#: lib/octomocto_web/components/game_page_components.ex:189
+#: lib/octomocto_web/components/game_page_components.ex:204
 #, elixir-autogen, elixir-format
 msgid "Wins"
 msgstr "Victorias"
 
-#: lib/octomocto_web/components/game_page_components.ex:200
+#: lib/octomocto_web/components/game_page_components.ex:215
 #, elixir-autogen, elixir-format
 msgid "you"
 msgstr "tú"
+
+#: lib/octomocto_web/components/game_page_components.ex:72
+#: lib/octomocto_web/components/game_page_components.ex:75
+#, elixir-autogen, elixir-format
+msgid "Make a public one."
+msgstr "Crea una pública."
+
+#: lib/octomocto_web/components/game_page_components.ex:65
+#, elixir-autogen, elixir-format
+msgid "No games now."
+msgstr "No hay partidas ahora."

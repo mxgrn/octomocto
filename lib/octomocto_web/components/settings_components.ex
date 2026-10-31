@@ -38,7 +38,7 @@ defmodule OctomoctoWeb.SettingsComponents do
     ~H"""
     <h3 class="flex items-center gap-2 text-left font-semibold">
       <.icon name={@icon} class="size-4 text-octo-indigo" /> {@label}
-      <%!-- In the brand orange, as on the Campaign tab --%>
+      <%!-- In the brand orange, so that it stands out from the indigo --%>
       <span
         :if={@badge}
         id={@badge_id}

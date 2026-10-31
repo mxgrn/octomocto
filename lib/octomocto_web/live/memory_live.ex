@@ -89,18 +89,35 @@ defmodule OctomoctoWeb.MemoryLive do
      |> assign_campaign(params)}
   end
 
+  # The public games, and the results of the default settings
+  def handle_params(_params, _uri, %{assigns: %{live_action: :lobby}} = socket) do
+    locale = socket.assigns.locale
+
+    {:noreply,
+     socket
+     |> remember_tab("lobby")
+     |> assign_free_play(%{})
+     |> assign(
+       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/memory/lobby"),
+       alternate_urls: Locale.alternate_urls("memory", ~p"/memory/lobby"),
+       languages: Locale.languages("memory", locale, ~p"/memory/lobby")
+     )}
+  end
+
   def handle_params(params, _uri, socket) do
     %{current_scope: scope, locale: locale} = socket.assigns
 
-    if campaign_tab?(scope) and not Enum.any?(@settings_params, &Map.has_key?(params, &1)) do
-      {:noreply, push_patch(socket, to: Locale.path(locale, ~p"/memory/campaign"))}
+    tab = last_tab(scope)
+
+    if tab in ["campaign", "lobby"] and not Enum.any?(@settings_params, &Map.has_key?(params, &1)) do
+      {:noreply, push_patch(socket, to: Locale.path(locale, ~p"/memory/#{tab}"))}
     else
       {:noreply, socket |> remember_tab("free") |> assign_free_play(params)}
     end
   end
 
-  defp campaign_tab?(%{user: %{memory_tab: "campaign"}}), do: true
-  defp campaign_tab?(_scope), do: false
+  defp last_tab(%{user: %{memory_tab: tab}}), do: tab
+  defp last_tab(_scope), do: nil
 
   # Saves the tab for a signed-in user, once the page is connected
   defp remember_tab(%{assigns: %{current_scope: %{user: user} = scope}} = socket, tab) do
@@ -120,8 +137,18 @@ defmodule OctomoctoWeb.MemoryLive do
     # The results of the fields with bombs have them in the settings
     filter = if settings.bombs > 0, do: Map.put(filter, "bombs", settings.bombs), else: filter
 
+    # The theme that the Random switch turns back to: the last chosen one,
+    # else the first one
+    last_theme =
+      cond do
+        settings.theme != "random" -> settings.theme
+        last = socket.assigns[:last_theme] -> last
+        true -> hd(socket.assigns.themes).name
+      end
+
     assign(socket,
       settings: settings,
+      last_theme: last_theme,
       canonical_url:
         OctomoctoWeb.Endpoint.url() <> Locale.path(socket.assigns.locale, ~p"/memory"),
       alternate_urls: Locale.alternate_urls("memory", ~p"/memory"),
@@ -498,16 +525,6 @@ defmodule OctomoctoWeb.MemoryLive do
   # field gets a random theme
   defp theme_choice(%{random_theme: true}), do: "random"
   defp theme_choice(state), do: state.theme
-
-  # True when the open game has the same settings as the new game. The
-  # theme "random" matches all themes.
-  defp same_settings?(game, settings) do
-    theme = if settings.theme == "random", do: game.settings.theme, else: settings.theme
-
-    {game.settings, game.players_needed} ==
-      {%{theme: theme, set: settings.set, cards: settings.cards, bombs: settings.bombs},
-       settings.players}
-  end
 
   @doc """
   The settings of a game in the list of public games. In a campaign game,
