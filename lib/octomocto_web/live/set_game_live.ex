@@ -106,7 +106,7 @@ defmodule OctomoctoWeb.SetGameLive do
       "When the table has no set, 3 more cards come from the deck.",
       "All players look at the same table. The first player who claims a set gets the point.",
       "The game ends when the deck is empty and the table has no set. Alone, find all sets as fast as you can. With other players, find the most sets.",
-      "In the easy mode, the deck has only the 27 solid cards."
+      "In the easy mode, the deck has only 27 cards. One feature is the same on all of them, for example the color. The game picks this feature and its value at random."
     ]
   end
 
@@ -159,7 +159,7 @@ defmodule OctomoctoWeb.SetGameLive do
     game.players_needed == settings.players and game.settings.mode == settings.mode
   end
 
-  defp mode_hint("easy"), do: "27 cards, all solid."
+  defp mode_hint("easy"), do: "27 cards, one feature is the same."
   defp mode_hint("normal"), do: "All 81 cards."
 
   @doc "The settings of a game in the list of public games."

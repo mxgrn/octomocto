@@ -8,8 +8,9 @@ defmodule Octomocto.SetGame.Deck do
   different on all 3 cards. For digits from 0 to 2, that is when the sum
   of the digits can be divided by 3.
 
-  The easy deck has the 27 solid cards. These rules are also correct for
-  the easy deck.
+  The easy deck has the 27 cards that share one value of one attribute,
+  for example all green cards. The attribute and its value are random.
+  These rules are also correct for the easy deck.
   """
 
   @size 81
@@ -24,10 +25,12 @@ defmodule Octomocto.SetGame.Deck do
   @doc "The cards of the mode in a random order."
   def shuffled("normal"), do: Enum.shuffle(0..(@size - 1))
 
-  # The shading is the digit of weight 9, and 0 is solid
   def shuffled("easy") do
+    weight = Enum.random([1, 3, 9, 27])
+    value = Enum.random(0..2)
+
     0..(@size - 1)
-    |> Enum.filter(&(digit(&1, 9) == 0))
+    |> Enum.filter(&(digit(&1, weight) == value))
     |> Enum.shuffle()
   end
 

@@ -1,11 +1,12 @@
 defmodule Octomocto.SetGame.Game do
   @moduledoc """
   One multiplayer Set game. The table has 12 cards from a deck of 81, or
-  of 27 solid cards in the easy mode (see `Octomocto.SetGame.Deck`). All
-  players look for sets at the same time, and the first player who claims
-  a set gets one point. The cards of the set go off the table, and cards
-  from the deck take their places. A wrong claim changes nothing. Nobody
-  sees the cards before the countdown is over.
+  of 27 cards with one same attribute in the easy mode (see
+  `Octomocto.SetGame.Deck`). All players look for sets at the same time,
+  and the first player who claims a set gets one point. The cards of the
+  set go off the table, and cards from the deck take their places. A wrong
+  claim changes nothing. Nobody sees the cards before the countdown is
+  over.
 
   When the table has no set, 3 more cards come from the deck until it has
   one. The next set then only goes off the table, and the last cards move
