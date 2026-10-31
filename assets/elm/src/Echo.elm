@@ -26,6 +26,7 @@ same name in one bundle.
 import Browser
 import Browser.Dom
 import Browser.Events
+import Dict exposing (Dict)
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick, preventDefaultOn)
@@ -201,6 +202,7 @@ type alias Playback =
 
 type alias Model =
     { gameUrl : String
+    , indexUrl : String
     , settingsUrl : String
     , nextGame : NextGame
     , guest : Bool
@@ -228,7 +230,15 @@ type alias Model =
 
     -- The width and the height of the browser window
     , viewport : ( Float, Float )
+    , texts : Texts
     }
+
+
+{-| The texts in the language of the page, by the English text (see
+`OctomoctoWeb.EchoHTML.elm_texts/0`).
+-}
+type alias Texts =
+    Dict String String
 
 
 {-| The other game that the end screen invites the player to try
@@ -241,17 +251,20 @@ type alias NextGame =
 
 type alias Flags =
     { gameUrl : String
+    , indexUrl : String
     , settingsUrl : String
     , nextGame : NextGame
     , guest : Bool
     , muted : Bool
     , shapes : Bool
+    , texts : Decode.Value
     }
 
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { gameUrl = flags.gameUrl
+      , indexUrl = flags.indexUrl
       , settingsUrl = flags.settingsUrl
       , nextGame = flags.nextGame
       , guest = flags.guest
@@ -269,6 +282,7 @@ init flags =
       , flashId = 0
       , shaking = False
       , viewport = ( 1024, 768 )
+      , texts = Decode.decodeValue (Decode.dict Decode.string) flags.texts |> Result.withDefault Dict.empty
       }
     , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
     )
@@ -508,10 +522,10 @@ stepPlayback model =
                 slot =
                     flashMs length + gapMs
 
-                t =
+                elapsed =
                     model.now - playback.start
             in
-            if t >= length * slot - gapMs then
+            if elapsed >= length * slot - gapMs then
                 ( { model | playback = Nothing }, Cmd.none )
 
             else
@@ -546,13 +560,13 @@ playbackPad model =
                 slot =
                     flashMs length + gapMs
 
-                t =
+                elapsed =
                     model.now - playback.start
 
                 index =
-                    t // slot
+                    elapsed // slot
             in
-            if t >= 0 && index < length && t - index * slot < flashMs length then
+            if elapsed >= 0 && index < length && elapsed - index * slot < flashMs length then
                 List.drop index playback.sequence |> List.head |> Maybe.map (Tuple.pair index)
 
             else
@@ -862,14 +876,30 @@ keyDecoder =
 -- VIEW
 
 
+{-| The text in the language of the page. A text without a translation
+stays in English.
+-}
+t : Texts -> String -> String
+t texts english =
+    Dict.get english texts |> Maybe.withDefault english
+
+
+{-| The text in the language of the page, with the values in its `{name}`
+parts.
+-}
+tf : Texts -> String -> List ( String, String ) -> String
+tf texts english values =
+    List.foldl (\( name, value ) result -> String.replace ("{" ++ name ++ "}") value result) (t texts english) values
+
+
 view : Model -> Html Msg
 view model =
     case model.connection of
         Connecting ->
-            p [ id "echo-connecting", class "py-24 text-center opacity-60" ] [ text "Joining the game…" ]
+            p [ id "echo-connecting", class "py-24 text-center opacity-60" ] [ text (t model.texts "Joining the game…") ]
 
         Failed reason ->
-            p [ id "echo-failed", class "py-24 text-center text-red-600" ] [ text ("Could not join the game: " ++ reason) ]
+            p [ id "echo-failed", class "py-24 text-center text-red-600" ] [ text (tf model.texts "Could not join the game: {reason}" [ ( "reason", reason ) ]) ]
 
         Joined me game ->
             viewGame model me game
@@ -901,18 +931,20 @@ viewGame model me game =
                             , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block lg:h-9" ] []
                             ]
                         , h1 [ class "mr-1 truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
-                            [ a [ id "echo-title-link", href "/echo", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Echo" ] ]
-                        , viewMuteButton model.muted
-                        , viewWatchers model.watchers
-                        , viewShapesButton model.shapes
+                            [ a [ id "echo-title-link", href model.indexUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text (t model.texts "Echo") ] ]
+                        , viewMuteButton model.texts model.muted
+                        , viewWatchers model.texts model.watchers
+                        , viewShapesButton model.texts model.shapes
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
                         [ text
-                            (if solo game then
-                                "Watch the pads light up, then tap them in the same order."
+                            (t model.texts
+                                (if solo game then
+                                    "Watch the pads light up, then tap them in the same order."
 
-                             else
-                                "Repeat the sequence, then add a pad of your choice."
+                                 else
+                                    "Repeat the sequence, then add a pad of your choice."
+                                )
                             )
                         ]
                     ]
@@ -920,7 +952,7 @@ viewGame model me game =
                     text ""
 
                   else
-                    viewRestartButton
+                    viewRestartButton model.texts
                 ]
             , if game.playersNeeded > 1 then
                 viewShareLink model
@@ -934,7 +966,7 @@ viewGame model me game =
                 text ""
             , if me == Nothing then
                 p [ id "echo-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 lg:order-5 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
-                    [ text "You are watching this game." ]
+                    [ text (t model.texts "You are watching this game.") ]
 
               else
                 text ""
@@ -943,7 +975,7 @@ viewGame model me game =
                 , href model.settingsUrl
                 , class "hidden text-sm font-medium text-octo-indigo underline-offset-4 transition hover:underline lg:order-6 lg:block dark:text-octo-indigo-light"
                 ]
-                [ text "Best results" ]
+                [ text (t model.texts "Best results") ]
             ]
 
         -- On a small screen that is wider than tall, the status line is at
@@ -956,10 +988,10 @@ viewGame model me game =
                 ]
                 [ viewRing model me game
                 , if game.waiting then
-                    viewWaiting game
+                    viewWaiting model.texts game
 
                   else if game.finished then
-                    viewResult model.nextGame model.guest me game
+                    viewResult model me game
 
                   else
                     text ""
@@ -1036,13 +1068,13 @@ boardWidth model me game =
 
 {-| The number of browsers that only watch the game, when there are any.
 -}
-viewWatchers : Int -> Html Msg
-viewWatchers count =
+viewWatchers : Texts -> Int -> Html Msg
+viewWatchers texts count =
     if count > 0 then
         span
             [ id "echo-watchers"
             , class "flex shrink-0 items-center gap-1 text-sm tabular-nums text-slate-500 dark:text-slate-400"
-            , Html.Attributes.title ("Watchers: " ++ String.fromInt count)
+            , Html.Attributes.title (tf texts "Watchers: {count}" [ ( "count", String.fromInt count ) ])
             ]
             [ span [ class "hero-eye size-4" ] [], text (String.fromInt count) ]
 
@@ -1050,15 +1082,17 @@ viewWatchers count =
         text ""
 
 
-viewMuteButton : Bool -> Html Msg
-viewMuteButton muted =
+viewMuteButton : Texts -> Bool -> Html Msg
+viewMuteButton texts muted =
     iconButton "echo-mute"
         ToggleMuted
-        (if muted then
-            "Turn the sounds on"
+        (t texts
+            (if muted then
+                "Turn the sounds on"
 
-         else
-            "Turn the sounds off"
+             else
+                "Turn the sounds off"
+            )
         )
         (if muted then
             "hero-speaker-x-mark"
@@ -1068,15 +1102,17 @@ viewMuteButton muted =
         )
 
 
-viewShapesButton : Bool -> Html Msg
-viewShapesButton shapes =
+viewShapesButton : Texts -> Bool -> Html Msg
+viewShapesButton texts shapes =
     iconButton "echo-shapes"
         ToggleShapes
-        (if shapes then
-            "Hide the shapes on the pads"
+        (t texts
+            (if shapes then
+                "Hide the shapes on the pads"
 
-         else
-            "Show the shapes on the pads"
+             else
+                "Show the shapes on the pads"
+            )
         )
         (if shapes then
             "hero-eye"
@@ -1101,16 +1137,16 @@ iconButton buttonId msg title icon =
 screen, only the icon shows, but not in the column of a screen that is wider
 than tall.
 -}
-viewRestartButton : Html Msg
-viewRestartButton =
+viewRestartButton : Texts -> Html Msg
+viewRestartButton texts =
     button
         [ id "echo-restart"
         , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
         , onClick Restart
-        , Html.Attributes.title "Restart game"
+        , Html.Attributes.title (t texts "Restart game")
         ]
         [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text "Restart game" ]
+        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text (t texts "Restart game") ]
         ]
 
 
@@ -1130,11 +1166,13 @@ viewShareLink model =
             , onClick CopyLink
             ]
             [ text
-                (if model.copied then
-                    "Copied!"
+                (t model.texts
+                    (if model.copied then
+                        "Copied!"
 
-                 else
-                    "Copy link"
+                     else
+                        "Copy link"
+                    )
                 )
             ]
         ]
@@ -1163,12 +1201,12 @@ viewScores model me game =
                     , attribute "style" ("--player-color: " ++ player.color)
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "max-lg:landscape:flex-1 lg:flex-1", classList [ ( "line-through", player.out /= Nothing ) ] ] [ text (playerName me player) ]
+                    , span [ class "max-lg:landscape:flex-1 lg:flex-1", classList [ ( "line-through", player.out /= Nothing ) ] ] [ text (playerName model.texts me player) ]
                     , if current then
-                        span [ class "text-xs font-medium tracking-wide uppercase", style "color" player.color ] [ text "turn" ]
+                        span [ class "text-xs font-medium tracking-wide uppercase", style "color" player.color ] [ text (t model.texts "turn") ]
 
                       else if player.out /= Nothing then
-                        span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text "out" ]
+                        span [ class "text-xs font-medium tracking-wide text-slate-400 uppercase" ] [ text (t model.texts "out") ]
 
                       else
                         text ""
@@ -1212,25 +1250,32 @@ viewTurnTimer model game =
             text ""
 
 
-playerName : Me -> Player -> String
-playerName me player =
+playerName : Texts -> Me -> Player -> String
+playerName texts me player =
     if isMe me player then
-        Maybe.withDefault player.colorName player.name ++ " (you)"
+        tf texts "{name} (you)" [ ( "name", shortName texts player ) ]
 
     else
-        Maybe.withDefault player.colorName player.name
+        shortName texts player
+
+
+{-| The name of a player, or the color for a guest
+-}
+shortName : Texts -> Player -> String
+shortName texts player =
+    Maybe.withDefault (t texts player.colorName) player.name
 
 
 {-| The name of a player in a sentence: "The pink player" for a guest
 -}
-sentenceName : Player -> String
-sentenceName player =
+sentenceName : Texts -> Player -> String
+sentenceName texts player =
     case player.name of
         Just name ->
             name
 
         Nothing ->
-            "The " ++ player.colorName ++ " player"
+            tf texts "The {color} player" [ ( "color", t texts player.colorName ) ]
 
 
 turnPlayer : Game -> Maybe Player
@@ -1242,55 +1287,66 @@ turnPlayer game =
 -}
 status : Model -> Me -> Game -> String
 status model me game =
+    let
+        texts =
+            model.texts
+    in
     if game.waiting || game.finished then
         ""
 
     else if solo game then
         if game.length == 0 then
-            "Tap Go to start."
+            t texts "Tap Go to start."
 
         else if model.playback /= Nothing || model.typed >= game.length then
-            "Watch closely…"
+            t texts "Watch closely…"
 
         else
-            "Your turn: " ++ taps (game.length - model.typed) ++ " to go."
+            tf texts "Your turn: {taps} to go." [ ( "taps", taps texts (game.length - model.typed) ) ]
 
     else if me /= Nothing && List.any (\player -> isMe me player && player.out /= Nothing) game.players then
-        "You are out. Watch the others play."
+        t texts "You are out. Watch the others play."
 
     else if myTurn me game then
         if game.length == 0 then
-            "You start. Tap any pad to add it to the sequence."
+            t texts "You start. Tap any pad to add it to the sequence."
 
         else if game.step < game.length then
-            "Your turn: repeat the sequence. " ++ taps (game.length - game.step) ++ " to go."
+            tf texts "Your turn: repeat the sequence. {taps} to go." [ ( "taps", taps texts (game.length - game.step) ) ]
 
         else
-            "Now add a pad of your choice."
+            t texts "Now add a pad of your choice."
 
     else
         case turnPlayer game of
             Just player ->
+                let
+                    name =
+                        [ ( "name", sentenceName texts player ) ]
+                in
                 if game.length == 0 then
-                    sentenceName player ++ " starts the sequence."
+                    tf texts "{name} starts the sequence." name
 
                 else if game.step < game.length then
-                    sentenceName player ++ " repeats the sequence."
+                    tf texts "{name} repeats the sequence." name
 
                 else
-                    sentenceName player ++ " adds a pad."
+                    tf texts "{name} adds a pad." name
 
             Nothing ->
                 ""
 
 
-taps : Int -> String
-taps n =
+{-| The texts have one form for 1 and one for more, as in English and
+Portuguese
+-}
+taps : Texts -> Int -> String
+taps texts n =
     if n == 1 then
-        "1 tap"
+        t texts "1 tap"
 
     else
-        String.fromInt n ++ " taps"
+        tf texts "{count} taps" [ ( "count", String.fromInt n ) ]
 
 
 
@@ -1355,14 +1411,14 @@ viewRing model me game =
                     [ Svg.feGaussianBlur [ SA.stdDeviation "10" ] [] ]
                 ]
                 :: Svg.circle [ SA.cx "170", SA.cy "170", SA.r "170", SA.class "echo-backing" ] []
-                :: List.concatMap (\( index, pad ) -> viewPad game.pads playable (lit == Just index) index pad) pads
+                :: List.concatMap (\( index, pad ) -> viewPad model.texts game.pads playable (lit == Just index) index pad) pads
             )
         , viewHub model me game lit
         ]
 
 
-viewPad : Int -> Bool -> Bool -> Int -> Pad -> List (Html Msg)
-viewPad count playable lit index pad =
+viewPad : Texts -> Int -> Bool -> Bool -> Int -> Pad -> List (Html Msg)
+viewPad texts count playable lit index pad =
     let
         path =
             sectorPath index count
@@ -1406,7 +1462,7 @@ viewPad count playable lit index pad =
                 )
             )
         , attribute "role" "button"
-        , attribute "aria-label" (pad.name ++ " pad, " ++ pad.shape)
+        , attribute "aria-label" (tf texts "{color} pad, {shape}" [ ( "color", t texts pad.name ), ( "shape", t texts pad.shape ) ])
         , preventDefaultOn "pointerdown" (Decode.succeed ( Press index, True ))
         ]
         []
@@ -1527,10 +1583,10 @@ viewHub model me game lit =
         , onClick Start
         , attribute "aria-label"
             (if startable then
-                "Start game"
+                t model.texts "Start game"
 
              else
-                "Level " ++ String.fromInt game.length
+                tf model.texts "Level {level}" [ ( "level", String.fromInt game.length ) ]
             )
         ]
         [ span
@@ -1554,50 +1610,54 @@ hubText model me game =
     let
         level =
             String.fromInt game.length
+
+        texts =
+            model.texts
     in
     if solo game then
         if game.length == 0 then
-            ( "Go", "tap to play" )
+            ( t texts "Go", t texts "tap to play" )
 
         else if model.playback /= Nothing || model.typed >= game.length then
-            ( level, "watch" )
+            ( level, t texts "watch" )
 
         else
-            ( level, "your turn" )
+            ( level, t texts "your turn" )
 
     else if myTurn me game then
         if game.step < game.length then
-            ( level, "repeat" )
+            ( level, t texts "repeat" )
 
         else
-            ( level, "add a pad" )
+            ( level, t texts "add a pad" )
 
     else
         ( level
         , turnPlayer game
-            |> Maybe.map (\player -> Maybe.withDefault player.colorName player.name)
+            |> Maybe.map (shortName texts)
             |> Maybe.withDefault ""
         )
 
 
 {-| Covers the field until all players are in.
 -}
-viewWaiting : Game -> Html Msg
-viewWaiting game =
+viewWaiting : Texts -> Game -> Html Msg
+viewWaiting texts game =
     div
         [ id "echo-waiting"
         , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-octo-navy/80 p-4 text-center text-white"
         ]
-        [ p [ class "text-3xl font-semibold" ] [ text "Waiting for players" ]
+        [ p [ class "text-3xl font-semibold" ] [ text (t texts "Waiting for players") ]
         , p [ id "echo-waiting-count", class "text-lg tabular-nums opacity-80" ]
             [ text
-                (String.fromInt (List.length game.players)
-                    ++ " of "
-                    ++ String.fromInt game.playersNeeded
-                    ++ " players are in"
+                (tf texts
+                    "{players} of {needed} players are in"
+                    [ ( "players", String.fromInt (List.length game.players) )
+                    , ( "needed", String.fromInt game.playersNeeded )
+                    ]
                 )
             ]
-        , p [ class "text-sm opacity-60" ] [ text "Send the link to the other players. The game starts when all of them are in." ]
+        , p [ class "text-sm opacity-60" ] [ text (t texts "Send the link to the other players. The game starts when all of them are in.") ]
         ]
 
 
@@ -1608,33 +1668,37 @@ ranking players =
     List.sortBy (\player -> negate (Maybe.withDefault 1000 player.out)) players
 
 
-viewResult : NextGame -> Bool -> Me -> Game -> Html Msg
-viewResult nextGame guest me game =
+viewResult : Model -> Me -> Game -> Html Msg
+viewResult model me game =
     let
+        texts =
+            model.texts
+
+        nextGame =
+            model.nextGame
+
         winner =
             List.filter (\player -> game.winner == Just player.id) game.players |> List.head
 
         ( message, detail ) =
             if solo game then
-                ( "Game over"
-                , "You repeated "
-                    ++ (List.head game.players |> Maybe.map .score |> Maybe.withDefault 0 |> padsText)
-                    ++ "."
+                ( t texts "Game over"
+                , tf texts "You repeated {pads}." [ ( "pads", List.head game.players |> Maybe.map .score |> Maybe.withDefault 0 |> padsText texts ) ]
                 )
 
             else
                 case winner of
                     Just player ->
                         ( if isMe me player then
-                            "You win!"
+                            t texts "You win!"
 
                           else
-                            sentenceName player ++ " wins!"
-                        , "The sequence had " ++ padsText game.length ++ "."
+                            tf texts "{name} wins!" [ ( "name", sentenceName texts player ) ]
+                        , tf texts "The sequence had {pads}." [ ( "pads", padsText texts game.length ) ]
                         )
 
                     Nothing ->
-                        ( "Game over", "" )
+                        ( t texts "Game over", "" )
     in
     div
         [ id "echo-result"
@@ -1651,7 +1715,7 @@ viewResult nextGame guest me game =
                     (\player ->
                         li [ class "flex items-center gap-2" ]
                             [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                            , span [ class "flex-1 text-left" ] [ text (playerName me player) ]
+                            , span [ class "flex-1 text-left" ] [ text (playerName texts me player) ]
                             , span [ class "pl-6 font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
                             ]
                     )
@@ -1666,7 +1730,7 @@ viewResult nextGame guest me game =
                 , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:-translate-y-0.5 hover:bg-octo-mist active:translate-y-0"
                 , onClick Restart
                 ]
-                [ text "Play again" ]
+                [ text (t texts "Play again") ]
         , let
             -- In a game with other players, a player starts the next game for all of them
             ( element, action ) =
@@ -1684,54 +1748,75 @@ viewResult nextGame guest me game =
             , attribute "data-ga-to" nextGame.name
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]
-            [ text ("Or try " ++ nextGame.name ++ " ")
+            [ text (tf texts "Or try {game}" [ ( "game", nextGame.name ) ] ++ " ")
             , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
             ]
 
         -- Only a guest who played gets the call to sign in, not a spectator
-        , if guest && me /= Nothing then
+        , if model.guest && me /= Nothing then
             p [ id "echo-sign-in", class "text-sm text-white/70" ]
-                [ a
-                    [ href "/signin"
-                    , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
-                    ]
-                    [ text "Sign in" ]
-                , text " to keep your scores."
-                ]
+                (withLink texts
+                    "{sign_in} to keep your scores."
+                    "sign_in"
+                    (a
+                        [ href "/signin"
+                        , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
+                        ]
+                        [ text (t texts "Sign in") ]
+                    )
+                )
 
           else
             text ""
-        , viewFeed
+        , viewFeed texts
         ]
 
 
 {-| The call to support Octomocto on Patreon, at the bottom of a result.
 The link opens in a new tab, so that the player stays in the game.
 -}
-viewFeed : Html msg
-viewFeed =
+viewFeed : Texts -> Html msg
+viewFeed texts =
     p [ id "echo-feed", class "mt-2 max-w-sm border-t border-white/15 pt-4 text-center text-sm leading-10 text-balance text-white/80" ]
-        [ text "Enjoying Octomocto? "
-        , a
-            [ href "https://patreon.com/mxgrn"
-            , target "_blank"
-            , rel "noopener"
-            , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:-translate-y-0.5 hover:bg-octo-orange-light active:translate-y-0"
-            ]
-            [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
-            , text "Feed Octo & Mocto"
-            ]
-        , text " to keep it ad-free."
-        ]
+        (withLink texts
+            "Enjoying Octomocto? {feed} to keep it ad-free."
+            "feed"
+            (a
+                [ href "https://patreon.com/mxgrn"
+                , target "_blank"
+                , rel "noopener"
+                , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:-translate-y-0.5 hover:bg-octo-orange-light active:translate-y-0"
+                ]
+                [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
+                , text (t texts "Feed Octo & Mocto")
+                ]
+            )
+        )
 
 
-padsText : Int -> String
-padsText n =
+{-| The text in the language of the page, with the link in its `{name}`
+part
+-}
+withLink : Texts -> String -> String -> Html msg -> List (Html msg)
+withLink texts english name link =
+    case String.split ("{" ++ name ++ "}") (t texts english) of
+        [ before, after ] ->
+            [ text before, link, text after ]
+
+        _ ->
+            [ text (t texts english), link ]
+
+
+{-| The texts have one form for 1 and one for more, as in English and
+Portuguese
+-}
+padsText : Texts -> Int -> String
+padsText texts n =
     if n == 1 then
-        "1 pad"
+        t texts "1 pad"
 
     else
-        String.fromInt n ++ " pads"
+        tf texts "{count} pads" [ ( "count", String.fromInt n ) ]
 
 
 

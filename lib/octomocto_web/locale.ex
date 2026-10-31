@@ -53,7 +53,7 @@ defmodule OctomoctoWeb.Locale do
 
   # The games with translations, by language
   @games %{
-    "pt" => ["memory"],
+    "pt" => ["memory", "echo"],
     "de" => ["memory"],
     "ru" => ["memory"],
     "fr" => ["memory"],

@@ -3,9 +3,11 @@
     id="echo-main"
     data-game-id={@id}
     data-user-token={@user_token}
+    data-index-url={@index_path}
     data-settings-url={@settings_path}
     data-next-game-name={@next_game.name}
-    data-next-game-path={@next_game.path}
+    data-next-game-path={Locale.game_path(@locale, @next_game)}
+    data-texts={Jason.encode!(elm_texts())}
   >
   </div>
 </Layouts.app>

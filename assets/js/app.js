@@ -518,7 +518,7 @@ if (echoNode) {
     shapes = localStorage.getItem("echo-shapes") !== "false"
   } catch (_e) {}
 
-  const echo = window.Elm.Echo.init({node: echoNode, flags: {gameUrl: window.location.href, settingsUrl: echoNode.dataset.settingsUrl, nextGame: {name: echoNode.dataset.nextGameName, path: echoNode.dataset.nextGamePath}, guest: !echoNode.dataset.userToken, muted, shapes}})
+  const echo = window.Elm.Echo.init({node: echoNode, flags: {gameUrl: window.location.href, indexUrl: echoNode.dataset.indexUrl, settingsUrl: echoNode.dataset.settingsUrl, nextGame: {name: echoNode.dataset.nextGameName, path: echoNode.dataset.nextGamePath}, guest: !echoNode.dataset.userToken, muted, shapes, texts: JSON.parse(echoNode.dataset.texts)}})
   const socket = new Socket("/socket", {params: {user_token: echoNode.dataset.userToken, _csrf_token: csrfToken}})
   socket.connect()
 

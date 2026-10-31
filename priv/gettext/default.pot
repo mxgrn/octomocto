@@ -33,7 +33,7 @@ msgid "Attempting to reconnect"
 msgstr ""
 
 #: lib/octomocto_web/components/layouts.ex:457
-#: lib/octomocto_web/components/layouts/root.html.heex:32
+#: lib/octomocto_web/components/layouts/root.html.heex:31
 #, elixir-autogen, elixir-format
 msgid "Brain Games to Play Solo or with Friends"
 msgstr ""
@@ -188,6 +188,7 @@ msgstr ""
 msgid "Theme"
 msgstr ""
 
+#: lib/octomocto_web/controllers/echo_controller.ex:24
 #: lib/octomocto_web/controllers/memory_controller.ex:26
 #, elixir-autogen, elixir-format
 msgid "This game does not exist (any more). Start a new one."

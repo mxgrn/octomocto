@@ -130,10 +130,12 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
+      live "/echo", EchoLive
     end
 
     # After the live routes, so that "campaign" is not a game id
     get "/memory/:id", MemoryController, :show
+    get "/echo/:id", EchoController, :show
 
     get "/*path", LocaleController, :english
   end

@@ -3,6 +3,7 @@
   notifications={@notifications}
   current_scope={@current_scope}
   guest_name={@guest_name}
+  languages={@languages}
 >
   <%!-- The same columns as on the Memory page --%>
   <div
@@ -14,11 +15,11 @@
         <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
           <OctomoctoWeb.GameIcons.game_icon game="echo" class="size-9" />
         </div>
-        <h1 class="text-3xl font-semibold tracking-tight">Echo</h1>
+        <h1 class="text-3xl font-semibold tracking-tight">{dgettext("echo", "Echo")}</h1>
       </div>
       <p class="text-base-content/70">
-        A Simon-like game: repeat the sequence of colored pads.
-        Choose the settings and start a new game.
+        {dgettext("echo", "A Simon-like game: repeat the sequence of colored pads.")}
+        {dgettext("echo", "Choose the settings and start a new game.")}
       </p>
       <.how_to_play />
     </div>
@@ -31,7 +32,7 @@
         games={@lobby_games}
         watchers={@watchers}
         matches={&same_settings?(&1, @settings)}
-        path={&~p"/echo/#{&1.id}"}
+        path={&Locale.path(@locale, ~p"/echo/#{&1.id}")}
       >
         <:icon>
           <OctomoctoWeb.GameIcons.game_icon game="echo" class="size-9 shrink-0" />
@@ -42,37 +43,45 @@
 
     <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
       <div id="echo-settings" class="flex w-full flex-col gap-4">
-        <.setting label="Players" icon="hero-users" hint={players_hint(@settings.players)}>
+        <.setting
+          label={dgettext("echo", "Players")}
+          icon="hero-users"
+          hint={players_hint(@settings.players)}
+        >
           <.option
             :for={n <- 1..4}
             id={"players-#{n}"}
             selected={@settings.players == n}
-            patch={~p"/echo?#{query(@settings, players: n)}"}
+            patch={settings_path(@locale, @settings, players: n)}
           >
             {n}
           </.option>
         </.setting>
-        <.setting label="Pads" icon="hero-chart-pie">
+        <.setting label={dgettext("echo", "Pads")} icon="hero-chart-pie">
           <.option
             :for={n <- 2..8}
             id={"pads-#{n}"}
             selected={@settings.pads == n}
-            patch={~p"/echo?#{query(@settings, pads: n)}"}
+            patch={settings_path(@locale, @settings, pads: n)}
           >
             {n}
           </.option>
         </.setting>
-        <.setting label="Visibility" icon="hero-eye" hint={visibility_hint(@settings)}>
+        <.setting
+          label={dgettext("echo", "Visibility")}
+          icon="hero-eye"
+          hint={visibility_hint(@settings)}
+        >
           <.option
             :for={
               {value, public, label} <- [
-                {"public", true, "Public"},
-                {"private", false, "Private"}
+                {"public", true, dgettext("echo", "Public")},
+                {"private", false, dgettext("echo", "Private")}
               ]
             }
             id={"visibility-#{value}"}
             selected={@settings.public == public}
-            patch={~p"/echo?#{query(@settings, public: public)}"}
+            patch={settings_path(@locale, @settings, public: public)}
           >
             {label}
           </.option>
@@ -90,9 +99,9 @@
         id="your-results"
         icon="hero-user"
         icon_class="text-octo-indigo"
-        title="Your results"
+        title={dgettext("echo", "Your results")}
         empty={@user_results != nil and @user_results.latest == []}
-        empty_text="No games yet."
+        empty_text={dgettext("echo", "No games yet.")}
       >
         <:aside :if={@user_results && @user_results.best}>
           <span
@@ -100,14 +109,14 @@
             class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
           >
             <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
-            <span class="text-base-content/60">Best</span>
+            <span class="text-base-content/60">{dgettext("echo", "Best")}</span>
             <span class="font-semibold tabular-nums">{@user_results.best.score}</span>
           </span>
         </:aside>
         <%= if @user_results do %>
           <.result_row :for={%{result: result, players: players} <- @user_results.latest}>
             <span :if={@settings.players == 1} class="flex-1 font-medium">
-              {Calendar.strftime(result.inserted_at, "%b %-d")}
+              {Locale.short_date(result.inserted_at)}
             </span>
             <span :if={@settings.players > 1} class="min-w-0 flex-1 truncate font-medium">
               <.player_list players={players} scores={false} />
@@ -123,9 +132,9 @@
               href={~p"/signin"}
               class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
             >
-              Sign in
+              {dgettext("echo", "Sign in")}
             </.link>
-            to start saving your results.
+            {dgettext("echo", "to start saving your results.")}
           </li>
         <% end %>
       </.score_list>
@@ -133,7 +142,7 @@
         id="best-results"
         icon="hero-trophy"
         icon_class="text-amber-500"
-        title="Best results"
+        title={dgettext("echo", "Best results")}
         empty={@best_results == []}
       >
         <:aside :if={!@user_results}>
@@ -143,9 +152,9 @@
               href={~p"/signin"}
               class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
             >
-              Sign in
+              {dgettext("echo", "Sign in")}
             </.link>
-            to get listed
+            {dgettext("echo", "to get listed")}
           </span>
         </:aside>
         <.result_row :for={{result, place} <- Enum.with_index(@best_results, 1)}>

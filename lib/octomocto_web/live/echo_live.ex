@@ -27,7 +27,7 @@ defmodule OctomoctoWeb.EchoLive do
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/echo"), rules: rules()] ++ seo())
+     |> assign([rules: rules()] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))
      |> assign(watchers: Lobby.watchers(Game))}
   end
@@ -35,9 +35,12 @@ defmodule OctomoctoWeb.EchoLive do
   @doc "The title and the description of the Echo pages, for search engines."
   def seo do
     [
-      page_title: "Echo: a Simon-Like Memory Game Online",
+      page_title: dgettext("echo", "Echo: a Simon-Like Memory Game Online"),
       page_description:
-        "A free game like Simon: repeat the sequence of colored pads. Play alone or with up to 3 friends. No sign-up."
+        dgettext(
+          "echo",
+          "A free game like Simon: repeat the sequence of colored pads. Play alone or with up to 3 friends. No sign-up."
+        )
     ]
   end
 
@@ -45,9 +48,15 @@ defmodule OctomoctoWeb.EchoLive do
     settings = settings(params)
     filter = %{"pads" => settings.pads, "players" => settings.players}
 
+    locale = socket.assigns.locale
+
     {:noreply,
      assign(socket,
        settings: settings,
+       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/echo"),
+       alternate_urls: Locale.alternate_urls("echo", ~p"/echo"),
+       # The other language keeps the settings
+       languages: Locale.languages("echo", locale, ~p"/echo?#{query(settings, [])}"),
        best_results: Echo.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
@@ -73,7 +82,7 @@ defmodule OctomoctoWeb.EchoLive do
 
   def handle_event("new_game", _params, socket) do
     id = Echo.create_game(socket.assigns.settings)
-    {:noreply, redirect(socket, to: ~p"/echo/#{id}")}
+    {:noreply, redirect(socket, to: Locale.path(socket.assigns.locale, ~p"/echo/#{id}"))}
   end
 
   # 4 pads, one player and a public game, when the params do not say
@@ -104,24 +113,41 @@ defmodule OctomoctoWeb.EchoLive do
 
   defp rules do
     [
-      "The pads light up one by one. Tap them in the same order.",
-      "Each round, the sequence gets one pad longer. One wrong pad, and the game ends.",
-      "With friends, there is no playback: watch the taps of the others. In your turn, repeat the sequence, then add a pad of your choice.",
-      "A player who taps a wrong pad is out. The last player who is in wins.",
-      "Echo is a Simon-like game. Simon is a trademark of Hasbro. Octomocto is not affiliated with Hasbro."
+      dgettext("echo", "The pads light up one by one. Tap them in the same order."),
+      dgettext(
+        "echo",
+        "Each round, the sequence gets one pad longer. One wrong pad, and the game ends."
+      ),
+      dgettext(
+        "echo",
+        "With friends, there is no playback: watch the taps of the others. In your turn, repeat the sequence, then add a pad of your choice."
+      ),
+      dgettext("echo", "A player who taps a wrong pad is out. The last player who is in wins."),
+      dgettext(
+        "echo",
+        "Echo is a Simon-like game. Simon is a trademark of Hasbro. Octomocto is not affiliated with Hasbro."
+      )
     ]
   end
 
-  defp players_hint(1), do: "The game adds a random pad each round."
+  defp players_hint(1), do: dgettext("echo", "The game adds a random pad each round.")
 
   defp players_hint(_players),
     do:
-      "Each player repeats the sequence and adds a pad. The game starts when all players are in."
+      dgettext(
+        "echo",
+        "Each player repeats the sequence and adds a pad. The game starts when all players are in."
+      )
 
-  @doc "The path of this page with the settings of the game in the given state."
-  def settings_path(state) do
+  @doc "The path of this page in the language with the settings of the game in the given state."
+  def settings_path(locale, state) do
     settings = %{pads: state.pads, players: state.needed, public: state.public}
-    ~p"/echo?#{query(settings, [])}"
+    settings_path(locale, settings, [])
+  end
+
+  # The path of this page in the language for the settings, with some of them changed
+  defp settings_path(locale, settings, changes) do
+    Locale.path(locale, ~p"/echo?#{query(settings, changes)}")
   end
 
   # The query of the page for the settings, with some of them changed
@@ -139,5 +165,6 @@ defmodule OctomoctoWeb.EchoLive do
   end
 
   @doc "The settings of a game in the list of public games."
-  def game_summary(%{settings: settings}), do: "#{settings.pads} pads"
+  def game_summary(%{settings: settings}),
+    do: dngettext("echo", "%{count} pad", "%{count} pads", settings.pads)
 end
