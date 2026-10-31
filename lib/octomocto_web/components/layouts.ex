@@ -455,7 +455,7 @@ defmodule OctomoctoWeb.Layouts do
 
   # The same title as in the browser tab
   defp og_title(nil), do: "Octomocto · " <> gettext("Brain Games to Play Solo or with Friends")
-  defp og_title(title), do: "#{title} · Octomocto"
+  defp og_title(title), do: title
 
   @doc """
   Adds the Google tag (gtag.js) for Google Analytics.

@@ -27,9 +27,8 @@
     <.live_title
       default="Octomocto"
       suffix={
-        if(assigns[:page_title],
-          do: " · Octomocto",
-          else: " · " <> gettext("Brain Games to Play Solo or with Friends")
+        if(!assigns[:page_title],
+          do: " · " <> gettext("Brain Games to Play Solo or with Friends")
         )
       }
       phx-no-format
