@@ -48,6 +48,10 @@ defmodule OctomoctoWeb.Router do
     plug OctomoctoWeb.Locale, "es"
   end
 
+  pipeline :japanese do
+    plug OctomoctoWeb.Locale, "ja"
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -256,6 +260,27 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         {OctomoctoWeb.Locale, "es"}
+      ] do
+      live "/memory", MemoryLive, :index
+      live "/memory/campaign", MemoryLive, :campaign
+      live "/memory/lobby", MemoryLive, :lobby
+    end
+
+    # After the live routes, so that "campaign" is not a game id
+    get "/memory/:id", MemoryController, :show
+
+    get "/*path", LocaleController, :english
+  end
+
+  # The pages in Japanese, the same as the pages in Portuguese
+  scope "/ja", OctomoctoWeb do
+    pipe_through [:browser, :japanese]
+
+    live_session :japanese,
+      on_mount: [
+        {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GuestName,
+        {OctomoctoWeb.Locale, "ja"}
       ] do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign

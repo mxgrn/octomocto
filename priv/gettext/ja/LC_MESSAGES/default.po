@@ -1,0 +1,341 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: lib/octomocto_web/components/game_page_components.ex:114
+#, elixir-autogen, elixir-format
+msgid "%{joined} of %{needed}"
+msgstr "%{joined}/%{needed}"
+
+#: lib/octomocto_web/components/settings_components.ex:153
+#, elixir-autogen, elixir-format
+msgid "%{score} pts"
+msgstr "%{score}点"
+
+#: lib/octomocto_web/components/core_components.ex:375
+#, elixir-autogen, elixir-format
+msgid "Actions"
+msgstr "操作"
+
+#: lib/octomocto_web/components/layouts.ex:597
+#: lib/octomocto_web/components/layouts.ex:612
+#, elixir-autogen, elixir-format
+msgid "Attempting to reconnect"
+msgstr "再接続中"
+
+#: lib/octomocto_web/components/layouts.ex:457
+#: lib/octomocto_web/components/layouts/root.html.heex:32
+#, elixir-autogen, elixir-format
+msgid "Brain Games to Play Solo or with Friends"
+msgstr "ひとりでも友達とでも遊べる脳トレゲーム"
+
+#: lib/octomocto_web/components/game_page_components.ex:324
+#: lib/octomocto_web/components/layouts.ex:84
+#: lib/octomocto_web/components/layouts.ex:360
+#, elixir-autogen, elixir-format
+msgid "Close"
+msgstr "閉じる"
+
+#: lib/octomocto_web/components/layouts.ex:549
+#, elixir-autogen, elixir-format
+msgid "Dark theme"
+msgstr "ダークテーマ"
+
+#: lib/octomocto_web/controllers/user_session_html.ex:127
+#, elixir-autogen, elixir-format
+msgid "Email"
+msgstr "メールアドレス"
+
+#: lib/octomocto_web/controllers/user_session_html.ex:111
+#, elixir-autogen, elixir-format
+msgid "Email me a sign-in link"
+msgstr "ログイン用リンクをメールで受け取る"
+
+#: lib/octomocto_web/components/layouts.ex:268
+#, elixir-autogen, elixir-format
+msgid "Feed Octo & Mocto"
+msgstr "OctoとMoctoにごはんをあげる"
+
+#: lib/octomocto_web/components/game_page_components.ex:135
+#, elixir-autogen, elixir-format
+msgid "Finished"
+msgstr "終了"
+
+#: lib/octomocto_web/components/settings_components.ex:170
+#: lib/octomocto_web/components/settings_components.ex:171
+#, elixir-autogen, elixir-format
+msgid "Guest"
+msgstr "ゲスト"
+
+#: lib/octomocto_web/components/game_page_components.ex:289
+#: lib/octomocto_web/components/game_page_components.ex:319
+#, elixir-autogen, elixir-format
+msgid "How to play"
+msgstr "遊び方"
+
+#: lib/octomocto_web/components/game_page_components.ex:127
+#, elixir-autogen, elixir-format
+msgid "Join"
+msgstr "参加"
+
+#: lib/octomocto_web/components/layouts.ex:277
+#, elixir-autogen, elixir-format
+msgid "Language"
+msgstr "言語"
+
+#: lib/octomocto_web/components/layouts.ex:547
+#, elixir-autogen, elixir-format
+msgid "Light theme"
+msgstr "ライトテーマ"
+
+#: lib/octomocto_web/components/settings_components.ex:101
+#, elixir-autogen, elixir-format
+msgid "No games yet — be the first."
+msgstr "まだゲームはない。最初のひとりになろう。"
+
+#: lib/octomocto_web/components/layouts.ex:443
+#, elixir-autogen, elixir-format
+msgid "Octomocto: Use your heads. Play solo or with friends."
+msgstr "Octomocto：頭を使おう。ひとりでも、友達とでも。"
+
+#: lib/octomocto_web/components/game_page_components.ex:358
+#, elixir-autogen, elixir-format
+msgid "Only players with the link can join."
+msgstr "リンクを知っている人だけが参加できる。"
+
+#: lib/octomocto_web/components/game_page_components.ex:353
+#, elixir-autogen, elixir-format
+msgid "Only players with the link can watch."
+msgstr "リンクを知っている人だけが観戦できる。"
+
+#: lib/octomocto_web/components/game_page_components.ex:350
+#, elixir-autogen, elixir-format
+msgid "Other players can watch this game in Ongoing games."
+msgstr "ほかのプレイヤーは「進行中のゲーム」でこのゲームを観戦できる。"
+
+#: lib/octomocto_web/components/game_page_components.ex:356
+#, elixir-autogen, elixir-format
+msgid "Other players see this game in Ongoing games."
+msgstr "ほかのプレイヤーには「進行中のゲーム」にこのゲームが表示される。"
+
+#: lib/octomocto_web/components/layouts.ex:244
+#, elixir-autogen, elixir-format
+msgid "Privacy Policy"
+msgstr "プライバシーポリシー"
+
+#: lib/octomocto_web/components/game_page_components.ex:54
+#, elixir-autogen, elixir-format
+msgid "Ongoing games"
+msgstr "進行中のゲーム"
+
+#: lib/octomocto_web/components/layouts.ex:451
+#, elixir-autogen, elixir-format
+msgid "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
+msgstr "記憶力、論理力、スピードをきたえるサクッと遊べる脳トレゲーム。ひとりでも、友達と対戦でも。"
+
+#: lib/octomocto_web/controllers/user_session_html.ex:135
+#, elixir-autogen, elixir-format
+msgid "Send"
+msgstr "送信"
+
+#: lib/octomocto_web/components/layouts.ex:200
+#, elixir-autogen, elixir-format
+msgid "Settings"
+msgstr "設定"
+
+#: lib/octomocto_web/components/layouts.ex:208
+#, elixir-autogen, elixir-format
+msgid "Sign out"
+msgstr "ログアウト"
+
+#: lib/octomocto_web/components/layouts.ex:604
+#, elixir-autogen, elixir-format
+msgid "Something went wrong!"
+msgstr "問題が起きた！"
+
+#: lib/octomocto_web/components/game_page_components.ex:267
+#, elixir-autogen, elixir-format
+msgid "Start game"
+msgstr "ゲーム開始"
+
+#: lib/octomocto_web/components/game_page_components.ex:254
+#, elixir-autogen, elixir-format
+msgid "Starting..."
+msgstr "開始中..."
+
+#: lib/octomocto_web/components/layouts.ex:545
+#, elixir-autogen, elixir-format
+msgid "System theme"
+msgstr "システムに合わせる"
+
+#: lib/octomocto_web/components/layouts.ex:247
+#, elixir-autogen, elixir-format
+msgid "Terms of Service"
+msgstr "利用規約"
+
+#: lib/octomocto_web/components/layouts.ex:167
+#: lib/octomocto_web/components/layouts.ex:513
+#, elixir-autogen, elixir-format
+msgid "Theme"
+msgstr "テーマ"
+
+#: lib/octomocto_web/controllers/memory_controller.ex:26
+#, elixir-autogen, elixir-format
+msgid "This game does not exist (any more). Start a new one."
+msgstr "このゲームは存在しない（もうない）。新しいゲームを始めよう。"
+
+#: lib/octomocto_web/components/layouts.ex:114
+#, elixir-autogen, elixir-format
+msgid "Use your heads"
+msgstr "頭を使おう"
+
+#: lib/octomocto_web/components/game_page_components.ex:146
+#, elixir-autogen, elixir-format
+msgid "Watch"
+msgstr "観戦"
+
+#: lib/octomocto_web/components/layouts.ex:589
+#, elixir-autogen, elixir-format
+msgid "We can't find the internet"
+msgstr "インターネットに接続できない"
+
+#: lib/octomocto_web/components/game_page_components.ex:271
+#, elixir-autogen, elixir-format
+msgid "You get a link to share with other players."
+msgstr "ほかのプレイヤーに送るリンクがもらえる。"
+
+#: lib/octomocto_web/components/game_page_components.ex:375
+#, elixir-autogen, elixir-format
+msgid "amber"
+msgstr "琥珀"
+
+#: lib/octomocto_web/components/core_components.ex:81
+#, elixir-autogen, elixir-format
+msgid "close"
+msgstr "閉じる"
+
+#: lib/octomocto_web/components/game_page_components.ex:379
+#, elixir-autogen, elixir-format
+msgid "indigo"
+msgstr "藍"
+
+#: lib/octomocto_web/components/game_page_components.ex:374
+#, elixir-autogen, elixir-format
+msgid "lime"
+msgstr "黄緑"
+
+#: lib/octomocto_web/controllers/user_session_html.ex:98
+#, elixir-autogen, elixir-format
+msgid "or"
+msgstr "または"
+
+#: lib/octomocto_web/components/game_page_components.ex:372
+#, elixir-autogen, elixir-format
+msgid "pink"
+msgstr "ピンク"
+
+#: lib/octomocto_web/components/game_page_components.ex:377
+#, elixir-autogen, elixir-format
+msgid "red"
+msgstr "赤"
+
+#: lib/octomocto_web/components/game_page_components.ex:373
+#, elixir-autogen, elixir-format
+msgid "sky"
+msgstr "水色"
+
+#: lib/octomocto_web/components/game_page_components.ex:378
+#, elixir-autogen, elixir-format
+msgid "teal"
+msgstr "青緑"
+
+#: lib/octomocto_web/components/game_page_components.ex:376
+#, elixir-autogen, elixir-format
+msgid "violet"
+msgstr "紫"
+
+#: lib/octomocto_web/controllers/user_session_html.ex:124
+#, elixir-autogen, elixir-format
+msgid "you@example.com"
+msgstr "you@example.com"
+
+#: lib/octomocto_web/components/layouts.ex:132
+#, elixir-autogen, elixir-format
+msgid "Menu"
+msgstr "メニュー"
+
+#: lib/octomocto_web/components/game_page_components.ex:265
+#, elixir-autogen, elixir-format
+msgid "Create game"
+msgstr "ゲームを作る"
+
+#: lib/octomocto_web/components/game_page_components.ex:254
+#, elixir-autogen, elixir-format
+msgid "Creating..."
+msgstr "作成中..."
+
+#: lib/octomocto_web/components/layouts.ex:254
+#, elixir-autogen, elixir-format
+msgid "Suggest a game"
+msgstr "ゲームを提案する"
+
+#: lib/octomocto_web/components/layouts.ex:178
+#, elixir-autogen, elixir-format
+msgid "Sign in to change your name"
+msgstr "ログインして名前を変えよう"
+
+#: lib/octomocto_web/components/game_page_components.ex:221
+#, elixir-autogen, elixir-format
+msgid "%{count} tie"
+msgid_plural "%{count} ties"
+msgstr[0] "引き分け%{count}回"
+
+#: lib/octomocto_web/components/game_page_components.ex:200
+#, elixir-autogen, elixir-format
+msgid "Back to the game"
+msgstr "ゲームに戻る"
+
+#: lib/octomocto_web/components/game_page_components.ex:189
+#, elixir-autogen, elixir-format
+msgid "Match"
+msgstr "マッチ"
+
+#: lib/octomocto_web/components/game_page_components.ex:263
+#, elixir-autogen, elixir-format
+msgid "Start next game"
+msgstr "次のゲームを始める"
+
+#: lib/octomocto_web/components/game_page_components.ex:224
+#, elixir-autogen, elixir-format
+msgid "The other players wait until you start the next game."
+msgstr "ほかのプレイヤーは、次のゲームが始まるのを待っている。"
+
+#: lib/octomocto_web/components/game_page_components.ex:204
+#, elixir-autogen, elixir-format
+msgid "Wins"
+msgstr "勝ち"
+
+#: lib/octomocto_web/components/game_page_components.ex:215
+#, elixir-autogen, elixir-format
+msgid "you"
+msgstr "自分"
+
+#: lib/octomocto_web/components/game_page_components.ex:72
+#: lib/octomocto_web/components/game_page_components.ex:75
+#, elixir-autogen, elixir-format
+msgid "Make a public one."
+msgstr "公開ゲームを作ろう。"
+
+#: lib/octomocto_web/components/game_page_components.ex:65
+#, elixir-autogen, elixir-format
+msgid "No games now."
+msgstr "今はゲームがない。"

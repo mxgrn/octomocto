@@ -1,0 +1,707 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: lib/octomocto_web/live/memory_live.ex:537
+#: lib/octomocto_web/live/memory_live.ex:663
+#: lib/octomocto_web/live/memory_live.html.heex:89
+#, elixir-autogen, elixir-format
+msgid "%{count} card"
+msgid_plural "%{count} cards"
+msgstr[0] "%{count}枚"
+
+#: lib/octomocto_web/controllers/memory_html.ex:34
+#: lib/octomocto_web/live/memory_live.html.heex:441
+#: lib/octomocto_web/live/memory_live.html.heex:488
+#, elixir-autogen, elixir-format
+msgid "Accuracy"
+msgstr "正解率"
+
+#: lib/octomocto_web/controllers/memory_html.ex:51
+#, elixir-autogen, elixir-format
+msgid "Accuracy {accuracy}"
+msgstr "正解率 {accuracy}"
+
+#: lib/octomocto_web/live/memory_live.ex:585
+#, elixir-autogen, elixir-format
+msgid "Animals"
+msgstr "動物"
+
+#: lib/octomocto_web/live/memory_live.html.heex:423
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "ベスト"
+
+#: lib/octomocto_web/controllers/memory_html.ex:25
+#: lib/octomocto_web/live/memory_live.html.heex:468
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "ベスト記録"
+
+#: lib/octomocto_web/live/memory_live.ex:582
+#, elixir-autogen, elixir-format
+msgid "Birds"
+msgstr "鳥"
+
+#: lib/octomocto_web/live/memory_live.html.heex:306
+#: lib/octomocto_web/live/memory_live.html.heex:323
+#, elixir-autogen, elixir-format
+msgid "Cards"
+msgstr "カード"
+
+#: lib/octomocto_web/live/memory_live.html.heex:46
+#, elixir-autogen, elixir-format
+msgid "Choose the settings and start a new game."
+msgstr "設定を選んで、新しいゲームを始めよう。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:30
+#, elixir-autogen, elixir-format
+msgid "Copied!"
+msgstr "コピーした！"
+
+#: lib/octomocto_web/controllers/memory_html.ex:31
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr "リンクをコピー"
+
+#: lib/octomocto_web/controllers/memory_html.ex:17
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "ゲームに参加できなかった：{reason}"
+
+#: lib/octomocto_web/controllers/memory_html.ex:45
+#, elixir-autogen, elixir-format
+msgid "Done!"
+msgstr "クリア！"
+
+#: lib/octomocto_web/live/memory_live.ex:587
+#, elixir-autogen, elixir-format
+msgid "Ecology"
+msgstr "エコロジー"
+
+#: lib/octomocto_web/live/memory_live.ex:579
+#, elixir-autogen, elixir-format
+msgid "Eighties"
+msgstr "80年代"
+
+#: lib/octomocto_web/live/memory_live.ex:586
+#, elixir-autogen, elixir-format
+msgid "Fairy Tales"
+msgstr "おとぎ話"
+
+#: lib/octomocto_web/live/memory_live.html.heex:310
+#, elixir-autogen, elixir-format
+msgid "Fewer cards"
+msgstr "カードを減らす"
+
+#: lib/octomocto_web/live/memory_live.html.heex:282
+#, elixir-autogen, elixir-format
+msgid "Find 2 cards with the same image."
+msgstr "同じ絵のカードを2枚見つけよう。"
+
+#: lib/octomocto_web/live/memory_live.html.heex:283
+#, elixir-autogen, elixir-format
+msgid "Find 3 cards with the same image."
+msgstr "同じ絵のカードを3枚見つけよう。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:20
+#, elixir-autogen, elixir-format
+msgid "Find the pairs of cards with the same image."
+msgstr "同じ絵のカードを2枚ずつ見つけよう。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:22
+#, elixir-autogen, elixir-format
+msgid "Find the triplets of cards with the same image."
+msgstr "同じ絵のカードを3枚ずつ見つけよう。"
+
+#: lib/octomocto_web/live/memory_live.ex:590
+#, elixir-autogen, elixir-format
+msgid "Flags"
+msgstr "国旗"
+
+#: lib/octomocto_web/live/memory_live.ex:581
+#, elixir-autogen, elixir-format
+msgid "Flowers"
+msgstr "花"
+
+#: lib/octomocto_web/live/memory_live.ex:589
+#, elixir-autogen, elixir-format
+msgid "Halloween"
+msgstr "ハロウィン"
+
+#: lib/octomocto_web/live/memory_live.ex:399
+#, elixir-autogen, elixir-format
+msgid "If they match, you get a point for each card, and you go again. If not, the next player goes."
+msgstr "絵がそろったら、1枚につき1点もらえて、もう一度めくれる。そろわなければ、次の人の番。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:49
+#, elixir-autogen, elixir-format
+msgid "It's a tie!"
+msgstr "引き分け！"
+
+#: lib/octomocto_web/controllers/memory_html.ex:15
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "ゲームに参加中…"
+
+#: lib/octomocto_web/live/memory_live.html.heex:278
+#, elixir-autogen, elixir-format
+msgid "Look for"
+msgstr "そろえる枚数"
+
+#: lib/octomocto_web/controllers/memory_html.ex:18
+#: lib/octomocto_web/live/memory_live.html.heex:35
+#, elixir-autogen, elixir-format
+msgid "Memory"
+msgstr "神経衰弱"
+
+#: lib/octomocto_web/live/memory_live.ex:54
+#, elixir-autogen, elixir-format
+msgid "Multiplayer Memory Card Game"
+msgstr "神経衰弱オンライン：友達と遊べる無料の記憶ゲーム"
+
+#: lib/octomocto_web/live/memory_live.html.heex:339
+#, elixir-autogen, elixir-format
+msgid "More cards"
+msgstr "カードを増やす"
+
+#: lib/octomocto_web/live/memory_live.ex:588
+#, elixir-autogen, elixir-format
+msgid "Music"
+msgstr "音楽"
+
+#: lib/octomocto_web/live/memory_live.html.heex:415
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "まだゲームはない。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:57
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "{game}も遊んでみよう"
+
+#: lib/octomocto_web/live/memory_live.ex:535
+#: lib/octomocto_web/live/memory_live.ex:664
+#: lib/octomocto_web/live/memory_live.html.heex:290
+#, elixir-autogen, elixir-format
+msgid "Pairs"
+msgstr "ペア"
+
+#: lib/octomocto_web/live/memory_live.ex:66
+#, elixir-autogen, elixir-format
+msgid "Pairs One is now Octomocto. Your favorite Memory game (improved!) plus more games to play."
+msgstr "Pairs OneはOctomoctoになった。おなじみの神経衰弱（さらにパワーアップ！）に加えて、ほかのゲームもいろいろ。"
+
+#: lib/octomocto_web/live/memory_live.ex:583
+#, elixir-autogen, elixir-format
+msgid "Pets"
+msgstr "ペット"
+
+#: lib/octomocto_web/live/memory_live.ex:56
+#, elixir-autogen, elixir-format
+msgid "Play multiplayer Memory online with friends, or solo. Free, instant, no sign-up."
+msgstr "神経衰弱をオンラインで、友達と、またはひとりで遊ぼう。無料、登録不要、すぐに遊べる。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:52
+#: lib/octomocto_web/live/memory_live.ex:709
+#, elixir-autogen, elixir-format
+msgid "Play again"
+msgstr "もう一度遊ぶ"
+
+#: lib/octomocto_web/live/memory_live.html.heex:175
+#, elixir-autogen, elixir-format
+msgid "Players"
+msgstr "プレイヤー"
+
+#: lib/octomocto_web/live/memory_live.html.heex:386
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "非公開"
+
+#: lib/octomocto_web/live/memory_live.html.heex:385
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "公開"
+
+#: lib/octomocto_web/controllers/memory_html.ex:29
+#, elixir-autogen, elixir-format
+msgid "Restart game"
+msgstr "やり直す"
+
+#: lib/octomocto_web/controllers/memory_html.ex:41
+#, elixir-autogen, elixir-format
+msgid "Send the link to the other players. The game starts when all of them are in."
+msgstr "ほかのプレイヤーにリンクを送ろう。全員がそろったらゲーム開始。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:58
+#: lib/octomocto_web/live/memory_live.html.heex:112
+#: lib/octomocto_web/live/memory_live.html.heex:458
+#: lib/octomocto_web/live/memory_live.html.heex:478
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "ログイン"
+
+#: lib/octomocto_web/live/memory_live.ex:580
+#, elixir-autogen, elixir-format
+msgid "Spring"
+msgstr "春"
+
+#: lib/octomocto_web/live/memory_live.html.heex:180
+#, elixir-autogen, elixir-format
+msgid "The players take turns. The game starts when all players are in."
+msgstr "プレイヤーは順番にめくる。全員がそろったらゲーム開始。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:48
+#, elixir-autogen, elixir-format
+msgid "The {color} player wins!"
+msgstr "{color}のプレイヤーの勝ち！"
+
+#: lib/octomocto_web/live/memory_live.ex:683
+#: lib/octomocto_web/live/memory_live.html.heex:205
+#, elixir-autogen, elixir-format
+msgid "Theme"
+msgstr "テーマ"
+
+#: lib/octomocto_web/controllers/memory_html.ex:24
+#, elixir-autogen, elixir-format
+msgid "This game is full, so you can only watch it."
+msgstr "このゲームは満員なので、観戦だけできる。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:50
+#, elixir-autogen, elixir-format
+msgid "Time {time}"
+msgstr "タイム {time}"
+
+#: lib/octomocto_web/live/memory_live.ex:535
+#: lib/octomocto_web/live/memory_live.ex:665
+#: lib/octomocto_web/live/memory_live.html.heex:95
+#: lib/octomocto_web/live/memory_live.html.heex:291
+#, elixir-autogen, elixir-format
+msgid "Triplets"
+msgstr "トリプル"
+
+#: lib/octomocto_web/live/memory_live.ex:395
+#, elixir-autogen, elixir-format
+msgid "Turn over 2 cards at a time (3 for triplets) to find the cards with the same image."
+msgstr "一度に2枚（トリプルなら3枚）めくって、同じ絵のカードを見つけよう。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:27
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "音をオフにする"
+
+#: lib/octomocto_web/controllers/memory_html.ex:26
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "音をオンにする"
+
+#: lib/octomocto_web/live/memory_live.html.heex:378
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "公開設定"
+
+#: lib/octomocto_web/controllers/memory_html.ex:37
+#, elixir-autogen, elixir-format
+msgid "Waiting for players"
+msgstr "プレイヤー待ち"
+
+#: lib/octomocto_web/live/memory_live.ex:403
+#, elixir-autogen, elixir-format
+msgid "Whoever has the most points wins. Alone, clear the field as fast as you can."
+msgstr "いちばん点が多い人の勝ち。ひとりなら、できるだけ速く全部のカードを取ろう。"
+
+#: lib/octomocto_web/live/memory_live.ex:584
+#, elixir-autogen, elixir-format
+msgid "Workout"
+msgstr "トレーニング"
+
+#: lib/octomocto_web/controllers/memory_html.ex:46
+#, elixir-autogen, elixir-format
+msgid "You win!"
+msgstr "勝ち！"
+
+#: lib/octomocto_web/live/memory_live.html.heex:413
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "自分の記録"
+
+#: lib/octomocto_web/controllers/memory_html.ex:33
+#, elixir-autogen, elixir-format
+msgid "accuracy"
+msgstr "正解率"
+
+#: lib/octomocto_web/controllers/memory_html.ex:32
+#, elixir-autogen, elixir-format
+msgid "time"
+msgstr "タイム"
+
+#: lib/octomocto_web/live/memory_live.html.heex:460
+#, elixir-autogen, elixir-format
+msgid "to start saving your results."
+msgstr "して、記録を保存しよう。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:35
+#, elixir-autogen, elixir-format
+msgid "turn"
+msgstr "番"
+
+#: lib/octomocto_web/controllers/memory_html.ex:36
+#, elixir-autogen, elixir-format
+msgid "{name} (you)"
+msgstr "{name}（自分）"
+
+#: lib/octomocto_web/controllers/memory_html.ex:47
+#, elixir-autogen, elixir-format
+msgid "{name} wins!"
+msgstr "{name}の勝ち！"
+
+#: lib/octomocto_web/controllers/memory_html.ex:39
+#, elixir-autogen, elixir-format
+msgid "{players} of {needed} players are in"
+msgstr "参加者：{players}/{needed}人"
+
+#: lib/octomocto_web/controllers/memory_html.ex:59
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in}して、スコアを残そう。"
+
+#: lib/octomocto_web/live/memory_live.ex:578
+#, elixir-autogen, elixir-format
+msgid "Insects"
+msgstr "虫"
+
+#: lib/octomocto_web/live/memory_live.ex:577
+#, elixir-autogen, elixir-format
+msgid "Monsters"
+msgstr "モンスター"
+
+#: lib/octomocto_web/live/memory_live.ex:576
+#, elixir-autogen, elixir-format
+msgid "Ocean"
+msgstr "海"
+
+#: lib/octomocto_web/live/memory_live.ex:575
+#, elixir-autogen, elixir-format
+msgid "Desert"
+msgstr "砂漠"
+
+#: lib/octomocto_web/live/memory_live.ex:574
+#, elixir-autogen, elixir-format
+msgid "Food"
+msgstr "食べ物"
+
+#: lib/octomocto_web/live/memory_live.ex:573
+#, elixir-autogen, elixir-format
+msgid "Sushi"
+msgstr "寿司"
+
+#: lib/octomocto_web/live/memory_live.html.heex:480
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "してランキングに載ろう"
+
+#: lib/octomocto_web/live/memory_live.ex:591
+#, elixir-autogen, elixir-format
+msgid "Cats"
+msgstr "猫"
+
+#: lib/octomocto_web/live/memory_live.ex:592
+#, elixir-autogen, elixir-format
+msgid "Space"
+msgstr "宇宙"
+
+#: lib/octomocto_web/controllers/memory_html.ex:53
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "設定を変える"
+
+#: lib/octomocto_web/live/memory_live.html.heex:40
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "次のゲームの設定を選ぼう。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:56
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "{color}のプレイヤーが設定を変更中…"
+
+#: lib/octomocto_web/controllers/memory_html.ex:54
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name}が設定を変更中…"
+
+#: lib/octomocto_web/controllers/memory_html.ex:64
+#, elixir-autogen, elixir-format
+msgid "Back to the map"
+msgstr "レベル一覧へ"
+
+#: lib/octomocto_web/live/memory_live.ex:561
+#: lib/octomocto_web/live/memory_live.html.heex:57
+#, elixir-autogen, elixir-format
+msgid "Campaign"
+msgstr "チャレンジ"
+
+#: lib/octomocto_web/live/memory_live.ex:677
+#, elixir-autogen, elixir-format
+msgid "Finish level %{level} with no errors first."
+msgstr "先にレベル%{level}をノーミスでクリアしよう。"
+
+#: lib/octomocto_web/live/memory_live.html.heex:56
+#, elixir-autogen, elixir-format
+msgid "Free play"
+msgstr "フリープレイ"
+
+#: lib/octomocto_web/live/memory_live.html.heex:42
+#, elixir-autogen, elixir-format
+msgid "Get 100% accuracy to unlock the next level."
+msgstr "正解率100%で次のレベルが解放される。"
+
+#: lib/octomocto_web/live/memory_live.html.heex:78
+#, elixir-autogen, elixir-format
+msgid "Highest level"
+msgstr "最高レベル"
+
+#: lib/octomocto_web/live/memory_live.html.heex:124
+#, elixir-autogen, elixir-format
+msgid "Highest levels"
+msgstr "最高レベル"
+
+#: lib/octomocto_web/live/memory_live.ex:551
+#: lib/octomocto_web/live/memory_live.ex:655
+#: lib/octomocto_web/live/memory_live.html.heex:86
+#: lib/octomocto_web/live/memory_live.html.heex:132
+#, elixir-autogen, elixir-format
+msgid "Level %{level}"
+msgstr "レベル%{level}"
+
+#: lib/octomocto_web/controllers/memory_html.ex:63
+#, elixir-autogen, elixir-format
+msgid "Level {level}"
+msgstr "レベル{level}"
+
+#: lib/octomocto_web/controllers/memory_html.ex:70
+#, elixir-autogen, elixir-format
+msgid "Level {level} done"
+msgstr "レベル{level}クリア"
+
+#: lib/octomocto_web/live/memory_live.html.heex:71
+#, elixir-autogen, elixir-format
+msgid "Levels"
+msgstr "レベル"
+
+#: lib/octomocto_web/controllers/memory_html.ex:72
+#, elixir-autogen, elixir-format
+msgid "Next level"
+msgstr "次のレベル"
+
+#: lib/octomocto_web/live/memory_live.html.heex:126
+#, elixir-autogen, elixir-format
+msgid "Nobody has finished a level yet."
+msgstr "まだ誰もレベルをクリアしていない。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:69
+#, elixir-autogen, elixir-format
+msgid "Perfect!"
+msgstr "パーフェクト！"
+
+#: lib/octomocto_web/live/memory_live.ex:713
+#, elixir-autogen, elixir-format
+msgid "Play"
+msgstr "プレイ"
+
+#: lib/octomocto_web/live/memory_live.ex:626
+#: lib/octomocto_web/live/memory_live.html.heex:222
+#, elixir-autogen, elixir-format
+msgid "Random"
+msgstr "ランダム"
+
+#: lib/octomocto_web/live/memory_live.html.heex:110
+#, elixir-autogen, elixir-format
+msgid "Sign in to enable campaigns"
+msgstr "ログインしてチャレンジを遊ぼう"
+
+#: lib/octomocto_web/live/memory_live.ex:704
+#, elixir-autogen, elixir-format
+msgid "Starting..."
+msgstr "開始中..."
+
+#: lib/octomocto_web/controllers/memory_html.ex:71
+#: lib/octomocto_web/live/memory_live.ex:711
+#, elixir-autogen, elixir-format
+msgid "Try again"
+msgstr "もう一度"
+
+#: lib/octomocto_web/controllers/memory_html.ex:65
+#, elixir-autogen, elixir-format
+msgid "Wrong card!"
+msgstr "違うカード！"
+
+#: lib/octomocto_web/controllers/memory_html.ex:67
+#, elixir-autogen, elixir-format
+msgid "You cleared {cleared} of {cards} cards."
+msgstr "{cards}枚中{cleared}枚を取った。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:68
+#, elixir-autogen, elixir-format
+msgid "You finished the campaign!"
+msgstr "チャレンジを全部クリア！"
+
+#: lib/octomocto_web/live/memory_live.html.heex:111
+#, elixir-autogen, elixir-format
+msgid "Your progress is saved to your account."
+msgstr "進み具合はアカウントに保存される。"
+
+#: lib/octomocto_web/live/memory_live.ex:667
+#, elixir-autogen, elixir-format
+msgid "best: %{cleared} of %{cards} cleared"
+msgstr "ベスト：%{cards}枚中%{cleared}枚"
+
+#: lib/octomocto_web/controllers/memory_html.ex:28
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "観戦者：{count}"
+
+#: lib/octomocto_web/live/memory_live.ex:544
+#, elixir-autogen, elixir-format
+msgid "%{count} bomb"
+msgid_plural "%{count} bombs"
+msgstr[0] "爆弾%{count}個"
+
+#: lib/octomocto_web/live/memory_live.html.heex:347
+#, elixir-autogen, elixir-format
+msgid "Bombs"
+msgstr "爆弾"
+
+#: lib/octomocto_web/controllers/memory_html.ex:94
+#, elixir-autogen, elixir-format
+msgid "Boom!"
+msgstr "ドカーン！"
+
+#: lib/octomocto_web/controllers/memory_html.ex:87
+#, elixir-autogen, elixir-format
+msgid "Demine the field now: turn all other bombs. A wrong card puts you out."
+msgstr "さあ爆弾処理：残りの爆弾を全部めくろう。違うカードをめくったら脱落。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:75
+#, elixir-autogen, elixir-format
+msgid "Deminer"
+msgstr "処理班"
+
+#: lib/octomocto_web/live/memory_live.html.heex:373
+#, elixir-autogen, elixir-format
+msgid "None"
+msgstr "なし"
+
+#: lib/octomocto_web/controllers/memory_html.ex:76
+#, elixir-autogen, elixir-format
+msgid "Out"
+msgstr "脱落"
+
+#: lib/octomocto_web/controllers/memory_html.ex:98
+#, elixir-autogen, elixir-format
+msgid "The demining failed: the last card was not a bomb."
+msgstr "爆弾処理に失敗：最後のカードは爆弾じゃなかった。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:100
+#, elixir-autogen, elixir-format
+msgid "The field wasn't demined."
+msgstr "爆弾は処理されなかった。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:93
+#, elixir-autogen, elixir-format
+msgid "The {color} player demines the field…"
+msgstr "{color}のプレイヤーが爆弾処理中…"
+
+#: lib/octomocto_web/controllers/memory_html.ex:85
+#, elixir-autogen, elixir-format
+msgid "The {color} player found the last bomb and can demine the field…"
+msgstr "{color}のプレイヤーが最後の爆弾を発見！爆弾処理のチャンス…"
+
+#: lib/octomocto_web/live/memory_live.html.heex:357
+#, elixir-autogen, elixir-format
+msgid "Turn a bomb that was seen, and you are out. Turn all bombs in one go to demine the field."
+msgstr "一度見えた爆弾をめくったら脱落。爆弾を全部続けてめくれば、爆弾処理に成功。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:99
+#, elixir-autogen, elixir-format
+msgid "You demined the field!"
+msgstr "爆弾処理に成功！"
+
+#: lib/octomocto_web/controllers/memory_html.ex:78
+#, elixir-autogen, elixir-format
+msgid "You found the last bomb! Turn another bomb now to demine the field, or any other card to play on."
+msgstr "最後の爆弾を発見！今ほかの爆弾をめくれば爆弾処理、それ以外のカードならゲーム続行。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:96
+#, elixir-autogen, elixir-format
+msgid "You turned a bomb that was seen."
+msgstr "一度見えた爆弾をめくった。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:73
+#, elixir-autogen, elixir-format
+msgid "bombs"
+msgstr "爆弾"
+
+#: lib/octomocto_web/controllers/memory_html.ex:74
+#, elixir-autogen, elixir-format
+msgid "demining"
+msgstr "爆弾処理"
+
+#: lib/octomocto_web/controllers/memory_html.ex:91
+#, elixir-autogen, elixir-format
+msgid "{name} demines the field…"
+msgstr "{name}が爆弾処理中…"
+
+#: lib/octomocto_web/controllers/memory_html.ex:83
+#, elixir-autogen, elixir-format
+msgid "{name} found the last bomb and can demine the field…"
+msgstr "{name}が最後の爆弾を発見！爆弾処理のチャンス…"
+
+#: lib/octomocto_web/controllers/memory_html.ex:61
+#, elixir-autogen, elixir-format
+msgid "Enjoying Octomocto? {feed} to keep it ad-free."
+msgstr "Octomoctoを楽しんでる？広告なしで続けられるように、{feed}。"
+
+#: lib/octomocto_web/controllers/memory_html.ex:62
+#, elixir-autogen, elixir-format
+msgid "Feed Octo & Mocto"
+msgstr "OctoとMoctoにごはんをあげよう"
+
+#: lib/octomocto_web/live/memory_live.html.heex:363
+#, elixir-autogen, elixir-format
+msgid "Turn a bomb that was seen, and you are out."
+msgstr "一度見えた爆弾をめくったら脱落。"
+
+#: lib/octomocto_web/live/memory_live.html.heex:44
+#, elixir-autogen, elixir-format
+msgid "Join a game, or watch one."
+msgstr "ゲームに参加するか、観戦しよう。"
+
+#: lib/octomocto_web/live/memory_live.html.heex:58
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "ロビー"
+
+#: lib/octomocto_web/live/memory_live.html.heex:354
+#, elixir-autogen, elixir-format
+msgid "Add bombs to make the game harder."
+msgstr "爆弾を入れて、ゲームを難しくしよう。"
+
+#: lib/octomocto_web/live/memory_live.html.heex:184
+#, elixir-autogen, elixir-format
+msgid "Clear the board as fast as you can."
+msgstr "できるだけ速く全部のカードを取ろう。"
+
+#: lib/octomocto_web/live/memory_live.html.heex:242
+#, elixir-autogen, elixir-format
+msgid "A new theme for each game."
+msgstr "ゲームごとに新しいテーマ。"
