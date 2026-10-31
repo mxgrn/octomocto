@@ -163,7 +163,7 @@ msgstr "Busca"
 #: lib/octomocto_web/live/memory_live.html.heex:35
 #, elixir-autogen, elixir-format
 msgid "Memory"
-msgstr "Memory"
+msgstr "Memorama"
 
 #: lib/octomocto_web/live/memory_live.ex:54
 #, elixir-autogen, elixir-format
@@ -210,7 +210,7 @@ msgstr "Mascotas"
 #: lib/octomocto_web/live/memory_live.ex:56
 #, elixir-autogen, elixir-format
 msgid "Play multiplayer Memory online with friends, or solo. Free, instant, no sign-up."
-msgstr "Memorama en línea: juega Memory multijugador con amigos, o solo. Gratis, al instante, sin registro."
+msgstr "Memorama en línea multijugador: juega con amigos, o solo. Gratis, al instante, sin registro."
 
 #: lib/octomocto_web/controllers/memory_html.ex:52
 #: lib/octomocto_web/live/memory_live.ex:709
