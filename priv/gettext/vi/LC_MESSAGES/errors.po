@@ -1,0 +1,93 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: vi\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "can't be blank"
+msgstr "không được để trống"
+
+msgid "has already been taken"
+msgstr "đã được sử dụng"
+
+msgid "is invalid"
+msgstr "không hợp lệ"
+
+msgid "must be accepted"
+msgstr "phải được chấp nhận"
+
+msgid "has invalid format"
+msgstr "sai định dạng"
+
+msgid "has an invalid entry"
+msgstr "có mục không hợp lệ"
+
+msgid "is reserved"
+msgstr "đã được dành riêng"
+
+msgid "does not match confirmation"
+msgstr "không khớp với xác nhận"
+
+msgid "is still associated with this entry"
+msgstr "vẫn còn liên kết với mục này"
+
+msgid "are still associated with this entry"
+msgstr "vẫn còn liên kết với mục này"
+
+msgid "should have %{count} item(s)"
+msgid_plural "should have %{count} item(s)"
+msgstr[0] "phải có %{count} mục"
+
+msgid "should be %{count} character(s)"
+msgid_plural "should be %{count} character(s)"
+msgstr[0] "phải có %{count} ký tự"
+
+msgid "should be %{count} byte(s)"
+msgid_plural "should be %{count} byte(s)"
+msgstr[0] "phải có %{count} byte"
+
+msgid "should have at least %{count} item(s)"
+msgid_plural "should have at least %{count} item(s)"
+msgstr[0] "phải có ít nhất %{count} mục"
+
+msgid "should be at least %{count} character(s)"
+msgid_plural "should be at least %{count} character(s)"
+msgstr[0] "phải có ít nhất %{count} ký tự"
+
+msgid "should be at least %{count} byte(s)"
+msgid_plural "should be at least %{count} byte(s)"
+msgstr[0] "phải có ít nhất %{count} byte"
+
+msgid "should have at most %{count} item(s)"
+msgid_plural "should have at most %{count} item(s)"
+msgstr[0] "chỉ được có tối đa %{count} mục"
+
+msgid "should be at most %{count} character(s)"
+msgid_plural "should be at most %{count} character(s)"
+msgstr[0] "chỉ được có tối đa %{count} ký tự"
+
+msgid "should be at most %{count} byte(s)"
+msgid_plural "should be at most %{count} byte(s)"
+msgstr[0] "chỉ được có tối đa %{count} byte"
+
+msgid "must be less than %{number}"
+msgstr "phải nhỏ hơn %{number}"
+
+msgid "must be greater than %{number}"
+msgstr "phải lớn hơn %{number}"
+
+msgid "must be less than or equal to %{number}"
+msgstr "phải nhỏ hơn hoặc bằng %{number}"
+
+msgid "must be greater than or equal to %{number}"
+msgstr "phải lớn hơn hoặc bằng %{number}"
+
+msgid "must be equal to %{number}"
+msgstr "phải bằng %{number}"

@@ -1,0 +1,707 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: vi\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: lib/octomocto_web/live/memory_live.ex:537
+#: lib/octomocto_web/live/memory_live.ex:663
+#: lib/octomocto_web/live/memory_live.html.heex:89
+#, elixir-autogen, elixir-format
+msgid "%{count} card"
+msgid_plural "%{count} cards"
+msgstr[0] "%{count} thẻ"
+
+#: lib/octomocto_web/controllers/memory_html.ex:34
+#: lib/octomocto_web/live/memory_live.html.heex:441
+#: lib/octomocto_web/live/memory_live.html.heex:488
+#, elixir-autogen, elixir-format
+msgid "Accuracy"
+msgstr "Độ chính xác"
+
+#: lib/octomocto_web/controllers/memory_html.ex:51
+#, elixir-autogen, elixir-format
+msgid "Accuracy {accuracy}"
+msgstr "Độ chính xác {accuracy}"
+
+#: lib/octomocto_web/live/memory_live.ex:585
+#, elixir-autogen, elixir-format
+msgid "Animals"
+msgstr "Động vật"
+
+#: lib/octomocto_web/live/memory_live.html.heex:423
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "Tốt nhất"
+
+#: lib/octomocto_web/controllers/memory_html.ex:25
+#: lib/octomocto_web/live/memory_live.html.heex:468
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "Kết quả tốt nhất"
+
+#: lib/octomocto_web/live/memory_live.ex:582
+#, elixir-autogen, elixir-format
+msgid "Birds"
+msgstr "Chim"
+
+#: lib/octomocto_web/live/memory_live.html.heex:306
+#: lib/octomocto_web/live/memory_live.html.heex:323
+#, elixir-autogen, elixir-format
+msgid "Cards"
+msgstr "Thẻ"
+
+#: lib/octomocto_web/live/memory_live.html.heex:46
+#, elixir-autogen, elixir-format
+msgid "Choose the settings and start a new game."
+msgstr "Chọn cài đặt và bắt đầu ván mới."
+
+#: lib/octomocto_web/controllers/memory_html.ex:30
+#, elixir-autogen, elixir-format
+msgid "Copied!"
+msgstr "Đã sao chép!"
+
+#: lib/octomocto_web/controllers/memory_html.ex:31
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr "Sao chép liên kết"
+
+#: lib/octomocto_web/controllers/memory_html.ex:17
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "Không vào được ván: {reason}"
+
+#: lib/octomocto_web/controllers/memory_html.ex:45
+#, elixir-autogen, elixir-format
+msgid "Done!"
+msgstr "Xong!"
+
+#: lib/octomocto_web/live/memory_live.ex:587
+#, elixir-autogen, elixir-format
+msgid "Ecology"
+msgstr "Sinh thái"
+
+#: lib/octomocto_web/live/memory_live.ex:579
+#, elixir-autogen, elixir-format
+msgid "Eighties"
+msgstr "Thập niên 80"
+
+#: lib/octomocto_web/live/memory_live.ex:586
+#, elixir-autogen, elixir-format
+msgid "Fairy Tales"
+msgstr "Cổ tích"
+
+#: lib/octomocto_web/live/memory_live.html.heex:310
+#, elixir-autogen, elixir-format
+msgid "Fewer cards"
+msgstr "Ít thẻ hơn"
+
+#: lib/octomocto_web/live/memory_live.html.heex:282
+#, elixir-autogen, elixir-format
+msgid "Find 2 cards with the same image."
+msgstr "Tìm 2 thẻ có cùng hình."
+
+#: lib/octomocto_web/live/memory_live.html.heex:283
+#, elixir-autogen, elixir-format
+msgid "Find 3 cards with the same image."
+msgstr "Tìm 3 thẻ có cùng hình."
+
+#: lib/octomocto_web/controllers/memory_html.ex:20
+#, elixir-autogen, elixir-format
+msgid "Find the pairs of cards with the same image."
+msgstr "Tìm các cặp thẻ có cùng hình."
+
+#: lib/octomocto_web/controllers/memory_html.ex:22
+#, elixir-autogen, elixir-format
+msgid "Find the triplets of cards with the same image."
+msgstr "Tìm các bộ ba thẻ có cùng hình."
+
+#: lib/octomocto_web/live/memory_live.ex:590
+#, elixir-autogen, elixir-format
+msgid "Flags"
+msgstr "Quốc kỳ"
+
+#: lib/octomocto_web/live/memory_live.ex:581
+#, elixir-autogen, elixir-format
+msgid "Flowers"
+msgstr "Hoa"
+
+#: lib/octomocto_web/live/memory_live.ex:589
+#, elixir-autogen, elixir-format
+msgid "Halloween"
+msgstr "Halloween"
+
+#: lib/octomocto_web/live/memory_live.ex:399
+#, elixir-autogen, elixir-format
+msgid "If they match, you get a point for each card, and you go again. If not, the next player goes."
+msgstr "Nếu các thẻ giống nhau, bạn được 1 điểm cho mỗi thẻ và được lật tiếp. Nếu không, đến lượt người chơi tiếp theo."
+
+#: lib/octomocto_web/controllers/memory_html.ex:49
+#, elixir-autogen, elixir-format
+msgid "It's a tie!"
+msgstr "Hòa!"
+
+#: lib/octomocto_web/controllers/memory_html.ex:15
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "Đang vào ván…"
+
+#: lib/octomocto_web/live/memory_live.html.heex:278
+#, elixir-autogen, elixir-format
+msgid "Look for"
+msgstr "Tìm"
+
+#: lib/octomocto_web/controllers/memory_html.ex:18
+#: lib/octomocto_web/live/memory_live.html.heex:35
+#, elixir-autogen, elixir-format
+msgid "Memory"
+msgstr "Lật hình"
+
+#: lib/octomocto_web/live/memory_live.ex:54
+#, elixir-autogen, elixir-format
+msgid "Multiplayer Memory Card Game"
+msgstr "Game lật hình online: trò chơi trí nhớ cùng bạn bè"
+
+#: lib/octomocto_web/live/memory_live.html.heex:339
+#, elixir-autogen, elixir-format
+msgid "More cards"
+msgstr "Nhiều thẻ hơn"
+
+#: lib/octomocto_web/live/memory_live.ex:588
+#, elixir-autogen, elixir-format
+msgid "Music"
+msgstr "Âm nhạc"
+
+#: lib/octomocto_web/live/memory_live.html.heex:415
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "Chưa có ván nào."
+
+#: lib/octomocto_web/controllers/memory_html.ex:57
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "Hoặc thử {game}"
+
+#: lib/octomocto_web/live/memory_live.ex:535
+#: lib/octomocto_web/live/memory_live.ex:664
+#: lib/octomocto_web/live/memory_live.html.heex:290
+#, elixir-autogen, elixir-format
+msgid "Pairs"
+msgstr "Cặp"
+
+#: lib/octomocto_web/live/memory_live.ex:66
+#, elixir-autogen, elixir-format
+msgid "Pairs One is now Octomocto. Your favorite Memory game (improved!) plus more games to play."
+msgstr "Pairs One giờ là Octomocto. Trò lật hình bạn yêu thích (nay còn hay hơn!) cùng nhiều trò chơi khác."
+
+#: lib/octomocto_web/live/memory_live.ex:583
+#, elixir-autogen, elixir-format
+msgid "Pets"
+msgstr "Thú cưng"
+
+#: lib/octomocto_web/live/memory_live.ex:56
+#, elixir-autogen, elixir-format
+msgid "Play multiplayer Memory online with friends, or solo. Free, instant, no sign-up."
+msgstr "Chơi game lật hình online với bạn bè hoặc một mình. Miễn phí, chơi ngay, không cần đăng ký."
+
+#: lib/octomocto_web/controllers/memory_html.ex:52
+#: lib/octomocto_web/live/memory_live.ex:709
+#, elixir-autogen, elixir-format
+msgid "Play again"
+msgstr "Chơi lại"
+
+#: lib/octomocto_web/live/memory_live.html.heex:175
+#, elixir-autogen, elixir-format
+msgid "Players"
+msgstr "Người chơi"
+
+#: lib/octomocto_web/live/memory_live.html.heex:386
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "Riêng tư"
+
+#: lib/octomocto_web/live/memory_live.html.heex:385
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "Công khai"
+
+#: lib/octomocto_web/controllers/memory_html.ex:29
+#, elixir-autogen, elixir-format
+msgid "Restart game"
+msgstr "Chơi lại từ đầu"
+
+#: lib/octomocto_web/controllers/memory_html.ex:41
+#, elixir-autogen, elixir-format
+msgid "Send the link to the other players. The game starts when all of them are in."
+msgstr "Gửi liên kết cho những người chơi khác. Ván bắt đầu khi mọi người đã vào."
+
+#: lib/octomocto_web/controllers/memory_html.ex:58
+#: lib/octomocto_web/live/memory_live.html.heex:112
+#: lib/octomocto_web/live/memory_live.html.heex:458
+#: lib/octomocto_web/live/memory_live.html.heex:478
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Đăng nhập"
+
+#: lib/octomocto_web/live/memory_live.ex:580
+#, elixir-autogen, elixir-format
+msgid "Spring"
+msgstr "Mùa xuân"
+
+#: lib/octomocto_web/live/memory_live.html.heex:180
+#, elixir-autogen, elixir-format
+msgid "The players take turns. The game starts when all players are in."
+msgstr "Người chơi lần lượt lật thẻ. Ván bắt đầu khi mọi người đã vào."
+
+#: lib/octomocto_web/controllers/memory_html.ex:48
+#, elixir-autogen, elixir-format
+msgid "The {color} player wins!"
+msgstr "Người chơi màu {color} thắng!"
+
+#: lib/octomocto_web/live/memory_live.ex:683
+#: lib/octomocto_web/live/memory_live.html.heex:205
+#, elixir-autogen, elixir-format
+msgid "Theme"
+msgstr "Chủ đề"
+
+#: lib/octomocto_web/controllers/memory_html.ex:24
+#, elixir-autogen, elixir-format
+msgid "This game is full, so you can only watch it."
+msgstr "Ván này đã đủ người, bạn chỉ có thể xem."
+
+#: lib/octomocto_web/controllers/memory_html.ex:50
+#, elixir-autogen, elixir-format
+msgid "Time {time}"
+msgstr "Thời gian {time}"
+
+#: lib/octomocto_web/live/memory_live.ex:535
+#: lib/octomocto_web/live/memory_live.ex:665
+#: lib/octomocto_web/live/memory_live.html.heex:95
+#: lib/octomocto_web/live/memory_live.html.heex:291
+#, elixir-autogen, elixir-format
+msgid "Triplets"
+msgstr "Bộ ba"
+
+#: lib/octomocto_web/live/memory_live.ex:395
+#, elixir-autogen, elixir-format
+msgid "Turn over 2 cards at a time (3 for triplets) to find the cards with the same image."
+msgstr "Mỗi lần lật 2 thẻ (3 thẻ nếu chơi bộ ba) để tìm các thẻ có cùng hình."
+
+#: lib/octomocto_web/controllers/memory_html.ex:27
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "Tắt âm thanh"
+
+#: lib/octomocto_web/controllers/memory_html.ex:26
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "Bật âm thanh"
+
+#: lib/octomocto_web/live/memory_live.html.heex:378
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "Hiển thị"
+
+#: lib/octomocto_web/controllers/memory_html.ex:37
+#, elixir-autogen, elixir-format
+msgid "Waiting for players"
+msgstr "Đang chờ người chơi"
+
+#: lib/octomocto_web/live/memory_live.ex:403
+#, elixir-autogen, elixir-format
+msgid "Whoever has the most points wins. Alone, clear the field as fast as you can."
+msgstr "Ai nhiều điểm nhất sẽ thắng. Khi chơi một mình, hãy lật hết thẻ nhanh nhất có thể."
+
+#: lib/octomocto_web/live/memory_live.ex:584
+#, elixir-autogen, elixir-format
+msgid "Workout"
+msgstr "Thể dục"
+
+#: lib/octomocto_web/controllers/memory_html.ex:46
+#, elixir-autogen, elixir-format
+msgid "You win!"
+msgstr "Bạn thắng!"
+
+#: lib/octomocto_web/live/memory_live.html.heex:413
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "Kết quả của bạn"
+
+#: lib/octomocto_web/controllers/memory_html.ex:33
+#, elixir-autogen, elixir-format
+msgid "accuracy"
+msgstr "độ chính xác"
+
+#: lib/octomocto_web/controllers/memory_html.ex:32
+#, elixir-autogen, elixir-format
+msgid "time"
+msgstr "thời gian"
+
+#: lib/octomocto_web/live/memory_live.html.heex:460
+#, elixir-autogen, elixir-format
+msgid "to start saving your results."
+msgstr "để bắt đầu lưu kết quả."
+
+#: lib/octomocto_web/controllers/memory_html.ex:35
+#, elixir-autogen, elixir-format
+msgid "turn"
+msgstr "lượt"
+
+#: lib/octomocto_web/controllers/memory_html.ex:36
+#, elixir-autogen, elixir-format
+msgid "{name} (you)"
+msgstr "{name} (bạn)"
+
+#: lib/octomocto_web/controllers/memory_html.ex:47
+#, elixir-autogen, elixir-format
+msgid "{name} wins!"
+msgstr "{name} thắng!"
+
+#: lib/octomocto_web/controllers/memory_html.ex:39
+#, elixir-autogen, elixir-format
+msgid "{players} of {needed} players are in"
+msgstr "Đã có {players}/{needed} người chơi"
+
+#: lib/octomocto_web/controllers/memory_html.ex:59
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in} để lưu điểm của bạn."
+
+#: lib/octomocto_web/live/memory_live.ex:578
+#, elixir-autogen, elixir-format
+msgid "Insects"
+msgstr "Côn trùng"
+
+#: lib/octomocto_web/live/memory_live.ex:577
+#, elixir-autogen, elixir-format
+msgid "Monsters"
+msgstr "Quái vật"
+
+#: lib/octomocto_web/live/memory_live.ex:576
+#, elixir-autogen, elixir-format
+msgid "Ocean"
+msgstr "Đại dương"
+
+#: lib/octomocto_web/live/memory_live.ex:575
+#, elixir-autogen, elixir-format
+msgid "Desert"
+msgstr "Sa mạc"
+
+#: lib/octomocto_web/live/memory_live.ex:574
+#, elixir-autogen, elixir-format
+msgid "Food"
+msgstr "Đồ ăn"
+
+#: lib/octomocto_web/live/memory_live.ex:573
+#, elixir-autogen, elixir-format
+msgid "Sushi"
+msgstr "Sushi"
+
+#: lib/octomocto_web/live/memory_live.html.heex:480
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "để có tên trong bảng"
+
+#: lib/octomocto_web/live/memory_live.ex:591
+#, elixir-autogen, elixir-format
+msgid "Cats"
+msgstr "Mèo"
+
+#: lib/octomocto_web/live/memory_live.ex:592
+#, elixir-autogen, elixir-format
+msgid "Space"
+msgstr "Vũ trụ"
+
+#: lib/octomocto_web/controllers/memory_html.ex:53
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "Đổi cài đặt"
+
+#: lib/octomocto_web/live/memory_live.html.heex:40
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "Chọn cài đặt cho ván tiếp theo."
+
+#: lib/octomocto_web/controllers/memory_html.ex:56
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "Người chơi màu {color} đang đổi cài đặt…"
+
+#: lib/octomocto_web/controllers/memory_html.ex:54
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name} đang đổi cài đặt…"
+
+#: lib/octomocto_web/controllers/memory_html.ex:64
+#, elixir-autogen, elixir-format
+msgid "Back to the map"
+msgstr "Về bản đồ"
+
+#: lib/octomocto_web/live/memory_live.ex:561
+#: lib/octomocto_web/live/memory_live.html.heex:57
+#, elixir-autogen, elixir-format
+msgid "Campaign"
+msgstr "Thử thách"
+
+#: lib/octomocto_web/live/memory_live.ex:677
+#, elixir-autogen, elixir-format
+msgid "Finish level %{level} with no errors first."
+msgstr "Hãy qua màn %{level} mà không sai lần nào trước."
+
+#: lib/octomocto_web/live/memory_live.html.heex:56
+#, elixir-autogen, elixir-format
+msgid "Free play"
+msgstr "Chơi tự do"
+
+#: lib/octomocto_web/live/memory_live.html.heex:42
+#, elixir-autogen, elixir-format
+msgid "Get 100% accuracy to unlock the next level."
+msgstr "Đạt độ chính xác 100% để mở khóa màn tiếp theo."
+
+#: lib/octomocto_web/live/memory_live.html.heex:78
+#, elixir-autogen, elixir-format
+msgid "Highest level"
+msgstr "Màn cao nhất"
+
+#: lib/octomocto_web/live/memory_live.html.heex:124
+#, elixir-autogen, elixir-format
+msgid "Highest levels"
+msgstr "Màn cao nhất"
+
+#: lib/octomocto_web/live/memory_live.ex:551
+#: lib/octomocto_web/live/memory_live.ex:655
+#: lib/octomocto_web/live/memory_live.html.heex:86
+#: lib/octomocto_web/live/memory_live.html.heex:132
+#, elixir-autogen, elixir-format
+msgid "Level %{level}"
+msgstr "Màn %{level}"
+
+#: lib/octomocto_web/controllers/memory_html.ex:63
+#, elixir-autogen, elixir-format
+msgid "Level {level}"
+msgstr "Màn {level}"
+
+#: lib/octomocto_web/controllers/memory_html.ex:70
+#, elixir-autogen, elixir-format
+msgid "Level {level} done"
+msgstr "Đã qua màn {level}"
+
+#: lib/octomocto_web/live/memory_live.html.heex:71
+#, elixir-autogen, elixir-format
+msgid "Levels"
+msgstr "Các màn"
+
+#: lib/octomocto_web/controllers/memory_html.ex:72
+#, elixir-autogen, elixir-format
+msgid "Next level"
+msgstr "Màn tiếp theo"
+
+#: lib/octomocto_web/live/memory_live.html.heex:126
+#, elixir-autogen, elixir-format
+msgid "Nobody has finished a level yet."
+msgstr "Chưa ai qua màn nào."
+
+#: lib/octomocto_web/controllers/memory_html.ex:69
+#, elixir-autogen, elixir-format
+msgid "Perfect!"
+msgstr "Hoàn hảo!"
+
+#: lib/octomocto_web/live/memory_live.ex:713
+#, elixir-autogen, elixir-format
+msgid "Play"
+msgstr "Chơi"
+
+#: lib/octomocto_web/live/memory_live.ex:626
+#: lib/octomocto_web/live/memory_live.html.heex:222
+#, elixir-autogen, elixir-format
+msgid "Random"
+msgstr "Ngẫu nhiên"
+
+#: lib/octomocto_web/live/memory_live.html.heex:110
+#, elixir-autogen, elixir-format
+msgid "Sign in to enable campaigns"
+msgstr "Đăng nhập để chơi thử thách"
+
+#: lib/octomocto_web/live/memory_live.ex:704
+#, elixir-autogen, elixir-format
+msgid "Starting..."
+msgstr "Đang bắt đầu..."
+
+#: lib/octomocto_web/controllers/memory_html.ex:71
+#: lib/octomocto_web/live/memory_live.ex:711
+#, elixir-autogen, elixir-format
+msgid "Try again"
+msgstr "Thử lại"
+
+#: lib/octomocto_web/controllers/memory_html.ex:65
+#, elixir-autogen, elixir-format
+msgid "Wrong card!"
+msgstr "Sai thẻ!"
+
+#: lib/octomocto_web/controllers/memory_html.ex:67
+#, elixir-autogen, elixir-format
+msgid "You cleared {cleared} of {cards} cards."
+msgstr "Bạn đã lật được {cleared}/{cards} thẻ."
+
+#: lib/octomocto_web/controllers/memory_html.ex:68
+#, elixir-autogen, elixir-format
+msgid "You finished the campaign!"
+msgstr "Bạn đã qua hết các màn thử thách!"
+
+#: lib/octomocto_web/live/memory_live.html.heex:111
+#, elixir-autogen, elixir-format
+msgid "Your progress is saved to your account."
+msgstr "Tiến độ được lưu vào tài khoản của bạn."
+
+#: lib/octomocto_web/live/memory_live.ex:667
+#, elixir-autogen, elixir-format
+msgid "best: %{cleared} of %{cards} cleared"
+msgstr "tốt nhất: %{cleared}/%{cards} thẻ"
+
+#: lib/octomocto_web/controllers/memory_html.ex:28
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "Người xem: {count}"
+
+#: lib/octomocto_web/live/memory_live.ex:544
+#, elixir-autogen, elixir-format
+msgid "%{count} bomb"
+msgid_plural "%{count} bombs"
+msgstr[0] "%{count} bom"
+
+#: lib/octomocto_web/live/memory_live.html.heex:347
+#, elixir-autogen, elixir-format
+msgid "Bombs"
+msgstr "Bom"
+
+#: lib/octomocto_web/controllers/memory_html.ex:94
+#, elixir-autogen, elixir-format
+msgid "Boom!"
+msgstr "Bùm!"
+
+#: lib/octomocto_web/controllers/memory_html.ex:87
+#, elixir-autogen, elixir-format
+msgid "Demine the field now: turn all other bombs. A wrong card puts you out."
+msgstr "Giờ hãy gỡ bom: lật tất cả các quả bom còn lại. Lật sai thẻ là bạn bị loại."
+
+#: lib/octomocto_web/controllers/memory_html.ex:75
+#, elixir-autogen, elixir-format
+msgid "Deminer"
+msgstr "Người gỡ bom"
+
+#: lib/octomocto_web/live/memory_live.html.heex:373
+#, elixir-autogen, elixir-format
+msgid "None"
+msgstr "Không"
+
+#: lib/octomocto_web/controllers/memory_html.ex:76
+#, elixir-autogen, elixir-format
+msgid "Out"
+msgstr "Bị loại"
+
+#: lib/octomocto_web/controllers/memory_html.ex:98
+#, elixir-autogen, elixir-format
+msgid "The demining failed: the last card was not a bomb."
+msgstr "Gỡ bom thất bại: thẻ cuối cùng không phải bom."
+
+#: lib/octomocto_web/controllers/memory_html.ex:100
+#, elixir-autogen, elixir-format
+msgid "The field wasn't demined."
+msgstr "Bom chưa được gỡ."
+
+#: lib/octomocto_web/controllers/memory_html.ex:93
+#, elixir-autogen, elixir-format
+msgid "The {color} player demines the field…"
+msgstr "Người chơi màu {color} đang gỡ bom…"
+
+#: lib/octomocto_web/controllers/memory_html.ex:85
+#, elixir-autogen, elixir-format
+msgid "The {color} player found the last bomb and can demine the field…"
+msgstr "Người chơi màu {color} đã tìm thấy quả bom cuối cùng và có thể gỡ bom…"
+
+#: lib/octomocto_web/live/memory_live.html.heex:357
+#, elixir-autogen, elixir-format
+msgid "Turn a bomb that was seen, and you are out. Turn all bombs in one go to demine the field."
+msgstr "Lật trúng quả bom đã lộ là bạn bị loại. Lật hết bom liền một mạch để gỡ bom."
+
+#: lib/octomocto_web/controllers/memory_html.ex:99
+#, elixir-autogen, elixir-format
+msgid "You demined the field!"
+msgstr "Bạn đã gỡ hết bom!"
+
+#: lib/octomocto_web/controllers/memory_html.ex:78
+#, elixir-autogen, elixir-format
+msgid "You found the last bomb! Turn another bomb now to demine the field, or any other card to play on."
+msgstr "Bạn đã tìm thấy quả bom cuối cùng! Lật ngay một quả bom khác để gỡ bom, hoặc lật thẻ khác để chơi tiếp."
+
+#: lib/octomocto_web/controllers/memory_html.ex:96
+#, elixir-autogen, elixir-format
+msgid "You turned a bomb that was seen."
+msgstr "Bạn đã lật trúng quả bom đã lộ."
+
+#: lib/octomocto_web/controllers/memory_html.ex:73
+#, elixir-autogen, elixir-format
+msgid "bombs"
+msgstr "bom"
+
+#: lib/octomocto_web/controllers/memory_html.ex:74
+#, elixir-autogen, elixir-format
+msgid "demining"
+msgstr "gỡ bom"
+
+#: lib/octomocto_web/controllers/memory_html.ex:91
+#, elixir-autogen, elixir-format
+msgid "{name} demines the field…"
+msgstr "{name} đang gỡ bom…"
+
+#: lib/octomocto_web/controllers/memory_html.ex:83
+#, elixir-autogen, elixir-format
+msgid "{name} found the last bomb and can demine the field…"
+msgstr "{name} đã tìm thấy quả bom cuối cùng và có thể gỡ bom…"
+
+#: lib/octomocto_web/controllers/memory_html.ex:61
+#, elixir-autogen, elixir-format
+msgid "Enjoying Octomocto? {feed} to keep it ad-free."
+msgstr "Bạn thích Octomocto? {feed} để trang luôn không có quảng cáo."
+
+#: lib/octomocto_web/controllers/memory_html.ex:62
+#, elixir-autogen, elixir-format
+msgid "Feed Octo & Mocto"
+msgstr "Cho Octo & Mocto ăn"
+
+#: lib/octomocto_web/live/memory_live.html.heex:363
+#, elixir-autogen, elixir-format
+msgid "Turn a bomb that was seen, and you are out."
+msgstr "Lật trúng quả bom đã lộ là bạn bị loại."
+
+#: lib/octomocto_web/live/memory_live.html.heex:44
+#, elixir-autogen, elixir-format
+msgid "Join a game, or watch one."
+msgstr "Vào một ván, hoặc xem người khác chơi."
+
+#: lib/octomocto_web/live/memory_live.html.heex:58
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "Sảnh"
+
+#: lib/octomocto_web/live/memory_live.html.heex:354
+#, elixir-autogen, elixir-format
+msgid "Add bombs to make the game harder."
+msgstr "Thêm bom để trò chơi khó hơn."
+
+#: lib/octomocto_web/live/memory_live.html.heex:184
+#, elixir-autogen, elixir-format
+msgid "Clear the board as fast as you can."
+msgstr "Lật hết thẻ nhanh nhất có thể."
+
+#: lib/octomocto_web/live/memory_live.html.heex:242
+#, elixir-autogen, elixir-format
+msgid "A new theme for each game."
+msgstr "Mỗi ván một chủ đề mới."

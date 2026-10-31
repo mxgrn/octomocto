@@ -24,7 +24,8 @@ defmodule OctomoctoWeb.Locale do
     "pl" => "Polski",
     "it" => "Italiano",
     "es" => "Español",
-    "ja" => "日本語"
+    "ja" => "日本語",
+    "vi" => "Tiếng Việt"
   }
 
   # The value of the `lang` and `hreflang` attributes. The Portuguese
@@ -39,7 +40,8 @@ defmodule OctomoctoWeb.Locale do
     "pl" => "pl",
     "it" => "it",
     "es" => "es",
-    "ja" => "ja"
+    "ja" => "ja",
+    "vi" => "vi"
   }
 
   # The games with translations, by language
@@ -52,7 +54,8 @@ defmodule OctomoctoWeb.Locale do
     "pl" => ["memory"],
     "it" => ["memory"],
     "es" => ["memory"],
-    "ja" => ["memory"]
+    "ja" => ["memory"],
+    "vi" => ["memory"]
   }
 
   def init(locale), do: locale
@@ -124,7 +127,7 @@ defmodule OctomoctoWeb.Locale do
 
   @es_months ~w(ene. feb. mar. abr. may. jun. jul. ago. sept. oct. nov. dic.)
 
-  @doc "A short date in the language of the process, for example \"Oct 17\", \"17 de out.\", \"17. Okt.\", \"17 окт.\", \"17 oct.\", \"17 жовт.\", \"17 paź.\", \"17 ott.\", \"17 oct.\" or \"10月17日\"."
+  @doc "A short date in the language of the process, for example \"Oct 17\", \"17 de out.\", \"17. Okt.\", \"17 окт.\", \"17 oct.\", \"17 жовт.\", \"17 paź.\", \"17 ott.\", \"17 oct.\", \"10月17日\" or \"17 thg 10\"."
   def short_date(date) do
     case Gettext.get_locale(OctomoctoWeb.Gettext) do
       "pt" ->
@@ -155,6 +158,9 @@ defmodule OctomoctoWeb.Locale do
 
       "ja" ->
         Calendar.strftime(date, "%-m月%-d日")
+
+      "vi" ->
+        Calendar.strftime(date, "%-d thg %-m")
 
       _ ->
         Calendar.strftime(date, "%b %-d")

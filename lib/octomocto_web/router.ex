@@ -52,6 +52,10 @@ defmodule OctomoctoWeb.Router do
     plug OctomoctoWeb.Locale, "ja"
   end
 
+  pipeline :vietnamese do
+    plug OctomoctoWeb.Locale, "vi"
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -281,6 +285,27 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         {OctomoctoWeb.Locale, "ja"}
+      ] do
+      live "/memory", MemoryLive, :index
+      live "/memory/campaign", MemoryLive, :campaign
+      live "/memory/lobby", MemoryLive, :lobby
+    end
+
+    # After the live routes, so that "campaign" is not a game id
+    get "/memory/:id", MemoryController, :show
+
+    get "/*path", LocaleController, :english
+  end
+
+  # The pages in Vietnamese, the same as the pages in Portuguese
+  scope "/vi", OctomoctoWeb do
+    pipe_through [:browser, :vietnamese]
+
+    live_session :vietnamese,
+      on_mount: [
+        {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GuestName,
+        {OctomoctoWeb.Locale, "vi"}
       ] do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
