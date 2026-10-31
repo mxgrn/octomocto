@@ -53,17 +53,27 @@ defmodule OctomoctoWeb.TrainsLive do
      |> assign_campaign(params)}
   end
 
+  # The public games, and the results of the default settings
+  def handle_params(_params, _uri, %{assigns: %{live_action: :lobby}} = socket) do
+    {:noreply,
+     socket
+     |> remember_tab("lobby")
+     |> assign_free_play(%{})
+     |> assign(canonical_url: url(~p"/trains/lobby"))}
+  end
+
   def handle_params(params, _uri, socket) do
-    if campaign_tab?(socket.assigns.current_scope) and
-         not Enum.any?(@settings_params, &Map.has_key?(params, &1)) do
-      {:noreply, push_patch(socket, to: ~p"/trains/campaign")}
+    tab = last_tab(socket.assigns.current_scope)
+
+    if tab in ["campaign", "lobby"] and not Enum.any?(@settings_params, &Map.has_key?(params, &1)) do
+      {:noreply, push_patch(socket, to: ~p"/trains/#{tab}")}
     else
       {:noreply, socket |> remember_tab("free") |> assign_free_play(params)}
     end
   end
 
-  defp campaign_tab?(%{user: %{trains_tab: "campaign"}}), do: true
-  defp campaign_tab?(_scope), do: false
+  defp last_tab(%{user: %{trains_tab: tab}}), do: tab
+  defp last_tab(_scope), do: nil
 
   # Saves the tab for a signed-in user, once the page is connected
   defp remember_tab(%{assigns: %{current_scope: %{user: user} = scope}} = socket, tab) do
@@ -259,14 +269,6 @@ defmodule OctomoctoWeb.TrainsLive do
     # A public game has no param, so that most links stay short
     query = if s.public, do: query, else: query ++ [visibility: "private"]
     ~p"/trains?#{query}"
-  end
-
-  # True when the open game has the same settings as the new game
-  defp same_settings?(game, settings) do
-    game.players_needed == settings.players and
-      game.settings.switch_count == settings.switch_count and
-      game.settings.trains_per_house == settings.trains_per_house and
-      game.settings.pace == settings.pace
   end
 
   @doc """

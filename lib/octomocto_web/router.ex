@@ -96,6 +96,7 @@ defmodule OctomoctoWeb.Router do
       live "/", HomeLive
       live "/trains", TrainsLive, :index
       live "/trains/campaign", TrainsLive, :campaign
+      live "/trains/lobby", TrainsLive, :lobby
       live "/schulte", SchulteLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign

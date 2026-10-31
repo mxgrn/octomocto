@@ -5,17 +5,24 @@
   guest_name={@guest_name}
 >
   <%!--
-    The same layout as the Set page. One column on a small screen: the
-    title, the public games, the settings and the results. Two columns on a
-    large screen: the results go to the right. Three columns on an extra
-    large screen: the public games go to the left, and the settings in the
-    center are wider than the other columns.
+    The same layout as the Memory page. One column on a small screen: the
+    title, the tab and the results. Two columns on a large screen: the
+    results go to the right. Three columns on an extra large screen: the
+    tab in the center is wider than the other columns, and the left column
+    is empty, so that the tabs stay in place.
     The last row takes the free height, so that the tall results column does
     not make gaps between the rows on the left.
+    In free play on an extra large screen, the columns fill the height of the
+    window below the 4rem header. Only the settings scroll, and the results
+    hide the rows that do not fit.
   --%>
   <div
     id="trains-index"
-    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[1fr_1.4fr_1fr] xl:grid-rows-[auto_1fr]"
+    class={[
+      "relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[1fr_1.4fr_1fr]",
+      @live_action == :index &&
+        "xl:h-[calc(100dvh-4rem)] xl:grid-rows-[auto_minmax(0,1fr)] xl:pb-6"
+    ]}
   >
     <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 xl:max-w-none">
       <div class="flex items-center justify-center gap-3">
@@ -25,20 +32,26 @@
         <h1 class="text-3xl font-semibold tracking-tight">Right on Track</h1>
       </div>
       <p class="text-base-content/70">
-        <%= if @live_action == :campaign do %>
-          Get 90% of the trains home to unlock the next level.
-        <% else %>
-          A train switching game: click the switches to send each train to the house with its colors.
+        <%= cond do %>
+          <% @live_action == :campaign -> %>
+            Get 90% of the trains home to unlock the next level.
+          <% @live_action == :lobby -> %>
+            Join a game, or watch one.
+          <% true -> %>
+            A train switching game: click the switches to send each train to the house with its colors.
         <% end %>
       </p>
       <.how_to_play />
       <div class="pt-2">
         <.mode_tabs
-          tab={if(@live_action == :campaign, do: :campaign, else: :free)}
+          tab={if(@live_action == :index, do: :free, else: @live_action)}
           free_path={settings_path(@settings, %{})}
           campaign_path={~p"/trains/campaign"}
+          lobby_path={~p"/trains/lobby"}
           free_label="Free play"
           campaign_label="Campaign"
+          lobby_label="Lobby"
+          lobby_count={Enum.count(@lobby_games, &(&1.status == :open))}
         />
       </div>
     </div>
@@ -46,7 +59,7 @@
     <%= if @live_action == :campaign do %>
       <div
         id="campaign"
-        class="relative mx-auto flex w-full max-w-md flex-col gap-4 lg:col-start-1 lg:row-span-2 lg:row-start-2 xl:col-start-2 xl:row-start-2 xl:max-w-none"
+        class="relative mx-auto flex w-full max-w-md flex-col gap-4 lg:col-start-1 lg:row-start-2 xl:col-start-2 xl:max-w-none"
       >
         <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
           <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -90,7 +103,7 @@
 
       <div
         id="campaign-results"
-        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
+        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 xl:col-start-3 xl:max-w-none"
       >
         <.score_list
           id="campaign-leaderboard"
@@ -111,14 +124,15 @@
       </div>
     <% else %>
       <div
+        :if={@live_action == :lobby}
         id="trains-lobby"
-        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
+        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:col-start-2 xl:max-w-none"
       >
         <.lobby_games
           games={@lobby_games}
           watchers={@watchers}
-          matches={&same_settings?(&1, @settings)}
           path={&~p"/trains/#{&1.id}"}
+          new_game_path={settings_path(@settings, %{})}
         >
           <:icon :let={_game}>
             <OctomoctoWeb.GameIcons.game_icon game="trains" class="size-9 shrink-0" />
@@ -127,7 +141,11 @@
         </.lobby_games>
       </div>
 
-      <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
+      <%!-- The padding keeps the rings of the boxes and the wide start bar in the scroll box --%>
+      <div
+        :if={@live_action == :index}
+        class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-2 xl:static xl:col-start-2 xl:-mx-2 xl:w-[calc(100%+1rem)] xl:max-w-none xl:self-stretch xl:overflow-y-auto xl:px-2 xl:pt-1"
+      >
         <div id="trains-settings" class="flex w-full flex-col gap-4">
           <.setting
             label="Players"
@@ -204,7 +222,11 @@
 
       <div
         id="trains-leaderboard"
-        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
+        class={[
+          "mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 xl:col-start-3 xl:max-w-none",
+          @live_action == :index &&
+            "xl:-mt-1 xl:content-start xl:self-stretch xl:overflow-y-clip xl:pt-1"
+        ]}
       >
         <.score_list
           id="your-results"
