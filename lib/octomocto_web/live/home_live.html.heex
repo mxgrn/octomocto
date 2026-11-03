@@ -60,7 +60,10 @@
               <span
                 :if={game[:badge]}
                 id={"game-badge-#{game.id}"}
-                class="absolute -top-2 -right-2 z-10 inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-octo-indigo py-1 pr-2 pl-1.5 text-[11px] leading-none font-semibold tracking-wide text-white uppercase shadow-sm"
+                class={[
+                  "absolute -top-2 -right-2 z-10 inline-flex items-center gap-1 whitespace-nowrap rounded-full py-1 pr-2 pl-1.5 text-[11px] leading-none font-semibold tracking-wide text-white uppercase shadow-sm",
+                  if(elem(game.badge, 0) == "New", do: "bg-octo-orange", else: "bg-octo-indigo")
+                ]}
               >
                 <.icon name={elem(game.badge, 1)} class="size-3" />
                 {elem(game.badge, 0)}

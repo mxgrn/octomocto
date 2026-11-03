@@ -31,6 +31,7 @@ defmodule OctomoctoWeb.HomeLive do
       description:
         "Find the numbers in order. The first player to click the next number gets the point.",
       path: "/schulte",
+      badge: {"Trending this week", "hero-fire-mini"},
       icon_class: "bg-octo-indigo/10 dark:bg-octo-indigo-light/15"
     },
     %{
@@ -38,7 +39,6 @@ defmodule OctomoctoWeb.HomeLive do
       name: "Right on Track",
       description: "Click the switches to send each train to the house with its colors.",
       path: "/trains",
-      badge: {"Trending this week", "hero-fire-mini"},
       icon_class: "bg-octo-orange/10 dark:bg-octo-orange-light/15"
     },
     %{
@@ -88,7 +88,6 @@ defmodule OctomoctoWeb.HomeLive do
       description:
         "A Dobble-like game: any two cards have exactly one symbol in common. Spot it first.",
       path: "/overlap",
-      badge: {"New", "hero-sparkles-mini"},
       icon_class: "bg-pink-500/10 dark:bg-pink-400/15"
     },
     %{
@@ -97,7 +96,6 @@ defmodule OctomoctoWeb.HomeLive do
       description:
         "Is the new card the same as the card before it? Answer fast for 45 seconds to build a multiplier.",
       path: "/snap",
-      badge: {"New", "hero-sparkles-mini"},
       icon_class: "bg-teal-500/10 dark:bg-teal-400/15",
       # Not suggested at the end of a multiplayer game, see `OctomoctoWeb.NextGame`
       single_player: true
