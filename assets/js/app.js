@@ -35,6 +35,7 @@ import {playEchoSound} from "./echo_sounds"
 import {playMahjongSound} from "./mahjong_sounds"
 import {playOverlapSound} from "./overlap_sounds"
 import {playSnapSound} from "./snap_sounds"
+import {playAfterglowSound} from "./afterglow_sounds"
 import {LobbySound} from "./lobby_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
@@ -730,6 +731,53 @@ if (snapNode) {
   snap.ports.snapPlaySound.subscribe(playSnapSound)
   snap.ports.snapSaveMuted.subscribe(value => {
     try { localStorage.setItem("snap-muted", String(value)) } catch (_e) {}
+  })
+}
+
+// Start the Afterglow game and connect its ports to the game channel. It
+// works as the Snap game above.
+const afterglowNode = document.getElementById("afterglow-main")
+if (afterglowNode) {
+  if (navigator.userActivation?.hasBeenActive) unlockAudio()
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  document.addEventListener("keydown", unlockAudio, {once: true})
+  let muted = false
+  try { muted = localStorage.getItem("afterglow-muted") === "true" } catch (_e) {}
+
+  const afterglow = window.Elm.Afterglow.init({node: afterglowNode, flags: {settingsUrl: afterglowNode.dataset.settingsUrl, nextGame: {name: afterglowNode.dataset.nextGameName, path: afterglowNode.dataset.nextGamePath}, guest: !afterglowNode.dataset.userToken, muted}})
+  const socket = new Socket("/socket", {params: {user_token: afterglowNode.dataset.userToken, _csrf_token: csrfToken}})
+  socket.connect()
+
+  const tokenKey = `afterglow-token:${afterglowNode.dataset.gameId}`
+  let token = null
+  try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
+  const joined = reply => {
+    token = reply.token
+    try {
+      if (token) sessionStorage.setItem(tokenKey, token)
+      else sessionStorage.removeItem(tokenKey)
+    } catch (_e) {}
+    afterglow.ports.afterglowJoined.send(reply)
+  }
+  const channel = socket.channel(`afterglow:${afterglowNode.dataset.gameId}`, () => token ? {token} : {})
+  channel.on("state", state => afterglow.ports.afterglowState.send(state))
+  channel.on("joined", joined)
+  channel.join()
+    .receive("ok", joined)
+    .receive("error", ({reason}) => {
+      // The server of the game stopped a moment ago. The channel tries again.
+      if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
+      channel.leave()
+      afterglow.ports.afterglowJoinFailed.send(reason)
+    })
+
+  afterglow.ports.afterglowTap.subscribe(tap => channel.push("tap", tap))
+  afterglow.ports.afterglowRestart.subscribe(() => channel.push("restart", {}))
+  afterglow.ports.afterglowPlaySound.subscribe(playAfterglowSound)
+  afterglow.ports.afterglowSaveMuted.subscribe(value => {
+    try { localStorage.setItem("afterglow-muted", String(value)) } catch (_e) {}
   })
 }
 

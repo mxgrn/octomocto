@@ -214,6 +214,45 @@ defmodule OctomoctoWeb.GameIcons do
     """
   end
 
+  # A grid of tiles, some lit, and one with the glow that stays after it
+  # went out
+  def game_icon(%{game: "afterglow"} = assigns) do
+    ~H"""
+    <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
+      <rect
+        :for={{x, y} <- for(y <- 0..2, x <- 0..2, do: {x, y})}
+        x={6 + x * 13}
+        y={6 + y * 13}
+        width="10"
+        height="10"
+        rx="2.5"
+        fill={
+          cond do
+            {x, y} in [{0, 0}, {2, 1}, {1, 2}] -> "#1A9FCB"
+            {x, y} == {1, 1} -> "#D946EF"
+            true -> "#fff"
+          end
+        }
+        fill-opacity={if {x, y} == {1, 1}, do: "0.35", else: "1"}
+        stroke={if {x, y} in [{0, 0}, {2, 1}, {1, 2}, {1, 1}], do: "none", else: "#D946EF"}
+        stroke-opacity="0.35"
+        stroke-width="1.2"
+      />
+      <rect
+        x="17"
+        y="17"
+        width="14"
+        height="14"
+        rx="4"
+        fill="none"
+        stroke="#D946EF"
+        stroke-opacity="0.5"
+        stroke-width="1.2"
+      />
+    </svg>
+    """
+  end
+
   def game_icon(%{game: "sudoku"} = assigns) do
     ~H"""
     <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
@@ -260,7 +299,7 @@ defmodule OctomoctoWeb.GameIcons do
           rx="3"
           fill={
             cond do
-              digit < 3 -> "#4B4BE8"
+              digit < 3 -> "#1A9FCB"
               digit == 3 -> "#F26A1B"
               true -> "#fff"
             end

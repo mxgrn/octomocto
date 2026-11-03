@@ -1,0 +1,150 @@
+<Layouts.app
+  flash={@flash}
+  notifications={@notifications}
+  current_scope={@current_scope}
+  guest_name={@guest_name}
+>
+  <%!--
+    One column on a small screen: the title, the first round and the results.
+    Two columns on a large screen: the results go to the right.
+  --%>
+  <div
+    id="afterglow-index"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16"
+  >
+    <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1">
+      <div class="flex items-center justify-center gap-3">
+        <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
+          <OctomoctoWeb.GameIcons.game_icon game="afterglow" class="size-9" />
+        </div>
+        <h1 class="text-3xl font-semibold tracking-tight">Afterglow</h1>
+      </div>
+      <p class="text-base-content/70">
+        Tiles light up for a moment. When they go out, click the tiles that were lit.
+      </p>
+      <.how_to_play />
+    </div>
+
+    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-2">
+      <div
+        id="afterglow-first-round"
+        class="flex w-full items-center gap-5 rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
+      >
+        <div
+          class="afterglow-preview grid size-24 shrink-0 gap-1"
+          style={"grid-template-columns: repeat(#{@preview.side}, minmax(0, 1fr))"}
+          aria-hidden="true"
+        >
+          <span
+            :for={cell <- 0..(@preview.side * @preview.side - 1)}
+            class={[
+              "rounded-[3px]",
+              if(MapSet.member?(@preview.lit, cell),
+                do: "afterglow-preview-lit bg-octo-indigo dark:bg-octo-indigo-light",
+                else: "bg-base-content/10"
+              )
+            ]}
+            style={"--delay: #{rem(cell * 37, 11) * 90}ms"}
+          />
+        </div>
+        <div class="min-w-0 flex-1 space-y-1">
+          <.setting_header label="First round" icon="hero-squares-2x2" />
+          <p class="text-start">
+            <span id="afterglow-start-level" class="text-2xl font-semibold tabular-nums">
+              {@start_level}
+            </span>
+            <span class="text-base-content/60">tiles</span>
+          </p>
+          <p class="text-start text-xs text-base-content/50">
+            <%= if @first_game do %>
+              Each correct round adds a tile.
+            <% else %>
+              Your last game ended here.
+            <% end %>
+          </p>
+        </div>
+      </div>
+
+      <.start_bar multiplayer={false} />
+    </div>
+
+    <div
+      id="afterglow-leaderboard"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1"
+    >
+      <.score_list
+        id="your-results"
+        icon="hero-user"
+        icon_class="text-octo-indigo"
+        title="Your results"
+        empty={@user_results != nil and @user_results.latest == []}
+        empty_text="No games yet."
+      >
+        <:aside :if={@user_results && @user_results.best}>
+          <span
+            id="your-best"
+            class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
+          >
+            <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
+            <span class="text-base-content/60">Best</span>
+            <span class="font-semibold tabular-nums">{@user_results.best.score}</span>
+          </span>
+        </:aside>
+        <%= if @user_results do %>
+          <.result_row :for={result <- @user_results.latest}>
+            <span class="flex-1 font-medium">
+              {Calendar.strftime(result.inserted_at, "%b %-d")}
+            </span>
+            <span
+              class="text-xs text-base-content/50 tabular-nums"
+              title="Most tiles in a correct round"
+            >
+              {if result.best_level, do: "#{result.best_level} tiles", else: "–"}
+            </span>
+            <.result_pill best={@user_results.best != nil and result.id == @user_results.best.id}>
+              {result.score}
+            </.result_pill>
+          </.result_row>
+        <% else %>
+          <li class="py-2 text-center text-base-content/60">
+            <.link
+              id="your-results-sign-in"
+              href={~p"/signin"}
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
+            >
+              Sign in
+            </.link>
+            to start saving your results.
+          </li>
+        <% end %>
+      </.score_list>
+      <.score_list
+        id="best-results"
+        icon="hero-trophy"
+        icon_class="text-amber-500"
+        title="Best results"
+        empty={@best_results == []}
+      >
+        <:aside :if={!@user_results}>
+          <span class="text-sm text-base-content/60">
+            <.link
+              id="best-results-sign-in"
+              href={~p"/signin"}
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
+            >
+              Sign in
+            </.link>
+            to get listed
+          </span>
+        </:aside>
+        <.result_row :for={{result, place} <- Enum.with_index(@best_results, 1)}>
+          <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+          <span class="min-w-0 flex-1 truncate font-medium">{player_name(result.user)}</span>
+          <.result_pill>{result.score}</.result_pill>
+        </.result_row>
+      </.score_list>
+    </div>
+  </div>
+
+  <.rules rules={@rules} />
+</Layouts.app>

@@ -83,6 +83,7 @@ defmodule OctomoctoWeb.Router do
     get "/mahjong/:id", MahjongController, :show
     get "/overlap/:id", OverlapController, :show
     get "/snap/:id", SnapController, :show
+    get "/afterglow/:id", AfterglowController, :show
 
     # The front page updates its list of public games live. The
     # settings of a new game: a LiveView changes the settings without a page
@@ -107,6 +108,7 @@ defmodule OctomoctoWeb.Router do
       live "/mahjong", MahjongLive
       live "/overlap", OverlapLive
       live "/snap", SnapLive
+      live "/afterglow", AfterglowLive
       live "/stats", StatsLive
     end
 

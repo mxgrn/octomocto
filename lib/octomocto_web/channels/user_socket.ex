@@ -1,6 +1,7 @@
 defmodule OctomoctoWeb.UserSocket do
   use Phoenix.Socket
 
+  channel "afterglow:*", OctomoctoWeb.AfterglowChannel
   channel "astronaut:*", OctomoctoWeb.AstronautChannel
   channel "echo:*", OctomoctoWeb.EchoChannel
   channel "mahjong:*", OctomoctoWeb.MahjongChannel

@@ -20,7 +20,8 @@ defmodule OctomoctoWeb.PageControllerTest do
              "/echo",
              "/mahjong",
              "/overlap",
-             "/snap"
+             "/snap",
+             "/afterglow"
            ]
   end
 

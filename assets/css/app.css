@@ -601,6 +601,68 @@ multiplier pops when it changes. */
   .snap-card, .snap-multiplier { animation: none; }
 }
 
+/* Afterglow. The lit tiles light up at once and go out slowly, so that
+each tile leaves a short glow. A correct tile pops, a wrong tile shakes,
+and after a wrong tile the missed tiles show as rings. Each round fades
+in, because the grid can change its size. */
+.afterglow-stage { width: min(26rem, 92vw, 52dvh); }
+.afterglow-grid { display: grid; gap: clamp(0.25rem, 2.2%, 0.625rem); animation: afterglow-grid-in 250ms ease-out; }
+.afterglow-tile {
+  aspect-ratio: 1;
+  border-radius: 18%;
+  background: rgb(15 23 42 / 0.07);
+  transition: background-color 900ms ease-out, box-shadow 900ms ease-out, transform 120ms ease-out;
+  touch-action: manipulation;
+}
+.afterglow-tile.is-open { cursor: pointer; }
+.afterglow-tile.is-open:hover { background: rgb(26 159 203 / 0.16); transition-duration: 120ms; }
+.afterglow-tile.is-open:active { transform: scale(0.94); }
+.afterglow-tile.is-lit {
+  background: var(--color-octo-indigo);
+  box-shadow: 0 0 1.25rem 0.125rem rgb(26 159 203 / 0.55);
+  transition-duration: 150ms;
+}
+.afterglow-tile.is-found {
+  background: var(--color-octo-indigo);
+  box-shadow: 0 0 0.75rem rgb(26 159 203 / 0.35);
+  transition-duration: 150ms;
+  animation: afterglow-pop 220ms ease-out;
+}
+.afterglow-tile.is-wrong { background: #ef4444; transition-duration: 150ms; animation: afterglow-shake 320ms ease-in-out; }
+.afterglow-tile.is-missed { box-shadow: inset 0 0 0 3px var(--color-octo-indigo); background: rgb(26 159 203 / 0.12); transition-duration: 300ms; }
+.afterglow-grid.is-perfect .afterglow-tile.is-found { box-shadow: 0 0 1.5rem 0.25rem rgb(26 159 203 / 0.6); }
+.afterglow-dot { transition: background-color 200ms ease, transform 200ms ease; }
+.afterglow-dot.is-current { transform: scale(1.35); }
+#afterglow-root button { touch-action: manipulation; }
+
+[data-theme=dark] .afterglow-tile { background: rgb(255 255 255 / 0.07); }
+[data-theme=dark] .afterglow-tile.is-open:hover { background: rgb(140 140 255 / 0.18); }
+[data-theme=dark] .afterglow-tile.is-lit,
+[data-theme=dark] .afterglow-tile.is-found { background: var(--color-octo-indigo-light); box-shadow: 0 0 1.25rem 0.125rem rgb(140 140 255 / 0.45); }
+[data-theme=dark] .afterglow-tile.is-wrong { background: #ef4444; }
+[data-theme=dark] .afterglow-tile.is-missed { box-shadow: inset 0 0 0 3px var(--color-octo-indigo-light); background: rgb(140 140 255 / 0.12); }
+
+/* The tiles of the first round on the settings page glow one after another */
+.afterglow-preview-lit { animation: afterglow-breathe 2.4s ease-in-out infinite; animation-delay: var(--delay); }
+
+@keyframes afterglow-grid-in {
+  from { opacity: 0; transform: scale(0.96); }
+}
+@keyframes afterglow-pop {
+  50% { transform: scale(1.08); }
+}
+@keyframes afterglow-shake {
+  20%, 60% { transform: translateX(-6%); }
+  40%, 80% { transform: translateX(6%); }
+}
+@keyframes afterglow-breathe {
+  50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .afterglow-grid, .afterglow-tile, .afterglow-preview-lit { animation: none; }
+}
+
 /* Echo. A shade over each pad makes it pale (light theme) or dark (dark
 theme) until it lights up. The backing under the pads shows in the gaps
 between the pads: white in the light theme, and dark in the dark theme. */
@@ -794,6 +856,7 @@ three times */
   --series-7: #6250d6;
   --series-8: #e34948;
   --series-9: #9c6b30;
+  --series-10: #0e8f9c;
 }
 [data-theme=dark] #stats {
   --series-1: #3987e5;
@@ -805,6 +868,7 @@ three times */
   --series-7: #9085e9;
   --series-8: #e66767;
   --series-9: #b98a52;
+  --series-10: #22aebb;
 }
 
 /* A pointer on a shown game in the legend of the stats chart (or the
@@ -823,7 +887,9 @@ three times */
 #games-chart:has([data-legend="5"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="5"],
 #games-chart:has([data-legend="6"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="6"],
 #games-chart:has([data-legend="7"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="7"],
-#games-chart:has([data-legend="8"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="8"] {
+#games-chart:has([data-legend="8"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="8"],
+#games-chart:has([data-legend="9"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="9"],
+#games-chart:has([data-legend="10"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="10"] {
   opacity: 1;
   stroke-width: 3;
 }

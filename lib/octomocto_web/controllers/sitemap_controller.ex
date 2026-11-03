@@ -28,6 +28,7 @@ defmodule OctomoctoWeb.SitemapController do
       url(~p"/mahjong"),
       url(~p"/overlap"),
       url(~p"/snap"),
+      url(~p"/afterglow"),
       url(~p"/astronaut"),
       url(~p"/privacy"),
       url(~p"/terms")

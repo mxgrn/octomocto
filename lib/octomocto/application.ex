@@ -20,11 +20,12 @@ defmodule Octomocto.Application do
       Octomocto.Repo,
       {Cluster.Supervisor, [topologies, [name: Octomocto.ClusterSupervisor]]},
       # Before the endpoint: a new node gets the Schulte, trains, Memory, Set,
-      # sudoku, Echo, Mahjong, Overlap and Snap games from the other node
-      # before it serves requests.
+      # sudoku, Echo, Mahjong, Overlap, Snap and Afterglow games from the
+      # other node before it serves requests.
       {Mnesiac.Supervisor, [hosts, [name: Octomocto.MnesiacSupervisor]]},
       {Phoenix.PubSub, name: Octomocto.PubSub},
       Octomocto.Lobby.Watchers,
+      {DynamicSupervisor, name: Octomocto.Afterglow.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Astronaut.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Echo.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Mahjong.GameSupervisor},

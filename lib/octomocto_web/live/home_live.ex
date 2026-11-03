@@ -101,6 +101,16 @@ defmodule OctomoctoWeb.HomeLive do
       icon_class: "bg-teal-500/10 dark:bg-teal-400/15",
       # Not suggested at the end of a multiplayer game, see `OctomoctoWeb.NextGame`
       single_player: true
+    },
+    %{
+      id: "afterglow",
+      name: "Afterglow",
+      description:
+        "Tiles light up for a moment. Click the tiles that were lit. Each correct round adds a tile.",
+      path: "/afterglow",
+      badge: {"New", "hero-sparkles-mini"},
+      icon_class: "bg-fuchsia-500/10 dark:bg-fuchsia-400/15",
+      single_player: true
     }
     # Station Escape is archived: it is not on the front page and is not
     # suggested on the end screens. Do not change it for now.
