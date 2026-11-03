@@ -63,6 +63,25 @@ config :phoenix_live_view,
 # at the `config/runtime.exs`.
 config :octomocto, Octomocto.Mailer, adapter: Swoosh.Adapters.Local
 
+# Translates the texts that admins write, such as notifications, with an LLM
+# (see `Octomocto.Notifications.translate/1`). The translations are cached in
+# the database. The static texts use `OctomoctoWeb.Gettext`.
+config :understudy,
+  repo: Octomocto.Repo,
+  translator:
+    {Understudy.Translator.ReqLLM,
+     model: "google:gemini-3.1-flash-lite",
+     llm_opts: [temperature: 0.5],
+     persona:
+       "You translate the announcements of Octomocto, a site with free online games to play solo or with friends.",
+     style:
+       "Informal and friendly. Always use the informal you (du, tu, ты, ти, ty, tu, tú, você).",
+     rules: [
+       ~s(Never translate "Octomocto".),
+       "The text is Markdown on one line. Keep the Markdown syntax and the URLs of the links unchanged.",
+       "In French, put a space before ! ? : and ;."
+     ]}
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",
