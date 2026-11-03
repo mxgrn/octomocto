@@ -7,11 +7,12 @@ defmodule OctomoctoWeb.GuestName do
   the browser (`Accept-Language`), for the locale of the user or guest
   (see `Octomocto.Locales`).
 
-  The guest id is only for statistics and for the names in the results
-  (see `Octomocto.Guests.Guest`). Never use it for authentication or
-  access.
+  The guest id is only for statistics, for the names in the results (see
+  `Octomocto.Guests.Guest`) and for the last settings of the games (see
+  `Octomocto.GameSettings`). Never use it for authentication or access.
 
-  Use the plug in the browser pipeline, and `on_mount/4` in a `live_session`.
+  Use the plug in the browser pipeline, and `on_mount/4` in a `live_session`
+  (it also assigns the id as `:guest_id`).
   The `OctomoctoWeb.UserSocket` reads the name and the id from the session
   too.
   """
@@ -68,7 +69,11 @@ defmodule OctomoctoWeb.GuestName do
   end
 
   def on_mount(:default, _params, session, socket) do
-    {:cont, Phoenix.Component.assign(socket, :guest_name, from_session(session))}
+    {:cont,
+     Phoenix.Component.assign(socket,
+       guest_name: from_session(session),
+       guest_id: id_from_session(session)
+     )}
   end
 
   @doc "The guest name in a session, or nil when it has no valid name."

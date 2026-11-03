@@ -19,6 +19,7 @@ defmodule OctomoctoWeb.MahjongLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Lobby, Mahjong}
+  alias OctomoctoWeb.SavedSettings
   alias Octomocto.Mahjong.{Game, Store}
 
   def mount(_params, _session, socket) do
@@ -40,8 +41,16 @@ defmodule OctomoctoWeb.MahjongLive do
     ]
   end
 
+  # The params of the settings. Without them, the page shows the settings
+  # that the user chose last.
+  @settings_params ["players", "visibility"]
+
   def handle_params(params, _uri, socket) do
-    settings = settings(params)
+    settings =
+      socket |> SavedSettings.params("mahjong", params, @settings_params) |> settings()
+
+    SavedSettings.save_change(socket, "mahjong", settings, query(settings, []))
+
     filter = %{"layout" => "turtle", "players" => settings.players}
 
     {:noreply,

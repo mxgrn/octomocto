@@ -19,6 +19,7 @@ defmodule OctomoctoWeb.OverlapLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Lobby, Overlap}
+  alias OctomoctoWeb.SavedSettings
   alias Octomocto.Overlap.{Game, Store}
 
   def mount(_params, _session, socket) do
@@ -40,8 +41,16 @@ defmodule OctomoctoWeb.OverlapLive do
     ]
   end
 
+  # The params of the settings. Without them, the page shows the settings
+  # that the user chose last.
+  @settings_params ["players", "visibility"]
+
   def handle_params(params, _uri, socket) do
-    settings = settings(params)
+    settings =
+      socket |> SavedSettings.params("overlap", params, @settings_params) |> settings()
+
+    SavedSettings.save_change(socket, "overlap", settings, query(settings, []))
+
     filter = %{"symbols" => 8, "players" => settings.players}
 
     {:noreply,

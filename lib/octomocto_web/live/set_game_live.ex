@@ -19,6 +19,7 @@ defmodule OctomoctoWeb.SetGameLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Lobby, SetGame}
+  alias OctomoctoWeb.SavedSettings
   alias Octomocto.SetGame.{Deck, Game, Store}
 
   def mount(_params, _session, socket) do
@@ -40,8 +41,16 @@ defmodule OctomoctoWeb.SetGameLive do
     ]
   end
 
+  # The params of the settings. Without them, the page shows the settings
+  # that the user chose last.
+  @settings_params ["players", "mode", "visibility"]
+
   def handle_params(params, _uri, socket) do
-    settings = settings(params)
+    settings =
+      socket |> SavedSettings.params("set", params, @settings_params) |> settings()
+
+    SavedSettings.save_change(socket, "set", settings, query(settings, []))
+
     filter = %{"mode" => settings.mode, "players" => settings.players}
 
     {:noreply,

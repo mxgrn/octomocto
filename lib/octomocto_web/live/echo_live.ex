@@ -18,6 +18,7 @@ defmodule OctomoctoWeb.EchoLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Echo, Lobby}
+  alias OctomoctoWeb.SavedSettings
   alias Octomocto.Echo.{Game, Store}
 
   @default_pads 4
@@ -44,8 +45,16 @@ defmodule OctomoctoWeb.EchoLive do
     ]
   end
 
+  # The params of the settings. Without them, the page shows the settings
+  # that the user chose last.
+  @settings_params ["pads", "players", "visibility"]
+
   def handle_params(params, _uri, socket) do
-    settings = settings(params)
+    settings =
+      socket |> SavedSettings.params("echo", params, @settings_params) |> settings()
+
+    SavedSettings.save_change(socket, "echo", settings, query(settings, []))
+
     filter = %{"pads" => settings.pads, "players" => settings.players}
 
     locale = socket.assigns.locale

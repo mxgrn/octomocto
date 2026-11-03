@@ -7,6 +7,7 @@ defmodule OctomoctoWeb.SchulteLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Lobby, Schulte}
+  alias OctomoctoWeb.SavedSettings
   alias Octomocto.Schulte.{Game, Store}
 
   def mount(_params, _session, socket) do
@@ -28,8 +29,16 @@ defmodule OctomoctoWeb.SchulteLive do
     ]
   end
 
+  # The params of the settings. Without them, the page shows the settings
+  # that the user chose last.
+  @settings_params ["board", "mode", "players", "visibility"]
+
   def handle_params(params, _uri, socket) do
-    settings = settings(params)
+    settings =
+      socket |> SavedSettings.params("schulte", params, @settings_params) |> settings()
+
+    SavedSettings.save_change(socket, "schulte", settings, query(settings, []))
+
     filter = %{"type" => settings.board, "mode" => settings.mode, "players" => settings.players}
 
     {:noreply,

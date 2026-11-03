@@ -13,6 +13,7 @@ defmodule OctomoctoWeb.SnapLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.Snap
+  alias OctomoctoWeb.SavedSettings
 
   def mount(_params, _session, socket) do
     {:ok, assign(socket, [canonical_url: url(~p"/snap"), rules: rules()] ++ seo())}
@@ -27,8 +28,16 @@ defmodule OctomoctoWeb.SnapLive do
     ]
   end
 
+  # The params of the settings. Without them, the page shows the settings
+  # that the user chose last.
+  @settings_params ["back"]
+
   def handle_params(params, _uri, socket) do
-    settings = settings(params)
+    settings =
+      socket |> SavedSettings.params("snap", params, @settings_params) |> settings()
+
+    SavedSettings.save_change(socket, "snap", settings, query(settings))
+
     filter = %{"back" => settings.back, "players" => 1}
 
     {:noreply,

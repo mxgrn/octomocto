@@ -22,7 +22,7 @@ defmodule OctomoctoWeb.MemoryLive do
 
   alias Octomocto.{Accounts, Lobby, Memory}
   alias Octomocto.Memory.{Board, Campaign, Game, Store, Themes}
-  alias OctomoctoWeb.MemoryChannel
+  alias OctomoctoWeb.{MemoryChannel, SavedSettings}
 
   def mount(params, _session, socket) do
     locale = socket.assigns.locale
@@ -81,7 +81,7 @@ defmodule OctomoctoWeb.MemoryLive do
      socket
      |> remember_tab("campaign")
      |> assign(
-       settings: settings(%{}),
+       settings: settings(tab_params(socket)),
        canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/memory/campaign"),
        alternate_urls: Locale.alternate_urls("memory", ~p"/memory/campaign"),
        languages: Locale.languages("memory", locale, ~p"/memory/campaign")
@@ -89,14 +89,14 @@ defmodule OctomoctoWeb.MemoryLive do
      |> assign_campaign(params)}
   end
 
-  # The public games, and the results of the default settings
+  # The public games, and the results of the settings of the Free play tab
   def handle_params(_params, _uri, %{assigns: %{live_action: :lobby}} = socket) do
     locale = socket.assigns.locale
 
     {:noreply,
      socket
      |> remember_tab("lobby")
-     |> assign_free_play(%{})
+     |> assign_free_play(tab_params(socket))
      |> assign(
        canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/memory/lobby"),
        alternate_urls: Locale.alternate_urls("memory", ~p"/memory/lobby"),
@@ -112,9 +112,28 @@ defmodule OctomoctoWeb.MemoryLive do
     if tab in ["campaign", "lobby"] and not Enum.any?(@settings_params, &Map.has_key?(params, &1)) do
       {:noreply, push_patch(socket, to: Locale.path(locale, ~p"/memory/#{tab}"))}
     else
-      {:noreply, socket |> remember_tab("free") |> assign_free_play(params)}
+      new_socket =
+        socket |> remember_tab("free") |> assign_free_play(saved_params(socket, params))
+
+      settings = new_socket.assigns.settings
+      SavedSettings.save_change(socket, "memory", settings, query(settings, match: nil))
+      {:noreply, new_socket}
     end
   end
+
+  # The settings that the user chose last, when the page
+  # loads without settings. A match has its own settings.
+  defp saved_params(%{assigns: %{match: nil}} = socket, params),
+    do: SavedSettings.params(socket, "memory", params, @settings_params)
+
+  defp saved_params(_socket, params), do: params
+
+  # The Campaign and Lobby tabs keep the settings of the Free play tab, so
+  # that its tab link goes back to them
+  defp tab_params(%{assigns: %{settings: settings}}),
+    do: SavedSettings.to_params(query(settings, match: nil))
+
+  defp tab_params(socket), do: saved_params(socket, %{})
 
   defp last_tab(%{user: %{memory_tab: tab}}), do: tab
   defp last_tab(_scope), do: nil

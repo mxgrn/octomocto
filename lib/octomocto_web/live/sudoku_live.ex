@@ -19,6 +19,7 @@ defmodule OctomoctoWeb.SudokuLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Lobby, Sudoku}
+  alias OctomoctoWeb.SavedSettings
   alias Octomocto.Sudoku.{Game, Puzzle, Store}
 
   def mount(_params, _session, socket) do
@@ -40,8 +41,16 @@ defmodule OctomoctoWeb.SudokuLive do
     ]
   end
 
+  # The params of the settings. Without them, the page shows the settings
+  # that the user chose last.
+  @settings_params ["players", "difficulty", "visibility"]
+
   def handle_params(params, _uri, socket) do
-    settings = settings(params)
+    settings =
+      socket |> SavedSettings.params("sudoku", params, @settings_params) |> settings()
+
+    SavedSettings.save_change(socket, "sudoku", settings, query(settings, []))
+
     filter = %{"difficulty" => settings.difficulty, "players" => settings.players}
 
     {:noreply,
