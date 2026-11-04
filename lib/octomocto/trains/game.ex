@@ -388,6 +388,7 @@ defmodule Octomocto.Trains.Game do
   # The round starts after the countdown, when the game has all its players
   defp start_round(%{started_at: nil} = state) when map_size(state.players) == state.needed do
     Process.send_after(self(), :countdown_over, @countdown_ms)
+    Octomocto.Guests.save_started(state.players)
     %{state | started_at: now() + @countdown_ms, opened: false}
   end
 

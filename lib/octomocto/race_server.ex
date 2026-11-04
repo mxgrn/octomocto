@@ -323,6 +323,7 @@ defmodule Octomocto.RaceServer do
   defp start_clock(%{started_at: nil} = state)
        when map_size(state.players) == state.needed do
     Process.send_after(self(), {:countdown_over, state.field_id}, state.countdown_ms)
+    Octomocto.Guests.save_started(state.players)
     %{state | started_at: now() + state.countdown_ms, listed: false}
   end
 

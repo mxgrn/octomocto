@@ -1,6 +1,7 @@
 defmodule Octomocto.Guests do
   @moduledoc """
-  The guests that finished a game (see `Octomocto.Guests.Guest`).
+  The guests that started a game (see `Octomocto.Guests.Guest`). A guest
+  with no results started games but did not finish them.
   """
   alias Octomocto.Guests.Guest
   alias Octomocto.Repo
@@ -19,6 +20,12 @@ defmodule Octomocto.Guests do
 
     Repo.insert_all(Guest, rows, on_conflict: :nothing, conflict_target: :id)
   end
+
+  @doc """
+  Saves the guests among the players of a game that starts, which is when
+  it has all its players. The `players` are the map of `Octomocto.Seats`.
+  """
+  def save_started(players), do: save(Map.values(players), DateTime.utc_now())
 
   @doc """
   The guest id of a player for its result. It is nil for a user, for a
