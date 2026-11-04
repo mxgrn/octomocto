@@ -44,7 +44,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # One host at a time (sync), so that the other node keeps the Schulte
+      # One host at a time (sync), so that the other node keeps the Nimble Mosaic
       # games. A new node gets the games from the other node before its
       # health check passes.
       - name: Pull image on hosts, restart

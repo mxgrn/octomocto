@@ -13,7 +13,7 @@ defmodule Octomocto.Stats do
 
   # The result schema of each game, by the game id of the front page
   @results %{
-    "schulte" => Octomocto.Schulte.Result,
+    "nimble-mosaic" => Octomocto.NimbleMosaic.Result,
     "trains" => Octomocto.Trains.Result,
     "memory" => Octomocto.Memory.Result,
     "set" => Octomocto.SetGame.Result,

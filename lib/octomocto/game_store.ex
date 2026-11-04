@@ -9,7 +9,7 @@ defmodule Octomocto.GameStore do
   Use it in one module for each kind of game, and add that module to the
   `:stores` of `:mnesiac` in the config:
 
-      defmodule Octomocto.Schulte.Store do
+      defmodule Octomocto.NimbleMosaic.Store do
         use Octomocto.GameStore
       end
 

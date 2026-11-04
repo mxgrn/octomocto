@@ -287,10 +287,10 @@ defmodule OctomoctoWeb.GameIcons do
     """
   end
 
-  def game_icon(%{game: "schulte"} = assigns) do
+  def game_icon(%{game: "nimble-mosaic"} = assigns) do
     ~H"""
     <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
-      <g :for={{digit, x, y} <- schulte_cells()}>
+      <g :for={{digit, x, y} <- nimble_mosaic_cells()}>
         <rect
           x={x}
           y={y}
@@ -320,8 +320,8 @@ defmodule OctomoctoWeb.GameIcons do
     """
   end
 
-  # The digits of a 3 x 3 Schulte grid, with the positions of their cells
-  defp schulte_cells do
+  # The digits of a 3 x 3 grid, with the positions of their cells
+  defp nimble_mosaic_cells do
     for {digit, i} <- Enum.with_index([7, 2, 5, 4, 9, 1, 6, 3, 8]) do
       {digit, 4 + rem(i, 3) * 14, 4 + div(i, 3) * 14}
     end

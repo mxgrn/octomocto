@@ -20,7 +20,7 @@ defmodule OctomoctoWeb.HomeLive do
     MahjongLive,
     MemoryLive,
     OverlapLive,
-    SchulteLive,
+    NimbleMosaicLive,
     SetGameLive,
     SudokuLive,
     TrainsLive
@@ -28,11 +28,11 @@ defmodule OctomoctoWeb.HomeLive do
 
   @games [
     %{
-      id: "schulte",
-      name: "Schulte Race",
+      id: "nimble-mosaic",
+      name: "Nimble Mosaic",
       description:
         "Find the numbers in order. The first player to click the next number gets the point.",
-      path: "/schulte",
+      path: "/nimble-mosaic",
       badge: {"Trending this week", "hero-fire-mini"},
       icon_class: "bg-octo-indigo/10 dark:bg-octo-indigo-light/15"
     },
@@ -137,7 +137,8 @@ defmodule OctomoctoWeb.HomeLive do
     "trains" => {Octomocto.Trains.Game, Octomocto.Trains.Store, TrainsLive},
     "set" => {Octomocto.SetGame.Game, Octomocto.SetGame.Store, SetGameLive},
     "sudoku" => {Octomocto.Sudoku.Game, Octomocto.Sudoku.Store, SudokuLive},
-    "schulte" => {Octomocto.Schulte.Game, Octomocto.Schulte.Store, SchulteLive},
+    "nimble-mosaic" =>
+      {Octomocto.NimbleMosaic.Game, Octomocto.NimbleMosaic.Store, NimbleMosaicLive},
     "echo" => {Octomocto.Echo.Game, Octomocto.Echo.Store, EchoLive},
     "mahjong" => {Octomocto.Mahjong.Game, Octomocto.Mahjong.Store, MahjongLive},
     "overlap" => {Octomocto.Overlap.Game, Octomocto.Overlap.Store, OverlapLive}

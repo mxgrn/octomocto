@@ -76,7 +76,12 @@ defmodule OctomoctoWeb.Router do
     get "/astronaut", AstronautController, :index
     post "/astronaut", AstronautController, :create
     get "/astronaut/:id", AstronautController, :show
-    get "/schulte/:id", SchulteController, :show
+    get "/nimble-mosaic/:id", NimbleMosaicController, :show
+    # Temporary (302): "/schulte" is for the classic Schulte tables later.
+    # Before the live routes, so that "/stats/schulte" is not a game id.
+    get "/schulte", SchulteRedirectController, :index
+    get "/schulte/:id", SchulteRedirectController, :show
+    get "/stats/schulte", SchulteRedirectController, :stats
     get "/set/:id", SetGameController, :show
     get "/sudoku/:id", SudokuController, :show
     get "/echo/:id", EchoController, :show
@@ -102,7 +107,7 @@ defmodule OctomoctoWeb.Router do
       live "/trains", TrainsLive, :index
       live "/trains/campaign", TrainsLive, :campaign
       live "/trains/lobby", TrainsLive, :lobby
-      live "/schulte", SchulteLive
+      live "/nimble-mosaic", NimbleMosaicLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby

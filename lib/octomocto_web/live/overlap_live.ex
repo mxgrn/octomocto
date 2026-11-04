@@ -3,7 +3,7 @@ defmodule OctomoctoWeb.OverlapLive do
 
   on_mount {OctomoctoWeb.SiteNotifications, "overlap"}
 
-  # The same settings and result lists as on the Schulte page
+  # The same settings and result lists as on the Nimble Mosaic page
   import OctomoctoWeb.SettingsComponents,
     only: [
       setting: 1,

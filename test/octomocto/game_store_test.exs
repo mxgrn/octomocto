@@ -2,7 +2,7 @@ defmodule Octomocto.GameStoreTest do
   use ExUnit.Case, async: true
 
   # A store module made with `use Octomocto.GameStore`
-  alias Octomocto.Schulte.Store
+  alias Octomocto.NimbleMosaic.Store
 
   test "read/1 gives the state that write/1 wrote, and nil after delete/1" do
     id = "game-#{System.unique_integer([:positive])}"

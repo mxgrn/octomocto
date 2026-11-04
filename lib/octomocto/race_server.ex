@@ -25,16 +25,16 @@ defmodule Octomocto.RaceServer do
 
   A game module uses this module:
 
-      defmodule Octomocto.Schulte.Game do
+      defmodule Octomocto.NimbleMosaic.Game do
         use Octomocto.RaceServer,
-          # Each change is sent on the "schulte_game:<id>" PubSub topic as
-          # `{:schulte_state, state}`
-          topic: "schulte_game",
-          state_message: :schulte_state,
-          lobby_topic: "schulte_lobby",
-          store: Octomocto.Schulte.Store,
+          # Each change is sent on the "nimble_mosaic_game:<id>" PubSub topic as
+          # `{:nimble_mosaic_state, state}`
+          topic: "nimble_mosaic_game",
+          state_message: :nimble_mosaic_state,
+          lobby_topic: "nimble_mosaic_lobby",
+          store: Octomocto.NimbleMosaic.Store,
           # The module with `save_results/4`
-          context: Octomocto.Schulte
+          context: Octomocto.NimbleMosaic
       end
 
   The game is created with `{id, config}`, where the config has the

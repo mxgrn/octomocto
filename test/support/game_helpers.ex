@@ -8,9 +8,9 @@ defmodule Octomocto.GameHelpers do
 
   @defaults %{players: 1, public: false, countdown_ms: 0, rejoin_grace_ms: 0}
 
-  @doc "A Schulte game with a random layout in the easy mode."
-  def schulte_game(id, config \\ []),
-    do: game(Octomocto.Schulte.Game, id, %{layout: :random, mode: :easy}, config)
+  @doc "A Nimble Mosaic game with a random layout in the easy mode."
+  def nimble_mosaic_game(id, config \\ []),
+    do: game(Octomocto.NimbleMosaic.Game, id, %{layout: :random, mode: :easy}, config)
 
   @doc "A sudoku game with an easy puzzle."
   def sudoku_game(id, config \\ []),

@@ -4,11 +4,11 @@ defmodule Octomocto.GameProcessTest do
   import Octomocto.GameHelpers
 
   alias Octomocto.GameProcess
-  alias Octomocto.Schulte.{Game, GameSupervisor, Store}
+  alias Octomocto.NimbleMosaic.{Game, GameSupervisor, Store}
 
   test "join/9 adds a player to a running game" do
     id = "game-#{System.unique_integer([:positive])}"
-    start_supervised!(schulte_game(id))
+    start_supervised!(nimble_mosaic_game(id))
 
     assert {:ok, player_id, %{players: [%{id: player_id}]}} =
              GameProcess.join(Game, Store, GameSupervisor, id, nil, nil, nil, nil, false)
@@ -16,7 +16,7 @@ defmodule Octomocto.GameProcessTest do
 
   test "join/9 starts a stopped game again from its copy in the store" do
     id = "game-#{System.unique_integer([:positive])}"
-    pid = start_supervised!(schulte_game(id))
+    pid = start_supervised!(nimble_mosaic_game(id))
 
     {:ok, _player_id, before} =
       GameProcess.join(Game, Store, GameSupervisor, id, nil, nil, nil, nil, false)

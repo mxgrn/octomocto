@@ -1,17 +1,17 @@
-defmodule Octomocto.Schulte do
+defmodule Octomocto.NimbleMosaic do
   @moduledoc """
-  Multiplayer Schulte tables. Each game is a `Octomocto.Schulte.Game`
+  Multiplayer Nimble Mosaic games. Each game is a `Octomocto.NimbleMosaic.Game`
   process on one node of the cluster, found by its id. A copy of its state
-  is in `Octomocto.Schulte.Store`, so the game continues on another node
+  is in `Octomocto.NimbleMosaic.Store`, so the game continues on another node
   when its node stops. Finished fields are saved as
-  `Octomocto.Schulte.Result` rows.
+  `Octomocto.NimbleMosaic.Result` rows.
   """
 
   import Ecto.Query
 
   alias Octomocto.GameProcess
   alias Octomocto.Repo
-  alias Octomocto.Schulte.{Game, Result, Store}
+  alias Octomocto.NimbleMosaic.{Game, Result, Store}
 
   @list_size 5
 
@@ -27,7 +27,7 @@ defmodule Octomocto.Schulte do
 
     {:ok, _pid} =
       DynamicSupervisor.start_child(
-        Octomocto.Schulte.GameSupervisor,
+        Octomocto.NimbleMosaic.GameSupervisor,
         {Game,
          {id, %{layout: layout, mode: mode, players: players, public: public, creator: creator}}}
       )
@@ -49,7 +49,7 @@ defmodule Octomocto.Schulte do
 
   Give the `player_id` of a player that is still in the game to bind that
   player to the calling process again. Only give a player id that the
-  caller can trust (see `OctomoctoWeb.SchulteChannel`).
+  caller can trust (see `OctomoctoWeb.NimbleMosaicChannel`).
 
   Gives `{:error, :unavailable}` when the node of the game stopped a
   moment ago. Try again soon.
@@ -65,7 +65,7 @@ defmodule Octomocto.Schulte do
     GameProcess.join(
       Game,
       Store,
-      Octomocto.Schulte.GameSupervisor,
+      Octomocto.NimbleMosaic.GameSupervisor,
       id,
       user_id,
       name,
@@ -81,7 +81,7 @@ defmodule Octomocto.Schulte do
   updates. Gives the same errors as `join/4`.
   """
   def watch(id) do
-    GameProcess.watch(Game, Store, Octomocto.Schulte.GameSupervisor, id)
+    GameProcess.watch(Game, Store, Octomocto.NimbleMosaic.GameSupervisor, id)
   end
 
   @doc "The player clicks a number. Only the next number counts."

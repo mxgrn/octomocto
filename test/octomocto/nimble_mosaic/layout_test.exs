@@ -1,7 +1,7 @@
-defmodule Octomocto.Schulte.LayoutTest do
+defmodule Octomocto.NimbleMosaic.LayoutTest do
   use ExUnit.Case, async: true
 
-  alias Octomocto.Schulte.Layout
+  alias Octomocto.NimbleMosaic.Layout
 
   test "generate/1 makes the given number of regions with labels on the board" do
     {width, height} = Layout.size()

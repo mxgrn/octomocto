@@ -1,6 +1,6 @@
-port module Schulte exposing (main)
+port module NimbleMosaic exposing (main)
 
-{-| Multiplayer Schulte table race.
+{-| Multiplayer Nimble Mosaic race.
 
 The server owns the game: the field with the numbers 1 to 90, the next
 number and the scores. The first player to click the next number gets a
@@ -19,7 +19,7 @@ board is hidden and nobody can pick. A countdown with beeps comes before
 each field. A browser that joins a full game only
 watches: it has no player id.
 
-The port names start with "schulte", because Elm does not allow two ports
+The port names start with "nimble-mosaic", because Elm does not allow two ports
 with the same name in one bundle.
 
 -}
@@ -46,39 +46,39 @@ import Time
 -- PORTS
 
 
-port schultePick : Int -> Cmd msg
+port nimbleMosaicPick : Int -> Cmd msg
 
 
-port schulteRestart : () -> Cmd msg
+port nimbleMosaicRestart : () -> Cmd msg
 
 
 {-| Starts the next game for all players, see OctomoctoWeb.NextGame
 -}
-port schulteNextGame : () -> Cmd msg
+port nimbleMosaicNextGame : () -> Cmd msg
 
 
-port schulteCopyText : String -> Cmd msg
+port nimbleMosaicCopyText : String -> Cmd msg
 
 
-port schulteJoined : (Decode.Value -> msg) -> Sub msg
+port nimbleMosaicJoined : (Decode.Value -> msg) -> Sub msg
 
 
-port schulteState : (Decode.Value -> msg) -> Sub msg
+port nimbleMosaicState : (Decode.Value -> msg) -> Sub msg
 
 
-port schulteJoinFailed : (String -> msg) -> Sub msg
+port nimbleMosaicJoinFailed : (String -> msg) -> Sub msg
 
 
 {-| The number of browsers that only watch the game, after the join and
 after each change.
 -}
-port schulteWatchers : (Int -> msg) -> Sub msg
+port nimbleMosaicWatchers : (Int -> msg) -> Sub msg
 
 
-port schultePlaySound : String -> Cmd msg
+port nimbleMosaicPlaySound : String -> Cmd msg
 
 
-port schulteSaveMuted : Bool -> Cmd msg
+port nimbleMosaicSaveMuted : Bool -> Cmd msg
 
 
 
@@ -294,7 +294,7 @@ update msg model =
                         ( model, Cmd.none )
 
                     else if number == game.next then
-                        ( model, schultePick number )
+                        ( model, nimbleMosaicPick number )
 
                     else if number > game.next || not game.hidesFound then
                         let
@@ -322,15 +322,15 @@ update msg model =
                 ( model, Cmd.none )
 
         Restart ->
-            ( model, schulteRestart () )
+            ( model, nimbleMosaicRestart () )
 
         StartNextGame ->
-            ( model, schulteNextGame () )
+            ( model, nimbleMosaicNextGame () )
 
         CopyLink ->
             ( { model | copied = True }
             , Cmd.batch
-                [ schulteCopyText model.gameUrl
+                [ nimbleMosaicCopyText model.gameUrl
                 , Process.sleep 1500 |> Task.perform (\_ -> CopiedTimeout)
                 ]
             )
@@ -352,7 +352,7 @@ update msg model =
             ( { model | viewport = ( width, height ) }, Cmd.none )
 
         ToggleMuted ->
-            ( { model | muted = not model.muted }, schulteSaveMuted (not model.muted) )
+            ( { model | muted = not model.muted }, nimbleMosaicSaveMuted (not model.muted) )
 
 
 {-| The seconds left in the countdown (3, 2, 1), 0 after it, and Nothing
@@ -410,7 +410,7 @@ playSounds model names =
         Cmd.none
 
     else
-        Cmd.batch (List.map schultePlaySound names)
+        Cmd.batch (List.map nimbleMosaicPlaySound names)
 
 
 {-| The sounds for the change from the old state to the new one: the start
@@ -561,10 +561,10 @@ playerDecoder =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ schulteJoined GotJoined
-        , schulteState GotState
-        , schulteJoinFailed GotJoinFailed
-        , schulteWatchers GotWatchers
+        [ nimbleMosaicJoined GotJoined
+        , nimbleMosaicState GotState
+        , nimbleMosaicJoinFailed GotJoinFailed
+        , nimbleMosaicWatchers GotWatchers
         , Browser.Events.onResize (\w h -> Resized (toFloat w) (toFloat h))
         , case model.connection of
             Joined _ game ->
@@ -593,10 +593,10 @@ view : Model -> Html Msg
 view model =
     case model.connection of
         Connecting ->
-            p [ id "schulte-connecting", class "py-24 text-center opacity-60" ] [ text "Joining the game…" ]
+            p [ id "nimble-mosaic-connecting", class "py-24 text-center opacity-60" ] [ text "Joining the game…" ]
 
         Failed reason ->
-            p [ id "schulte-failed", class "py-24 text-center text-red-600 dark:text-red-400" ] [ text ("Could not join the game: " ++ reason) ]
+            p [ id "nimble-mosaic-failed", class "py-24 text-center text-red-600 dark:text-red-400" ] [ text ("Could not join the game: " ++ reason) ]
 
         Joined me game ->
             viewGame model me game
@@ -609,11 +609,11 @@ viewGame model me game =
             isTall model me game
     in
     div
-        [ id "schulte-root"
+        [ id "nimble-mosaic-root"
         , class "flex w-full flex-col gap-2 select-none max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:gap-3 lg:flex-row lg:items-start lg:gap-8"
         , classList [ ( "is-playing", not game.waiting && not (finished game) ) ]
         ]
-        [ aside [ id "schulte-panel", class "flex flex-col gap-2 max-lg:landscape:w-48 max-lg:landscape:shrink-0 max-lg:landscape:gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
+        [ aside [ id "nimble-mosaic-panel", class "flex flex-col gap-2 max-lg:landscape:w-48 max-lg:landscape:shrink-0 max-lg:landscape:gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
             -- On a small screen, the title, the stats and the restart button
             -- are in one compact row. On a small screen that is wider than
             -- tall, they are in a narrow column at the left of the board, so
@@ -624,7 +624,7 @@ viewGame model me game =
                 [ div [ class "min-w-0 lg:order-1" ]
                     [ div [ class "flex items-center gap-1 lg:gap-2" ]
                         [ a
-                            [ id "schulte-home"
+                            [ id "nimble-mosaic-home"
                             , href "/"
                             , class "mr-1 shrink-0 transition lg:mr-0"
                             ]
@@ -633,11 +633,11 @@ viewGame model me game =
                             ]
                         , h1 [ class "truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
                             [ a
-                                [ id "schulte-title-link"
-                                , href "/schulte"
+                                [ id "nimble-mosaic-title-link"
+                                , href "/nimble-mosaic"
                                 , class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light"
                                 ]
-                                [ text "Schulte Race" ]
+                                [ text "Nimble Mosaic" ]
                             ]
                         , viewWatchers model.watchers
                         ]
@@ -657,7 +657,7 @@ viewGame model me game =
               else
                 text ""
             , if me == Nothing then
-                p [ id "schulte-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 lg:order-5 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
+                p [ id "nimble-mosaic-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 lg:order-5 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
                     [ text "This game is full, so you can only watch it." ]
 
               else
@@ -700,7 +700,7 @@ so that the result of a game that ends shows over it.
 viewTurnRequest : Model -> Me -> Game -> Html Msg
 viewTurnRequest model me game =
     div
-        [ id "schulte-turn"
+        [ id "nimble-mosaic-turn"
         , class "relative flex flex-col items-center justify-center gap-3 rounded-2xl bg-octo-mist p-6 text-center ring-1 ring-octo-indigo/15 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25"
         , style "height" ("calc(100dvh - " ++ String.fromFloat (reservedHeight model me game) ++ "px)")
         ]
@@ -849,7 +849,7 @@ viewWatchers : Int -> Html Msg
 viewWatchers count =
     if count > 0 then
         span
-            [ id "schulte-watchers"
+            [ id "nimble-mosaic-watchers"
             , class "flex shrink-0 items-center gap-1 text-sm tabular-nums text-slate-500 dark:text-slate-400"
             , Html.Attributes.title ("Watchers: " ++ String.fromInt count)
             ]
@@ -893,14 +893,14 @@ viewShareLink : Model -> Html Msg
 viewShareLink model =
     div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm lg:order-3 ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
-            [ id "schulte-link"
+            [ id "nimble-mosaic-link"
             , readonly True
             , value model.gameUrl
             , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none max-lg:landscape:px-2 max-lg:landscape:py-1 lg:px-2 lg:py-1 dark:text-slate-100"
             ]
             []
         , button
-            [ id "schulte-copy-link"
+            [ id "nimble-mosaic-copy-link"
             , class "rounded-full bg-octo-indigo px-4 py-1.5 font-medium text-white transition hover:bg-octo-indigo/90 active:scale-95"
             , onClick CopyLink
             ]
@@ -921,7 +921,7 @@ is made again and the flash starts again.
 -}
 viewScores : Model -> Me -> List Player -> Html Msg
 viewScores model me players =
-    Html.Keyed.ul [ id "schulte-scores", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:order-4 lg:flex-col" ]
+    Html.Keyed.ul [ id "nimble-mosaic-scores", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:order-4 lg:flex-col" ]
         (List.map
             (\player ->
                 let
@@ -934,11 +934,11 @@ viewScores model me players =
                   else
                     player.id
                 , li
-                    [ id ("schulte-score-" ++ player.id)
+                    [ id ("nimble-mosaic-score-" ++ player.id)
                     , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200 dark:bg-white/5 dark:text-slate-100 dark:shadow-none dark:ring-white/10"
                     , class
                         (if flashing then
-                            "schulte-flash"
+                            "nimble-mosaic-flash"
 
                          else
                             ""
@@ -999,15 +999,15 @@ viewField model tall game =
                 []
     in
     Svg.svg
-        [ SA.id "schulte-field"
+        [ SA.id "nimble-mosaic-field"
         , SA.viewBox viewBox
         , SA.class "block h-auto w-full drop-shadow-sm"
         , SA.strokeLinejoin "round"
         ]
         [ Svg.g turn
             [ Svg.defs []
-                [ Svg.clipPath [ SA.id "schulte-board-shape" ] [ boardRect 0 cornerRadius [] ] ]
-            , Svg.g [ SA.clipPath "url(#schulte-board-shape)" ]
+                [ Svg.clipPath [ SA.id "nimble-mosaic-board-shape" ] [ boardRect 0 cornerRadius [] ] ]
+            , Svg.g [ SA.clipPath "url(#nimble-mosaic-board-shape)" ]
                 (boardRect 0 cornerRadius [ SA.fill "#fbf5e1" ]
                     :: List.map (viewCell model game) game.cells
                     -- The bursts are on top of all the cells, so that the
@@ -1057,17 +1057,17 @@ viewClock model game =
             else
                 max 0 (model.now - model.clockStart)
     in
-    div [ id "schulte-clock", class "ml-auto flex gap-4 pr-2 max-lg:landscape:ml-0 max-lg:landscape:gap-6 max-lg:landscape:pr-0 max-lg:landscape:pl-2 lg:order-2 lg:ml-0 lg:grid lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10" ]
+    div [ id "nimble-mosaic-clock", class "ml-auto flex gap-4 pr-2 max-lg:landscape:ml-0 max-lg:landscape:gap-6 max-lg:landscape:pr-0 max-lg:landscape:pl-2 lg:order-2 lg:ml-0 lg:grid lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10" ]
         [ div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
             [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text "time" ]
-            , span [ id "schulte-time", class "text-lg leading-tight font-light text-slate-700 tabular-nums lg:text-3xl dark:text-slate-100" ] [ text (formatTime elapsedMs) ]
+            , span [ id "nimble-mosaic-time", class "text-lg leading-tight font-light text-slate-700 tabular-nums lg:text-3xl dark:text-slate-100" ] [ text (formatTime elapsedMs) ]
             ]
         , div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
             [ span [ class "text-[0.625rem] font-medium tracking-wide whitespace-nowrap text-slate-400 uppercase lg:text-xs" ] [ text "looking for" ]
             , Html.Keyed.node "span"
                 [ class "text-xl leading-tight font-bold text-[#d9534f] tabular-nums lg:text-4xl lg:leading-none dark:text-[#f0807b]" ]
                 [ ( nextText game
-                  , span [ id "schulte-next", class "schulte-next inline-block" ] [ text (nextText game) ]
+                  , span [ id "nimble-mosaic-next", class "nimble-mosaic-next inline-block" ] [ text (nextText game) ]
                   )
                 ]
             ]
@@ -1097,27 +1097,27 @@ viewCell model game cell =
             game.minStretch
     in
     Svg.g
-        [ SA.id ("schulte-cell-" ++ String.fromInt cell.number)
+        [ SA.id ("nimble-mosaic-cell-" ++ String.fromInt cell.number)
         , SA.class
             (if found then
-                "schulte-cell schulte-found"
+                "nimble-mosaic-cell nimble-mosaic-found"
 
              else
-                "schulte-cell"
+                "nimble-mosaic-cell"
             )
         , SE.onClick (Pick cell.number)
         ]
         [ Svg.path [ SA.d cell.d, SA.fill cell.color, SA.fillRule "evenodd", SA.stroke ink, SA.strokeWidth "3" ] []
         , if found then
             -- The found number grows and fades out one time
-            Svg.g [ SA.class "schulte-pop" ] [ viewNumber minStretch cell ]
+            Svg.g [ SA.class "nimble-mosaic-pop" ] [ viewNumber minStretch cell ]
 
           else
             -- Only the number shakes after a wrong click, not the cell
             Svg.g
                 [ SA.class
                     (if model.shaking == Just cell.number then
-                        "schulte-shake"
+                        "nimble-mosaic-shake"
 
                      else
                         ""
@@ -1167,7 +1167,7 @@ viewBurst cell =
                 , SA.cy (String.fromFloat (y + h / 2))
                 , SA.r (String.fromFloat radius)
                 , SA.fill ink
-                , SA.class "schulte-particle"
+                , SA.class "nimble-mosaic-particle"
                 , SA.style
                     ("--dx: "
                         ++ String.fromFloat (distance * cos angle)
@@ -1230,11 +1230,11 @@ viewNumber minStretch cell =
 viewWaiting : Game -> Html Msg
 viewWaiting game =
     div
-        [ id "schulte-waiting"
+        [ id "nimble-mosaic-waiting"
         , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-octo-navy/80 p-4 text-center text-white"
         ]
         [ p [ class "text-3xl font-semibold" ] [ text "Waiting for players" ]
-        , p [ id "schulte-waiting-count", class "text-lg tabular-nums opacity-80" ]
+        , p [ id "nimble-mosaic-waiting-count", class "text-lg tabular-nums opacity-80" ]
             [ text
                 (String.fromInt (List.length game.players)
                     ++ " of "
@@ -1251,7 +1251,7 @@ viewWaiting game =
 viewCountdown : Int -> Html Msg
 viewCountdown seconds =
     div
-        [ id "schulte-countdown"
+        [ id "nimble-mosaic-countdown"
         , class "absolute inset-0 flex items-center justify-center rounded-2xl bg-octo-navy/80"
         ]
         [ Html.Keyed.node "div"
@@ -1296,11 +1296,11 @@ viewResult settingsUrl nextGame guest me game =
             List.reverse (List.sortBy .score players)
     in
     div
-        [ id "schulte-result"
+        [ id "nimble-mosaic-result"
         , class "absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl bg-octo-navy/70 p-4 text-white backdrop-blur-sm"
         ]
         [ p [ class "text-3xl font-semibold" ] [ text message ]
-        , p [ id "schulte-final-time", class "text-lg tabular-nums opacity-80" ]
+        , p [ id "nimble-mosaic-final-time", class "text-lg tabular-nums opacity-80" ]
             [ text ("Time " ++ formatTime game.elapsedMs) ]
         , if solo then
             text ""
@@ -1322,13 +1322,13 @@ viewResult settingsUrl nextGame guest me game =
 
           else
             button
-                [ id "schulte-play-again"
+                [ id "nimble-mosaic-play-again"
                 , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:bg-octo-mist"
                 , onClick Restart
                 ]
                 [ text "Play again" ]
         , a
-            [ id "schulte-leaderboards-link"
+            [ id "nimble-mosaic-leaderboards-link"
             , href settingsUrl
             , class "text-sm font-medium text-white/80 underline-offset-4 transition hover:text-white hover:underline"
             ]
@@ -1343,10 +1343,10 @@ viewResult settingsUrl nextGame guest me game =
                     ( a, href nextGame.path )
           in
           element
-            [ id "schulte-next-game"
+            [ id "nimble-mosaic-next-game"
             , action
             , attribute "data-ga-link" "or_try"
-            , attribute "data-ga-from" "Schulte Race"
+            , attribute "data-ga-from" "Nimble Mosaic"
             , attribute "data-ga-to" nextGame.name
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]
@@ -1356,7 +1356,7 @@ viewResult settingsUrl nextGame guest me game =
 
         -- Only a guest who played gets the call to sign in, not a spectator
         , if guest && me /= Nothing then
-            p [ id "schulte-sign-in", class "text-sm text-white/70" ]
+            p [ id "nimble-mosaic-sign-in", class "text-sm text-white/70" ]
                 [ a
                     [ href "/signin"
                     , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
@@ -1376,7 +1376,7 @@ The link opens in a new tab, so that the player stays in the game.
 -}
 viewFeed : Html msg
 viewFeed =
-    p [ id "schulte-feed", class "mt-2 max-w-sm border-t border-white/15 pt-4 text-center text-sm leading-10 text-balance text-white/80" ]
+    p [ id "nimble-mosaic-feed", class "mt-2 max-w-sm border-t border-white/15 pt-4 text-center text-sm leading-10 text-balance text-white/80" ]
         [ text "Enjoying Octomocto? "
         , a
             [ href "https://patreon.com/mxgrn"

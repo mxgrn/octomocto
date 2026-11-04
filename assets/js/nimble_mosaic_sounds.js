@@ -1,4 +1,4 @@
-// Sounds for the Schulte race.
+// Sounds for Nimble Mosaic.
 
 import {audioReady, countdownBeep, gameStart, goBeep, noise, tone} from "./sounds"
 
@@ -40,6 +40,6 @@ const sounds = {
   },
 }
 
-export function playSchulteSound(name) {
+export function playNimbleMosaicSound(name) {
   if (audioReady()) sounds[name]?.()
 }

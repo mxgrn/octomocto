@@ -1,9 +1,9 @@
-defmodule Octomocto.Schulte.Game do
+defmodule Octomocto.NimbleMosaic.Game do
   @moduledoc """
-  One multiplayer Schulte table: a field with the numbers 1 to 90. The
+  One multiplayer Nimble Mosaic game: a field with the numbers 1 to 90. The
   layout is `:random` (a new board for each field, see
-  `Octomocto.Schulte.Layout`) or `:classic` (always the same board, see
-  `Octomocto.Schulte.Classic`). The numbers are in a random order.
+  `Octomocto.NimbleMosaic.Layout`) or `:classic` (always the same board, see
+  `Octomocto.NimbleMosaic.Classic`). The numbers are in a random order.
   The mode is `:easy` (the client hides the found numbers) or `:normal`
   (the found numbers stay on the board).
   The first player to click the next number gets a point. Nobody can pick
@@ -11,23 +11,23 @@ defmodule Octomocto.Schulte.Game do
   numbers are found.
 
   The players, the clock, the lists of the settings page and the copy in
-  `Octomocto.Schulte.Store` are the same as in the other games, see
+  `Octomocto.NimbleMosaic.Store` are the same as in the other games, see
   `Octomocto.RaceServer`. Each change is broadcast on the
-  `"schulte_game:<id>"` PubSub topic as `{:schulte_state, state}`.
+  `"nimble_mosaic_game:<id>"` PubSub topic as `{:nimble_mosaic_state, state}`.
   """
   use Octomocto.RaceServer,
-    topic: "schulte_game",
-    state_message: :schulte_state,
-    lobby_topic: "schulte_lobby",
-    store: Octomocto.Schulte.Store,
-    context: Octomocto.Schulte
+    topic: "nimble_mosaic_game",
+    state_message: :nimble_mosaic_state,
+    lobby_topic: "nimble_mosaic_lobby",
+    store: Octomocto.NimbleMosaic.Store,
+    context: Octomocto.NimbleMosaic
 
   alias Octomocto.RaceServer
-  alias Octomocto.Schulte.{Classic, Layout}
+  alias Octomocto.NimbleMosaic.{Classic, Layout}
 
   @total 90
   # The game ends after this number. Dev config sets a small value for easier testing.
-  @last Application.compile_env(:octomocto, :schulte_last_number, @total)
+  @last Application.compile_env(:octomocto, :nimble_mosaic_last_number, @total)
 
   @impl true
   def init_settings(%{layout: layout, mode: mode})

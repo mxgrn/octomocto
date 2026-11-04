@@ -1,12 +1,12 @@
-defmodule Octomocto.Schulte.Classic do
+defmodule Octomocto.NimbleMosaic.Classic do
   @moduledoc """
-  The classic Schulte board: a fixed drawing with 90 shapes, traced from a
+  The classic Nimble Mosaic board: a fixed drawing with 90 shapes, traced from a
   printed puzzle. The shapes never change, but the game puts the numbers into
   them in a random order. The cream shapes stay cream. The other colors of
   the puzzle are shuffled between the other shapes, so each color is used the
   same number of times as in the puzzle.
 
-  The regions have the same format as in `Octomocto.Schulte.Layout`. The
+  The regions have the same format as in `Octomocto.NimbleMosaic.Layout`. The
   list order is the drawing order: some shapes are drawn on top of others
   (for example, the half ellipses on top of the stripes), so a region can
   be larger than the part that is visible.

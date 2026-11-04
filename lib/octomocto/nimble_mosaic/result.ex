@@ -1,4 +1,4 @@
-defmodule Octomocto.Schulte.Result do
+defmodule Octomocto.NimbleMosaic.Result do
   @moduledoc """
   The result of one player in one finished field. All rows of a field have
   the same `game_id`, `settings` and `elapsed_ms`. The `settings` tell which
@@ -7,7 +7,7 @@ defmodule Octomocto.Schulte.Result do
   """
   use Ecto.Schema
 
-  schema "schulte_results" do
+  schema "nimble_mosaic_results" do
     field :game_id, :string
     field :settings, :map
     field :score, :integer

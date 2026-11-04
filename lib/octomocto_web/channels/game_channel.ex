@@ -23,7 +23,7 @@ defmodule OctomoctoWeb.GameChannel do
 
   The `opts` are:
 
-    * `:context` - the module with `join/4`, for example `Octomocto.Schulte`,
+    * `:context` - the module with `join/4`, for example `Octomocto.NimbleMosaic`,
       and `watch/1` when its browsers can only watch,
     * `:game` - the game process module, with `via/1` and `topic/1`,
     * `:salt` - the salt of the player tokens of this game,

@@ -10,7 +10,7 @@ defmodule OctomoctoWeb.UserSocket do
   channel "mahjong:*", OctomoctoWeb.MahjongChannel
   channel "memory:*", OctomoctoWeb.MemoryChannel
   channel "overlap:*", OctomoctoWeb.OverlapChannel
-  channel "schulte:*", OctomoctoWeb.SchulteChannel
+  channel "nimble-mosaic:*", OctomoctoWeb.NimbleMosaicChannel
   channel "set:*", OctomoctoWeb.SetGameChannel
   channel "snap:*", OctomoctoWeb.SnapChannel
   channel "sudoku:*", OctomoctoWeb.SudokuChannel

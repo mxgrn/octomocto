@@ -3,7 +3,7 @@ defmodule OctomoctoWeb.SetGameLive do
 
   on_mount {OctomoctoWeb.SiteNotifications, "set"}
 
-  # The same settings and result lists as on the Schulte page
+  # The same settings and result lists as on the Nimble Mosaic page
   import OctomoctoWeb.SettingsComponents,
     only: [
       setting: 1,

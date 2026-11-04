@@ -1,5 +1,5 @@
 defmodule OctomoctoWeb.BrowserLocaleTest do
-  # The Schulte channel uses OctomoctoWeb.GameChannel, which writes the
+  # The Nimble Mosaic channel uses OctomoctoWeb.GameChannel, which writes the
   # browser locale when a game saves its results
   use OctomoctoWeb.ChannelCase, async: true
 
@@ -10,11 +10,11 @@ defmodule OctomoctoWeb.BrowserLocaleTest do
   alias Octomocto.Accounts.User
   alias Octomocto.Guests.Guest
   alias Octomocto.Repo
-  alias OctomoctoWeb.{SchulteChannel, UserSocket}
+  alias OctomoctoWeb.{NimbleMosaicChannel, UserSocket}
 
   setup do
     id = "game-#{System.unique_integer([:positive])}"
-    pid = start_supervised!(schulte_game(id))
+    pid = start_supervised!(nimble_mosaic_game(id))
     Ecto.Adapters.SQL.Sandbox.allow(Repo, self(), pid)
     %{id: id}
   end
@@ -23,7 +23,7 @@ defmodule OctomoctoWeb.BrowserLocaleTest do
     {:ok, _reply, socket} =
       UserSocket
       |> socket(nil, assigns)
-      |> subscribe_and_join(SchulteChannel, "schulte:" <> id)
+      |> subscribe_and_join(NimbleMosaicChannel, "nimble-mosaic:" <> id)
 
     for n <- 1..90, do: push(socket, "pick", %{"number" => n})
 

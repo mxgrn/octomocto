@@ -1,10 +1,10 @@
-defmodule Octomocto.Schulte.ClassicTest do
+defmodule Octomocto.NimbleMosaic.ClassicTest do
   use ExUnit.Case, async: true
 
   import Octomocto.GameHelpers
 
-  alias Octomocto.Schulte
-  alias Octomocto.Schulte.Classic
+  alias Octomocto.NimbleMosaic
+  alias Octomocto.NimbleMosaic.Classic
 
   test "regions/0 has 90 regions with labels on the board" do
     {width, height} = Classic.size()
@@ -31,9 +31,9 @@ defmodule Octomocto.Schulte.ClassicTest do
 
   test "a classic game puts the numbers into the same shapes in a random order" do
     id = "game-#{System.unique_integer([:positive])}"
-    start_supervised!(schulte_game(id, layout: :classic))
+    start_supervised!(nimble_mosaic_game(id, layout: :classic))
 
-    {:ok, _player_id, state} = Schulte.join(id)
+    {:ok, _player_id, state} = NimbleMosaic.join(id)
 
     assert state.board == Tuple.to_list(Classic.size())
     assert state.min_stretch < 0.3

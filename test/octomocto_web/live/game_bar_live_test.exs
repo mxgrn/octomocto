@@ -28,9 +28,9 @@ defmodule OctomoctoWeb.GameBarLiveTest do
 
   test "shows the settings, the number of players and the visibility", %{conn: conn} do
     id = "game-#{System.unique_integer([:positive])}"
-    start_supervised!(schulte_game(id, players: 2))
+    start_supervised!(nimble_mosaic_game(id, players: 2))
 
-    view = bar(conn, "schulte", id)
+    view = bar(conn, "nimble-mosaic", id)
 
     assert summary(view) == "Random board · Easy · 2 players · Private link"
   end

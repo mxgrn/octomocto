@@ -7,12 +7,12 @@ defmodule OctomoctoWeb.InviteChannelTest do
   import Octomocto.AccountsFixtures
 
   alias Octomocto.Friends.Follow
-  alias Octomocto.{Notices, OnlineUsers, Repo, Schulte}
+  alias Octomocto.{Notices, OnlineUsers, Repo, NimbleMosaic}
   alias OctomoctoWeb.{InviteChannel, UserSocket}
 
   setup do
     id = "game-#{System.unique_integer([:positive])}"
-    start_supervised!(schulte_game(id, players: 2))
+    start_supervised!(nimble_mosaic_game(id, players: 2))
     %{id: id}
   end
 
@@ -34,14 +34,14 @@ defmodule OctomoctoWeb.InviteChannelTest do
   defp join_menu(user_id, id) do
     UserSocket
     |> socket(nil, %{user_id: user_id})
-    |> subscribe_and_join(InviteChannel, "invites:schulte:" <> id, %{"locale" => "en"})
+    |> subscribe_and_join(InviteChannel, "invites:nimble-mosaic:" <> id, %{"locale" => "en"})
   end
 
   test "a player of a waiting game invites a friend who is online", %{id: id} do
     [user, friend] = for _ <- 1..2, do: user_fixture()
     make_friends(user, friend)
     online(friend)
-    {:ok, _, _} = Schulte.join(id, user.id)
+    {:ok, _, _} = NimbleMosaic.join(id, user.id)
     Notices.subscribe({:user, friend.id})
     friend_id = friend.id
 
@@ -52,7 +52,7 @@ defmodule OctomoctoWeb.InviteChannelTest do
 
     assert_reply ref, :ok
     assert_push "update", %{friends: [%{id: ^friend_id, status: "invited"}]}
-    path = "/schulte/#{id}"
+    path = "/nimble-mosaic/#{id}"
     name = user.display_name
     assert_receive {:notice, %{actions: [%{id: "join", href: ^path} | _], avatar: %{name: ^name}}}
   end
@@ -61,7 +61,7 @@ defmodule OctomoctoWeb.InviteChannelTest do
     [user, friend] = for _ <- 1..2, do: user_fixture()
     make_friends(user, friend)
     online(friend)
-    {:ok, _, _} = Schulte.join(id, user.id)
+    {:ok, _, _} = NimbleMosaic.join(id, user.id)
     Notices.subscribe({:user, friend.id})
     {:ok, _, socket} = join_menu(user.id, id)
     push(socket, "invite", %{"friend_id" => friend.id})
@@ -77,8 +77,8 @@ defmodule OctomoctoWeb.InviteChannelTest do
     [user, friend] = for _ <- 1..2, do: user_fixture()
     make_friends(user, friend)
     online(friend)
-    {:ok, _, _} = Schulte.join(id, user.id)
-    {:ok, _, _} = Schulte.join(id)
+    {:ok, _, _} = NimbleMosaic.join(id, user.id)
+    {:ok, _, _} = NimbleMosaic.join(id)
 
     {:ok, %{waiting: false, can_invite: false}, socket} = join_menu(user.id, id)
 

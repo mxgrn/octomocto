@@ -6,7 +6,7 @@ defmodule OctomoctoWeb.PlayerFriendsLiveTest do
 
   alias Octomocto.Friends.Follow
   alias Octomocto.Guests.Guest
-  alias Octomocto.{OnlineUsers, Repo, Schulte}
+  alias Octomocto.{OnlineUsers, Repo, NimbleMosaic}
 
   defp make_friends(user, friend) do
     Repo.insert_all(Follow, [
@@ -48,9 +48,14 @@ defmodule OctomoctoWeb.PlayerFriendsLiveTest do
   test "gives 404 for a guest", %{conn: conn} do
     guest_id = Ecto.UUID.generate()
 
-    Schulte.save_results("a", %{"type" => "random", "mode" => "easy", "players" => 1}, 1000, [
-      %{user_id: nil, guest_id: guest_id, name: "Brave Otter", score: 90}
-    ])
+    NimbleMosaic.save_results(
+      "a",
+      %{"type" => "random", "mode" => "easy", "players" => 1},
+      1000,
+      [
+        %{user_id: nil, guest_id: guest_id, name: "Brave Otter", score: 90}
+      ]
+    )
 
     public_id = Repo.get!(Guest, guest_id).public_id
     assert_error_sent 404, fn -> get(conn, ~p"/players/#{public_id}/friends") end

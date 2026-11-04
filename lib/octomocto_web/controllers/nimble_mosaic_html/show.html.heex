@@ -2,11 +2,11 @@
   <:bar>
     {live_render(@conn, OctomoctoWeb.GameBarLive,
       id: "game-bar-live",
-      session: %{"kind" => "schulte", "id" => @id, "locale" => @locale}
+      session: %{"kind" => "nimble-mosaic", "id" => @id, "locale" => @locale}
     )}
   </:bar>
   <div
-    id="schulte-main"
+    id="nimble-mosaic-main"
     data-game-id={@id}
     data-user-token={@user_token}
     data-settings-url={@settings_path}

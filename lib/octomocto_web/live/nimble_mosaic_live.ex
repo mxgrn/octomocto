@@ -1,29 +1,29 @@
-defmodule OctomoctoWeb.SchulteLive do
+defmodule OctomoctoWeb.NimbleMosaicLive do
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, "schulte"}
+  on_mount {OctomoctoWeb.SiteNotifications, "nimble-mosaic"}
 
   import OctomoctoWeb.SettingsComponents
   import OctomoctoWeb.GamePageComponents
 
-  alias Octomocto.{Lobby, Schulte}
+  alias Octomocto.{Lobby, NimbleMosaic}
   alias OctomoctoWeb.SavedSettings
-  alias Octomocto.Schulte.{Game, Store}
+  alias Octomocto.NimbleMosaic.{Game, Store}
 
   def mount(_params, _session, socket) do
     if connected?(socket), do: Lobby.subscribe(Game)
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/schulte"), rules: rules()] ++ seo())
+     |> assign([canonical_url: url(~p"/nimble-mosaic"), rules: rules()] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))
      |> assign(watchers: Lobby.watchers(Game))}
   end
 
-  @doc "The title and the description of the Schulte pages, for search engines."
+  @doc "The title and the description of the Nimble Mosaic pages, for search engines."
   def seo do
     [
-      page_title: "Schulte Table Race: Find Numbers 1–90",
+      page_title: "Nimble Mosaic: Find the Numbers 1–90 in Order",
       page_description:
         "Train your focus and speed: find the numbers 1 to 90 in order, solo or in a race with up to 3 friends. Free, in your browser."
     ]
@@ -35,16 +35,16 @@ defmodule OctomoctoWeb.SchulteLive do
 
   def handle_params(params, _uri, socket) do
     settings =
-      socket |> SavedSettings.params("schulte", params, @settings_params) |> settings()
+      socket |> SavedSettings.params("nimble-mosaic", params, @settings_params) |> settings()
 
-    SavedSettings.save_change(socket, "schulte", settings, query(settings, []))
+    SavedSettings.save_change(socket, "nimble-mosaic", settings, query(settings, []))
 
     filter = %{"type" => settings.board, "mode" => settings.mode, "players" => settings.players}
 
     {:noreply,
      assign(socket,
        settings: settings,
-       best_results: Schulte.best_results(filter),
+       best_results: NimbleMosaic.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
   end
@@ -70,15 +70,15 @@ defmodule OctomoctoWeb.SchulteLive do
 
   def handle_event("new_game", _params, socket) do
     id = create_game(socket.assigns.settings)
-    {:noreply, redirect(socket, to: ~p"/schulte/#{id}")}
+    {:noreply, redirect(socket, to: ~p"/nimble-mosaic/#{id}")}
   end
 
   defp create_game(%{board: board, mode: mode, players: players, public: public}, creator \\ true) do
     # Not String.to_existing_atom/1: in dev, the atom can be missing until
-    # the Schulte.Game module is loaded
+    # the NimbleMosaic.Game module is loaded
     layout = if board == "random", do: :random, else: :classic
     mode = if mode == "normal", do: :normal, else: :easy
-    Schulte.create_game(layout, mode, players, public, creator)
+    NimbleMosaic.create_game(layout, mode, players, public, creator)
   end
 
   # The classic board in the easy mode for one player, and a public game,
@@ -103,7 +103,7 @@ defmodule OctomoctoWeb.SchulteLive do
   end
 
   # Nil for a guest
-  defp user_results(%{user: _} = scope, filter), do: Schulte.user_results(scope, filter)
+  defp user_results(%{user: _} = scope, filter), do: NimbleMosaic.user_results(scope, filter)
   defp user_results(nil, _filter), do: nil
 
   defp rules do
@@ -136,7 +136,7 @@ defmodule OctomoctoWeb.SchulteLive do
       public: state.public
     }
 
-    ~p"/schulte?#{query(settings, [])}"
+    ~p"/nimble-mosaic?#{query(settings, [])}"
   end
 
   # The query of the page for the settings, with some of them changed

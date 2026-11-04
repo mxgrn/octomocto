@@ -5,19 +5,19 @@ defmodule OctomoctoWeb.PlayerLiveTest do
   import Octomocto.AccountsFixtures
 
   alias Octomocto.Guests.Guest
-  alias Octomocto.{OnlineUsers, Repo, Schulte}
+  alias Octomocto.{OnlineUsers, Repo, NimbleMosaic}
   alias OctomoctoWeb.PlayerLive
 
   @settings %{"type" => "random", "mode" => "easy", "players" => 1}
 
   test "shows the games of a user in each game and the friends", %{conn: conn} do
     user = user_fixture()
-    Schulte.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
 
     {:ok, view, _html} = live(conn, ~p"/players/#{user.public_id}")
 
     assert view |> element("#player-games") |> render() =~ "1"
-    assert has_element?(view, "#player-game-schulte")
+    assert has_element?(view, "#player-game-nimble-mosaic")
     assert has_element?(view, "#player-friends")
   end
 
@@ -37,7 +37,7 @@ defmodule OctomoctoWeb.PlayerLiveTest do
   test "shows no friends for a guest", %{conn: conn} do
     guest_id = Ecto.UUID.generate()
 
-    Schulte.save_results("a", @settings, 1000, [
+    NimbleMosaic.save_results("a", @settings, 1000, [
       %{user_id: nil, guest_id: guest_id, name: "Brave Otter", score: 90}
     ])
 
@@ -49,7 +49,7 @@ defmodule OctomoctoWeb.PlayerLiveTest do
 
   test "shows how long ago a player last played", %{conn: conn} do
     user = user_fixture()
-    Schulte.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
 
     {:ok, view, _html} = live(conn, ~p"/players/#{user.public_id}")
 
@@ -96,11 +96,16 @@ defmodule OctomoctoWeb.PlayerLiveTest do
   test "the best results link to the profile of the user", %{conn: conn} do
     user = user_fixture()
 
-    Schulte.save_results("a", %{"type" => "random", "mode" => "easy", "players" => 2}, 1000, [
-      %{user_id: user.id, score: 90}
-    ])
+    NimbleMosaic.save_results(
+      "a",
+      %{"type" => "random", "mode" => "easy", "players" => 2},
+      1000,
+      [
+        %{user_id: user.id, score: 90}
+      ]
+    )
 
-    {:ok, view, _html} = live(conn, ~p"/schulte?board=random&players=2")
+    {:ok, view, _html} = live(conn, ~p"/nimble-mosaic?board=random&players=2")
 
     assert has_element?(view, ~s|#best-results a[href="/players/#{user.public_id}"]|)
   end

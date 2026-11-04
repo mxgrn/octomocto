@@ -1,7 +1,7 @@
 import Config
 
-# End the Schulte race after number 3 for easier testing.
-config :octomocto, schulte_last_number: 3
+# End the Nimble Mosaic race after number 3 for easier testing.
+config :octomocto, nimble_mosaic_last_number: 3
 
 # Allow very small Memory fields for easier testing.
 config :octomocto, memory_min_cards: 4

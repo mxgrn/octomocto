@@ -1,6 +1,6 @@
-defmodule Octomocto.Schulte.Layout do
+defmodule Octomocto.NimbleMosaic.Layout do
   @moduledoc """
-  Makes a random Schulte board in the style of a hand-drawn puzzle: the
+  Makes a random Nimble Mosaic board in the style of a hand-drawn puzzle: the
   board is cut again and again into rectangles, and some rectangles are cut
   into triangles or get a round shape (an ellipse or an arch) inside.
 

@@ -1,5 +1,5 @@
 defmodule OctomoctoWeb.GameChannelTest do
-  # The Schulte channel uses OctomoctoWeb.GameChannel for the join and the
+  # The Nimble Mosaic channel uses OctomoctoWeb.GameChannel for the join and the
   # rejoin
   # Not async: the game process reads the public id of the user (see
   # `Octomocto.Seats.add/7`), so it needs the shared sandbox
@@ -9,16 +9,18 @@ defmodule OctomoctoWeb.GameChannelTest do
   import Octomocto.AccountsFixtures
 
   alias Octomocto.OnlineUsers
-  alias OctomoctoWeb.{SchulteChannel, UserSocket}
+  alias OctomoctoWeb.{NimbleMosaicChannel, UserSocket}
 
   setup do
     id = "game-#{System.unique_integer([:positive])}"
-    pid = start_supervised!(schulte_game(id, players: 2))
+    pid = start_supervised!(nimble_mosaic_game(id, players: 2))
     %{id: id, pid: pid}
   end
 
   defp join_game(id, params \\ %{}) do
-    UserSocket |> socket() |> subscribe_and_join(SchulteChannel, "schulte:" <> id, params)
+    UserSocket
+    |> socket()
+    |> subscribe_and_join(NimbleMosaicChannel, "nimble-mosaic:" <> id, params)
   end
 
   test "a join with the token of a player gives the same player", %{id: id} do
@@ -46,10 +48,10 @@ defmodule OctomoctoWeb.GameChannelTest do
     {:ok, _reply, _socket} =
       UserSocket
       |> socket(nil, %{user_id: user.id})
-      |> subscribe_and_join(SchulteChannel, "schulte:" <> id, %{})
+      |> subscribe_and_join(NimbleMosaicChannel, "nimble-mosaic:" <> id, %{})
 
     assert OnlineUsers.activities([user.id]) == %{
-             user.id => %{kind: "schulte", doing: "playing"}
+             user.id => %{kind: "nimble-mosaic", doing: "playing"}
            }
   end
 

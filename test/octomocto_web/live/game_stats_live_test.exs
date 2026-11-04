@@ -5,8 +5,8 @@ defmodule OctomoctoWeb.GameStatsLiveTest do
   import Octomocto.AccountsFixtures
 
   alias Octomocto.Guests.Guest
-  alias Octomocto.{Repo, Schulte}
-  alias Octomocto.Schulte.Result
+  alias Octomocto.{Repo, NimbleMosaic}
+  alias Octomocto.NimbleMosaic.Result
 
   @settings %{"type" => "random", "mode" => "easy", "players" => 1}
 
@@ -15,11 +15,11 @@ defmodule OctomoctoWeb.GameStatsLiveTest do
     guest_id = Ecto.UUID.generate()
     guest = %{user_id: nil, guest_id: guest_id, name: "Brave Otter", score: 90}
 
-    Schulte.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
-    Schulte.save_results("b", @settings, 1000, [guest])
-    Schulte.save_results("c", @settings, 1000, [guest])
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+    NimbleMosaic.save_results("b", @settings, 1000, [guest])
+    NimbleMosaic.save_results("c", @settings, 1000, [guest])
 
-    {:ok, view, _html} = live(conn, ~p"/stats/schulte")
+    {:ok, view, _html} = live(conn, ~p"/stats/nimble-mosaic")
 
     guest_public_id = Repo.get!(Guest, guest_id).public_id
     assert has_element?(view, ~s|#top-player-1 a[href="/players/#{guest_public_id}"]|)
@@ -29,10 +29,10 @@ defmodule OctomoctoWeb.GameStatsLiveTest do
 
   test "does not count the games from before the last 30 days", %{conn: conn} do
     user = user_fixture()
-    Schulte.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
     Repo.update_all(Result, set: [inserted_at: DateTime.add(DateTime.utc_now(), -30, :day)])
 
-    {:ok, view, _html} = live(conn, ~p"/stats/schulte")
+    {:ok, view, _html} = live(conn, ~p"/stats/nimble-mosaic")
 
     assert has_element?(view, "#top-players-empty")
   end

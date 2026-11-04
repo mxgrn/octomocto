@@ -27,7 +27,7 @@ import topbar from "../vendor/topbar"
 import {inviteSound, muted, setMuted, unlockAudio} from "./sounds"
 import {playTrainSound} from "./train_sounds"
 import {playAstronautSound} from "./astronaut_sounds"
-import {playSchulteSound} from "./schulte_sounds"
+import {playNimbleMosaicSound} from "./nimble_mosaic_sounds"
 import {playMemorySound} from "./memory_sounds"
 import {playSetSound} from "./set_sounds"
 import {playSudokuSound} from "./sudoku_sounds"
@@ -246,7 +246,7 @@ const connectNextGame = (port, channel, node) => {
 }
 
 // Start the trains game and connect its ports to the game channel. The
-// token gets the same player back after a reload, as in the Schulte race
+// token gets the same player back after a reload, as in Nimble Mosaic
 // below. The browser remembers if the player muted the sounds. Audio can
 // start only after a click, so the first click on the page (normally on
 // "Start game") unlocks it.
@@ -310,7 +310,7 @@ if (trainsNode) {
   })
 }
 
-// Start the Schulte race and connect its ports to the game channel.
+// Start Nimble Mosaic and connect its ports to the game channel.
 // The browser remembers if the player muted the sounds. The storage can
 // be unavailable (for example, in a private window), so the sounds are
 // then on.
@@ -319,22 +319,22 @@ if (trainsNode) {
 // click on "Start game", the browser lets the page start the audio at once,
 // so that the countdown beeps. A player who opens a shared link gets the
 // audio on the first click.
-const schulteNode = document.getElementById("schulte-main")
-if (schulteNode) {
+const nimbleMosaicNode = document.getElementById("nimble-mosaic-main")
+if (nimbleMosaicNode) {
   if (navigator.userActivation?.hasBeenActive) unlockAudio()
   document.addEventListener("pointerdown", unlockAudio, {once: true})
   let muted = false
-  try { muted = localStorage.getItem("schulte-muted") === "true" } catch (_e) {}
+  try { muted = localStorage.getItem("nimble-mosaic-muted") === "true" } catch (_e) {}
 
-  const schulte = window.Elm.Schulte.init({node: schulteNode, flags: {gameUrl: window.location.href, settingsUrl: schulteNode.dataset.settingsUrl, nextGame: {name: schulteNode.dataset.nextGameName, path: schulteNode.dataset.nextGamePath}, guest: !schulteNode.dataset.userToken, muted}})
-  const socket = new Socket("/socket", {params: {user_token: schulteNode.dataset.userToken, _csrf_token: csrfToken}})
+  const nimbleMosaic = window.Elm.NimbleMosaic.init({node: nimbleMosaicNode, flags: {gameUrl: window.location.href, settingsUrl: nimbleMosaicNode.dataset.settingsUrl, nextGame: {name: nimbleMosaicNode.dataset.nextGameName, path: nimbleMosaicNode.dataset.nextGamePath}, guest: !nimbleMosaicNode.dataset.userToken, muted}})
+  const socket = new Socket("/socket", {params: {user_token: nimbleMosaicNode.dataset.userToken, _csrf_token: csrfToken}})
   socket.connect()
 
   // The token gets the same player back when the channel joins again, for
   // example after a reconnect to another server in a deploy, or after a
   // reload of the page. The tab remembers it, so that a new tab gets a new
   // player.
-  const tokenKey = `schulte-token:${schulteNode.dataset.gameId}`
+  const tokenKey = `nimble-mosaic-token:${nimbleMosaicNode.dataset.gameId}`
   let token = null
   try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
   const joined = reply => {
@@ -343,17 +343,17 @@ if (schulteNode) {
       if (token) sessionStorage.setItem(tokenKey, token)
       else sessionStorage.removeItem(tokenKey)
     } catch (_e) {}
-    schulte.ports.schulteJoined.send(reply)
-    schulte.ports.schulteWatchers.send(reply.watchers ?? 0)
+    nimbleMosaic.ports.nimbleMosaicJoined.send(reply)
+    nimbleMosaic.ports.nimbleMosaicWatchers.send(reply.watchers ?? 0)
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
   // The menu of the game page joins its channel on this socket
-  setGameMenu({kind: "schulte", id: schulteNode.dataset.gameId, socket})
-  const channel = socket.channel(`schulte:${schulteNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
-  channel.on("state", state => schulte.ports.schulteState.send(state))
+  setGameMenu({kind: "nimble-mosaic", id: nimbleMosaicNode.dataset.gameId, socket})
+  const channel = socket.channel(`nimble-mosaic:${nimbleMosaicNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
+  channel.on("state", state => nimbleMosaic.ports.nimbleMosaicState.send(state))
   channel.on("joined", joined)
-  channel.on("watchers", ({count}) => schulte.ports.schulteWatchers.send(count))
+  channel.on("watchers", ({count}) => nimbleMosaic.ports.nimbleMosaicWatchers.send(count))
   channel.join()
     .receive("ok", joined)
     .receive("error", ({reason}) => {
@@ -362,21 +362,21 @@ if (schulteNode) {
       // The game ended. The page redirects to the settings of the game.
       if (reason === "not_found") return window.location.reload()
       channel.leave()
-      schulte.ports.schulteJoinFailed.send(reason)
+      nimbleMosaic.ports.nimbleMosaicJoinFailed.send(reason)
     })
 
-  schulte.ports.schultePick.subscribe(number => channel.push("pick", {number}))
-  schulte.ports.schulteRestart.subscribe(() => channel.push("restart", {}))
-  connectNextGame(schulte.ports.schulteNextGame, channel, schulteNode)
-  schulte.ports.schulteCopyText.subscribe(text => navigator.clipboard.writeText(text))
-  schulte.ports.schultePlaySound.subscribe(playSchulteSound)
-  schulte.ports.schulteSaveMuted.subscribe(value => {
-    try { localStorage.setItem("schulte-muted", String(value)) } catch (_e) {}
+  nimbleMosaic.ports.nimbleMosaicPick.subscribe(number => channel.push("pick", {number}))
+  nimbleMosaic.ports.nimbleMosaicRestart.subscribe(() => channel.push("restart", {}))
+  connectNextGame(nimbleMosaic.ports.nimbleMosaicNextGame, channel, nimbleMosaicNode)
+  nimbleMosaic.ports.nimbleMosaicCopyText.subscribe(text => navigator.clipboard.writeText(text))
+  nimbleMosaic.ports.nimbleMosaicPlaySound.subscribe(playNimbleMosaicSound)
+  nimbleMosaic.ports.nimbleMosaicSaveMuted.subscribe(value => {
+    try { localStorage.setItem("nimble-mosaic-muted", String(value)) } catch (_e) {}
   })
 }
 
 // Start the Memory game and connect its ports to the game channel. It
-// works as the Schulte race above: the browser remembers if the player
+// works as Nimble Mosaic above: the browser remembers if the player
 // muted the sounds, and the tab remembers the token of the player.
 const memoryNode = document.getElementById("memory-main")
 if (memoryNode) {
@@ -453,7 +453,7 @@ if (memoryNode) {
 }
 
 // Start the Set game and connect its ports to the game channel. It works
-// as the Schulte race above: the browser remembers if the player muted the
+// as Nimble Mosaic above: the browser remembers if the player muted the
 // sounds, and the tab remembers the token of the player.
 const setNode = document.getElementById("set-main")
 if (setNode) {

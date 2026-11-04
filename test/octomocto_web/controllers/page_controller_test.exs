@@ -12,7 +12,7 @@ defmodule OctomoctoWeb.PageControllerTest do
       |> LazyHTML.attribute("href")
 
     assert hrefs == [
-             "/schulte",
+             "/nimble-mosaic",
              "/trains",
              "/memory",
              "/set",

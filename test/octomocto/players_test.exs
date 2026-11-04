@@ -6,7 +6,7 @@ defmodule Octomocto.PlayersTest do
 
   alias Octomocto.Friends.Follow
   alias Octomocto.Guests.Guest
-  alias Octomocto.{Players, Schulte, Snap}
+  alias Octomocto.{Players, NimbleMosaic, Snap}
 
   @settings %{"type" => "random", "mode" => "easy", "players" => 1}
 
@@ -20,30 +20,30 @@ defmodule Octomocto.PlayersTest do
       %{follower_id: friend.id, followed_id: user.id, inserted_at: now}
     ])
 
-    Schulte.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
-    Schulte.save_results("b", @settings, 1000, [%{user_id: user.id, score: 90}])
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+    NimbleMosaic.save_results("b", @settings, 1000, [%{user_id: user.id, score: 90}])
     Snap.save_results("c", %{}, 0, [%{user_id: user.id, score: 5, correct: 5, wrong: 0}])
 
-    assert %{guest: false, games: %{"schulte" => 2, "snap" => 1}, friends: 1} =
+    assert %{guest: false, games: %{"nimble-mosaic" => 2, "snap" => 1}, friends: 1} =
              Players.profile(user.public_id)
   end
 
   test "profile/1 gives a guest with no friends count" do
     guest_id = Ecto.UUID.generate()
 
-    Schulte.save_results("a", @settings, 1000, [
+    NimbleMosaic.save_results("a", @settings, 1000, [
       %{user_id: nil, guest_id: guest_id, name: "Brave Otter", score: 90}
     ])
 
     guest = Repo.get!(Guest, guest_id)
 
-    assert %{name: "Brave Otter", guest: true, games: %{"schulte" => 1}, friends: nil} =
+    assert %{name: "Brave Otter", guest: true, games: %{"nimble-mosaic" => 1}, friends: nil} =
              Players.profile(guest.public_id)
   end
 
   test "profile/1 gives the time of the last finished game in all games" do
     user = user_fixture()
-    Schulte.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
     Snap.save_results("b", %{}, 0, [%{user_id: user.id, score: 5, correct: 5, wrong: 0}])
 
     last = Repo.one!(from r in Snap.Result, select: r.inserted_at)
@@ -68,7 +68,7 @@ defmodule Octomocto.PlayersTest do
 
     assert state.players[player_id].public_id == nil
 
-    Schulte.save_results("a", @settings, 1000, Map.values(state.players))
+    NimbleMosaic.save_results("a", @settings, 1000, Map.values(state.players))
     state = Octomocto.Seats.refresh_public_ids(state)
 
     assert state.players[player_id].public_id == Repo.get!(Guest, guest_id).public_id

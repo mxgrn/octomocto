@@ -1,4 +1,4 @@
-defmodule OctomoctoWeb.SchulteChannelTest do
+defmodule OctomoctoWeb.NimbleMosaicChannelTest do
   # Not async: the game process reads the public id of the user (see
   # `Octomocto.Seats.add/7`), so it needs the shared sandbox
   use OctomoctoWeb.ChannelCase, async: false
@@ -9,7 +9,7 @@ defmodule OctomoctoWeb.SchulteChannelTest do
 
   setup do
     id = "game-#{System.unique_integer([:positive])}"
-    start_supervised!(schulte_game(id))
+    start_supervised!(nimble_mosaic_game(id))
     %{id: id}
   end
 
@@ -17,7 +17,7 @@ defmodule OctomoctoWeb.SchulteChannelTest do
     {:ok, reply, _socket} =
       OctomoctoWeb.UserSocket
       |> socket()
-      |> subscribe_and_join(OctomoctoWeb.SchulteChannel, "schulte:" <> id)
+      |> subscribe_and_join(OctomoctoWeb.NimbleMosaicChannel, "nimble-mosaic:" <> id)
 
     assert %{player_id: player_id, state: %{players: [%{id: player_id}]}} = reply
   end
@@ -28,7 +28,7 @@ defmodule OctomoctoWeb.SchulteChannelTest do
     {:ok, reply, _socket} =
       OctomoctoWeb.UserSocket
       |> socket(nil, %{user_id: user.id})
-      |> subscribe_and_join(OctomoctoWeb.SchulteChannel, "schulte:" <> id)
+      |> subscribe_and_join(OctomoctoWeb.NimbleMosaicChannel, "nimble-mosaic:" <> id)
 
     assert [%{name: "Ada"}] = reply.state.players
   end
@@ -37,7 +37,7 @@ defmodule OctomoctoWeb.SchulteChannelTest do
     {:ok, reply, _socket} =
       OctomoctoWeb.UserSocket
       |> socket()
-      |> subscribe_and_join(OctomoctoWeb.SchulteChannel, "schulte:" <> id)
+      |> subscribe_and_join(OctomoctoWeb.NimbleMosaicChannel, "nimble-mosaic:" <> id)
 
     assert [%{name: nil}] = reply.state.players
   end
@@ -46,7 +46,7 @@ defmodule OctomoctoWeb.SchulteChannelTest do
     {:ok, _reply, socket} =
       OctomoctoWeb.UserSocket
       |> socket()
-      |> subscribe_and_join(OctomoctoWeb.SchulteChannel, "schulte:" <> id)
+      |> subscribe_and_join(OctomoctoWeb.NimbleMosaicChannel, "nimble-mosaic:" <> id)
 
     push(socket, "pick", %{"number" => 1})
 
@@ -57,7 +57,7 @@ defmodule OctomoctoWeb.SchulteChannelTest do
     {:ok, _reply, socket} =
       OctomoctoWeb.UserSocket
       |> socket()
-      |> subscribe_and_join(OctomoctoWeb.SchulteChannel, "schulte:" <> id)
+      |> subscribe_and_join(OctomoctoWeb.NimbleMosaicChannel, "nimble-mosaic:" <> id)
 
     push(socket, "pick", %{"number" => 1})
     assert_push "state", %{next: 2}
@@ -81,6 +81,6 @@ defmodule OctomoctoWeb.SchulteChannelTest do
     assert {:error, %{reason: "not_found"}} =
              OctomoctoWeb.UserSocket
              |> socket()
-             |> subscribe_and_join(OctomoctoWeb.SchulteChannel, "schulte:unknown")
+             |> subscribe_and_join(OctomoctoWeb.NimbleMosaicChannel, "nimble-mosaic:unknown")
   end
 end

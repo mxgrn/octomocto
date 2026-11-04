@@ -27,7 +27,7 @@ config :octomocto,
 # The Mnesia tables that the cluster nodes share
 config :mnesiac,
   stores: [
-    Octomocto.Schulte.Store,
+    Octomocto.NimbleMosaic.Store,
     Octomocto.Trains.Store,
     Octomocto.Memory.Store,
     Octomocto.SetGame.Store,
