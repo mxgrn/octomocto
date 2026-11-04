@@ -2,6 +2,7 @@ defmodule OctomoctoWeb.Admin.NotificationsLiveTest do
   use OctomoctoWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
+  import Octomocto.AccountsFixtures
   import Octomocto.NotificationsFixtures
 
   alias Octomocto.Notifications
@@ -15,6 +16,15 @@ defmodule OctomoctoWeb.Admin.NotificationsLiveTest do
 
     assert has_element?(view, "#notifications-#{notification.id} a[href='/overlap']", "Overlap")
     assert has_element?(view, "#notifications-#{notification.id}", "Memory")
+  end
+
+  test "shows the number of closes", %{conn: conn} do
+    notification = notification_fixture()
+    Notifications.record_close(notification.id, user_scope_fixture(), nil)
+
+    {:ok, view, _html} = live(conn, ~p"/admin/notifications")
+
+    assert has_element?(view, "#notification-closes-#{notification.id}", "1 closed")
   end
 
   test "creates a notification", %{conn: conn} do
