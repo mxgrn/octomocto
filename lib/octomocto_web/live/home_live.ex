@@ -244,8 +244,8 @@ defmodule OctomoctoWeb.HomeLive do
     assign(socket, friends_online: friends_online)
   end
 
-  # For example "Playing Memory"
-  defp activity_text(%{kind: kind, doing: doing}) do
+  @doc ~S|The text of the activity of an online user, for example "Playing Memory".|
+  def activity_text(%{kind: kind, doing: doing}) do
     name = kind && Enum.find_value(@games, &(&1.id == kind && &1.name))
 
     case doing do

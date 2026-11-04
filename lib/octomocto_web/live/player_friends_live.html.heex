@@ -1,0 +1,76 @@
+<Layouts.app
+  notices={@notices}
+  flash={@flash}
+  notifications={@notifications}
+  current_scope={@current_scope}
+  guest_name={@guest_name}
+  guest_public_id={@guest_public_id}
+>
+  <div id="player-friends-page" class="mx-auto flex w-full max-w-2xl flex-col gap-6 pt-2 pb-4">
+    <div>
+      <.link
+        id="player-friends-back"
+        navigate={~p"/players/#{@public_id}"}
+        class="inline-flex items-center gap-1 text-sm text-base-content/60 transition hover:text-octo-indigo dark:hover:text-octo-indigo-light"
+      >
+        <.icon name="hero-arrow-left" class="size-4" /> {@name}
+      </.link>
+      <h1 class="mt-1 text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
+        Friends
+      </h1>
+    </div>
+
+    <section class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10 sm:p-6">
+      <p
+        :if={@friends == []}
+        id="player-friends-empty"
+        class="py-2 text-center text-sm text-base-content/50"
+      >
+        No friends yet.
+      </p>
+      <%!-- The rows as in Friends online on the front page --%>
+      <ul :if={@friends != []} id="player-friends-list" class="-mx-2 space-y-1">
+        <li
+          :for={friend <- @friends}
+          id={"player-friend-#{friend.id}"}
+          class="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-base-200/60"
+        >
+          <% shared = friend.id in @shared_ids %>
+          <% activity = @activities[friend.id] %>
+          <span class="relative shrink-0">
+            <img
+              :if={friend.avatar_url}
+              src={friend.avatar_url}
+              alt=""
+              class="size-9 rounded-full object-cover"
+            />
+            <span
+              :if={!friend.avatar_url}
+              class="flex size-9 items-center justify-center rounded-full bg-octo-indigo/10 font-semibold text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light"
+            >
+              {String.first(friend.name || "?") |> String.upcase()}
+            </span>
+            <%!-- Only for a friend of the viewer --%>
+            <span
+              :if={shared}
+              id={"player-friend-status-#{friend.id}"}
+              data-online={to_string(activity != nil)}
+              class={[
+                "absolute -right-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-base-100 transition-colors",
+                if(activity, do: "bg-emerald-500", else: "bg-base-content/25")
+              ]}
+            />
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-sm font-medium">
+              <.player_link player={friend}>{friend.name}</.player_link>
+            </p>
+            <p :if={shared && activity} class="truncate text-xs text-base-content/60">
+              {HomeLive.activity_text(activity)}
+            </p>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </div>
+</Layouts.app>

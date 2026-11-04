@@ -26,6 +26,7 @@ defmodule OctomoctoWeb.PlayerLive do
        page_title: profile.name,
        noindex: true,
        profile: profile,
+       public_id: public_id,
        games: games,
        total: profile.games |> Map.values() |> Enum.sum()
      )}

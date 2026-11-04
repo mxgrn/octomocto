@@ -56,7 +56,13 @@
         <div :if={!@profile.guest} id="player-friends">
           <dt class="text-sm text-base-content/60">Friends</dt>
           <dd class="mt-0.5 text-lg font-semibold text-octo-navy tabular-nums dark:text-base-content">
-            {@profile.friends}
+            <.link
+              id="player-friends-link"
+              navigate={~p"/players/#{@public_id}/friends"}
+              class="text-octo-indigo transition-colors hover:text-octo-indigo/70 dark:text-octo-indigo-light dark:hover:text-octo-indigo-light/70"
+            >
+              {@profile.friends}
+            </.link>
           </dd>
         </div>
       </dl>

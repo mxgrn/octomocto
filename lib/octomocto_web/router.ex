@@ -117,6 +117,7 @@ defmodule OctomoctoWeb.Router do
       live "/stats/:game", GameStatsLive
       live "/stats/languages/:language", LanguageStatsLive
       live "/players/:public_id", PlayerLive
+      live "/players/:public_id/friends", PlayerFriendsLive
     end
 
     # After the live routes, so that "campaign" is not a game id

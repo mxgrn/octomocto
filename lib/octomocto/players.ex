@@ -44,6 +44,10 @@ defmodule Octomocto.Players do
     end
   end
 
+  @doc "The user with the `public_id`, or nil. A guest has no user."
+  def user(public_id) when is_binary(public_id),
+    do: Repo.one(from u in User, where: u.public_id == ^public_id)
+
   @doc """
   The public id of the user `user_id` or of the guest `guest_id`, or nil
   when there is none: a guest without a row has no profile yet.
