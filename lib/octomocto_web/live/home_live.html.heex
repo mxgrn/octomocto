@@ -144,13 +144,6 @@
         >
           <h3 class="mb-3 flex items-center gap-2 font-semibold">
             <.icon name="hero-heart" class="size-4 text-octo-indigo" /> Friends online
-            <span
-              :if={@friends_online != []}
-              id="friends-online-count"
-              class="text-sm font-normal tabular-nums text-base-content/40"
-            >
-              {length(@friends_online)}
-            </span>
           </h3>
           <%= cond do %>
             <% @friends == nil -> %>
