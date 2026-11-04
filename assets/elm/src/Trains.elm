@@ -381,6 +381,9 @@ type alias Model =
     , muted : Bool
     , watchers : Int
     , viewport : ( Float, Float )
+
+    -- The countdown step that last played its beep (see `countdownStep`)
+    , beepedStep : Maybe Int
     }
 
 
@@ -406,6 +409,7 @@ init flags =
       , muted = flags.muted
       , watchers = 0
       , viewport = ( 1024, 768 )
+      , beepedStep = Nothing
       }
     , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
     )
@@ -586,7 +590,7 @@ update msg model =
                         Nothing ->
                             ms - elapsedMs
             in
-            ( { model | clockStart = Just clockStart, now = ms }, Cmd.none )
+            beepCountdown ( { model | clockStart = Just clockStart, now = ms }, Cmd.none )
 
         Tick time ->
             let
@@ -616,9 +620,10 @@ update msg model =
                             else
                                 Cmd.none
                     in
-                    ( { model | now = ms, connection = Joined me { game | round = round } }
-                    , Cmd.batch [ eventsCmd (sounds && not model.muted) events, finished ]
-                    )
+                    beepCountdown
+                        ( { model | now = ms, connection = Joined me { game | round = round } }
+                        , Cmd.batch [ eventsCmd (sounds && not model.muted) events, finished ]
+                        )
 
                 _ ->
                     ( { model | now = ms }, Cmd.none )
@@ -1764,6 +1769,63 @@ subscriptions model =
             _ ->
                 Sub.none
         ]
+
+
+
+{-| The seconds left in the countdown (3, 2, 1), 0 after it, and Nothing
+when no round runs. The step is right only after the clock is in sync.
+-}
+countdownStep : Model -> Maybe Int
+countdownStep model =
+    case ( model.connection, model.clockStart ) of
+        ( Joined _ game, Just clockStart ) ->
+            if game.started && not (over game.round) then
+                Just (max 0 (ceiling (toFloat (clockStart - model.now) / 1000)))
+
+            else
+                Nothing
+
+        _ ->
+            Nothing
+
+
+{-| A beep on each step of the countdown, and a higher beep at the start.
+There is no start beep without a countdown before it, for example for a
+watcher who joins later.
+-}
+beepCountdown : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+beepCountdown ( model, cmd ) =
+    let
+        current =
+            countdownStep model
+
+        sound =
+            if current == model.beepedStep || model.muted then
+                Nothing
+
+            else
+                case current of
+                    Just 0 ->
+                        if Maybe.withDefault 0 model.beepedStep > 0 then
+                            Just "go"
+
+                        else
+                            Nothing
+
+                    Just _ ->
+                        Just "countdown"
+
+                    Nothing ->
+                        Nothing
+    in
+    ( { model | beepedStep = current }
+    , case sound of
+        Just name ->
+            Cmd.batch [ cmd, playTrainSound name ]
+
+        Nothing ->
+            cmd
+    )
 
 
 

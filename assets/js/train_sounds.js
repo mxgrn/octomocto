@@ -6,6 +6,16 @@ const sounds = {
   // The same sound in all games when all players are ready
   start: gameStart,
 
+  // The countdown beeps, the same as in the Schulte race
+  countdown() {
+    tone({freq: 880, duration: 0.15, gain: 0.2})
+  },
+
+  // A longer beep, one octave higher, when the round starts
+  go() {
+    tone({freq: 1760, duration: 0.5, gain: 0.2})
+  },
+
   // A short mechanical click
   switch() {
     tone({type: "square", freq: 2200, freqEnd: 700, duration: 0.04, gain: 0.05, filter: 3000})
