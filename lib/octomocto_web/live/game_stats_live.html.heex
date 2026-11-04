@@ -1,0 +1,91 @@
+<Layouts.app
+  notices={@notices}
+  flash={@flash}
+  notifications={@notifications}
+  current_scope={@current_scope}
+  guest_name={@guest_name}
+  guest_public_id={@guest_public_id}
+>
+  <% most = @players |> Enum.map(& &1.count) |> Enum.max(fn -> 0 end) %>
+
+  <div id="game-stats" class="mx-auto flex w-full max-w-2xl flex-col gap-6 pt-2 pb-4">
+    <div>
+      <.link
+        navigate={~p"/stats"}
+        id="game-stats-back"
+        class="inline-flex items-center gap-1 text-sm text-base-content/60 transition hover:text-octo-indigo dark:hover:text-octo-indigo-light"
+      >
+        <.icon name="hero-arrow-left" class="size-4" /> Stats
+      </.link>
+      <div class="mt-3 flex items-center gap-3">
+        <div class={[
+          "flex size-11 shrink-0 items-center justify-center rounded-xl",
+          @game.icon_class
+        ]}>
+          <GameIcons.game_icon game={@game.id} class="size-8" />
+        </div>
+        <div class="min-w-0 flex-1">
+          <h1 class="text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
+            {@game.name}
+          </h1>
+          <p class="text-sm text-base-content/60">The players with the most games of all time.</p>
+        </div>
+        <.link
+          navigate={@game.path}
+          id="game-stats-play"
+          class="shrink-0 rounded-full bg-octo-indigo px-4 py-1.5 text-sm font-medium text-white transition hover:bg-octo-indigo/90 active:scale-95"
+        >
+          Play
+        </.link>
+      </div>
+    </div>
+
+    <section
+      id="top-players"
+      class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10 sm:p-6"
+    >
+      <h2 class="mb-4 font-semibold text-octo-navy dark:text-base-content">Top players</h2>
+      <p :if={@players == []} id="top-players-empty" class="text-sm text-base-content/60">
+        No games yet.
+      </p>
+      <ol :if={@players != []} class="flex flex-col gap-3">
+        <li
+          :for={{player, place} <- Enum.with_index(@players, 1)}
+          id={"top-player-#{place}"}
+          class="flex items-center gap-3 text-sm"
+        >
+          <span class={[
+            "flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold tabular-nums",
+            if(place <= 3,
+              do:
+                "bg-octo-indigo/10 text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light",
+              else: "text-base-content/50"
+            )
+          ]}>
+            {place}
+          </span>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-baseline justify-between gap-4">
+              <span class="min-w-0 truncate font-medium text-octo-navy dark:text-base-content">
+                <.player_link player={player.user || player.guest}>{name(player)}</.player_link>
+                <span :if={!player.user} class="ml-1 text-xs font-normal text-base-content/50">
+                  Guest
+                </span>
+              </span>
+              <span class="font-semibold text-octo-navy tabular-nums dark:text-base-content">
+                {player.count}
+              </span>
+            </div>
+            <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-base-content/5">
+              <div
+                class="h-full rounded-full bg-octo-indigo dark:bg-octo-indigo-light"
+                style={"width: #{if most > 0, do: player.count / most * 100, else: 0}%"}
+              >
+              </div>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+  </div>
+</Layouts.app>

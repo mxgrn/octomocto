@@ -114,6 +114,7 @@ defmodule OctomoctoWeb.Router do
       live "/snap", SnapLive
       live "/afterglow", AfterglowLive
       live "/stats", StatsLive
+      live "/stats/:game", GameStatsLive
       live "/players/:public_id", PlayerLive
     end
 

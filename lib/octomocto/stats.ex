@@ -142,5 +142,49 @@ defmodule Octomocto.Stats do
     |> Map.new(&{&1.game, &1.count})
   end
 
+  @doc """
+  The `limit` players with the most games of all time in the game with the
+  id `game` of the front page, the most games first. Each item is
+  `%{user: user, guest: guest, count: n}`, with a user or a guest and the
+  other nil. Two players with the same count are in the order of their
+  first game. The rows of a user count for the user, also when they have a
+  guest id. The results of guests from before the guest ids have no
+  player, so they are not counted.
+  """
+  def top_players(game, limit \\ 10) do
+    schema = Map.fetch!(@results, game)
+
+    rows =
+      from(r in schema,
+        where: not is_nil(r.user_id) or not is_nil(r.guest_id),
+        group_by: [r.user_id, fragment("CASE WHEN ? IS NULL THEN ? END", r.user_id, r.guest_id)],
+        order_by: [
+          desc: count(fragment("DISTINCT (?, ?)", r.game_id, r.inserted_at)),
+          asc: min(r.inserted_at)
+        ],
+        limit: ^limit,
+        select: %{
+          user_id: r.user_id,
+          guest_id:
+            type(fragment("CASE WHEN ? IS NULL THEN ? END", r.user_id, r.guest_id), Ecto.UUID),
+          count: count(fragment("DISTINCT (?, ?)", r.game_id, r.inserted_at))
+        }
+      )
+      |> Repo.all()
+
+    users = by_id(User, rows |> Enum.map(& &1.user_id) |> Enum.reject(&is_nil/1))
+    guests = by_id(Guest, rows |> Enum.map(& &1.guest_id) |> Enum.reject(&is_nil/1))
+
+    Enum.map(rows, fn row ->
+      %{user: users[row.user_id], guest: guests[row.guest_id], count: row.count}
+    end)
+  end
+
+  defp by_id(schema, ids),
+    do: from(s in schema, where: s.id in ^ids) |> Repo.all() |> Map.new(&{&1.id, &1})
+
+  @doc "True when the game id of the front page has results."
+  def game?(game), do: Map.has_key?(@results, game)
+
   defp since(first), do: DateTime.new!(first, ~T[00:00:00], "Etc/UTC")
 end
