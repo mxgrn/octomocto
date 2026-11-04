@@ -53,7 +53,7 @@ defmodule OctomoctoWeb.Admin.NotificationsLive do
           <.link
             id="new-notification"
             navigate={~p"/admin/notifications/new"}
-            class="inline-flex items-center gap-1.5 rounded-full bg-octo-indigo px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-octo-indigo/20 active:scale-95"
+            class="inline-flex items-center gap-1.5 rounded-full bg-octo-indigo px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-octo-indigo/20 active:scale-95"
           >
             <.icon name="hero-plus-micro" class="size-4" /> New
           </.link>

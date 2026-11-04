@@ -121,7 +121,7 @@ defmodule OctomoctoWeb.GamePageComponents do
               id={"join-#{game.id}"}
               href={@path.(game) <> "?from=lobby"}
               class={[
-                "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium text-white shadow-sm transition hover:-translate-y-0.5 active:translate-y-0",
+                "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium text-white shadow-sm transition",
                 "bg-octo-indigo hover:bg-octo-indigo/90"
               ]}
             >
@@ -140,7 +140,7 @@ defmodule OctomoctoWeb.GamePageComponents do
               id={"watch-#{game.id}"}
               href={@path.(game) <> "?watch=1"}
               class={[
-                "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ring-1 transition hover:-translate-y-0.5 active:translate-y-0",
+                "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ring-1 transition",
                 "text-octo-indigo ring-octo-indigo/30 hover:bg-octo-mist dark:text-octo-indigo-light dark:hover:bg-octo-indigo-light/10"
               ]}
             >
@@ -255,7 +255,7 @@ defmodule OctomoctoWeb.GamePageComponents do
           if(@multiplayer and not @match, do: gettext("Creating..."), else: gettext("Starting..."))
         }
         class={[
-          "pointer-events-auto cursor-pointer rounded-full px-8 py-3 font-medium text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0",
+          "pointer-events-auto cursor-pointer rounded-full px-8 py-3 font-medium text-white shadow-lg transition hover:shadow-xl",
           "bg-octo-indigo shadow-octo-indigo/25 hover:bg-octo-indigo/90"
         ]}
       >

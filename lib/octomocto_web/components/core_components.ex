@@ -110,7 +110,7 @@ defmodule OctomoctoWeb.CoreComponents do
       :if={@public_id}
       navigate={~p"/players/#{@public_id}"}
       class={[
-        "decoration-octo-indigo/40 underline-offset-2 transition hover:text-octo-indigo hover:underline dark:hover:text-octo-indigo-light",
+        "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light",
         @class
       ]}
     >

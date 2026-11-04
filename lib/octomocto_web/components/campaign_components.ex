@@ -306,7 +306,7 @@ defmodule OctomoctoWeb.CampaignComponents do
         <.link
           id="campaign-sign-in-link"
           href={~p"/signin"}
-          class="mt-4 inline-block rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/25 transition hover:-translate-y-0.5 hover:bg-octo-indigo/90 active:translate-y-0"
+          class="mt-4 inline-block rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/25 transition hover:bg-octo-indigo/90"
         >
           {@button}
         </.link>

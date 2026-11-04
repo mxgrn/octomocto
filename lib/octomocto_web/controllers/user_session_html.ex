@@ -53,7 +53,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
         <.turnstile_widget id="sign-in-panel-turnstile" />
         <button
           id="sign-in-submit"
-          class="w-full rounded-xl bg-indigo-600 px-4 py-3 font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
+          class="w-full rounded-xl bg-indigo-600 px-4 py-3 font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500"
         >
           Email me a sign-in link
         </button>
@@ -106,7 +106,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
             |> JS.show(to: "#sign-in-form", display: "flex")
             |> JS.focus(to: "#sign-in-email")
           }
-          class="w-full shrink-0 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
+          class="w-full shrink-0 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:bg-indigo-500"
         >
           {gettext("Email me a sign-in link")}
         </button>
@@ -130,7 +130,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
             />
             <button
               id="sign-in-submit"
-              class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:translate-y-0"
+              class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:bg-indigo-500"
             >
               {gettext("Send")}
             </button>

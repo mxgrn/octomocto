@@ -403,7 +403,7 @@ html:has(.is-playing) body {
 .set-card.is-empty { background: rgb(0 0 0 / 0.04); box-shadow: none; animation: none; }
 .set-card-face { width: 100%; height: 100%; padding: 4%; }
 .set-card.is-playable { cursor: pointer; }
-.set-card.is-playable:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgb(0 0 0 / 0.12), 0 6px 14px rgb(0 0 0 / 0.1); }
+.set-card.is-playable:hover { box-shadow: 0 2px 4px rgb(0 0 0 / 0.12), 0 6px 14px rgb(0 0 0 / 0.1); }
 .set-card.is-playable:active { transform: scale(0.97); }
 .set-card.is-selected,
 .set-card.is-selected:hover {
@@ -718,7 +718,6 @@ place. The `translate` adds to the `transform` of the place. */
   from { translate: var(--from-x) var(--from-y); }
 }
 .mahjong-tile-body { transition: transform 120ms ease; }
-.mahjong-tile.is-free:hover .mahjong-tile-body { transform: translate(-1px, -2px); }
 .mahjong-tile.is-free:hover .mahjong-face { stroke: var(--color-octo-indigo-light); stroke-width: 2; }
 .mahjong-tile.is-selected .mahjong-tile-body { transform: translate(-1px, -3px); }
 .mahjong-tile.is-selected .mahjong-face { fill: #DBF2FA; stroke: var(--color-octo-indigo); stroke-width: 3; }

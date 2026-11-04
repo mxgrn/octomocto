@@ -303,7 +303,7 @@ defmodule OctomoctoWeb.Layouts do
           class={[
             "group -my-1 inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-semibold transition",
             "bg-octo-orange/10 text-octo-orange ring-1 ring-octo-orange/30",
-            "hover:-translate-y-0.5 hover:bg-octo-orange hover:text-white hover:shadow-md hover:shadow-octo-orange/20 active:scale-95",
+            " hover:bg-octo-orange hover:text-white hover:shadow-md hover:shadow-octo-orange/20 active:scale-95",
             "dark:bg-octo-orange-light/10 dark:text-octo-orange-light dark:ring-octo-orange-light/30",
             "dark:hover:bg-octo-orange-light dark:hover:text-base-100"
           ]}

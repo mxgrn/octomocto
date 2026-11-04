@@ -856,7 +856,7 @@ viewGame model me game =
                         [ a
                             [ id "mahjong-home"
                             , href "/"
-                            , class "mr-1 shrink-0 transition hover:-translate-y-0.5 active:translate-y-0 lg:mr-0"
+                            , class "mr-1 shrink-0 transition lg:mr-0"
                             ]
                             [ img [ src "/images/mark.svg", alt "octomocto", class "h-8 w-auto dark:hidden lg:h-9" ] []
                             , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block lg:h-9" ] []
@@ -2071,7 +2071,7 @@ viewResult nextGame guest me game =
           else
             button
                 [ id "mahjong-play-again"
-                , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:-translate-y-0.5 hover:bg-octo-mist active:translate-y-0"
+                , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:bg-octo-mist"
                 , onClick Restart
                 ]
                 [ text "Play again" ]
@@ -2124,7 +2124,7 @@ viewFeed =
             [ href "https://patreon.com/mxgrn"
             , target "_blank"
             , rel "noopener"
-            , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:-translate-y-0.5 hover:bg-octo-orange-light active:translate-y-0"
+            , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:bg-octo-orange-light"
             ]
             [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
             , text "Feed Octo & Mocto"

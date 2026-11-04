@@ -1838,7 +1838,7 @@ viewGame model me game =
                         [ a
                             [ id "trains-home"
                             , href "/"
-                            , class "mr-1 shrink-0 transition hover:-translate-y-0.5 active:translate-y-0 lg:mr-0"
+                            , class "mr-1 shrink-0 transition lg:mr-0"
                             ]
                             [ img [ src "/images/mark.svg", alt "octomocto", class "h-8 w-auto dark:hidden lg:h-9" ] []
                             , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block lg:h-9" ] []
@@ -2252,7 +2252,7 @@ viewFeed =
             [ href "https://patreon.com/mxgrn"
             , target "_blank"
             , rel "noopener"
-            , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:-translate-y-0.5 hover:bg-octo-orange-light active:translate-y-0"
+            , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:bg-octo-orange-light"
             ]
             [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
             , text "Feed Octo & Mocto"
@@ -2313,7 +2313,7 @@ viewCampaignResult model me game campaign =
                 , a
                     [ id "trains-campaign-map"
                     , href model.settingsUrl
-                    , class "rounded-full px-5 py-2.5 font-medium text-white ring-1 ring-white/40 transition hover:-translate-y-0.5 hover:bg-white/10 active:translate-y-0"
+                    , class "rounded-full px-5 py-2.5 font-medium text-white ring-1 ring-white/40 transition hover:bg-white/10"
                     ]
                     [ text "Back to the map" ]
                 ]
@@ -2323,7 +2323,7 @@ viewCampaignResult model me game campaign =
 
 campaignButton : String
 campaignButton =
-    "rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/30 transition hover:-translate-y-0.5 hover:bg-octo-indigo/90 active:translate-y-0"
+    "rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/30 transition hover:bg-octo-indigo/90"
 
 
 verdict : Round -> String
@@ -2351,7 +2351,7 @@ overlayButton : String -> Msg -> String -> Html Msg
 overlayButton buttonId msg label =
     button
         [ id buttonId
-        , class "mt-3 rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/30 transition hover:-translate-y-0.5 hover:bg-octo-indigo/90 active:translate-y-0"
+        , class "mt-3 rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/30 transition hover:bg-octo-indigo/90"
         , onClick msg
         ]
         [ text label ]

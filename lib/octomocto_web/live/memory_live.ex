@@ -724,7 +724,7 @@ defmodule OctomoctoWeb.MemoryLive do
             phx-click="play_level"
             phx-value-level={@level.level}
             phx-disable-with={dgettext("memory", "Starting...")}
-            class="flex cursor-pointer items-center gap-1.5 rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/25 transition hover:-translate-y-0.5 hover:bg-octo-indigo/90 hover:shadow-xl active:translate-y-0"
+            class="flex cursor-pointer items-center gap-1.5 rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/25 transition hover:bg-octo-indigo/90 hover:shadow-xl"
           >
             <%= cond do %>
               <% @level.status == :done -> %>

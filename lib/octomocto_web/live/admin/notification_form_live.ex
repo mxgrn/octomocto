@@ -111,7 +111,7 @@ defmodule OctomoctoWeb.Admin.NotificationFormLive do
               id="save-notification"
               type="submit"
               phx-disable-with="Saving..."
-              class="rounded-full bg-octo-indigo px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-octo-indigo/20 active:scale-95"
+              class="rounded-full bg-octo-indigo px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-octo-indigo/20 active:scale-95"
             >
               Save
             </button>
