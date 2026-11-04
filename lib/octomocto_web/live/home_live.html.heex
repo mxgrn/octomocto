@@ -71,6 +71,18 @@
               <div class="flex min-w-0 items-center gap-3">
                 <.game_icon game={game} />
                 <h3 class="font-semibold text-octo-navy dark:text-base-content">{game.name}</h3>
+                <%!-- A hint that friends can play this game together --%>
+                <span
+                  :if={!game[:single_player]}
+                  id={"game-multiplayer-#{game.id}"}
+                  class="group/tip relative ml-auto flex shrink-0 text-octo-navy/25 transition group-hover:text-octo-indigo/70 dark:text-base-content/25 dark:group-hover:text-octo-indigo-light/80"
+                >
+                  <.icon name="hero-user-group" class="size-5" />
+                  <%!-- The tooltip; screen readers read it too --%>
+                  <span class="pointer-events-none absolute right-0 bottom-full z-20 mb-1.5 rounded-md bg-octo-navy px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 shadow-sm transition group-hover/tip:opacity-100 dark:bg-base-300 dark:text-base-content">
+                    Solo or with friends
+                  </span>
+                </span>
               </div>
               <p class="text-sm text-octo-navy/60 dark:text-base-content/60">
                 {game.description}
