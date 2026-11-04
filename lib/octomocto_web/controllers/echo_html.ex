@@ -29,6 +29,7 @@ defmodule OctomoctoWeb.EchoHTML do
       "Hide the shapes on the pads" => dgettext("echo", "Hide the shapes on the pads"),
       "Show the shapes on the pads" => dgettext("echo", "Show the shapes on the pads"),
       "Restart game" => dgettext("echo", "Restart game"),
+      "Menu" => dgettext("echo", "Menu"),
       "Copied!" => dgettext("echo", "Copied!"),
       "Copy link" => dgettext("echo", "Copy link"),
       "turn" => dgettext("echo", "turn"),

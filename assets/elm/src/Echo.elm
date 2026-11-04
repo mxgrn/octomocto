@@ -933,7 +933,6 @@ viewGame model me game =
                             ]
                         , h1 [ class "mr-1 truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
                             [ a [ id "echo-title-link", href model.indexUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text (t model.texts "Echo") ] ]
-                        , viewMuteButton model.texts model.muted
                         , viewWatchers model.texts model.watchers
                         , viewShapesButton model.texts model.shapes
                         ]
@@ -949,11 +948,7 @@ viewGame model me game =
                             )
                         ]
                     ]
-                , if me == Nothing then
-                    text ""
-
-                  else
-                    viewRestartButton model.texts
+                , viewMenu model.texts model.muted (me /= Nothing)
                 ]
             , if game.playersNeeded > 1 then
                 viewShareLink model
@@ -1090,25 +1085,6 @@ viewWatchers texts count =
         text ""
 
 
-viewMuteButton : Texts -> Bool -> Html Msg
-viewMuteButton texts muted =
-    iconButton "echo-mute"
-        ToggleMuted
-        (t texts
-            (if muted then
-                "Turn the sounds on"
-
-             else
-                "Turn the sounds off"
-            )
-        )
-        (if muted then
-            "hero-speaker-x-mark"
-
-         else
-            "hero-speaker-wave"
-        )
-
 
 viewShapesButton : Texts -> Bool -> Html Msg
 viewShapesButton texts shapes =
@@ -1145,17 +1121,20 @@ iconButton buttonId msg title icon =
 screen, only the icon shows, but not in the column of a screen that is wider
 than tall.
 -}
-viewRestartButton : Texts -> Html Msg
-viewRestartButton texts =
-    button
-        [ id "echo-restart"
-        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
-        , onClick Restart
-        , Html.Attributes.title (t texts "Restart game")
+viewMenu : Texts -> Bool -> Bool -> Html Msg
+viewMenu texts muted player =
+    Html.node "octo-game-menu"
+        [ class "relative shrink-0 lg:order-5 lg:self-start"
+        , attribute "menu-label" (t texts "Menu")
+        , attribute "restart-label" (t texts "Restart game")
+        , attribute "sound-on-label" (t texts "Turn the sounds on")
+        , attribute "sound-off-label" (t texts "Turn the sounds off")
+        , attribute "muted" (boolAttribute muted)
+        , attribute "player" (boolAttribute player)
+        , Html.Events.on "octo-restart" (Decode.succeed Restart)
+        , Html.Events.on "octo-toggle-mute" (Decode.succeed ToggleMuted)
         ]
-        [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text (t texts "Restart game") ]
-        ]
+        []
 
 
 viewShareLink : Model -> Html Msg
@@ -1839,3 +1818,12 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+boolAttribute : Bool -> String
+boolAttribute value =
+    if value then
+        "true"
+
+    else
+        "false"

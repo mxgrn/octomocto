@@ -727,7 +727,6 @@ viewGame model me game =
 
                             Nothing ->
                                 text ""
-                        , viewMuteButton model.texts model.muted
                         , viewWatchers model.texts model.watchers
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
@@ -748,11 +747,7 @@ viewGame model me game =
 
                   else
                     text ""
-                , if me == Nothing then
-                    text ""
-
-                  else
-                    viewRestartButton model.texts (game.editing /= Nothing)
+                , viewMenu model.texts (game.editing /= Nothing) model.muted (me /= Nothing)
                 ]
             , if bombMessageShown game then
                 viewBombMessage model.texts me game False
@@ -956,51 +951,26 @@ viewWatchers texts count =
         text ""
 
 
-viewMuteButton : Texts -> Bool -> Html Msg
-viewMuteButton texts muted =
-    button
-        [ id "memory-mute"
-        , class "grid size-8 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
-        , onClick ToggleMuted
-        , Html.Attributes.title
-            (t texts
-                (if muted then
-                    "Turn the sounds on"
-
-                 else
-                    "Turn the sounds off"
-                )
-            )
-        ]
-        [ span
-            [ class
-                (if muted then
-                    "hero-speaker-x-mark size-5"
-
-                 else
-                    "hero-speaker-wave size-5"
-                )
-            ]
-            []
-        ]
-
 
 {-| Starts a new field for all players, also during a game. On a small
 screen, only the icon shows. It is disabled while a player changes the
 settings.
 -}
-viewRestartButton : Texts -> Bool -> Html Msg
-viewRestartButton texts locked =
-    button
-        [ id "memory-restart"
-        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 disabled:pointer-events-none disabled:opacity-50 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
-        , onClick Restart
-        , disabled locked
-        , Html.Attributes.title (t texts "Restart game")
+viewMenu : Texts -> Bool -> Bool -> Bool -> Html Msg
+viewMenu texts locked muted player =
+    Html.node "octo-game-menu"
+        [ class "relative shrink-0 lg:order-5 lg:self-start"
+        , attribute "menu-label" (t texts "Menu")
+        , attribute "restart-label" (t texts "Restart game")
+        , attribute "locked" (boolAttribute locked)
+        , attribute "sound-on-label" (t texts "Turn the sounds on")
+        , attribute "sound-off-label" (t texts "Turn the sounds off")
+        , attribute "muted" (boolAttribute muted)
+        , attribute "player" (boolAttribute player)
+        , Html.Events.on "octo-restart" (Decode.succeed Restart)
+        , Html.Events.on "octo-toggle-mute" (Decode.succeed ToggleMuted)
         ]
-        [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , span [ class "hidden lg:inline" ] [ text (t texts "Restart game") ]
-        ]
+        []
 
 
 viewShareLink : Model -> Html Msg
@@ -1738,3 +1708,12 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+boolAttribute : Bool -> String
+boolAttribute value =
+    if value then
+        "true"
+
+    else
+        "false"

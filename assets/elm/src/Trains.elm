@@ -1856,7 +1856,6 @@ viewGame model me game =
 
                             Nothing ->
                                 text ""
-                        , viewMuteButton model.muted
                         , viewWatchers model.watchers
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
@@ -1870,11 +1869,7 @@ viewGame model me game =
                         ]
                     ]
                 , viewStats game.round
-                , if me == Nothing then
-                    text ""
-
-                  else
-                    viewRestartButton
+                , viewMenu model.muted (me /= Nothing)
                 ]
             , if solo then
                 text ""
@@ -2038,32 +2033,6 @@ viewWatchers count =
         text ""
 
 
-viewMuteButton : Bool -> Html Msg
-viewMuteButton muted =
-    button
-        [ id "trains-mute"
-        , class "grid size-8 shrink-0 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
-        , onClick ToggleMuted
-        , Html.Attributes.title
-            (if muted then
-                "Turn the sounds on"
-
-             else
-                "Turn the sounds off"
-            )
-        ]
-        [ span
-            [ class
-                (if muted then
-                    "hero-speaker-x-mark size-5"
-
-                 else
-                    "hero-speaker-wave size-5"
-                )
-            ]
-            []
-        ]
-
 
 {-| The trains that got home, and the number of the last train that left
 the station. On a small screen, they are small and without a box, at the
@@ -2158,17 +2127,20 @@ playerName me player =
 round. On a small screen, only the icon shows, but not in the column of a
 screen that is wider than tall.
 -}
-viewRestartButton : Html Msg
-viewRestartButton =
-    button
-        [ id "trains-restart"
-        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
-        , onClick Restart
-        , Html.Attributes.title "New board"
+viewMenu : Bool -> Bool -> Html Msg
+viewMenu muted player =
+    Html.node "octo-game-menu"
+        [ class "relative shrink-0 lg:order-5 lg:self-start"
+        , attribute "menu-label" "Menu"
+        , attribute "restart-label" "New board"
+        , attribute "sound-on-label" "Turn the sounds on"
+        , attribute "sound-off-label" "Turn the sounds off"
+        , attribute "muted" (boolAttribute muted)
+        , attribute "player" (boolAttribute player)
+        , Html.Events.on "octo-restart" (Decode.succeed Restart)
+        , Html.Events.on "octo-toggle-mute" (Decode.succeed ToggleMuted)
         ]
-        [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text "New board" ]
-        ]
+        []
 
 
 viewOverlay : Model -> Me -> Game -> Html Msg
@@ -2768,3 +2740,12 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+boolAttribute : Bool -> String
+boolAttribute value =
+    if value then
+        "true"
+
+    else
+        "false"

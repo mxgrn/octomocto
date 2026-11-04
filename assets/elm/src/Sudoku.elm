@@ -819,18 +819,13 @@ viewGame model me game =
                             ]
                         , h1 [ class "truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
                             [ a [ id "sudoku-title-link", href "/sudoku", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Sudoku Race" ] ]
-                        , viewMuteButton model.muted
                         , viewWatchers model.watchers
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
                         [ text (String.toUpper (String.left 1 game.difficulty) ++ String.dropLeft 1 game.difficulty ++ ". Each row, column and box has each digit one time.") ]
                     ]
                 , viewClock model game
-                , if me == Nothing then
-                    text ""
-
-                  else
-                    viewRestartButton
+                , viewMenu model.muted (me /= Nothing)
                 ]
             , if game.playersNeeded > 1 then
                 viewShareLink model
@@ -985,46 +980,23 @@ viewWatchers count =
         text ""
 
 
-viewMuteButton : Bool -> Html Msg
-viewMuteButton muted =
-    button
-        [ id "sudoku-mute"
-        , class "grid size-8 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
-        , onClick ToggleMuted
-        , Html.Attributes.title
-            (if muted then
-                "Turn the sounds on"
-
-             else
-                "Turn the sounds off"
-            )
-        ]
-        [ span
-            [ class
-                (if muted then
-                    "hero-speaker-x-mark size-5"
-
-                 else
-                    "hero-speaker-wave size-5"
-                )
-            ]
-            []
-        ]
-
 
 {-| Starts a new puzzle for all players, also during a game.
 -}
-viewRestartButton : Html Msg
-viewRestartButton =
-    button
-        [ id "sudoku-restart"
-        , class "group flex size-9 shrink-0 items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2 lg:order-5 lg:size-auto lg:self-start lg:px-4 lg:py-2 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
-        , onClick Restart
-        , Html.Attributes.title "Restart game"
+viewMenu : Bool -> Bool -> Html Msg
+viewMenu muted player =
+    Html.node "octo-game-menu"
+        [ class "relative shrink-0 lg:order-5 lg:self-start"
+        , attribute "menu-label" "Menu"
+        , attribute "restart-label" "Restart game"
+        , attribute "sound-on-label" "Turn the sounds on"
+        , attribute "sound-off-label" "Turn the sounds off"
+        , attribute "muted" (boolAttribute muted)
+        , attribute "player" (boolAttribute player)
+        , Html.Events.on "octo-restart" (Decode.succeed Restart)
+        , Html.Events.on "octo-toggle-mute" (Decode.succeed ToggleMuted)
         ]
-        [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-        , span [ class "hidden max-lg:landscape:inline lg:inline" ] [ text "Restart game" ]
-        ]
+        []
 
 
 viewShareLink : Model -> Html Msg
@@ -1504,3 +1476,12 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+boolAttribute : Bool -> String
+boolAttribute value =
+    if value then
+        "true"
+
+    else
+        "false"

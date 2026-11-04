@@ -3,6 +3,7 @@ defmodule OctomoctoWeb.UserSocket do
 
   channel "afterglow:*", OctomoctoWeb.AfterglowChannel
   channel "astronaut:*", OctomoctoWeb.AstronautChannel
+  channel "invites:*", OctomoctoWeb.InviteChannel
   channel "echo:*", OctomoctoWeb.EchoChannel
   channel "mahjong:*", OctomoctoWeb.MahjongChannel
   channel "memory:*", OctomoctoWeb.MemoryChannel
