@@ -131,6 +131,17 @@ defmodule Octomocto.Memory.Game do
   a `:score` and a `:turn`.
   """
   def lobby_entry(state) do
+    Seats.lobby_entry(state, lobby_settings(state), if(state.ready, do: state.ready_at), fn id,
+                                                                                            p ->
+      %{score: p.score, turn: id == state.turn}
+    end)
+  end
+
+  @doc """
+  The settings of the game in its row of the lists, and in the bar of the
+  game page (see `OctomoctoWeb.GameBarLive`).
+  """
+  def lobby_settings(state) do
     settings = %{
       theme: state.theme,
       set: state.set,
@@ -141,12 +152,7 @@ defmodule Octomocto.Memory.Game do
 
     # A game of the campaign has its level. Thus it never has the settings
     # of a new game of the settings page.
-    settings =
-      if state.campaign, do: Map.put(settings, :campaign, state.campaign.level), else: settings
-
-    Seats.lobby_entry(state, settings, if(state.ready, do: state.ready_at), fn id, p ->
-      %{score: p.score, turn: id == state.turn}
-    end)
+    if state.campaign, do: Map.put(settings, :campaign, state.campaign.level), else: settings
   end
 
   @impl true

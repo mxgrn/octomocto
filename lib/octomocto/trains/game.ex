@@ -123,18 +123,9 @@ defmodule Octomocto.Trains.Game do
       |> Enum.sort_by(& &1.slot)
       |> Enum.map(&Lobby.player/1)
 
-    settings = %{
-      switch_count: state.switch_count,
-      trains_per_house: state.trains_per_house,
-      pace: state.pace
-    }
-
     entry = %{
       id: state.id,
-      # A game of the campaign has its level. Thus it never has the
-      # settings of a new game of the settings page.
-      settings:
-        if(state.campaign, do: Map.put(settings, :campaign, state.campaign.level), else: settings),
+      settings: lobby_settings(state),
       players_needed: state.needed,
       players: players,
       created_at: state.created_at
@@ -163,6 +154,22 @@ defmodule Octomocto.Trains.Game do
   end
 
   def lobby_entry(_state), do: nil
+
+  @doc """
+  The settings of the game in its row of the lists, and in the bar of the
+  game page (see `OctomoctoWeb.GameBarLive`).
+  """
+  def lobby_settings(state) do
+    settings = %{
+      switch_count: state.switch_count,
+      trains_per_house: state.trains_per_house,
+      pace: state.pace
+    }
+
+    # A game of the campaign has its level. Thus it never has the settings
+    # of a new game of the settings page.
+    if state.campaign, do: Map.put(settings, :campaign, state.campaign.level), else: settings
+  end
 
   @impl true
   def init({id, settings}) do

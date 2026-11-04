@@ -27,6 +27,7 @@ import Browser
 import Browser.Dom
 import Browser.Events
 import Dict exposing (Dict)
+import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick, preventDefaultOn)
@@ -1035,6 +1036,13 @@ padding is not for the board.
 -}
 reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
+    GameBar.height + reservedPageHeight model me game
+
+
+{-| The height of the page around the field, without the bar at the top.
+-}
+reservedPageHeight : Model -> Me -> Game -> Float
+reservedPageHeight model me game =
     if Tuple.first model.viewport >= largeScreen then
         48 + 20 + 48
 

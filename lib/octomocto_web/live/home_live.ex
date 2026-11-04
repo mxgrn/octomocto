@@ -145,6 +145,12 @@ defmodule OctomoctoWeb.HomeLive do
 
   @kinds_by_game Map.new(@lobbies, fn {kind, {game, _store, _page}} -> {game, kind} end)
 
+  @doc """
+  The game module, the store and the settings page of a game with lists of
+  public games, by the id in `games/0`, or nil for another game.
+  """
+  def lobby_modules(id), do: @lobbies[id]
+
   @doc "The settings page of the game, by the id in `games/0`."
   def settings_page(id), do: @lobbies |> Map.fetch!(id) |> elem(2)
 

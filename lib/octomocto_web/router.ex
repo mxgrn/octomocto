@@ -95,6 +95,7 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
         {OctomoctoWeb.Locale, "en"}
       ] do
       live "/", HomeLive
@@ -131,6 +132,7 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
         {OctomoctoWeb.Locale, "pt"}
       ] do
       live "/memory", MemoryLive, :index
@@ -155,6 +157,7 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
         {OctomoctoWeb.Locale, "de"}
       ] do
       live "/memory", MemoryLive, :index
@@ -177,6 +180,7 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
         {OctomoctoWeb.Locale, "ru"}
       ] do
       live "/memory", MemoryLive, :index
@@ -199,6 +203,7 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
         {OctomoctoWeb.Locale, "fr"}
       ] do
       live "/memory", MemoryLive, :index
@@ -221,6 +226,7 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
         {OctomoctoWeb.Locale, "uk"}
       ] do
       live "/memory", MemoryLive, :index
@@ -243,6 +249,7 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
         {OctomoctoWeb.Locale, "pl"}
       ] do
       live "/memory", MemoryLive, :index
@@ -265,6 +272,7 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
         {OctomoctoWeb.Locale, "it"}
       ] do
       live "/memory", MemoryLive, :index
@@ -287,6 +295,7 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
         {OctomoctoWeb.Locale, "es"}
       ] do
       live "/memory", MemoryLive, :index
@@ -309,6 +318,7 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
         {OctomoctoWeb.Locale, "ja"}
       ] do
       live "/memory", MemoryLive, :index
@@ -331,6 +341,7 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
         {OctomoctoWeb.Locale, "vi"}
       ] do
       live "/memory", MemoryLive, :index
@@ -353,6 +364,7 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
         {OctomoctoWeb.Locale, "tr"}
       ] do
       live "/memory", MemoryLive, :index
@@ -375,6 +387,7 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
         {OctomoctoWeb.Locale, "ar"}
       ] do
       live "/memory", MemoryLive, :index

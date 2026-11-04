@@ -66,6 +66,16 @@ defmodule OctomoctoWeb.Layouts do
     doc:
       "content between the wordmark and the theme toggle; on a small screen it goes into the menu"
 
+  attr :notices, :list,
+    default: [],
+    doc: """
+    the notices of the user (see `OctomoctoWeb.Notices`). The first one
+    floats over the top of the page. A game page shows them in its bar.
+    """
+
+  slot :bar,
+    doc: "the bar at the top of a game page (see `OctomoctoWeb.GameBarLive`)"
+
   slot :inner_block, required: true
 
   def app(assigns) do
@@ -211,6 +221,21 @@ defmodule OctomoctoWeb.Layouts do
           </div>
         </div>
       </header>
+
+      {render_slot(@bar)}
+
+      <div
+        :if={@notices != []}
+        id="notice-float"
+        class="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-2 pt-2"
+      >
+        <div class="pointer-events-auto flex min-h-10 max-w-full items-center rounded-full bg-octo-indigo px-4 py-1.5 text-sm text-white shadow-lg shadow-octo-indigo/25">
+          <OctomoctoWeb.Notices.notice
+            notice={hd(@notices)}
+            waiting={length(@notices) - 1}
+          />
+        </div>
+      </div>
 
       <main class={[
         "flex-1",

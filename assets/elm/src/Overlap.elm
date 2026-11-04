@@ -32,6 +32,7 @@ import Array exposing (Array)
 import Browser
 import Browser.Dom
 import Browser.Events
+import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
@@ -818,6 +819,13 @@ because the text can wrap.
 -}
 reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
+    GameBar.height + reservedPageHeight model me game
+
+
+{-| The height of the page around the field, without the bar at the top.
+-}
+reservedPageHeight : Model -> Me -> Game -> Float
+reservedPageHeight model me game =
     let
         row condition rowHeight =
             if condition then
