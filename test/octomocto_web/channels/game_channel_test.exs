@@ -4,7 +4,9 @@ defmodule OctomoctoWeb.GameChannelTest do
   use OctomoctoWeb.ChannelCase, async: true
 
   import Octomocto.GameHelpers
+  import Octomocto.AccountsFixtures
 
+  alias Octomocto.OnlineUsers
   alias OctomoctoWeb.{SchulteChannel, UserSocket}
 
   setup do
@@ -34,6 +36,19 @@ defmodule OctomoctoWeb.GameChannelTest do
 
     assert %{^lobby_id => %{from_lobby: true}, ^direct_id => %{from_lobby: false}} =
              state.players
+  end
+
+  test "a signed-in player is online as playing the game", %{id: id} do
+    user = user_fixture()
+
+    {:ok, _reply, _socket} =
+      UserSocket
+      |> socket(nil, %{user_id: user.id})
+      |> subscribe_and_join(SchulteChannel, "schulte:" <> id, %{})
+
+    assert OnlineUsers.activities([user.id]) == %{
+             user.id => %{kind: "schulte", doing: "playing"}
+           }
   end
 
   test "a join with a bad token gives a new player", %{id: id} do

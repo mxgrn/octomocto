@@ -1,7 +1,9 @@
 defmodule OctomoctoWeb.HomeLive do
   @moduledoc """
-  The front page: the list of all games, and the public games of all
-  games together (see `Octomocto.Lobby`).
+  The front page: the list of all games, the public games of all games
+  together (see `Octomocto.Lobby`), and the friends of the user who are
+  online (see `Octomocto.Friends` and `Octomocto.OnlineUsers`). A guest
+  sees a text that asks to sign in instead.
   """
   use OctomoctoWeb, :live_view
 
@@ -9,7 +11,7 @@ defmodule OctomoctoWeb.HomeLive do
 
   import OctomoctoWeb.GamePageComponents
 
-  alias Octomocto.{Lobby, Stats}
+  alias Octomocto.{Accounts, Friends, Lobby, OnlineUsers, Stats}
   alias Octomocto.Memory.Themes
 
   alias OctomoctoWeb.{
@@ -147,9 +149,18 @@ defmodule OctomoctoWeb.HomeLive do
   def settings_page(id), do: @lobbies |> Map.fetch!(id) |> elem(2)
 
   def mount(_params, _session, socket) do
+    # Nil for a guest. A friend that the user gets later shows after a
+    # page load.
+    friends =
+      case socket.assigns.current_scope do
+        %{user: user} -> Friends.friends(user.id)
+        nil -> nil
+      end
+
     if connected?(socket) do
       for {_kind, {game, _store, _page}} <- @lobbies, do: Lobby.subscribe(game)
       Stats.subscribe()
+      if friends, do: OnlineUsers.subscribe()
     end
 
     entries =
@@ -162,7 +173,9 @@ defmodule OctomoctoWeb.HomeLive do
      |> assign(canonical_url: url(~p"/"), games: @games, kinds: Map.new(@games, &{&1.id, &1}))
      |> assign(games_played: Stats.games_played())
      |> assign_lobby(entries)
-     |> assign(watchers: watchers())}
+     |> assign(watchers: watchers())
+     |> assign(friends: friends)
+     |> assign_friends_online()}
   end
 
   def handle_info({:lobby_changed, game, id, entry}, socket) do
@@ -174,9 +187,12 @@ defmodule OctomoctoWeb.HomeLive do
      |> assign_lobby(Lobby.put_entry(socket.assigns.lobby, id, entry))}
   end
 
-  # A watcher came or left, see `Octomocto.Lobby.watch/3`
-  def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff"}, socket) do
-    {:noreply, assign(socket, watchers: watchers())}
+  # A user came, left or changed the page, or a watcher came or left (see
+  # `Octomocto.Lobby.watch/3`)
+  def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", topic: topic}, socket) do
+    if topic == OnlineUsers.topic(),
+      do: {:noreply, assign_friends_online(socket)},
+      else: {:noreply, assign(socket, watchers: watchers())}
   end
 
   # Each finished round adds one, so the page does not count all games again
@@ -197,6 +213,35 @@ defmodule OctomoctoWeb.HomeLive do
   defp watchers do
     for {_kind, {game, _store, _page}} <- @lobbies, reduce: %{} do
       watchers -> Map.merge(watchers, Lobby.watchers(game))
+    end
+  end
+
+  # The friends who are online, by name, each with an activity
+  defp assign_friends_online(%{assigns: %{friends: nil}} = socket),
+    do: assign(socket, friends_online: [])
+
+  defp assign_friends_online(%{assigns: %{friends: friends}} = socket) do
+    activities = OnlineUsers.activities(Enum.map(friends, & &1.id))
+
+    friends_online =
+      for friend <- friends, activity = activities[friend.id] do
+        %{id: friend.id, name: Accounts.public_name(friend), avatar_url: friend.avatar_url}
+        |> Map.put(:activity, activity)
+      end
+      |> Enum.sort_by(&String.downcase(&1.name || ""))
+
+    assign(socket, friends_online: friends_online)
+  end
+
+  # For example "Playing Memory"
+  defp activity_text(%{kind: kind, doing: doing}) do
+    name = kind && Enum.find_value(@games, &(&1.id == kind && &1.name))
+
+    case doing do
+      "playing" when name != nil -> "Playing #{name}"
+      "watching" when name != nil -> "Watching #{name}"
+      "settings" when name != nil -> "On the #{name} page"
+      _ -> "Online"
     end
   end
 

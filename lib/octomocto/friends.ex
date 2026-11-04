@@ -11,11 +11,25 @@ defmodule Octomocto.Friends do
   two players who joined do not become friends of each other: they can be
   strangers. Guests have no friends.
 
-  Nothing makes a follow with no follow back yet, and nothing shows the
-  friends yet.
+  Nothing makes a follow with no follow back yet. The front page shows the
+  friends who are online (see `OctomoctoWeb.HomeLive`).
   """
+  import Ecto.Query
+
+  alias Octomocto.Accounts.User
   alias Octomocto.Friends.Follow
   alias Octomocto.Repo
+
+  @doc "The friends of the user: the users who follow the user back."
+  def friends(user_id) do
+    Repo.all(
+      from u in User,
+        join: out in Follow,
+        on: out.followed_id == u.id and out.follower_id == ^user_id,
+        join: back in Follow,
+        on: back.follower_id == u.id and back.followed_id == ^user_id
+    )
+  end
 
   @doc """
   Makes friends of the creator of the game and of each player who joined

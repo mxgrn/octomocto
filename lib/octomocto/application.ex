@@ -25,6 +25,7 @@ defmodule Octomocto.Application do
       {Mnesiac.Supervisor, [hosts, [name: Octomocto.MnesiacSupervisor]]},
       {Phoenix.PubSub, name: Octomocto.PubSub},
       Octomocto.Lobby.Watchers,
+      Octomocto.OnlineUsers,
       {DynamicSupervisor, name: Octomocto.Afterglow.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Astronaut.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Echo.GameSupervisor},

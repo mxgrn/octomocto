@@ -32,13 +32,16 @@ defmodule OctomoctoWeb.GameChannel do
   When a player starts the next game (see `OctomoctoWeb.NextGame`), the
   channels of the players push its id as a `"next_game"` event.
 
+  The channel of a signed-in user tracks the user as online, as playing or
+  watching the game (see `Octomocto.OnlineUsers`).
+
   The channel writes the browser locale of its user or guest when a game
   saves the results (see `Octomocto.Locales`).
   """
   import Phoenix.Channel, only: [push: 3]
   import Phoenix.Socket, only: [assign: 2]
 
-  alias Octomocto.{Accounts, Lobby, Locales}
+  alias Octomocto.{Accounts, Lobby, Locales, OnlineUsers}
 
   # In seconds
   @token_max_age 24 * 60 * 60
@@ -60,10 +63,22 @@ defmodule OctomoctoWeb.GameChannel do
       )
 
     case join_game(socket, opts) do
-      {:ok, reply, socket} -> {:ok, reply, socket}
-      {:error, reason} -> {:error, %{reason: Atom.to_string(reason)}}
+      {:ok, reply, socket} ->
+        track_user(socket, opts)
+        {:ok, reply, socket}
+
+      {:error, reason} ->
+        {:error, %{reason: Atom.to_string(reason)}}
     end
   end
+
+  defp track_user(%{assigns: %{user_id: user_id, player_id: player_id}}, opts)
+       when user_id != nil do
+    doing = if player_id, do: "playing", else: "watching"
+    OnlineUsers.track(self(), user_id, %{kind: opts[:kind], doing: doing})
+  end
+
+  defp track_user(_socket, _opts), do: nil
 
   # The game ended because nobody played
   def handle_info(
