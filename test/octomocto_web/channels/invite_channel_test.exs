@@ -80,7 +80,7 @@ defmodule OctomoctoWeb.InviteChannelTest do
     {:ok, _, _} = Schulte.join(id, user.id)
     {:ok, _, _} = Schulte.join(id)
 
-    {:ok, %{can_invite: false}, socket} = join_menu(user.id, id)
+    {:ok, %{waiting: false, can_invite: false}, socket} = join_menu(user.id, id)
 
     ref = push(socket, "invite", %{"friend_id" => friend.id})
     assert_reply ref, :error

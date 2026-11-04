@@ -220,7 +220,8 @@ class OctoGameMenu extends HTMLElement {
 
   invites() {
     const menu = this.menu
-    if (!menu || !menu.multiplayer) return null
+    // No invites for a full game
+    if (!menu || !menu.multiplayer || !menu.waiting) return null
 
     const t = menu.texts
     const note = text => h("p", {class: "px-3 py-2 text-sm text-base-content/60"}, text)
@@ -228,8 +229,6 @@ class OctoGameMenu extends HTMLElement {
 
     if (menu.guest) {
       body = note(t.sign_in)
-    } else if (!menu.can_invite) {
-      body = note(t.not_waiting)
     } else if (menu.friends.length === 0) {
       body = note(t.no_friends)
     } else {

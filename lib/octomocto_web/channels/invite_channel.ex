@@ -7,6 +7,8 @@ defmodule OctomoctoWeb.InviteChannel do
 
   The join reply, and each `"update"` push after a change, has:
 
+    * `:waiting` - true while the game waits for players (the menu shows
+      no invites for a full game),
     * `:can_invite` - true for a signed-in player of a game that waits for
       players,
     * `:multiplayer` - true for a game for more than one player (the menu
@@ -26,7 +28,7 @@ defmodule OctomoctoWeb.InviteChannel do
   """
   use Phoenix.Channel
 
-  alias Octomocto.{Accounts, Friends, Notices, OnlineUsers}
+  alias Octomocto.{Accounts, Friends, Notices, OnlineUsers, Seats}
   alias OctomoctoWeb.HomeLive
 
   # How long an invite stays in the bar of the friend
@@ -113,10 +115,11 @@ defmodule OctomoctoWeb.InviteChannel do
         }
       end
 
+    waiting = state != nil and not Seats.full?(state)
+
     %{
-      can_invite:
-        state != nil and assigns.user_id != nil and MapSet.member?(in_game, assigns.user_id) and
-          map_size(state.players) < state.needed,
+      waiting: waiting,
+      can_invite: waiting and assigns.user_id != nil and MapSet.member?(in_game, assigns.user_id),
       multiplayer: state != nil and state.needed > 1,
       guest: assigns.user_id == nil,
       friends: Enum.sort_by(friends, &String.downcase(&1.name || "")),
@@ -150,8 +153,7 @@ defmodule OctomoctoWeb.InviteChannel do
       invited: gettext("Invited"),
       declined: gettext("Declined"),
       sign_in: gettext("Sign in to invite your friends."),
-      no_friends: gettext("No friends online."),
-      not_waiting: gettext("You can invite friends while the game waits for players.")
+      no_friends: gettext("No friends online.")
     }
   end
 
