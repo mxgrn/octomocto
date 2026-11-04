@@ -26,6 +26,20 @@ defmodule Octomocto.GameHelpers do
   @doc "An Echo game with 4 pads."
   def echo_game(id, config \\ []), do: game(Octomocto.Echo.Game, id, %{pads: 4}, config)
 
+  @doc "A Memory game of pairs with the smallest field."
+  def memory_game(id, config \\ []),
+    do: game(Octomocto.Memory.Game, id, %{theme: "monsters", set: 2, cards: 16}, config)
+
+  @doc "A Trains game with 4 switches."
+  def trains_game(id, config \\ []),
+    do:
+      game(
+        Octomocto.Trains.Game,
+        id,
+        %{switch_count: 4, trains_per_house: 1, pace: "easy"},
+        config
+      )
+
   defp game(module, id, settings, config) do
     {module, {id, @defaults |> Map.merge(settings) |> Map.merge(Map.new(config))}}
   end

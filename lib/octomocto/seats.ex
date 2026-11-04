@@ -1,7 +1,8 @@
 defmodule Octomocto.Seats do
   @moduledoc """
   The players of a game process, the same for all games on
-  `Octomocto.RaceServer` and `Octomocto.TurnServer`.
+  `Octomocto.RaceServer` and `Octomocto.TurnServer`, and for
+  `Octomocto.Memory.Game` and `Octomocto.Trains.Game`.
 
   The game is for a set number of players (`needed`). A process that joins
   a full game only watches. Each player is bound to the process that
@@ -76,7 +77,8 @@ defmodule Octomocto.Seats do
   @doc """
   Adds a new player for the process `pid`, with a color that no other
   player has, if possible. The `fields` are the fields of the game, such
-  as `:score`. Gives the id of the player and the new state.
+  as `:score`. A game can also give the `:color` and the `:color_name` in
+  the fields. Gives the id of the player and the new state.
   """
   def add(state, pid, user_id, name, guest_id, fields) do
     Process.monitor(pid)
@@ -85,17 +87,20 @@ defmodule Octomocto.Seats do
     {color_name, color} = pick_color(state.players)
 
     player =
-      Map.merge(fields, %{
-        pid: pid,
-        user_id: user_id,
-        guest_id: guest_id,
-        name: name,
-        color: color,
-        color_name: color_name,
-        joined_at: System.system_time(),
-        # A reference while the player is away, see leave/2
-        left: nil
-      })
+      Map.merge(
+        %{
+          pid: pid,
+          user_id: user_id,
+          guest_id: guest_id,
+          name: name,
+          color: color,
+          color_name: color_name,
+          joined_at: System.system_time(),
+          # A reference while the player is away, see leave/2
+          left: nil
+        },
+        fields
+      )
 
     {player_id, put_in(state.players[player_id], player)}
   end

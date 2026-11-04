@@ -78,11 +78,11 @@ defmodule Octomocto.Memory.Game do
   """
   use GenServer, restart: :temporary
 
-  alias Octomocto.{Lobby, Memory}
+  alias Octomocto.{Lobby, Memory, Seats}
   alias Octomocto.Memory.{Board, Campaign, Store, Themes}
 
-  @idle_timeout_ms :timer.minutes(5)
-  # How long a player stays after its process stops
+  # How long a player stays after its process stops, when the config of
+  # the game does not say (see `Octomocto.Seats`)
   @rejoin_grace_ms Application.compile_env(
                      :octomocto,
                      :memory_rejoin_grace_ms,
@@ -91,17 +91,6 @@ defmodule Octomocto.Memory.Game do
   # With 2 or more players, the turn goes to the next player after this
   # time with no card turned
   @turn_timeout_ms :timer.seconds(15)
-
-  @colors [
-    {"pink", "#ec4899"},
-    {"sky", "#0ea5e9"},
-    {"lime", "#65a30d"},
-    {"amber", "#d97706"},
-    {"violet", "#8b5cf6"},
-    {"red", "#dc2626"},
-    {"teal", "#0d9488"},
-    {"indigo", "#4f46e5"}
-  ]
 
   def start_link(
         {id, %{theme: theme, set: set, cards: cards, players: needed, public: public} = config}
@@ -141,15 +130,7 @@ defmodule Octomocto.Memory.Game do
   `Octomocto.Lobby`), or nil when the game is in no list. Each player has
   a `:score` and a `:turn`.
   """
-  # A state from before the lists has no `:public`
-  def lobby_entry(%{public: true} = state) when map_size(state.players) > 0 do
-    players =
-      state.players
-      |> Enum.sort_by(fn {_id, p} -> p.joined_at end)
-      |> Enum.map(fn {id, p} ->
-        p |> Lobby.player() |> Map.merge(%{score: p.score, turn: id == state.turn})
-      end)
-
+  def lobby_entry(state) do
     settings = %{
       theme: state.theme,
       set: state.set,
@@ -158,69 +139,40 @@ defmodule Octomocto.Memory.Game do
       bombs: Map.get(state, :bombs, 0)
     }
 
-    entry = %{
-      id: state.id,
-      # A game of the campaign has its level. Thus it never has the
-      # settings of a new game of the settings page.
-      settings:
-        if(state.campaign, do: Map.put(settings, :campaign, state.campaign.level), else: settings),
-      players_needed: state.needed,
-      players: players,
-      created_at: state.created_at
-    }
+    # A game of the campaign has its level. Thus it never has the settings
+    # of a new game of the settings page.
+    settings =
+      if state.campaign, do: Map.put(settings, :campaign, state.campaign.level), else: settings
 
-    cond do
-      state.listed ->
-        Map.merge(entry, %{
-          status: :open,
-          seats_left: state.needed - map_size(state.players)
-        })
-
-      state.ready ->
-        Map.merge(entry, %{
-          status: :ongoing,
-          started_at: state.ready_at,
-          finished: state.finished_at != nil
-        })
-
-      # Not all players are back after a restart
-      true ->
-        nil
-    end
+    Seats.lobby_entry(state, settings, if(state.ready, do: state.ready_at), fn id, p ->
+      %{score: p.score, turn: id == state.turn}
+    end)
   end
-
-  def lobby_entry(_state), do: nil
 
   @impl true
   def init({id, config}) do
     # So that terminate/2 runs when the node stops
     Process.flag(:trap_exit, true)
-    schedule_idle_check()
+    Seats.schedule_idle_check()
 
     state =
-      new_field(%{
-        id: id,
+      %{
         # With the theme "random", each new field gets a random theme
         theme: Themes.pick(config.theme, config.set, config.cards),
         random_theme: config.theme == "random",
         set: config.set,
         size: config.cards,
         bombs: Map.get(config, :bombs, 0),
-        needed: config.players,
-        players: %{},
-        public: config.public,
-        created_at: now(),
         # The fields of the match that ended with no single winner
         ties: 0,
         # The id of the player on the settings page, see edit_settings/3
         editing: nil,
-        # True while the game is in the list of open games. A game with one
-        # player is never in it.
-        listed: config.public and config.players > 1,
         # The `:level`, the `:user_id` of the player and the `:theme` choice
         # of a game of the campaign, else nil
         campaign: Map.get(config, :campaign)
-      })
+      }
+      |> Map.merge(Seats.new(id, Map.put_new(config, :rejoin_grace_ms, @rejoin_grace_ms)))
+      |> new_field()
 
     store(state)
     {:ok, state}
@@ -230,16 +182,17 @@ defmodule Octomocto.Memory.Game do
   # again during the grace time.
   def init(%{} = state) do
     Process.flag(:trap_exit, true)
-    schedule_idle_check()
+    Seats.schedule_idle_check()
 
     state =
-      Enum.reduce(Map.keys(state.players), state, &leave(&2, &1))
+      state
+      # A state from before the timings in the config
+      |> Map.put_new(:rejoin_grace_ms, @rejoin_grace_ms)
+      |> Seats.restore()
+      |> Seats.leave_all()
       |> restart_turn_timer()
       # A state from before the lists of the settings page
-      |> Map.put_new(:public, false)
-      |> Map.put_new(:created_at, now())
       |> Map.put_new(:ready_at, now())
-      |> Map.put_new(:listed, false)
       # A state from before the accuracy
       |> Map.put_new(:seen, MapSet.new())
       |> Map.update!(:players, fn players ->
@@ -275,8 +228,7 @@ defmodule Octomocto.Memory.Game do
   @impl true
   def handle_call({:join, pid, _user_id, _name, player_id, _guest_id}, _from, state)
       when is_map_key(state.players, player_id) do
-    Process.monitor(pid)
-    state = update_in(state.players[player_id], &%{&1 | pid: pid, left: nil})
+    state = Seats.rejoin(state, player_id, pid)
 
     # The player is back from the settings page
     if state.editing == player_id do
@@ -303,11 +255,7 @@ defmodule Octomocto.Memory.Game do
   def handle_call({:edit_settings, pid, player_id}, _from, state)
       when is_map_key(state.players, player_id) and state.needed > 1 and
              state.finished_at != nil and state.editing in [nil, player_id] do
-    Process.monitor(pid)
-
-    state =
-      update_in(state.players[player_id], &%{&1 | pid: pid, left: nil})
-      |> Map.put(:editing, player_id)
+    state = state |> Seats.rejoin(player_id, pid) |> Map.put(:editing, player_id)
 
     publish(state)
     {:reply, {:ok, public(state)}, state}
@@ -362,18 +310,7 @@ defmodule Octomocto.Memory.Game do
   end
 
   def handle_call({:join, pid, user_id, name, _player_id, guest_id}, _from, state) do
-    Process.monitor(pid)
-    # Unique in the cluster, because the game can move to another node
-    player_id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
-    {color_name, color} = pick_color(state.players)
-
-    player = %{
-      pid: pid,
-      user_id: user_id,
-      guest_id: guest_id,
-      name: name,
-      color: color,
-      color_name: color_name,
+    fields = %{
       score: 0,
       correct: 0,
       errors: 0,
@@ -384,14 +321,13 @@ defmodule Octomocto.Memory.Game do
       dead: false,
       failed_demining: false,
       # True when the player demined the field
-      deminer: false,
-      joined_at: System.system_time(),
-      # A reference while the player is away, see leave/2
-      left: nil
+      deminer: false
     }
 
+    {player_id, state} = Seats.add(state, pid, user_id, name, guest_id, fields)
+
     state =
-      put_in(state.players[player_id], player)
+      state
       |> Map.update!(:turn, &(&1 || player_id))
       |> make_ready()
 
@@ -455,9 +391,12 @@ defmodule Octomocto.Memory.Game do
 
   @impl true
   def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
-    case Enum.find(state.players, fn {_id, p} -> p.pid == pid end) do
-      {player_id, _player} ->
-        state = leave(state, player_id)
+    case Seats.player_id(state, pid) do
+      nil ->
+        {:noreply, state}
+
+      player_id ->
+        state = Seats.leave(state, player_id)
 
         # The other players wait for the player on the settings page
         if state.editing == player_id do
@@ -468,28 +407,23 @@ defmodule Octomocto.Memory.Game do
           store(state)
           {:noreply, state}
         end
-
-      nil ->
-        {:noreply, state}
     end
   end
 
   # The player did not join again in the grace time
   def handle_info({:remove, player_id, left}, state) do
-    case state.players do
-      %{^player_id => %{left: ^left}} ->
-        state =
-          if state.turn == player_id,
-            do: state |> pass_turn() |> restart_turn_timer(),
-            else: state
+    if Seats.remove?(state, player_id, left) do
+      state =
+        if state.turn == player_id,
+          do: state |> pass_turn() |> restart_turn_timer(),
+          else: state
 
-        state = %{state | players: Map.delete(state.players, player_id)}
-        state = if state.players == %{}, do: %{state | turn: nil}, else: state
-        publish(state)
-        {:noreply, state}
-
-      _ ->
-        {:noreply, state}
+      state = Seats.remove(state, player_id)
+      state = if state.players == %{}, do: %{state | turn: nil}, else: state
+      publish(state)
+      {:noreply, state}
+    else
+      {:noreply, state}
     end
   end
 
@@ -508,7 +442,7 @@ defmodule Octomocto.Memory.Game do
       Store.delete(state.id)
       {:stop, :normal, state}
     else
-      schedule_idle_check()
+      Seats.schedule_idle_check()
       {:noreply, state}
     end
   end
@@ -517,14 +451,14 @@ defmodule Octomocto.Memory.Game do
   # player joins it again on another node (see `Octomocto.GameProcess`).
   @impl true
   def terminate(_reason, state) do
-    if in_lobby?(state), do: Lobby.broadcast(__MODULE__, state.id, nil)
+    if state.public, do: Lobby.broadcast(__MODULE__, state.id, nil)
   end
 
   # A new field with zero scores for the same players. The winner of a
   # finished field starts (of the tied players, the one who joined first).
   # After an unfinished field, the player who joined first starts.
   defp new_round(state) do
-    order = player_order(state.players)
+    order = Seats.order(state)
 
     turn =
       if state.finished_at,
@@ -769,15 +703,11 @@ defmodule Octomocto.Memory.Game do
   # player who is out has no turns. When all others are out, the player of
   # the turn turns again.
   defp next_player(state) do
-    order = player_order(state.players)
+    order = Seats.order(state)
     {before, rest} = Enum.split_while(order, &(&1 != state.turn))
 
     (Enum.drop(rest, 1) ++ before ++ Enum.take(rest, 1))
     |> Enum.find(List.first(order), &(not state.players[&1].dead))
-  end
-
-  defp player_order(players) do
-    players |> Enum.sort_by(fn {_id, p} -> p.joined_at end) |> Enum.map(&elem(&1, 0))
   end
 
   # The field ends when all sets are off the field. Bombs can stay.
@@ -858,38 +788,11 @@ defmodule Octomocto.Memory.Game do
 
   defp restart_turn_timer(state), do: %{state | turn_since: nil, turn_ref: nil}
 
-  defp now, do: System.system_time(:millisecond)
-
-  # Prefer a color that no player has. Reuse colors when all are taken.
-  defp pick_color(players) do
-    taken = players |> Map.values() |> Enum.map(& &1.color)
-
-    case Enum.reject(@colors, fn {_name, color} -> color in taken end) do
-      [] -> Enum.random(@colors)
-      free -> Enum.random(free)
-    end
-  end
-
-  defp schedule_idle_check do
-    Process.send_after(self(), :idle_check, @idle_timeout_ms)
-  end
-
-  # Removes the player after the grace time, unless the player joins again
-  defp leave(state, player_id) do
-    left = make_ref()
-    Process.send_after(self(), {:remove, player_id, left}, @rejoin_grace_ms)
-    update_in(state.players[player_id], &%{&1 | pid: nil, left: left})
-  end
+  defp now, do: Seats.now()
 
   # Writes the state to the store, and sends the new row of the game to the
   # settings pages
-  defp store(state) do
-    Store.write(state)
-    if in_lobby?(state), do: Lobby.broadcast(__MODULE__, state.id, lobby_entry(state))
-  end
-
-  # True for a game that can be in the lists of the settings page
-  defp in_lobby?(state), do: state.public
+  defp store(state), do: Seats.write(state, __MODULE__, Store)
 
   defp publish(state) do
     store(state)
@@ -904,18 +807,11 @@ defmodule Octomocto.Memory.Game do
   """
   def public(state) do
     players =
-      state.players
-      |> Enum.sort_by(fn {_id, p} -> p.joined_at end)
-      |> Enum.map(fn {id, p} ->
+      Seats.public_players(state, fn _id, p ->
         %{
-          id: id,
-          name: p.name,
-          color: p.color,
-          color_name: p.color_name,
           score: p.score,
           # In percent, nil when no flip was counted
           accuracy: Memory.accuracy(p),
-          away: p.left != nil,
           wins: p.wins,
           dead: p.dead,
           failed_demining: p.failed_demining,

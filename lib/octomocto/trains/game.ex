@@ -59,13 +59,13 @@ defmodule Octomocto.Trains.Game do
   """
   use GenServer, restart: :temporary
 
-  alias Octomocto.{Lobby, Trains}
+  alias Octomocto.{Lobby, Seats, Trains}
   alias Octomocto.Trains.{Campaign, Store}
 
-  @idle_timeout_ms :timer.minutes(5)
   # Test config turns the countdown off.
   @countdown_ms Application.compile_env(:octomocto, :trains_countdown_ms, 3000)
-  # How long a player stays after its process stops
+  # How long a player stays after its process stops, when the config of
+  # the game does not say (see `Octomocto.Seats`)
   @rejoin_grace_ms Application.compile_env(
                      :octomocto,
                      :trains_rejoin_grace_ms,
@@ -85,6 +85,7 @@ defmodule Octomocto.Trains.Game do
   # The number of trains of a round, the same as `trainCount` in Trains.elm
   defguardp trains(state) when state.trains_per_house * (state.switch_count + 1)
 
+  # The color of each slot
   @colors [
     {"pink", "#ec4899"},
     {"sky", "#0ea5e9"},
@@ -167,26 +168,20 @@ defmodule Octomocto.Trains.Game do
   def init({id, settings}) do
     # So that terminate/2 runs when the node stops
     Process.flag(:trap_exit, true)
-    schedule_idle_check()
+    Seats.schedule_idle_check()
 
     state =
-      new_round(%{
-        id: id,
-        needed: settings.players,
+      %{
         switch_count: settings.switch_count,
         trains_per_house: settings.trains_per_house,
         pace: settings.pace,
-        players: %{},
         opened: true,
-        public: settings.public,
-        created_at: now(),
-        # True while the game is in the list of open games. A game with one
-        # player is never in it.
-        listed: settings.public and settings.players > 1,
         # The `:level` and the `:user_id` of the player of a game of the
         # campaign, else nil
         campaign: Map.get(settings, :campaign)
-      })
+      }
+      |> Map.merge(Seats.new(id, Map.put_new(settings, :rejoin_grace_ms, @rejoin_grace_ms)))
+      |> new_round()
 
     store(state)
     {:ok, state}
@@ -196,18 +191,18 @@ defmodule Octomocto.Trains.Game do
   # again during the grace time.
   def init(%{} = state) do
     Process.flag(:trap_exit, true)
-    schedule_idle_check()
+    Seats.schedule_idle_check()
 
-    # A state from before the results and the lists of the settings page
+    # A state from before the results
     state =
-      Map.merge(
-        %{round_id: Ecto.UUID.generate(), score: nil, public: false, listed: false},
-        state
-      )
+      Map.merge(%{round_id: Ecto.UUID.generate(), score: nil}, state)
       # A state from before the campaign
       |> Map.put_new(:campaign, nil)
+      # A state from before the timings in the config
+      |> Map.put_new(:rejoin_grace_ms, @rejoin_grace_ms)
+      |> Seats.restore()
+      |> Seats.leave_all()
 
-    state = Enum.reduce(Map.keys(state.players), state, &leave(&2, &1))
     store(state)
     {:ok, state}
   end
@@ -215,8 +210,7 @@ defmodule Octomocto.Trains.Game do
   @impl true
   def handle_call({:join, pid, _user_id, _name, player_id, _guest_id}, _from, state)
       when is_map_key(state.players, player_id) do
-    Process.monitor(pid)
-    state = update_in(state.players[player_id], &%{&1 | pid: pid, left: nil})
+    state = Seats.rejoin(state, player_id, pid)
     store(state)
     {:reply, {:ok, player_id, public(state)}, state}
   end
@@ -247,25 +241,10 @@ defmodule Octomocto.Trains.Game do
   end
 
   def handle_call({:join, pid, user_id, name, _player_id, guest_id}, _from, state) do
-    Process.monitor(pid)
-    # Unique in the cluster, because the game can move to another node
-    player_id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
     slot = Enum.find(0..(state.needed - 1), &(&1 not in slots(state)))
     {color_name, color} = Enum.at(@colors, slot)
-
-    player = %{
-      pid: pid,
-      user_id: user_id,
-      guest_id: guest_id,
-      name: name,
-      color: color,
-      color_name: color_name,
-      slot: slot,
-      # A reference while the player is away, see leave/2
-      left: nil
-    }
-
-    state = put_in(state.players[player_id], player)
+    fields = %{slot: slot, color: color, color_name: color_name}
+    {player_id, state} = Seats.add(state, pid, user_id, name, guest_id, fields)
     # The game leaves the open games when it is full for the first time
     state = %{state | listed: state.listed and map_size(state.players) < state.needed}
     state = start_round(state)
@@ -326,27 +305,23 @@ defmodule Octomocto.Trains.Game do
 
   @impl true
   def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
-    case Enum.find(state.players, fn {_id, p} -> p.pid == pid end) do
-      {player_id, _player} ->
-        state = leave(state, player_id)
-        store(state)
-        {:noreply, state}
-
-      nil ->
-        {:noreply, state}
+    if player_id = Seats.player_id(state, pid) do
+      state = Seats.leave(state, player_id)
+      store(state)
+      {:noreply, state}
+    else
+      {:noreply, state}
     end
   end
 
   # The player did not join again in the grace time
   def handle_info({:remove, player_id, left}, state) do
-    case state.players do
-      %{^player_id => %{left: ^left}} ->
-        state = %{state | players: Map.delete(state.players, player_id)}
-        publish(state)
-        {:noreply, state}
-
-      _ ->
-        {:noreply, state}
+    if Seats.remove?(state, player_id, left) do
+      state = Seats.remove(state, player_id)
+      publish(state)
+      {:noreply, state}
+    else
+      {:noreply, state}
     end
   end
 
@@ -362,7 +337,7 @@ defmodule Octomocto.Trains.Game do
       Store.delete(state.id)
       {:stop, :normal, state}
     else
-      schedule_idle_check()
+      Seats.schedule_idle_check()
       {:noreply, state}
     end
   end
@@ -426,18 +401,7 @@ defmodule Octomocto.Trains.Game do
 
   defp slots(state), do: Enum.map(state.players, fn {_id, p} -> p.slot end)
 
-  defp now, do: System.system_time(:millisecond)
-
-  defp schedule_idle_check do
-    Process.send_after(self(), :idle_check, @idle_timeout_ms)
-  end
-
-  # Removes the player after the grace time, unless the player joins again
-  defp leave(state, player_id) do
-    left = make_ref()
-    Process.send_after(self(), {:remove, player_id, left}, @rejoin_grace_ms)
-    update_in(state.players[player_id], &%{&1 | pid: nil, left: left})
-  end
+  defp now, do: Seats.now()
 
   # The node stops. The game leaves the lists of the settings page until a
   # player joins it again on another node (see `Octomocto.GameProcess`).
@@ -448,10 +412,7 @@ defmodule Octomocto.Trains.Game do
 
   # Writes the state to the store, and sends the new row of the game to the
   # settings pages
-  defp store(state) do
-    Store.write(state)
-    if state.public, do: Lobby.broadcast(__MODULE__, state.id, lobby_entry(state))
-  end
+  defp store(state), do: Seats.write(state, __MODULE__, Store)
 
   defp publish(state) do
     store(state)
