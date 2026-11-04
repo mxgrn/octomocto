@@ -8,8 +8,9 @@ defmodule OctomoctoWeb.Notices do
 
   The page renders the first notice with `notice/1`. A click on one of its
   buttons sends the `"notice_action"` event, which this hook handles: it
-  closes the notice on all pages of the recipient, and goes to the `:href` of
-  the button, if any.
+  closes the notice on all pages of the recipient, tells the sender the
+  answer if the notice has a `:reply_to`, and goes to the `:href` of the
+  button, if any.
   """
   use Phoenix.Component
 
@@ -66,6 +67,7 @@ defmodule OctomoctoWeb.Notices do
     with %{} = notice <- Enum.find(socket.assigns.notices, &(&1.id == id)),
          %{} = action <- Enum.find(notice.actions, &(&1.id == action_id)) do
       Notices.dismiss(socket.assigns.notice_recipient, id)
+      Notices.answer(notice, action_id, socket.assigns.notice_recipient)
       if action.href, do: {:halt, redirect(socket, to: action.href)}, else: {:halt, socket}
     else
       _ -> {:halt, socket}

@@ -43,15 +43,31 @@ defmodule OctomoctoWeb.InviteChannelTest do
     Notices.subscribe({:user, friend.id})
     friend_id = friend.id
 
-    {:ok, %{can_invite: true, friends: [%{id: ^friend_id, invited: false}]}, socket} =
+    {:ok, %{can_invite: true, friends: [%{id: ^friend_id, status: "invite"}]}, socket} =
       join_menu(user.id, id)
 
     ref = push(socket, "invite", %{"friend_id" => friend.id})
 
     assert_reply ref, :ok
-    assert_push "update", %{friends: [%{id: ^friend_id, invited: true}]}
+    assert_push "update", %{friends: [%{id: ^friend_id, status: "invited"}]}
     path = "/schulte/#{id}"
     assert_receive {:notice, %{actions: [%{id: "join", href: ^path} | _]}}
+  end
+
+  test "the menu shows that the friend declined the invite", %{id: id} do
+    [user, friend] = for _ <- 1..2, do: user_fixture()
+    make_friends(user, friend)
+    online(friend)
+    {:ok, _, _} = Schulte.join(id, user.id)
+    Notices.subscribe({:user, friend.id})
+    {:ok, _, socket} = join_menu(user.id, id)
+    push(socket, "invite", %{"friend_id" => friend.id})
+    assert_receive {:notice, notice}
+
+    Notices.answer(notice, "later", {:user, friend.id})
+
+    friend_id = friend.id
+    assert_push "update", %{friends: [%{id: ^friend_id, status: "declined"}]}
   end
 
   test "a player cannot invite to a full game", %{id: id} do

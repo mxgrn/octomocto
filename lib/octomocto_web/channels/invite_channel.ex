@@ -13,12 +13,16 @@ defmodule OctomoctoWeb.InviteChannel do
       shows no invites for a single-player game),
     * `:guest` - true when the browser has no signed-in user,
     * `:friends` - the friends of the user who are online and not in the
-      game, each with `:invited` when the user invited them from this page,
+      game, each with a `:status`: `"invite"` before an invite from this
+      page, then `"invited"`, or `"declined"` when the friend clicked
+      "Not now",
     * `:texts` - the texts of the menu in the locale of the page.
 
   The `"invite"` event with a `"friend_id"` sends a notice to the friend
   (see `Octomocto.Notices`), with a button that opens the game. A friend
-  gets one invite from each page.
+  gets one invite from each page. The status stays until the page loads
+  again, also when the invite expires. The notice has a `:reply_to` topic
+  of this user and game, so that all pages of the user see the answer.
   """
   use Phoenix.Channel
 
@@ -39,10 +43,11 @@ defmodule OctomoctoWeb.InviteChannel do
       if user_id do
         OnlineUsers.subscribe()
         Phoenix.PubSub.subscribe(Octomocto.PubSub, game.topic(id))
+        Phoenix.PubSub.subscribe(Octomocto.PubSub, reply_topic(id, user_id))
       end
 
       socket =
-        assign(socket, kind: kind, id: id, store: store, friends: friends, invited: MapSet.new())
+        assign(socket, kind: kind, id: id, store: store, friends: friends, invited: %{})
 
       reply = menu(socket)
       {:ok, reply, assign(socket, last: reply)}
@@ -55,18 +60,28 @@ defmodule OctomoctoWeb.InviteChannel do
   def handle_in("invite", %{"friend_id" => friend_id}, socket) do
     menu = menu(socket)
 
-    if menu.can_invite and Enum.any?(menu.friends, &(&1.id == friend_id)) do
+    if menu.can_invite and
+         Enum.any?(menu.friends, &(&1.id == friend_id and &1.status == "invite")) do
       send_invite(socket, friend_id)
-      invited = MapSet.put(socket.assigns.invited, friend_id)
+      invited = Map.put(socket.assigns.invited, friend_id, "invited")
       {:reply, :ok, socket |> assign(invited: invited) |> push_update()}
     else
       {:reply, :error, socket}
     end
   end
 
-  # A user came or left, or the game changed
+  # The friend clicked "Not now" in the notice of an invite of this page
   @impl true
+  def handle_info({:notice_answered, "invite:" <> _, "later", {:user, friend_id}}, socket)
+      when is_map_key(socket.assigns.invited, friend_id) do
+    invited = Map.put(socket.assigns.invited, friend_id, "declined")
+    {:noreply, socket |> assign(invited: invited) |> push_update()}
+  end
+
+  # A user came or left, or the game changed
   def handle_info(_message, socket), do: {:noreply, push_update(socket)}
+
+  defp reply_topic(game_id, user_id), do: "invite_replies:#{game_id}:#{user_id}"
 
   defp push_update(socket) do
     menu = menu(socket)
@@ -94,7 +109,7 @@ defmodule OctomoctoWeb.InviteChannel do
           id: friend.id,
           name: Accounts.public_name(friend),
           avatar_url: friend.avatar_url,
-          invited: MapSet.member?(assigns.invited, friend.id)
+          status: Map.get(assigns.invited, friend.id, "invite")
         }
       end
 
@@ -120,7 +135,8 @@ defmodule OctomoctoWeb.InviteChannel do
         %{id: "join", label: "Join", href: "/#{assigns.kind}/#{assigns.id}"},
         %{id: "later", label: "Not now", href: nil}
       ],
-      expires_at: System.system_time(:millisecond) + @invite_ms
+      expires_at: System.system_time(:millisecond) + @invite_ms,
+      reply_to: reply_topic(assigns.id, assigns.user_id)
     })
   end
 
@@ -129,6 +145,7 @@ defmodule OctomoctoWeb.InviteChannel do
       invite_title: gettext("Invite a friend"),
       invite: gettext("Invite"),
       invited: gettext("Invited"),
+      declined: gettext("Declined"),
       sign_in: gettext("Sign in to invite your friends."),
       no_friends: gettext("No friends online."),
       not_waiting: gettext("You can invite friends while the game waits for players.")

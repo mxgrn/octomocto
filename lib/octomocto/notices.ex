@@ -22,7 +22,10 @@ defmodule Octomocto.Notices do
       an `:href` (nil for a button that only closes the notice). Each
       button closes the notice on all pages of the recipient.
     * `:expires_at` - the system time in milliseconds when the notice
-      goes away by itself, or nil.
+      goes away by itself, or nil,
+    * `:reply_to` (optional) - a PubSub topic. A click on a button sends
+      `{:notice_answered, notice_id, action_id, recipient}` to it, so that
+      the sender knows the answer.
 
   For example, from a remote console:
 
@@ -58,6 +61,17 @@ defmodule Octomocto.Notices do
   def push(recipient, %{id: _, text: _, actions: _, expires_at: _} = notice) do
     Phoenix.PubSub.broadcast(Octomocto.PubSub, topic(recipient), {:notice, notice})
   end
+
+  @doc "Tells the sender of the notice which button the recipient clicked, if it asked."
+  def answer(%{reply_to: topic, id: id}, action_id, recipient) when is_binary(topic) do
+    Phoenix.PubSub.broadcast(
+      Octomocto.PubSub,
+      topic,
+      {:notice_answered, id, action_id, recipient}
+    )
+  end
+
+  def answer(_notice, _action_id, _recipient), do: :ok
 
   @doc "Closes the notice on all pages of the recipient."
   def dismiss(recipient, notice_id) do

@@ -54,6 +54,17 @@ defmodule OctomoctoWeb.NoticesTest do
       refute has_element?(other, "#notice-first")
     end
 
+    test "tells the sender which button the user clicked", %{conn: conn, user: user} do
+      {:ok, view, _html} = live(conn, ~p"/")
+      Phoenix.PubSub.subscribe(Octomocto.PubSub, "replies")
+      Notices.push({:user, user.id}, Map.put(notice("first"), :reply_to, "replies"))
+
+      view |> element("#notice-first-later") |> render_click()
+
+      recipient = {:user, user.id}
+      assert_receive {:notice_answered, "first", "later", ^recipient}
+    end
+
     test "goes to the link of a button", %{conn: conn, user: user} do
       {:ok, view, _html} = live(conn, ~p"/")
       Notices.push({:user, user.id}, notice("first", href: "/memory/abc"))

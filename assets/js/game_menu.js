@@ -167,9 +167,13 @@ class OctoGameMenu extends HTMLElement {
             : h("span", {class: "flex size-7 shrink-0 items-center justify-center rounded-full bg-octo-indigo/10 text-xs font-semibold text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light"},
                 (friend.name || "?").charAt(0).toUpperCase()),
           h("span", {class: "min-w-0 flex-1 truncate text-sm font-medium"}, friend.name),
-          friend.invited
+          friend.status === "invited"
             ? h("span", {class: "flex shrink-0 items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400"}, [
                 icon("hero-check"), t.invited
+              ])
+            : friend.status === "declined"
+            ? h("span", {class: "flex shrink-0 items-center gap-1 text-xs font-medium text-base-content/50"}, [
+                icon("hero-x-mark"), t.declined
               ])
             : h("button", {
                 type: "button",
