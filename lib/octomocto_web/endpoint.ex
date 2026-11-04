@@ -20,7 +20,7 @@ defmodule OctomoctoWeb.Endpoint do
     longpoll: [connect_info: [session: @session_options]]
 
   socket "/socket", OctomoctoWeb.UserSocket,
-    websocket: [connect_info: [session: @session_options]],
+    websocket: [connect_info: [:user_agent, session: @session_options]],
     longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.

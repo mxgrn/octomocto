@@ -67,6 +67,8 @@ defmodule OctomoctoWeb.SchulteChannelTest do
     assert_push "state", %{next: 1, players: [%{score: 0}]}
   end
 
+  # The sockets have no session, thus they log a warning
+  @tag :capture_log
   test "connect gives the user id from a valid token, and nil for a guest" do
     {:ok, socket} = connect(OctomoctoWeb.UserSocket, %{"user_token" => UserSocket.user_token(42)})
     assert socket.assigns.user_id == 42

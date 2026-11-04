@@ -1,6 +1,8 @@
 defmodule OctomoctoWeb.UserSocket do
   use Phoenix.Socket
 
+  require Logger
+
   channel "afterglow:*", OctomoctoWeb.AfterglowChannel
   channel "astronaut:*", OctomoctoWeb.AstronautChannel
   channel "invites:*", OctomoctoWeb.InviteChannel
@@ -17,13 +19,29 @@ defmodule OctomoctoWeb.UserSocket do
   @impl true
   # The session is nil when the browser does not send the `_csrf_token` param
   def connect(params, socket, connect_info) do
+    user_id = verify_user_token(params["user_token"])
+    if connect_info[:session] == nil, do: log_no_session(params, user_id, connect_info)
+
     {:ok,
      assign(socket,
-       user_id: verify_user_token(params["user_token"]),
+       user_id: user_id,
        guest_name: OctomoctoWeb.GuestName.from_session(connect_info[:session]),
        guest_id: OctomoctoWeb.GuestName.id_from_session(connect_info[:session]),
        browser_locale: OctomoctoWeb.GuestName.locale_from_session(connect_info[:session])
      )}
+  end
+
+  # A guest without a session joins a game without a name, thus the page
+  # shows the color of the player. The session is also nil when the browser
+  # sends no session cookie, or a `_csrf_token` of an older session (for
+  # example, after a sign-in in another tab).
+  defp log_no_session(params, user_id, connect_info) do
+    Logger.warning(
+      "Socket without session: " <>
+        "csrf_token=#{if params["_csrf_token"] in [nil, ""], do: "missing", else: "sent"} " <>
+        "user=#{if user_id, do: "signed_in", else: "guest"} " <>
+        "user_agent=#{inspect(connect_info[:user_agent])}"
+    )
   end
 
   @salt "user socket"
