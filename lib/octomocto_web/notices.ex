@@ -105,6 +105,11 @@ defmodule OctomoctoWeb.Notices do
       }
       class="flex min-w-0 items-center gap-3"
     >
+      <.notice_avatar
+        :if={@notice[:avatar]}
+        id={"notice-#{@notice.id}-avatar"}
+        avatar={@notice.avatar}
+      />
       <p class="min-w-0 truncate font-medium">{@notice.text}</p>
       <div class="flex shrink-0 items-center gap-1">
         <button
@@ -129,6 +134,31 @@ defmodule OctomoctoWeb.Notices do
         +{@waiting}
       </span>
     </div>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :avatar, :map, required: true
+
+  defp notice_avatar(%{avatar: %{url: url}} = assigns) when is_binary(url) do
+    ~H"""
+    <img
+      id={@id}
+      src={@avatar.url}
+      alt=""
+      class="-ml-2 size-6 shrink-0 rounded-full ring-2 ring-white/40"
+    />
+    """
+  end
+
+  defp notice_avatar(assigns) do
+    ~H"""
+    <span
+      id={@id}
+      class="-ml-2 flex size-6 shrink-0 items-center justify-center rounded-full bg-white/20 text-xs font-semibold uppercase ring-2 ring-white/40"
+    >
+      {String.first(@avatar.name || "?")}
+    </span>
     """
   end
 end

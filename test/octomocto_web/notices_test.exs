@@ -41,6 +41,15 @@ defmodule OctomoctoWeb.NoticesTest do
       refute has_element?(view, "#notice-second")
     end
 
+    test "sees the avatar of the sender", %{conn: conn, user: user} do
+      {:ok, view, _html} = live(conn, ~p"/")
+
+      avatar = %{url: "https://example.com/max.png", name: "Max"}
+      Notices.push({:user, user.id}, Map.put(notice("first"), :avatar, avatar))
+
+      assert has_element?(view, "img#notice-first-avatar[src='https://example.com/max.png']")
+    end
+
     test "closes a notice on all pages with a button, and the next one shows",
          %{conn: conn, user: user} do
       {:ok, view, _html} = live(conn, ~p"/")

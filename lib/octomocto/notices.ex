@@ -26,6 +26,9 @@ defmodule Octomocto.Notices do
     * `:reply_to` (optional) - a PubSub topic. A click on a button sends
       `{:notice_answered, notice_id, action_id, recipient}` to it, so that
       the sender knows the answer.
+    * `:avatar` (optional) - `%{url: url, name: name}` of the sender. The
+      bar shows the picture before the text, or the first letter of the
+      name when the url is nil.
     * `:sound` (optional) - `"invite"` plays the invite sound in the
       browser when the notice comes (see `assets/js/sounds.js`).
 

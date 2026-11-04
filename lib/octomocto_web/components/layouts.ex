@@ -251,6 +251,18 @@ defmodule OctomoctoWeb.Layouts do
       <div
         :if={@notices != []}
         id="notice-float"
+        phx-mounted={
+          JS.transition(
+            {"ease-out duration-300", "-translate-y-[150%]", "translate-y-0"},
+            time: 300
+          )
+        }
+        phx-remove={
+          JS.transition(
+            {"ease-in duration-200", "translate-y-0", "-translate-y-[150%]"},
+            time: 200
+          )
+        }
         class="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-2 pt-2"
       >
         <div class="pointer-events-auto flex min-h-10 max-w-full items-center rounded-full bg-octo-indigo px-4 py-1.5 text-sm text-white shadow-lg shadow-octo-indigo/25">

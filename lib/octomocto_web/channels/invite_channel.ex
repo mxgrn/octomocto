@@ -125,12 +125,14 @@ defmodule OctomoctoWeb.InviteChannel do
   end
 
   defp send_invite(%{assigns: assigns}, friend_id) do
-    name = Accounts.display_name(assigns.user_id)
+    sender = Accounts.get_user!(assigns.user_id)
+    name = Accounts.public_name(sender)
     game = Enum.find(HomeLive.games(), &(&1.id == assigns.kind))
 
     Notices.push({:user, friend_id}, %{
       id: "invite:#{assigns.id}:#{assigns.user_id}",
       text: "#{name} invites you to #{game.name}",
+      avatar: %{url: sender.avatar_url, name: name},
       actions: [
         %{id: "join", label: "Join", href: "/#{assigns.kind}/#{assigns.id}"},
         %{id: "later", label: "Not now", href: nil}

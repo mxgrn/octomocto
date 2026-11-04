@@ -53,7 +53,8 @@ defmodule OctomoctoWeb.InviteChannelTest do
     assert_reply ref, :ok
     assert_push "update", %{friends: [%{id: ^friend_id, status: "invited"}]}
     path = "/schulte/#{id}"
-    assert_receive {:notice, %{actions: [%{id: "join", href: ^path} | _]}}
+    name = user.display_name
+    assert_receive {:notice, %{actions: [%{id: "join", href: ^path} | _], avatar: %{name: ^name}}}
   end
 
   test "the menu shows that the friend declined the invite", %{id: id} do

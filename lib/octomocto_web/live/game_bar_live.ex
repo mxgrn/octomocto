@@ -55,23 +55,27 @@ defmodule OctomoctoWeb.GameBarLive do
     ~H"""
     <div
       id="game-bar"
-      class={[
-        "flex h-8 items-center justify-center px-4 text-xs transition-colors",
-        if(@notices != [], do: "bg-octo-indigo text-white", else: "text-base-content/60")
-      ]}
+      class="relative flex h-8 items-center justify-center overflow-hidden px-4 text-xs text-base-content/60"
     >
-      <%= cond do %>
-        <% @notices != [] -> %>
-          <OctomoctoWeb.Notices.notice notice={hd(@notices)} waiting={length(@notices) - 1} />
-        <% @state -> %>
-          <p id="game-bar-summary" class="truncate">
-            <%= if summary = @page.game_summary(%{id: @id, settings: @game.lobby_settings(@state)}) do %>
-              {summary} ·
-            <% end %>
-            {players(@state.needed)} · {visibility(@state)}
-          </p>
-        <% true -> %>
-      <% end %>
+      <p :if={@state} id="game-bar-summary" class="truncate">
+        <%= if summary = @page.game_summary(%{id: @id, settings: @game.lobby_settings(@state)}) do %>
+          {summary} ·
+        <% end %>
+        {players(@state.needed)} · {visibility(@state)}
+      </p>
+      <div
+        :if={@notices != []}
+        id="game-bar-notice"
+        phx-mounted={
+          JS.transition({"ease-out duration-300", "-translate-y-full", "translate-y-0"}, time: 300)
+        }
+        phx-remove={
+          JS.transition({"ease-in duration-200", "translate-y-0", "-translate-y-full"}, time: 200)
+        }
+        class="absolute inset-0 flex items-center justify-center bg-octo-indigo px-4 text-white"
+      >
+        <OctomoctoWeb.Notices.notice notice={hd(@notices)} waiting={length(@notices) - 1} />
+      </div>
     </div>
     """
   end
