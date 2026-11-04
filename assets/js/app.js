@@ -52,41 +52,27 @@ const Turnstile = {
 // The bar of notifications above the header (see `site_notifications` in
 // layouts.ex). It shows the first notification that the user did not close,
 // in the order the notifications were added. After the user closes it, the
-// next one shows on the next page load. The server also gets the first
-// view and the close of each notification (see NotificationViewController).
+// next one shows on the next page load. The server also gets each close
+// (see NotificationCloseController).
 const CLOSED_NOTIFICATIONS_KEY = "closed-notifications"
-const SHOWN_NOTIFICATIONS_KEY = "shown-notifications"
-const storedIds = (key) => {
-  try { return JSON.parse(localStorage.getItem(key)) || [] } catch (_e) { return [] }
-}
-const storeId = (key, id) => {
-  const ids = new Set([...storedIds(key), id])
-  try { localStorage.setItem(key, JSON.stringify([...ids])) } catch (_e) {}
-}
-// The bar works the same when the request fails
-const sendNotificationEvent = (id, event) => {
-  fetch(`/notifications/${id}/${event}`, {method: "POST", headers: {"x-csrf-token": csrfToken}})
-    .catch(() => {})
+const closedNotifications = () => {
+  try { return JSON.parse(localStorage.getItem(CLOSED_NOTIFICATIONS_KEY)) || [] } catch (_e) { return [] }
 }
 const closeNotification = (notification) => {
   const id = notification.dataset.notificationId
-  storeId(CLOSED_NOTIFICATIONS_KEY, id)
-  sendNotificationEvent(id, "closed")
+  const closed = new Set([...closedNotifications(), id])
+  try { localStorage.setItem(CLOSED_NOTIFICATIONS_KEY, JSON.stringify([...closed])) } catch (_e) {}
+  // The bar works the same when the request fails
+  fetch(`/notifications/${id}/close`, {method: "POST", headers: {"x-csrf-token": csrfToken}})
+    .catch(() => {})
   notification.classList.add("closing")
   setTimeout(() => { notification.hidden = true }, 150)
 }
 function showSiteNotification(container) {
-  const closed = storedIds(CLOSED_NOTIFICATIONS_KEY)
+  const closed = closedNotifications()
   const notification = [...container.querySelectorAll("[data-notification-id]")]
     .find(el => !closed.includes(el.dataset.notificationId))
-  if (!notification) return
-  notification.hidden = false
-  // Only the first view in this browser goes to the server
-  const id = notification.dataset.notificationId
-  if (!storedIds(SHOWN_NOTIFICATIONS_KEY).includes(id)) {
-    storeId(SHOWN_NOTIFICATIONS_KEY, id)
-    sendNotificationEvent(id, "shown")
-  }
+  if (notification) notification.hidden = false
 }
 document.addEventListener("click", e => {
   const button = e.target.closest("[data-close-notification]")

@@ -5,16 +5,16 @@ defmodule Octomocto.Notifications do
 
   A page shows one notification at a time: the first that the user did not
   close, in the order the notifications were added. The browser keeps the
-  closed notifications (see `OctomoctoWeb.SiteNotifications`). The views and
-  closes are also in the database (see `Octomocto.Notifications.View`), for
-  the statistics and so that a signed-in user does not see a closed
+  closed notifications (see `OctomoctoWeb.SiteNotifications`). The closes
+  are also in the database (see `Octomocto.Notifications.Close`), for the
+  statistics and so that a signed-in user does not see a closed
   notification again on other devices.
   """
   import Ecto.Query
 
   alias Octomocto.Accounts.Scope
   alias Octomocto.Guests
-  alias Octomocto.Notifications.{Notification, View}
+  alias Octomocto.Notifications.{Close, Notification}
   alias Octomocto.Repo
 
   @doc "Gives all notifications, also the expired ones, in the order they were added."
@@ -49,9 +49,8 @@ defmodule Octomocto.Notifications do
 
   defp omit_closed(%Scope{user: %{id: user_id}}, query) do
     closed =
-      from v in View,
-        where: v.notification_id == parent_as(:notification).id,
-        where: v.user_id == ^user_id and not is_nil(v.closed_at)
+      from c in Close,
+        where: c.notification_id == parent_as(:notification).id and c.user_id == ^user_id
 
     from n in query, as: :notification, where: not exists(closed)
   end
@@ -59,24 +58,18 @@ defmodule Octomocto.Notifications do
   defp omit_closed(_scope, query), do: query
 
   @doc """
-  Saves that a user or a guest saw a notification (`:shown`) or closed it
-  (`:closed`). The `scope` gives the user. Without a user, the `guest` is
-  `{id, name}` from the session, and the guest is saved first (see
-  `Octomocto.Guests`). The first view and the first close are kept. A
-  notification that does not exist is ignored.
+  Saves that a user or a guest closed a notification. The `scope` gives
+  the user. Without a user, the `guest` is `{id, name}` from the session,
+  and the guest is saved first (see `Octomocto.Guests`). The first close is
+  kept. A notification that does not exist is ignored.
   """
-  def record_view(notification_id, action, scope, guest) when action in [:shown, :closed] do
+  def record_close(notification_id, scope, guest) do
     with %Notification{} <- Repo.get(Notification, notification_id),
-         {field, id} <- viewer(scope, guest) do
-      now = DateTime.utc_now()
-
+         {field, id} <- closer(scope, guest) do
       Repo.insert_all(
-        View,
-        [
-          %{:notification_id => notification_id, field => id, :inserted_at => now}
-          |> Map.put(:closed_at, if(action == :closed, do: now))
-        ],
-        on_conflict: on_view_conflict(action),
+        Close,
+        [%{:notification_id => notification_id, field => id, :inserted_at => DateTime.utc_now()}],
+        on_conflict: :nothing,
         conflict_target:
           {:unsafe_fragment, "(notification_id, #{field}) WHERE #{field} IS NOT NULL"}
       )
@@ -85,31 +78,18 @@ defmodule Octomocto.Notifications do
     :ok
   end
 
-  defp viewer(%Scope{user: %{id: id}}, _guest), do: {:user_id, id}
+  defp closer(%Scope{user: %{id: id}}, _guest), do: {:user_id, id}
 
-  defp viewer(_scope, {id, name}) when is_binary(id) and is_binary(name) do
+  defp closer(_scope, {id, name}) when is_binary(id) and is_binary(name) do
     Guests.save([%{guest_id: id, name: name}], DateTime.utc_now())
     {:guest_id, id}
   end
 
-  defp viewer(_scope, _guest), do: nil
+  defp closer(_scope, _guest), do: nil
 
-  defp on_view_conflict(:shown), do: :nothing
-
-  defp on_view_conflict(:closed) do
-    from v in View,
-      update: [set: [closed_at: fragment("COALESCE(?, EXCLUDED.closed_at)", v.closed_at)]]
-  end
-
-  @doc """
-  Gives the numbers of views and closes of each notification, as a map
-  from the notification id to `%{shown: n, closed: n}`.
-  """
-  def view_counts do
-    from(v in View,
-      group_by: v.notification_id,
-      select: {v.notification_id, %{shown: count(v.id), closed: count(v.closed_at)}}
-    )
+  @doc "Gives the number of closes of each notification, as a map from the notification id."
+  def close_counts do
+    from(c in Close, group_by: c.notification_id, select: {c.notification_id, count(c.id)})
     |> Repo.all()
     |> Map.new()
   end

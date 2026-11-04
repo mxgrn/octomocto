@@ -84,8 +84,8 @@ defmodule OctomoctoWeb.Router do
     get "/overlap/:id", OverlapController, :show
     get "/snap/:id", SnapController, :show
     get "/afterglow/:id", AfterglowController, :show
-    # The bar of notifications sends each view and close, also for guests
-    post "/notifications/:id/:event", NotificationViewController, :create
+    # The bar of notifications sends each close, also for guests
+    post "/notifications/:id/close", NotificationCloseController, :create
 
     # The front page updates its list of public games live. The
     # settings of a new game: a LiveView changes the settings without a page

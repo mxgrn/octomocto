@@ -15,8 +15,7 @@ defmodule OctomoctoWeb.SiteNotifications do
   The page gets all notifications that did not expire, without the ones
   that a signed-in user closed. The script in `app.js` shows the first one
   that the user did not close, and keeps the closed ones in `localStorage`.
-  It also sends each view and each close to
-  `OctomoctoWeb.NotificationViewController`.
+  It also sends each close to `OctomoctoWeb.NotificationCloseController`.
   """
 
   alias Octomocto.Notifications
