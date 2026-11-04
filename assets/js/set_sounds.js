@@ -1,6 +1,6 @@
 // Sounds for the Set game.
 
-import {audioReady, gameStart, noise, tone} from "./sounds"
+import {audioReady, countdownBeep, gameStart, goBeep, noise, tone} from "./sounds"
 
 const sounds = {
   // The same sound in all games when all players are ready
@@ -11,14 +11,9 @@ const sounds = {
     tone({type: "triangle", freq: 660, duration: 0.05, gain: 0.05})
   },
 
-  // The countdown beeps, the same as in the Schulte race
-  countdown() {
-    tone({freq: 880, duration: 0.15, gain: 0.2})
-  },
-
-  go() {
-    tone({freq: 1760, duration: 0.5, gain: 0.2})
-  },
+  // The same countdown and start beeps in all games
+  countdown: countdownBeep,
+  go: goBeep,
 
   // A short bright chime when you find a set
   found() {

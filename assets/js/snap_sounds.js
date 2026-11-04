@@ -1,13 +1,11 @@
 // Sounds for the Snap game. The answers come fast, so their sounds are
 // short and soft.
 
-import {noise, audioReady, tone} from "./sounds"
+import {audioReady, countdownBeep, noise, tone} from "./sounds"
 
 const sounds = {
-  // The countdown beeps, the same as in the Schulte race
-  countdown() {
-    tone({freq: 880, duration: 0.15, gain: 0.2})
-  },
+  // The same countdown beeps in all games
+  countdown: countdownBeep,
 
   // A soft tap for each card to remember
   card() {

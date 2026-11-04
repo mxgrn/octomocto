@@ -1,21 +1,14 @@
 // Sounds for the Schulte race.
 
-import {audioReady, gameStart, noise, tone} from "./sounds"
+import {audioReady, countdownBeep, gameStart, goBeep, noise, tone} from "./sounds"
 
 const sounds = {
   // The same sound in all games when all players are ready
   start: gameStart,
 
-  // A short beep on each step of the countdown. Laptop speakers are weak
-  // in low tones, so the beeps are high and a little louder than the others.
-  countdown() {
-    tone({freq: 880, duration: 0.15, gain: 0.2})
-  },
-
-  // A longer beep, one octave higher, when the race starts
-  go() {
-    tone({freq: 1760, duration: 0.5, gain: 0.2})
-  },
+  // The same countdown and start beeps in all games
+  countdown: countdownBeep,
+  go: goBeep,
 
   // A short bright pop when you get the point
   found() {

@@ -86,6 +86,19 @@ export function gameStart() {
   }
 }
 
+// The beep on each step (3, 2, 1) of the countdown in all games with a
+// countdown. Laptop speakers are weak in low tones, so the beep is high and
+// a little louder than the other sounds.
+export function countdownBeep() {
+  tone({freq: 880, duration: 0.15, gain: 0.2})
+}
+
+// A longer beep, one octave higher, when the countdown is over and the game
+// starts
+export function goBeep() {
+  tone({freq: 1760, duration: 0.5, gain: 0.2})
+}
+
 // The sound of an invite from a friend. No other sound of the site is like
 // it: a soft "knock, knock" on the same note, a short stop, and then a
 // warm "bing": a major chord (B, D sharp, F sharp) that rolls up quickly
