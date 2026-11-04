@@ -14,6 +14,7 @@ defmodule OctomoctoWeb.Admin.NotificationsLive do
     {:ok,
      socket
      |> assign(page_title: "Notifications", noindex: true, now: DateTime.utc_now())
+     |> assign(:view_counts, Notifications.view_counts())
      |> assign(:empty?, notifications == [])
      |> stream(:notifications, notifications)}
   end
@@ -92,6 +93,10 @@ defmodule OctomoctoWeb.Admin.NotificationsLive do
                   {if expired?(notification, @now), do: "Expired", else: "Expires"}
                   {Calendar.strftime(notification.expires_at, "%Y-%m-%d %H:%M")} UTC
                 </span>
+                <.view_counts
+                  id={"notification-views-#{notification.id}"}
+                  counts={Map.get(@view_counts, notification.id, %{shown: 0, closed: 0})}
+                />
               </div>
             </div>
             <div class="flex shrink-0 items-center gap-1">
@@ -119,6 +124,26 @@ defmodule OctomoctoWeb.Admin.NotificationsLive do
         </ul>
       </div>
     </Layouts.app>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :counts, :map, required: true
+
+  # The number of users and guests that saw and that closed the notification
+  defp view_counts(assigns) do
+    ~H"""
+    <span id={@id} class="inline-flex items-center gap-3 text-base-content/70">
+      <span class="inline-flex items-center gap-1" title="Users and guests that saw it">
+        <.icon name="hero-eye-micro" class="size-3.5" /> {@counts.shown}
+      </span>
+      <span class="inline-flex items-center gap-1" title="Users and guests that closed it">
+        <.icon name="hero-x-circle-micro" class="size-3.5" /> {@counts.closed}
+        <span :if={@counts.shown > 0} class="text-base-content/50">
+          ({round(@counts.closed * 100 / @counts.shown)}%)
+        </span>
+      </span>
+    </span>
     """
   end
 

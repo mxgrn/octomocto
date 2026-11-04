@@ -1,6 +1,7 @@
 defmodule Octomocto.Guests do
   @moduledoc """
-  The guests that finished a game (see `Octomocto.Guests.Guest`).
+  The guests that finished a game or saw a notification (see
+  `Octomocto.Guests.Guest`).
   """
   alias Octomocto.Guests.Guest
   alias Octomocto.Repo

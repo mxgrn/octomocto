@@ -12,22 +12,25 @@ defmodule OctomoctoWeb.SiteNotifications do
 
       plug OctomoctoWeb.SiteNotifications
 
-  The page gets all notifications that did not expire. The script in
-  `app.js` shows the first one that the user did not close, and keeps the
-  closed ones in `localStorage`.
+  The page gets all notifications that did not expire, without the ones
+  that a signed-in user closed. The script in `app.js` shows the first one
+  that the user did not close, and keeps the closed ones in `localStorage`.
+  It also sends each view and each close to
+  `OctomoctoWeb.NotificationViewController`.
   """
 
   alias Octomocto.Notifications
 
   def on_mount(game, _params, _session, socket) do
-    {:cont,
-     Phoenix.Component.assign(socket, :notifications, Notifications.active_notifications(game))}
+    notifications = Notifications.active_notifications(game, socket.assigns[:current_scope])
+    {:cont, Phoenix.Component.assign(socket, :notifications, notifications)}
   end
 
   def init(opts), do: opts
 
   def call(conn, _opts) do
-    Plug.Conn.assign(conn, :notifications, Notifications.active_notifications(nil))
+    notifications = Notifications.active_notifications(nil, conn.assigns[:current_scope])
+    Plug.Conn.assign(conn, :notifications, notifications)
   end
 
   @doc """
