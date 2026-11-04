@@ -11,7 +11,10 @@ defmodule Octomocto.MixProject do
       aliases: aliases(),
       deps: deps(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+      # No file references in the PO(T) files, so that a code change does
+      # not change them
+      gettext: [write_reference_line_numbers: false, write_reference_comments: false]
     ]
   end
 

@@ -135,5 +135,4 @@ msgid "must be greater than or equal to %{number}"
 msgstr "يجب أن يكون أكبر من أو يساوي %{number}"
 
 msgid "must be equal to %{number}"
-
 msgstr "يجب أن يساوي %{number}"
