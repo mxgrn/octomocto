@@ -14,7 +14,7 @@ defmodule Octomocto.Snap do
   alias Octomocto.Repo
   alias Octomocto.Snap.{Game, Result, Store}
 
-  @list_size 10
+  @list_size 5
 
   @doc """
   Starts a new game and returns its id. The `config` has `:back`, the

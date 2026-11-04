@@ -13,7 +13,7 @@ defmodule Octomocto.Schulte do
   alias Octomocto.Repo
   alias Octomocto.Schulte.{Game, Result, Store}
 
-  @list_size 10
+  @list_size 5
 
   @doc """
   Starts a new game with a `:random` or a `:classic` layout, in the

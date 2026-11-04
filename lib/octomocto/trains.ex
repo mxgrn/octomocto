@@ -14,7 +14,7 @@ defmodule Octomocto.Trains do
 
   @switch_counts [4, 6, 8, 12]
   @paces ~w(easy normal hard expert)
-  @list_size 10
+  @list_size 5
 
   @doc """
   How the pause between trains changes: it stays at 8 s (`"easy"`), or it

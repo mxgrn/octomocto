@@ -345,11 +345,28 @@ defmodule Octomocto.SchulteTest do
       assert theirs.user_id == other.id
       assert %{game_id: "a"} = best
     end
+
+    test "gives at most 5 latest results" do
+      user = user_fixture()
+
+      for i <- 1..6,
+          do: Schulte.save_results("g#{i}", @duo, 1000, [%{user_id: user.id, score: 1}])
+
+      assert length(Schulte.user_results(%{user: user}, @duo).latest) == 5
+    end
   end
 
   describe "best_results/1" do
     @solo %{"type" => "classic", "mode" => "easy", "players" => 1}
     @duo %{"type" => "classic", "mode" => "easy", "players" => 2}
+
+    test "gives at most 5 users" do
+      for i <- 1..6,
+          do:
+            Schulte.save_results("g#{i}", @solo, 1000, [%{user_id: user_fixture().id, score: 90}])
+
+      assert length(Schulte.best_results(@solo)) == 5
+    end
 
     test "shows only the results with the given settings" do
       user = user_fixture()
