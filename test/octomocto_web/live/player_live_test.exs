@@ -57,6 +57,12 @@ defmodule OctomoctoWeb.PlayerLiveTest do
     refute has_element?(view, "#player-online")
   end
 
+  test "shows how long ago a player joined", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/players/#{user_fixture().public_id}")
+
+    assert view |> element("#player-joined") |> render() =~ "just now"
+  end
+
   test "shows an online user as online now", %{conn: conn} do
     user = user_fixture()
     OnlineUsers.track(self(), user.id, %{kind: nil, doing: nil})

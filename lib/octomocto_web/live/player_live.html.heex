@@ -44,7 +44,12 @@
         <div id="player-joined">
           <dt class="text-sm text-base-content/60">Joined</dt>
           <dd class="mt-0.5 text-lg font-semibold text-octo-navy dark:text-base-content">
-            {Calendar.strftime(@profile.joined_at, "%b %-d, %Y")}
+            <time
+              datetime={DateTime.to_iso8601(@profile.joined_at)}
+              title={Calendar.strftime(@profile.joined_at, "%b %-d, %Y")}
+            >
+              {ago(@profile.joined_at)}
+            </time>
           </dd>
         </div>
         <div id="player-games">
