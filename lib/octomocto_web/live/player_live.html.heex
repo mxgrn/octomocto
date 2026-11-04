@@ -10,9 +10,21 @@
 
   <div id="player" class="mx-auto flex w-full max-w-2xl flex-col gap-6 pt-2 pb-4">
     <div class="flex items-center gap-4">
-      <div class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 text-2xl font-semibold text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light">
+      <%!-- As the avatars in Friends online on the front page --%>
+      <img
+        :if={@profile.avatar_url}
+        id="player-avatar"
+        src={@profile.avatar_url}
+        alt=""
+        class="size-14 shrink-0 rounded-full object-cover"
+      />
+      <span
+        :if={!@profile.avatar_url}
+        id="player-initial"
+        class="flex size-14 shrink-0 items-center justify-center rounded-full bg-octo-indigo/10 text-2xl font-semibold text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light"
+      >
         {@profile.name |> String.first() |> String.upcase()}
-      </div>
+      </span>
       <div class="min-w-0">
         <h1
           id="player-name"

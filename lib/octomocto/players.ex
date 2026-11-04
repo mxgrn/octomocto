@@ -23,6 +23,7 @@ defmodule Octomocto.Players do
         %{
           name: Accounts.public_name(user) || "Guest",
           guest: false,
+          avatar_url: user.avatar_url,
           joined_at: user.inserted_at,
           games: Stats.games_of(:user_id, user.id),
           friends: length(Friends.friends(user.id))
@@ -32,6 +33,7 @@ defmodule Octomocto.Players do
         %{
           name: guest.name,
           guest: true,
+          avatar_url: nil,
           joined_at: guest.inserted_at,
           games: Stats.games_of(:guest_id, guest.id),
           friends: nil

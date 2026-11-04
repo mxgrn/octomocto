@@ -20,6 +20,19 @@ defmodule OctomoctoWeb.PlayerLiveTest do
     assert has_element?(view, "#player-friends")
   end
 
+  test "shows the photo of a user", %{conn: conn} do
+    user = user_fixture()
+
+    user
+    |> Ecto.Changeset.change(avatar_url: "https://example.com/max.jpg")
+    |> Repo.update!()
+
+    {:ok, view, _html} = live(conn, ~p"/players/#{user.public_id}")
+
+    assert has_element?(view, ~s|#player-avatar[src="https://example.com/max.jpg"]|)
+    refute has_element?(view, "#player-initial")
+  end
+
   test "shows no friends for a guest", %{conn: conn} do
     guest_id = Ecto.UUID.generate()
 
