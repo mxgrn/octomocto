@@ -79,8 +79,13 @@ defmodule Octomocto.Seats do
   player has, if possible. The `fields` are the fields of the game, such
   as `:score`. A game can also give the `:color` and the `:color_name` in
   the fields. Gives the id of the player and the new state.
+
+  `from_lobby` is true when the player came from a list of open games (a
+  link with `?from=lobby`, see `OctomoctoWeb.GamePageComponents`), and
+  false when the player came from a link that someone shared. A rejoin
+  does not change it. A seat from older code has no `:from_lobby`.
   """
-  def add(state, pid, user_id, name, guest_id, fields) do
+  def add(state, pid, user_id, name, guest_id, from_lobby, fields) do
     Process.monitor(pid)
     # Unique in the cluster, because the game can move to another node
     player_id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
@@ -96,6 +101,7 @@ defmodule Octomocto.Seats do
           color: color,
           color_name: color_name,
           joined_at: System.system_time(),
+          from_lobby: from_lobby,
           # A reference while the player is away, see leave/2
           left: nil
         },

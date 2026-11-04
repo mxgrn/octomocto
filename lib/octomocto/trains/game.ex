@@ -208,7 +208,12 @@ defmodule Octomocto.Trains.Game do
   end
 
   @impl true
-  def handle_call({:join, pid, _user_id, _name, player_id, _guest_id}, _from, state)
+  # A join from a node with older code, or from a player who did not come
+  # from a list of open games (see `Octomocto.GameProcess.join/9`)
+  def handle_call({:join, pid, user_id, name, player_id, guest_id}, from, state),
+    do: handle_call({:join, pid, user_id, name, player_id, guest_id, false}, from, state)
+
+  def handle_call({:join, pid, _user_id, _name, player_id, _guest_id, _from_lobby}, _from, state)
       when is_map_key(state.players, player_id) do
     state = Seats.rejoin(state, player_id, pid)
     store(state)
@@ -225,14 +230,18 @@ defmodule Octomocto.Trains.Game do
     {:reply, {:ok, nil, public(state)}, state}
   end
 
-  def handle_call({:join, _pid, _user_id, _name, _player_id, _guest_id}, _from, state)
+  def handle_call(
+        {:join, _pid, _user_id, _name, _player_id, _guest_id, _from_lobby},
+        _from,
+        state
+      )
       when map_size(state.players) >= state.needed or not state.opened do
     {:reply, {:ok, nil, public(state)}, state}
   end
 
   # Only the user who started a game of the campaign can play it
   def handle_call(
-        {:join, _pid, user_id, _name, _player_id, _guest_id},
+        {:join, _pid, user_id, _name, _player_id, _guest_id, _from_lobby},
         _from,
         %{campaign: %{} = campaign} = state
       )
@@ -240,11 +249,11 @@ defmodule Octomocto.Trains.Game do
     {:reply, {:ok, nil, public(state)}, state}
   end
 
-  def handle_call({:join, pid, user_id, name, _player_id, guest_id}, _from, state) do
+  def handle_call({:join, pid, user_id, name, _player_id, guest_id, from_lobby}, _from, state) do
     slot = Enum.find(0..(state.needed - 1), &(&1 not in slots(state)))
     {color_name, color} = Enum.at(@colors, slot)
     fields = %{slot: slot, color: color, color_name: color_name}
-    {player_id, state} = Seats.add(state, pid, user_id, name, guest_id, fields)
+    {player_id, state} = Seats.add(state, pid, user_id, name, guest_id, from_lobby, fields)
     # The game leaves the open games when it is full for the first time
     state = %{state | listed: state.listed and map_size(state.players) < state.needed}
     state = start_round(state)

@@ -39,6 +39,19 @@ import {playAfterglowSound} from "./afterglow_sounds"
 import {LobbySound} from "./lobby_sounds"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+
+// A Join link of the lists of open games has ?from=lobby (see
+// OctomoctoWeb.GamePageComponents). The game page takes it out of the
+// address bar before the game reads the URL, so that a copied link does not
+// have it, and sends it in the join params of the channel.
+const fromLobby = (() => {
+  const url = new URL(window.location.href)
+  if (url.searchParams.get("from") !== "lobby") return false
+  url.searchParams.delete("from")
+  history.replaceState(history.state, "", url)
+  return true
+})()
+const lobbyParams = fromLobby ? {from: "lobby"} : {}
 // On a LiveView page, also after live navigation
 const TelegramLogin = {
   mounted() { showTelegramLogin(this.el) },
@@ -226,7 +239,7 @@ if (trainsNode) {
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
-  const channel = socket.channel(`trains:${trainsNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  const channel = socket.channel(`trains:${trainsNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
   channel.on("state", state => trains.ports.trainsState.send(state))
   channel.on("flip", flip => trains.ports.trainsFlipped.send(flip))
   channel.on("decision", decision => trains.ports.trainsDecided.send(decision))
@@ -297,7 +310,7 @@ if (schulteNode) {
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
-  const channel = socket.channel(`schulte:${schulteNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  const channel = socket.channel(`schulte:${schulteNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
   channel.on("state", state => schulte.ports.schulteState.send(state))
   channel.on("joined", joined)
   channel.on("watchers", ({count}) => schulte.ports.schulteWatchers.send(count))
@@ -351,7 +364,7 @@ if (memoryNode) {
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
-  const channel = socket.channel(`memory:${memoryNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  const channel = socket.channel(`memory:${memoryNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
   // Loads the images of the field before the cards turn, so that a face
   // does not come in empty during the turn (slow on phones and tablets)
   const preloaded = new Map()
@@ -425,7 +438,7 @@ if (setNode) {
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
-  const channel = socket.channel(`set:${setNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  const channel = socket.channel(`set:${setNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
   channel.on("state", state => setGame.ports.setGameState.send(state))
   channel.on("joined", joined)
   channel.on("watchers", ({count}) => setGame.ports.setGameWatchers.send(count))
@@ -478,7 +491,7 @@ if (sudokuNode) {
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
-  const channel = socket.channel(`sudoku:${sudokuNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  const channel = socket.channel(`sudoku:${sudokuNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
   channel.on("state", state => sudoku.ports.sudokuState.send(state))
   channel.on("joined", joined)
   channel.on("watchers", ({count}) => sudoku.ports.sudokuWatchers.send(count))
@@ -542,7 +555,7 @@ if (echoNode) {
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
-  const channel = socket.channel(`echo:${echoNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  const channel = socket.channel(`echo:${echoNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
   channel.on("state", state => echo.ports.echoState.send(state))
   channel.on("joined", joined)
   channel.on("watchers", ({count}) => echo.ports.echoWatchers.send(count))
@@ -599,7 +612,7 @@ if (mahjongNode) {
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
-  const channel = socket.channel(`mahjong:${mahjongNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  const channel = socket.channel(`mahjong:${mahjongNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
   channel.on("state", state => mahjong.ports.mahjongState.send(state))
   channel.on("joined", joined)
   channel.on("watchers", ({count}) => mahjong.ports.mahjongWatchers.send(count))
@@ -665,7 +678,7 @@ if (overlapNode) {
   }
   // A link with ?watch=1 only watches the game. The token of a player wins.
   const watch = new URLSearchParams(window.location.search).has("watch")
-  const channel = socket.channel(`overlap:${overlapNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : {}))
+  const channel = socket.channel(`overlap:${overlapNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
   channel.on("state", state => overlap.ports.overlapState.send(state))
   channel.on("joined", joined)
   channel.on("watchers", ({count}) => overlap.ports.overlapWatchers.send(count))

@@ -23,6 +23,19 @@ defmodule OctomoctoWeb.GameChannelTest do
     assert {:ok, %{player_id: ^player_id}, _socket} = join_game(id, %{"token" => token})
   end
 
+  test "a join from a list of open games marks the seat, and a rejoin keeps the mark",
+       %{id: id, pid: pid} do
+    {:ok, %{player_id: lobby_id, token: token}, _socket} = join_game(id, %{"from" => "lobby"})
+    {:ok, %{player_id: direct_id}, _socket} = join_game(id)
+
+    {:ok, %{player_id: ^lobby_id}, _socket} = join_game(id, %{"token" => token})
+
+    {_game, state} = :sys.get_state(pid)
+
+    assert %{^lobby_id => %{from_lobby: true}, ^direct_id => %{from_lobby: false}} =
+             state.players
+  end
+
   test "a join with a bad token gives a new player", %{id: id} do
     {:ok, %{player_id: player_id}, _socket} = join_game(id)
 

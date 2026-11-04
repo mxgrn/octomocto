@@ -15,7 +15,9 @@ defmodule OctomoctoWeb.GameChannel do
   example, after a reload or a reconnect to another node in a deploy), and
   gets back the same player. A browser with `"watch": true` in the join
   params and no token of a player only watches, also when the game has a
-  free seat. When the game stops on its node, the channel
+  free seat. A browser with `"from": "lobby"` in the join params came from
+  a list of open games: a new player of it is marked so (see
+  `Octomocto.Seats.add/7`). When the game stops on its node, the channel
   joins the game again (on this node) and pushes a new reply as a
   `"joined"` event.
 
@@ -50,7 +52,12 @@ defmodule OctomoctoWeb.GameChannel do
     player_id = verify_token(game_id, params["token"], opts)
 
     socket =
-      assign(socket, game_id: game_id, player_id: player_id, watch: params["watch"] == true)
+      assign(socket,
+        game_id: game_id,
+        player_id: player_id,
+        watch: params["watch"] == true,
+        from_lobby: params["from"] == "lobby"
+      )
 
     case join_game(socket, opts) do
       {:ok, reply, socket} -> {:ok, reply, socket}
@@ -140,7 +147,8 @@ defmodule OctomoctoWeb.GameChannel do
   defp join_or_watch(%{game_id: game_id, player_id: player_id} = assigns, opts) do
     user_id = assigns[:user_id]
     name = player_name(user_id, assigns[:guest_name])
-    opts[:context].join(game_id, user_id, name, player_id, guest_id(user_id, assigns[:guest_id]))
+    guest_id = guest_id(user_id, assigns[:guest_id])
+    opts[:context].join(game_id, user_id, name, player_id, guest_id, assigns.from_lobby)
   end
 
   # Only a guest has a guest id in the game

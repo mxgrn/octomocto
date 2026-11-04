@@ -226,7 +226,12 @@ defmodule Octomocto.Memory.Game do
   end
 
   @impl true
-  def handle_call({:join, pid, _user_id, _name, player_id, _guest_id}, _from, state)
+  # A join from a node with older code, or from a player who did not come
+  # from a list of open games (see `Octomocto.GameProcess.join/9`)
+  def handle_call({:join, pid, user_id, name, player_id, guest_id}, from, state),
+    do: handle_call({:join, pid, user_id, name, player_id, guest_id, false}, from, state)
+
+  def handle_call({:join, pid, _user_id, _name, player_id, _guest_id, _from_lobby}, _from, state)
       when is_map_key(state.players, player_id) do
     state = Seats.rejoin(state, player_id, pid)
 
@@ -294,14 +299,18 @@ defmodule Octomocto.Memory.Game do
     {:reply, {:ok, nil, public(state)}, state}
   end
 
-  def handle_call({:join, _pid, _user_id, _name, _player_id, _guest_id}, _from, state)
+  def handle_call(
+        {:join, _pid, _user_id, _name, _player_id, _guest_id, _from_lobby},
+        _from,
+        state
+      )
       when map_size(state.players) >= state.needed do
     {:reply, {:ok, nil, public(state)}, state}
   end
 
   # Only the user who started a game of the campaign can play it
   def handle_call(
-        {:join, _pid, user_id, _name, _player_id, _guest_id},
+        {:join, _pid, user_id, _name, _player_id, _guest_id, _from_lobby},
         _from,
         %{campaign: %{} = campaign} = state
       )
@@ -309,7 +318,7 @@ defmodule Octomocto.Memory.Game do
     {:reply, {:ok, nil, public(state)}, state}
   end
 
-  def handle_call({:join, pid, user_id, name, _player_id, guest_id}, _from, state) do
+  def handle_call({:join, pid, user_id, name, _player_id, guest_id, from_lobby}, _from, state) do
     fields = %{
       score: 0,
       correct: 0,
@@ -324,7 +333,7 @@ defmodule Octomocto.Memory.Game do
       deminer: false
     }
 
-    {player_id, state} = Seats.add(state, pid, user_id, name, guest_id, fields)
+    {player_id, state} = Seats.add(state, pid, user_id, name, guest_id, from_lobby, fields)
 
     state =
       state

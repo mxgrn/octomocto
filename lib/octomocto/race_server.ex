@@ -175,7 +175,16 @@ defmodule Octomocto.RaceServer do
   end
 
   @impl true
-  def handle_call({:join, pid, _user_id, _name, player_id, _guest_id}, _from, {game, state})
+  # A join from a node with older code, or from a player who did not come
+  # from a list of open games (see `Octomocto.GameProcess.join/9`)
+  def handle_call({:join, pid, user_id, name, player_id, guest_id}, from, {game, state}),
+    do: handle_call({:join, pid, user_id, name, player_id, guest_id, false}, from, {game, state})
+
+  def handle_call(
+        {:join, pid, _user_id, _name, player_id, _guest_id, _from_lobby},
+        _from,
+        {game, state}
+      )
       when is_map_key(state.players, player_id) do
     state = Seats.rejoin(state, player_id, pid)
     store(game, state)
@@ -192,18 +201,26 @@ defmodule Octomocto.RaceServer do
     {:reply, {:ok, nil, public(game, state)}, {game, state}}
   end
 
-  def handle_call({:join, _pid, _user_id, _name, _player_id, _guest_id}, _from, {game, state})
+  def handle_call(
+        {:join, _pid, _user_id, _name, _player_id, _guest_id, _from_lobby},
+        _from,
+        {game, state}
+      )
       when map_size(state.players) >= state.needed do
     {:reply, {:ok, nil, public(game, state)}, {game, state}}
   end
 
-  def handle_call({:join, pid, user_id, name, _player_id, guest_id}, _from, {game, state}) do
+  def handle_call(
+        {:join, pid, user_id, name, _player_id, guest_id, from_lobby},
+        _from,
+        {game, state}
+      ) do
     fields = %{score: 0}
 
     fields =
       if function_exported?(game, :new_player, 1), do: game.new_player(fields), else: fields
 
-    {player_id, state} = Seats.add(state, pid, user_id, name, guest_id, fields)
+    {player_id, state} = Seats.add(state, pid, user_id, name, guest_id, from_lobby, fields)
     state = start_clock(state)
     publish(game, state)
     {:reply, {:ok, player_id, public(game, state)}, {game, state}}

@@ -118,7 +118,7 @@ defmodule OctomoctoWeb.GamePageComponents do
             </span>
             <.link
               id={"join-#{game.id}"}
-              href={@path.(game)}
+              href={@path.(game) <> "?from=lobby"}
               class={[
                 "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium text-white shadow-sm transition hover:-translate-y-0.5 active:translate-y-0",
                 "bg-octo-indigo hover:bg-octo-indigo/90"

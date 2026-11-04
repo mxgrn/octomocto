@@ -50,7 +50,14 @@ defmodule Octomocto.Mahjong do
   Gives `{:error, :unavailable}` when the node of the game stopped a
   moment ago. Try again soon.
   """
-  def join(id, user_id \\ nil, name \\ nil, player_id \\ nil, guest_id \\ nil) do
+  def join(
+        id,
+        user_id \\ nil,
+        name \\ nil,
+        player_id \\ nil,
+        guest_id \\ nil,
+        from_lobby \\ false
+      ) do
     GameProcess.join(
       Game,
       Store,
@@ -59,7 +66,8 @@ defmodule Octomocto.Mahjong do
       user_id,
       name,
       player_id,
-      guest_id
+      guest_id,
+      from_lobby
     )
   end
 

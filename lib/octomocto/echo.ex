@@ -37,7 +37,14 @@ defmodule Octomocto.Echo do
   Adds a player for the calling process, as `Octomocto.Memory.join/5`
   does.
   """
-  def join(id, user_id \\ nil, name \\ nil, player_id \\ nil, guest_id \\ nil) do
+  def join(
+        id,
+        user_id \\ nil,
+        name \\ nil,
+        player_id \\ nil,
+        guest_id \\ nil,
+        from_lobby \\ false
+      ) do
     GameProcess.join(
       Game,
       Store,
@@ -46,7 +53,8 @@ defmodule Octomocto.Echo do
       user_id,
       name,
       player_id,
-      guest_id
+      guest_id,
+      from_lobby
     )
   end
 

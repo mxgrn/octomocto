@@ -71,19 +71,34 @@ defmodule Octomocto.GameProcess do
 
   @doc """
   Adds a player for the calling process with a `{:join, pid, user_id, name,
-  player_id, guest_id}` call to the game, and gives the reply of the game.
-  The `guest_id` is nil for a user (see `Octomocto.Guests`). Gives
-  `{:error, :not_found}` when the game does not exist, and
-  `{:error, :unavailable}` when the node of the game stopped a moment ago
-  (try again soon).
+  player_id, guest_id, from_lobby}` call to the game, and gives the reply
+  of the game. The `guest_id` is nil for a user (see `Octomocto.Guests`).
+  `from_lobby` is true when the player came from a list of open games (see
+  `Octomocto.Seats.add/7`). Gives `{:error, :not_found}` when the game does
+  not exist, and `{:error, :unavailable}` when the node of the game stopped
+  a moment ago (try again soon).
   """
-  def join(game, store, supervisor, id, user_id, name, player_id, guest_id) do
-    call(game, store, supervisor, id, {:join, self(), user_id, name, player_id, guest_id})
+  def join(game, store, supervisor, id, user_id, name, player_id, guest_id, from_lobby) do
+    call(
+      game,
+      store,
+      supervisor,
+      id,
+      join_request(user_id, name, player_id, guest_id, from_lobby)
+    )
   end
+
+  # A game on a node with older code knows only the call with no
+  # `from_lobby`. Thus most joins still use it during a deploy.
+  defp join_request(user_id, name, player_id, guest_id, true),
+    do: {:join, self(), user_id, name, player_id, guest_id, true}
+
+  defp join_request(user_id, name, player_id, guest_id, false),
+    do: {:join, self(), user_id, name, player_id, guest_id}
 
   @doc """
   Gives the reply of a `:watch` call to the game: the state for a process
-  that only watches. Gives the same errors as `join/8`.
+  that only watches. Gives the same errors as `join/9`.
   """
   def watch(game, store, supervisor, id) do
     call(game, store, supervisor, id, :watch)
