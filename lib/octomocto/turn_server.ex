@@ -352,7 +352,6 @@ defmodule Octomocto.TurnServer do
   end
 
   defp make_ready(%{ready: false} = state) when map_size(state.players) == state.needed do
-    Octomocto.Guests.save_started(state.players)
     %{state | ready: true, ready_at: now(), listed: false} |> restart_turn_timer()
   end
 
