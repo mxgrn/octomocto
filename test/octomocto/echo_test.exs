@@ -2,9 +2,11 @@ defmodule Octomocto.EchoTest do
   use Octomocto.DataCase, async: true
 
   import Octomocto.GameHelpers
+  import Octomocto.AccountsFixtures
 
   alias Octomocto.{Echo, Lobby}
   alias Octomocto.Echo.{Game, Result, Store}
+  alias Octomocto.Friends.Follow
 
   # One player and a private game, if the test has no `@tag players: n` or
   # `@tag public: true`
@@ -99,6 +101,24 @@ defmodule Octomocto.EchoTest do
 
       assert %{finished: true, winner: ^first} = watch(id)
       assert [%Result{}, %Result{}] = Repo.all(Result)
+    end
+
+    @tag players: 2
+    test "a finished game makes friends of the creator and a player from a shared link",
+         %{id: id} do
+      [creator, friend] = for _ <- 1..2, do: user_fixture()
+      {:ok, first, _} = Echo.join(id, creator.id)
+      {:ok, second, _} = Echo.join(id, friend.id)
+      Echo.press(id, first, 2)
+
+      Echo.press(id, second, wrong(2))
+
+      assert %{finished: true} = watch(id)
+
+      assert Repo.all(
+               from f in Follow, where: f.follower_id == ^creator.id, select: f.followed_id
+             ) ==
+               [friend.id]
     end
 
     @tag players: 2

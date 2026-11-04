@@ -2,8 +2,10 @@ defmodule Octomocto.Memory.GameTest do
   use Octomocto.DataCase, async: true
 
   import Octomocto.GameHelpers
+  import Octomocto.AccountsFixtures
 
   alias Octomocto.{Lobby, Memory}
+  alias Octomocto.Friends.Follow
   alias Octomocto.Memory.Game
 
   test "lobby_entry/1 gives no bombs for a stored state from before the bombs" do
@@ -37,6 +39,7 @@ defmodule Octomocto.Memory.GameTest do
         [players: tags[:players] || 1, public: tags[:public] || false] ++ (tags[:config] || [])
 
       pid = start_supervised!(memory_game(id, config))
+      Ecto.Adapters.SQL.Sandbox.allow(Repo, self(), pid)
       Phoenix.PubSub.subscribe(Octomocto.PubSub, Game.topic(id))
       %{id: id, pid: pid}
     end
@@ -77,6 +80,28 @@ defmodule Octomocto.Memory.GameTest do
 
       assert_receive {:memory_state, %{players: [_, _]}}
       assert_receive {:memory_state, %{players: [%{id: ^first}]}}
+    end
+
+    @tag players: 2
+    test "a finished field makes friends of the creator and a player from a shared link",
+         %{id: id, pid: pid} do
+      [creator, friend] = for _ <- 1..2, do: user_fixture()
+      {:ok, first, _} = Memory.join(id, creator.id)
+      {:ok, _, _} = Memory.join(id, friend.id)
+
+      # The first player turns all pairs, so the turn does not change
+      %{cards: cards} = :sys.get_state(pid)
+
+      for {_image, pair} <- cards |> Enum.with_index() |> Enum.group_by(&elem(&1, 0).image),
+          {_card, i} <- pair,
+          do: Memory.flip(id, first, i)
+
+      assert {:ok, nil, %{finished: true}} = Memory.watch(id)
+
+      assert Repo.all(
+               from f in Follow, where: f.follower_id == ^creator.id, select: f.followed_id
+             ) ==
+               [friend.id]
     end
 
     test "a process that joins a full game only watches", %{id: id} do

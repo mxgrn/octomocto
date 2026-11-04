@@ -11,6 +11,12 @@ defmodule Octomocto.Seats do
   join again (for example, after a reconnect). Then the player is removed.
   The game stops after some time with no players.
 
+  The first player who joins is the `creator` of the game: the player who
+  created the game and shared its link. Nobody takes its place, also when
+  that player is removed. A game with `creator: false` in its config has no
+  creator: the next game of a match (see `OctomoctoWeb.NextGame`), which
+  any player can start. Then `creator` is false.
+
   A public game is in the lists of the settings page (see
   `Octomocto.Lobby`): in the open games until it has all its players for
   the first time (`listed`), then in the ongoing games.
@@ -38,7 +44,8 @@ defmodule Octomocto.Seats do
 
   @doc """
   The fields of the seats in the state of a new game. The config has the
-  number of `:players`, `:public`, and optionally `:rejoin_grace_ms`.
+  number of `:players`, `:public`, and optionally `:rejoin_grace_ms` and
+  `:creator` (see above).
   """
   def new(id, %{players: needed, public: public} = config) do
     %{
@@ -50,7 +57,9 @@ defmodule Octomocto.Seats do
       # True while the game is in the list of open games. A game with one
       # player is never in it.
       listed: public and needed > 1,
-      rejoin_grace_ms: Map.get(config, :rejoin_grace_ms, @rejoin_grace_ms)
+      rejoin_grace_ms: Map.get(config, :rejoin_grace_ms, @rejoin_grace_ms),
+      # Nil until the first player joins, then the id of that player
+      creator: if(Map.get(config, :creator, true), do: nil, else: false)
     }
   end
 
@@ -63,6 +72,8 @@ defmodule Octomocto.Seats do
     |> Map.put_new(:listed, false)
     # A state from before the timings in the config
     |> Map.put_new(:rejoin_grace_ms, @rejoin_grace_ms)
+    # A state from before the creator. Its creator is not known.
+    |> Map.put_new(:creator, false)
   end
 
   @doc "True when the game has all its players."
@@ -108,7 +119,9 @@ defmodule Octomocto.Seats do
         fields
       )
 
-    {player_id, put_in(state.players[player_id], player)}
+    state = put_in(state.players[player_id], player)
+    state = if state.creator == nil, do: %{state | creator: player_id}, else: state
+    {player_id, state}
   end
 
   @doc "The id of the player of the process `pid`, or nil."

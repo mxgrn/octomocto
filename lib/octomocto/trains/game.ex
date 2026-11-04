@@ -59,7 +59,7 @@ defmodule Octomocto.Trains.Game do
   """
   use GenServer, restart: :temporary
 
-  alias Octomocto.{Lobby, Seats, Trains}
+  alias Octomocto.{GameEnd, Lobby, Seats, Trains}
   alias Octomocto.Trains.{Campaign, Store}
 
   # Test config turns the countdown off.
@@ -403,6 +403,7 @@ defmodule Octomocto.Trains.Game do
     }
 
     Trains.save_results(state.round_id, settings, correct, Map.values(state.players))
+    GameEnd.finished(state)
   end
 
   # A player left: the result does not count

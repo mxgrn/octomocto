@@ -4,6 +4,17 @@ defmodule OctomoctoWeb.SchulteLiveTest do
   import Phoenix.LiveViewTest
 
   alias Octomocto.Schulte
+  alias OctomoctoWeb.SchulteLive
+
+  test "the next game of a match has no creator" do
+    id = SchulteLive.create_default_game(2, false)
+    pid = GenServer.whereis(Schulte.Game.via(id))
+    on_exit(fn -> DynamicSupervisor.terminate_child(Schulte.GameSupervisor, pid) end)
+
+    {:ok, _player_id, _state} = Schulte.join(id)
+
+    assert %{creator: false} = Schulte.Store.read(id)
+  end
 
   test "selects the classic board for one player", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/schulte")

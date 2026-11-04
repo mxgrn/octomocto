@@ -44,7 +44,7 @@ defmodule Octomocto.RaceServer do
   """
   use GenServer
 
-  alias Octomocto.{GameProcess, Lobby, Seats}
+  alias Octomocto.{GameEnd, GameProcess, Lobby, Seats}
 
   @countdown_ms 3000
 
@@ -357,6 +357,8 @@ defmodule Octomocto.RaceServer do
       finished_at - state.started_at,
       Map.values(state.players)
     )
+
+    GameEnd.finished(state)
   end
 
   defp save_results(_game, _old_state, _state), do: nil

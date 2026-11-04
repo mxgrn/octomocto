@@ -78,7 +78,7 @@ defmodule Octomocto.Memory.Game do
   """
   use GenServer, restart: :temporary
 
-  alias Octomocto.{Lobby, Memory, Seats}
+  alias Octomocto.{GameEnd, Lobby, Memory, Seats}
   alias Octomocto.Memory.{Board, Campaign, Store, Themes}
 
   # How long a player stays after its process stops, when the config of
@@ -777,6 +777,7 @@ defmodule Octomocto.Memory.Game do
     players = Map.values(state.players)
     elapsed_ms = state.finished_at - state.started_at
     Memory.save_results(state.field_id, settings, state.theme, elapsed_ms, players)
+    GameEnd.finished(state)
     state
   end
 

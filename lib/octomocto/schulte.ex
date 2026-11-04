@@ -19,15 +19,17 @@ defmodule Octomocto.Schulte do
   Starts a new game with a `:random` or a `:classic` layout, in the
   `:easy` or the `:normal` mode, for the given number of players, and
   returns its id. A `public` game is in the lists of the settings page (see
-  `Octomocto.Lobby`).
+  `Octomocto.Lobby`). A game with `creator` false has no creator (see
+  `Octomocto.Seats`).
   """
-  def create_game(layout, mode, players, public) do
+  def create_game(layout, mode, players, public, creator \\ true) do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
 
     {:ok, _pid} =
       DynamicSupervisor.start_child(
         Octomocto.Schulte.GameSupervisor,
-        {Game, {id, %{layout: layout, mode: mode, players: players, public: public}}}
+        {Game,
+         {id, %{layout: layout, mode: mode, players: players, public: public, creator: creator}}}
       )
 
     id

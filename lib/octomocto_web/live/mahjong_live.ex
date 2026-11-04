@@ -75,7 +75,10 @@ defmodule OctomoctoWeb.MahjongLive do
   gives its id. See `OctomoctoWeb.NextGame`.
   """
   def create_default_game(players, public) do
+    # Any player can start the next game, thus it has no creator (see
+    # `Octomocto.Seats`)
     %{settings(%{"players" => Integer.to_string(players)}) | public: public}
+    |> Map.put(:creator, false)
     |> Mahjong.create_game()
   end
 

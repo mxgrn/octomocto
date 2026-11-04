@@ -6,6 +6,7 @@ defmodule Octomocto.SchulteTest do
   import Octomocto.AccountsFixtures
 
   alias Octomocto.{Lobby, Schulte}
+  alias Octomocto.Friends.Follow
   alias Octomocto.Schulte.{Game, Result, Store}
 
   # One player and a private game, if the test has no `@tag players: n` or
@@ -130,6 +131,21 @@ defmodule Octomocto.SchulteTest do
     assert player.settings == %{"type" => "random", "mode" => "easy", "players" => 2}
     assert player.elapsed_ms == elapsed_ms
     assert guest.game_id == player.game_id
+  end
+
+  @tag players: 2
+  test "a finished field makes friends of the creator and a player from a shared link",
+       %{id: id} do
+    [creator, friend] = for _ <- 1..2, do: user_fixture()
+    {:ok, first, _} = Schulte.join(id, creator.id)
+    {:ok, _, _} = Schulte.join(id, friend.id)
+
+    for n <- 1..90, do: Schulte.pick(id, first, n)
+
+    assert_receive {:schulte_state, %{next: 91}}
+
+    assert Repo.all(from f in Follow, where: f.follower_id == ^creator.id, select: f.followed_id) ==
+             [friend.id]
   end
 
   @tag players: 2

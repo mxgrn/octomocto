@@ -32,7 +32,7 @@ defmodule Octomocto.Echo.Game do
     lobby_topic: "echo_lobby",
     store: Octomocto.Echo.Store
 
-  alias Octomocto.{Echo, TurnServer}
+  alias Octomocto.{Echo, GameEnd, TurnServer}
 
   @impl true
   def init_settings(%{pads: pads}) when pads in 2..8 do
@@ -194,6 +194,7 @@ defmodule Octomocto.Echo.Game do
   defp save_results(state) when map_size(state.players) == state.needed do
     settings = %{"pads" => state.pads, "players" => state.needed}
     Echo.save_results(state.field_id, settings, Map.values(state.players))
+    GameEnd.finished(state)
     state
   end
 

@@ -63,7 +63,9 @@ defmodule OctomoctoWeb.SchulteLive do
   gives its id. See `OctomoctoWeb.NextGame`.
   """
   def create_default_game(players, public) do
-    create_game(%{settings(%{"players" => Integer.to_string(players)}) | public: public})
+    # Any player can start the next game, thus it has no creator (see
+    # `Octomocto.Seats`)
+    create_game(%{settings(%{"players" => Integer.to_string(players)}) | public: public}, false)
   end
 
   def handle_event("new_game", _params, socket) do
@@ -71,12 +73,12 @@ defmodule OctomoctoWeb.SchulteLive do
     {:noreply, redirect(socket, to: ~p"/schulte/#{id}")}
   end
 
-  defp create_game(%{board: board, mode: mode, players: players, public: public}) do
+  defp create_game(%{board: board, mode: mode, players: players, public: public}, creator \\ true) do
     # Not String.to_existing_atom/1: in dev, the atom can be missing until
     # the Schulte.Game module is loaded
     layout = if board == "random", do: :random, else: :classic
     mode = if mode == "normal", do: :normal, else: :easy
-    Schulte.create_game(layout, mode, players, public)
+    Schulte.create_game(layout, mode, players, public, creator)
   end
 
   # The classic board in the easy mode for one player, and a public game,

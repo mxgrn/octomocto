@@ -2,8 +2,10 @@ defmodule Octomocto.Trains.GameTest do
   use Octomocto.DataCase, async: true
 
   import Octomocto.GameHelpers
+  import Octomocto.AccountsFixtures
 
   alias Octomocto.{Lobby, Trains}
+  alias Octomocto.Friends.Follow
   alias Octomocto.Trains.Game
 
   # One player and a private game, if the test has no `@tag players: n` or
@@ -15,6 +17,7 @@ defmodule Octomocto.Trains.GameTest do
       [players: tags[:players] || 1, public: tags[:public] || false] ++ (tags[:config] || [])
 
     pid = start_supervised!(trains_game(id, config))
+    Ecto.Adapters.SQL.Sandbox.allow(Repo, self(), pid)
     Phoenix.PubSub.subscribe(Octomocto.PubSub, Game.topic(id))
     %{id: id, pid: pid}
   end
@@ -60,6 +63,21 @@ defmodule Octomocto.Trains.GameTest do
 
     assert_receive {:trains_state, %{players: [_, _]}}
     assert_receive {:trains_state, %{players: [%{id: ^first}]}}
+  end
+
+  @tag players: 2
+  test "a finished round makes friends of the creator and a player from a shared link",
+       %{id: id} do
+    [creator, friend] = for _ <- 1..2, do: user_fixture()
+    {:ok, first, _} = Trains.join(id, creator.id)
+    {:ok, _, %{seed: seed}} = Trains.join(id, friend.id)
+
+    Trains.finish(id, first, seed, 1)
+
+    {:ok, _, _} = Trains.watch(id)
+
+    assert Repo.all(from f in Follow, where: f.follower_id == ^creator.id, select: f.followed_id) ==
+             [friend.id]
   end
 
   test "a process that joins a full game only watches", %{id: id} do
