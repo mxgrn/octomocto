@@ -861,7 +861,7 @@ viewGame model me game =
                             , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block lg:h-9" ] []
                             ]
                         , h1 [ class "truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
-                            [ a [ id "mahjong-title-link", href "/mahjong", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Mahjong" ] ]
+                            [ a [ id "mahjong-title-link", href "/mahjong", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Mahjong Race" ] ]
                         , viewMuteButton model.muted
                         , viewWatchers model.watchers
                         ]
@@ -2108,7 +2108,7 @@ viewResult nextGame guest me game =
             [ id "mahjong-next-game"
             , action
             , attribute "data-ga-link" "or_try"
-            , attribute "data-ga-from" "Mahjong"
+            , attribute "data-ga-from" "Mahjong Race"
             , attribute "data-ga-to" nextGame.name
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]

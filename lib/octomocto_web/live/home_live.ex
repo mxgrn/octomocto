@@ -76,7 +76,7 @@ defmodule OctomoctoWeb.HomeLive do
     },
     %{
       id: "mahjong",
-      name: "Mahjong",
+      name: "Mahjong Race",
       description:
         "Remove pairs of free tiles from the Turtle. With friends, the first to take a pair gets the point.",
       path: "/mahjong",
