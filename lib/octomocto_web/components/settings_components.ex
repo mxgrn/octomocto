@@ -153,7 +153,9 @@ defmodule OctomoctoWeb.SettingsComponents do
     ~H"""
     <span class="flex flex-col">
       <span :for={player <- @players} class="flex min-w-0 items-baseline">
-        <span class="truncate">{result_name(player)}</span>
+        <.player_link player={player.user || player.guest} class="truncate">
+          {result_name(player)}
+        </.player_link>
         <span :if={@scores} class="ms-1 shrink-0 tabular-nums text-base-content/60">
           {gettext("%{score} pts", score: player.score)}
         </span>

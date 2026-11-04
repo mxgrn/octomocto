@@ -195,7 +195,6 @@ defmodule Octomocto.Echo.Game do
     settings = %{"pads" => state.pads, "players" => state.needed}
     Echo.save_results(state.field_id, settings, Map.values(state.players))
     GameEnd.finished(state)
-    state
   end
 
   defp save_results(state), do: state

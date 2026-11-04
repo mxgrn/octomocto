@@ -27,10 +27,14 @@ defmodule OctomoctoWeb.GuestName do
   def init(opts), do: opts
 
   def call(conn, _opts) do
+    # A new guest id has no row yet, thus no public id
     conn =
       if get_session(conn, @id_key),
-        do: conn,
-        else: put_session(conn, @id_key, Ecto.UUID.generate())
+        do: assign(conn, :guest_public_id, guest_public_id(conn.assigns[:current_scope], conn)),
+        else:
+          conn
+          |> put_session(@id_key, Ecto.UUID.generate())
+          |> assign(:guest_public_id, nil)
 
     conn = put_locale(conn)
 
@@ -72,8 +76,24 @@ defmodule OctomoctoWeb.GuestName do
     {:cont,
      Phoenix.Component.assign(socket,
        guest_name: from_session(session),
-       guest_id: id_from_session(session)
+       guest_id: id_from_session(session),
+       guest_public_id: guest_public_id(socket.assigns[:current_scope], session)
      )}
+  end
+
+  # The public id of the guest for the link to the profile page in the
+  # menu. Nil for a user, and for a guest without a row (see
+  # `Octomocto.Players`).
+  defp guest_public_id(%{user: %{}}, _session), do: nil
+
+  defp guest_public_id(_scope, %Plug.Conn{} = conn),
+    do: guest_public_id(nil, get_session(conn))
+
+  defp guest_public_id(_scope, session) do
+    case id_from_session(session) do
+      nil -> nil
+      guest_id -> Octomocto.Players.public_id(nil, guest_id)
+    end
   end
 
   @doc "The guest name in a session, or nil when it has no valid name."

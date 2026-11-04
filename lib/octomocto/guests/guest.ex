@@ -18,6 +18,10 @@ defmodule Octomocto.Guests.Guest do
   schema "guests" do
     field :name, :string
     field :locale, :string
+    # The id in the URL of the profile page (see `Octomocto.PublicId`).
+    # `Octomocto.Guests.save/2` sets it, because `insert_all` does not
+    # autogenerate.
+    field :public_id, :string
 
     timestamps(type: :utc_datetime_usec, updated_at: false)
   end

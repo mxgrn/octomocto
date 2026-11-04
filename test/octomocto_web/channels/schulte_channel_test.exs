@@ -1,5 +1,7 @@
 defmodule OctomoctoWeb.SchulteChannelTest do
-  use OctomoctoWeb.ChannelCase, async: true
+  # Not async: the game process reads the public id of the user (see
+  # `Octomocto.Seats.add/7`), so it needs the shared sandbox
+  use OctomoctoWeb.ChannelCase, async: false
 
   import Octomocto.GameHelpers
 

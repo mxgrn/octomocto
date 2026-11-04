@@ -22,6 +22,8 @@ defmodule Octomocto.Accounts.User do
     field :locale, :string
     # Only admins can open the /admin pages. Set it in the database.
     field :role, Ecto.Enum, values: [:user, :admin], default: :user
+    # The id in the URL of the profile page (see `Octomocto.PublicId`)
+    field :public_id, :string, autogenerate: {Octomocto.PublicId, :generate, []}
     # Copied from the session token (see `UserToken`). Nothing reads it now.
     field :authenticated_at, :utc_datetime, virtual: true
 

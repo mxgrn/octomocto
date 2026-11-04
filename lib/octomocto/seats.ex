@@ -26,7 +26,7 @@ defmodule Octomocto.Seats do
   messages to the game itself (`{:remove, player_id, ref}` and
   `:idle_check`).
   """
-  alias Octomocto.Lobby
+  alias Octomocto.{Lobby, Players}
 
   @idle_timeout_ms :timer.minutes(5)
   @rejoin_grace_ms :timer.seconds(15)
@@ -108,6 +108,9 @@ defmodule Octomocto.Seats do
           pid: pid,
           user_id: user_id,
           guest_id: guest_id,
+          # For the links to the profile page. Nil for a guest without a
+          # row (see `Octomocto.Players`).
+          public_id: Players.public_id(user_id, guest_id),
           name: name,
           color: color,
           color_name: color_name,
@@ -122,6 +125,29 @@ defmodule Octomocto.Seats do
     state = put_in(state.players[player_id], player)
     state = if state.creator == nil, do: %{state | creator: player_id}, else: state
     {player_id, state}
+  end
+
+  @doc """
+  Puts the public id in each seat of a user or a guest that has none: a
+  guest gets a row, thus a public id, only with its first finished field
+  (see `Octomocto.Guests`). Call it after the results are saved.
+  """
+  def refresh_public_ids(state) do
+    players =
+      Map.new(state.players, fn
+        {id, %{public_id: nil, user_id: user_id, guest_id: guest_id} = p}
+        when user_id != nil or guest_id != nil ->
+          {id, %{p | public_id: Players.public_id(user_id, guest_id)}}
+
+        # A seat from before the profile pages has no `:public_id`
+        {id, p} when not is_map_key(p, :public_id) ->
+          {id, Map.put(p, :public_id, Players.public_id(p.user_id, Map.get(p, :guest_id)))}
+
+        pair ->
+          pair
+      end)
+
+    %{state | players: players}
   end
 
   @doc "The id of the player of the process `pid`, or nil."
@@ -165,7 +191,15 @@ defmodule Octomocto.Seats do
       p = state.players[id]
 
       Map.merge(
-        %{id: id, name: p.name, color: p.color, color_name: p.color_name, away: p.left != nil},
+        %{
+          id: id,
+          name: p.name,
+          # A seat from before the profile pages has no `:public_id`
+          public_id: Map.get(p, :public_id),
+          color: p.color,
+          color_name: p.color_name,
+          away: p.left != nil
+        },
         fields.(id, p)
       )
     end

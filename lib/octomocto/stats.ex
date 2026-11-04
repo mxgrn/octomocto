@@ -121,5 +121,26 @@ defmodule Octomocto.Stats do
       }
   end
 
+  @doc """
+  The number of games of one player in each game, by the game id of the
+  front page. The `field` is `:user_id` or `:guest_id`. A game with no
+  results of the player is not in the map.
+  """
+  def games_of(field, id) when field in [:user_id, :guest_id] do
+    @results
+    |> Enum.map(fn {game, schema} ->
+      from r in schema,
+        where: field(r, ^field) == ^id,
+        select: %{
+          game: type(^game, :string),
+          count: count(fragment("DISTINCT (?, ?)", r.game_id, r.inserted_at))
+        }
+    end)
+    |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
+    |> Repo.all()
+    |> Enum.reject(&(&1.count == 0))
+    |> Map.new(&{&1.game, &1.count})
+  end
+
   defp since(first), do: DateTime.new!(first, ~T[00:00:00], "Etc/UTC")
 end

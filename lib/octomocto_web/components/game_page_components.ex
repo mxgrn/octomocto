@@ -8,7 +8,7 @@ defmodule OctomoctoWeb.GamePageComponents do
   use Phoenix.Component
   use Gettext, backend: OctomoctoWeb.Gettext
 
-  import OctomoctoWeb.CoreComponents, only: [icon: 1, show: 2, hide: 1]
+  import OctomoctoWeb.CoreComponents, only: [icon: 1, show: 2, hide: 1, player_link: 1]
 
   alias Phoenix.LiveView.JS
 
@@ -98,11 +98,12 @@ defmodule OctomoctoWeb.GamePageComponents do
             ]}>
               <span :for={player <- game.players} class="flex items-center gap-1">
                 <.presence away={player.away} />
-                <span class={[
-                  player[:turn] && !game[:finished] && "font-semibold text-base-content"
-                ]}>
+                <.player_link
+                  player={player}
+                  class={[player[:turn] && !game[:finished] && "font-semibold text-base-content"]}
+                >
                   {player_name(player)}
-                </span>
+                </.player_link>
                 <span :if={player[:score]} class="tabular-nums text-base-content/50">
                   {player.score}
                 </span>
@@ -211,7 +212,7 @@ defmodule OctomoctoWeb.GamePageComponents do
         >
           <span class="size-3 shrink-0 rounded-full" style={"background: #{player.color}"} />
           <span class="min-w-0 flex-1 truncate">
-            {player_name(player)}
+            <.player_link player={player}>{player_name(player)}</.player_link>
             <span :if={player.id == @me} class="text-base-content/50">({gettext("you")})</span>
           </span>
           <span class="text-xl font-semibold tabular-nums">{player.wins}</span>

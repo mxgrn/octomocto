@@ -309,7 +309,7 @@ defmodule Octomocto.RaceServer do
   defp move(game, move, state) do
     case game.handle_move(move, state) do
       {:publish, reply, new_state} ->
-        save_results(game, state, new_state)
+        new_state = save_results(game, state, new_state)
         publish(game, new_state)
         {reply, new_state}
 
@@ -361,7 +361,7 @@ defmodule Octomocto.RaceServer do
     GameEnd.finished(state)
   end
 
-  defp save_results(_game, _old_state, _state), do: nil
+  defp save_results(_game, _old_state, state), do: state
 
   defp store(game, state), do: Seats.write(state, game, game.__game__().store)
 

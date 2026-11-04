@@ -29,6 +29,11 @@ defmodule OctomoctoWeb.CoreComponents do
   use Phoenix.Component
   use Gettext, backend: OctomoctoWeb.Gettext
 
+  use Phoenix.VerifiedRoutes,
+    endpoint: OctomoctoWeb.Endpoint,
+    router: OctomoctoWeb.Router,
+    statics: OctomoctoWeb.static_paths()
+
   alias Phoenix.LiveView.JS
 
   @doc """
@@ -83,6 +88,35 @@ defmodule OctomoctoWeb.CoreComponents do
         </button>
       </div>
     </div>
+    """
+  end
+
+  attr :player, :map,
+    default: nil,
+    doc: """
+    a user, a guest or a player map with `:public_id`. Nil, or no public id
+    (a guest without a row, see `Octomocto.Players`), gives plain text.
+    """
+
+  attr :class, :any, default: nil
+  slot :inner_block, required: true
+
+  @doc "The name of a player as a link to the profile page of the player."
+  def player_link(assigns) do
+    assigns = assign(assigns, :public_id, assigns.player && Map.get(assigns.player, :public_id))
+
+    ~H"""
+    <.link
+      :if={@public_id}
+      navigate={~p"/players/#{@public_id}"}
+      class={[
+        "decoration-octo-indigo/40 underline-offset-2 transition hover:text-octo-indigo hover:underline dark:hover:text-octo-indigo-light",
+        @class
+      ]}
+    >
+      {render_slot(@inner_block)}
+    </.link>
+    <span :if={!@public_id} class={@class}>{render_slot(@inner_block)}</span>
     """
   end
 

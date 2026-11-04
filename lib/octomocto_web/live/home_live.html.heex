@@ -4,6 +4,7 @@
   notifications={@notifications}
   current_scope={@current_scope}
   guest_name={@guest_name}
+  guest_public_id={@guest_public_id}
   home
   wide
 >
@@ -197,7 +198,9 @@
                     <span class="absolute -right-0.5 -bottom-0.5 size-3 rounded-full bg-emerald-500 ring-2 ring-base-100" />
                   </span>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-medium">{friend.name}</p>
+                    <p class="truncate text-sm font-medium">
+                      <.player_link player={friend}>{friend.name}</.player_link>
+                    </p>
                     <p class="truncate text-xs text-base-content/60">
                       {activity_text(friend.activity)}
                     </p>

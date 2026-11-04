@@ -35,6 +35,10 @@ defmodule OctomoctoWeb.Layouts do
     default: nil,
     doc: "the name of a guest (see `OctomoctoWeb.GuestName`), for the menu of a guest"
 
+  attr :guest_public_id, :string,
+    default: nil,
+    doc: "the public id of the guest (see `Octomocto.Players`), for the link to the profile page"
+
   attr :home, :boolean,
     default: false,
     doc: "shows the octopi, a larger wordmark and the slogan in the header"
@@ -183,6 +187,14 @@ defmodule OctomoctoWeb.Layouts do
                 <.icon name="hero-user-circle" class="size-6" />
                 {@guest_name}
               </:label>
+              <.link
+                :if={@guest_public_id}
+                id="profile-link"
+                navigate={~p"/players/#{@guest_public_id}"}
+                class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+              >
+                {gettext("Profile")}
+              </.link>
               <div id="guest-sign-in" class="space-y-3 px-3 pt-1 pb-3">
                 <p class="text-center text-base-content/70">
                   {gettext("Sign in to change your name")}
@@ -202,6 +214,13 @@ defmodule OctomoctoWeb.Layouts do
                 {@current_scope.user.display_name || @current_scope.user.name ||
                   @current_scope.user.email}
               </:label>
+              <.link
+                id="profile-link"
+                navigate={~p"/players/#{@current_scope.user.public_id}"}
+                class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+              >
+                {gettext("Profile")}
+              </.link>
               <.link
                 id="settings-link"
                 href={~p"/settings"}

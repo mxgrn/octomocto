@@ -305,7 +305,7 @@ defmodule Octomocto.Trains.Game do
       when is_map_key(state.players, player_id) and seed == state.seed and
              state.started_at != nil and state.score == nil and is_integer(correct) and
              correct >= 0 and correct <= trains(state) do
-    save_results(state, correct)
+    state = save_results(state, correct)
     state = %{state | score: correct}
     store(state)
     {:noreply, state}
@@ -399,6 +399,7 @@ defmodule Octomocto.Trains.Game do
     }
 
     Trains.save_results(state.round_id, settings, correct, Map.values(state.players))
+    state
   end
 
   defp save_results(state, correct) when map_size(state.players) == state.needed do
@@ -414,7 +415,7 @@ defmodule Octomocto.Trains.Game do
   end
 
   # A player left: the result does not count
-  defp save_results(_state, _correct), do: nil
+  defp save_results(state, _correct), do: state
 
   defp slots(state), do: Enum.map(state.players, fn {_id, p} -> p.slot end)
 

@@ -114,6 +114,7 @@ defmodule OctomoctoWeb.Router do
       live "/snap", SnapLive
       live "/afterglow", AfterglowLive
       live "/stats", StatsLive
+      live "/players/:public_id", PlayerLive
     end
 
     # After the live routes, so that "campaign" is not a game id

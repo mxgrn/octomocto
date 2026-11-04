@@ -4,7 +4,7 @@ defmodule Octomocto.Guests do
   `Octomocto.Guests.Guest`).
   """
   alias Octomocto.Guests.Guest
-  alias Octomocto.Repo
+  alias Octomocto.{PublicId, Repo}
 
   @doc """
   Saves the guests among the players of a finished game, before their
@@ -15,7 +15,7 @@ defmodule Octomocto.Guests do
   def save(players, now) do
     rows =
       for %{guest_id: id, name: name} <- players, id != nil and name != nil do
-        %{id: id, name: name, inserted_at: now}
+        %{id: id, name: name, public_id: PublicId.generate(), inserted_at: now}
       end
 
     Repo.insert_all(Guest, rows, on_conflict: :nothing, conflict_target: :id)

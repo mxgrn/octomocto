@@ -231,7 +231,12 @@ defmodule OctomoctoWeb.HomeLive do
 
     friends_online =
       for friend <- friends, activity = activities[friend.id] do
-        %{id: friend.id, name: Accounts.public_name(friend), avatar_url: friend.avatar_url}
+        %{
+          id: friend.id,
+          name: Accounts.public_name(friend),
+          avatar_url: friend.avatar_url,
+          public_id: friend.public_id
+        }
         |> Map.put(:activity, activity)
       end
       |> Enum.sort_by(&String.downcase(&1.name || ""))

@@ -784,7 +784,6 @@ defmodule Octomocto.Memory.Game do
     elapsed_ms = state.finished_at - state.started_at
     Memory.save_results(state.field_id, settings, state.theme, elapsed_ms, players)
     GameEnd.finished(state)
-    state
   end
 
   defp save_results(state), do: state

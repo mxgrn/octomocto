@@ -84,7 +84,13 @@ defmodule Octomocto.Lobby do
   `:turn` (true for the player of the turn).
   """
   def player(player) do
-    %{name: player.name, color_name: player.color_name, away: player.left != nil}
+    %{
+      name: player.name,
+      # A seat from before the profile pages has no `:public_id`
+      public_id: Map.get(player, :public_id),
+      color_name: player.color_name,
+      away: player.left != nil
+    }
   end
 
   @doc "The rows of all games of the `game` module in its `store`."

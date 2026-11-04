@@ -4,6 +4,7 @@
   notifications={@notifications}
   current_scope={@current_scope}
   guest_name={@guest_name}
+  guest_public_id={@guest_public_id}
 >
   <%!--
     Wider than the app container, so that the columns have room. One column
@@ -156,7 +157,9 @@
         </:aside>
         <.result_row :for={{result, place} <- Enum.with_index(@best_results, 1)}>
           <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
-          <span class="min-w-0 flex-1 truncate font-medium">{player_name(result.user)}</span>
+          <span class="min-w-0 flex-1 truncate font-medium"><.player_link player={result.user}>{player_name(
+            result.user
+          )}</.player_link></span>
           <.result_pill>{format_time(result.elapsed_ms)}</.result_pill>
         </.result_row>
       </.score_list>

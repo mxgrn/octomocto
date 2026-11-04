@@ -3,6 +3,7 @@
   flash={@flash}
   current_scope={@current_scope}
   guest_name={@guest_name}
+  guest_public_id={@guest_public_id}
   banner={@banner}
   notifications={@notifications}
   languages={@languages}
@@ -128,7 +129,9 @@
         >
           <.result_row :for={{row, place} <- Enum.with_index(@campaign.leaderboard, 1)}>
             <span class="w-4 shrink-0 text-end tabular-nums text-base-content/40">{place}</span>
-            <span class="min-w-0 flex-1 truncate font-medium">{player_name(row.user)}</span>
+            <span class="min-w-0 flex-1 truncate font-medium"><.player_link player={row.user}>{player_name(
+              row.user
+            )}</.player_link></span>
             <.result_pill best={@current_scope != nil and row.user_id == @current_scope.user.id}>
               {dgettext("memory", "Level %{level}", level: row.level)}
             </.result_pill>
@@ -483,7 +486,9 @@
           </:aside>
           <.result_row :for={{result, place} <- Enum.with_index(@best_results, 1)}>
             <span class="w-4 shrink-0 text-end tabular-nums text-base-content/40">{place}</span>
-            <span class="min-w-0 flex-1 truncate font-medium">{player_name(result.user)}</span>
+            <span class="min-w-0 flex-1 truncate font-medium"><.player_link player={result.user}>{player_name(
+              result.user
+            )}</.player_link></span>
             <span
               class="w-12 text-end tabular-nums text-base-content/60"
               title={dgettext("memory", "Accuracy")}
