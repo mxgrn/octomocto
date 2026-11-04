@@ -1,6 +1,7 @@
 defmodule Octomocto.PlayersTest do
   use Octomocto.DataCase, async: true
 
+  import Ecto.Query
   import Octomocto.AccountsFixtures
 
   alias Octomocto.Friends.Follow
@@ -38,6 +39,20 @@ defmodule Octomocto.PlayersTest do
 
     assert %{name: "Brave Otter", guest: true, games: %{"schulte" => 1}, friends: nil} =
              Players.profile(guest.public_id)
+  end
+
+  test "profile/1 gives the time of the last finished game in all games" do
+    user = user_fixture()
+    Schulte.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+    Snap.save_results("b", %{}, 0, [%{user_id: user.id, score: 5, correct: 5, wrong: 0}])
+
+    last = Repo.one!(from r in Snap.Result, select: r.inserted_at)
+
+    assert %{last_played_at: ^last} = Players.profile(user.public_id)
+  end
+
+  test "profile/1 gives no last game time for a user with no games" do
+    assert %{last_played_at: nil} = Players.profile(user_fixture().public_id)
   end
 
   test "profile/1 gives nil for an unknown public id" do

@@ -172,6 +172,20 @@ defmodule Octomocto.Stats do
   end
 
   @doc """
+  The time of the last finished game, in all games, of the user (`field`
+  is `:user_id`) or the guest (`:guest_id`) `id`, or nil when it has none.
+  """
+  def last_played_of(field, id) when field in [:user_id, :guest_id] do
+    @results
+    |> Map.values()
+    |> Enum.map(&from(r in &1, where: field(r, ^field) == ^id, select: max(r.inserted_at)))
+    |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
+    |> Repo.all()
+    |> Enum.reject(&is_nil/1)
+    |> Enum.max(DateTime, fn -> nil end)
+  end
+
+  @doc """
   The 10 players with the most games in the last `days` days, today
   included, in the game with the id `game` of the front page, the most
   games first. Each item is

@@ -2,8 +2,10 @@ defmodule Octomocto.Players do
   @moduledoc """
   The public profiles of users and guests, by their public id (see
   `Octomocto.PublicId`). A profile shows the name, the date of the first
-  visit that the site saved, the games played and, for a user, the number
-  of friends. A guest has a profile only after it has a row (see
+  visit that the site saved, the games played, the time of the last
+  finished game and, for a user, the number of friends and whether the
+  user is online now (guests are never online, see
+  `Octomocto.OnlineUsers`). A guest has a profile only after it has a row (see
   `Octomocto.Guests.Guest`).
   """
   import Ecto.Query
@@ -11,11 +13,12 @@ defmodule Octomocto.Players do
   alias Octomocto.Accounts
   alias Octomocto.Accounts.User
   alias Octomocto.Guests.Guest
-  alias Octomocto.{Friends, Repo, Stats}
+  alias Octomocto.{Friends, OnlineUsers, Repo, Stats}
 
   @doc """
   The profile of the user or the guest with the `public_id`, or nil. The
   `:friends` count is nil for a guest: guests have no friends.
+  `:last_played_at` is nil for a player with no finished games.
   """
   def profile(public_id) when is_binary(public_id) do
     cond do
@@ -26,6 +29,8 @@ defmodule Octomocto.Players do
           avatar_url: user.avatar_url,
           joined_at: user.inserted_at,
           games: Stats.games_of(:user_id, user.id),
+          last_played_at: Stats.last_played_of(:user_id, user.id),
+          online: Map.has_key?(OnlineUsers.activities([user.id]), user.id),
           friends: length(Friends.friends(user.id))
         }
 
@@ -36,6 +41,8 @@ defmodule Octomocto.Players do
           avatar_url: nil,
           joined_at: guest.inserted_at,
           games: Stats.games_of(:guest_id, guest.id),
+          last_played_at: Stats.last_played_of(:guest_id, guest.id),
+          online: false,
           friends: nil
         }
 

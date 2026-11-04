@@ -5,7 +5,8 @@ defmodule OctomoctoWeb.PlayerLiveTest do
   import Octomocto.AccountsFixtures
 
   alias Octomocto.Guests.Guest
-  alias Octomocto.{Repo, Schulte}
+  alias Octomocto.{OnlineUsers, Repo, Schulte}
+  alias OctomoctoWeb.PlayerLive
 
   @settings %{"type" => "random", "mode" => "easy", "players" => 1}
 
@@ -44,6 +45,42 @@ defmodule OctomoctoWeb.PlayerLiveTest do
 
     assert has_element?(view, "#player-guest")
     refute has_element?(view, "#player-friends")
+  end
+
+  test "shows how long ago a player last played", %{conn: conn} do
+    user = user_fixture()
+    Schulte.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+
+    {:ok, view, _html} = live(conn, ~p"/players/#{user.public_id}")
+
+    assert view |> element("#player-last-active") |> render() =~ "just now"
+    refute has_element?(view, "#player-online")
+  end
+
+  test "shows an online user as online now", %{conn: conn} do
+    user = user_fixture()
+    OnlineUsers.track(self(), user.id, %{kind: nil, doing: nil})
+
+    {:ok, view, _html} = live(conn, ~p"/players/#{user.public_id}")
+
+    assert has_element?(view, "#player-online")
+  end
+
+  test "shows no last active time for a user with no games", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/players/#{user_fixture().public_id}")
+
+    refute has_element?(view, "#player-last-active")
+  end
+
+  test "ago/2 gives the time in the largest whole unit" do
+    now = ~U[2026-11-04 12:00:00Z]
+
+    assert PlayerLive.ago(~U[2026-11-04 11:59:30Z], now) == "just now"
+    assert PlayerLive.ago(~U[2026-11-04 11:59:00Z], now) == "1 minute ago"
+    assert PlayerLive.ago(~U[2026-11-04 09:00:00Z], now) == "3 hours ago"
+    assert PlayerLive.ago(~U[2026-11-02 12:00:00Z], now) == "2 days ago"
+    assert PlayerLive.ago(~U[2026-07-04 12:00:00Z], now) == "4 months ago"
+    assert PlayerLive.ago(~U[2024-11-04 12:00:00Z], now) == "2 years ago"
   end
 
   test "gives 404 for an unknown public id", %{conn: conn} do
