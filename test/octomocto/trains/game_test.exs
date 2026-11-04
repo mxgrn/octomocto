@@ -86,6 +86,16 @@ defmodule Octomocto.Trains.GameTest do
     assert {:ok, nil, %{players: [_]}} = Trains.join(id)
   end
 
+  test "the state gives each decision with the player who made it", %{id: id} do
+    {:ok, player_id, _} = Trains.join(id)
+
+    Trains.decide(id, player_id, 0, [1, 1], [1, 2])
+
+    assert {:ok, _,
+            %{decisions: [%{train: 0, cell: [1, 1], exit: [1, 2], player_id: ^player_id}]}} =
+             Trains.watch(id)
+  end
+
   @tag players: 2, public: true
   test "a public game is open until it is full, then ongoing", %{id: id} do
     Lobby.subscribe(Game)

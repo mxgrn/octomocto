@@ -12,7 +12,9 @@ defmodule Octomocto.Trains.Game do
     * the position of each switch that a player flipped (the other
       switches keep their first position, which comes from the seed),
     * the route decisions: the owner of a switch decides which way each
-      train goes at that switch (see `Octomocto.Trains.decide/5`).
+      train goes at that switch (see `Octomocto.Trains.decide/5`). Each
+      decision keeps the player who made it, so that the clients can count
+      the errors of each player.
 
   A client that joins in the middle of a round makes the full state from
   these.
@@ -207,6 +209,7 @@ defmodule Octomocto.Trains.Game do
       |> Map.put_new(:campaign, nil)
       # A state from before the timings in the config
       |> Map.put_new(:rejoin_grace_ms, @rejoin_grace_ms)
+      |> with_deciders()
       |> Seats.restore()
       |> Seats.leave_all()
 
@@ -289,7 +292,7 @@ defmodule Octomocto.Trains.Game do
     if is_map_key(state.decisions, {train, cell}) do
       {:noreply, state}
     else
-      state = put_in(state.decisions[{train, cell}], exit)
+      state = put_in(state.decisions[{train, cell}], {exit, player_id})
       Store.write(state)
 
       broadcast(
@@ -371,7 +374,7 @@ defmodule Octomocto.Trains.Game do
       started_at: nil,
       # The positions of the flipped switches, by cell
       switches: %{},
-      # The exits by {train, switch cell}
+      # The {exit, player id} by {train, switch cell}
       decisions: %{}
     })
   end
@@ -416,6 +419,18 @@ defmodule Octomocto.Trains.Game do
 
   # A player left: the result does not count
   defp save_results(state, _correct), do: state
+
+  # A state from before the deciders has only the exits. These decisions
+  # have no player.
+  defp with_deciders(state) do
+    decisions =
+      Map.new(state.decisions, fn
+        {key, {_exit, _player_id} = decision} -> {key, decision}
+        {key, exit} -> {key, {exit, nil}}
+      end)
+
+    %{state | decisions: decisions}
+  end
 
   defp slots(state), do: Enum.map(state.players, fn {_id, p} -> p.slot end)
 
@@ -462,8 +477,8 @@ defmodule Octomocto.Trains.Game do
       elapsed_ms: if(state.started_at, do: now() - state.started_at),
       switches: Enum.map(state.switches, fn {cell, value} -> %{cell: cell, value: value} end),
       decisions:
-        Enum.map(state.decisions, fn {{train, cell}, exit} ->
-          %{train: train, cell: cell, exit: exit}
+        Enum.map(state.decisions, fn {{train, cell}, {exit, player_id}} ->
+          %{train: train, cell: cell, exit: exit, player_id: player_id}
         end),
       # The level of a game of the campaign, the number of levels and the
       # trains that must get home to pass the level

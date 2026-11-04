@@ -23,6 +23,9 @@ other way, they move the train back to the switch and run it again on the
 correct branch. Trains do not affect each other, so a correction changes
 only one train.
 
+In a game for 2 or more players, each browser counts the errors of each
+player from the decisions (see `errors`).
+
 A browser that joins in the middle of a round makes the round from the
 seed, the switch positions and the decisions, and runs it fast up to now.
 
@@ -291,17 +294,20 @@ type alias Arrival =
 
 {-| One round on one board. `time` is the game time in ms since the start
 of the round. `decisions` has the exits of the trains (by their ids) at
-the switches. `numbers` has the house numbers of the trains that did not
-leave yet.
+the switches, and `deciders` has the players who made them. `numbers` has
+the house numbers of the trains that did not leave yet, and `houses` has
+the house numbers of all trains by their ids.
 -}
 type alias Round =
     { seed : Int
     , layout : Layout
     , switches : Dict Cell Int
     , decisions : Dict ( Int, Cell ) Cell
+    , deciders : Dict ( Int, Cell ) String
     , time : Float
     , trains : List Train
     , numbers : List Int
+    , houses : Dict Int Int
     , sent : Int
     , nextDeparture : Float
     , correct : Int
@@ -431,9 +437,11 @@ newRound seed board =
     , layout = layout
     , switches = switches
     , decisions = Dict.empty
+    , deciders = Dict.empty
     , time = 0
     , trains = []
     , numbers = numbers
+    , houses = Dict.fromList (List.indexedMap Tuple.pair numbers)
     , sent = 0
     , nextDeparture = firstDepartureMs
     , correct = 0
@@ -562,8 +570,13 @@ update msg model =
 
                     else
                         let
-                            ( round, events ) =
+                            ( applied, events ) =
                                 applyDecision (mySwitches me game) decision game.round
+
+                            round =
+                                applied
+                                    |> addDecider decision.playerId ( decision.train, decision.cell )
+                                    |> addMyDeciders me events
                         in
                         ( { model | connection = Joined me { game | round = round } }, eventsCmd (not model.muted) events )
 
@@ -608,8 +621,11 @@ update msg model =
                         sounds =
                             target - game.round.time < quietCatchUpMs
 
-                        ( round, events ) =
+                        ( advanced, events ) =
                             advance (mySwitches me game) target game.round
+
+                        round =
+                            addMyDeciders me events advanced
 
                         -- Each player reports, and the server keeps the first
                         -- report. A watcher cannot report.
@@ -692,7 +708,14 @@ gameFromState state =
     { players = state.players
     , needed = state.needed
     , started = state.elapsedMs /= Nothing
-    , round = { round | switches = switches, decisions = Dict.fromList state.decisions }
+    , round =
+        { round
+            | switches = switches
+            , decisions = Dict.fromList (List.map (\d -> ( d.key, d.exit )) state.decisions)
+            , deciders =
+                Dict.fromList
+                    (List.filterMap (\d -> Maybe.map (Tuple.pair d.key) d.playerId) state.decisions)
+        }
     , campaign = state.campaign
     }
 
@@ -1037,6 +1060,70 @@ applyDecision mine { train, cell, exit } round =
 
 
 
+-- ERRORS
+
+
+addDecider : String -> ( Int, Cell ) -> Round -> Round
+addDecider playerId key round =
+    { round | deciders = Dict.insert key playerId round.deciders }
+
+
+{-| The decisions that this browser sent out are from its player.
+-}
+addMyDeciders : Me -> List Event -> Round -> Round
+addMyDeciders me events round =
+    case me of
+        Just playerId ->
+            List.foldl
+                (\event acc ->
+                    case event of
+                        Decided train cell _ ->
+                            addDecider playerId ( train, cell ) acc
+
+                        _ ->
+                            acc
+                )
+                round
+                events
+
+        Nothing ->
+            round
+
+
+{-| The number of errors of each player, by player id. An error is a
+decision that sends a train off the route to its house. Only the first
+switch where a train leaves its route counts: after it, no exit gets the
+train home.
+-}
+errors : Round -> Dict String Int
+errors round =
+    Dict.foldl
+        (\( train, cell ) exit acc ->
+            case ( Dict.get train round.houses, Dict.get ( train, cell ) round.deciders ) of
+                ( Just number, Just playerId ) ->
+                    if leadsTo round.layout number cell && not (leadsTo round.layout number exit) then
+                        Dict.update playerId (\count -> Just (Maybe.withDefault 0 count + 1)) acc
+
+                    else
+                        acc
+
+                _ ->
+                    acc
+        )
+        Dict.empty
+        round.decisions
+
+
+{-| If the house with the `number` is at the `cell` or after it.
+-}
+leadsTo : Layout -> Int -> Cell -> Bool
+leadsTo layout number cell =
+    Dict.get cell layout.houses
+        == Just number
+        || List.any (leadsTo layout number) (Maybe.withDefault [] (Dict.get cell layout.children))
+
+
+
 -- OWNERS
 
 
@@ -1144,8 +1231,17 @@ type alias ServerState =
     , needed : Int
     , elapsedMs : Maybe Int
     , switches : List ( Cell, Int )
-    , decisions : List ( ( Int, Cell ), Cell )
+    , decisions : List StateDecision
     , campaign : Maybe Campaign
+    }
+
+
+{-| The `playerId` is Nothing for a decision from before the deciders.
+-}
+type alias StateDecision =
+    { key : ( Int, Cell )
+    , exit : Cell
+    , playerId : Maybe String
     }
 
 
@@ -1193,10 +1289,11 @@ stateDecoder =
         )
         (Decode.field "decisions"
             (Decode.list
-                (Decode.map3 (\train cell exit -> ( ( train, cell ), exit ))
+                (Decode.map4 (\train cell exit playerId -> StateDecision ( train, cell ) exit playerId)
                     (Decode.field "train" Decode.int)
                     (Decode.field "cell" cellDecoder)
                     (Decode.field "exit" cellDecoder)
+                    (Decode.maybe (Decode.field "player_id" Decode.string))
                 )
             )
         )
@@ -2142,8 +2239,15 @@ viewShareLink model =
         ]
 
 
+{-| Each player with the number of its switches. In a game for 2 or more
+players, also with the number of its errors in the round (see `errors`).
+-}
 viewPlayers : Me -> Game -> Dict Cell Player -> Html Msg
 viewPlayers me game owned =
+    let
+        playerErrors =
+            errors game.round
+    in
     Html.Keyed.ul [ id "trains-players", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:order-4 lg:flex-col" ]
         (List.map
             (\player ->
@@ -2169,11 +2273,38 @@ viewPlayers me game owned =
                                    )
                             )
                         ]
+                    , if game.needed > 1 then
+                        viewErrors player (Maybe.withDefault 0 (Dict.get player.id playerErrors))
+
+                      else
+                        text ""
                     ]
                 )
             )
             game.players
         )
+
+
+viewErrors : Player -> Int -> Html Msg
+viewErrors player count =
+    span
+        [ id ("trains-player-errors-" ++ player.id)
+        , class "rounded-full px-2 text-xs tabular-nums transition-colors duration-300"
+        , classList
+            [ ( "bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-slate-400", count == 0 )
+            , ( "bg-rose-100 font-medium text-rose-700 dark:bg-rose-500/20 dark:text-rose-300", count > 0 )
+            ]
+        ]
+        [ text
+            (String.fromInt count
+                ++ (if count == 1 then
+                        " error"
+
+                    else
+                        " errors"
+                   )
+            )
+        ]
 
 
 playerName : Me -> Player -> String
@@ -2260,6 +2391,11 @@ viewResult model me game =
         [ p [ id "trains-result", class "text-2xl font-semibold" ]
             [ text (String.fromInt game.round.correct ++ " of " ++ String.fromInt (trainCount game.round.layout.board) ++ " trains got home") ]
         , span [ class "text-sm opacity-80" ] [ text (verdict game.round) ]
+        , if game.needed > 1 then
+            viewResultErrors me game
+
+          else
+            text ""
         , if me == Nothing then
             text ""
 
@@ -2301,6 +2437,45 @@ viewResult model me game =
             text ""
         , viewFeed
         ]
+
+
+{-| The errors of each player in the round, in the result of a game for 2
+or more players
+-}
+viewResultErrors : Me -> Game -> Html Msg
+viewResultErrors me game =
+    let
+        playerErrors =
+            errors game.round
+    in
+    ul [ id "trains-result-errors", class "flex flex-col gap-1.5 rounded-2xl bg-white/10 px-4 py-3 text-sm ring-1 ring-white/15" ]
+        (List.map
+            (\player ->
+                let
+                    count =
+                        Maybe.withDefault 0 (Dict.get player.id playerErrors)
+                in
+                li [ id ("trains-result-errors-" ++ player.id), class "flex items-center gap-2" ]
+                    [ span [ class "size-2.5 shrink-0 rounded-full", style "background" player.color ] []
+                    , span [ class "min-w-0 flex-1 truncate text-left" ] [ text (playerName me player) ]
+                    , span
+                        [ class "ml-4 tabular-nums"
+                        , classList [ ( "text-white/60", count == 0 ), ( "font-medium text-rose-300", count > 0 ) ]
+                        ]
+                        [ text
+                            (String.fromInt count
+                                ++ (if count == 1 then
+                                        " error"
+
+                                    else
+                                        " errors"
+                                   )
+                            )
+                        ]
+                    ]
+            )
+            game.players
+        )
 
 
 {-| The call to support Octomocto on Patreon, at the bottom of a result.
