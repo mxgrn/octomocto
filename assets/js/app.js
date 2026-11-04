@@ -24,7 +24,7 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/octomocto"
 import topbar from "../vendor/topbar"
-import {unlockAudio} from "./sounds"
+import {inviteSound, muted, setMuted, unlockAudio} from "./sounds"
 import {playTrainSound} from "./train_sounds"
 import {playAstronautSound} from "./astronaut_sounds"
 import {playSchulteSound} from "./schulte_sounds"
@@ -133,6 +133,41 @@ document.addEventListener("visibilitychange", markResuming)
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
+
+// A notice can come on any page, so each page unlocks the audio at the
+// first click or key press of the player.
+if (navigator.userActivation?.hasBeenActive) unlockAudio()
+document.addEventListener("pointerdown", unlockAudio, {once: true})
+document.addEventListener("keydown", unlockAudio, {once: true})
+
+window.addEventListener("phx:notice-sound", e => {
+  if (e.detail.sound === "invite") inviteSound()
+})
+
+// The sound switches of the user menu (`sound_switch` in layouts.ex). The
+// server cannot know the state in the browser storage, so this sets
+// `aria-checked` after each page load, and after a change in another tab.
+const syncSoundSwitches = () => {
+  for (const el of document.querySelectorAll("[data-sound-switch]")) {
+    el.setAttribute("aria-checked", String(!muted(el.dataset.soundSwitch)))
+  }
+}
+syncSoundSwitches()
+window.addEventListener("phx:page-loading-stop", syncSoundSwitches)
+window.addEventListener("storage", syncSoundSwitches)
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-sound-switch]")
+  if (!el) return
+  const kind = el.dataset.soundSwitch
+  setMuted(kind, !muted(kind))
+  syncSoundSwitches()
+  // Play the sound that the switch turned on, so the player hears it
+  if (!muted(kind)) {
+    unlockAudio()
+    if (kind === "invites") inviteSound()
+  }
+})
 
 // Pick the eyes in the header wordmark that blink: the orange or the blue ones.
 // pointerenter does not bubble, so the listener is on the capture phase.

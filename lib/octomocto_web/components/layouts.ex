@@ -182,7 +182,12 @@ defmodule OctomoctoWeb.Layouts do
             </span>
             <.theme_toggle :if={!@current_scope && !@guest_name} />
 
-            <.account_menu :if={!@current_scope && @guest_name} id="guest-menu" theme_last>
+            <.account_menu
+              :if={!@current_scope && @guest_name}
+              id="guest-menu"
+              theme_last
+              invite_switch={false}
+            >
               <:label>
                 <.icon name="hero-user-circle" class="size-6" />
                 {@guest_name}
@@ -520,6 +525,7 @@ defmodule OctomoctoWeb.Layouts do
 
   attr :id, :string, required: true
   attr :theme_last, :boolean, default: false, doc: "shows the theme toggle below the links"
+  attr :invite_switch, :boolean, default: true, doc: "shows the switch of the invite sound"
   slot :label, required: true, doc: "the content of the button"
   slot :inner_block, required: true, doc: "the links below the theme toggle"
 
@@ -541,8 +547,15 @@ defmodule OctomoctoWeb.Layouts do
       >
         <div class="min-w-36 space-y-1 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg">
           <.theme_row :if={!@theme_last} />
+          <.sound_rows
+            :if={!@theme_last}
+            id={"#{@id}-sounds"}
+            invite_switch={@invite_switch}
+            class="border-b border-base-300 pb-1"
+          />
           {render_slot(@inner_block)}
           <.theme_row :if={@theme_last} class="border-t border-base-300 pt-3" />
+          <.sound_rows :if={@theme_last} id={"#{@id}-sounds"} invite_switch={@invite_switch} />
         </div>
       </div>
     </nav>
@@ -557,6 +570,42 @@ defmodule OctomoctoWeb.Layouts do
       <span class="text-base-content/70">{gettext("Theme")}</span>
       <.theme_toggle />
     </div>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :invite_switch, :boolean, required: true
+  attr :class, :string, default: nil
+
+  # The sound switches. They are on by default, and app.js sets their state
+  # from the browser storage, so LiveView must not change them.
+  defp sound_rows(assigns) do
+    ~H"""
+    <div id={@id} phx-update="ignore" class={@class}>
+      <.sound_switch :if={@invite_switch} kind="invites" label={gettext("Invite sound")} />
+      <.sound_switch kind="sounds" label={gettext("All other sounds")} />
+    </div>
+    """
+  end
+
+  attr :kind, :string, required: true
+  attr :label, :string, required: true
+
+  defp sound_switch(assigns) do
+    ~H"""
+    <button
+      id={"sound-switch-#{@kind}"}
+      type="button"
+      role="switch"
+      aria-checked="true"
+      data-sound-switch={@kind}
+      class="group flex w-full cursor-pointer items-center justify-between gap-6 rounded-lg px-3 py-2 text-start text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+    >
+      <span class="whitespace-nowrap">{@label}</span>
+      <span class="relative h-5 w-9 shrink-0 rounded-full bg-base-content/15 transition-colors duration-200 group-aria-checked:bg-octo-indigo">
+        <span class="absolute top-0.5 start-0.5 size-4 rounded-full bg-white shadow-sm transition-[inset-inline-start] duration-200 group-aria-checked:start-4.5"></span>
+      </span>
+    </button>
     """
   end
 

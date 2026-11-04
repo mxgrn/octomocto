@@ -46,11 +46,11 @@ defmodule OctomoctoWeb.Notices do
         {:halt, socket}
 
       notice.expires_at == nil ->
-        {:halt, update(socket, :notices, &(&1 ++ [notice]))}
+        {:halt, add(socket, notice)}
 
       (left = notice.expires_at - System.system_time(:millisecond)) > 0 ->
         Process.send_after(self(), {:notice_expired, notice.id}, left)
-        {:halt, update(socket, :notices, &(&1 ++ [notice]))}
+        {:halt, add(socket, notice)}
 
       true ->
         {:halt, socket}
@@ -75,6 +75,17 @@ defmodule OctomoctoWeb.Notices do
   end
 
   defp handle_event(_event, _params, socket), do: {:cont, socket}
+
+  # The browser plays the sound of the notice, if it has one (see
+  # `assets/js/sounds.js`). All pages of the recipient get it.
+  defp add(socket, notice) do
+    socket = update(socket, :notices, &(&1 ++ [notice]))
+
+    case notice do
+      %{sound: sound} -> push_event(socket, "notice-sound", %{sound: sound})
+      _ -> socket
+    end
+  end
 
   @doc """
   The first notice of the queue: its text and its buttons. The first button

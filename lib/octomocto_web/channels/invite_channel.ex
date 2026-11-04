@@ -136,7 +136,8 @@ defmodule OctomoctoWeb.InviteChannel do
         %{id: "later", label: "Not now", href: nil}
       ],
       expires_at: System.system_time(:millisecond) + @invite_ms,
-      reply_to: reply_topic(assigns.id, assigns.user_id)
+      reply_to: reply_topic(assigns.id, assigns.user_id),
+      sound: "invite"
     })
   end
 

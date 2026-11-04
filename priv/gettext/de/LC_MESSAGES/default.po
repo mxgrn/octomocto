@@ -340,3 +340,11 @@ msgstr "Erstelle ein öffentliches."
 #, elixir-autogen, elixir-format
 msgid "No games now."
 msgstr "Gerade keine Spiele."
+
+#, elixir-autogen, elixir-format
+msgid "Invite sound"
+msgstr "Einladungston"
+
+#, elixir-autogen, elixir-format
+msgid "All other sounds"
+msgstr "Alle anderen Töne"

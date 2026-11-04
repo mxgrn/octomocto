@@ -341,3 +341,10 @@ msgstr "Herkese açık bir oyun oluştur."
 msgid "No games now."
 
 msgstr "Şu an oyun yok."
+#, elixir-autogen, elixir-format
+msgid "Invite sound"
+msgstr "Davet sesi"
+
+#, elixir-autogen, elixir-format
+msgid "All other sounds"
+msgstr "Diğer tüm sesler"

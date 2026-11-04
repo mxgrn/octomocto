@@ -341,3 +341,11 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "No games now."
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Invite sound"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "All other sounds"
+msgstr ""

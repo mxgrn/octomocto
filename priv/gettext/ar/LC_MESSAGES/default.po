@@ -345,3 +345,10 @@ msgstr "أنشئ لعبة عامة."
 msgid "No games now."
 
 msgstr "لا توجد ألعاب الآن."
+#, elixir-autogen, elixir-format
+msgid "Invite sound"
+msgstr "صوت الدعوات"
+
+#, elixir-autogen, elixir-format
+msgid "All other sounds"
+msgstr "كل الأصوات الأخرى"

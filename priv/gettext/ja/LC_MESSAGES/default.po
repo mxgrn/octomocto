@@ -339,3 +339,11 @@ msgstr "公開ゲームを作ろう。"
 #, elixir-autogen, elixir-format
 msgid "No games now."
 msgstr "今はゲームがない。"
+
+#, elixir-autogen, elixir-format
+msgid "Invite sound"
+msgstr "招待の音"
+
+#, elixir-autogen, elixir-format
+msgid "All other sounds"
+msgstr "その他すべての音"

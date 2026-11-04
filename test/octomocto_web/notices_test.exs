@@ -84,6 +84,21 @@ defmodule OctomoctoWeb.NoticesTest do
       refute has_element?(view, "#notice-float")
     end
 
+    test "the browser plays the sound of a notice that has one", %{conn: conn, user: user} do
+      {:ok, view, _html} = live(conn, ~p"/")
+
+      Notices.push({:user, user.id}, Map.put(notice("first"), :sound, "invite"))
+
+      assert_push_event view, "notice-sound", %{sound: "invite"}
+    end
+
+    test "has the switches of the invite sound and of the other sounds", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/")
+
+      assert has_element?(view, "#user-menu #sound-switch-invites")
+      assert has_element?(view, "#user-menu #sound-switch-sounds")
+    end
+
     test "sees a notice in the bar of a game page in place of the settings",
          %{conn: conn, user: user} do
       {:ok, view, _html} =

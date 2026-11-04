@@ -339,3 +339,11 @@ msgstr "Hãy tạo một ván công khai."
 #, elixir-autogen, elixir-format
 msgid "No games now."
 msgstr "Hiện không có ván nào."
+
+#, elixir-autogen, elixir-format
+msgid "Invite sound"
+msgstr "Âm báo lời mời"
+
+#, elixir-autogen, elixir-format
+msgid "All other sounds"
+msgstr "Tất cả âm thanh khác"

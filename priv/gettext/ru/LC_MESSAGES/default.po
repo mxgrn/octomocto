@@ -341,3 +341,11 @@ msgstr "Создай открытую."
 #, elixir-autogen, elixir-format
 msgid "No games now."
 msgstr "Сейчас игр нет."
+
+#, elixir-autogen, elixir-format
+msgid "Invite sound"
+msgstr "Звук приглашений"
+
+#, elixir-autogen, elixir-format
+msgid "All other sounds"
+msgstr "Все остальные звуки"
