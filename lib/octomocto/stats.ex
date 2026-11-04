@@ -122,6 +122,35 @@ defmodule Octomocto.Stats do
   end
 
   @doc """
+  The number of games in the last `days` days, today included, in each
+  game with players of the `language`, by the game id of the front page. The language is as in
+  `games_by_language/2`, for example "pt". A game with no games in the
+  language is not in the map.
+  """
+  def games_in_language(language, days, today \\ Date.utc_today()) do
+    since = since(Date.add(today, 1 - days))
+
+    @results
+    |> Enum.map(fn {game, schema} ->
+      from r in schema,
+        left_join: u in User,
+        on: u.id == r.user_id,
+        left_join: g in Guest,
+        on: g.id == r.guest_id,
+        where: r.inserted_at >= ^since,
+        where: fragment("split_part(coalesce(?, ?), '-', 1)", u.locale, g.locale) == ^language,
+        select: %{
+          game: type(^game, :string),
+          count: count(fragment("DISTINCT (?, ?)", r.game_id, r.inserted_at))
+        }
+    end)
+    |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
+    |> Repo.all()
+    |> Enum.reject(&(&1.count == 0))
+    |> Map.new(&{&1.game, &1.count})
+  end
+
+  @doc """
   The number of games of one player in each game, by the game id of the
   front page. The `field` is `:user_id` or `:guest_id`. A game with no
   results of the player is not in the map.
@@ -143,26 +172,29 @@ defmodule Octomocto.Stats do
   end
 
   @doc """
-  The `limit` players with the most games of all time in the game with the
-  id `game` of the front page, the most games first. Each item is
+  The 10 players with the most games in the last `days` days, today
+  included, in the game with the id `game` of the front page, the most
+  games first. Each item is
   `%{user: user, guest: guest, count: n}`, with a user or a guest and the
   other nil. Two players with the same count are in the order of their
   first game. The rows of a user count for the user, also when they have a
   guest id. The results of guests from before the guest ids have no
   player, so they are not counted.
   """
-  def top_players(game, limit \\ 10) do
+  def top_players(game, days, today \\ Date.utc_today()) do
     schema = Map.fetch!(@results, game)
+    since = since(Date.add(today, 1 - days))
 
     rows =
       from(r in schema,
+        where: r.inserted_at >= ^since,
         where: not is_nil(r.user_id) or not is_nil(r.guest_id),
         group_by: [r.user_id, fragment("CASE WHEN ? IS NULL THEN ? END", r.user_id, r.guest_id)],
         order_by: [
           desc: count(fragment("DISTINCT (?, ?)", r.game_id, r.inserted_at)),
           asc: min(r.inserted_at)
         ],
-        limit: ^limit,
+        limit: 10,
         select: %{
           user_id: r.user_id,
           guest_id:

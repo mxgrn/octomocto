@@ -6,6 +6,7 @@ defmodule OctomoctoWeb.GameStatsLiveTest do
 
   alias Octomocto.Guests.Guest
   alias Octomocto.{Repo, Schulte}
+  alias Octomocto.Schulte.Result
 
   @settings %{"type" => "random", "mode" => "easy", "players" => 1}
 
@@ -24,6 +25,16 @@ defmodule OctomoctoWeb.GameStatsLiveTest do
     assert has_element?(view, ~s|#top-player-1 a[href="/players/#{guest_public_id}"]|)
     assert view |> element("#top-player-1") |> render() =~ "2"
     assert has_element?(view, ~s|#top-player-2 a[href="/players/#{user.public_id}"]|)
+  end
+
+  test "does not count the games from before the last 30 days", %{conn: conn} do
+    user = user_fixture()
+    Schulte.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+    Repo.update_all(Result, set: [inserted_at: DateTime.add(DateTime.utc_now(), -30, :day)])
+
+    {:ok, view, _html} = live(conn, ~p"/stats/schulte")
+
+    assert has_element?(view, "#top-players-empty")
   end
 
   test "shows an empty list for a game without results", %{conn: conn} do

@@ -13,6 +13,9 @@ defmodule OctomoctoWeb.StatsLive do
 
   @days 30
 
+  @doc "The number of days of all stats pages, today included."
+  def days, do: @days
+
   # The size of the SVG coordinates of the chart. The SVG stretches to the
   # size of the plot, so only the proportions of the values are important.
   @width 1000

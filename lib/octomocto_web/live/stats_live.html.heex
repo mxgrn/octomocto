@@ -108,9 +108,12 @@
       <ul :if={@by_language != []} class="flex flex-col gap-3">
         <li :for={item <- @by_language} id={"stats-language-#{item.language}"} class="text-sm">
           <div class="flex items-baseline justify-between gap-4">
-            <span class="font-medium text-octo-navy dark:text-base-content">
+            <.link
+              navigate={~p"/stats/languages/#{item.language}"}
+              class="font-medium text-octo-navy transition hover:text-octo-indigo dark:text-base-content dark:hover:text-octo-indigo-light"
+            >
               {item.language}
-            </span>
+            </.link>
             <span class="font-semibold text-octo-navy tabular-nums dark:text-base-content">
               {item.count}
             </span>
