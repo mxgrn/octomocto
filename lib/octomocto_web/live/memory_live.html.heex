@@ -23,7 +23,7 @@
   <div
     id="memory-index"
     class={[
-      "relative start-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 rtl:translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[1fr_1.4fr_1fr]",
+      "relative start-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 rtl:translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)]",
       @live_action == :index &&
         "xl:h-[calc(100dvh-4rem)] xl:grid-rows-[auto_minmax(0,1fr)] xl:pb-6"
     ]}
@@ -433,7 +433,7 @@
               <span :if={@settings.players == 1} class="flex-1 font-medium">
                 {Locale.short_date(result.inserted_at)}
               </span>
-              <span :if={@settings.players > 1} class="min-w-0 flex-1 truncate font-medium">
+              <span :if={@settings.players > 1} class="min-w-0 flex-1 font-medium">
                 <.player_list players={players} scores accuracy={&format_accuracy/1} />
               </span>
               <span

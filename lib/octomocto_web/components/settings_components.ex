@@ -145,17 +145,23 @@ defmodule OctomoctoWeb.SettingsComponents do
     default: nil,
     doc: "a function that gives the accuracy text of a player, shown after the points"
 
-  @doc "The names of the players of one game, separated by commas."
+  @doc """
+  The players of one game, one line for each player. A long name is cut,
+  the points and the accuracy always show.
+  """
   def player_list(assigns) do
     ~H"""
-    <span :for={{player, index} <- Enum.with_index(@players)}>{if index > 0, do: ", "}{result_name(
-      player
-    )}<span :if={@scores} class="ms-1 tabular-nums text-base-content/60">{gettext("%{score} pts",
-      score: player.score
-    )}</span><span
-      :if={@accuracy}
-      class="tabular-nums text-base-content/60"
-    > · {@accuracy.(player)}</span></span>
+    <span class="flex flex-col">
+      <span :for={player <- @players} class="flex min-w-0 items-baseline">
+        <span class="truncate">{result_name(player)}</span>
+        <span :if={@scores} class="ms-1 shrink-0 tabular-nums text-base-content/60">
+          {gettext("%{score} pts", score: player.score)}
+        </span>
+        <span :if={@accuracy} class="ms-1 shrink-0 tabular-nums text-base-content/60">
+          · {@accuracy.(player)}
+        </span>
+      </span>
+    </span>
     """
   end
 
