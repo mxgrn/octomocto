@@ -35,6 +35,14 @@ defmodule Octomocto.NimbleMosaic.Game do
     %{layout: layout, mode: mode}
   end
 
+  # The next field of a match, see `Octomocto.Match`
+  @impl true
+  def change_settings(%{layout: layout, mode: mode}, state)
+      when layout in [:random, :classic] and mode in [:easy, :normal],
+      do: {:ok, %{state | layout: layout, mode: mode}}
+
+  def change_settings(_settings, _state), do: :error
+
   @impl true
   def new_field(state) do
     shapes = if state.layout == :classic, do: Classic.regions(), else: Layout.generate(@total)

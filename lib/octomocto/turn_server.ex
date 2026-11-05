@@ -18,7 +18,12 @@ defmodule Octomocto.TurnServer do
   restarts the turn timer after each move with `restart_turn_timer/1`.
 
   A player can restart the game at any time: the scores go back to zero,
-  a new field starts, and the first player has the turn. The game module
+  a new field starts, and the first player has the turn.
+
+  With 2 or more players, the players play a match (see `Octomocto.Match`):
+  each finished field gives a win to its winner (see `c:winners/1`), and
+  one player can change the settings of the next field (see
+  `c:change_settings/2`). The game module
   saves the results itself, because each game saves other things.
 
   The game is registered in the whole cluster, and it writes its state to
@@ -46,7 +51,7 @@ defmodule Octomocto.TurnServer do
   """
   use GenServer
 
-  alias Octomocto.{GameProcess, Lobby, Seats}
+  alias Octomocto.{GameProcess, Lobby, Match, Seats}
 
   @turn_timeout_ms :timer.seconds(15)
 
@@ -105,7 +110,23 @@ defmodule Octomocto.TurnServer do
   """
   @callback restore(state()) :: state()
 
-  @optional_callbacks public_player: 1,
+  @doc """
+  The ids of the winners of a finished field. One winner gets a win, else
+  the field is a tie. Without this callback, the players with the most
+  points win.
+  """
+  @callback winners(state()) :: [String.t()]
+
+  @doc """
+  Puts the new settings of the next field of a match into the state (see
+  `Octomocto.Match`). Gives `:error` for settings that are not valid. A
+  game without this callback has no settings to change.
+  """
+  @callback change_settings(settings :: map(), state()) :: {:ok, state()} | :error
+
+  @optional_callbacks winners: 1,
+                      change_settings: 2,
+                      public_player: 1,
                       new_player: 1,
                       reset_player: 1,
                       after_remove: 1,
@@ -128,6 +149,7 @@ defmodule Octomocto.TurnServer do
         turn: nil,
         turn_timeout_ms: Map.get(config, :turn_timeout_ms, @turn_timeout_ms)
       })
+      |> Match.new()
 
     GenServer.start_link(__MODULE__, {game, {:new, state}}, name: game.via(id))
   end
@@ -190,6 +212,7 @@ defmodule Octomocto.TurnServer do
       |> Seats.restore()
       # A state from before the timings in the config
       |> Map.put_new(:turn_timeout_ms, @turn_timeout_ms)
+      |> Match.restore()
 
     state = if function_exported?(game, :restore, 1), do: game.restore(state), else: state
     state = state |> Seats.leave_all() |> restart_turn_timer()
@@ -210,15 +233,57 @@ defmodule Octomocto.TurnServer do
       )
       when is_map_key(state.players, player_id) do
     state = Seats.rejoin(state, player_id, pid)
-    store(game, state)
-    {:reply, {:ok, player_id, public(game, state)}, {game, state}}
+
+    # The player is back from the settings page
+    if state.editing == player_id do
+      state = %{state | editing: nil}
+      publish(game, state)
+      {:reply, {:ok, player_id, public(game, state)}, {game, state}}
+    else
+      store(game, state)
+      {:reply, {:ok, player_id, public(game, state)}, {game, state}}
+    end
   end
 
-  # The next game for all players, see `OctomoctoWeb.NextGame`
-  def handle_call({:next_game, player_id, page}, _from, {game, state}) do
+  # The next game for all players, see `OctomoctoWeb.NextGame`. Not while a
+  # player changes the settings.
+  def handle_call({:next_game, player_id, page}, _from, {game, %{editing: nil} = state}) do
     {id, state} = GameProcess.next_game(state, player_id, page)
     {:reply, id, {game, state}}
   end
+
+  def handle_call({:next_game, _player_id, _page}, _from, game_state),
+    do: {:reply, nil, game_state}
+
+  # The process of the settings page holds the seat of the player, see
+  # `Octomocto.Match.edit_settings/4`
+  def handle_call({:edit_settings, pid, player_id}, _from, {game, state}) do
+    if function_exported?(game, :change_settings, 2) and Match.edit?(state, player_id) do
+      state = state |> Seats.rejoin(player_id, pid) |> Map.put(:editing, player_id)
+      publish(game, state)
+      {:reply, {:ok, public(game, state)}, {game, state}}
+    else
+      {:reply, {:error, :not_allowed}, {game, state}}
+    end
+  end
+
+  # The next field with the new settings and the same players. Only the
+  # player on the settings page can.
+  def handle_call({:change_settings, player_id, settings}, _from, {game, state})
+      when is_binary(player_id) and state.editing == player_id do
+    case game.change_settings(settings, state) do
+      {:ok, state} ->
+        state = new_round(game, %{state | editing: nil})
+        publish(game, state)
+        {:reply, :ok, {game, state}}
+
+      :error ->
+        {:reply, {:error, :not_allowed}, {game, state}}
+    end
+  end
+
+  def handle_call({:change_settings, _player_id, _settings}, _from, game_state),
+    do: {:reply, {:error, :not_allowed}, game_state}
 
   def handle_call(:watch, _from, {game, state}) do
     {:reply, {:ok, nil, public(game, state)}, {game, state}}
@@ -238,7 +303,7 @@ defmodule Octomocto.TurnServer do
         _from,
         {game, state}
       ) do
-    fields = optional(game, :new_player, %{score: 0})
+    fields = optional(game, :new_player, Match.new_player(%{score: 0}))
     {player_id, state} = Seats.add(state, pid, user_id, name, guest_id, from_lobby, fields)
     state = state |> Map.update!(:turn, &(&1 || player_id)) |> make_ready()
     publish(game, state)
@@ -250,24 +315,12 @@ defmodule Octomocto.TurnServer do
     {:reply, reply, {game, state}}
   end
 
-  # A player can restart at any time. A game that is not finished is not
-  # saved.
+  # A player can restart at any time, but not while a player changes the
+  # settings. A game that is not finished is not saved.
   @impl true
-  def handle_cast({:restart, player_id}, {game, state})
+  def handle_cast({:restart, player_id}, {game, %{editing: nil} = state})
       when is_map_key(state.players, player_id) do
-    players =
-      Map.new(state.players, fn {id, player} ->
-        {id, optional(game, :reset_player, %{player | score: 0})}
-      end)
-
-    state =
-      %{state | players: players}
-      |> Map.delete(:next_game)
-      |> then(&new_field(game, &1))
-      |> then(&%{&1 | turn: List.first(Seats.order(&1))})
-      |> make_ready()
-      |> then(&optional(game, :after_restart, &1))
-
+    state = new_round(game, state)
     publish(game, state)
     {:noreply, {game, state}}
   end
@@ -283,8 +336,16 @@ defmodule Octomocto.TurnServer do
   def handle_info({:DOWN, _ref, :process, pid, _reason}, {game, state}) do
     if player_id = Seats.player_id(state, pid) do
       state = Seats.leave(state, player_id)
-      store(game, state)
-      {:noreply, {game, state}}
+
+      # The other players wait for the player on the settings page
+      if state.editing == player_id do
+        state = %{state | editing: nil}
+        publish(game, state)
+        {:noreply, {game, state}}
+      else
+        store(game, state)
+        {:noreply, {game, state}}
+      end
     else
       {:noreply, {game, state}}
     end
@@ -294,6 +355,8 @@ defmodule Octomocto.TurnServer do
   # turn gives the turn to the next player first.
   def handle_info({:remove, player_id, left}, {game, state}) do
     if Seats.remove?(state, player_id, left) do
+      old_state = state
+
       state =
         if state.turn == player_id,
           do: state |> game.pass_turn() |> restart_turn_timer(),
@@ -302,6 +365,7 @@ defmodule Octomocto.TurnServer do
       state = Seats.remove(state, player_id)
       state = if state.players == %{}, do: %{state | turn: nil}, else: state
       state = optional(game, :after_remove, state)
+      state = count_win(game, old_state, state)
       publish(game, state)
       {:noreply, {game, state}}
     else
@@ -338,9 +402,10 @@ defmodule Octomocto.TurnServer do
 
   defp move(game, move, state) do
     case game.handle_move(move, state) do
-      {:publish, reply, state} ->
-        publish(game, state)
-        {reply, state}
+      {:publish, reply, new_state} ->
+        new_state = count_win(game, state, new_state)
+        publish(game, new_state)
+        {reply, new_state}
 
       {:store, reply, state} ->
         store(game, state)
@@ -350,6 +415,35 @@ defmodule Octomocto.TurnServer do
         {reply, state}
     end
   end
+
+  # A new field with zero scores for the same players. The first player has
+  # the turn.
+  defp new_round(game, state) do
+    players =
+      Map.new(state.players, fn {id, player} ->
+        {id, optional(game, :reset_player, %{player | score: 0})}
+      end)
+
+    %{state | players: players}
+    |> Map.delete(:next_game)
+    |> then(&new_field(game, &1))
+    |> then(&%{&1 | turn: List.first(Seats.order(&1))})
+    |> make_ready()
+    |> then(&optional(game, :after_restart, &1))
+  end
+
+  # The change finished the field: count the win of the match
+  defp count_win(game, %{finished_at: nil}, %{finished_at: finished_at} = state)
+       when finished_at != nil do
+    winners =
+      if function_exported?(game, :winners, 1),
+        do: game.winners(state),
+        else: Match.top_scorers(state)
+
+    Match.count(state, winners)
+  end
+
+  defp count_win(_game, _old_state, state), do: state
 
   defp new_field(game, state) do
     state
@@ -387,11 +481,14 @@ defmodule Octomocto.TurnServer do
     Phoenix.PubSub.broadcast(Octomocto.PubSub, game.topic(state.id), message)
   end
 
-  # The state that clients see, ready to encode as JSON
-  defp public(game, state) do
+  @doc """
+  The state that clients see, ready to encode as JSON. With `editing`, the
+  id of the player on the settings page (see `Octomocto.Match`).
+  """
+  def public(game, state) do
     players =
       Seats.public_players(state, fn _id, p ->
-        Map.put(public_player(game, p), :score, p.score)
+        public_player(game, p) |> Map.put(:score, p.score) |> Map.put(:wins, Match.wins(p))
       end)
 
     Map.merge(
@@ -404,7 +501,10 @@ defmodule Octomocto.TurnServer do
         turn_ms: if(state.turn_since, do: now() - state.turn_since, else: 0),
         turn_limit_ms: if(state.needed > 1, do: state.turn_timeout_ms),
         players: players,
-        players_needed: state.needed
+        players_needed: state.needed,
+        public: state.public,
+        editing: state.editing,
+        ties: state.ties
       },
       game.public_field(state)
     )

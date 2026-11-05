@@ -35,6 +35,13 @@ defmodule Octomocto.SetGame.Game do
   @impl true
   def restore(state), do: Map.put_new(state, :mode, "normal")
 
+  # The next deal of a match, see `Octomocto.Match`
+  @impl true
+  def change_settings(%{mode: mode}, state) when mode in ~w(easy normal),
+    do: {:ok, Map.put(state, :mode, mode)}
+
+  def change_settings(_settings, _state), do: :error
+
   @impl true
   def new_field(state) do
     {table, deck} = Enum.split(Deck.shuffled(state.mode), Deck.table())

@@ -27,6 +27,13 @@ defmodule Octomocto.Sudoku.Game do
     %{difficulty: difficulty}
   end
 
+  # The next puzzle of a match, see `Octomocto.Match`
+  @impl true
+  def change_settings(%{difficulty: difficulty}, state) when difficulty in ~w(easy medium hard),
+    do: {:ok, %{state | difficulty: difficulty}}
+
+  def change_settings(_settings, _state), do: :error
+
   @impl true
   def new_field(state) do
     {puzzle, solution} = Puzzle.generate(state.difficulty)

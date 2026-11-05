@@ -4,7 +4,7 @@ defmodule Octomocto.EchoTest do
   import Octomocto.GameHelpers
   import Octomocto.AccountsFixtures
 
-  alias Octomocto.{Echo, Lobby}
+  alias Octomocto.{Echo, Lobby, Match}
   alias Octomocto.Echo.{Game, Result, Store}
   alias Octomocto.Friends.Follow
 
@@ -218,6 +218,22 @@ defmodule Octomocto.EchoTest do
                         finished: false,
                         players: [%{turn: true}, %{turn: false}]
                       }}
+    end
+  end
+
+  describe "a match" do
+    @tag players: 2
+    test "the winner gets a win, and a player changes the pads of the next game", %{id: id} do
+      {:ok, first, _} = Echo.join(id)
+      {:ok, second, _} = Echo.join(id)
+      Echo.press(id, first, 2)
+      Echo.press(id, second, wrong(2))
+
+      {:ok, %{editing: ^second}} = Match.edit_settings(Game, id, second)
+      :ok = Match.change_settings(Game, id, second, %{pads: 6})
+
+      assert %{pads: 6, finished: false, editing: nil, players: players} = watch(id)
+      assert Enum.map(players, &{&1.id, &1.wins}) == [{first, 1}, {second, 0}]
     end
   end
 end

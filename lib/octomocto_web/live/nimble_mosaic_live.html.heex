@@ -29,13 +29,19 @@
         <h1 class="text-3xl font-semibold tracking-tight">Nimble Mosaic</h1>
       </div>
       <p class="text-base-content/70">
-        A mosaic of 90 shapes for focus and speed: find the numbers in order.
-        Choose the settings and start a new game.
+        <%= if @match do %>
+          Choose the settings of the next game.
+        <% else %>
+          A mosaic of 90 shapes for focus and speed: find the numbers in order.
+          Choose the settings and start a new game.
+        <% end %>
       </p>
       <.how_to_play />
     </div>
 
+    <%!-- A match plays on with the same players, so it needs no other games --%>
     <div
+      :if={!@match}
       id="nimble-mosaic-lobby"
       class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
     >
@@ -54,7 +60,15 @@
 
     <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
       <div id="nimble-mosaic-settings" class="flex w-full flex-col gap-4">
+        <.match_score
+          :if={@match}
+          players={@match.state.players}
+          ties={@match.state.ties}
+          me={@match.player_id}
+          back={~p"/nimble-mosaic/#{@match.id}"}
+        />
         <.setting
+          :if={!@match}
           id="setting-players"
           label="Players"
           icon="hero-users"
@@ -110,6 +124,7 @@
           </.option>
         </.setting>
         <.setting
+          :if={!@match}
           id="setting-visibility"
           label="Visibility"
           icon="hero-eye"
@@ -131,7 +146,7 @@
         </.setting>
       </div>
 
-      <.start_bar multiplayer={@settings.players > 1} />
+      <.start_bar multiplayer={@settings.players > 1} match={@match != nil} />
     </div>
 
     <div

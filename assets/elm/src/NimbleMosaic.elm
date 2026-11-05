@@ -29,7 +29,7 @@ import Browser.Dom
 import Browser.Events
 import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
-import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, rel, src, style, target, value)
+import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
@@ -137,6 +137,10 @@ type alias Game =
 
     -- True in the easy mode. In the normal mode, the found numbers stay.
     , hidesFound : Bool
+
+    -- The id of the player who changes the settings of the next game
+    -- of the match (see `OctomoctoWeb.MatchPage`). The other players wait.
+    , editing : Maybe String
     }
 
 
@@ -163,6 +167,10 @@ type alias NextGame =
 type alias Model =
     { gameUrl : String
     , settingsUrl : String
+
+    -- The settings page of the next game of the match. Nothing for a
+    -- game with one player.
+    , changeSettingsUrl : Maybe String
     , nextGame : NextGame
     , guest : Bool
     , connection : Connection
@@ -196,6 +204,10 @@ type alias Model =
 type alias Flags =
     { gameUrl : String
     , settingsUrl : String
+
+    -- The settings page of the next game of the match. Nothing for a
+    -- game with one player.
+    , changeSettingsUrl : Maybe String
     , nextGame : NextGame
     , guest : Bool
     , muted : Bool
@@ -206,6 +218,7 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { gameUrl = flags.gameUrl
       , settingsUrl = flags.settingsUrl
+      , changeSettingsUrl = flags.changeSettingsUrl
       , nextGame = flags.nextGame
       , guest = flags.guest
       , connection = Connecting
@@ -518,6 +531,7 @@ gameDecoder =
         |> andMap (Decode.field "waiting" Decode.bool)
         |> andMap (Decode.field "players_needed" Decode.int)
         |> andMap (Decode.field "mode" (Decode.map ((==) "easy") Decode.string))
+        |> andMap (Decode.field "editing" (Decode.nullable Decode.string))
 
 
 andMap : Decoder a -> Decoder (a -> b) -> Decoder b
@@ -644,7 +658,7 @@ viewGame model me game =
                     , p [ class "hidden text-sm opacity-60 lg:block" ] [ text "Click the numbers in order. The first click gets the point." ]
                     ]
                 , viewClock model game
-                , viewMenu model.muted (me /= Nothing)
+                , viewMenu (game.editing /= Nothing) model.muted (me /= Nothing)
                 ]
             , if game.playersNeeded > 1 then
                 viewShareLink model
@@ -675,7 +689,7 @@ viewBoard model me tall game =
             viewCountdown (Maybe.withDefault 0 (countdownStep model))
 
           else if finished game then
-            viewResult model.settingsUrl model.nextGame model.guest me game
+            viewResult model.settingsUrl model.changeSettingsUrl model.nextGame model.guest me game
 
           else
             text ""
@@ -833,14 +847,15 @@ viewWatchers watching count =
 screen, only the icon shows, but not in the column of a screen that is wider
 than tall.
 -}
-viewMenu : Bool -> Bool -> Html Msg
-viewMenu muted player =
+viewMenu : Bool -> Bool -> Bool -> Html Msg
+viewMenu locked muted player =
     Html.node "octo-game-menu"
         [ class "relative shrink-0 lg:order-5 lg:self-start"
         , attribute "menu-label" "Menu"
         , attribute "restart-label" "Restart game"
         , attribute "sound-on-label" "Turn the sounds on"
         , attribute "sound-off-label" "Turn the sounds off"
+        , attribute "locked" (boolAttribute locked)
         , attribute "muted" (boolAttribute muted)
         , attribute "player" (boolAttribute player)
         , Html.Events.on "octo-restart" (Decode.succeed Restart)
@@ -1232,8 +1247,8 @@ viewCountdown seconds =
         ]
 
 
-viewResult : String -> NextGame -> Bool -> Me -> Game -> Html Msg
-viewResult settingsUrl nextGame guest me game =
+viewResult : String -> Maybe String -> NextGame -> Bool -> Me -> Game -> Html Msg
+viewResult settingsUrl changeSettingsUrl nextGame guest me game =
     let
         players =
             game.players
@@ -1263,6 +1278,15 @@ viewResult settingsUrl nextGame guest me game =
 
         ranked =
             List.reverse (List.sortBy .score players)
+
+        -- The player on the settings page. Nobody can start a game until
+        -- that player is back.
+        editor =
+            game.editing
+                |> Maybe.andThen (\editing -> List.head (List.filter (\player -> player.id == editing) players))
+
+        locked =
+            editor /= Nothing
     in
     div
         [ id "nimble-mosaic-result"
@@ -1286,16 +1310,54 @@ viewResult settingsUrl nextGame guest me game =
                     )
                     ranked
                 )
+        , case editor of
+            Just player ->
+                p [ id "nimble-mosaic-editing", class "animate-pulse text-sm text-white/80" ]
+                    [ text
+                        (case player.name of
+                            Just name ->
+                                name ++ " changes the settings…"
+
+                            Nothing ->
+                                "The " ++ player.colorName ++ " player changes the settings…"
+                        )
+                    ]
+
+            Nothing ->
+                text ""
         , if me == Nothing then
             text ""
 
           else
-            button
-                [ id "nimble-mosaic-play-again"
-                , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:bg-octo-mist"
-                , onClick Restart
+            div [ class "flex flex-wrap items-center justify-center gap-3" ]
+                [ button
+                    [ id "nimble-mosaic-play-again"
+                    , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:bg-octo-mist disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
+                    , onClick Restart
+                    , disabled locked
+                    ]
+                    [ text "Play again" ]
+                , case changeSettingsUrl of
+                    Nothing ->
+                        text ""
+
+                    Just url ->
+                        if locked then
+                            span
+                                [ id "nimble-mosaic-change-settings"
+                                , attribute "aria-disabled" "true"
+                                , class "cursor-not-allowed rounded-full px-5 py-2.5 font-medium text-white opacity-50 ring-1 ring-white/40"
+                                ]
+                                [ text "Change settings" ]
+
+                        else
+                            a
+                                [ id "nimble-mosaic-change-settings"
+                                , href url
+                                , class "rounded-full px-5 py-2.5 font-medium text-white ring-1 ring-white/40 transition hover:bg-white/10"
+                                ]
+                                [ text "Change settings" ]
                 ]
-                [ text "Play again" ]
         , a
             [ id "nimble-mosaic-leaderboards-link"
             , href settingsUrl
@@ -1314,10 +1376,11 @@ viewResult settingsUrl nextGame guest me game =
           element
             [ id "nimble-mosaic-next-game"
             , action
+            , disabled locked
             , attribute "data-ga-link" "or_try"
             , attribute "data-ga-from" "Nimble Mosaic"
             , attribute "data-ga-to" nextGame.name
-            , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
+            , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:no-underline"
             ]
             [ text ("Or try " ++ nextGame.name ++ " ")
             , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]

@@ -19,15 +19,17 @@ defmodule OctomoctoWeb.SudokuLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Lobby, Sudoku}
-  alias OctomoctoWeb.SavedSettings
+  alias OctomoctoWeb.{MatchPage, SavedSettings, SudokuChannel}
   alias Octomocto.Sudoku.{Game, Puzzle, Store}
 
-  def mount(_params, _session, socket) do
-    if connected?(socket), do: Lobby.subscribe(Game)
+  def mount(params, _session, socket) do
+    # The settings of the next puzzle of a match, see `OctomoctoWeb.MatchPage`
+    match = MatchPage.load(params["match"], socket, Game, SudokuChannel)
+    MatchPage.subscribe(socket, match, Game)
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/sudoku"), rules: rules()] ++ seo())
+     |> assign([canonical_url: url(~p"/sudoku"), rules: rules(), match: match] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))
      |> assign(watchers: Lobby.watchers(Game))}
   end
@@ -46,10 +48,12 @@ defmodule OctomoctoWeb.SudokuLive do
   @settings_params ["players", "difficulty", "visibility"]
 
   def handle_params(params, _uri, socket) do
-    settings =
-      socket |> SavedSettings.params("sudoku", params, @settings_params) |> settings()
+    match = socket.assigns.match
 
-    SavedSettings.save_change(socket, "sudoku", settings, query(settings, []))
+    settings =
+      socket |> settings_params(params, match) |> settings() |> Map.put(:match, match && match.id)
+
+    SavedSettings.save_change(socket, "sudoku", settings, query(%{settings | match: nil}, []))
 
     filter = %{"difficulty" => settings.difficulty, "players" => settings.players}
 
@@ -59,6 +63,18 @@ defmodule OctomoctoWeb.SudokuLive do
        best_results: Sudoku.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
+  end
+
+  # A match has its own settings
+  defp settings_params(socket, params, nil),
+    do: SavedSettings.params(socket, "sudoku", params, @settings_params)
+
+  defp settings_params(_socket, params, %{settings: state} = match),
+    do: MatchPage.params(params, match, %{"difficulty" => state.difficulty})
+
+  # The score of the match shows the changes of the players
+  def handle_info({:sudoku_state, state}, socket) do
+    {:noreply, update(socket, :match, &%{&1 | state: state})}
   end
 
   def handle_info({:lobby_changed, _game, id, entry}, socket) do
@@ -82,6 +98,16 @@ defmodule OctomoctoWeb.SudokuLive do
     |> Sudoku.create_game()
   end
 
+  # The next puzzle of the match, in the same game
+  def handle_event("new_game", _params, %{assigns: %{match: %{player_id: id} = match}} = socket)
+      when is_binary(id) do
+    settings = socket.assigns.settings
+
+    MatchPage.start(Game, match, Map.take(settings, [:difficulty]))
+
+    {:noreply, redirect(socket, to: ~p"/sudoku/#{match.id}")}
+  end
+
   def handle_event("new_game", _params, socket) do
     id = Sudoku.create_game(socket.assigns.settings)
     {:noreply, redirect(socket, to: ~p"/sudoku/#{id}")}
@@ -99,7 +125,12 @@ defmodule OctomoctoWeb.SudokuLive do
     difficulty =
       if params["difficulty"] in Puzzle.difficulties(), do: params["difficulty"], else: "easy"
 
-    %{players: players, difficulty: difficulty, public: params["visibility"] != "private"}
+    %{
+      players: players,
+      difficulty: difficulty,
+      public: params["visibility"] != "private",
+      match: nil
+    }
   end
 
   defp assign_lobby(socket, entries) do
@@ -154,10 +185,18 @@ defmodule OctomoctoWeb.SudokuLive do
 
   @doc "The path of this page with the settings of the game in the given state."
   def settings_path(state) do
-    settings = %{players: state.needed, difficulty: state.difficulty, public: state.public}
+    settings = %{
+      players: state.needed,
+      difficulty: state.difficulty,
+      public: state.public,
+      match: nil
+    }
 
     ~p"/sudoku?#{query(settings, [])}"
   end
+
+  @doc "The path of the Change settings button of the game, see `OctomoctoWeb.MatchPage.path/2`."
+  def match_path(state), do: MatchPage.path(~p"/sudoku", state)
 
   # The query of the page for the settings, with some of them changed
   defp query(settings, changes) do
@@ -165,7 +204,8 @@ defmodule OctomoctoWeb.SudokuLive do
     query = [players: settings.players, difficulty: settings.difficulty]
 
     # A public game has no param, so that most links stay short
-    if settings.public, do: query, else: query ++ [visibility: "private"]
+    query = if settings.public, do: query, else: query ++ [visibility: "private"]
+    if settings.match, do: query ++ [match: settings.match], else: query
   end
 
   defp difficulty_hint(difficulty) do

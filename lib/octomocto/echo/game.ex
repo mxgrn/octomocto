@@ -56,6 +56,16 @@ defmodule Octomocto.Echo.Game do
     })
   end
 
+  # The next game of a match, see `Octomocto.Match`
+  @impl true
+  def change_settings(%{pads: pads}, state) when pads in 2..8, do: {:ok, %{state | pads: pads}}
+  def change_settings(_settings, _state), do: :error
+
+  # The last player who is in wins. With no such player, it is a tie.
+  @impl true
+  def winners(%{winner: nil}), do: []
+  def winners(%{winner: winner}), do: [winner]
+
   # The place in the order in which the players went out, or nil while the
   # player is in
   @impl true

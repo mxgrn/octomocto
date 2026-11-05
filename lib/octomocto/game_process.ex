@@ -15,7 +15,7 @@ defmodule Octomocto.GameProcess do
         # The options of `use Octomocto.RaceServer` in the game module
         options: [topic: "sudoku", state_message: :sudoku_state, ...]
 
-  The server must have `start_link/2` and `lobby_entry/2`, both with the
+  The server must have `start_link/2`, `lobby_entry/2` and `public/2`, all with the
   game module as the first argument. It reads the options with
   `game.__game__()`.
   """
@@ -62,6 +62,9 @@ defmodule Octomocto.GameProcess do
 
       @doc "The row of the game in the lists, see `#{inspect(server)}.lobby_entry/2`."
       def lobby_entry(state), do: @game_server.lobby_entry(__MODULE__, state)
+
+      @doc "The state that clients see, see `#{inspect(server)}.public/2`."
+      def public(state), do: @game_server.public(__MODULE__, state)
 
       # The options of `use`, for the functions of the server
       @doc false

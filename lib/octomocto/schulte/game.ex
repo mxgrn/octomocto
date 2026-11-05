@@ -34,6 +34,14 @@ defmodule Octomocto.Schulte.Game do
     %{size: size, marks: marks}
   end
 
+  # The next table of a match, see `Octomocto.Match`
+  @impl true
+  def change_settings(%{size: size, marks: marks}, state)
+      when size in 5..9 and is_boolean(marks),
+      do: {:ok, %{state | size: size, marks: marks}}
+
+  def change_settings(_settings, _state), do: :error
+
   @impl true
   def new_field(state) do
     Map.merge(state, %{

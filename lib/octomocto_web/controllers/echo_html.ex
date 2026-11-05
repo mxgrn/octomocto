@@ -92,6 +92,10 @@ defmodule OctomoctoWeb.EchoHTML do
       "{name} wins!" => dgettext("echo", "{name} wins!"),
       "The sequence had {pads}." => dgettext("echo", "The sequence had {pads}."),
       "Play again" => dgettext("echo", "Play again"),
+      "Change settings" => dgettext("echo", "Change settings"),
+      "{name} changes the settings…" => dgettext("echo", "{name} changes the settings…"),
+      "The {color} player changes the settings…" =>
+        dgettext("echo", "The {color} player changes the settings…"),
       "Or try {game}" => dgettext("echo", "Or try {game}"),
       "Sign in" => dgettext("echo", "Sign in"),
       "{sign_in} to keep your scores." => dgettext("echo", "{sign_in} to keep your scores."),

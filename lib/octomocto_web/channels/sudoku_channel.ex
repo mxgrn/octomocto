@@ -12,6 +12,9 @@ defmodule OctomoctoWeb.SudokuChannel do
 
   @game [context: Sudoku, game: Sudoku.Game, salt: "sudoku player", kind: "sudoku"]
 
+  @doc "The player id in the token of a player of the game, or nil."
+  def player_id(game_id, token), do: GameChannel.verify_token(game_id, token, @game)
+
   @impl true
   def join("sudoku:" <> game_id, params, socket) do
     GameChannel.join(game_id, params, socket, @game)

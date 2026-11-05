@@ -391,3 +391,19 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Menu"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "Đổi cài đặt"
+
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "Chọn cài đặt cho ván tiếp theo."
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "Người chơi màu {color} đang đổi cài đặt…"
+
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name} đang đổi cài đặt…"

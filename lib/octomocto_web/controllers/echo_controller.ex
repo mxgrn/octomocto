@@ -14,6 +14,7 @@ defmodule OctomoctoWeb.EchoController do
         id: id,
         index_path: Locale.path(locale, ~p"/echo"),
         settings_path: EchoLive.settings_path(locale, state),
+        change_settings_path: EchoLive.match_path(locale, state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
         next_game: NextGame.pick("echo", id, state.needed > 1),

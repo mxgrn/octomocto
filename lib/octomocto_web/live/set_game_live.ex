@@ -19,15 +19,17 @@ defmodule OctomoctoWeb.SetGameLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Lobby, SetGame}
-  alias OctomoctoWeb.SavedSettings
+  alias OctomoctoWeb.{MatchPage, SavedSettings, SetGameChannel}
   alias Octomocto.SetGame.{Deck, Game, Store}
 
-  def mount(_params, _session, socket) do
-    if connected?(socket), do: Lobby.subscribe(Game)
+  def mount(params, _session, socket) do
+    # The settings of the next deal of a match, see `OctomoctoWeb.MatchPage`
+    match = MatchPage.load(params["match"], socket, Game, SetGameChannel)
+    MatchPage.subscribe(socket, match, Game)
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/set"), rules: rules()] ++ seo())
+     |> assign([canonical_url: url(~p"/set"), rules: rules(), match: match] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))
      |> assign(watchers: Lobby.watchers(Game))}
   end
@@ -46,10 +48,12 @@ defmodule OctomoctoWeb.SetGameLive do
   @settings_params ["players", "mode", "visibility"]
 
   def handle_params(params, _uri, socket) do
-    settings =
-      socket |> SavedSettings.params("set", params, @settings_params) |> settings()
+    match = socket.assigns.match
 
-    SavedSettings.save_change(socket, "set", settings, query(settings, []))
+    settings =
+      socket |> settings_params(params, match) |> settings() |> Map.put(:match, match && match.id)
+
+    SavedSettings.save_change(socket, "set", settings, query(%{settings | match: nil}, []))
 
     filter = %{"mode" => settings.mode, "players" => settings.players}
 
@@ -59,6 +63,18 @@ defmodule OctomoctoWeb.SetGameLive do
        best_results: SetGame.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
+  end
+
+  # A match has its own settings
+  defp settings_params(socket, params, nil),
+    do: SavedSettings.params(socket, "set", params, @settings_params)
+
+  defp settings_params(_socket, params, %{settings: state} = match),
+    do: MatchPage.params(params, match, %{"mode" => Map.get(state, :mode, "normal")})
+
+  # The score of the match shows the changes of the players
+  def handle_info({:set_state, state}, socket) do
+    {:noreply, update(socket, :match, &%{&1 | state: state})}
   end
 
   def handle_info({:lobby_changed, _game, id, entry}, socket) do
@@ -82,6 +98,16 @@ defmodule OctomoctoWeb.SetGameLive do
     |> SetGame.create_game()
   end
 
+  # The next deal of the match, in the same game
+  def handle_event("new_game", _params, %{assigns: %{match: %{player_id: id} = match}} = socket)
+      when is_binary(id) do
+    settings = socket.assigns.settings
+
+    MatchPage.start(Game, match, Map.take(settings, [:mode]))
+
+    {:noreply, redirect(socket, to: ~p"/set/#{match.id}")}
+  end
+
   def handle_event("new_game", _params, socket) do
     id = SetGame.create_game(socket.assigns.settings)
     {:noreply, redirect(socket, to: ~p"/set/#{id}")}
@@ -98,7 +124,7 @@ defmodule OctomoctoWeb.SetGameLive do
 
     mode = if params["mode"] in Deck.modes(), do: params["mode"], else: "normal"
 
-    %{players: players, mode: mode, public: params["visibility"] != "private"}
+    %{players: players, mode: mode, public: params["visibility"] != "private", match: nil}
   end
 
   defp assign_lobby(socket, entries) do
@@ -151,11 +177,15 @@ defmodule OctomoctoWeb.SetGameLive do
     settings = %{
       players: state.needed,
       mode: Map.get(state, :mode, "normal"),
-      public: state.public
+      public: state.public,
+      match: nil
     }
 
     ~p"/set?#{query(settings, [])}"
   end
+
+  @doc "The path of the Change settings button of the game, see `OctomoctoWeb.MatchPage.path/2`."
+  def match_path(state), do: MatchPage.path(~p"/set", state)
 
   # The query of the page for the settings, with some of them changed
   defp query(settings, changes) do
@@ -163,7 +193,8 @@ defmodule OctomoctoWeb.SetGameLive do
     query = [players: settings.players, mode: settings.mode]
 
     # A public game has no param, so that most links stay short
-    if settings.public, do: query, else: query ++ [visibility: "private"]
+    query = if settings.public, do: query, else: query ++ [visibility: "private"]
+    if settings.match, do: query ++ [match: settings.match], else: query
   end
 
   # True when the open game has the same settings as the new game

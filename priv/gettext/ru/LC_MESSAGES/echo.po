@@ -393,3 +393,19 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Menu"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "Изменить настройки"
+
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "Выбери настройки следующей игры."
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "{color} меняет настройки…"
+
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name} меняет настройки…"

@@ -4,7 +4,7 @@ defmodule Octomocto.SchulteTest do
   import Octomocto.GameHelpers
   import Octomocto.AccountsFixtures
 
-  alias Octomocto.Schulte
+  alias Octomocto.{Match, Schulte}
   alias Octomocto.Schulte.{Game, Result}
 
   # One player and a 5 × 5 grid, if the test has no `@tag config: [...]`
@@ -71,5 +71,41 @@ defmodule Octomocto.SchulteTest do
 
     assert %{latest: [%{result: %Result{game_id: "a"}}], best: %Result{elapsed_ms: 9000}} =
              Schulte.user_results(%{user: user}, settings)
+  end
+
+  describe "a match" do
+    # Two players and a finished table, won by the first player
+    setup %{id: id} do
+      {:ok, first, _} = Schulte.join(id)
+      {:ok, second, _} = Schulte.join(id)
+      for n <- 1..25, do: Schulte.pick(id, first, n)
+      %{first: first, second: second}
+    end
+
+    @tag config: [players: 2]
+    test "a player changes the settings of the next table, and the wins stay",
+         %{id: id, first: first, second: second} do
+      {:ok, %{editing: ^first}} = Match.edit_settings(Game, id, first)
+      Schulte.restart(id, second)
+      assert {:ok, nil, %{finished: true}} = Schulte.watch(id)
+
+      :ok = Match.change_settings(Game, id, first, %{size: 6, marks: true})
+
+      assert {:ok, nil, state} = Schulte.watch(id)
+      assert %{size: 6, marks: true, finished: false, editing: nil, ties: 0} = state
+      assert Enum.map(state.players, &{&1.id, &1.wins}) == [{first, 1}, {second, 0}]
+    end
+
+    @tag config: [players: 2]
+    test "the other players can play again when the page of the player closes",
+         %{id: id, first: first} do
+      task = Task.async(fn -> Match.edit_settings(Game, id, first) end)
+      {:ok, %{editing: ^first}} = Task.await(task)
+      ref = Process.monitor(task.pid)
+      assert_receive {:DOWN, ^ref, :process, _, _}
+      _ = :sys.get_state(GenServer.whereis(Game.via(id)))
+
+      assert {:ok, nil, %{editing: nil}} = Schulte.watch(id)
+    end
   end
 end

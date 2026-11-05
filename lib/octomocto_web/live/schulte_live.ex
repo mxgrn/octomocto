@@ -12,15 +12,17 @@ defmodule OctomoctoWeb.SchulteLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Lobby, Schulte}
-  alias OctomoctoWeb.SavedSettings
+  alias OctomoctoWeb.{MatchPage, SavedSettings, SchulteChannel}
   alias Octomocto.Schulte.{Game, TableStore}
 
-  def mount(_params, _session, socket) do
-    if connected?(socket), do: Lobby.subscribe(Game)
+  def mount(params, _session, socket) do
+    # The settings of the next table of a match, see `OctomoctoWeb.MatchPage`
+    match = MatchPage.load(params["match"], socket, Game, SchulteChannel)
+    MatchPage.subscribe(socket, match, Game)
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/schulte"), rules: rules()] ++ seo())
+     |> assign([canonical_url: url(~p"/schulte"), rules: rules(), match: match] ++ seo())
      |> assign_lobby(Lobby.entries(Game, TableStore))
      |> assign(watchers: Lobby.watchers(Game))}
   end
@@ -39,10 +41,12 @@ defmodule OctomoctoWeb.SchulteLive do
   @settings_params ["size", "marks", "players", "visibility"]
 
   def handle_params(params, _uri, socket) do
-    settings =
-      socket |> SavedSettings.params("schulte", params, @settings_params) |> settings()
+    match = socket.assigns.match
 
-    SavedSettings.save_change(socket, "schulte", settings, query(settings, []))
+    settings =
+      socket |> settings_params(params, match) |> settings() |> Map.put(:match, match && match.id)
+
+    SavedSettings.save_change(socket, "schulte", settings, query(%{settings | match: nil}, []))
 
     filter = %{"size" => settings.size, "marks" => settings.marks, "players" => settings.players}
 
@@ -52,6 +56,20 @@ defmodule OctomoctoWeb.SchulteLive do
        best_results: Schulte.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
+  end
+
+  # A match has its own settings
+  defp settings_params(socket, params, nil),
+    do: SavedSettings.params(socket, "schulte", params, @settings_params)
+
+  defp settings_params(_socket, params, %{settings: state} = match) do
+    marks = if state.marks, do: "on", else: "off"
+    MatchPage.params(params, match, %{"size" => Integer.to_string(state.size), "marks" => marks})
+  end
+
+  # The score of the match shows the changes of the players
+  def handle_info({:schulte_state, state}, socket) do
+    {:noreply, update(socket, :match, &%{&1 | state: state})}
   end
 
   def handle_info({:lobby_changed, _game, id, entry}, socket) do
@@ -71,6 +89,13 @@ defmodule OctomoctoWeb.SchulteLive do
     # Any player can start the next game, thus it has no creator (see
     # `Octomocto.Seats`)
     create_game(%{settings(%{"players" => Integer.to_string(players)}) | public: public}, false)
+  end
+
+  # The next table of the match, in the same game
+  def handle_event("new_game", _params, %{assigns: %{match: %{player_id: id} = match}} = socket)
+      when is_binary(id) do
+    MatchPage.start(Game, match, Map.take(socket.assigns.settings, [:size, :marks]))
+    {:noreply, redirect(socket, to: ~p"/schulte/#{match.id}")}
   end
 
   def handle_event("new_game", _params, socket) do
@@ -101,7 +126,7 @@ defmodule OctomoctoWeb.SchulteLive do
 
     public = params["visibility"] != "private"
 
-    %{size: size, marks: marks, players: players, public: public}
+    %{size: size, marks: marks, players: players, public: public, match: nil}
   end
 
   defp size_hint(size), do: "The numbers from 1 to #{size * size}."
@@ -141,11 +166,15 @@ defmodule OctomoctoWeb.SchulteLive do
       size: state.size,
       marks: state.marks,
       players: state.needed,
-      public: state.public
+      public: state.public,
+      match: nil
     }
 
     ~p"/schulte?#{query(settings, [])}"
   end
+
+  @doc "The path of the Change settings button of the game, see `OctomoctoWeb.MatchPage.path/2`."
+  def match_path(state), do: MatchPage.path(~p"/schulte", state)
 
   # The query of the page for the settings, with some of them changed
   defp query(settings, changes) do
@@ -154,7 +183,8 @@ defmodule OctomoctoWeb.SchulteLive do
     query = [size: settings.size, marks: marks, players: settings.players]
 
     # A public game has no param, so that most links stay short
-    if settings.public, do: query, else: query ++ [visibility: "private"]
+    query = if settings.public, do: query, else: query ++ [visibility: "private"]
+    if settings.match, do: query ++ [match: settings.match], else: query
   end
 
   # True when the open game has the same settings as the new game

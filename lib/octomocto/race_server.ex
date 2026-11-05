@@ -12,7 +12,12 @@ defmodule Octomocto.RaceServer do
   A player can restart the game at any time: the scores go back to zero
   and a new field starts. When a field is finished with all players still
   in the game, the game saves the result of each player with
-  `save_results/4` of the game context. The game sends its row in the lists
+  `save_results/4` of the game context.
+
+  With 2 or more players, the players play a match (see `Octomocto.Match`):
+  the player with the most points wins the field, and one player can
+  change the settings of the next field (see the `c:change_settings/2`
+  callback). The game sends its row in the lists
   after each change, and nil when its node stops.
 
   The game is registered in the whole cluster, and it writes its state to
@@ -44,7 +49,7 @@ defmodule Octomocto.RaceServer do
   """
   use GenServer
 
-  alias Octomocto.{GameEnd, GameProcess, Lobby, Seats}
+  alias Octomocto.{GameEnd, GameProcess, Lobby, Match, Seats}
 
   @countdown_ms 3000
 
@@ -99,7 +104,14 @@ defmodule Octomocto.RaceServer do
   """
   @callback restore(state()) :: state()
 
-  @optional_callbacks new_player: 1, reset_player: 1, restore: 1
+  @doc """
+  Puts the new settings of the next field of a match into the state (see
+  `Octomocto.Match`). Gives `:error` for settings that are not valid. A
+  game without this callback has no settings to change.
+  """
+  @callback change_settings(settings :: map(), state()) :: {:ok, state()} | :error
+
+  @optional_callbacks new_player: 1, reset_player: 1, restore: 1, change_settings: 2
 
   defmacro __using__(opts) do
     quote do
@@ -114,6 +126,7 @@ defmodule Octomocto.RaceServer do
       game.init_settings(config)
       |> Map.merge(Seats.new(id, config))
       |> Map.put(:countdown_ms, Map.get(config, :countdown_ms, @countdown_ms))
+      |> Match.new()
 
     GenServer.start_link(__MODULE__, {game, {:new, state}}, name: game.via(id))
   end
@@ -163,6 +176,7 @@ defmodule Octomocto.RaceServer do
       |> Seats.restore()
       # A state from before the timings in the config
       |> Map.put_new(:countdown_ms, @countdown_ms)
+      |> Match.restore()
 
     if state.started_at != nil and now() < state.started_at do
       Process.send_after(self(), {:countdown_over, state.field_id}, state.started_at - now())
@@ -187,15 +201,57 @@ defmodule Octomocto.RaceServer do
       )
       when is_map_key(state.players, player_id) do
     state = Seats.rejoin(state, player_id, pid)
-    store(game, state)
-    {:reply, {:ok, player_id, public(game, state)}, {game, state}}
+
+    # The player is back from the settings page
+    if state.editing == player_id do
+      state = %{state | editing: nil}
+      publish(game, state)
+      {:reply, {:ok, player_id, public(game, state)}, {game, state}}
+    else
+      store(game, state)
+      {:reply, {:ok, player_id, public(game, state)}, {game, state}}
+    end
   end
 
-  # The next game for all players, see `OctomoctoWeb.NextGame`
-  def handle_call({:next_game, player_id, page}, _from, {game, state}) do
+  # The next game for all players, see `OctomoctoWeb.NextGame`. Not while a
+  # player changes the settings.
+  def handle_call({:next_game, player_id, page}, _from, {game, %{editing: nil} = state}) do
     {id, state} = GameProcess.next_game(state, player_id, page)
     {:reply, id, {game, state}}
   end
+
+  def handle_call({:next_game, _player_id, _page}, _from, game_state),
+    do: {:reply, nil, game_state}
+
+  # The process of the settings page holds the seat of the player, see
+  # `Octomocto.Match.edit_settings/4`
+  def handle_call({:edit_settings, pid, player_id}, _from, {game, state}) do
+    if function_exported?(game, :change_settings, 2) and Match.edit?(state, player_id) do
+      state = state |> Seats.rejoin(player_id, pid) |> Map.put(:editing, player_id)
+      publish(game, state)
+      {:reply, {:ok, public(game, state)}, {game, state}}
+    else
+      {:reply, {:error, :not_allowed}, {game, state}}
+    end
+  end
+
+  # The next field with the new settings and the same players. Only the
+  # player on the settings page can.
+  def handle_call({:change_settings, player_id, settings}, _from, {game, state})
+      when is_binary(player_id) and state.editing == player_id do
+    case game.change_settings(settings, state) do
+      {:ok, state} ->
+        state = new_round(game, %{state | editing: nil})
+        publish(game, state)
+        {:reply, :ok, {game, state}}
+
+      :error ->
+        {:reply, {:error, :not_allowed}, {game, state}}
+    end
+  end
+
+  def handle_call({:change_settings, _player_id, _settings}, _from, game_state),
+    do: {:reply, {:error, :not_allowed}, game_state}
 
   def handle_call(:watch, _from, {game, state}) do
     {:reply, {:ok, nil, public(game, state)}, {game, state}}
@@ -215,7 +271,7 @@ defmodule Octomocto.RaceServer do
         _from,
         {game, state}
       ) do
-    fields = %{score: 0}
+    fields = Match.new_player(%{score: 0})
 
     fields =
       if function_exported?(game, :new_player, 1), do: game.new_player(fields), else: fields
@@ -231,22 +287,12 @@ defmodule Octomocto.RaceServer do
     {:reply, reply, {game, state}}
   end
 
-  # A player can restart at any time. A field that is not finished is not
-  # saved.
+  # A player can restart at any time, but not while a player changes the
+  # settings. A field that is not finished is not saved.
   @impl true
-  def handle_cast({:restart, player_id}, {game, state})
+  def handle_cast({:restart, player_id}, {game, %{editing: nil} = state})
       when is_map_key(state.players, player_id) do
-    players =
-      Map.new(state.players, fn {id, player} ->
-        {id, reset_player(game, %{player | score: 0})}
-      end)
-
-    state =
-      %{state | players: players}
-      |> Map.delete(:next_game)
-      |> then(&new_field(game, &1))
-      |> start_clock()
-
+    state = new_round(game, state)
     publish(game, state)
     {:noreply, {game, state}}
   end
@@ -262,8 +308,16 @@ defmodule Octomocto.RaceServer do
   def handle_info({:DOWN, _ref, :process, pid, _reason}, {game, state}) do
     if player_id = Seats.player_id(state, pid) do
       state = Seats.leave(state, player_id)
-      store(game, state)
-      {:noreply, {game, state}}
+
+      # The other players wait for the player on the settings page
+      if state.editing == player_id do
+        state = %{state | editing: nil}
+        publish(game, state)
+        {:noreply, {game, state}}
+      else
+        store(game, state)
+        {:noreply, {game, state}}
+      end
     else
       {:noreply, {game, state}}
     end
@@ -309,6 +363,7 @@ defmodule Octomocto.RaceServer do
   defp move(game, move, state) do
     case game.handle_move(move, state) do
       {:publish, reply, new_state} ->
+        new_state = count_win(state, new_state)
         new_state = save_results(game, state, new_state)
         publish(game, new_state)
         {reply, new_state}
@@ -321,6 +376,26 @@ defmodule Octomocto.RaceServer do
         {reply, new_state}
     end
   end
+
+  # A new field with zero scores for the same players
+  defp new_round(game, state) do
+    players =
+      Map.new(state.players, fn {id, player} ->
+        {id, reset_player(game, %{player | score: 0})}
+      end)
+
+    %{state | players: players}
+    |> Map.delete(:next_game)
+    |> then(&new_field(game, &1))
+    |> start_clock()
+  end
+
+  # The move finished the field: the player with the most points wins it
+  defp count_win(%{finished_at: nil}, %{finished_at: finished_at} = state)
+       when finished_at != nil,
+       do: Match.count(state, Match.top_scorers(state))
+
+  defp count_win(_old_state, state), do: state
 
   defp new_field(game, state) do
     state
@@ -375,9 +450,14 @@ defmodule Octomocto.RaceServer do
     Phoenix.PubSub.broadcast(Octomocto.PubSub, game.topic(state.id), message)
   end
 
-  # The state that clients see, ready to encode as JSON
-  defp public(game, state) do
-    players = Seats.public_players(state, fn _id, p -> %{score: p.score} end)
+  @doc """
+  The state that clients see, ready to encode as JSON. With `editing`, the
+  id of the player on the settings page (see `Octomocto.Match`).
+  """
+  def public(game, state) do
+    players =
+      Seats.public_players(state, fn _id, p -> %{score: p.score, wins: Match.wins(p)} end)
+
     waiting? = state.started_at == nil
 
     Map.merge(
@@ -387,7 +467,10 @@ defmodule Octomocto.RaceServer do
         # Below zero during the countdown
         elapsed_ms: if(waiting?, do: 0, else: (state.finished_at || now()) - state.started_at),
         players: players,
-        players_needed: state.needed
+        players_needed: state.needed,
+        public: state.public,
+        editing: state.editing,
+        ties: state.ties
       },
       game.public_field(state)
     )

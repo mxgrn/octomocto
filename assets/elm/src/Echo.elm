@@ -29,7 +29,7 @@ import Browser.Events
 import Dict exposing (Dict)
 import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
-import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, rel, src, style, target, value)
+import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (Decoder)
 import Press
@@ -177,6 +177,10 @@ type alias Game =
     , turnLimitMs : Maybe Int
     , players : List Player
     , playersNeeded : Int
+
+    -- The id of the player who changes the settings of the next game of
+    -- the match (see `OctomoctoWeb.MatchPage`). The other players wait.
+    , editing : Maybe String
     }
 
 
@@ -206,6 +210,10 @@ type alias Model =
     { gameUrl : String
     , indexUrl : String
     , settingsUrl : String
+
+    -- The settings page of the next game of the match. Nothing for a
+    -- game with one player.
+    , changeSettingsUrl : Maybe String
     , nextGame : NextGame
     , guest : Bool
     , connection : Connection
@@ -255,6 +263,10 @@ type alias Flags =
     { gameUrl : String
     , indexUrl : String
     , settingsUrl : String
+
+    -- The settings page of the next game of the match. Nothing for a
+    -- game with one player.
+    , changeSettingsUrl : Maybe String
     , nextGame : NextGame
     , guest : Bool
     , muted : Bool
@@ -268,6 +280,7 @@ init flags =
     ( { gameUrl = flags.gameUrl
       , indexUrl = flags.indexUrl
       , settingsUrl = flags.settingsUrl
+      , changeSettingsUrl = flags.changeSettingsUrl
       , nextGame = flags.nextGame
       , guest = flags.guest
       , connection = Connecting
@@ -799,6 +812,7 @@ gameDecoder =
         |> andMap (Decode.field "turn_limit_ms" (Decode.nullable Decode.int))
         |> andMap (Decode.field "players" (Decode.list playerDecoder))
         |> andMap (Decode.field "players_needed" Decode.int)
+        |> andMap (Decode.field "editing" (Decode.nullable Decode.string))
 
 
 andMap : Decoder a -> Decoder (a -> b) -> Decoder b
@@ -953,7 +967,7 @@ viewGame model me game =
                             )
                         ]
                     ]
-                , viewMenu model.texts model.muted (me /= Nothing)
+                , viewMenu model.texts (game.editing /= Nothing) model.muted (me /= Nothing)
                 ]
             , if game.playersNeeded > 1 then
                 viewShareLink model
@@ -1129,12 +1143,13 @@ iconButton buttonId msg title icon =
 screen, only the icon shows, but not in the column of a screen that is wider
 than tall.
 -}
-viewMenu : Texts -> Bool -> Bool -> Html Msg
-viewMenu texts muted player =
+viewMenu : Texts -> Bool -> Bool -> Bool -> Html Msg
+viewMenu texts locked muted player =
     Html.node "octo-game-menu"
         [ class "relative shrink-0 lg:order-5 lg:self-start"
         , attribute "menu-label" (t texts "Menu")
         , attribute "restart-label" (t texts "Restart game")
+        , attribute "locked" (boolAttribute locked)
         , attribute "sound-on-label" (t texts "Turn the sounds on")
         , attribute "sound-off-label" (t texts "Turn the sounds off")
         , attribute "muted" (boolAttribute muted)
@@ -1694,6 +1709,15 @@ viewResult model me game =
 
                     Nothing ->
                         ( t texts "Game over", "" )
+
+        -- The player on the settings page. Nobody can start a game until
+        -- that player is back.
+        editor =
+            game.editing
+                |> Maybe.andThen (\editing -> List.head (List.filter (\player -> player.id == editing) game.players))
+
+        locked =
+            editor /= Nothing
     in
     div
         [ id "echo-result"
@@ -1716,16 +1740,54 @@ viewResult model me game =
                     )
                     (ranking game.players)
                 )
+        , case editor of
+            Just player ->
+                p [ id "echo-editing", class "animate-pulse text-sm text-white/80" ]
+                    [ text
+                        (case player.name of
+                            Just name ->
+                                tf texts "{name} changes the settings…" [ ( "name", name ) ]
+
+                            Nothing ->
+                                tf texts "The {color} player changes the settings…" [ ( "color", t texts player.colorName ) ]
+                        )
+                    ]
+
+            Nothing ->
+                text ""
         , if me == Nothing then
             text ""
 
           else
-            button
-                [ id "echo-play-again"
-                , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:bg-octo-mist"
-                , onClick Restart
+            div [ class "flex flex-wrap items-center justify-center gap-3" ]
+                [ button
+                    [ id "echo-play-again"
+                    , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:bg-octo-mist disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
+                    , onClick Restart
+                    , disabled locked
+                    ]
+                    [ text (t texts "Play again") ]
+                , case model.changeSettingsUrl of
+                    Nothing ->
+                        text ""
+
+                    Just url ->
+                        if locked then
+                            span
+                                [ id "echo-change-settings"
+                                , attribute "aria-disabled" "true"
+                                , class "cursor-not-allowed rounded-full px-5 py-2.5 font-medium text-white opacity-50 ring-1 ring-white/40"
+                                ]
+                                [ text (t texts "Change settings") ]
+
+                        else
+                            a
+                                [ id "echo-change-settings"
+                                , href url
+                                , class "rounded-full px-5 py-2.5 font-medium text-white ring-1 ring-white/40 transition hover:bg-white/10"
+                                ]
+                                [ text (t texts "Change settings") ]
                 ]
-                [ text (t texts "Play again") ]
         , let
             -- In a game with other players, a player starts the next game for all of them
             ( element, action ) =
@@ -1738,10 +1800,11 @@ viewResult model me game =
           element
             [ id "echo-next-game"
             , action
+            , disabled locked
             , attribute "data-ga-link" "or_try"
             , attribute "data-ga-from" "Echo"
             , attribute "data-ga-to" nextGame.name
-            , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
+            , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:no-underline"
             ]
             [ text (tf texts "Or try {game}" [ ( "game", nextGame.name ) ] ++ " ")
             , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]

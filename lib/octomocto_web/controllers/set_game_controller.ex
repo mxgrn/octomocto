@@ -11,6 +11,7 @@ defmodule OctomoctoWeb.SetGameController do
       render(conn, :show,
         id: id,
         settings_path: SetGameLive.settings_path(state),
+        change_settings_path: SetGameLive.match_path(state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
         next_game: NextGame.pick("set", id, state.needed > 1),

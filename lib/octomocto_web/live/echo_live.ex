@@ -18,17 +18,19 @@ defmodule OctomoctoWeb.EchoLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Echo, Lobby}
-  alias OctomoctoWeb.SavedSettings
+  alias OctomoctoWeb.{EchoChannel, MatchPage, SavedSettings}
   alias Octomocto.Echo.{Game, Store}
 
   @default_pads 4
 
-  def mount(_params, _session, socket) do
-    if connected?(socket), do: Lobby.subscribe(Game)
+  def mount(params, _session, socket) do
+    # The settings of the next game of a match, see `OctomoctoWeb.MatchPage`
+    match = MatchPage.load(params["match"], socket, Game, EchoChannel)
+    MatchPage.subscribe(socket, match, Game)
 
     {:ok,
      socket
-     |> assign([rules: rules()] ++ seo())
+     |> assign([rules: rules(), match: match] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))
      |> assign(watchers: Lobby.watchers(Game))}
   end
@@ -50,10 +52,12 @@ defmodule OctomoctoWeb.EchoLive do
   @settings_params ["pads", "players", "visibility"]
 
   def handle_params(params, _uri, socket) do
-    settings =
-      socket |> SavedSettings.params("echo", params, @settings_params) |> settings()
+    match = socket.assigns.match
 
-    SavedSettings.save_change(socket, "echo", settings, query(settings, []))
+    settings =
+      socket |> settings_params(params, match) |> settings() |> Map.put(:match, match && match.id)
+
+    SavedSettings.save_change(socket, "echo", settings, query(%{settings | match: nil}, []))
 
     filter = %{"pads" => settings.pads, "players" => settings.players}
 
@@ -69,6 +73,18 @@ defmodule OctomoctoWeb.EchoLive do
        best_results: Echo.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
+  end
+
+  # A match has its own settings
+  defp settings_params(socket, params, nil),
+    do: SavedSettings.params(socket, "echo", params, @settings_params)
+
+  defp settings_params(_socket, params, %{settings: state} = match),
+    do: MatchPage.params(params, match, %{"pads" => Integer.to_string(state.pads)})
+
+  # The score of the match shows the changes of the players
+  def handle_info({:echo_state, state}, socket) do
+    {:noreply, update(socket, :match, &%{&1 | state: state})}
   end
 
   def handle_info({:lobby_changed, _game, id, entry}, socket) do
@@ -92,6 +108,13 @@ defmodule OctomoctoWeb.EchoLive do
     |> Echo.create_game()
   end
 
+  # The next game of the match, in the same game
+  def handle_event("new_game", _params, %{assigns: %{match: %{player_id: id} = match}} = socket)
+      when is_binary(id) do
+    MatchPage.start(Game, match, Map.take(socket.assigns.settings, [:pads]))
+    {:noreply, redirect(socket, to: Locale.path(socket.assigns.locale, ~p"/echo/#{match.id}"))}
+  end
+
   def handle_event("new_game", _params, socket) do
     id = Echo.create_game(socket.assigns.settings)
     {:noreply, redirect(socket, to: Locale.path(socket.assigns.locale, ~p"/echo/#{id}"))}
@@ -112,7 +135,7 @@ defmodule OctomoctoWeb.EchoLive do
         _ -> 1
       end
 
-    %{pads: pads, players: players, public: params["visibility"] != "private"}
+    %{pads: pads, players: players, public: params["visibility"] != "private", match: nil}
   end
 
   defp assign_lobby(socket, entries) do
@@ -153,8 +176,16 @@ defmodule OctomoctoWeb.EchoLive do
 
   @doc "The path of this page in the language with the settings of the game in the given state."
   def settings_path(locale, state) do
-    settings = %{pads: state.pads, players: state.needed, public: state.public}
+    settings = %{pads: state.pads, players: state.needed, public: state.public, match: nil}
     settings_path(locale, settings, [])
+  end
+
+  @doc """
+  The path of the Change settings button of the game in the language, see
+  `OctomoctoWeb.MatchPage.path/2`.
+  """
+  def match_path(locale, state) do
+    if path = MatchPage.path(~p"/echo", state), do: Locale.path(locale, path)
   end
 
   # The path of this page in the language for the settings, with some of them changed
@@ -168,7 +199,8 @@ defmodule OctomoctoWeb.EchoLive do
     query = [pads: settings.pads, players: settings.players]
 
     # A public game has no param, so that most links stay short
-    if settings.public, do: query, else: query ++ [visibility: "private"]
+    query = if settings.public, do: query, else: query ++ [visibility: "private"]
+    if settings.match, do: query ++ [match: settings.match], else: query
   end
 
   # True when the open game has the same settings as the new game

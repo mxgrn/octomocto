@@ -7,15 +7,17 @@ defmodule OctomoctoWeb.NimbleMosaicLive do
   import OctomoctoWeb.GamePageComponents
 
   alias Octomocto.{Lobby, NimbleMosaic}
-  alias OctomoctoWeb.SavedSettings
+  alias OctomoctoWeb.{MatchPage, NimbleMosaicChannel, SavedSettings}
   alias Octomocto.NimbleMosaic.{Game, Store}
 
-  def mount(_params, _session, socket) do
-    if connected?(socket), do: Lobby.subscribe(Game)
+  def mount(params, _session, socket) do
+    # The settings of the next field of a match, see `OctomoctoWeb.MatchPage`
+    match = MatchPage.load(params["match"], socket, Game, NimbleMosaicChannel)
+    MatchPage.subscribe(socket, match, Game)
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/nimble-mosaic"), rules: rules()] ++ seo())
+     |> assign([canonical_url: url(~p"/nimble-mosaic"), rules: rules(), match: match] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))
      |> assign(watchers: Lobby.watchers(Game))}
   end
@@ -34,10 +36,17 @@ defmodule OctomoctoWeb.NimbleMosaicLive do
   @settings_params ["board", "mode", "players", "visibility"]
 
   def handle_params(params, _uri, socket) do
-    settings =
-      socket |> SavedSettings.params("nimble-mosaic", params, @settings_params) |> settings()
+    match = socket.assigns.match
 
-    SavedSettings.save_change(socket, "nimble-mosaic", settings, query(settings, []))
+    settings =
+      socket |> settings_params(params, match) |> settings() |> Map.put(:match, match && match.id)
+
+    SavedSettings.save_change(
+      socket,
+      "nimble-mosaic",
+      settings,
+      query(%{settings | match: nil}, [])
+    )
 
     filter = %{"type" => settings.board, "mode" => settings.mode, "players" => settings.players}
 
@@ -47,6 +56,22 @@ defmodule OctomoctoWeb.NimbleMosaicLive do
        best_results: NimbleMosaic.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
+  end
+
+  # A match has its own settings
+  defp settings_params(socket, params, nil),
+    do: SavedSettings.params(socket, "nimble-mosaic", params, @settings_params)
+
+  defp settings_params(_socket, params, %{settings: state} = match),
+    do:
+      MatchPage.params(params, match, %{
+        "board" => Atom.to_string(state.layout),
+        "mode" => Atom.to_string(state.mode)
+      })
+
+  # The score of the match shows the changes of the players
+  def handle_info({:nimble_mosaic_state, state}, socket) do
+    {:noreply, update(socket, :match, &%{&1 | state: state})}
   end
 
   def handle_info({:lobby_changed, _game, id, entry}, socket) do
@@ -66,6 +91,19 @@ defmodule OctomoctoWeb.NimbleMosaicLive do
     # Any player can start the next game, thus it has no creator (see
     # `Octomocto.Seats`)
     create_game(%{settings(%{"players" => Integer.to_string(players)}) | public: public}, false)
+  end
+
+  # The next field of the match, in the same game
+  def handle_event("new_game", _params, %{assigns: %{match: %{player_id: id} = match}} = socket)
+      when is_binary(id) do
+    settings = socket.assigns.settings
+
+    MatchPage.start(Game, match, %{
+      layout: if(settings.board == "random", do: :random, else: :classic),
+      mode: if(settings.mode == "normal", do: :normal, else: :easy)
+    })
+
+    {:noreply, redirect(socket, to: ~p"/nimble-mosaic/#{match.id}")}
   end
 
   def handle_event("new_game", _params, socket) do
@@ -95,7 +133,7 @@ defmodule OctomoctoWeb.NimbleMosaicLive do
 
     public = params["visibility"] != "private"
 
-    %{board: board, mode: mode, players: players, public: public}
+    %{board: board, mode: mode, players: players, public: public, match: nil}
   end
 
   defp assign_lobby(socket, entries) do
@@ -133,11 +171,15 @@ defmodule OctomoctoWeb.NimbleMosaicLive do
       board: Atom.to_string(state.layout),
       mode: Atom.to_string(state.mode),
       players: state.needed,
-      public: state.public
+      public: state.public,
+      match: nil
     }
 
     ~p"/nimble-mosaic?#{query(settings, [])}"
   end
+
+  @doc "The path of the Change settings button of the game, see `OctomoctoWeb.MatchPage.path/2`."
+  def match_path(state), do: MatchPage.path(~p"/nimble-mosaic", state)
 
   # The query of the page for the settings, with some of them changed
   defp query(settings, changes) do
@@ -145,7 +187,8 @@ defmodule OctomoctoWeb.NimbleMosaicLive do
     query = [board: settings.board, mode: settings.mode, players: settings.players]
 
     # A public game has no param, so that most links stay short
-    if settings.public, do: query, else: query ++ [visibility: "private"]
+    query = if settings.public, do: query, else: query ++ [visibility: "private"]
+    if settings.match, do: query ++ [match: settings.match], else: query
   end
 
   # True when the open game has the same settings as the new game
