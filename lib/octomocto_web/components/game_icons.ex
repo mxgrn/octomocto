@@ -289,25 +289,18 @@ defmodule OctomoctoWeb.GameIcons do
 
   # A small board as in the game: shapes of different forms and colors,
   # with numbers of different sizes. The colors are those of the board.
+  # The shapes in the corners have the same round corners as the board, so
+  # the icon needs no clip path: an id in the SVG would not be unique when
+  # a page shows the icon more than once.
   def game_icon(%{game: "nimble-mosaic"} = assigns) do
     ~H"""
     <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
-      <defs>
-        <clipPath id="nimble-mosaic-icon-board">
-          <rect x="4" y="4" width="40" height="40" rx="6" />
-        </clipPath>
-      </defs>
-      <g
-        clip-path="url(#nimble-mosaic-icon-board)"
-        stroke="#474d50"
-        stroke-width="1.2"
-        stroke-linejoin="round"
-      >
-        <rect x="4" y="4" width="40" height="40" fill="#fbf5e1" />
-        <path d="M24 4H44V16H24Z" fill="#9dedc4" />
+      <g stroke="#474d50" stroke-width="1.2" stroke-linejoin="round">
+        <rect x="4" y="4" width="40" height="40" rx="6" fill="#fbf5e1" />
+        <path d="M24 4H38A6 6 0 0 1 44 10V16H24Z" fill="#9dedc4" />
         <path d="M24 16H44V30H34L24 22Z" fill="#ff9c98" />
-        <path d="M4 22A10 10 0 0 1 4 42Z" fill="#ffd06c" />
-        <path d="M30 44L44 30V44Z" fill="#9dedc4" />
+        <path d="M4 20A9 9 0 0 1 4 38Z" fill="#ffd06c" />
+        <path d="M30 44L44 30V38A6 6 0 0 1 38 44Z" fill="#9dedc4" />
         <path d="M24 4V22M4 18H24M24 22L18 44" fill="none" />
       </g>
       <text
@@ -316,7 +309,7 @@ defmodule OctomoctoWeb.GameIcons do
             {14, 15.5, "7", 11},
             {34, 13.5, "2", 8},
             {35, 27, "1", 9},
-            {8.5, 35.5, "3", 7},
+            {8.5, 31.5, "3", 7},
             {18.5, 31, "5", 6.5},
             {27.5, 39.5, "9", 8},
             {40, 41.5, "4", 5.5}
@@ -336,45 +329,39 @@ defmodule OctomoctoWeb.GameIcons do
     """
   end
 
-  # The classic Schulte table (the game is not there yet): a 3 x 3 grid
-  # with the numbers 1 to 9
+  # The classic Schulte table, as on its board: white cells with thin gray
+  # lines, a dark border and the center dot. The dot is paler and larger
+  # than on the board, so the middle number stays clear at a small size.
   def game_icon(%{game: "schulte"} = assigns) do
     ~H"""
     <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
-      <g :for={{digit, x, y} <- schulte_cells()}>
-        <rect
-          x={x}
-          y={y}
-          width="12"
-          height="12"
-          rx="3"
-          fill={
-            cond do
-              digit < 3 -> "#1A9FCB"
-              digit == 3 -> "#F26A1B"
-              true -> "#fff"
-            end
-          }
-        />
-        <text
-          x={x + 6}
-          y={y + 9}
-          text-anchor="middle"
-          font-size="8.5"
-          font-weight="700"
-          fill={if(digit <= 3, do: "#fff", else: "#171532")}
-        >
-          {digit}
-        </text>
-      </g>
+      <rect x="4" y="4" width="40" height="40" rx="6" fill="#fff" />
+      <path
+        d="M17.33 4v40M30.67 4v40M4 17.33h40M4 30.67h40"
+        stroke="#9aa5b1"
+        stroke-width="1.2"
+      />
+      <circle cx="24" cy="24" r="5.2" fill="#1A9FCB" fill-opacity="0.25" />
+      <text
+        :for={{digit, x, y} <- schulte_cells()}
+        x={x}
+        y={y}
+        text-anchor="middle"
+        font-size="9.5"
+        font-weight="700"
+        fill="#1f2933"
+      >
+        {digit}
+      </text>
+      <rect x="4" y="4" width="40" height="40" rx="6" fill="none" stroke="#474d50" stroke-width="1.5" />
     </svg>
     """
   end
 
-  # The digits of a 3 x 3 grid, with the positions of their cells
+  # The digits of a 3 x 3 grid, with the positions of their text
   defp schulte_cells do
     for {digit, i} <- Enum.with_index([7, 2, 5, 4, 9, 1, 6, 3, 8]) do
-      {digit, 4 + rem(i, 3) * 14, 4 + div(i, 3) * 14}
+      {digit, 10.67 + rem(i, 3) * 13.33, 13.9 + div(i, 3) * 13.33}
     end
   end
 end
