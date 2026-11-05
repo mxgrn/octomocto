@@ -713,9 +713,13 @@ type alias Sound =
     { name : String, pad : Int, ms : Int }
 
 
+{-| The tone of a tapped pad. It is as long as the slowest tone of the
+playback, not as short as the flash of the tap, so that it is not cut. The
+tones of quick taps overlap.
+-}
 padSound : Int -> Sound
 padSound pad =
-    { name = "pad", pad = pad, ms = tapFlashMs }
+    { name = "pad", pad = pad, ms = flashMs 1 }
 
 
 buzz : Sound
