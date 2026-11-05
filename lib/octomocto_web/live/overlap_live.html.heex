@@ -46,7 +46,7 @@
         path={&~p"/overlap/#{&1.id}"}
       >
         <:icon :let={game}>
-          <img src={cover_path(lobby_theme(game))} alt="" class="size-9 shrink-0" />
+          <img src={lobby_cover_path(game)} alt="" class="size-9 shrink-0" />
         </:icon>
         <:summary :let={game}>{game_summary(game)}</:summary>
       </.lobby_games>

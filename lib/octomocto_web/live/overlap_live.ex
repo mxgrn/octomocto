@@ -173,6 +173,9 @@ defmodule OctomoctoWeb.OverlapLive do
     Themes.get(game.settings[:theme]) || Themes.get(Themes.default())
   end
 
+  @doc "The path of the cover image of the theme of a game in the list of public games."
+  def lobby_cover_path(game), do: game |> lobby_theme() |> cover_path()
+
   @doc "The path of the cover image of the theme."
   def cover_path(theme) do
     file = "#{theme.cover}.svg"

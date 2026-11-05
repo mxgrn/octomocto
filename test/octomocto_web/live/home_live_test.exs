@@ -57,4 +57,18 @@ defmodule OctomoctoWeb.HomeLiveTest do
       refute has_element?(view, "#friend-online-#{follower.id}")
     end
   end
+
+  test "an open Overlap game shows the cover of its theme", %{conn: conn} do
+    id = "game-#{System.unique_integer([:positive])}"
+
+    start_supervised!(
+      Octomocto.GameHelpers.overlap_game(id, theme: "mix2", players: 2, public: true)
+    )
+
+    {:ok, _player_id, _state} = Octomocto.Overlap.join(id)
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, ~s(#lobby-game-#{id} img[src^="/images/overlap/mix2/"]))
+  end
 end

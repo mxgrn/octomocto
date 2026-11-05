@@ -115,6 +115,7 @@
               <.icon name="hero-bell-alert" class="hidden size-5 group-aria-pressed:block" />
             </button>
           </:action>
+          <%!-- A game with themes shows the cover of its theme --%>
           <:icon :let={game}>
             <img
               :if={game.kind == "memory"}
@@ -122,7 +123,17 @@
               alt=""
               class="size-9 shrink-0"
             />
-            <.game_icon :if={game.kind != "memory"} game={@kinds[game.kind]} small />
+            <img
+              :if={game.kind == "overlap"}
+              src={OverlapLive.lobby_cover_path(game)}
+              alt=""
+              class="size-9 shrink-0"
+            />
+            <.game_icon
+              :if={game.kind not in ["memory", "overlap"]}
+              game={@kinds[game.kind]}
+              small
+            />
           </:icon>
           <:summary :let={game}>
             <.link
