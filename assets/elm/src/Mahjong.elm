@@ -863,7 +863,7 @@ viewGame model me game =
                             ]
                         , h1 [ class "truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
                             [ a [ id "mahjong-title-link", href "/mahjong", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Mahjong Race" ] ]
-                        , viewWatchers model.watchers
+                        , viewWatchers (me == Nothing) model.watchers
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ] [ text "Remove pairs of free tiles with the same picture. Any two flowers make a pair, and any two card suits make a pair." ]
                     ]
@@ -1042,15 +1042,25 @@ fieldWidth model me game =
 
 {-| The number of browsers that only watch the game, when there are any.
 -}
-viewWatchers : Int -> Html Msg
-viewWatchers count =
-    if count > 0 then
+viewWatchers : Bool -> Int -> Html Msg
+viewWatchers watching count =
+    if watching || count > 0 then
         span
             [ id "mahjong-watchers"
-            , class "flex shrink-0 items-center gap-1 text-sm tabular-nums text-slate-500 dark:text-slate-400"
-            , Html.Attributes.title ("Watchers: " ++ String.fromInt count)
+            , class "flex shrink-0 items-center gap-1 text-sm tabular-nums transition-colors"
+            , classList
+                [ ( "text-slate-500 dark:text-slate-400", not watching )
+                , ( "font-medium text-octo-indigo dark:text-octo-indigo-light", watching )
+                ]
+            , Html.Attributes.title
+                (if watching then
+                    "You are watching this game."
+
+                 else
+                    "Watchers: " ++ String.fromInt count
+                )
             ]
-            [ span [ class "hero-eye size-4" ] [], text (String.fromInt count) ]
+            [ span [ class "hero-eye size-4" ] [], text (String.fromInt (max count 1)) ]
 
     else
         text ""

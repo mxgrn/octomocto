@@ -247,6 +247,10 @@ msgid "Workout"
 msgstr "Sport"
 
 #, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "Oglądasz tę grę."
+
+#, elixir-autogen, elixir-format
 msgid "You win!"
 msgstr "Wygrywasz!"
 

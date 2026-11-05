@@ -18,8 +18,8 @@ defmodule Octomocto.Afterglow.Game do
   The player, the clock and the copy in `Octomocto.Afterglow.Store` are
   the same as in the other games, see `Octomocto.RaceServer`. Each change
   is broadcast on the `"afterglow:<id>"` PubSub topic as
-  `{:afterglow_state, state}`. A correct tile that does not end the round
-  only changes the copy, because the page knows it already.
+  `{:afterglow_state, state}`, also each correct tile, so that a watcher
+  sees it.
   """
   use Octomocto.RaceServer,
     topic: "afterglow",
@@ -100,7 +100,7 @@ defmodule Octomocto.Afterglow.Game do
 
       if length(state.found) == state.level,
         do: {:publish, :ok, end_round(state, player_id, true)},
-        else: {:store, :ok, state}
+        else: {:publish, :ok, state}
     else
       {:publish, :ok, end_round(state, player_id, false)}
     end

@@ -24,6 +24,7 @@ defmodule OctomoctoWeb.MemoryHTML do
       "Turn the sounds on" => dgettext("memory", "Turn the sounds on"),
       "Turn the sounds off" => dgettext("memory", "Turn the sounds off"),
       "Watchers: {count}" => dgettext("memory", "Watchers: {count}"),
+      "You are watching this game." => dgettext("memory", "You are watching this game."),
       "Restart game" => dgettext("memory", "Restart game"),
       "Menu" => dgettext("memory", "Menu"),
       "Copied!" => dgettext("memory", "Copied!"),

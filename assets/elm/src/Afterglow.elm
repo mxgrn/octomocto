@@ -233,7 +233,7 @@ update msg model =
         GotJoined value ->
             case Decode.decodeValue joinedDecoder value of
                 Ok ( me, game ) ->
-                    ( sync game { model | connection = Joined me game }, syncClock game )
+                    ( sync me game { model | connection = Joined me game }, syncClock game )
 
                 Err err ->
                     ( { model | connection = Failed (Decode.errorToString err) }, Cmd.none )
@@ -241,7 +241,7 @@ update msg model =
         GotState value ->
             case ( model.connection, Decode.decodeValue gameDecoder value ) of
                 ( Joined me _, Ok game ) ->
-                    ( sync game { model | connection = Joined me game }, syncClock game )
+                    ( sync me game { model | connection = Joined me game }, syncClock game )
 
                 _ ->
                     ( model, Cmd.none )
@@ -280,10 +280,10 @@ update msg model =
 
 {-| Takes the score from the server for a new game, after a reload, and
 after each round. During a round, the page is ahead of the server, so it
-keeps its own score.
+keeps its own score. A watcher takes the found tiles from the server.
 -}
-sync : Game -> Model -> Model
-sync game model =
+sync : Me -> Game -> Model -> Model
+sync me game model =
     let
         server =
             List.head game.players |> Maybe.map .score |> Maybe.withDefault 0
@@ -295,6 +295,9 @@ sync game model =
 
             else if game.round > round.number || game.finished then
                 { model | score = server }
+
+            else if me == Nothing && game.round == round.number then
+                { model | current = Just { round | found = Set.fromList game.found }, score = server }
 
             else
                 model
@@ -681,15 +684,7 @@ view model =
                 ]
                 [ viewHeader model me
                 , viewStats model game
-                , if me == Nothing then
-                    p [ id "afterglow-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
-                        [ text "Afterglow is a single-player game, and this game has its player already. "
-                        , a [ href "/afterglow", class "font-medium underline underline-offset-4" ] [ text "Start your own game" ]
-                        , text "."
-                        ]
-
-                  else
-                    viewBoard model game
+                , viewBoard model (me == Nothing) game
                 ]
 
 
@@ -706,6 +701,16 @@ viewHeader model me =
             ]
         , h1 [ class "text-xl font-semibold tracking-tight lg:text-2xl" ]
             [ a [ id "afterglow-title-link", href model.settingsUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Afterglow" ] ]
+        , if me == Nothing then
+            span
+                [ id "afterglow-watching"
+                , class "flex shrink-0 items-center text-octo-indigo dark:text-octo-indigo-light"
+                , Html.Attributes.title "You are watching this game."
+                ]
+                [ span [ class "hero-eye size-4" ] [] ]
+
+          else
+            text ""
         , viewMuteButton model.muted
         , if me == Nothing then
             text ""
@@ -835,24 +840,24 @@ viewDots model game =
 
 
 {-| The prompt and the grid, with the covers of the countdown and the end
-over them
+over them. A watcher sees the same board, but it cannot click the tiles.
 -}
-viewBoard : Model -> Game -> Html Msg
-viewBoard model game =
+viewBoard : Model -> Bool -> Game -> Html Msg
+viewBoard model watching game =
     let
         current =
             phase model game
     in
     div [ class "relative flex flex-col items-center gap-4 pt-1" ]
         [ p [ id "afterglow-prompt", class "h-7 text-center text-lg font-medium text-slate-600 dark:text-slate-300" ]
-            [ text (prompt model game current) ]
+            [ text (prompt model watching game current) ]
         , div [ class "afterglow-stage" ]
             [ case ( current, model.current ) of
                 ( Playing round, _ ) ->
-                    viewGrid model round
+                    viewGrid model watching round
 
                 ( Over, Just round ) ->
-                    viewGrid model round
+                    viewGrid model watching round
 
                 _ ->
                     viewEmptyGrid game.size
@@ -862,15 +867,15 @@ viewBoard model game =
                 viewCountdown (Maybe.withDefault 0 (countdownStep model game))
 
             Over ->
-                viewResult model game
+                viewResult model watching game
 
             _ ->
                 text ""
         ]
 
 
-prompt : Model -> Game -> Phase -> String
-prompt model game current =
+prompt : Model -> Bool -> Game -> Phase -> String
+prompt model watching game current =
     case current of
         Playing round ->
             case stage model round of
@@ -881,7 +886,11 @@ prompt model game current =
                     "Remember the tiles"
 
                 Recall ->
-                    "Click the tiles that were lit · " ++ String.fromInt (round.level - Set.size round.found) ++ " left"
+                    if watching then
+                        "The player clicks the tiles · " ++ String.fromInt (round.level - Set.size round.found) ++ " left"
+
+                    else
+                        "Click the tiles that were lit · " ++ String.fromInt (round.level - Set.size round.found) ++ " left"
 
                 Done ->
                     if round.number >= game.rounds then
@@ -906,8 +915,8 @@ prompt model game current =
 
 {-| The grid is keyed by the round, so that each round fades in
 -}
-viewGrid : Model -> Round -> Html Msg
-viewGrid model round =
+viewGrid : Model -> Bool -> Round -> Html Msg
+viewGrid model watching round =
     let
         now =
             stage model round
@@ -928,7 +937,7 @@ viewGrid model round =
                     , ( "is-found", found )
                     , ( "is-wrong", round.wrong == Just cell )
                     , ( "is-missed", now == Done && round.wrong /= Nothing && lit && not found )
-                    , ( "is-open", now == Recall && not found )
+                    , ( "is-open", now == Recall && not found && not watching )
                     ]
                 , attribute "aria-label" ("Tile " ++ String.fromInt (cell + 1))
                 , Press.onPress (Tap cell)
@@ -984,8 +993,8 @@ viewCountdown seconds =
         ]
 
 
-viewResult : Model -> Game -> Html Msg
-viewResult model game =
+viewResult : Model -> Bool -> Game -> Html Msg
+viewResult model watching game =
     let
         score =
             List.head game.players |> Maybe.map .score |> Maybe.withDefault model.score
@@ -1011,17 +1020,21 @@ viewResult model game =
                        )
                 )
             ]
-        , button
-            [ id "afterglow-play-again"
-            , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:bg-octo-mist"
-            , onClick Restart
-            ]
-            [ text
-                ("Play again with "
-                    ++ String.fromInt (Maybe.withDefault game.level game.lastLevel)
-                    ++ " tiles"
-                )
-            ]
+        , if watching then
+            text ""
+
+          else
+            button
+                [ id "afterglow-play-again"
+                , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:bg-octo-mist"
+                , onClick Restart
+                ]
+                [ text
+                    ("Play again with "
+                        ++ String.fromInt (Maybe.withDefault game.level game.lastLevel)
+                        ++ " tiles"
+                    )
+                ]
         , a
             [ id "afterglow-leaderboards-link"
             , href model.settingsUrl

@@ -636,11 +636,7 @@ view model =
                 [ viewHeader model me
                 , viewStats model game
                 , if me == Nothing then
-                    p [ id "snap-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
-                        [ text "Snap is a single-player game, and this game has its player already. "
-                        , a [ href "/snap", class "font-medium underline underline-offset-4" ] [ text "Start your own game" ]
-                        , text "."
-                        ]
+                    text ""
 
                   else
                     viewTable model game
@@ -660,6 +656,16 @@ viewHeader model me =
             ]
         , h1 [ class "text-xl font-semibold tracking-tight lg:text-2xl" ]
             [ a [ id "snap-title-link", href model.settingsUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Snap" ] ]
+        , if me == Nothing then
+            span
+                [ id "snap-watching"
+                , class "flex shrink-0 items-center text-octo-indigo dark:text-octo-indigo-light"
+                , Html.Attributes.title "You are watching this game."
+                ]
+                [ span [ class "hero-eye size-4" ] [] ]
+
+          else
+            text ""
         , viewMuteButton model.muted
         , if me == Nothing then
             text ""

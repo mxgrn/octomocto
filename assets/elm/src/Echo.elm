@@ -938,7 +938,7 @@ viewGame model me game =
                             ]
                         , h1 [ class "mr-1 truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
                             [ a [ id "echo-title-link", href model.indexUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text (t model.texts "Echo") ] ]
-                        , viewWatchers model.texts model.watchers
+                        , viewWatchers model.texts (me == Nothing) model.watchers
                         , viewShapesButton model.texts model.shapes
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
@@ -962,12 +962,6 @@ viewGame model me game =
                 text ""
             , if List.length game.players > 1 then
                 viewScores model me game
-
-              else
-                text ""
-            , if me == Nothing then
-                p [ id "echo-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 lg:order-5 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
-                    [ text (t model.texts "You are watching this game.") ]
 
               else
                 text ""
@@ -1076,15 +1070,25 @@ boardWidth model me game =
 
 {-| The number of browsers that only watch the game, when there are any.
 -}
-viewWatchers : Texts -> Int -> Html Msg
-viewWatchers texts count =
-    if count > 0 then
+viewWatchers : Texts -> Bool -> Int -> Html Msg
+viewWatchers texts watching count =
+    if watching || count > 0 then
         span
             [ id "echo-watchers"
-            , class "flex shrink-0 items-center gap-1 text-sm tabular-nums text-slate-500 dark:text-slate-400"
-            , Html.Attributes.title (tf texts "Watchers: {count}" [ ( "count", String.fromInt count ) ])
+            , class "flex shrink-0 items-center gap-1 text-sm tabular-nums transition-colors"
+            , classList
+                [ ( "text-slate-500 dark:text-slate-400", not watching )
+                , ( "font-medium text-octo-indigo dark:text-octo-indigo-light", watching )
+                ]
+            , Html.Attributes.title
+                (if watching then
+                    t texts "You are watching this game."
+
+                 else
+                    tf texts "Watchers: {count}" [ ( "count", String.fromInt count ) ]
+                )
             ]
-            [ span [ class "hero-eye size-4" ] [], text (String.fromInt count) ]
+            [ span [ class "hero-eye size-4" ] [], text (String.fromInt (max count 1)) ]
 
     else
         text ""

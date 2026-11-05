@@ -728,7 +728,7 @@ viewGame model me game =
 
                             Nothing ->
                                 text ""
-                        , viewWatchers model.texts model.watchers
+                        , viewWatchers model.texts (me == Nothing) model.watchers
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
                         [ text
@@ -932,19 +932,28 @@ fieldWidth model me game layout gap =
 
 {-| The number of browsers that only watch the game, when there are any.
 -}
-viewWatchers : Texts -> Int -> Html Msg
-viewWatchers texts count =
-    if count > 0 then
+viewWatchers : Texts -> Bool -> Int -> Html Msg
+viewWatchers texts watching count =
+    if watching || count > 0 then
         span
             [ id "memory-watchers"
-            , class "flex shrink-0 items-center gap-1 text-sm tabular-nums text-slate-500 dark:text-slate-400"
-            , Html.Attributes.title (tf texts "Watchers: {count}" [ ( "count", String.fromInt count ) ])
+            , class "flex shrink-0 items-center gap-1 text-sm tabular-nums transition-colors"
+            , classList
+                [ ( "text-slate-500 dark:text-slate-400", not watching )
+                , ( "font-medium text-octo-indigo dark:text-octo-indigo-light", watching )
+                ]
+            , Html.Attributes.title
+                (if watching then
+                    t texts "You are watching this game."
+
+                 else
+                    tf texts "Watchers: {count}" [ ( "count", String.fromInt count ) ]
+                )
             ]
-            [ span [ class "hero-eye size-4" ] [], text (String.fromInt count) ]
+            [ span [ class "hero-eye size-4" ] [], text (String.fromInt (max count 1)) ]
 
     else
         text ""
-
 
 
 {-| Starts a new field for all players, also during a game. On a small
@@ -1339,6 +1348,7 @@ viewBombMessage texts me game inRow =
     div
         (if inRow then
             [ id "memory-bomb-message-row"
+
             -- It hangs from the top of the screen over the compact row, with
             -- the 0.5rem side padding of the page. It is at least as tall as
             -- the 0.5rem padding and the row, and taller only for a long text
