@@ -535,7 +535,7 @@ stepPlayback model =
                     Just ( index, pad ) ->
                         if index > playback.shown then
                             ( { model | playback = Just { playback | shown = index } }
-                            , playSounds model [ { name = "pad", pad = pad, ms = flashMs length } ]
+                            , playSounds model [ padSound pad ]
                             )
 
                         else
@@ -713,9 +713,9 @@ type alias Sound =
     { name : String, pad : Int, ms : Int }
 
 
-{-| The tone of a tapped pad. It is as long as the slowest tone of the
-playback, not as short as the flash of the tap, so that it is not cut. The
-tones of quick taps overlap.
+{-| The tone of a pad in the playback and of a tapped pad. It is as long as
+the slowest flash of the playback, not as short as the current flash, so
+that it is not cut when the playback speeds up. Quick tones overlap.
 -}
 padSound : Int -> Sound
 padSound pad =
