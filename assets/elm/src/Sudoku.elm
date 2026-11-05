@@ -34,6 +34,7 @@ import Html.Attributes exposing (alt, attribute, class, classList, href, id, rea
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
+import Press
 import Process
 import Task
 import Time
@@ -1221,7 +1222,8 @@ viewBoardCell model game playable selectedDigit cell =
             , ( "is-conflict", List.member cell model.conflicts )
             , ( "ring-2 ring-inset ring-octo-indigo/40 dark:ring-octo-indigo-light/50", isLast && not game.finished && model.selected /= Just cell )
             ]
-        , onClick (Select cell)
+        , Press.onPress (Select cell)
+        , Press.onKeyClick (Select cell)
         , Html.Attributes.attribute "aria-label" (cellName cell filled)
         ]
         [ digitView ]
@@ -1276,7 +1278,8 @@ viewPad model me game =
                         , ( "opacity-30", left == 0 )
                         ]
                     , Html.Attributes.disabled (left == 0)
-                    , onClick (Place digit)
+                    , Press.onPress (Place digit)
+                    , Press.onKeyClick (Place digit)
                     ]
                     [ span [ class "text-xl font-semibold text-slate-800 sm:text-2xl dark:text-slate-100" ] [ text (String.fromInt digit) ]
                     , span [ class "text-[10px] text-slate-400 tabular-nums sm:text-xs" ] [ text (String.fromInt left) ]

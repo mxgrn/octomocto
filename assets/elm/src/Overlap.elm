@@ -39,6 +39,7 @@ import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+import Press
 import Process
 import Task
 import Time
@@ -1155,7 +1156,8 @@ viewSymbol model playable highlight card index placed =
                 ]
             )
         , Html.Attributes.disabled (not playable)
-        , onClick (Tap card.id placed.symbol)
+        , Press.onPress (Tap card.id placed.symbol)
+        , Press.onKeyClick (Tap card.id placed.symbol)
         , Html.Attributes.attribute "aria-label" name
         ]
         [ case highlight of

@@ -37,6 +37,7 @@ import Html.Attributes exposing (alt, attribute, class, classList, href, id, rea
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
+import Press
 import Process
 import Random
 import Svg exposing (Svg)
@@ -1383,7 +1384,8 @@ viewCard model playable card =
             , ( "is-wrong", List.member card model.wrong )
             , ( "is-playable", playable )
             ]
-        , onClick (Pick card)
+        , Press.onPress (Pick card)
+        , Press.onKeyClick (Pick card)
         , Html.Attributes.attribute "aria-label" (cardName card)
         ]
         [ div [ class "set-card-face" ] [ cardImage card ] ]

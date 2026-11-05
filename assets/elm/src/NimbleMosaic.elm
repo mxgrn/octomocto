@@ -33,10 +33,10 @@ import Html.Attributes exposing (alt, attribute, class, classList, href, id, rea
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
+import Press
 import Process
 import Svg exposing (Svg)
 import Svg.Attributes as SA
-import Svg.Events as SE
 import Svg.Keyed
 import Task
 import Time
@@ -1105,7 +1105,7 @@ viewCell model game cell =
              else
                 "nimble-mosaic-cell"
             )
-        , SE.onClick (Pick cell.number)
+        , Press.onPress (Pick cell.number)
         ]
         [ Svg.path [ SA.d cell.d, SA.fill cell.color, SA.fillRule "evenodd", SA.stroke ink, SA.strokeWidth "3" ] []
         , if found then

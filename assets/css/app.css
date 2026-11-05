@@ -189,7 +189,7 @@
 /* Schulte table: white cells with dark numbers and thin lines, as on paper.
    The board is an SVG, so the sizes are in board units (100 for a cell). */
 .schulte-board { fill: #ffffff; }
-.schulte-cell { cursor: pointer; fill: #ffffff; transition: fill 150ms; }
+.schulte-cell { cursor: pointer; fill: #ffffff; transition: fill 150ms; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .schulte-cell:hover { fill: var(--color-octo-mist); }
 .schulte-number {
   fill: #1f2933;

@@ -28,6 +28,7 @@ import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+import Press
 import Set exposing (Set)
 import Task
 import Time
@@ -930,7 +931,8 @@ viewGrid model round =
                     , ( "is-open", now == Recall && not found )
                     ]
                 , attribute "aria-label" ("Tile " ++ String.fromInt (cell + 1))
-                , onClick (Tap cell)
+                , Press.onPress (Tap cell)
+                , Press.onKeyClick (Tap cell)
                 ]
                 []
     in

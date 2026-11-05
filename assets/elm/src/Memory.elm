@@ -32,6 +32,7 @@ import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, sp
 import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (Decoder)
+import Press
 import Process
 import Task
 import Time
@@ -1265,7 +1266,8 @@ viewCard model me game index card =
             , ( "is-bomb", face == Just Bomb )
             , ( "is-clickable", canFlip me game (Just card) )
             ]
-        , onClick (Flip index)
+        , Press.onPress (Flip index)
+        , Press.onKeyClick (Flip index)
         ]
         [ div [ class "memory-card-inner" ]
             [ div [ class "memory-card-back" ] []

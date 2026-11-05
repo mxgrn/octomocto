@@ -37,10 +37,10 @@ import Html.Attributes exposing (alt, attribute, class, classList, href, id, rea
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
+import Press
 import Process
 import Svg exposing (Svg)
 import Svg.Attributes as SA
-import Svg.Events
 import Svg.Keyed
 import Task
 import Time
@@ -1062,7 +1062,6 @@ viewWatchers count =
         text ""
 
 
-
 {-| Shows a free pair. It is off when no pair is free: then the player
 must shuffle. On a small screen, only the icon shows, but not in the column
 of a screen that is wider than tall.
@@ -1439,7 +1438,7 @@ viewTile model game playable tile =
             , ( "is-hinted", hinted )
             , ( "is-shuffling", from /= Nothing )
             ]
-        , Svg.Events.onClick (ClickTile tile.id)
+        , Press.onPress (ClickTile tile.id)
         , Html.Attributes.attribute "aria-label" (faceName tile.face)
         , Html.Attributes.attribute "role" "button"
         ]
@@ -1935,7 +1934,6 @@ flower n =
                             []
                     )
                     [ -50, 50, -25, 25, 0 ]
-
 
 
 {-| A playing card suit: spades, hearts, diamonds or clubs

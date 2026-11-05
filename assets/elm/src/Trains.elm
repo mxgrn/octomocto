@@ -47,11 +47,11 @@ import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+import Press
 import Random exposing (Generator)
 import Set exposing (Set)
 import Svg exposing (Svg)
 import Svg.Attributes as SA
-import Svg.Events
 import Task
 import Time
 
@@ -2760,7 +2760,7 @@ viewSwitchTarget (( x, y ) as cell) =
     switchCircle cell
         [ SA.id ("trains-switch-" ++ String.fromInt x ++ "-" ++ String.fromInt y)
         , SA.class "cursor-pointer fill-transparent transition-colors hover:fill-amber-300/30"
-        , Svg.Events.onClick (Toggle cell)
+        , Press.onPress (Toggle cell)
         ]
 
 

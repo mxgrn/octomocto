@@ -28,6 +28,7 @@ import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+import Press
 import Svg
 import Svg.Attributes as SA
 import Task
@@ -907,7 +908,8 @@ viewButtons enabled =
                     , ( "bg-white text-slate-700 ring-slate-200 hover:bg-slate-50 dark:bg-white/5 dark:text-slate-100 dark:ring-white/15 dark:hover:bg-white/10", not same )
                     ]
                 , disabled (not enabled)
-                , onClick (Answer same)
+                , Press.onPress (Answer same)
+                , Press.onKeyClick (Answer same)
                 ]
                 (if same then
                     [ text label, viewKey key ]

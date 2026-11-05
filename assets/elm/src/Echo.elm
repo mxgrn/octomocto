@@ -30,8 +30,9 @@ import Dict exposing (Dict)
 import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, rel, src, style, target, value)
-import Html.Events exposing (onClick, preventDefaultOn)
+import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (Decoder)
+import Press
 import Process
 import Svg exposing (svg)
 import Svg.Attributes as SA
@@ -1085,7 +1086,6 @@ viewWatchers texts count =
         text ""
 
 
-
 viewShapesButton : Texts -> Bool -> Html Msg
 viewShapesButton texts shapes =
     iconButton "echo-shapes"
@@ -1450,7 +1450,7 @@ viewPad texts count playable lit index pad =
             )
         , attribute "role" "button"
         , attribute "aria-label" (tf texts "{color} pad, {shape}" [ ( "color", t texts pad.name ), ( "shape", t texts pad.shape ) ])
-        , preventDefaultOn "pointerdown" (Decode.succeed ( Press index, True ))
+        , Press.onPress (Press index)
         ]
         []
 
