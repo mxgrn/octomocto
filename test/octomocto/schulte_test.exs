@@ -24,12 +24,12 @@ defmodule Octomocto.SchulteTest do
     assert state.cells |> Enum.map(& &1.number) |> Enum.sort() == Enum.to_list(1..25)
   end
 
-  @tag config: [size: 10, marks: true]
-  test "a 10 × 10 grid has the numbers from 1 to 100", %{id: id} do
+  @tag config: [size: 9, marks: true]
+  test "a 9 × 9 grid has the numbers from 1 to 81", %{id: id} do
     {:ok, _player_id, state} = Schulte.join(id)
 
-    assert %{size: 10, total: 100, marks: true} = state
-    assert length(state.cells) == 100
+    assert %{size: 9, total: 81, marks: true} = state
+    assert length(state.cells) == 81
   end
 
   test "pick/3 counts only the next number", %{id: id} do

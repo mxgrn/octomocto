@@ -26,11 +26,11 @@ defmodule Octomocto.Schulte.Game do
 
   alias Octomocto.RaceServer
 
-  @doc "The sizes of the grid: from 5 × 5 to 10 × 10."
-  def sizes, do: 5..10
+  @doc "The sizes of the grid: from 5 × 5 to 9 × 9."
+  def sizes, do: 5..9
 
   @impl true
-  def init_settings(%{size: size, marks: marks}) when size in 5..10 and is_boolean(marks) do
+  def init_settings(%{size: size, marks: marks}) when size in 5..9 and is_boolean(marks) do
     %{size: size, marks: marks}
   end
 

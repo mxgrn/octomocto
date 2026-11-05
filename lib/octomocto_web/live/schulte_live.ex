@@ -30,7 +30,7 @@ defmodule OctomoctoWeb.SchulteLive do
     [
       page_title: "Schulte Table Online: Find the Numbers in Order",
       page_description:
-        "Classic Schulte tables from 5×5 to 10×10. Find the numbers in order to train focus, peripheral vision and speed reading. Solo or in a race with up to 3 friends. Free, in your browser."
+        "Classic Schulte tables from 5×5 to 9×9. Find the numbers in order to train focus, peripheral vision and speed reading. Solo or in a race with up to 3 friends. Free, in your browser."
     ]
   end
 
