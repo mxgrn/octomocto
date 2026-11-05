@@ -751,8 +751,9 @@ if (mahjongNode) {
 }
 
 // Start the Overlap game and connect its ports to the game channel. It works
-// as the Set game above. The images of all symbols load at the start, so
-// that a new card does not come in with empty places.
+// as the Set game above. The images of all symbols of the theme of the game
+// load with its first state, so that a new card does not come in with empty
+// places. With the theme "random", the next game can have another theme.
 const overlapNode = document.getElementById("overlap-main")
 if (overlapNode) {
   if (navigator.userActivation?.hasBeenActive) unlockAudio()
@@ -761,10 +762,15 @@ if (overlapNode) {
   try { muted = localStorage.getItem("overlap-muted") === "true" } catch (_e) {}
 
   const symbols = JSON.parse(overlapNode.dataset.symbols)
-  symbols.forEach((_name, symbol) => {
-    const img = new Image()
-    img.src = `/images/overlap/${symbol}.svg`
-  })
+  const loadedThemes = new Set()
+  const loadImages = theme => {
+    if (!theme || loadedThemes.has(theme) || !symbols[theme]) return
+    loadedThemes.add(theme)
+    symbols[theme].forEach((_name, symbol) => {
+      const img = new Image()
+      img.src = `/images/overlap/${theme}/${symbol}.svg`
+    })
+  }
 
   const overlap = window.Elm.Overlap.init({node: overlapNode, flags: {gameUrl: window.location.href, settingsUrl: overlapNode.dataset.settingsUrl, nextGame: {name: overlapNode.dataset.nextGameName, path: overlapNode.dataset.nextGamePath}, guest: !overlapNode.dataset.userToken, muted, symbols}})
   const socket = new Socket("/socket", {params: {user_token: overlapNode.dataset.userToken, _csrf_token: csrfToken}})
@@ -779,6 +785,7 @@ if (overlapNode) {
       if (token) sessionStorage.setItem(tokenKey, token)
       else sessionStorage.removeItem(tokenKey)
     } catch (_e) {}
+    loadImages(reply.state?.theme)
     overlap.ports.overlapJoined.send(reply)
     overlap.ports.overlapWatchers.send(reply.watchers ?? 0)
   }
@@ -787,7 +794,10 @@ if (overlapNode) {
   // The menu of the game page joins its channel on this socket
   setGameMenu({kind: "overlap", id: overlapNode.dataset.gameId, socket})
   const channel = socket.channel(`overlap:${overlapNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
-  channel.on("state", state => overlap.ports.overlapState.send(state))
+  channel.on("state", state => {
+    loadImages(state.theme)
+    overlap.ports.overlapState.send(state)
+  })
   channel.on("joined", joined)
   channel.on("watchers", ({count}) => overlap.ports.overlapWatchers.send(count))
   channel.join()

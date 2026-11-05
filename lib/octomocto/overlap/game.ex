@@ -24,15 +24,20 @@ defmodule Octomocto.Overlap.Game do
     context: Octomocto.Overlap
 
   alias Octomocto.RaceServer
-  alias Octomocto.Overlap.Deck
+  alias Octomocto.Overlap.{Deck, Themes}
 
   # How long the taps of a player are blocked after a wrong symbol. The page
   # blocks them for 1 second. The block here is a bit shorter, so that the
   # first tap after the block on the page is not lost on the way.
   @freeze_ms 800
 
+  # With the theme "random", each new deck gets a random theme
   @impl true
-  def init_settings(_config), do: %{}
+  def init_settings(config) do
+    choice = Map.get(config, :theme, Themes.default())
+    true = choice == "random" or Themes.exists?(choice)
+    %{theme: Themes.pick(choice), random_theme: choice == "random"}
+  end
 
   # The system time in ms until which the taps of the player are blocked
   @impl true
@@ -45,7 +50,9 @@ defmodule Octomocto.Overlap.Game do
   def new_field(state) do
     [pile, card | deck] = Deck.shuffled()
 
-    Map.merge(state, %{
+    state
+    |> pick_theme()
+    |> Map.merge(%{
       # The top card of the pile, and the card that the players try to win
       pile: pile,
       card: card,
@@ -54,6 +61,21 @@ defmodule Octomocto.Overlap.Game do
       last: nil
     })
   end
+
+  # A new deck with the theme "random" gets a random theme. A state from
+  # before the themes has no `:random_theme`.
+  defp pick_theme(%{random_theme: true} = state), do: %{state | theme: Themes.pick("random")}
+  defp pick_theme(state), do: state
+
+  @doc """
+  The theme of the game in the state. A state from before the themes has
+  no `:theme`.
+  """
+  def theme(state), do: Map.get(state, :theme, Themes.default())
+
+  @doc "The theme choice of the game in the state: \"random\" or a theme."
+  def theme_choice(%{random_theme: true}), do: "random"
+  def theme_choice(state), do: theme(state)
 
   # Two players can tap the common symbol at the same time. The first tap
   # wins the card. The second tap is for cards that are not on the table
@@ -96,7 +118,7 @@ defmodule Octomocto.Overlap.Game do
   end
 
   @impl true
-  def lobby_settings(_state), do: %{}
+  def lobby_settings(state), do: %{theme: theme(state)}
 
   @impl true
   def result_settings(_state), do: %{"symbols" => 8}
@@ -106,6 +128,7 @@ defmodule Octomocto.Overlap.Game do
     started? = RaceServer.started?(state)
 
     %{
+      theme: theme(state),
       # Do not show the cards before the start (also during the countdown),
       # so that nobody can look for the symbol early.
       pile: if(started?, do: state.pile),

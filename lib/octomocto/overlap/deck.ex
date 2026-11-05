@@ -10,76 +10,11 @@ defmodule Octomocto.Overlap.Deck do
   is the symbol 56. Two lines of the plane always meet in exactly one
   point.
 
-  The images of the symbols are in `priv/static/images/overlap/`, with the
-  names `0.svg` to `56.svg`. They are Twemoji (CC-BY 4.0, Twitter, Inc. and
-  other contributors, https://github.com/jdecked/twemoji).
+  The images of the symbols are in the themes, see
+  `Octomocto.Overlap.Themes`.
   """
 
   @order 7
-
-  # The names, in the order of the images
-  @names [
-    "octopus",
-    "apple",
-    "lemon",
-    "carrot",
-    "mushroom",
-    "cactus",
-    "sunflower",
-    "maple leaf",
-    "clover",
-    "moon",
-    "star",
-    "sun",
-    "lightning",
-    "snowflake",
-    "fire",
-    "drop",
-    "rainbow",
-    "ladybug",
-    "turtle",
-    "dolphin",
-    "butterfly",
-    "penguin",
-    "lion",
-    "elephant",
-    "owl",
-    "dinosaur",
-    "crab",
-    "cat",
-    "dog",
-    "banana",
-    "grapes",
-    "cheese",
-    "pizza",
-    "ice cream",
-    "lollipop",
-    "cake",
-    "balloon",
-    "gift",
-    "guitar",
-    "die",
-    "ball",
-    "rocket",
-    "anchor",
-    "key",
-    "light bulb",
-    "alarm clock",
-    "scissors",
-    "magnet",
-    "heart",
-    "crown",
-    "puzzle piece",
-    "pencil",
-    "bell",
-    "target",
-    "ghost",
-    "snowman",
-    "unicorn"
-  ]
-
-  @doc "The names of the symbols, by symbol."
-  def names, do: @names
 
   @doc "The symbols of each card, as lists of 8 integers."
   def cards do

@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.OverlapController do
   use OctomoctoWeb, :controller
 
-  alias Octomocto.Overlap.{Deck, Store}
+  alias Octomocto.Overlap.{Store, Themes}
   alias OctomoctoWeb.{NextGame, OverlapLive}
 
   plug :put_seo
@@ -14,8 +14,8 @@ defmodule OctomoctoWeb.OverlapController do
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
         next_game: NextGame.pick("overlap", id, state.needed > 1),
-        # The names of the symbols, for the screen readers
-        symbols: Deck.names(),
+        # The names of the symbols of each theme, for the screen readers
+        symbols: Themes.names(),
         noindex: true
       )
     else

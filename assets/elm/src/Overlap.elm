@@ -32,6 +32,7 @@ import Array exposing (Array)
 import Browser
 import Browser.Dom
 import Browser.Events
+import Dict exposing (Dict)
 import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, rel, src, style, target, value)
@@ -136,8 +137,11 @@ type alias Found =
 
 
 type alias Game =
-    { -- Nothing before the start and during the countdown
-      pile : Maybe Card
+    { -- The theme of the symbols, see `Octomocto.Overlap.Themes`
+      theme : String
+
+    -- Nothing before the start and during the countdown
+    , pile : Maybe Card
     , card : Maybe Card
     , cardsLeft : Int
     , last : Maybe Found
@@ -188,8 +192,9 @@ type alias Model =
     , nextGame : NextGame
     , guest : Bool
 
-    -- The names of the symbols, for the screen readers
-    , names : Array String
+    -- The names of the symbols of each theme by the theme name, for the
+    -- screen readers
+    , names : Dict String (Array String)
     , connection : Connection
     , copied : Bool
 
@@ -221,7 +226,7 @@ type alias Flags =
     , nextGame : NextGame
     , guest : Bool
     , muted : Bool
-    , symbols : List String
+    , symbols : Decode.Value
     }
 
 
@@ -231,7 +236,9 @@ init flags =
       , settingsUrl = flags.settingsUrl
       , nextGame = flags.nextGame
       , guest = flags.guest
-      , names = Array.fromList flags.symbols
+      , names =
+            Decode.decodeValue (Decode.dict (Decode.array Decode.string)) flags.symbols
+                |> Result.withDefault Dict.empty
       , connection = Connecting
       , copied = False
       , wrong = Nothing
@@ -578,6 +585,7 @@ andMap =
 gameDecoder : Decoder Game
 gameDecoder =
     Decode.succeed Game
+        |> andMap (Decode.field "theme" Decode.string)
         |> andMap (Decode.field "pile" (Decode.nullable cardDecoder))
         |> andMap (Decode.field "card" (Decode.nullable cardDecoder))
         |> andMap (Decode.field "cards_left" Decode.int)
@@ -1028,6 +1036,7 @@ viewTable model me game =
                 ( Just pile, Just card ) ->
                     [ ( "pile-" ++ String.fromInt pile.id
                       , viewCard model
+                            game.theme
                             playable
                             [ ( "overlap-to-pile", game.last /= Nothing && not game.finished ) ]
                             (Maybe.map .symbol game.last |> Maybe.map (\symbol -> ( symbol, lastColor game )))
@@ -1035,6 +1044,7 @@ viewTable model me game =
                       )
                     , ( "card-" ++ String.fromInt card.id
                       , viewCard model
+                            game.theme
                             playable
                             []
                             -- After the end, the last symbol is on both
@@ -1104,22 +1114,22 @@ ringDistance =
     0.66
 
 
-viewCard : Model -> Bool -> List ( String, Bool ) -> Maybe ( Symbol, String ) -> Card -> Html Msg
-viewCard model playable classes highlight card =
+viewCard : Model -> String -> Bool -> List ( String, Bool ) -> Maybe ( Symbol, String ) -> Card -> Html Msg
+viewCard model theme playable classes highlight card =
     div
         [ id ("overlap-card-" ++ String.fromInt card.id)
         , class "overlap-card"
         , classList (( "is-playable", playable ) :: classes)
         ]
-        (List.indexedMap (viewSymbol model playable highlight card) card.symbols)
+        (List.indexedMap (viewSymbol model theme playable highlight card) card.symbols)
 
 
 {-| A symbol at its place on the card. The tap area is the box of the
 image. The turn is on the button and the shake on the image, so that the
 two do not clash.
 -}
-viewSymbol : Model -> Bool -> Maybe ( Symbol, String ) -> Card -> Int -> Placed -> Html Msg
-viewSymbol model playable highlight card index placed =
+viewSymbol : Model -> String -> Bool -> Maybe ( Symbol, String ) -> Card -> Int -> Placed -> Html Msg
+viewSymbol model theme playable highlight card index placed =
     let
         ( x, y, room ) =
             if index == 0 then
@@ -1136,7 +1146,9 @@ viewSymbol model playable highlight card index placed =
             String.fromFloat value ++ "%"
 
         name =
-            Array.get placed.symbol model.names |> Maybe.withDefault "symbol"
+            Dict.get theme model.names
+                |> Maybe.andThen (Array.get placed.symbol)
+                |> Maybe.withDefault "symbol"
 
         shaking =
             model.wrong == Just (WrongTap card.id placed.symbol)
@@ -1173,7 +1185,7 @@ viewSymbol model playable highlight card index placed =
 
             Nothing ->
                 text ""
-        , img [ src ("/images/overlap/" ++ String.fromInt placed.symbol ++ ".svg"), alt "", Html.Attributes.attribute "draggable" "false" ] []
+        , img [ src ("/images/overlap/" ++ theme ++ "/" ++ String.fromInt placed.symbol ++ ".svg"), alt "", Html.Attributes.attribute "draggable" "false" ] []
         ]
 
 

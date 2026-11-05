@@ -4,7 +4,7 @@ defmodule Octomocto.OverlapTest do
   import Octomocto.GameHelpers
 
   alias Octomocto.Overlap
-  alias Octomocto.Overlap.{Deck, Result, Store}
+  alias Octomocto.Overlap.{Deck, Game, Result, Store}
 
   setup do
     id = "game-#{System.unique_integer([:positive])}"
@@ -53,5 +53,21 @@ defmodule Octomocto.OverlapTest do
 
     assert {:ok, nil, %{finished: true, cards_left: 0}} = Overlap.watch(id)
     assert [%Result{settings: %{"symbols" => 8, "players" => 1}}] = Repo.all(Result)
+  end
+
+  test "a game without a theme gets the Mix 1 theme", %{id: id} do
+    assert {:ok, nil, %{theme: "mix1"}} = Overlap.watch(id)
+  end
+
+  test "a game with the theme \"random\" keeps the choice for the next deck" do
+    id = "game-#{System.unique_integer([:positive])}"
+    start_supervised!(overlap_game(id, theme: "random"), id: id)
+    {:ok, player_id, _} = Overlap.join(id)
+
+    Overlap.restart(id, player_id)
+
+    assert {:ok, nil, %{theme: theme}} = Overlap.watch(id)
+    assert theme in ["mix1", "mix2", "mix3"]
+    assert Game.theme_choice(Store.read(id)) == "random"
   end
 end

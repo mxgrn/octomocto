@@ -8,6 +8,7 @@ defmodule OctomoctoWeb.OverlapLive do
     only: [
       setting: 1,
       option: 1,
+      setting_header: 1,
       score_list: 1,
       player_list: 1,
       result_row: 1,
@@ -20,14 +21,14 @@ defmodule OctomoctoWeb.OverlapLive do
 
   alias Octomocto.{Lobby, Overlap}
   alias OctomoctoWeb.SavedSettings
-  alias Octomocto.Overlap.{Game, Store}
+  alias Octomocto.Overlap.{Game, Store, Themes}
 
   def mount(_params, _session, socket) do
     if connected?(socket), do: Lobby.subscribe(Game)
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/overlap"), rules: rules()] ++ seo())
+     |> assign([canonical_url: url(~p"/overlap"), rules: rules(), themes: Themes.list()] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))
      |> assign(watchers: Lobby.watchers(Game))}
   end
@@ -43,7 +44,7 @@ defmodule OctomoctoWeb.OverlapLive do
 
   # The params of the settings. Without them, the page shows the settings
   # that the user chose last.
-  @settings_params ["players", "visibility"]
+  @settings_params ["theme", "players", "visibility"]
 
   def handle_params(params, _uri, socket) do
     settings =
@@ -53,9 +54,19 @@ defmodule OctomoctoWeb.OverlapLive do
 
     filter = %{"symbols" => 8, "players" => settings.players}
 
+    # The theme that the Random switch turns back to: the last chosen one,
+    # else the default theme
+    last_theme =
+      cond do
+        settings.theme != "random" -> settings.theme
+        last = socket.assigns[:last_theme] -> last
+        true -> Themes.default()
+      end
+
     {:noreply,
      assign(socket,
        settings: settings,
+       last_theme: last_theme,
        best_results: Overlap.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
      )}
@@ -87,15 +98,21 @@ defmodule OctomoctoWeb.OverlapLive do
     {:noreply, redirect(socket, to: ~p"/overlap/#{id}")}
   end
 
-  # One player and a public game, when the params do not say otherwise
+  # The default theme, one player and a public game, when the params do
+  # not say otherwise
   defp settings(params) do
+    theme =
+      if params["theme"] == "random" or Themes.exists?(params["theme"]),
+        do: params["theme"],
+        else: Themes.default()
+
     players =
       case Integer.parse(params["players"] || "") do
         {n, ""} when n in 1..4 -> n
         _ -> 1
       end
 
-    %{players: players, public: params["visibility"] != "private"}
+    %{theme: theme, players: players, public: params["visibility"] != "private"}
   end
 
   defp assign_lobby(socket, entries) do
@@ -126,22 +143,39 @@ defmodule OctomoctoWeb.OverlapLive do
 
   @doc "The path of this page with the settings of the game in the given state."
   def settings_path(state) do
-    settings = %{players: state.needed, public: state.public}
+    settings = %{theme: Game.theme_choice(state), players: state.needed, public: state.public}
     ~p"/overlap?#{query(settings, [])}"
   end
 
   # The query of the page for the settings, with some of them changed
   defp query(settings, changes) do
     settings = Map.merge(settings, Map.new(changes))
-    query = [players: settings.players]
+    query = [theme: settings.theme, players: settings.players]
 
     # A public game has no param, so that most links stay short
     if settings.public, do: query, else: query ++ [visibility: "private"]
   end
 
-  # True when the open game has the same settings as the new game
-  defp same_settings?(game, settings), do: game.players_needed == settings.players
+  # True when the open game has the same settings as the new game. With the
+  # theme "random", any theme is the same.
+  defp same_settings?(game, settings) do
+    game.players_needed == settings.players and
+      settings.theme in ["random", lobby_theme(game).name]
+  end
 
-  @doc "The settings of a game in the list of public games: none, because they never change."
-  def game_summary(_game), do: nil
+  @doc "The settings of a game in the list of public games: its theme."
+  def game_summary(game), do: lobby_theme(game).title
+
+  # The theme of a game in the list of public games. A game from before the
+  # themes has no theme in its lobby settings, and a game can have a theme
+  # that is not in `Themes` any more. They show the default theme.
+  defp lobby_theme(game) do
+    Themes.get(game.settings[:theme]) || Themes.get(Themes.default())
+  end
+
+  @doc "The path of the cover image of the theme."
+  def cover_path(theme) do
+    file = "#{theme.cover}.svg"
+    ~p"/images/overlap/#{theme.name}/#{file}"
+  end
 end
