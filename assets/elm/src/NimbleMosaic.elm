@@ -773,7 +773,9 @@ reservedPageHeight model me game =
 
 {-| True when the board is larger turned 90 degrees, so that it is taller
 than wide. This is on a large screen that is taller than wide, for example
-a tablet. The player turns the tablet to read the numbers.
+a tablet. The player turns the tablet to read the numbers. On a small
+screen, for example a phone, the board is never turned, so that the
+numbers are upright.
 -}
 isTall : Model -> Me -> Game -> Bool
 isTall model me game =
@@ -781,7 +783,10 @@ isTall model me game =
         ( width, height ) =
             boardSpace model me game
     in
-    min (width / game.height) (height / game.width) > min (width / game.width) (height / game.height)
+    Tuple.first model.viewport
+        >= largeScreen
+        && min (width / game.height) (height / game.width)
+        > min (width / game.width) (height / game.height)
 
 
 {-| Make the board as wide as possible, but small enough that it is all on
