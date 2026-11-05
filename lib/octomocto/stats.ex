@@ -22,7 +22,8 @@ defmodule Octomocto.Stats do
     "mahjong" => Octomocto.Mahjong.Result,
     "overlap" => Octomocto.Overlap.Result,
     "snap" => Octomocto.Snap.Result,
-    "afterglow" => Octomocto.Afterglow.Result
+    "afterglow" => Octomocto.Afterglow.Result,
+    "schulte" => Octomocto.Schulte.Result
   }
 
   @topic "stats"

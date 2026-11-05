@@ -8,6 +8,7 @@ defmodule OctomoctoWeb.SitemapController do
       url(~p"/"),
       url(~p"/trains"),
       url(~p"/nimble-mosaic"),
+      url(~p"/schulte"),
       url(~p"/memory"),
       url(~p"/pt/memory"),
       url(~p"/de/memory"),

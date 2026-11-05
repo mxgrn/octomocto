@@ -375,6 +375,60 @@ if (nimbleMosaicNode) {
   })
 }
 
+// Start the Schulte table and connect its ports to the game channel. It
+// works as Nimble Mosaic above, with the same sounds.
+const schulteNode = document.getElementById("schulte-main")
+if (schulteNode) {
+  if (navigator.userActivation?.hasBeenActive) unlockAudio()
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  let muted = false
+  try { muted = localStorage.getItem("schulte-muted") === "true" } catch (_e) {}
+
+  const schulte = window.Elm.Schulte.init({node: schulteNode, flags: {gameUrl: window.location.href, settingsUrl: schulteNode.dataset.settingsUrl, nextGame: {name: schulteNode.dataset.nextGameName, path: schulteNode.dataset.nextGamePath}, guest: !schulteNode.dataset.userToken, muted}})
+  const socket = new Socket("/socket", {params: {user_token: schulteNode.dataset.userToken, _csrf_token: csrfToken}})
+  socket.connect()
+
+  const tokenKey = `schulte-token:${schulteNode.dataset.gameId}`
+  let token = null
+  try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
+  const joined = reply => {
+    token = reply.token
+    try {
+      if (token) sessionStorage.setItem(tokenKey, token)
+      else sessionStorage.removeItem(tokenKey)
+    } catch (_e) {}
+    schulte.ports.schulteJoined.send(reply)
+    schulte.ports.schulteWatchers.send(reply.watchers ?? 0)
+  }
+  // A link with ?watch=1 only watches the game. The token of a player wins.
+  const watch = new URLSearchParams(window.location.search).has("watch")
+  // The menu of the game page joins its channel on this socket
+  setGameMenu({kind: "schulte", id: schulteNode.dataset.gameId, socket})
+  const channel = socket.channel(`schulte:${schulteNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
+  channel.on("state", state => schulte.ports.schulteState.send(state))
+  channel.on("joined", joined)
+  channel.on("watchers", ({count}) => schulte.ports.schulteWatchers.send(count))
+  channel.join()
+    .receive("ok", joined)
+    .receive("error", ({reason}) => {
+      // The server of the game stopped a moment ago. The channel tries again.
+      if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
+      channel.leave()
+      schulte.ports.schulteJoinFailed.send(reason)
+    })
+
+  schulte.ports.schultePick.subscribe(number => channel.push("pick", {number}))
+  schulte.ports.schulteRestart.subscribe(() => channel.push("restart", {}))
+  connectNextGame(schulte.ports.schulteNextGame, channel, schulteNode)
+  schulte.ports.schulteCopyText.subscribe(text => navigator.clipboard.writeText(text))
+  schulte.ports.schultePlaySound.subscribe(playNimbleMosaicSound)
+  schulte.ports.schulteSaveMuted.subscribe(value => {
+    try { localStorage.setItem("schulte-muted", String(value)) } catch (_e) {}
+  })
+}
+
 // Start the Memory game and connect its ports to the game channel. It
 // works as Nimble Mosaic above: the browser remembers if the player
 // muted the sounds, and the tab remembers the token of the player.

@@ -21,6 +21,7 @@ defmodule OctomoctoWeb.HomeLive do
     MemoryLive,
     OverlapLive,
     NimbleMosaicLive,
+    SchulteLive,
     SetGameLive,
     SudokuLive,
     TrainsLive
@@ -34,6 +35,15 @@ defmodule OctomoctoWeb.HomeLive do
         "Find the numbers in order. The first player to click the next number gets the point.",
       path: "/nimble-mosaic",
       badge: {"Trending this week", "hero-fire-mini"},
+      icon_class: "bg-octo-indigo/10 dark:bg-octo-indigo-light/15"
+    },
+    %{
+      id: "schulte",
+      name: "Schulte Table",
+      description:
+        "The classic Schulte table: find the numbers in order on a square grid, with your eyes on the center.",
+      path: "/schulte",
+      badge: {"New", "hero-sparkles-mini"},
       icon_class: "bg-octo-indigo/10 dark:bg-octo-indigo-light/15"
     },
     %{
@@ -141,7 +151,8 @@ defmodule OctomoctoWeb.HomeLive do
       {Octomocto.NimbleMosaic.Game, Octomocto.NimbleMosaic.Store, NimbleMosaicLive},
     "echo" => {Octomocto.Echo.Game, Octomocto.Echo.Store, EchoLive},
     "mahjong" => {Octomocto.Mahjong.Game, Octomocto.Mahjong.Store, MahjongLive},
-    "overlap" => {Octomocto.Overlap.Game, Octomocto.Overlap.Store, OverlapLive}
+    "overlap" => {Octomocto.Overlap.Game, Octomocto.Overlap.Store, OverlapLive},
+    "schulte" => {Octomocto.Schulte.Game, Octomocto.Schulte.TableStore, SchulteLive}
   }
 
   @kinds_by_game Map.new(@lobbies, fn {kind, {game, _store, _page}} -> {game, kind} end)

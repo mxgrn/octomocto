@@ -186,6 +186,53 @@
 
 .nimble-mosaic-next { animation: nimble-mosaic-next-in 200ms ease-out; }
 
+/* Schulte table: white cells with dark numbers and thin lines, as on paper.
+   The board is an SVG, so the sizes are in board units (100 for a cell). */
+.schulte-board { fill: #ffffff; }
+.schulte-cell { cursor: pointer; fill: #ffffff; transition: fill 150ms; }
+.schulte-cell:hover { fill: var(--color-octo-mist); }
+.schulte-number {
+  fill: #1f2933;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  transition: opacity 200ms;
+}
+.schulte-cell.schulte-found { cursor: default; fill: #ffffff; }
+.schulte-number.is-found { opacity: 0.18; }
+.schulte-line line { stroke: #9aa5b1; stroke-width: 2; }
+.schulte-border { stroke: #474d50; }
+.schulte-dot { fill: var(--color-octo-indigo); }
+
+[data-theme=dark] .schulte-board,
+[data-theme=dark] .schulte-cell,
+[data-theme=dark] .schulte-cell.schulte-found { fill: #1e2230; }
+[data-theme=dark] .schulte-cell:hover { fill: #2a2f42; }
+[data-theme=dark] .schulte-cell.schulte-found:hover { fill: #1e2230; }
+[data-theme=dark] .schulte-number { fill: #e5e7eb; }
+[data-theme=dark] .schulte-line line { stroke: #3b4256; }
+[data-theme=dark] .schulte-border { stroke: #11131a; }
+[data-theme=dark] .schulte-dot { fill: var(--color-octo-indigo-light); }
+
+/* The number shakes from its own center after a wrong click */
+.schulte-shake {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nimble-mosaic-shake 220ms ease-in-out;
+}
+
+/* A found number flashes one time in the color of its finder */
+@keyframes schulte-hit {
+  from { opacity: 0.45; }
+  to { opacity: 0; }
+}
+
+.schulte-hit { opacity: 0; animation: schulte-hit 400ms ease-out; }
+
+/* As in Nimble Mosaic: the score row of the last finder flashes, and the
+   next number pops in */
+.schulte-flash { animation: nimble-mosaic-flash 1s ease-out; }
+.schulte-next { animation: nimble-mosaic-next-in 200ms ease-out; }
+
 /* Each step of the countdown starts large and shrinks into place */
 @keyframes countdown-pop {
   from { transform: scale(1.6); opacity: 0; }
@@ -217,6 +264,8 @@ html:has(.is-playing) body {
 @media (prefers-reduced-motion: reduce) {
   .nimble-mosaic-pop { animation: none; opacity: 0; }
   .nimble-mosaic-next { animation: none; }
+  .schulte-next { animation: none; }
+  .schulte-hit { animation: none; }
   .countdown-pop { animation: none; }
   .turn-phone { animation: none; }
 }

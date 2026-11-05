@@ -36,7 +36,8 @@ config :mnesiac,
     Octomocto.Mahjong.Store,
     Octomocto.Overlap.Store,
     Octomocto.Snap.Store,
-    Octomocto.Afterglow.Store
+    Octomocto.Afterglow.Store,
+    Octomocto.Schulte.TableStore
   ]
 
 # Configure the endpoint

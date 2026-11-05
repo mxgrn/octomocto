@@ -12,6 +12,10 @@ defmodule Octomocto.GameHelpers do
   def nimble_mosaic_game(id, config \\ []),
     do: game(Octomocto.NimbleMosaic.Game, id, %{layout: :random, mode: :easy}, config)
 
+  @doc "A Schulte game with a 5 × 5 grid without marks."
+  def schulte_game(id, config \\ []),
+    do: game(Octomocto.Schulte.Game, id, %{size: 5, marks: false}, config)
+
   @doc "A sudoku game with an easy puzzle."
   def sudoku_game(id, config \\ []),
     do: game(Octomocto.Sudoku.Game, id, %{difficulty: "easy"}, config)

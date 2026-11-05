@@ -20,7 +20,7 @@ defmodule Octomocto.Application do
       Octomocto.Repo,
       {Cluster.Supervisor, [topologies, [name: Octomocto.ClusterSupervisor]]},
       # Before the endpoint: a new node gets the Nimble Mosaic, trains, Memory, Set,
-      # sudoku, Echo, Mahjong, Overlap, Snap and Afterglow games from the
+      # sudoku, Echo, Mahjong, Overlap, Snap, Afterglow and Schulte games from the
       # other node before it serves requests.
       {Mnesiac.Supervisor, [hosts, [name: Octomocto.MnesiacSupervisor]]},
       {Phoenix.PubSub, name: Octomocto.PubSub},
@@ -33,6 +33,7 @@ defmodule Octomocto.Application do
       {DynamicSupervisor, name: Octomocto.Memory.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Overlap.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.NimbleMosaic.GameSupervisor},
+      {DynamicSupervisor, name: Octomocto.Schulte.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.SetGame.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Snap.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Sudoku.GameSupervisor},
