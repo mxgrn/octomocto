@@ -16,6 +16,18 @@ defmodule OctomoctoWeb.SentryFilterTest do
     assert SentryFilter.before_send(event) == nil
   end
 
+  test "drops a not found error" do
+    event = Sentry.Event.transform_exception(%OctomoctoWeb.NotFoundError{}, [])
+
+    assert SentryFilter.before_send(event) == nil
+  end
+
+  test "keeps a message event without an exception" do
+    event = Sentry.Event.create_event(message: "boom")
+
+    assert SentryFilter.before_send(event) == event
+  end
+
   test "keeps other errors" do
     event = Sentry.Event.transform_exception(%RuntimeError{message: "boom"}, [])
 
