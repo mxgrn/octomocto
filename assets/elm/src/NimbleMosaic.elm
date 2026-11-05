@@ -664,12 +664,7 @@ viewGame model me game =
                 text ""
             ]
         , div [ class "min-w-0 flex-1" ]
-            [ if upright model then
-                viewTurnRequest model me game
-
-              else
-                viewBoard model me tall game
-            ]
+            [ viewBoard model me tall game ]
         ]
 
 
@@ -686,28 +681,6 @@ viewBoard model me tall game =
             viewCountdown (Maybe.withDefault 0 (countdownStep model))
 
           else if finished game then
-            viewResult model.settingsUrl model.nextGame model.guest me game
-
-          else
-            text ""
-        ]
-
-
-{-| On a small screen that is taller than wide, the board is too small, so
-the request to turn the screen is in its place. It fills the free height,
-so that the result of a game that ends shows over it.
--}
-viewTurnRequest : Model -> Me -> Game -> Html Msg
-viewTurnRequest model me game =
-    div
-        [ id "nimble-mosaic-turn"
-        , class "relative flex flex-col items-center justify-center gap-3 rounded-2xl bg-octo-mist p-6 text-center ring-1 ring-octo-indigo/15 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25"
-        , style "height" ("calc(100dvh - " ++ String.fromFloat (reservedHeight model me game) ++ "px)")
-        ]
-        [ span [ class "turn-phone hero-device-phone-mobile size-14 text-octo-indigo dark:text-octo-indigo-light" ] []
-        , p [ class "mt-2 text-xl font-semibold text-octo-navy dark:text-slate-100" ] [ text "Turn your screen" ]
-        , p [ class "max-w-60 text-sm text-slate-500 dark:text-slate-400" ] [ text "The board needs a screen that is wider than tall." ]
-        , if finished game then
             viewResult model.settingsUrl model.nextGame model.guest me game
 
           else
@@ -733,18 +706,6 @@ sideways model =
             model.viewport
     in
     width < largeScreen && width > height
-
-
-{-| A small screen that is taller than wide. The board is too small on it, so
-the player gets a request to turn the screen.
--}
-upright : Model -> Bool
-upright model =
-    let
-        ( width, height ) =
-            model.viewport
-    in
-    width < largeScreen && width <= height
 
 
 {-| The width and the height in pixels of the space for the board. On a
