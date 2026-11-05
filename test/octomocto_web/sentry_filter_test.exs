@@ -10,6 +10,12 @@ defmodule OctomoctoWeb.SentryFilterTest do
     assert SentryFilter.before_send(event) == nil
   end
 
+  test "drops an invalid CSRF token error" do
+    event = Sentry.Event.transform_exception(%Plug.CSRFProtection.InvalidCSRFTokenError{}, [])
+
+    assert SentryFilter.before_send(event) == nil
+  end
+
   test "keeps other errors" do
     event = Sentry.Event.transform_exception(%RuntimeError{message: "boom"}, [])
 
