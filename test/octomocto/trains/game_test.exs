@@ -106,4 +106,53 @@ defmodule Octomocto.Trains.GameTest do
 
     assert_receive {:lobby_changed, Game, ^id, %{status: :ongoing, players: [_, _]}}
   end
+
+  describe "a match" do
+    # Two players and a finished round
+    setup %{id: id} do
+      {:ok, first, _} = Trains.join(id)
+      {:ok, second, %{seed: seed}} = Trains.join(id)
+      Trains.finish(id, first, seed, 1)
+      %{first: first, second: second}
+    end
+
+    @tag players: 2
+    test "the other players cannot start a round while a player changes the settings",
+         %{id: id, first: first, second: second} do
+      {:ok, %{seed: seed, editing: ^first}} = Trains.edit_settings(id, first)
+
+      Trains.restart(id, second)
+
+      assert {:error, :not_allowed} = Trains.edit_settings(id, second)
+      assert {:ok, nil, %{seed: ^seed, editing: ^first}} = Trains.watch(id)
+    end
+
+    @tag players: 2
+    test "change_settings/3 starts a new round with the new settings",
+         %{id: id, first: first} do
+      {:ok, %{seed: seed}} = Trains.edit_settings(id, first)
+
+      :ok =
+        Trains.change_settings(id, first, %{switch_count: 8, trains_per_house: 3, pace: "hard"})
+
+      assert {:ok, nil, state} = Trains.watch(id)
+
+      assert %{editing: nil, switch_count: 8, trains_per_house: 3, pace: "hard", players: [_, _]} =
+               state
+
+      assert state.seed != seed
+    end
+
+    @tag players: 2
+    test "the other players can play again when the page of the player closes",
+         %{id: id, pid: pid, first: first} do
+      task = Task.async(fn -> Trains.edit_settings(id, first) end)
+      {:ok, %{editing: ^first}} = Task.await(task)
+      ref = Process.monitor(task.pid)
+      assert_receive {:DOWN, ^ref, :process, _, _}
+      _ = :sys.get_state(pid)
+
+      assert {:ok, nil, %{editing: nil}} = Trains.watch(id)
+    end
+  end
 end

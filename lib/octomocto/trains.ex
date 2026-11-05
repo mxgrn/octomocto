@@ -168,6 +168,32 @@ defmodule Octomocto.Trains do
   end
 
   @doc """
+  The player goes to the settings page after a round of a game with 2 or
+  more players (see `Octomocto.Trains.Game`). The calling process holds
+  the seat of the player, and the other players wait until the player
+  changes the settings (`change_settings/3`) or joins the game again.
+  Gives `{:ok, state}` with the state that clients see, or
+  `{:error, reason}` when the round did not end, the game has one player,
+  or another player changes the settings.
+  """
+  def edit_settings(id, player_id, pid \\ self()) do
+    GenServer.call(Game.via(id), {:edit_settings, pid, player_id})
+  catch
+    :exit, _reason -> {:error, :not_found}
+  end
+
+  @doc """
+  Starts a new round with the new `settings` (`:switch_count`,
+  `:trains_per_house` and `:pace`). Only the player of `edit_settings/3`
+  can. Gives `:ok` or `{:error, reason}`.
+  """
+  def change_settings(id, player_id, settings) do
+    GenServer.call(Game.via(id), {:change_settings, player_id, settings})
+  catch
+    :exit, _reason -> {:error, :not_found}
+  end
+
+  @doc """
   Saves one finished round. All players get the same `score`. Each player
   is a map with `:user_id` (nil for a guest), `:name` and `:guest_id`
   (see `Octomocto.Guests`).

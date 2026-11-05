@@ -168,9 +168,11 @@ defmodule OctomoctoWeb.GamePageComponents do
 
   attr :players, :list,
     required: true,
-    doc: "the players of the match, each with `:id`, `:name`, `:color`, `:color_name` and `:wins`"
+    doc:
+      "the players of the match, each with `:id`, `:name`, `:color`, `:color_name` and `:wins` (not in a cooperative game)"
 
-  attr :ties, :integer, required: true
+  attr :ties, :integer, default: 0
+  attr :wins, :boolean, default: true, doc: "false for a cooperative game, which has no wins"
   attr :me, :string, default: nil, doc: "the id of the player on the page"
   attr :back, :string, required: true, doc: "the path of the game"
 
@@ -178,10 +180,14 @@ defmodule OctomoctoWeb.GamePageComponents do
   The score of a match on the settings page, in place of the Players
   setting: the wins of each player, the most wins first, and the ties. The
   player on the page changes the settings of the next field, and the
-  other players wait.
+  other players wait. A cooperative game shows only the players, in their
+  order.
   """
   def match_score(assigns) do
-    assigns = assign(assigns, :players, Enum.sort_by(assigns.players, & &1.wins, :desc))
+    assigns =
+      if assigns.wins,
+        do: assign(assigns, :players, Enum.sort_by(assigns.players, & &1.wins, :desc)),
+        else: assigns
 
     ~H"""
     <section
@@ -204,10 +210,13 @@ defmodule OctomoctoWeb.GamePageComponents do
           {gettext("Back to the game")}
         </a>
       </div>
-      <div class="mt-3 flex justify-end text-xs font-medium tracking-wide text-base-content/50 uppercase">
+      <div
+        :if={@wins}
+        class="mt-3 flex justify-end text-xs font-medium tracking-wide text-base-content/50 uppercase"
+      >
         {gettext("Wins")}
       </div>
-      <ul id="match-players" class="divide-y divide-base-content/5">
+      <ul id="match-players" class={["divide-y divide-base-content/5", !@wins && "mt-3"]}>
         <li
           :for={player <- @players}
           id={"match-player-#{player.id}"}
@@ -218,7 +227,7 @@ defmodule OctomoctoWeb.GamePageComponents do
             <.player_link player={player}>{player_name(player)}</.player_link>
             <span :if={player.id == @me} class="text-base-content/50">({gettext("you")})</span>
           </span>
-          <span class="text-xl font-semibold tabular-nums">{player.wins}</span>
+          <span :if={@wins} class="text-xl font-semibold tabular-nums">{player.wins}</span>
         </li>
       </ul>
       <p :if={@ties > 0} id="match-ties" class="mt-1 text-end text-sm text-base-content/60">

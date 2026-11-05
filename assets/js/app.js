@@ -102,7 +102,9 @@ const SiteNotifications = {
 const matchToken = () => {
   const match = new URLSearchParams(window.location.search).get("match")
   if (!match) return {}
-  try { return {match_token: sessionStorage.getItem(`memory-token:${match}`)} } catch (_e) { return {} }
+  // The last part of the path is the game: "memory" or "trains"
+  const game = window.location.pathname.split("/").pop()
+  try { return {match_token: sessionStorage.getItem(`${game}-token:${match}`)} } catch (_e) { return {} }
 }
 
 const liveSocket = new LiveSocket("/live", Socket, {
@@ -257,7 +259,7 @@ if (trainsNode) {
   let muted = false
   try { muted = localStorage.getItem("trains-muted") === "true" } catch (_e) {}
 
-  const trains = window.Elm.Trains.init({node: trainsNode, flags: {gameUrl: window.location.href, settingsUrl: trainsNode.dataset.settingsUrl, nextGame: {name: trainsNode.dataset.nextGameName, path: trainsNode.dataset.nextGamePath}, guest: !trainsNode.dataset.userToken, muted}})
+  const trains = window.Elm.Trains.init({node: trainsNode, flags: {gameUrl: window.location.href, settingsUrl: trainsNode.dataset.settingsUrl, changeSettingsUrl: trainsNode.dataset.changeSettingsUrl || null, nextGame: {name: trainsNode.dataset.nextGameName, path: trainsNode.dataset.nextGamePath}, guest: !trainsNode.dataset.userToken, muted}})
   const socket = new Socket("/socket", {params: {user_token: trainsNode.dataset.userToken, _csrf_token: csrfToken}})
   socket.connect()
 

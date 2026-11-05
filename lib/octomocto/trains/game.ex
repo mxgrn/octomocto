@@ -37,6 +37,12 @@ defmodule Octomocto.Trains.Game do
   `Octomocto.Trains.Campaign.save_run/3`) and as a result with the level in
   its settings. Restart starts a new round of the same level.
 
+  The players of a game with 2 or more players can play more rounds with
+  other settings. When a round ended, one player can change the settings
+  on the settings page (see `Octomocto.Trains.edit_settings/3`). The
+  player is in `editing` while the page is open, and the other players
+  cannot start a round until the player is back.
+
   A public game is in the lists of the settings page (see
   `Octomocto.Lobby`): in the open games until it has all its players for
   the first time, then in the ongoing games. A
@@ -185,6 +191,8 @@ defmodule Octomocto.Trains.Game do
         trains_per_house: settings.trains_per_house,
         pace: settings.pace,
         opened: true,
+        # The id of the player on the settings page, see edit_settings/3
+        editing: nil,
         # The `:level` and the `:user_id` of the player of a game of the
         # campaign, else nil
         campaign: Map.get(settings, :campaign)
@@ -209,6 +217,8 @@ defmodule Octomocto.Trains.Game do
       |> Map.put_new(:campaign, nil)
       # A state from before the timings in the config
       |> Map.put_new(:rejoin_grace_ms, @rejoin_grace_ms)
+      # The page of a player who changed the settings was on the old node
+      |> Map.put(:editing, nil)
       |> with_deciders()
       |> Seats.restore()
       |> Seats.leave_all()
@@ -226,15 +236,64 @@ defmodule Octomocto.Trains.Game do
   def handle_call({:join, pid, _user_id, _name, player_id, _guest_id, _from_lobby}, _from, state)
       when is_map_key(state.players, player_id) do
     state = Seats.rejoin(state, player_id, pid)
-    store(state)
-    {:reply, {:ok, player_id, public(state)}, state}
+
+    # The player is back from the settings page
+    if state.editing == player_id do
+      state = %{state | editing: nil}
+      publish(state)
+      {:reply, {:ok, player_id, public(state)}, state}
+    else
+      store(state)
+      {:reply, {:ok, player_id, public(state)}, state}
+    end
   end
 
-  # The next game for all players, see `OctomoctoWeb.NextGame`
-  def handle_call({:next_game, player_id, page}, _from, state) do
+  # The next game for all players, see `OctomoctoWeb.NextGame`. Not while a
+  # player changes the settings.
+  def handle_call({:next_game, player_id, page}, _from, %{editing: nil} = state) do
     {id, state} = Octomocto.GameProcess.next_game(state, player_id, page)
     {:reply, id, state}
   end
+
+  def handle_call({:next_game, _player_id, _page}, _from, state), do: {:reply, nil, state}
+
+  # The process of the settings page holds the seat of the player, see
+  # `Octomocto.Trains.edit_settings/3`
+  def handle_call({:edit_settings, pid, player_id}, _from, state)
+      when is_map_key(state.players, player_id) and state.needed > 1 and
+             state.campaign == nil and state.score != nil and
+             state.editing in [nil, player_id] do
+    state = state |> Seats.rejoin(player_id, pid) |> Map.put(:editing, player_id)
+    publish(state)
+    {:reply, {:ok, public(state)}, state}
+  end
+
+  def handle_call({:edit_settings, _pid, _player_id}, _from, state),
+    do: {:reply, {:error, :not_allowed}, state}
+
+  # A new round with the new settings and the same players. Only the
+  # player on the settings page can.
+  def handle_call({:change_settings, player_id, settings}, _from, %{editing: player_id} = state)
+      when is_binary(player_id) do
+    %{switch_count: switches, trains_per_house: trains, pace: pace} = settings
+
+    if switches in Trains.switch_counts(state.needed) and trains in 1..7 and
+         pace in Trains.paces() do
+      state =
+        %{state | switch_count: switches, trains_per_house: trains, pace: pace, editing: nil}
+        |> Map.delete(:next_game)
+        |> new_round()
+        |> start_round()
+
+      publish(state)
+      {:reply, :ok, state}
+    else
+      {:reply, {:error, :not_allowed}, state}
+    end
+  end
+
+  def handle_call({:change_settings, _player_id, _settings}, _from, state),
+    do: {:reply, {:error, :not_allowed}, state}
 
   def handle_call(:watch, _from, state) do
     {:reply, {:ok, nil, public(state)}, state}
@@ -314,7 +373,9 @@ defmodule Octomocto.Trains.Game do
     {:noreply, state}
   end
 
-  def handle_cast({:restart, player_id}, state) when is_map_key(state.players, player_id) do
+  # Not while a player changes the settings
+  def handle_cast({:restart, player_id}, %{editing: nil} = state)
+      when is_map_key(state.players, player_id) do
     state = state |> Map.delete(:next_game) |> new_round() |> start_round()
     publish(state)
     {:noreply, state}
@@ -326,8 +387,16 @@ defmodule Octomocto.Trains.Game do
   def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
     if player_id = Seats.player_id(state, pid) do
       state = Seats.leave(state, player_id)
-      store(state)
-      {:noreply, state}
+
+      # The other players wait for the player on the settings page
+      if state.editing == player_id do
+        state = %{state | editing: nil}
+        publish(state)
+        {:noreply, state}
+      else
+        store(state)
+        {:noreply, state}
+      end
     else
       {:noreply, state}
     end
@@ -456,14 +525,24 @@ defmodule Octomocto.Trains.Game do
     Phoenix.PubSub.broadcast(Octomocto.PubSub, topic(state.id), message)
   end
 
-  # The state that clients see, ready to encode as JSON. Cells are [x, y]
-  # lists.
-  defp public(state) do
+  @doc """
+  The state that clients see, ready to encode as JSON. Cells are [x, y]
+  lists.
+  """
+  def public(state) do
     players =
       state.players
       |> Enum.sort_by(fn {_id, p} -> p.slot end)
       |> Enum.map(fn {id, p} ->
-        %{id: id, name: p.name, color: p.color, color_name: p.color_name, slot: p.slot}
+        %{
+          id: id,
+          name: p.name,
+          # A seat from before the profile pages has no `:public_id`
+          public_id: Map.get(p, :public_id),
+          color: p.color,
+          color_name: p.color_name,
+          slot: p.slot
+        }
       end)
 
     %{
@@ -473,6 +552,9 @@ defmodule Octomocto.Trains.Game do
       pace: state.pace,
       players: players,
       players_needed: state.needed,
+      public: state.public,
+      # The id of the player on the settings page, or nil
+      editing: state.editing,
       # Nil before the start. Below zero during the countdown.
       elapsed_ms: if(state.started_at, do: now() - state.started_at),
       switches: Enum.map(state.switches, fn {cell, value} -> %{cell: cell, value: value} end),

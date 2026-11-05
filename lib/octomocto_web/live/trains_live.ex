@@ -21,14 +21,18 @@ defmodule OctomoctoWeb.TrainsLive do
 
   alias Octomocto.{Accounts, Lobby, Trains}
   alias Octomocto.Trains.{Campaign, Game, Store}
-  alias OctomoctoWeb.SavedSettings
+  alias OctomoctoWeb.{SavedSettings, TrainsChannel}
 
-  def mount(_params, _session, socket) do
-    if connected?(socket), do: Lobby.subscribe(Game)
+  def mount(params, _session, socket) do
+    match = match(params["match"], socket)
+    if connected?(socket) and !match, do: Lobby.subscribe(Game)
+
+    if match && connected?(socket),
+      do: Phoenix.PubSub.subscribe(Octomocto.PubSub, Game.topic(match.id))
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/trains"), rules: rules()] ++ seo())
+     |> assign([canonical_url: url(~p"/trains"), rules: rules(), match: match] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))
      |> assign(watchers: Lobby.watchers(Game))}
   end
@@ -44,7 +48,7 @@ defmodule OctomoctoWeb.TrainsLive do
 
   # The params of the Free play tab. Without them, a signed-in user goes to
   # the tab that the user used last.
-  @settings_params ["players", "switches", "trains", "pace", "visibility"]
+  @settings_params ["players", "switches", "trains", "pace", "visibility", "match"]
 
   def handle_params(params, _uri, %{assigns: %{live_action: :campaign}} = socket) do
     {:noreply,
@@ -76,20 +80,29 @@ defmodule OctomoctoWeb.TrainsLive do
         socket |> remember_tab("free") |> assign_free_play(saved_params(socket, params))
 
       settings = new_socket.assigns.settings
-      SavedSettings.save_change(socket, "trains", settings, settings_query(settings))
+
+      SavedSettings.save_change(
+        socket,
+        "trains",
+        settings,
+        settings_query(%{settings | match: nil})
+      )
+
       {:noreply, new_socket}
     end
   end
 
   # The settings that the user chose last, when the page
-  # loads without settings
-  defp saved_params(socket, params),
+  # loads without settings. A match has its own settings.
+  defp saved_params(%{assigns: %{match: nil}} = socket, params),
     do: SavedSettings.params(socket, "trains", params, @settings_params)
+
+  defp saved_params(_socket, params), do: params
 
   # The Campaign and Lobby tabs keep the settings of the Free play tab, so
   # that its tab link goes back to them
   defp tab_params(%{assigns: %{settings: settings}}),
-    do: SavedSettings.to_params(settings_query(settings))
+    do: SavedSettings.to_params(settings_query(%{settings | match: nil}))
 
   defp tab_params(socket), do: saved_params(socket, %{})
 
@@ -108,7 +121,8 @@ defmodule OctomoctoWeb.TrainsLive do
   defp remember_tab(socket, _tab), do: socket
 
   defp assign_free_play(socket, params) do
-    settings = settings(params)
+    match = socket.assigns.match
+    settings = params |> match_params(match) |> settings() |> match_settings(match)
 
     filter = %{
       "switch_count" => settings.switch_count,
@@ -183,6 +197,14 @@ defmodule OctomoctoWeb.TrainsLive do
     {:noreply, assign(socket, watchers: Lobby.watchers(Game))}
   end
 
+  # The match card shows the changes of the players
+  def handle_info({:trains_state, state}, socket) do
+    {:noreply, update(socket, :match, &%{&1 | state: state})}
+  end
+
+  def handle_info({:trains_flip, _flip}, socket), do: {:noreply, socket}
+  def handle_info({:trains_decision, _decision}, socket), do: {:noreply, socket}
+
   @doc """
   Starts a game in the default settings for the number of players, and
   gives its id. See `OctomoctoWeb.NextGame`.
@@ -210,6 +232,21 @@ defmodule OctomoctoWeb.TrainsLive do
 
   def handle_event("play_level", _params, socket), do: {:noreply, socket}
 
+  # The next round of the match, in the same game
+  def handle_event("new_game", _params, %{assigns: %{match: %{player_id: player_id}}} = socket)
+      when is_binary(player_id) do
+    %{match: match, settings: settings} = socket.assigns
+    # When the settings do not change (for example, the game stopped), the
+    # game page shows the end screen again
+    Trains.change_settings(
+      match.id,
+      player_id,
+      Map.take(settings, [:switch_count, :trains_per_house, :pace])
+    )
+
+    {:noreply, redirect(socket, to: ~p"/trains/#{match.id}")}
+  end
+
   def handle_event("new_game", _params, socket) do
     id = Trains.create_game(socket.assigns.settings)
     {:noreply, redirect(socket, to: ~p"/trains/#{id}")}
@@ -227,9 +264,62 @@ defmodule OctomoctoWeb.TrainsLive do
       switch_count: Trains.fit_switch_count(switches, players),
       trains_per_house: int_param(params["trains"], 1..7, 2),
       pace: if(params["pace"] in Trains.paces(), do: params["pace"], else: "normal"),
-      public: params["visibility"] != "private"
+      public: params["visibility"] != "private",
+      match: nil
     }
   end
+
+  # The match of the page (`?match=<game id>`, see `Octomocto.Trains.Game`),
+  # or nil: the `:id` of the game, the `:state` that its clients see, and
+  # the `:player_id` of the player who changes the settings. The token of
+  # the player is in the connect params (see app.js), so the page holds the
+  # seat of the player only after the connect. Before the connect, the page
+  # only shows the players.
+  defp match(id, socket) when is_binary(id) do
+    if connected?(socket) do
+      token = get_connect_params(socket)["match_token"]
+
+      with player_id when is_binary(player_id) <- TrainsChannel.player_id(id, token),
+           {:ok, state} <- Trains.edit_settings(id, player_id) do
+        %{id: id, player_id: player_id, state: state}
+      else
+        _ -> nil
+      end
+    else
+      case Store.read(id) do
+        %{needed: needed, campaign: nil} = state when needed > 1 ->
+          %{id: id, player_id: nil, state: Game.public(state)}
+
+        _ ->
+          nil
+      end
+    end
+  end
+
+  defp match(_id, _socket), do: nil
+
+  # The settings of the game are the defaults of the match page, because
+  # the link to the page has only the match
+  defp match_params(params, nil), do: params
+
+  defp match_params(params, %{state: state}) do
+    Map.merge(
+      %{
+        "switches" => Integer.to_string(state.switch_count),
+        "trains" => Integer.to_string(state.trains_per_house),
+        "pace" => state.pace
+      },
+      # A match keeps its players, and the switches must divide equally
+      # between them
+      Map.put(params, "players", Integer.to_string(state.players_needed))
+    )
+  end
+
+  # A match keeps its players and its visibility
+  defp match_settings(settings, nil), do: settings
+
+  defp match_settings(settings, %{id: id, state: state}),
+    do: %{settings | public: state.public, match: id}
 
   defp assign_lobby(socket, entries) do
     assign(socket, lobby: entries, lobby_games: Lobby.games(entries))
@@ -270,11 +360,24 @@ defmodule OctomoctoWeb.TrainsLive do
       switch_count: state.switch_count,
       trains_per_house: state.trains_per_house,
       pace: state.pace,
-      public: state.public
+      public: state.public,
+      match: nil
     }
 
     settings_path(settings, %{})
   end
+
+  @doc """
+  The path of the Change settings button of the game in the given state,
+  or nil for a game with one player or of the campaign. The page changes
+  the settings of the next round of the match (see
+  `Octomocto.Trains.Game`). The path has only the match, because the
+  settings of the game can change after the page load.
+  """
+  def match_path(%{needed: needed, campaign: nil} = state) when needed > 1,
+    do: ~p"/trains?#{[match: state.id]}"
+
+  def match_path(_state), do: nil
 
   @doc "The path of the Campaign tab with the level selected."
   def campaign_path(level), do: ~p"/trains/campaign?#{[level: level]}"
@@ -294,7 +397,8 @@ defmodule OctomoctoWeb.TrainsLive do
     ]
 
     # A public game has no param, so that most links stay short
-    if s.public, do: query, else: query ++ [visibility: "private"]
+    query = if s.public, do: query, else: query ++ [visibility: "private"]
+    if s.match, do: query ++ [match: s.match], else: query
   end
 
   @doc """

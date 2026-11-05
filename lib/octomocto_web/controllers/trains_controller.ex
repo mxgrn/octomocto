@@ -11,6 +11,7 @@ defmodule OctomoctoWeb.TrainsController do
       render(conn, :show,
         id: id,
         settings_path: TrainsLive.settings_path(state),
+        change_settings_path: TrainsLive.match_path(state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
         next_game: NextGame.pick("trains", id, state.needed > 1),

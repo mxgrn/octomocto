@@ -42,7 +42,7 @@ import Browser.Events
 import Dict exposing (Dict)
 import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, p, span, text, ul)
-import Html.Attributes exposing (alt, attribute, class, classList, href, id, readonly, rel, src, style, target, value)
+import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Json.Decode as Decode exposing (Decoder)
@@ -339,6 +339,10 @@ type alias Game =
 
     -- The level of a game of the campaign, Nothing for other games
     , campaign : Maybe Campaign
+
+    -- The id of the player who changes the settings of the next round
+    -- (see `OctomoctoWeb.TrainsLive`). The other players wait.
+    , editing : Maybe String
     }
 
 
@@ -378,6 +382,10 @@ Nothing until the round starts and the clock is in sync.
 type alias Model =
     { gameUrl : String
     , settingsUrl : String
+
+    -- The settings page of the next round of the match. Nothing for a
+    -- game with one player or of the campaign.
+    , changeSettingsUrl : Maybe String
     , nextGame : NextGame
     , guest : Bool
     , connection : Connection
@@ -396,6 +404,7 @@ type alias Model =
 type alias Flags =
     { gameUrl : String
     , settingsUrl : String
+    , changeSettingsUrl : Maybe String
     , nextGame : NextGame
     , guest : Bool
     , muted : Bool
@@ -406,6 +415,7 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { gameUrl = flags.gameUrl
       , settingsUrl = flags.settingsUrl
+      , changeSettingsUrl = flags.changeSettingsUrl
       , nextGame = flags.nextGame
       , guest = flags.guest
       , connection = Connecting
@@ -524,6 +534,7 @@ update msg model =
                                         | players = state.players
                                         , needed = state.needed
                                         , started = state.elapsedMs /= Nothing
+                                        , editing = state.editing
                                     }
                           }
                         , Cmd.batch
@@ -717,6 +728,7 @@ gameFromState state =
                     (List.filterMap (\d -> Maybe.map (Tuple.pair d.key) d.playerId) state.decisions)
         }
     , campaign = state.campaign
+    , editing = state.editing
     }
 
 
@@ -1233,6 +1245,7 @@ type alias ServerState =
     , switches : List ( Cell, Int )
     , decisions : List StateDecision
     , campaign : Maybe Campaign
+    , editing : Maybe String
     }
 
 
@@ -1269,6 +1282,13 @@ joinedDecoder =
 
 stateDecoder : Decoder ServerState
 stateDecoder =
+    Decode.map2 (<|)
+        stateDecoderWithoutEditing
+        (Decode.field "editing" (Decode.nullable Decode.string))
+
+
+stateDecoderWithoutEditing : Decoder (Maybe String -> ServerState)
+stateDecoderWithoutEditing =
     Decode.map8 ServerState
         (Decode.field "seed" Decode.int)
         (Decode.map3 boardFor
@@ -2027,7 +2047,7 @@ viewGame model me game =
                         ]
                     ]
                 , viewStats game.round
-                , viewMenu model.muted (me /= Nothing)
+                , viewMenu (game.editing /= Nothing) model.muted (me /= Nothing)
                 ]
             , if solo then
                 text ""
@@ -2282,14 +2302,16 @@ playerName me player =
 
 {-| Starts a new round with a new board for all players, also during a
 round. On a small screen, only the icon shows, but not in the column of a
-screen that is wider than tall.
+screen that is wider than tall. It is disabled while a player changes
+the settings.
 -}
-viewMenu : Bool -> Bool -> Html Msg
-viewMenu muted player =
+viewMenu : Bool -> Bool -> Bool -> Html Msg
+viewMenu locked muted player =
     Html.node "octo-game-menu"
         [ class "relative shrink-0 lg:order-5 lg:self-start"
         , attribute "menu-label" "Menu"
         , attribute "restart-label" "New board"
+        , attribute "locked" (boolAttribute locked)
         , attribute "sound-on-label" "Turn the sounds on"
         , attribute "sound-off-label" "Turn the sounds off"
         , attribute "muted" (boolAttribute muted)
@@ -2351,6 +2373,16 @@ viewOverlay model me game =
 -}
 viewResult : Model -> Me -> Game -> Html Msg
 viewResult model me game =
+    let
+        -- The player on the settings page. Nobody can start a round until
+        -- that player is back.
+        editor =
+            game.editing
+                |> Maybe.andThen (\editing -> List.head (List.filter (\player -> player.id == editing) game.players))
+
+        locked =
+            editor /= Nothing
+    in
     overlay "trains-over"
         [ p [ id "trains-result", class "text-2xl font-semibold" ]
             [ text (String.fromInt game.round.correct ++ " of " ++ String.fromInt (trainCount game.round.layout.board) ++ " trains got home") ]
@@ -2360,11 +2392,54 @@ viewResult model me game =
 
           else
             text ""
+        , case editor of
+            Just player ->
+                p [ id "trains-editing", class "animate-pulse text-sm text-white/80" ]
+                    [ text
+                        (case player.name of
+                            Just name ->
+                                name ++ " changes the settings…"
+
+                            Nothing ->
+                                "The " ++ player.colorName ++ " player changes the settings…"
+                        )
+                    ]
+
+            Nothing ->
+                text ""
         , if me == Nothing then
             text ""
 
           else
-            overlayButton "trains-again" Restart "Play again"
+            div [ class "mt-3 flex flex-wrap items-center justify-center gap-3" ]
+                [ button
+                    [ id "trains-again"
+                    , class "rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/30 transition hover:bg-octo-indigo/90 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-octo-indigo"
+                    , onClick Restart
+                    , disabled locked
+                    ]
+                    [ text "Play again" ]
+                , case model.changeSettingsUrl of
+                    Nothing ->
+                        text ""
+
+                    Just url ->
+                        if locked then
+                            span
+                                [ id "trains-change-settings"
+                                , attribute "aria-disabled" "true"
+                                , class "cursor-not-allowed rounded-full px-5 py-2.5 font-medium text-white opacity-50 ring-1 ring-white/40"
+                                ]
+                                [ text "Change settings" ]
+
+                        else
+                            a
+                                [ id "trains-change-settings"
+                                , href url
+                                , class "rounded-full px-5 py-2.5 font-medium text-white ring-1 ring-white/40 transition hover:bg-white/10"
+                                ]
+                                [ text "Change settings" ]
+                ]
         , let
             -- In a game with other players, a player starts the next game for all of them
             ( element, action ) =
@@ -2377,10 +2452,11 @@ viewResult model me game =
           element
             [ id "trains-next-game"
             , action
+            , disabled locked
             , attribute "data-ga-link" "or_try"
             , attribute "data-ga-from" "Right on Track"
             , attribute "data-ga-to" model.nextGame.name
-            , class "group mt-2 text-sm font-medium text-white underline-offset-4 transition hover:underline"
+            , class "group mt-2 text-sm font-medium text-white underline-offset-4 transition hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:no-underline"
             ]
             [ text ("Or try " ++ model.nextGame.name ++ " ")
             , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
@@ -2546,16 +2622,6 @@ verdict round =
 overlay : String -> List (Html Msg) -> Html Msg
 overlay overlayId =
     div [ id overlayId, class "absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-slate-900/55 p-4 text-center text-white backdrop-blur-[2px]" ]
-
-
-overlayButton : String -> Msg -> String -> Html Msg
-overlayButton buttonId msg label =
-    button
-        [ id buttonId
-        , class "mt-3 rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/30 transition hover:bg-octo-indigo/90"
-        , onClick msg
-        ]
-        [ text label ]
 
 
 {-| Only the ground, with the same size as the board

@@ -35,6 +35,8 @@
       </div>
       <p class="text-base-content/70">
         <%= cond do %>
+          <% @match -> %>
+            Choose the settings of the next game.
           <% @live_action == :campaign -> %>
             Get 90% of the trains home to unlock the next level.
           <% @live_action == :lobby -> %>
@@ -44,7 +46,8 @@
         <% end %>
       </p>
       <.how_to_play />
-      <div class="pt-2">
+      <%!-- A match plays on with the same players, so it needs no other games --%>
+      <div :if={!@match} class="pt-2">
         <.mode_tabs
           tab={if(@live_action == :index, do: :free, else: @live_action)}
           free_path={settings_path(@settings, %{})}
@@ -151,7 +154,15 @@
         class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-2 xl:static xl:col-start-2 xl:-mx-2 xl:w-[calc(100%+1rem)] xl:max-w-none xl:self-stretch xl:overflow-y-auto xl:px-2 xl:pt-1"
       >
         <div id="trains-settings" class="flex w-full flex-col gap-4">
+          <.match_score
+            :if={@match}
+            players={@match.state.players}
+            wins={false}
+            me={@match.player_id}
+            back={~p"/trains/#{@match.id}"}
+          />
           <.setting
+            :if={!@match}
             id="setting-players"
             label="Players"
             icon="hero-users"
@@ -217,6 +228,7 @@
             </.option>
           </.setting>
           <.setting
+            :if={!@match}
             id="setting-visibility"
             label="Visibility"
             icon="hero-eye"
@@ -238,7 +250,7 @@
           </.setting>
         </div>
 
-        <.start_bar multiplayer={@settings.players > 1} />
+        <.start_bar multiplayer={@settings.players > 1} match={@match != nil} />
       </div>
 
       <div
