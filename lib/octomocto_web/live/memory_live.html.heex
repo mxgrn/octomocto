@@ -176,6 +176,7 @@
           />
           <.setting
             :if={!@match}
+            id="setting-players"
             label={dgettext("memory", "Players")}
             icon="hero-users"
             hint={
@@ -279,6 +280,7 @@
             </div>
           </div>
           <.setting
+            id="setting-look-for"
             label={dgettext("memory", "Look for")}
             icon="hero-magnifying-glass"
             hint={
@@ -307,7 +309,12 @@
               {label}
             </.option>
           </.setting>
-          <.setting label={dgettext("memory", "Cards")} icon="hero-squares-2x2" wide>
+          <.setting
+            id="setting-cards"
+            label={dgettext("memory", "Cards")}
+            icon="hero-squares-2x2"
+            wide
+          >
             <.step_button
               id="cards-less"
               icon="hero-minus"
@@ -348,6 +355,7 @@
             />
           </.setting>
           <.setting
+            id="setting-bombs"
             label={dgettext("memory", "Bombs")}
             icon="icon-bomb"
             badge="New"
@@ -379,6 +387,7 @@
           </.setting>
           <.setting
             :if={!@match}
+            id="setting-visibility"
             label={dgettext("memory", "Visibility")}
             icon="hero-eye"
             hint={visibility_hint(@settings)}

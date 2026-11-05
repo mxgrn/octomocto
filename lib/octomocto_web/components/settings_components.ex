@@ -5,6 +5,7 @@ defmodule OctomoctoWeb.SettingsComponents do
   """
   use OctomoctoWeb, :html
 
+  attr :id, :string, required: true
   attr :label, :string, required: true
   attr :icon, :string, required: true, doc: "an icon name, such as `hero-users` (see `icon/1`)"
   attr :hint, :string, default: nil, doc: "a short explanation of the selected option"
@@ -16,15 +17,95 @@ defmodule OctomoctoWeb.SettingsComponents do
   @doc "One setting of a new game: the header, and the options in a row below it."
   def setting(assigns) do
     ~H"""
-    <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
+    <div id={@id} class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
       <.setting_header label={@label} icon={@icon} badge={@badge} badge_id={@badge_id} />
       <div class="mt-3 flex justify-center">
-        <div class={["option-slider flex gap-1 rounded-full bg-base-200 p-1", @wide && "w-full"]}>
+        <.option_slider id={"#{@id}-options"} class={@wide && "w-full"}>
           {render_slot(@inner_block)}
-        </div>
+        </.option_slider>
       </div>
       <p :if={@hint} class="mt-1.5 text-start text-xs text-base-content/50">{@hint}</p>
     </div>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :class, :any, default: nil
+  slot :inner_block, required: true
+
+  @doc """
+  A row of `option/1`s with one pill that slides to the selected option.
+
+  The hook measures the selected option and gives its place to the pill
+  in CSS variables (see `.option-slider` in app.css). Before the hook
+  runs, the selected option shows its own background. The hook measures
+  again after each update, and when the size of the row or of an option
+  changes, for example when a font loads or the screen turns.
+  """
+  def option_slider(assigns) do
+    ~H"""
+    <div
+      id={@id}
+      phx-hook=".OptionSlider"
+      class={["option-slider flex gap-1 rounded-full bg-base-200 p-1", @class]}
+    >
+      {render_slot(@inner_block)}
+    </div>
+    <script :type={Phoenix.LiveView.ColocatedHook} name=".OptionSlider">
+      export default {
+        mounted() {
+          // Keep the place of the pill when LiveView patches the row
+          this.js().ignoreAttributes(this.el, ["style", "data-slider-ready"])
+          this.observer = new ResizeObserver(() => this.place(false))
+          this.observe()
+          this.place(false)
+        },
+        updated() {
+          this.place(true)
+          this.observe()
+        },
+        destroyed() {
+          this.observer.disconnect()
+        },
+        observe() {
+          // Observing an element again has no effect
+          this.observer.observe(this.el)
+          for (const option of this.el.children) this.observer.observe(option)
+        },
+        place(slide) {
+          const option = this.el.querySelector("[aria-current]")
+          if (!option) {
+            // The next selected option gets the pill without a slide
+            this.last = null
+            return
+          }
+          // A hidden row has no size. The observer calls again when it shows.
+          if (option.offsetWidth === 0) return
+
+          const x = option.offsetLeft
+          const y = option.offsetTop
+          const width = option.offsetWidth
+          const height = option.offsetHeight
+          const key = `${x} ${y} ${width} ${height}`
+          if (key === this.last) return
+          const instant = !slide || this.last === null || this.last === undefined
+          this.last = key
+
+          const style = this.el.style
+          if (instant) style.setProperty("--pill-transition", "none")
+          style.setProperty("--pill-x", `${x}px`)
+          style.setProperty("--pill-y", `${y}px`)
+          style.setProperty("--pill-width", `${width}px`)
+          style.setProperty("--pill-height", `${height}px`)
+          this.el.dataset.sliderReady = ""
+          if (instant) {
+            // Apply the place without a transition, then allow transitions again
+            this.el.offsetWidth
+            style.removeProperty("--pill-transition")
+          }
+        }
+      }
+    </script>
     """
   end
 

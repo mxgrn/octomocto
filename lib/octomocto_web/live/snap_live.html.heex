@@ -30,7 +30,12 @@
 
     <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-2">
       <div id="snap-settings" class="flex w-full flex-col gap-4">
-        <.setting label="Cards back" icon="hero-arrow-uturn-left" hint={back_hint(@settings.back)}>
+        <.setting
+          id="setting-cards-back"
+          label="Cards back"
+          icon="hero-arrow-uturn-left"
+          hint={back_hint(@settings.back)}
+        >
           <.option
             :for={n <- 1..3}
             id={"back-#{n}"}

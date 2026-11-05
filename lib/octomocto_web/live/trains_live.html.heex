@@ -152,6 +152,7 @@
       >
         <div id="trains-settings" class="flex w-full flex-col gap-4">
           <.setting
+            id="setting-players"
             label="Players"
             icon="hero-users"
             hint={
@@ -171,6 +172,7 @@
             </.option>
           </.setting>
           <.setting
+            id="setting-switches"
             label="Switches"
             icon="hero-arrows-right-left"
             hint={switches_hint(@settings.switch_count, @settings.players)}
@@ -184,7 +186,12 @@
               {n}
             </.option>
           </.setting>
-          <.setting label="Trains per house" icon="hero-home" hint={trains_hint(@settings)}>
+          <.setting
+            id="setting-trains-per-house"
+            label="Trains per house"
+            icon="hero-home"
+            hint={trains_hint(@settings)}
+          >
             <.option
               :for={n <- 1..7}
               id={"trains-#{n}"}
@@ -194,7 +201,12 @@
               {n}
             </.option>
           </.setting>
-          <.setting label="Pace" icon="hero-bolt" hint={pace_hint(@settings.pace)}>
+          <.setting
+            id="setting-pace"
+            label="Pace"
+            icon="hero-bolt"
+            hint={pace_hint(@settings.pace)}
+          >
             <.option
               :for={pace <- Octomocto.Trains.paces()}
               id={"pace-#{pace}"}
@@ -204,7 +216,12 @@
               {String.capitalize(pace)}
             </.option>
           </.setting>
-          <.setting label="Visibility" icon="hero-eye" hint={visibility_hint(@settings)}>
+          <.setting
+            id="setting-visibility"
+            label="Visibility"
+            icon="hero-eye"
+            hint={visibility_hint(@settings)}
+          >
             <.option
               :for={
                 {value, public, label} <- [

@@ -53,7 +53,12 @@
 
     <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
       <div id="mahjong-settings" class="flex w-full flex-col gap-4">
-        <.setting label="Players" icon="hero-users" hint={players_hint(@settings.players)}>
+        <.setting
+          id="setting-players"
+          label="Players"
+          icon="hero-users"
+          hint={players_hint(@settings.players)}
+        >
           <.option
             :for={n <- 1..4}
             id={"players-#{n}"}
@@ -64,6 +69,7 @@
           </.option>
         </.setting>
         <.setting
+          id="setting-visibility"
           label="Visibility"
           icon="hero-eye"
           hint={visibility_hint(@settings)}

@@ -7,7 +7,7 @@ defmodule OctomoctoWeb.CampaignComponents do
   """
   use OctomoctoWeb, :html
 
-  import OctomoctoWeb.SettingsComponents, only: [option: 1]
+  import OctomoctoWeb.SettingsComponents, only: [option: 1, option_slider: 1]
 
   attr :tab, :atom, required: true, doc: ":free, :campaign or :lobby"
   attr :free_path, :string, required: true
@@ -26,7 +26,7 @@ defmodule OctomoctoWeb.CampaignComponents do
   def mode_tabs(assigns) do
     ~H"""
     <nav id="campaign-tabs" class="flex justify-center">
-      <div class="option-slider flex gap-1 rounded-full bg-base-200 p-1">
+      <.option_slider id="campaign-tabs-options">
         <.option id="tab-free" patch={@free_path} selected={@tab == :free}>
           {@free_label}
         </.option>
@@ -51,7 +51,7 @@ defmodule OctomoctoWeb.CampaignComponents do
             </span>
           </span>
         </.option>
-      </div>
+      </.option_slider>
     </nav>
     """
   end
