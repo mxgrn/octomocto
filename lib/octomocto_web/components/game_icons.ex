@@ -287,10 +287,61 @@ defmodule OctomoctoWeb.GameIcons do
     """
   end
 
+  # A small board as in the game: shapes of different forms and colors,
+  # with numbers of different sizes. The colors are those of the board.
   def game_icon(%{game: "nimble-mosaic"} = assigns) do
     ~H"""
     <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
-      <g :for={{digit, x, y} <- nimble_mosaic_cells()}>
+      <defs>
+        <clipPath id="nimble-mosaic-icon-board">
+          <rect x="4" y="4" width="40" height="40" rx="6" />
+        </clipPath>
+      </defs>
+      <g
+        clip-path="url(#nimble-mosaic-icon-board)"
+        stroke="#474d50"
+        stroke-width="1.2"
+        stroke-linejoin="round"
+      >
+        <rect x="4" y="4" width="40" height="40" fill="#fbf5e1" />
+        <path d="M24 4H44V16H24Z" fill="#9dedc4" />
+        <path d="M24 16H44V30H34L24 22Z" fill="#ff9c98" />
+        <path d="M4 22A10 10 0 0 1 4 42Z" fill="#ffd06c" />
+        <path d="M30 44L44 30V44Z" fill="#9dedc4" />
+        <path d="M24 4V22M4 18H24M24 22L18 44" fill="none" />
+      </g>
+      <text
+        :for={
+          {x, y, digit, size} <- [
+            {14, 15.5, "7", 11},
+            {34, 13.5, "2", 8},
+            {35, 27, "1", 9},
+            {8.5, 35.5, "3", 7},
+            {18.5, 31, "5", 6.5},
+            {27.5, 39.5, "9", 8},
+            {40, 41.5, "4", 5.5}
+          ]
+        }
+        x={x}
+        y={y}
+        text-anchor="middle"
+        font-size={size}
+        font-weight="700"
+        fill="#474d50"
+      >
+        {digit}
+      </text>
+      <rect x="4" y="4" width="40" height="40" rx="6" fill="none" stroke="#474d50" stroke-width="1.5" />
+    </svg>
+    """
+  end
+
+  # The classic Schulte table (the game is not there yet): a 3 x 3 grid
+  # with the numbers 1 to 9
+  def game_icon(%{game: "schulte"} = assigns) do
+    ~H"""
+    <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
+      <g :for={{digit, x, y} <- schulte_cells()}>
         <rect
           x={x}
           y={y}
@@ -321,7 +372,7 @@ defmodule OctomoctoWeb.GameIcons do
   end
 
   # The digits of a 3 x 3 grid, with the positions of their cells
-  defp nimble_mosaic_cells do
+  defp schulte_cells do
     for {digit, i} <- Enum.with_index([7, 2, 5, 4, 9, 1, 6, 3, 8]) do
       {digit, 4 + rem(i, 3) * 14, 4 + div(i, 3) * 14}
     end
