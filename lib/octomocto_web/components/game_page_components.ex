@@ -39,8 +39,8 @@ defmodule OctomoctoWeb.GamePageComponents do
   @doc """
   The public games: the open games that wait for players, then the games
   that have started. An open game with the same settings as the new game
-  has a green background. In a started game, the player of the turn is in
-  bold, and the points show when the game has them. The Watch button of a
+  has a green background. In a started game with two or more players, the
+  player of the turn is in bold, and the points show when the game has them. The Watch button of a
   game with watchers shows their number.
   """
   def lobby_games(assigns) do
@@ -100,7 +100,10 @@ defmodule OctomoctoWeb.GamePageComponents do
                 <.presence away={player.away} />
                 <.player_link
                   player={player}
-                  class={[player[:turn] && !game[:finished] && "font-semibold text-base-content"]}
+                  class={[
+                    player[:turn] && !game[:finished] && length(game.players) > 1 &&
+                      "font-semibold text-base-content"
+                  ]}
                 >
                   {player_name(player)}
                 </.player_link>
