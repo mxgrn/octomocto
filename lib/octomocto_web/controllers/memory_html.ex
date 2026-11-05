@@ -20,8 +20,6 @@ defmodule OctomoctoWeb.MemoryHTML do
         dgettext("memory", "Find the pairs of cards with the same image."),
       "Find the triplets of cards with the same image." =>
         dgettext("memory", "Find the triplets of cards with the same image."),
-      "This game is full, so you can only watch it." =>
-        dgettext("memory", "This game is full, so you can only watch it."),
       "Best results" => dgettext("memory", "Best results"),
       "Turn the sounds on" => dgettext("memory", "Turn the sounds on"),
       "Turn the sounds off" => dgettext("memory", "Turn the sounds off"),

@@ -656,12 +656,6 @@ viewGame model me game =
 
               else
                 text ""
-            , if me == Nothing then
-                p [ id "nimble-mosaic-watching", class "rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 lg:order-5 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
-                    [ text "This game is full, so you can only watch it." ]
-
-              else
-                text ""
             ]
         , div [ class "min-w-0 flex-1" ]
             [ viewBoard model me tall game ]

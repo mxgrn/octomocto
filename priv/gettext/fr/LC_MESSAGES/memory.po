@@ -210,10 +210,6 @@ msgid "Theme"
 msgstr "Thème"
 
 #, elixir-autogen, elixir-format
-msgid "This game is full, so you can only watch it."
-msgstr "Cette partie est complète, tu peux seulement la regarder."
-
-#, elixir-autogen, elixir-format
 msgid "Time {time}"
 msgstr "Temps {time}"
 
