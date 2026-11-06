@@ -16,6 +16,8 @@ defmodule Octomocto.GameHelpers do
   def schulte_game(id, config \\ []),
     do: game(Octomocto.Schulte.Game, id, %{size: 5, marks: false}, config)
 
+  def graze_game(id, config \\ []), do: game(Octomocto.Graze.Game, id, %{}, config)
+
   @doc "A sudoku game with an easy puzzle."
   def sudoku_game(id, config \\ []),
     do: game(Octomocto.Sudoku.Game, id, %{difficulty: "easy"}, config)

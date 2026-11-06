@@ -1,0 +1,180 @@
+<Layouts.app
+  notices={@notices}
+  flash={@flash}
+  notifications={@notifications}
+  current_scope={@current_scope}
+  guest_name={@guest_name}
+  guest_public_id={@guest_public_id}
+>
+  <%!--
+    Wider than the app container, so that the columns have room. One column
+    on a small screen: the title, the public games, the settings and the
+    results. Two columns on a large screen: the results go to the right.
+    Three columns on an extra large screen: the public games go to the left,
+    and the settings in the center are wider than the other columns. The
+    columns use the full width of the screen, with the side padding of the
+    header.
+    The last row takes the free height, so that the tall results column does
+    not make gaps between the rows on the left.
+  --%>
+  <div
+    id="graze-index"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] xl:grid-rows-[auto_1fr]"
+  >
+    <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 xl:max-w-none">
+      <div class="flex items-center justify-center gap-3">
+        <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
+          <OctomoctoWeb.GameIcons.game_icon game="graze" class="size-9" />
+        </div>
+        <h1 class="text-3xl font-semibold tracking-tight">Graze</h1>
+      </div>
+      <p class="text-base-content/70">
+        Your circle eats the black squares to stay alive and keeps away from
+        the red ones. Choose the players and start a new game.
+      </p>
+      <.how_to_play />
+    </div>
+
+    <div
+      id="graze-lobby"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
+    >
+      <.lobby_games
+        games={@lobby_games}
+        watchers={@watchers}
+        matches={&same_settings?(&1, @settings)}
+        path={&~p"/graze/#{&1.id}"}
+      >
+        <:icon>
+          <.lobby_icon />
+        </:icon>
+      </.lobby_games>
+    </div>
+
+    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
+      <div id="graze-settings" class="flex w-full flex-col gap-4">
+        <.setting
+          id="setting-players"
+          label="Players"
+          icon="hero-users"
+          hint={if(@settings.players > 1, do: "The game starts when all players are in.")}
+        >
+          <.option
+            :for={n <- 1..4}
+            id={"players-#{n}"}
+            selected={@settings.players == n}
+            patch={~p"/graze?#{query(@settings, players: n)}"}
+          >
+            {n}
+          </.option>
+        </.setting>
+        <.setting
+          id="setting-visibility"
+          label="Visibility"
+          icon="hero-eye"
+          hint={visibility_hint(@settings)}
+        >
+          <.option
+            :for={
+              {value, public, label} <- [
+                {"public", true, "Public"},
+                {"private", false, "Private"}
+              ]
+            }
+            id={"visibility-#{value}"}
+            selected={@settings.public == public}
+            patch={~p"/graze?#{query(@settings, public: public)}"}
+          >
+            {label}
+          </.option>
+        </.setting>
+      </div>
+
+      <.start_bar multiplayer={@settings.players > 1} />
+    </div>
+
+    <div
+      id="graze-leaderboard"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
+    >
+      <.score_list
+        id="your-results"
+        icon="hero-user"
+        icon_class="text-octo-indigo"
+        title="Your results"
+        empty={@user_results != nil and @user_results.latest == []}
+        empty_text="No games yet."
+      >
+        <:aside :if={@user_results && @user_results.best}>
+          <span
+            id="your-best"
+            class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
+          >
+            <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
+            <span class="text-base-content/60">Best</span>
+            <span class="font-semibold tabular-nums">
+              {@user_results.best.score}
+            </span>
+          </span>
+        </:aside>
+        <%= if @user_results do %>
+          <.result_row :for={%{result: result, players: players} <- @user_results.latest}>
+            <span :if={@settings.players == 1} class="flex-1 font-medium">
+              {Calendar.strftime(result.inserted_at, "%b %-d")}
+            </span>
+            <span :if={@settings.players > 1} class="min-w-0 flex-1 font-medium">
+              <.player_list players={players} scores />
+            </span>
+            <.result_pill best={@user_results.best != nil and result.id == @user_results.best.id}>
+              {result.score}
+            </.result_pill>
+          </.result_row>
+        <% else %>
+          <li class="py-2 text-center text-base-content/60">
+            <.link
+              id="your-results-sign-in"
+              href={~p"/signin"}
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
+            >
+              Sign in
+            </.link>
+            to start saving your results.
+          </li>
+        <% end %>
+      </.score_list>
+      <.score_list
+        id="best-results"
+        icon="hero-trophy"
+        icon_class="text-amber-500"
+        title="Best results"
+        empty={@best_results == []}
+        empty_text={OctomoctoWeb.BestResults.empty_text(@best_following)}
+      >
+        <:aside :if={@user_results}>
+          <OctomoctoWeb.BestResults.filter following={@best_following} />
+        </:aside>
+        <:aside :if={!@user_results}>
+          <span class="text-sm text-base-content/60">
+            <.link
+              id="best-results-sign-in"
+              href={~p"/signin"}
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
+            >
+              Sign in
+            </.link>
+            to get listed
+          </span>
+        </:aside>
+        <.result_row :for={{result, place} <- Enum.with_index(@best_results, 1)}>
+          <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+          <span class="min-w-0 flex-1 truncate font-medium"><.player_link player={result.user}>{player_name(
+            result.user
+          )}</.player_link></span>
+          <.result_pill>{result.score}</.result_pill>
+        </.result_row>
+      </.score_list>
+    </div>
+  </div>
+
+  <.rules rules={@rules} />
+</Layouts.app>

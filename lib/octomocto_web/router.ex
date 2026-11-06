@@ -85,6 +85,7 @@ defmodule OctomoctoWeb.Router do
     get "/overlap/:id", OverlapController, :show
     get "/snap/:id", SnapController, :show
     get "/afterglow/:id", AfterglowController, :show
+    get "/graze/:id", GrazeController, :show
     # The bar of notifications sends each close, also for guests
     post "/notifications/:id/close", NotificationCloseController, :create
 
@@ -115,6 +116,7 @@ defmodule OctomoctoWeb.Router do
       live "/snap", SnapLive
       live "/afterglow", AfterglowLive
       live "/schulte", SchulteLive
+      live "/graze", GrazeLive
       live "/stats", StatsLive
       live "/stats/:game", GameStatsLive
       live "/stats/languages/:language", LanguageStatsLive

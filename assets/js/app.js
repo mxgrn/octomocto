@@ -431,6 +431,61 @@ if (schulteNode) {
   })
 }
 
+// Start Graze and connect its ports to the game channel. It works as
+// Nimble Mosaic above, with the same sounds. The browser sends the place
+// of the circle of the player many times a second.
+const grazeNode = document.getElementById("graze-main")
+if (grazeNode) {
+  if (navigator.userActivation?.hasBeenActive) unlockAudio()
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  let muted = false
+  try { muted = localStorage.getItem("graze-muted") === "true" } catch (_e) {}
+
+  const graze = window.Elm.Graze.init({node: grazeNode, flags: {gameUrl: window.location.href, settingsUrl: grazeNode.dataset.settingsUrl, nextGame: {name: grazeNode.dataset.nextGameName, path: grazeNode.dataset.nextGamePath}, guest: !grazeNode.dataset.userToken, muted}})
+  const socket = new Socket("/socket", {params: {user_token: grazeNode.dataset.userToken, _csrf_token: csrfToken}})
+  socket.connect()
+
+  const tokenKey = `graze-token:${grazeNode.dataset.gameId}`
+  let token = null
+  try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
+  const joined = reply => {
+    token = reply.token
+    try {
+      if (token) sessionStorage.setItem(tokenKey, token)
+      else sessionStorage.removeItem(tokenKey)
+    } catch (_e) {}
+    graze.ports.grazeJoined.send(reply)
+    graze.ports.grazeWatchers.send(reply.watchers ?? 0)
+  }
+  // A link with ?watch=1 only watches the game. The token of a player wins.
+  const watch = new URLSearchParams(window.location.search).has("watch")
+  // The menu of the game page joins its channel on this socket
+  setGameMenu({kind: "graze", id: grazeNode.dataset.gameId, socket})
+  const channel = socket.channel(`graze:${grazeNode.dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
+  channel.on("state", state => graze.ports.grazeState.send(state))
+  channel.on("joined", joined)
+  channel.on("watchers", ({count}) => graze.ports.grazeWatchers.send(count))
+  channel.join()
+    .receive("ok", joined)
+    .receive("error", ({reason}) => {
+      // The server of the game stopped a moment ago. The channel tries again.
+      if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
+      channel.leave()
+      graze.ports.grazeJoinFailed.send(reason)
+    })
+
+  graze.ports.grazeSteer.subscribe(place => channel.push("steer", place))
+  graze.ports.grazeRestart.subscribe(() => channel.push("restart", {}))
+  connectNextGame(graze.ports.grazeNextGame, channel, grazeNode)
+  graze.ports.grazeCopyText.subscribe(text => navigator.clipboard.writeText(text))
+  graze.ports.grazePlaySound.subscribe(playNimbleMosaicSound)
+  graze.ports.grazeSaveMuted.subscribe(value => {
+    try { localStorage.setItem("graze-muted", String(value)) } catch (_e) {}
+  })
+}
+
 // Start the Memory game and connect its ports to the game channel. It
 // works as Nimble Mosaic above: the browser remembers if the player
 // muted the sounds, and the tab remembers the token of the player.

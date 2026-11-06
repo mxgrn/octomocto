@@ -7,6 +7,7 @@ defmodule OctomoctoWeb.UserSocket do
   channel "astronaut:*", OctomoctoWeb.AstronautChannel
   channel "invites:*", OctomoctoWeb.InviteChannel
   channel "echo:*", OctomoctoWeb.EchoChannel
+  channel "graze:*", OctomoctoWeb.GrazeChannel
   channel "mahjong:*", OctomoctoWeb.MahjongChannel
   channel "memory:*", OctomoctoWeb.MemoryChannel
   channel "overlap:*", OctomoctoWeb.OverlapChannel

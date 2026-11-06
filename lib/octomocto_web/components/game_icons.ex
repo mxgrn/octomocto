@@ -214,6 +214,38 @@ defmodule OctomoctoWeb.GameIcons do
     """
   end
 
+  # A circle with its energy ring, near a food square that it goes to and
+  # a red square that it keeps away from
+  def game_icon(%{game: "graze"} = assigns) do
+    ~H"""
+    <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
+      <rect x="31" y="6" width="10" height="10" rx="1.5" fill="#EF4444" />
+      <rect x="32" y="31" width="9" height="9" rx="1.5" fill="#374151" />
+      <circle
+        cx="18"
+        cy="26"
+        r="12"
+        fill="none"
+        stroke="#1A9FCB"
+        stroke-opacity="0.25"
+        stroke-width="3"
+      />
+      <circle
+        cx="18"
+        cy="26"
+        r="12"
+        fill="none"
+        stroke="#1A9FCB"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-dasharray="52 76"
+        transform="rotate(-90 18 26)"
+      />
+      <circle cx="18" cy="26" r="8" fill="#374151" />
+    </svg>
+    """
+  end
+
   # A grid of tiles, some lit, and one with the glow that stays after it
   # went out
   def game_icon(%{game: "afterglow"} = assigns) do

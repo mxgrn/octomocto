@@ -74,11 +74,21 @@ defmodule Octomocto.RaceServer do
   a call (a cast ignores it) and the new state. With `:publish`, the game
   writes the state and sends it to all clients. With `:store`, the game
   only writes it, for a change that the clients do not see. With
-  `:ignore`, nothing changed. A move that finishes the field calls
-  `finish/1`.
+  `:ignore`, nothing changed. With `:broadcast`, the game only sends the
+  state to all clients, for a change that does not need a copy in the
+  store, such as the moves of a real-time field. A move that finishes the
+  field calls `finish/1`.
   """
   @callback handle_move(move :: tuple(), state()) ::
-              {:publish | :store | :ignore, reply :: term(), state()}
+              {:publish | :store | :broadcast | :ignore, reply :: term(), state()}
+
+  @doc """
+  Handles a message to the game process that this module does not handle
+  itself, such as a timer of the game. Gives the same results as
+  `c:handle_move/2`, without a reply.
+  """
+  @callback handle_message(message :: term(), state()) ::
+              {:publish | :store | :broadcast | :ignore, state()}
 
   @doc "The fields of the state that clients see, added to the players and the clock."
   @callback public_field(state()) :: map()
@@ -111,7 +121,11 @@ defmodule Octomocto.RaceServer do
   """
   @callback change_settings(settings :: map(), state()) :: {:ok, state()} | :error
 
-  @optional_callbacks new_player: 1, reset_player: 1, restore: 1, change_settings: 2
+  @optional_callbacks new_player: 1,
+                      reset_player: 1,
+                      restore: 1,
+                      change_settings: 2,
+                      handle_message: 2
 
   defmacro __using__(opts) do
     quote do
@@ -353,6 +367,16 @@ defmodule Octomocto.RaceServer do
     end
   end
 
+  def handle_info(message, {game, state}) do
+    if function_exported?(game, :handle_message, 2) do
+      {kind, new_state} = game.handle_message(message, state)
+      {_reply, new_state} = apply_result(game, state, {kind, nil, new_state})
+      {:noreply, {game, new_state}}
+    else
+      {:noreply, {game, state}}
+    end
+  end
+
   # The node stops. The game leaves the lists of the settings page until a
   # player joins it again on another node (see `Octomocto.GameProcess`).
   @impl true
@@ -360,8 +384,10 @@ defmodule Octomocto.RaceServer do
     if state.public, do: Lobby.broadcast(game, state.id, nil)
   end
 
-  defp move(game, move, state) do
-    case game.handle_move(move, state) do
+  defp move(game, move, state), do: apply_result(game, state, game.handle_move(move, state))
+
+  defp apply_result(game, state, result) do
+    case result do
       {:publish, reply, new_state} ->
         new_state = count_win(state, new_state)
         new_state = save_results(game, state, new_state)
@@ -370,6 +396,10 @@ defmodule Octomocto.RaceServer do
 
       {:store, reply, new_state} ->
         store(game, new_state)
+        {reply, new_state}
+
+      {:broadcast, reply, new_state} ->
+        broadcast(game, new_state)
         {reply, new_state}
 
       {:ignore, reply, new_state} ->

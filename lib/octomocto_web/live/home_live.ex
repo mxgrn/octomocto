@@ -17,6 +17,7 @@ defmodule OctomoctoWeb.HomeLive do
   alias OctomoctoWeb.{
     EchoLive,
     GameIcons,
+    GrazeLive,
     MahjongLive,
     MemoryLive,
     OverlapLive,
@@ -46,6 +47,16 @@ defmodule OctomoctoWeb.HomeLive do
         "The classic Schulte table: find the numbers in order on a square grid, with your eyes on the center.",
       path: "/schulte",
       badge: {"New", "hero-sparkles-mini"},
+      icon_class: "bg-octo-indigo/10 dark:bg-octo-indigo-light/15"
+    },
+    %{
+      id: "graze",
+      tags: ["speed", "attention"],
+      name: "Graze",
+      description:
+        "Eat the black squares and keep away from the red ones, with up to 3 friends in one field.",
+      path: "/graze",
+      badge: {"Beta", "hero-beaker-mini"},
       icon_class: "bg-octo-indigo/10 dark:bg-octo-indigo-light/15"
     },
     %{
@@ -167,7 +178,8 @@ defmodule OctomoctoWeb.HomeLive do
     "echo" => {Octomocto.Echo.Game, Octomocto.Echo.Store, EchoLive},
     "mahjong" => {Octomocto.Mahjong.Game, Octomocto.Mahjong.Store, MahjongLive},
     "overlap" => {Octomocto.Overlap.Game, Octomocto.Overlap.Store, OverlapLive},
-    "schulte" => {Octomocto.Schulte.Game, Octomocto.Schulte.TableStore, SchulteLive}
+    "schulte" => {Octomocto.Schulte.Game, Octomocto.Schulte.TableStore, SchulteLive},
+    "graze" => {Octomocto.Graze.Game, Octomocto.Graze.Store, GrazeLive}
   }
 
   @kinds_by_game Map.new(@lobbies, fn {kind, {game, _store, _page}} -> {game, kind} end)

@@ -14,6 +14,7 @@ defmodule OctomoctoWeb.PageControllerTest do
     assert hrefs == [
              "/nimble-mosaic",
              "/schulte",
+             "/graze",
              "/trains",
              "/memory",
              "/set",

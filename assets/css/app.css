@@ -233,6 +233,47 @@
 .schulte-flash { animation: nimble-mosaic-flash 1s ease-out; }
 .schulte-next { animation: nimble-mosaic-next-in 200ms ease-out; }
 
+/* Graze: a white field with black food squares and red danger squares.
+   My circle is black, the others are gray. In the dark theme, the field is
+   dark, and my circle and the food are white. The ring around a circle is
+   its energy. */
+.graze-board { fill: #ffffff; }
+.graze-border { stroke: #474d50; }
+.graze-food { fill: #1f2933; }
+.graze-danger { fill: #ef4444; }
+.graze-me .graze-body { fill: #111827; }
+.graze-other .graze-body { fill: #9ca3af; }
+.graze-ring { stroke: var(--color-octo-indigo); }
+.graze-other .graze-ring { stroke: #9ca3af; }
+.graze-ring-track { stroke: #e5e7eb; }
+.graze-circle.is-out { opacity: 0.25; }
+.graze-name { fill: #6b7280; font-family: ui-sans-serif, system-ui, sans-serif; font-weight: 600; }
+.graze-dot-me { background: #111827; }
+.graze-dot-other { background: #9ca3af; }
+
+[data-theme=dark] .graze-board { fill: #1e2230; }
+[data-theme=dark] .graze-border { stroke: #11131a; }
+[data-theme=dark] .graze-food { fill: #f1f5f9; }
+[data-theme=dark] .graze-danger { fill: #f87171; }
+[data-theme=dark] .graze-me .graze-body { fill: #ffffff; }
+[data-theme=dark] .graze-other .graze-body { fill: #6b7280; }
+[data-theme=dark] .graze-ring { stroke: var(--color-octo-indigo-light); }
+[data-theme=dark] .graze-other .graze-ring { stroke: #6b7280; }
+[data-theme=dark] .graze-ring-track { stroke: #2f3548; }
+[data-theme=dark] .graze-name { fill: #9ca3af; }
+[data-theme=dark] .graze-dot-me { background: #ffffff; }
+[data-theme=dark] .graze-dot-other { background: #6b7280; }
+
+/* An almost empty ring of my circle blinks */
+@keyframes graze-ring-low {
+  50% { opacity: 0.35; }
+}
+
+.graze-ring-low { animation: graze-ring-low 400ms ease-in-out infinite; }
+
+/* As the next number of Nimble Mosaic: the new score pops in */
+.graze-score { animation: nimble-mosaic-next-in 200ms ease-out; }
+
 /* Each step of the countdown starts large and shrinks into place */
 @keyframes countdown-pop {
   from { transform: scale(1.6); opacity: 0; }
@@ -266,6 +307,8 @@ html:has(.is-playing) body {
   .nimble-mosaic-next { animation: none; }
   .schulte-next { animation: none; }
   .schulte-hit { animation: none; }
+  .graze-ring-low { animation: none; }
+  .graze-score { animation: none; }
   .countdown-pop { animation: none; }
   .turn-phone { animation: none; }
 }

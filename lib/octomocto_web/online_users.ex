@@ -7,6 +7,7 @@ defmodule OctomoctoWeb.OnlineUsers do
   alias OctomoctoWeb.{
     AfterglowLive,
     EchoLive,
+    GrazeLive,
     MahjongLive,
     MemoryLive,
     OverlapLive,
@@ -21,6 +22,7 @@ defmodule OctomoctoWeb.OnlineUsers do
   @kinds %{
     AfterglowLive => "afterglow",
     EchoLive => "echo",
+    GrazeLive => "graze",
     MahjongLive => "mahjong",
     MemoryLive => "memory",
     OverlapLive => "overlap",

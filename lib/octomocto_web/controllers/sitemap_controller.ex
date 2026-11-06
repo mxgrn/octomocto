@@ -30,6 +30,7 @@ defmodule OctomoctoWeb.SitemapController do
       url(~p"/overlap"),
       url(~p"/snap"),
       url(~p"/afterglow"),
+      url(~p"/graze"),
       url(~p"/astronaut"),
       url(~p"/privacy"),
       url(~p"/terms")
