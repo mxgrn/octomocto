@@ -247,7 +247,7 @@
               {dgettext("memory", "A new theme for each game.")}
             </p>
             <div :if={@settings.theme != "random"} class="memory-themes-box">
-              <div id="memory-themes" class="memory-themes grid grid-cols-4 gap-3 xl:grid-cols-6">
+              <div id="memory-themes" class="memory-themes grid gap-3">
                 <.link
                   :for={theme <- @themes}
                   id={"theme-#{theme.name}"}
