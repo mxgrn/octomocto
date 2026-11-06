@@ -30,6 +30,7 @@ defmodule OctomoctoWeb.HomeLive do
   @games [
     %{
       id: "nimble-mosaic",
+      tags: ["speed", "attention"],
       name: "Nimble Mosaic",
       description:
         "Find the numbers in order. The first player to click the next number gets the point.",
@@ -39,6 +40,7 @@ defmodule OctomoctoWeb.HomeLive do
     },
     %{
       id: "schulte",
+      tags: ["speed", "attention"],
       name: "Schulte Table",
       description:
         "The classic Schulte table: find the numbers in order on a square grid, with your eyes on the center.",
@@ -48,6 +50,7 @@ defmodule OctomoctoWeb.HomeLive do
     },
     %{
       id: "trains",
+      tags: ["attention"],
       name: "Right on Track",
       description: "Click the switches to send each train to the house with its colors.",
       path: "/trains",
@@ -55,6 +58,7 @@ defmodule OctomoctoWeb.HomeLive do
     },
     %{
       id: "memory",
+      tags: ["memory"],
       name: "Memory",
       description:
         "Find the cards with the same image. Play alone against the clock, or take turns.",
@@ -64,6 +68,7 @@ defmodule OctomoctoWeb.HomeLive do
     },
     %{
       id: "set",
+      tags: ["speed", "logic", "attention"],
       name: "Set",
       description:
         "Find 3 cards where each feature is all the same or all different. Race your friends.",
@@ -72,6 +77,7 @@ defmodule OctomoctoWeb.HomeLive do
     },
     %{
       id: "sudoku",
+      tags: ["speed", "logic"],
       name: "Sudoku Race",
       description:
         "Fill the same sudoku with your friends. The first player to put the correct digit gets the point.",
@@ -80,6 +86,7 @@ defmodule OctomoctoWeb.HomeLive do
     },
     %{
       id: "echo",
+      tags: ["memory"],
       name: "Echo",
       description:
         "A Simon-like game: repeat the sequence of colored pads. With friends, each player adds a pad.",
@@ -88,6 +95,7 @@ defmodule OctomoctoWeb.HomeLive do
     },
     %{
       id: "mahjong",
+      tags: ["speed"],
       name: "Mahjong Race",
       description:
         "Remove pairs of free tiles from the Turtle. With friends, the first to take a pair gets the point.",
@@ -96,6 +104,7 @@ defmodule OctomoctoWeb.HomeLive do
     },
     %{
       id: "overlap",
+      tags: ["speed", "attention"],
       name: "Overlap",
       description:
         "A Dobble-like game: any two cards have exactly one symbol in common. Spot it first.",
@@ -104,6 +113,7 @@ defmodule OctomoctoWeb.HomeLive do
     },
     %{
       id: "snap",
+      tags: ["speed", "memory"],
       name: "Snap",
       description:
         "Is the new card the same as the card before it? Answer fast for 45 seconds to build a multiplier.",
@@ -114,6 +124,7 @@ defmodule OctomoctoWeb.HomeLive do
     },
     %{
       id: "afterglow",
+      tags: ["memory"],
       name: "Afterglow",
       description:
         "Tiles light up for a moment. Click the tiles that were lit. Each correct round adds a tile.",
@@ -133,6 +144,10 @@ defmodule OctomoctoWeb.HomeLive do
     #   icon_class: "bg-octo-navy dark:bg-black/30 dark:ring-1 dark:ring-white/10"
     # }
   ]
+
+  # The tag filters above the games, in this order. Each game in @games has
+  # one or more of these tags.
+  @tags ["speed", "memory", "logic", "attention"]
 
   @doc """
   The list of all games, as on the front page.
@@ -188,12 +203,21 @@ defmodule OctomoctoWeb.HomeLive do
 
     {:ok,
      socket
-     |> assign(canonical_url: url(~p"/"), games: @games, kinds: Map.new(@games, &{&1.id, &1}))
+     |> assign(canonical_url: url(~p"/"), tags: @tags, kinds: Map.new(@games, &{&1.id, &1}))
      |> assign(games_played: Stats.games_played())
      |> assign_lobby(entries)
      |> assign(watchers: watchers())
      |> assign(friends: friends)
      |> assign_friends_online()}
+  end
+
+  # The tag filter is in the URL, for example /?tag=memory. An unknown tag
+  # shows all games.
+  def handle_params(params, _uri, socket) do
+    tag = if params["tag"] in @tags, do: params["tag"]
+    games = if tag, do: Enum.filter(@games, &(tag in &1.tags)), else: @games
+
+    {:noreply, assign(socket, tag: tag, games: games)}
   end
 
   def handle_info({:lobby_changed, game, id, entry}, socket) do

@@ -20,6 +20,34 @@ defmodule OctomoctoWeb.HomeLiveTest do
     assert has_element?(view, "#friends-online-sign-in")
   end
 
+  describe "the tag filter" do
+    test "shows only the games with the tag", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/")
+
+      view |> element("#game-tag-memory") |> render_click()
+
+      assert_patch(view, ~p"/?tag=memory")
+      assert has_element?(view, "#game-memory")
+      refute has_element?(view, "#game-schulte")
+    end
+
+    test "all clears the filter", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/?tag=memory")
+
+      view |> element("#game-tag-all") |> render_click()
+
+      assert_patch(view, ~p"/")
+      assert has_element?(view, "#game-schulte")
+    end
+
+    test "an unknown tag shows all games", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/?tag=unknown")
+
+      assert has_element?(view, "#game-tag-all[aria-current]")
+      assert has_element?(view, "#game-schulte")
+    end
+  end
+
   describe "a signed-in user" do
     setup :register_and_log_in_user
 
