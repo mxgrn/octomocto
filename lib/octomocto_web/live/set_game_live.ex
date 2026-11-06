@@ -2,6 +2,7 @@ defmodule OctomoctoWeb.SetGameLive do
   use OctomoctoWeb, :live_view
 
   on_mount {OctomoctoWeb.SiteNotifications, "set"}
+  on_mount OctomoctoWeb.BestResults
 
   # The same settings and result lists as on the Nimble Mosaic page
   import OctomoctoWeb.SettingsComponents,
@@ -60,9 +61,9 @@ defmodule OctomoctoWeb.SetGameLive do
     {:noreply,
      assign(socket,
        settings: settings,
-       best_results: SetGame.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
-     )}
+     )
+     |> OctomoctoWeb.BestResults.assign_best(SetGame, filter)}
   end
 
   # A match has its own settings

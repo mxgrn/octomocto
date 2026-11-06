@@ -2,6 +2,7 @@ defmodule OctomoctoWeb.OverlapLive do
   use OctomoctoWeb, :live_view
 
   on_mount {OctomoctoWeb.SiteNotifications, "overlap"}
+  on_mount OctomoctoWeb.BestResults
 
   # The same settings and result lists as on the Nimble Mosaic page
   import OctomoctoWeb.SettingsComponents,
@@ -67,9 +68,9 @@ defmodule OctomoctoWeb.OverlapLive do
      assign(socket,
        settings: settings,
        last_theme: last_theme,
-       best_results: Overlap.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
-     )}
+     )
+     |> OctomoctoWeb.BestResults.assign_best(Overlap, filter)}
   end
 
   def handle_info({:lobby_changed, _game, id, entry}, socket) do

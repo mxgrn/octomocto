@@ -5,6 +5,8 @@ defmodule OctomoctoWeb.SchulteLiveTest do
 
   alias Octomocto.Schulte
 
+  @settings %{"size" => 5, "marks" => false, "players" => 1}
+
   test "selects a 5 × 5 grid without marks for one player", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/schulte")
 
@@ -41,5 +43,40 @@ defmodule OctomoctoWeb.SchulteLiveTest do
       view |> element("#new-game") |> render_click()
 
     assert {:ok, _player_id, %{size: 8, marks: true, players_needed: 2}} = Schulte.join(id)
+  end
+
+  describe "best results filter" do
+    setup :register_and_log_in_user
+
+    test "shows only the user and the followed players", %{conn: conn, user: user} do
+      [followed, stranger] = for _ <- 1..2, do: Octomocto.AccountsFixtures.user_fixture()
+      Octomocto.Friends.follow(user.id, followed.id)
+
+      for player <- [user, followed, stranger] do
+        Schulte.save_results("a", @settings, 1000, [%{user_id: player.id, score: 25}])
+      end
+
+      {:ok, view, _html} = live(conn, ~p"/schulte")
+      view |> element("#best-results-following") |> render_click()
+
+      assert has_element?(view, ~s|#best-results a[href="/players/#{user.public_id}"]|)
+      assert has_element?(view, ~s|#best-results a[href="/players/#{followed.public_id}"]|)
+      refute has_element?(view, ~s|#best-results a[href="/players/#{stranger.public_id}"]|)
+    end
+
+    test "keeps the filter when a setting changes", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/schulte")
+      view |> element("#best-results-following") |> render_click()
+
+      view |> element("#size-7") |> render_click()
+
+      assert has_element?(view, ~s|#best-results-following[aria-pressed="true"]|)
+    end
+  end
+
+  test "has no best results filter for a guest", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/schulte")
+
+    refute has_element?(view, "#best-results-filter")
   end
 end

@@ -7,6 +7,7 @@ defmodule OctomoctoWeb.SchulteLive do
   use OctomoctoWeb, :live_view
 
   on_mount {OctomoctoWeb.SiteNotifications, "schulte"}
+  on_mount OctomoctoWeb.BestResults
 
   import OctomoctoWeb.SettingsComponents
   import OctomoctoWeb.GamePageComponents
@@ -53,9 +54,9 @@ defmodule OctomoctoWeb.SchulteLive do
     {:noreply,
      assign(socket,
        settings: settings,
-       best_results: Schulte.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
-     )}
+     )
+     |> OctomoctoWeb.BestResults.assign_best(Schulte, filter)}
   end
 
   # A match has its own settings

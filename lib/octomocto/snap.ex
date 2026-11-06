@@ -133,14 +133,17 @@ defmodule Octomocto.Snap do
   @doc """
   Gives the best result of each signed-in user for the settings (the
   highest score first).
+  With `user_ids`, only the results of these users (see
+  `Octomocto.ResultQueries.of_users/2`).
   """
-  def best_results(settings) do
+  def best_results(settings, user_ids \\ nil) do
     best_of_each_user =
       from(r in Result,
         where: r.settings == type(^settings, :map) and not is_nil(r.user_id),
         distinct: r.user_id,
         order_by: [asc: r.user_id, desc: r.score, asc: r.inserted_at]
       )
+      |> Octomocto.ResultQueries.of_users(user_ids)
 
     from(r in subquery(best_of_each_user),
       order_by: [desc: r.score, asc: r.inserted_at],

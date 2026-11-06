@@ -2,6 +2,7 @@ defmodule OctomoctoWeb.TrainsLive do
   use OctomoctoWeb, :live_view
 
   on_mount {OctomoctoWeb.SiteNotifications, "trains"}
+  on_mount OctomoctoWeb.BestResults
 
   # The same settings and result lists as on the Nimble Mosaic page
   import OctomoctoWeb.SettingsComponents,
@@ -135,9 +136,9 @@ defmodule OctomoctoWeb.TrainsLive do
       settings: settings,
       canonical_url: url(~p"/trains"),
       switch_counts: Trains.switch_counts(settings.players),
-      best_results: Trains.best_results(filter),
       user_results: user_results(socket.assigns.current_scope, filter)
     )
+    |> OctomoctoWeb.BestResults.assign_best(Trains, filter)
   end
 
   # The levels of the campaign with the progress of the user, and the

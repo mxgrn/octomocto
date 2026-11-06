@@ -11,8 +11,9 @@ defmodule Octomocto.Friends do
   two players who joined do not become friends of each other: they can be
   strangers. Guests have no friends.
 
-  Nothing makes a follow with no follow back yet. The front page shows the
-  friends who are online (see `OctomoctoWeb.HomeLive`).
+  A user can also follow another user from the profile page (see
+  `follow/2`). When the other user follows back, they are friends too. The
+  front page shows the friends who are online (see `OctomoctoWeb.HomeLive`).
   """
   import Ecto.Query
 
@@ -29,6 +30,52 @@ defmodule Octomocto.Friends do
         join: back in Follow,
         on: back.follower_id == u.id and back.followed_id == ^user_id
     )
+  end
+
+  @doc "True when the user `follower_id` follows the user `followed_id`."
+  def following?(follower_id, followed_id) do
+    Repo.exists?(
+      from f in Follow, where: f.follower_id == ^follower_id and f.followed_id == ^followed_id
+    )
+  end
+
+  @doc "The ids of the users that the user follows. Friends are included."
+  def followed_ids(user_id) do
+    Repo.all(from f in Follow, where: f.follower_id == ^user_id, select: f.followed_id)
+  end
+
+  @doc """
+  The user `follower_id` follows the user `followed_id`. A follow that
+  exists stays the same. A user cannot follow themself.
+  """
+  def follow(same_id, same_id), do: :ok
+
+  def follow(follower_id, followed_id) do
+    Repo.insert_all(
+      Follow,
+      [
+        %{
+          follower_id: follower_id,
+          followed_id: followed_id,
+          inserted_at: DateTime.utc_now(:second)
+        }
+      ],
+      on_conflict: :nothing
+    )
+
+    :ok
+  end
+
+  @doc """
+  The user `follower_id` stops following the user `followed_id`. When they
+  were friends, they are not friends after this: the follow back stays.
+  """
+  def unfollow(follower_id, followed_id) do
+    Repo.delete_all(
+      from f in Follow, where: f.follower_id == ^follower_id and f.followed_id == ^followed_id
+    )
+
+    :ok
   end
 
   @doc """

@@ -8,6 +8,7 @@ defmodule OctomoctoWeb.AfterglowLive do
   use OctomoctoWeb, :live_view
 
   on_mount {OctomoctoWeb.SiteNotifications, "afterglow"}
+  on_mount OctomoctoWeb.BestResults
 
   import OctomoctoWeb.SettingsComponents,
     only: [setting_header: 1, score_list: 1, result_row: 1, result_pill: 1, player_name: 1]
@@ -42,10 +43,10 @@ defmodule OctomoctoWeb.AfterglowLive do
          first_game: last_level == nil,
          # A small grid with the tiles of the first round, lit at random
          preview: %{side: side, lit: MapSet.new(Enum.take_random(0..(side * side - 1), level))},
-         best_results: Afterglow.best_results(@filter),
          user_results: user_results(scope)
        ] ++ seo()
-     )}
+     )
+     |> OctomoctoWeb.BestResults.assign_best(Afterglow, @filter)}
   end
 
   @doc "The title and the description of the Afterglow pages, for search engines."

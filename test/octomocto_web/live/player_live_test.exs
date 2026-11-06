@@ -145,4 +145,43 @@ defmodule OctomoctoWeb.PlayerLiveTest do
       assert has_element?(view, ~s|#profile-link[href="/players/#{user.public_id}"]|)
     end
   end
+
+  describe "follow" do
+    setup :register_and_log_in_user
+
+    test "follows and unfollows a user", %{conn: conn, user: user} do
+      player = user_fixture()
+      {:ok, view, _html} = live(conn, ~p"/players/#{player.public_id}")
+
+      view |> element("#follow-button") |> render_click()
+      assert Octomocto.Friends.following?(user.id, player.id)
+
+      view |> element("#unfollow-button") |> render_click()
+      refute Octomocto.Friends.following?(user.id, player.id)
+      assert has_element?(view, "#follow-button")
+    end
+
+    test "asks before an unfollow ends a friendship", %{conn: conn, user: user} do
+      player = user_fixture()
+      Octomocto.Friends.follow(player.id, user.id)
+      {:ok, view, _html} = live(conn, ~p"/players/#{player.public_id}")
+
+      view |> element("#follow-button") |> render_click()
+
+      assert view |> element("#player-friends-link") |> render() =~ "1"
+      assert has_element?(view, "#unfollow-button[data-confirm]")
+    end
+
+    test "has no button on the own profile", %{conn: conn, user: user} do
+      {:ok, view, _html} = live(conn, ~p"/players/#{user.public_id}")
+
+      refute has_element?(view, "#follow-button")
+    end
+  end
+
+  test "has no follow button for a guest", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/players/#{user_fixture().public_id}")
+
+    refute has_element?(view, "#follow-button")
+  end
 end

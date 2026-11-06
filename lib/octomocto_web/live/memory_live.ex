@@ -2,6 +2,7 @@ defmodule OctomoctoWeb.MemoryLive do
   use OctomoctoWeb, :live_view
 
   on_mount {OctomoctoWeb.SiteNotifications, "memory"}
+  on_mount OctomoctoWeb.BestResults
 
   # The same settings and result lists as on the Nimble Mosaic page
   import OctomoctoWeb.SettingsComponents,
@@ -176,9 +177,9 @@ defmodule OctomoctoWeb.MemoryLive do
         Locale.languages("memory", socket.assigns.locale, ~p"/memory?#{query(settings, [])}"),
       sizes: Board.sizes(settings.theme, settings.set),
       bomb_counts: Board.bomb_counts(settings.set, settings.cards),
-      best_results: Memory.best_results(filter),
       user_results: user_results(socket.assigns.current_scope, filter)
     )
+    |> OctomoctoWeb.BestResults.assign_best(Memory, filter)
   end
 
   # The levels of the campaign with the progress of the user, the selected

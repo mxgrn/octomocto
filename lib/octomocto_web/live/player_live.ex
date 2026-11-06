@@ -5,13 +5,14 @@ defmodule OctomoctoWeb.PlayerLive do
   saved, the games played in all, the games played in each game in the
   last 30 days (with a graph of the games per day), the time of the last
   finished game ("Online now" for a user that is online), and the number
-  of friends of a user. Anyone can open it.
+  of friends of a user. Anyone can open it. A signed-in user can follow
+  another user here (see `Octomocto.Friends`).
   """
   use OctomoctoWeb, :live_view
 
   on_mount {OctomoctoWeb.SiteNotifications, nil}
 
-  alias Octomocto.Players
+  alias Octomocto.{Friends, Players}
   alias OctomoctoWeb.{GameIcons, HomeLive, NotFoundError}
 
   # The number of days of the activity graphs (see `Octomocto.Players`)
@@ -35,7 +36,8 @@ defmodule OctomoctoWeb.PlayerLive do
       |> Enum.sort_by(& &1.count, :desc)
 
     {:ok,
-     assign(socket,
+     socket
+     |> assign(
        page_title: profile.name,
        noindex: true,
        profile: profile,
@@ -45,7 +47,48 @@ defmodule OctomoctoWeb.PlayerLive do
        # All sparklines have the same scale, as the bars of the counts
        most_in_day: games |> Enum.flat_map(& &1.days) |> Enum.max(fn -> 0 end),
        total: profile.games |> Map.values() |> Enum.sum()
-     )}
+     )
+     |> assign_follow()}
+  end
+
+  def handle_event("follow", _params, socket) do
+    Friends.follow(viewer_id(socket), socket.assigns.profile.user_id)
+    {:noreply, reload(socket)}
+  end
+
+  def handle_event("unfollow", _params, socket) do
+    Friends.unfollow(viewer_id(socket), socket.assigns.profile.user_id)
+    {:noreply, reload(socket)}
+  end
+
+  # A follow can make or end a friendship, so the count of friends changes
+  defp reload(socket) do
+    socket
+    |> assign(:profile, Players.profile(socket.assigns.public_id))
+    |> assign_follow()
+  end
+
+  # `follow` is nil when there is no Follow button: for a guest who looks,
+  # for the profile of a guest, and for the user's own profile. Else it
+  # tells if the user follows the player, and if they are friends.
+  defp assign_follow(socket) do
+    viewer_id = viewer_id(socket)
+    player_id = socket.assigns.profile.user_id
+
+    follow =
+      if viewer_id && player_id && viewer_id != player_id do
+        following = Friends.following?(viewer_id, player_id)
+        %{following: following, friends: following && Friends.following?(player_id, viewer_id)}
+      end
+
+    assign(socket, :follow, follow)
+  end
+
+  defp viewer_id(socket) do
+    case socket.assigns.current_scope do
+      %{user: %{id: id}} -> id
+      _ -> nil
+    end
   end
 
   @doc """

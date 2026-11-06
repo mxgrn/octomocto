@@ -148,7 +148,11 @@
         icon_class="text-amber-500"
         title="Best results"
         empty={@best_results == []}
+        empty_text={OctomoctoWeb.BestResults.empty_text(@best_following)}
       >
+        <:aside :if={@user_results}>
+          <OctomoctoWeb.BestResults.filter following={@best_following} />
+        </:aside>
         <:aside :if={!@user_results}>
           <span class="text-sm text-base-content/60">
             <.link

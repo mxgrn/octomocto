@@ -6,6 +6,7 @@ defmodule OctomoctoWeb.SnapLive do
   use OctomoctoWeb, :live_view
 
   on_mount {OctomoctoWeb.SiteNotifications, "snap"}
+  on_mount OctomoctoWeb.BestResults
 
   import OctomoctoWeb.SettingsComponents,
     only: [setting: 1, option: 1, score_list: 1, result_row: 1, result_pill: 1, player_name: 1]
@@ -43,9 +44,9 @@ defmodule OctomoctoWeb.SnapLive do
     {:noreply,
      assign(socket,
        settings: settings,
-       best_results: Snap.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
-     )}
+     )
+     |> OctomoctoWeb.BestResults.assign_best(Snap, filter)}
   end
 
   def handle_event("new_game", _params, socket) do

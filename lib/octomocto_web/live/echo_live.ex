@@ -2,6 +2,7 @@ defmodule OctomoctoWeb.EchoLive do
   use OctomoctoWeb, :live_view
 
   on_mount {OctomoctoWeb.SiteNotifications, "echo"}
+  on_mount OctomoctoWeb.BestResults
 
   # The same settings and result lists as on the Nimble Mosaic page
   import OctomoctoWeb.SettingsComponents,
@@ -70,9 +71,9 @@ defmodule OctomoctoWeb.EchoLive do
        alternate_urls: Locale.alternate_urls("echo", ~p"/echo"),
        # The other language keeps the settings
        languages: Locale.languages("echo", locale, ~p"/echo?#{query(settings, [])}"),
-       best_results: Echo.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
-     )}
+     )
+     |> OctomoctoWeb.BestResults.assign_best(Echo, filter)}
   end
 
   # A match has its own settings

@@ -2,6 +2,7 @@ defmodule OctomoctoWeb.MahjongLive do
   use OctomoctoWeb, :live_view
 
   on_mount {OctomoctoWeb.SiteNotifications, "mahjong"}
+  on_mount OctomoctoWeb.BestResults
 
   # The same settings and result lists as on the Nimble Mosaic page
   import OctomoctoWeb.SettingsComponents,
@@ -56,9 +57,9 @@ defmodule OctomoctoWeb.MahjongLive do
     {:noreply,
      assign(socket,
        settings: settings,
-       best_results: Mahjong.best_results(filter),
        user_results: user_results(socket.assigns.current_scope, filter)
-     )}
+     )
+     |> OctomoctoWeb.BestResults.assign_best(Mahjong, filter)}
   end
 
   def handle_info({:lobby_changed, _game, id, entry}, socket) do

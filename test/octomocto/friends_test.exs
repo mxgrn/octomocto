@@ -53,4 +53,26 @@ defmodule Octomocto.FriendsTest do
 
     assert pairs() == []
   end
+
+  test "follow/2 makes friends when the other user follows back" do
+    [a, b] = for _ <- 1..2, do: user_fixture().id
+
+    Friends.follow(a, b)
+    assert Friends.following?(a, b)
+    assert Friends.friends(a) == []
+
+    Friends.follow(b, a)
+    assert [%{id: ^b}] = Friends.friends(a)
+  end
+
+  test "unfollow/2 ends a friendship and keeps the follow back" do
+    [a, b] = for _ <- 1..2, do: user_fixture().id
+    Friends.follow(a, b)
+    Friends.follow(b, a)
+
+    Friends.unfollow(a, b)
+
+    assert pairs() == [{b, a}]
+    assert Friends.friends(b) == []
+  end
 end
