@@ -23,6 +23,8 @@ defmodule Octomocto.Graze.World do
   @size 1000
   @radius 22
 
+  # The fewest food squares in the field. With more danger squares, there
+  # are as many food squares as danger squares.
   @food_count 3
   @food_size 28
   @eat_energy 0.3
@@ -140,15 +142,12 @@ defmodule Octomocto.Graze.World do
   the time `t`, `elapsed_s` seconds after the start. It starts just out of
   a random edge and flies straight across the field: vertically from the
   top or the bottom edge, horizontally from the left or the right edge.
-  Danger squares get faster and faster.
+  All squares get faster and faster.
   """
   def spawn(kind, id, t, elapsed_s) do
     size = if kind == :food, do: @food_size, else: 23 + :rand.uniform(21)
 
-    speed =
-      if kind == :food,
-        do: 80 + :rand.uniform() * 50,
-        else: min(140 + 4 * elapsed_s, 420) * (0.8 + :rand.uniform() * 0.45)
+    speed = min(140 + 4 * elapsed_s, 420) * (0.8 + :rand.uniform() * 0.45)
 
     half = size / 2
     # Anywhere along the edge, so that no strip of the field is safe

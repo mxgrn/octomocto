@@ -77,6 +77,21 @@ defmodule Octomocto.GrazeTest do
     assert result.elapsed_ms > 0
   end
 
+  test "there are as many food squares as danger squares", %{id: id, pid: pid} do
+    join_and_start(id)
+
+    dangers =
+      for {x, y} <- [{50, 50}, {950, 50}, {50, 950}, {950, 950}, {50, 500}] do
+        %{square(:danger, x, y) | id: x * 1000 + y}
+      end
+
+    :sys.replace_state(pid, fn {game, state} -> {game, %{state | squares: dangers}} end)
+
+    # The first state after the change starts with the danger squares
+    assert_receive {:graze_state, %{squares: [%{id: 50_050} | _] = squares}}, 1000
+    assert Enum.count(squares, &(&1.kind == :food)) == 5
+  end
+
   test "best_results/1 gives the highest score first" do
     [first, second] = for _ <- 1..2, do: user_fixture()
     settings = %{"players" => 1}

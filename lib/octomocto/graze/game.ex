@@ -182,8 +182,8 @@ defmodule Octomocto.Graze.Game do
     state =
       state
       |> drop_gone(check_at)
-      |> add_food(now)
       |> add_dangers(now)
+      |> add_food(now)
 
     {state, changed} =
       Enum.reduce(alive_ids(state), {state, false}, fn id, {state, changed} ->
@@ -206,10 +206,15 @@ defmodule Octomocto.Graze.Game do
   defp drop_gone(state, check_at),
     do: %{state | squares: Enum.filter(state.squares, &(&1.until >= check_at))}
 
+  # A new food square for each one that is eaten or gone, so that there are
+  # always as many food squares as danger squares (at least
+  # `World.food_count/0`)
   defp add_food(state, now) do
     food = Enum.count(state.squares, &(&1.kind == :food))
+    dangers = length(state.squares) - food
+    wanted = max(World.food_count(), dangers)
 
-    Enum.reduce(food..(World.food_count() - 1)//1, state, fn _, state ->
+    Enum.reduce(food..(wanted - 1)//1, state, fn _, state ->
       add(state, :food, now)
     end)
   end

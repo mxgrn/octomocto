@@ -46,4 +46,10 @@ defmodule Octomocto.Graze.WorldTest do
       assert vx == 0.0 or vy == 0.0
     end
   end
+
+  test "food squares get faster after the start" do
+    speed = fn %{vx: vx, vy: vy} -> abs(vx) + abs(vy) end
+
+    assert speed.(World.spawn(:food, 1, 0, 60)) > speed.(World.spawn(:food, 1, 0, 0))
+  end
 end
