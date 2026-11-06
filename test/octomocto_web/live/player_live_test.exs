@@ -21,6 +21,32 @@ defmodule OctomoctoWeb.PlayerLiveTest do
     assert has_element?(view, "#player-friends")
   end
 
+  test "shows a graph of the last 30 days for each game", %{conn: conn} do
+    user = user_fixture()
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+
+    {:ok, view, _html} = live(conn, ~p"/players/#{user.public_id}")
+
+    assert has_element?(
+             view,
+             ~s|#player-activity-nimble-mosaic[aria-label="1 game in the last 30 days"]|
+           )
+  end
+
+  test "hides the games not played in the last 30 days", %{conn: conn} do
+    user = user_fixture()
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+
+    Repo.update_all(NimbleMosaic.Result,
+      set: [inserted_at: DateTime.add(DateTime.utc_now(), -31, :day)]
+    )
+
+    {:ok, view, _html} = live(conn, ~p"/players/#{user.public_id}")
+
+    refute has_element?(view, "#player-game-nimble-mosaic")
+    assert has_element?(view, "#player-no-recent-games")
+  end
+
   test "shows the photo of a user", %{conn: conn} do
     user = user_fixture()
 

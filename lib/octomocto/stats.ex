@@ -173,6 +173,32 @@ defmodule Octomocto.Stats do
   end
 
   @doc """
+  The number of games of one player in each of the last `days` days, today
+  included, by the game id of the front page. The `field` is `:user_id` or
+  `:guest_id`. Each value is a list of `days` counts, oldest first. A game
+  with no results of the player in these days is not in the map.
+  """
+  def games_per_day_of(field, id, days, today \\ Date.utc_today())
+      when field in [:user_id, :guest_id] do
+    first = Date.add(today, 1 - days)
+    since = since(first)
+
+    counts =
+      @results
+      |> Enum.map(fn {game, schema} ->
+        game |> daily_counts(schema, since) |> where([r], field(r, ^field) == ^id)
+      end)
+      |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
+      |> Repo.all()
+      |> Enum.group_by(& &1.game, &{&1.date, &1.count})
+
+    Map.new(counts, fn {game, by_date} ->
+      by_date = Map.new(by_date)
+      {game, for(date <- Date.range(first, today), do: Map.get(by_date, date, 0))}
+    end)
+  end
+
+  @doc """
   The time of the last finished game, in all games, of the user (`field`
   is `:user_id`) or the guest (`:guest_id`) `id`, or nil when it has none.
   """

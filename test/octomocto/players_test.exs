@@ -28,6 +28,18 @@ defmodule Octomocto.PlayersTest do
              Players.profile(user.public_id)
   end
 
+  test "profile/1 gives the games per day of the last 30 days in each game" do
+    user = user_fixture()
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+    NimbleMosaic.save_results("b", @settings, 1000, [%{user_id: user.id, score: 90}])
+
+    assert %{activity: %{"nimble-mosaic" => days} = activity} = Players.profile(user.public_id)
+    assert map_size(activity) == 1
+    assert length(days) == 30
+    assert List.last(days) == 2
+    assert Enum.sum(days) == 2
+  end
+
   test "profile/1 gives a guest with no friends count" do
     guest_id = Ecto.UUID.generate()
 

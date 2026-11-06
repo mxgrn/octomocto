@@ -15,10 +15,15 @@ defmodule Octomocto.Players do
   alias Octomocto.Guests.Guest
   alias Octomocto.{Friends, OnlineUsers, Repo, Stats}
 
+  # The number of days of the activity graphs
+  @activity_days 30
+
   @doc """
   The profile of the user or the guest with the `public_id`, or nil. The
   `:friends` count is nil for a guest: guests have no friends.
   `:last_played_at` is nil for a player with no finished games.
+  `:activity` has the games per day in the last #{@activity_days} days, by
+  game (see `Octomocto.Stats.games_per_day_of/4`).
   """
   def profile(public_id) when is_binary(public_id) do
     cond do
@@ -29,6 +34,7 @@ defmodule Octomocto.Players do
           avatar_url: user.avatar_url,
           joined_at: user.inserted_at,
           games: Stats.games_of(:user_id, user.id),
+          activity: Stats.games_per_day_of(:user_id, user.id, @activity_days),
           last_played_at: Stats.last_played_of(:user_id, user.id),
           online: Map.has_key?(OnlineUsers.activities([user.id]), user.id),
           friends: length(Friends.friends(user.id))
@@ -41,6 +47,7 @@ defmodule Octomocto.Players do
           avatar_url: nil,
           joined_at: guest.inserted_at,
           games: Stats.games_of(:guest_id, guest.id),
+          activity: Stats.games_per_day_of(:guest_id, guest.id, @activity_days),
           last_played_at: Stats.last_played_of(:guest_id, guest.id),
           online: false,
           friends: nil
