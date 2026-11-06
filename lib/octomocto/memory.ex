@@ -145,6 +145,30 @@ defmodule Octomocto.Memory do
   end
 
   @doc """
+  Gives the number of results of the scope's user, else of the guest with
+  the `guest_id`, for each theme name. All results count: also the themes
+  that the Random switch picked and the campaign runs. Empty without a
+  user and a guest id.
+  """
+  def theme_counts(%{user: %{id: id}}, _guest_id), do: count_themes(user_id: id)
+
+  def theme_counts(_scope, guest_id) when is_binary(guest_id),
+    do: count_themes(guest_id: guest_id)
+
+  def theme_counts(_scope, _guest_id), do: %{}
+
+  defp count_themes(player) do
+    from(r in Result,
+      where: ^player,
+      where: not is_nil(r.theme),
+      group_by: r.theme,
+      select: {r.theme, count()}
+    )
+    |> Repo.all()
+    |> Map.new()
+  end
+
+  @doc """
   Gives the accuracy of a player (or a saved result) in percent, from its
   `:correct` and `:errors` flips. Only the flips where the player can know
   the answer are counted (see `Octomocto.Memory.Game`). Gives nil when no

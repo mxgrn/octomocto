@@ -39,7 +39,10 @@ defmodule OctomoctoWeb.MemoryLive do
        [
          canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/memory"),
          alternate_urls: Locale.alternate_urls("memory", ~p"/memory"),
-         themes: Themes.list(),
+         themes:
+           Themes.by_use(
+             Memory.theme_counts(socket.assigns.current_scope, socket.assigns[:guest_id])
+           ),
          rules: rules(),
          banner: banner(params),
          match: match

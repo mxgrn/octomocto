@@ -35,6 +35,18 @@ defmodule Octomocto.Memory.Themes do
   @doc "The themes that a new game can get, in the order of the theme picker."
   def list, do: Enum.reject(@themes, & &1[:hidden])
 
+  @doc """
+  The themes of `list/0` in the order of the theme picker for a player
+  with the `counts` of results for each theme name (see
+  `Octomocto.Memory.theme_counts/2`). The new themes are first, so that
+  the player sees them. Then the most used themes. The themes with the
+  same count keep the order of `list/0`.
+  """
+  def by_use(counts) do
+    {new, others} = Enum.split_with(list(), & &1[:new])
+    new ++ Enum.sort_by(others, &(-Map.get(counts, &1.name, 0)))
+  end
+
   @doc "Gives the theme with the name, also a hidden theme, or nil."
   def get(name), do: Enum.find(@themes, &(&1.name == name))
 
