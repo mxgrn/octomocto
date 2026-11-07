@@ -30,9 +30,7 @@ defmodule OctomoctoWeb.LanguageStatsLive do
        noindex: true,
        language: language,
        days: StatsLive.days(),
-       games: games,
-       # All sparklines have the same scale, as the bars of the counts
-       most_in_day: games |> Enum.flat_map(& &1.days) |> Enum.max(fn -> 0 end)
+       games: games
      )}
   end
 end

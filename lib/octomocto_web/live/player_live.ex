@@ -44,8 +44,6 @@ defmodule OctomoctoWeb.PlayerLive do
        public_id: public_id,
        games: games,
        days: @days,
-       # All sparklines have the same scale, as the bars of the counts
-       most_in_day: games |> Enum.flat_map(& &1.days) |> Enum.max(fn -> 0 end),
        total: profile.games |> Map.values() |> Enum.sum()
      )
      |> assign_follow()}
@@ -94,16 +92,16 @@ defmodule OctomoctoWeb.PlayerLive do
   end
 
   @doc """
-  Renders a small line graph of the games per day, oldest first. The top of
-  the graph is `most`, the most games of one game in a day.
+  Renders a small line graph of the games per day, oldest first. Each graph
+  has its own scale: the top is the most games in one of its days. So the
+  graph shows the trend, and the bar next to it shows the size.
   """
   attr :id, :string, required: true
   attr :days, :list, required: true, doc: "the number of games in each day"
-  attr :most, :integer, required: true
 
   def sparkline(assigns) do
     count = length(assigns.days)
-    most = max(assigns.most, 1)
+    most = max(Enum.max(assigns.days, fn -> 0 end), 1)
 
     points =
       assigns.days
