@@ -68,7 +68,10 @@ defmodule OctomoctoWeb.Layouts do
 
   attr :games_played, :integer,
     default: nil,
-    doc: "the count of all finished games, for a link to /stats in the footer (home page only)"
+    doc: """
+    the live count of all finished games, for the link to /stats in the footer (see
+    `OctomoctoWeb.GamesPlayed`). Without it, the footer reads the count from memory.
+    """
 
   slot :header,
     doc:
@@ -308,18 +311,17 @@ defmodule OctomoctoWeb.Layouts do
             Max Gorin
           </a>
         </span>
-        <%!-- The count of all finished games, live (see `Octomocto.Stats`) --%>
+        <%!-- The count of all finished games (see `Octomocto.Stats.Counter`) --%>
         <.link
-          :if={@games_played}
           id="games-played"
           navigate={~p"/stats"}
           class="transition hover:text-base-content"
         >
           <span
-            id={"games-played-count-#{@games_played}"}
+            id={"games-played-count-#{games_played(@games_played)}"}
             class="games-played-bump font-semibold tabular-nums"
           >
-            {delimit(@games_played)}
+            {delimit(games_played(@games_played))}
           </span>
           games played
         </.link>
@@ -764,6 +766,10 @@ defmodule OctomoctoWeb.Layouts do
     </div>
     """
   end
+
+  # The live count of the page, or the count from memory on a page without one
+  defp games_played(nil), do: Octomocto.Stats.Counter.get()
+  defp games_played(count), do: count
 
   # A number with a comma between each 3 digits, for example 5,195
   defp delimit(n) do

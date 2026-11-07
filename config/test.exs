@@ -6,6 +6,9 @@ config :octomocto, :telegram, bot_token: "test-bot-token", bot_username: "test_b
 config :octomocto, :translate_notifications, false
 config :understudy, async: false, memory_cache: false
 
+# The games counter starts at zero and does not query the database at start
+config :octomocto, :load_games_played, false
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used

@@ -96,6 +96,7 @@ defmodule OctomoctoWeb.Router do
     live_session :default,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
@@ -139,6 +140,7 @@ defmodule OctomoctoWeb.Router do
     live_session :portuguese,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
@@ -166,6 +168,7 @@ defmodule OctomoctoWeb.Router do
     live_session :german,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
@@ -191,6 +194,7 @@ defmodule OctomoctoWeb.Router do
     live_session :russian,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
@@ -216,6 +220,7 @@ defmodule OctomoctoWeb.Router do
     live_session :french,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
@@ -241,6 +246,7 @@ defmodule OctomoctoWeb.Router do
     live_session :ukrainian,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
@@ -266,6 +272,7 @@ defmodule OctomoctoWeb.Router do
     live_session :polish,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
@@ -291,6 +298,7 @@ defmodule OctomoctoWeb.Router do
     live_session :italian,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
@@ -316,6 +324,7 @@ defmodule OctomoctoWeb.Router do
     live_session :spanish,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
@@ -341,6 +350,7 @@ defmodule OctomoctoWeb.Router do
     live_session :japanese,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
@@ -366,6 +376,7 @@ defmodule OctomoctoWeb.Router do
     live_session :vietnamese,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
@@ -391,6 +402,7 @@ defmodule OctomoctoWeb.Router do
     live_session :turkish,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
@@ -416,6 +428,7 @@ defmodule OctomoctoWeb.Router do
     live_session :arabic,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
@@ -442,6 +455,7 @@ defmodule OctomoctoWeb.Router do
     live_session :admin,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
+        OctomoctoWeb.GamesPlayed,
         {OctomoctoWeb.UserAuth, :require_admin}
       ] do
       live "/", DashboardLive

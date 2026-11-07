@@ -11,7 +11,7 @@ defmodule OctomoctoWeb.HomeLive do
 
   import OctomoctoWeb.GamePageComponents
 
-  alias Octomocto.{Accounts, Friends, Lobby, OnlineUsers, Stats}
+  alias Octomocto.{Accounts, Friends, Lobby, OnlineUsers}
   alias Octomocto.Memory.Themes
 
   alias OctomoctoWeb.{
@@ -206,7 +206,6 @@ defmodule OctomoctoWeb.HomeLive do
 
     if connected?(socket) do
       for {_kind, {game, _store, _page}} <- @lobbies, do: Lobby.subscribe(game)
-      Stats.subscribe()
       if friends, do: OnlineUsers.subscribe()
     end
 
@@ -218,7 +217,6 @@ defmodule OctomoctoWeb.HomeLive do
     {:ok,
      socket
      |> assign(canonical_url: url(~p"/"), tags: @tags, kinds: Map.new(@games, &{&1.id, &1}))
-     |> assign(games_played: Stats.games_played())
      |> assign_lobby(entries)
      |> assign(watchers: watchers())
      |> assign(friends: friends)
@@ -249,11 +247,6 @@ defmodule OctomoctoWeb.HomeLive do
     if topic == OnlineUsers.topic(),
       do: {:noreply, assign_friends_online(socket)},
       else: {:noreply, assign(socket, watchers: watchers())}
-  end
-
-  # Each finished round adds one, so the page does not count all games again
-  def handle_info({:game_finished}, socket) do
-    {:noreply, update(socket, :games_played, &(&1 + 1))}
   end
 
   # Tells the page to play a sound when a new open game enters the list

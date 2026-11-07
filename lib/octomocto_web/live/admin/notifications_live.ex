@@ -32,7 +32,7 @@ defmodule OctomoctoWeb.Admin.NotificationsLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
+    <Layouts.app flash={@flash} current_scope={@current_scope} games_played={@games_played}>
       <div id="admin-notifications" class="flex flex-col gap-6 pt-2 pb-4">
         <div class="flex flex-wrap items-end justify-between gap-4">
           <div>

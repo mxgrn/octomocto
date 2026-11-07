@@ -24,6 +24,8 @@ defmodule Octomocto.Application do
       # other node before it serves requests.
       {Mnesiac.Supervisor, [hosts, [name: Octomocto.MnesiacSupervisor]]},
       {Phoenix.PubSub, name: Octomocto.PubSub},
+      # After the PubSub, because it subscribes to the finished games
+      Octomocto.Stats.Counter,
       Octomocto.Lobby.Watchers,
       Octomocto.OnlineUsers,
       {DynamicSupervisor, name: Octomocto.Afterglow.GameSupervisor},

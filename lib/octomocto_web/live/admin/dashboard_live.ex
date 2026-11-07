@@ -8,7 +8,7 @@ defmodule OctomoctoWeb.Admin.DashboardLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
+    <Layouts.app flash={@flash} current_scope={@current_scope} games_played={@games_played}>
       <div id="admin" class="flex flex-col gap-6 pt-2 pb-4">
         <h1 class="text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
           Admin
