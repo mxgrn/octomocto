@@ -148,7 +148,10 @@ defmodule OctomoctoWeb.CampaignComponents do
       patch={@patch}
       aria-current={@selected && "true"}
       aria-label={@label}
-      class="group absolute flex w-20 -translate-x-1/2 -translate-y-8 flex-col items-center rtl:translate-x-1/2"
+      class={[
+        "group absolute flex w-20 -translate-x-1/2 -translate-y-8 flex-col items-center rtl:translate-x-1/2",
+        @selected && "cursor-default"
+      ]}
       style={@style}
     >
       <span class="relative grid size-16 place-items-center transition group-hover:scale-105">

@@ -709,7 +709,8 @@ defmodule OctomoctoWeb.MemoryLive do
             class={[
               "group relative flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
               if(@theme == theme.name,
-                do: "bg-octo-mist ring-2 ring-octo-indigo dark:bg-octo-indigo-light/10",
+                do:
+                  "cursor-default bg-octo-mist ring-2 ring-octo-indigo dark:bg-octo-indigo-light/10",
                 else: "ring-1 ring-base-content/5 hover:bg-base-200 hover:ring-base-content/15"
               )
             ]}

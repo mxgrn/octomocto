@@ -76,7 +76,7 @@ defmodule OctomoctoWeb.BestResults do
           "rounded-full px-2.5 py-1 transition-colors",
           if(following == @following,
             do: "bg-base-100 text-base-content shadow-sm",
-            else: "text-base-content/60 hover:text-base-content"
+            else: "cursor-pointer text-base-content/60 hover:text-base-content"
           )
         ]}
       >
