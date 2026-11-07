@@ -522,8 +522,8 @@ msgid "{name} found the last bomb and can demine the field…"
 msgstr "{name} ma ostatnią bombę i może rozminować pole…"
 
 #, elixir-autogen, elixir-format
-msgid "Enjoying Octomocto? {feed} to keep it ad-free."
-msgstr "Podoba ci się Octomocto? {feed}, żeby nadal było bez reklam."
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "{feed}, żeby Octomocto nadal było bez reklam."
 
 #, elixir-autogen, elixir-format
 msgid "Support the author"

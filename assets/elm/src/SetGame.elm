@@ -1748,8 +1748,7 @@ The link opens in a new tab, so that the player stays in the game.
 viewFeed : Html msg
 viewFeed =
     p [ id "set-feed", class "mt-2 max-w-sm border-t border-white/15 pt-4 text-center text-sm leading-10 text-balance text-white/80" ]
-        [ text "Enjoying Octomocto? "
-        , a
+        [ a
             [ href "/donate"
             , target "_blank"
             , rel "noopener"
@@ -1758,7 +1757,7 @@ viewFeed =
             [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
             , text "Support the author"
             ]
-        , text " to keep it ad-free."
+        , text " to keep Octomocto ad-free."
         ]
 
 

@@ -57,8 +57,8 @@ defmodule OctomoctoWeb.MemoryHTML do
       "Or try {game}" => dgettext("memory", "Or try {game}"),
       "Sign in" => dgettext("memory", "Sign in"),
       "{sign_in} to keep your scores." => dgettext("memory", "{sign_in} to keep your scores."),
-      "Enjoying Octomocto? {feed} to keep it ad-free." =>
-        dgettext("memory", "Enjoying Octomocto? {feed} to keep it ad-free."),
+      "{feed} to keep Octomocto ad-free." =>
+        dgettext("memory", "{feed} to keep Octomocto ad-free."),
       "Support the author" => dgettext("memory", "Support the author"),
       "Level {level}" => dgettext("memory", "Level {level}"),
       "Back to the map" => dgettext("memory", "Back to the map"),

@@ -1844,7 +1844,7 @@ viewFeed : String -> Texts -> Html msg
 viewFeed donateUrl texts =
     p [ id "echo-feed", class "mt-2 max-w-sm border-t border-white/15 pt-4 text-center text-sm leading-10 text-balance text-white/80" ]
         (withLink texts
-            "Enjoying Octomocto? {feed} to keep it ad-free."
+            "{feed} to keep Octomocto ad-free."
             "feed"
             (a
                 [ href donateUrl

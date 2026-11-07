@@ -1622,7 +1622,7 @@ viewFeed donateUrl texts =
     let
         -- The text around the link, which can be at any place of the text
         ( before, after ) =
-            case String.split "{feed}" (t texts "Enjoying Octomocto? {feed} to keep it ad-free.") of
+            case String.split "{feed}" (t texts "{feed} to keep Octomocto ad-free.") of
                 [ b, c ] ->
                     ( b, c )
 

@@ -99,8 +99,8 @@ defmodule OctomoctoWeb.EchoHTML do
       "Or try {game}" => dgettext("echo", "Or try {game}"),
       "Sign in" => dgettext("echo", "Sign in"),
       "{sign_in} to keep your scores." => dgettext("echo", "{sign_in} to keep your scores."),
-      "Enjoying Octomocto? {feed} to keep it ad-free." =>
-        dgettext("echo", "Enjoying Octomocto? {feed} to keep it ad-free."),
+      "{feed} to keep Octomocto ad-free." =>
+        dgettext("echo", "{feed} to keep Octomocto ad-free."),
       "Support the author" => dgettext("echo", "Support the author")
     }
     |> Map.merge(
