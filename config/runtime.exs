@@ -66,7 +66,7 @@ if config_env() == :prod do
     site_key: System.get_env("TURNSTILE_SITE_KEY"),
     secret_key: System.get_env("TURNSTILE_SECRET_KEY")
 
-  # The LLM that translates the notifications (see `config :understudy`
+  # The LLM that translates the banners (see `config :understudy`
   # in config.exs).
   # Without the key, ReqLLM raises when a page needs a translation, so the
   # release does not start without it.

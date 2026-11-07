@@ -8,7 +8,7 @@ defmodule OctomoctoWeb.GameStatsLive do
 
   import OctomoctoWeb.SettingsComponents, only: [player_name: 1]
 
-  on_mount {OctomoctoWeb.SiteNotifications, nil}
+  on_mount {OctomoctoWeb.SiteBanners, nil}
 
   alias Octomocto.Stats
   alias OctomoctoWeb.{GameIcons, HomeLive, NotFoundError, StatsLive}

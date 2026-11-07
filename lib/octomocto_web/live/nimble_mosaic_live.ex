@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.NimbleMosaicLive do
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, "nimble-mosaic"}
+  on_mount {OctomoctoWeb.SiteBanners, "nimble-mosaic"}
   on_mount OctomoctoWeb.BestResults
 
   import OctomoctoWeb.SettingsComponents

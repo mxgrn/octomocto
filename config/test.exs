@@ -2,8 +2,8 @@ import Config
 
 config :octomocto, :telegram, bot_token: "test-bot-token", bot_username: "test_bot"
 
-# Do not send the notifications to the LLM
-config :octomocto, :translate_notifications, false
+# Do not send the banners to the LLM
+config :octomocto, :translate_banners, false
 config :understudy, async: false, memory_cache: false
 
 # The games counter starts at zero and does not query the database at start

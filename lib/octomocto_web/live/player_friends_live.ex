@@ -7,7 +7,7 @@ defmodule OctomoctoWeb.PlayerFriendsLive do
   """
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, nil}
+  on_mount {OctomoctoWeb.SiteBanners, nil}
 
   alias Octomocto.{Accounts, Friends, OnlineUsers, Players}
   alias OctomoctoWeb.{HomeLive, NotFoundError}

@@ -18,13 +18,13 @@ defmodule OctomoctoWeb.MemoryController do
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
         next_game: NextGame.pick("memory", id, state.needed > 1),
-        banner: MemoryLive.banner(conn.query_params),
+        welcome: MemoryLive.welcome(conn.query_params),
         noindex: true
       )
     else
       conn
       |> put_flash(:error, gettext("This game does not exist (any more). Start a new one."))
-      # Keeps the link source, so that the Memory page can show its banner
+      # Keeps the link source, so that the Memory page can show its welcome line
       |> redirect(
         to: Locale.path(locale, ~p"/memory?#{Map.take(conn.query_params, ["utm_source"])}")
       )

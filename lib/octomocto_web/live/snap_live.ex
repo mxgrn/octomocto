@@ -5,7 +5,7 @@ defmodule OctomoctoWeb.SnapLive do
   """
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, "snap"}
+  on_mount {OctomoctoWeb.SiteBanners, "snap"}
   on_mount OctomoctoWeb.BestResults
 
   import OctomoctoWeb.SettingsComponents,

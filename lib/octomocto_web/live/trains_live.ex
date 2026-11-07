@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.TrainsLive do
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, "trains"}
+  on_mount {OctomoctoWeb.SiteBanners, "trains"}
   on_mount OctomoctoWeb.BestResults
 
   # The same settings and result lists as on the Nimble Mosaic page

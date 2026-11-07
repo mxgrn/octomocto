@@ -10,14 +10,14 @@ defmodule OctomoctoWeb.Admin.DashboardLiveTest do
   test "is not found for a user who is not an admin", %{conn: conn} do
     %{conn: conn} = register_and_log_in_user(%{conn: conn})
 
-    assert_error_sent 404, fn -> get(conn, ~p"/admin/notifications") end
+    assert_error_sent 404, fn -> get(conn, ~p"/admin/banners") end
   end
 
-  test "links to the notifications for an admin", %{conn: conn} do
+  test "links to the banners for an admin", %{conn: conn} do
     %{conn: conn} = register_and_log_in_admin(%{conn: conn})
 
     {:ok, view, _html} = live(conn, ~p"/admin")
 
-    assert has_element?(view, "#admin-notifications-link[href='/admin/notifications']")
+    assert has_element?(view, "#admin-banners-link[href='/admin/banners']")
   end
 end

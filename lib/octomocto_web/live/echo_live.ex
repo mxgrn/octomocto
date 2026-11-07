@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.EchoLive do
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, "echo"}
+  on_mount {OctomoctoWeb.SiteBanners, "echo"}
   on_mount OctomoctoWeb.BestResults
 
   # The same settings and result lists as on the Nimble Mosaic page

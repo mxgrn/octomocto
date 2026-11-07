@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.MemoryLive do
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, "memory"}
+  on_mount {OctomoctoWeb.SiteBanners, "memory"}
   on_mount OctomoctoWeb.BestResults
 
   # The same settings and result lists as on the Nimble Mosaic page
@@ -44,7 +44,7 @@ defmodule OctomoctoWeb.MemoryLive do
              Memory.theme_counts(socket.assigns.current_scope, socket.assigns[:guest_id])
            ),
          rules: rules(),
-         banner: banner(params),
+         welcome: welcome(params),
          match: match
        ] ++ seo()
      )
@@ -65,14 +65,14 @@ defmodule OctomoctoWeb.MemoryLive do
   end
 
   @doc "The message for the people who come from the links on Pairs One, the old site of the game."
-  def banner(%{"utm_source" => "pairs.one"}),
+  def welcome(%{"utm_source" => "pairs.one"}),
     do:
       dgettext(
         "memory",
         "Pairs One is now Octomocto. Your favorite Memory game (improved!) plus more games to play."
       )
 
-  def banner(_params), do: nil
+  def welcome(_params), do: nil
 
   # The params of the Free play tab. Without them, a signed-in user goes to
   # the tab that the user used last.

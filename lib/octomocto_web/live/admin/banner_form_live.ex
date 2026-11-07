@@ -1,82 +1,82 @@
-defmodule OctomoctoWeb.Admin.NotificationFormLive do
-  @moduledoc "The form to add a notification or to change one."
+defmodule OctomoctoWeb.Admin.BannerFormLive do
+  @moduledoc "The form to add a banner or to change one."
   use OctomoctoWeb, :live_view
 
-  alias Octomocto.Notifications
-  alias Octomocto.Notifications.Notification
-  alias OctomoctoWeb.Admin.NotificationsLive
+  alias Octomocto.Banners
+  alias Octomocto.Banners.Banner
+  alias OctomoctoWeb.Admin.BannersLive
   alias OctomoctoWeb.HomeLive
 
   def mount(params, _session, socket) do
-    notification = notification(socket.assigns.live_action, params)
+    banner = banner(socket.assigns.live_action, params)
 
     {:ok,
      socket
      |> assign(
        page_title: page_title(socket.assigns.live_action),
        noindex: true,
-       notification: notification,
+       banner: banner,
        game_options: [
-         {NotificationsLive.pages_name(nil), ""}
+         {BannersLive.pages_name(nil), ""}
          | Enum.map(HomeLive.games(), &{&1.name, &1.id})
        ]
      )
-     |> assign_form(Notifications.change_notification(notification))}
+     |> assign_form(Banners.change_banner(banner))}
   end
 
-  # A new notification expires in a week, at the start of the hour
-  defp notification(:new, _params) do
+  # A new banner expires in a week, at the start of the hour
+  defp banner(:new, _params) do
     expires_at =
       DateTime.utc_now()
       |> DateTime.add(7, :day)
       |> Map.merge(%{minute: 0, second: 0, microsecond: {0, 0}})
 
-    %Notification{expires_at: expires_at}
+    %Banner{expires_at: expires_at}
   end
 
-  defp notification(:edit, %{"id" => id}), do: Notifications.get_notification!(id)
+  defp banner(:edit, %{"id" => id}), do: Banners.get_banner!(id)
 
-  defp page_title(:new), do: "New notification"
-  defp page_title(:edit), do: "Edit notification"
+  defp page_title(:new), do: "New banner"
+  defp page_title(:edit), do: "Edit banner"
 
-  def handle_event("validate", %{"notification" => params}, socket) do
-    changeset = Notifications.change_notification(socket.assigns.notification, params)
+  def handle_event("validate", %{"banner" => params}, socket) do
+    changeset = Banners.change_banner(socket.assigns.banner, params)
     {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
   end
 
-  def handle_event("save", %{"notification" => params}, socket) do
-    case save(socket.assigns.live_action, socket.assigns.notification, params) do
-      {:ok, notification} ->
-        Notifications.translate(notification)
+  def handle_event("save", %{"banner" => params}, socket) do
+    case save(socket.assigns.live_action, socket.assigns.banner, params) do
+      {:ok, banner} ->
+        Banners.translate(banner)
 
         {:noreply,
          socket
-         |> put_flash(:info, "Notification saved")
-         |> push_navigate(to: ~p"/admin/notifications")}
+         |> put_flash(:info, "Banner saved")
+         |> push_navigate(to: ~p"/admin/banners")}
 
       {:error, changeset} ->
         {:noreply, assign_form(socket, changeset)}
     end
   end
 
-  defp save(:new, _notification, params), do: Notifications.create_notification(params)
+  defp save(:new, _banner, params), do: Banners.create_banner(params)
 
-  defp save(:edit, notification, params),
-    do: Notifications.update_notification(notification, params)
+  defp save(:edit, banner, params),
+    do: Banners.update_banner(banner, params)
 
   defp assign_form(socket, changeset), do: assign(socket, :form, to_form(changeset))
 
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} games_played={@games_played}>
-      <div id="admin-notification" class="flex flex-col gap-6 pt-2 pb-4">
+      <div id="admin-banner" class="flex flex-col gap-6 pt-2 pb-4">
         <div>
           <.link
-            id="notifications-link"
-            navigate={~p"/admin/notifications"}
+            id="banners-link"
+            navigate={~p"/admin/banners"}
             class="inline-flex items-center gap-1 text-sm text-base-content/60 transition hover:text-base-content"
           >
-            <.icon name="hero-chevron-left-micro" class="size-4" /> Notifications
+            <.icon name="hero-chevron-left-micro" class="size-4" /> Banners
           </.link>
           <h1 class="text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
             {@page_title}
@@ -85,7 +85,7 @@ defmodule OctomoctoWeb.Admin.NotificationFormLive do
 
         <.form
           for={@form}
-          id="notification-form"
+          id="banner-form"
           phx-change="validate"
           phx-submit="save"
           class="space-y-4 rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10 sm:p-6"
@@ -102,13 +102,13 @@ defmodule OctomoctoWeb.Admin.NotificationFormLive do
 
           <div class="flex items-center justify-end gap-3 pt-2">
             <.link
-              navigate={~p"/admin/notifications"}
+              navigate={~p"/admin/banners"}
               class="rounded-full px-4 py-2 text-sm font-medium text-base-content/70 transition hover:bg-base-content/5 hover:text-base-content"
             >
               Cancel
             </.link>
             <button
-              id="save-notification"
+              id="save-banner"
               type="submit"
               phx-disable-with="Saving..."
               class="rounded-full bg-octo-indigo px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-octo-indigo/20 active:scale-95"

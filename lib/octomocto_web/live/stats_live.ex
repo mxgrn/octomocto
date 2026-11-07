@@ -6,7 +6,7 @@ defmodule OctomoctoWeb.StatsLive do
   """
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, nil}
+  on_mount {OctomoctoWeb.SiteBanners, nil}
 
   alias Octomocto.Stats
   alias OctomoctoWeb.{GameIcons, HomeLive}

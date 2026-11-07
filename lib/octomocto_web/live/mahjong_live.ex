@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.MahjongLive do
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, "mahjong"}
+  on_mount {OctomoctoWeb.SiteBanners, "mahjong"}
   on_mount OctomoctoWeb.BestResults
 
   # The same settings and result lists as on the Nimble Mosaic page

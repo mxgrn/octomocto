@@ -63,38 +63,38 @@ const Turnstile = {
   destroyed() { hideTurnstile(this.el) },
 }
 
-// The bar of notifications above the header (see `site_notifications` in
-// layouts.ex). It shows the first notification that the user did not close,
-// in the order the notifications were added. After the user closes it, the
+// The bar of banners above the header (see `site_banners` in
+// layouts.ex). It shows the first banner that the user did not close,
+// in the order the banners were added. After the user closes it, the
 // next one shows on the next page load. The server also gets each close
-// (see NotificationCloseController).
-const CLOSED_NOTIFICATIONS_KEY = "closed-notifications"
-const closedNotifications = () => {
-  try { return JSON.parse(localStorage.getItem(CLOSED_NOTIFICATIONS_KEY)) || [] } catch (_e) { return [] }
+// (see BannerCloseController).
+const CLOSED_BANNERS_KEY = "closed-banners"
+const closedBanners = () => {
+  try { return JSON.parse(localStorage.getItem(CLOSED_BANNERS_KEY)) || [] } catch (_e) { return [] }
 }
-const closeNotification = (notification) => {
-  const id = notification.dataset.notificationId
-  const closed = new Set([...closedNotifications(), id])
-  try { localStorage.setItem(CLOSED_NOTIFICATIONS_KEY, JSON.stringify([...closed])) } catch (_e) {}
+const closeBanner = (banner) => {
+  const id = banner.dataset.bannerId
+  const closed = new Set([...closedBanners(), id])
+  try { localStorage.setItem(CLOSED_BANNERS_KEY, JSON.stringify([...closed])) } catch (_e) {}
   // The bar works the same when the request fails
-  fetch(`/notifications/${id}/close`, {method: "POST", headers: {"x-csrf-token": csrfToken}})
+  fetch(`/banners/${id}/close`, {method: "POST", headers: {"x-csrf-token": csrfToken}})
     .catch(() => {})
-  notification.classList.add("closing")
-  setTimeout(() => { notification.hidden = true }, 150)
+  banner.classList.add("closing")
+  setTimeout(() => { banner.hidden = true }, 150)
 }
-function showSiteNotification(container) {
-  const closed = closedNotifications()
-  const notification = [...container.querySelectorAll("[data-notification-id]")]
-    .find(el => !closed.includes(el.dataset.notificationId))
-  if (notification) notification.hidden = false
+function showSiteBanner(container) {
+  const closed = closedBanners()
+  const banner = [...container.querySelectorAll("[data-banner-id]")]
+    .find(el => !closed.includes(el.dataset.bannerId))
+  if (banner) banner.hidden = false
 }
 document.addEventListener("click", e => {
-  const button = e.target.closest("[data-close-notification]")
-  if (button) closeNotification(button.closest("[data-notification-id]"))
+  const button = e.target.closest("[data-close-banner]")
+  if (button) closeBanner(button.closest("[data-banner-id]"))
 })
 // On a LiveView page, also after live navigation
-const SiteNotifications = {
-  mounted() { showSiteNotification(this.el) },
+const SiteBanners = {
+  mounted() { showSiteBanner(this.el) },
 }
 
 // The settings page of a match (?match=<game id>) holds the seat of the
@@ -110,7 +110,7 @@ const matchToken = () => {
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: () => ({_csrf_token: csrfToken, ...matchToken()}),
-  hooks: {...colocatedHooks, TelegramLogin, Turnstile, LobbySound, SiteNotifications},
+  hooks: {...colocatedHooks, TelegramLogin, Turnstile, LobbySound, SiteBanners},
 })
 
 // The socket often drops while the tab is in the background, and the error
@@ -1116,7 +1116,7 @@ function hideTurnstile(node) {
 document.querySelectorAll("[data-telegram-login]").forEach(showTelegramLogin)
 document.querySelectorAll("[data-turnstile-sitekey]").forEach(showTurnstile)
 // On a page without a LiveView
-document.querySelectorAll("#site-notifications").forEach(showSiteNotification)
+document.querySelectorAll("#site-banners").forEach(showSiteBanner)
 
 // connect if there are any LiveViews on the page
 liveSocket.connect()

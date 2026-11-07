@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.SudokuLive do
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, "sudoku"}
+  on_mount {OctomoctoWeb.SiteBanners, "sudoku"}
   on_mount OctomoctoWeb.BestResults
 
   # The same settings and result lists as on the Nimble Mosaic page

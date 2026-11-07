@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.SetGameLive do
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, "set"}
+  on_mount {OctomoctoWeb.SiteBanners, "set"}
   on_mount OctomoctoWeb.BestResults
 
   # The same settings and result lists as on the Nimble Mosaic page

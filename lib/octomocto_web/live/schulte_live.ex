@@ -6,7 +6,7 @@ defmodule OctomoctoWeb.SchulteLive do
   """
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, "schulte"}
+  on_mount {OctomoctoWeb.SiteBanners, "schulte"}
   on_mount OctomoctoWeb.BestResults
 
   import OctomoctoWeb.SettingsComponents

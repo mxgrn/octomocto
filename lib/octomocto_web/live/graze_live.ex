@@ -5,7 +5,7 @@ defmodule OctomoctoWeb.GrazeLive do
   """
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, "graze"}
+  on_mount {OctomoctoWeb.SiteBanners, "graze"}
   on_mount OctomoctoWeb.BestResults
 
   import OctomoctoWeb.SettingsComponents

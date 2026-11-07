@@ -1,12 +1,12 @@
-defmodule Octomocto.Notifications.Notification do
+defmodule Octomocto.Banners.Banner do
   @moduledoc """
   A message on one line in a bar above the header, until it expires or the
-  user closes it. See `Octomocto.Notifications`.
+  user closes it. See `Octomocto.Banners`.
   """
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "notifications" do
+  schema "banners" do
     # Markdown, on one line
     field :text, :string
     # The id of a game in `OctomoctoWeb.HomeLive.games/0`. Nil means all pages.
@@ -17,8 +17,8 @@ defmodule Octomocto.Notifications.Notification do
   end
 
   @doc false
-  def changeset(notification, attrs) do
-    notification
+  def changeset(banner, attrs) do
+    banner
     |> cast(attrs, [:text, :game, :expires_at])
     |> validate_required([:text, :expires_at])
     |> validate_format(:text, ~r/\A[^\r\n]*\z/, message: "must be on one line")

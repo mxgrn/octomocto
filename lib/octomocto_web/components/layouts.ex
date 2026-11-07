@@ -51,15 +51,15 @@ defmodule OctomoctoWeb.Layouts do
     default: false,
     doc: "removes the header and the footer, so that the game uses all of the screen"
 
-  attr :banner, :string,
+  attr :welcome, :string,
     default: nil,
     doc: "a message in a bar above the header, which the user can close"
 
-  attr :notifications, :list,
+  attr :banners, :list,
     default: [],
     doc: """
-    the notifications for the bar above the header (see `OctomoctoWeb.SiteNotifications`).
-    The bar does not show on a game page or below a banner.
+    the banners for the bar above the header (see `OctomoctoWeb.SiteBanners`).
+    The bar does not show on a game page or below the welcome line.
     """
 
   attr :languages, :list,
@@ -94,24 +94,24 @@ defmodule OctomoctoWeb.Layouts do
     <%!-- The column keeps the footer at the bottom of a short page --%>
     <div class="flex min-h-dvh flex-col">
       <div
-        :if={@banner}
-        id="site-banner"
+        :if={@welcome}
+        id="site-welcome"
         class="flex items-center justify-center gap-3 bg-octo-indigo px-10 py-2 text-center text-sm font-medium text-white relative"
       >
-        <span>{@banner}</span>
+        <span>{@welcome}</span>
         <button
-          id="site-banner-close"
+          id="site-welcome-close"
           type="button"
           aria-label={gettext("Close")}
-          phx-click={JS.hide(to: "#site-banner")}
+          phx-click={JS.hide(to: "#site-welcome")}
           class="absolute end-2 rounded-full p-1 text-white/70 transition hover:bg-white/10 hover:text-white"
         >
           <.icon name="hero-x-mark" class="size-4" />
         </button>
       </div>
-      <.site_notifications
-        :if={!@game && !@banner && @notifications != []}
-        notifications={@notifications}
+      <.site_banners
+        :if={!@game && !@welcome && @banners != []}
+        banners={@banners}
       />
       <header
         :if={!@game}
@@ -422,30 +422,28 @@ defmodule OctomoctoWeb.Layouts do
     """
   end
 
-  attr :notifications, :list, required: true
+  attr :banners, :list, required: true
 
-  # All notifications are hidden. The `SiteNotifications` hook in `app.js`
+  # All banners are hidden. The `SiteBanners` hook in `app.js`
   # shows the first one that the user did not close.
-  defp site_notifications(assigns) do
+  defp site_banners(assigns) do
     ~H"""
-    <div id="site-notifications" phx-hook="SiteNotifications" phx-update="ignore">
+    <div id="site-banners" phx-hook="SiteBanners" phx-update="ignore">
       <div
-        :for={notification <- @notifications}
-        id={"site-notification-#{notification.id}"}
-        data-notification-id={notification.id}
+        :for={banner <- @banners}
+        id={"site-banner-#{banner.id}"}
+        data-banner-id={banner.id}
         hidden
-        class="site-notification relative flex items-center justify-center bg-octo-indigo px-10 py-2 text-center text-sm font-medium text-white"
+        class="site-banner relative flex items-center justify-center bg-octo-indigo px-10 py-2 text-center text-sm font-medium text-white"
       >
         <span class="[&_a]:font-semibold [&_a]:underline [&_a]:decoration-white/40 [&_a]:underline-offset-2 [&_a]:transition [&_a:hover]:decoration-white">
           {Phoenix.HTML.raw(
-            OctomoctoWeb.SiteNotifications.to_html(
-              Octomocto.Notifications.localized_text(notification)
-            )
+            OctomoctoWeb.SiteBanners.to_html(Octomocto.Banners.localized_text(banner))
           )}
         </span>
         <button
           type="button"
-          data-close-notification
+          data-close-banner
           aria-label={gettext("Close")}
           class="absolute end-2 rounded-full p-1 text-white/70 transition hover:bg-white/10 hover:text-white active:scale-90"
         >

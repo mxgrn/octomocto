@@ -1,6 +1,6 @@
 defmodule Octomocto.Guests.Guest do
   @moduledoc """
-  A guest that finished a game or closed a notification. The `id` is the guest id in the session
+  A guest that finished a game or closed a banner. The `id` is the guest id in the session
   (see `OctomoctoWeb.GuestName`). The `name` is the guest name when the
   guest was first saved, as text: a later change of the word lists
   in `Octomocto.GuestName` does not change it. The `locale` is the first

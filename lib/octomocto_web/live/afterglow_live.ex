@@ -9,7 +9,7 @@ defmodule OctomoctoWeb.AfterglowLive do
   """
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, "afterglow"}
+  on_mount {OctomoctoWeb.SiteBanners, "afterglow"}
   on_mount OctomoctoWeb.BestResults
 
   import OctomoctoWeb.SettingsComponents,

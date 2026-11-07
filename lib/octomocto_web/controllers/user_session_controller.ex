@@ -7,7 +7,7 @@ defmodule OctomoctoWeb.UserSessionController do
   alias OctomoctoWeb.UserAgent
   alias OctomoctoWeb.UserAuth
 
-  plug OctomoctoWeb.SiteNotifications when action in [:new, :confirm]
+  plug OctomoctoWeb.SiteBanners when action in [:new, :confirm]
 
   # Marks the browser that asked for a magic link. When the link opens in the same
   # browser, we sign the user in at once. Email link scanners do not have this cookie,

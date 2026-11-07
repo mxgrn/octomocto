@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.OverlapLive do
   use OctomoctoWeb, :live_view
 
-  on_mount {OctomoctoWeb.SiteNotifications, "overlap"}
+  on_mount {OctomoctoWeb.SiteBanners, "overlap"}
   on_mount OctomoctoWeb.BestResults
 
   # The same settings and result lists as on the Nimble Mosaic page

@@ -87,8 +87,8 @@ defmodule OctomoctoWeb.Router do
     get "/snap/:id", SnapController, :show
     get "/afterglow/:id", AfterglowController, :show
     get "/graze/:id", GrazeController, :show
-    # The bar of notifications sends each close, also for guests
-    post "/notifications/:id/close", NotificationCloseController, :create
+    # The bar of banners sends each close, also for guests
+    post "/banners/:id/close", BannerCloseController, :create
 
     # The front page updates its list of public games live. The
     # settings of a new game: a LiveView changes the settings without a page
@@ -459,9 +459,9 @@ defmodule OctomoctoWeb.Router do
         {OctomoctoWeb.UserAuth, :require_admin}
       ] do
       live "/", DashboardLive
-      live "/notifications", NotificationsLive
-      live "/notifications/new", NotificationFormLive, :new
-      live "/notifications/:id/edit", NotificationFormLive, :edit
+      live "/banners", BannersLive
+      live "/banners/new", BannerFormLive, :new
+      live "/banners/:id/edit", BannerFormLive, :edit
     end
   end
 
