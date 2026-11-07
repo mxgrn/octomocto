@@ -34,6 +34,24 @@
           {@profile.name}
         </h1>
         <p :if={@profile.guest} id="player-guest" class="text-sm text-base-content/60">Guest</p>
+        <p :if={!@profile.guest} id="player-follows" class="mt-0.5 flex gap-4 text-sm">
+          <.link
+            :for={
+              {list, label, path} <- [
+                {:followers, "Followers", ~p"/players/#{@public_id}/followers"},
+                {:following, "Following", ~p"/players/#{@public_id}/following"}
+              ]
+            }
+            id={"player-#{list}-link"}
+            navigate={path}
+            class="group whitespace-nowrap text-base-content/60 transition-colors hover:text-octo-indigo dark:hover:text-octo-indigo-light"
+          >
+            <span class="font-semibold text-octo-navy tabular-nums transition-colors group-hover:text-octo-indigo dark:text-base-content dark:group-hover:text-octo-indigo-light">
+              {Map.fetch!(@profile, list)}
+            </span>
+            {label}
+          </.link>
+        </p>
       </div>
       <div :if={@follow} class="ml-auto shrink-0">
         <button
@@ -75,7 +93,7 @@
       id="player-summary"
       class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100 sm:p-6"
     >
-      <dl class="grid grid-cols-2 gap-6 sm:grid-cols-4">
+      <dl class="grid grid-cols-2 gap-6 sm:grid-cols-3">
         <div id="player-joined">
           <dt class="text-sm text-base-content/60">Joined</dt>
           <dd class="mt-0.5 text-lg font-semibold text-octo-navy dark:text-base-content">
@@ -96,7 +114,11 @@
         <div :if={@profile.online || @profile.last_played_at} id="player-last-active">
           <dt class="text-sm text-base-content/60">Last active</dt>
           <dd class="mt-0.5 text-lg font-semibold text-octo-navy dark:text-base-content">
-            <span :if={@profile.online} id="player-online" class="flex items-center gap-2">
+            <span
+              :if={@profile.online}
+              id="player-online"
+              class="flex items-center gap-2 whitespace-nowrap"
+            >
               <span class="size-2 shrink-0 rounded-full bg-emerald-500"></span> Online now
             </span>
             <time
@@ -106,18 +128,6 @@
             >
               {ago(@profile.last_played_at)}
             </time>
-          </dd>
-        </div>
-        <div :if={!@profile.guest} id="player-friends">
-          <dt class="text-sm text-base-content/60">Friends</dt>
-          <dd class="mt-0.5 text-lg font-semibold text-octo-navy tabular-nums dark:text-base-content">
-            <.link
-              id="player-friends-link"
-              navigate={~p"/players/#{@public_id}/friends"}
-              class="text-octo-indigo transition-colors hover:text-octo-indigo/70 dark:text-octo-indigo-light dark:hover:text-octo-indigo-light/70"
-            >
-              {@profile.friends}
-            </.link>
           </dd>
         </div>
       </dl>

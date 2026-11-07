@@ -4,8 +4,8 @@ defmodule OctomoctoWeb.PlayerLive do
   (see `Octomocto.Players`): the date of the first visit that the site
   saved, the games played in all, the games played in each game in the
   last 30 days (with a graph of the games per day), the time of the last
-  finished game ("Online now" for a user that is online), and the number
-  of friends of a user. Anyone can open it. A signed-in user can follow
+  finished game ("Online now" for a user that is online), and the numbers
+  of followers and followed users of a user. Anyone can open it. A signed-in user can follow
   another user here (see `Octomocto.Friends`).
   """
   use OctomoctoWeb, :live_view
@@ -61,7 +61,7 @@ defmodule OctomoctoWeb.PlayerLive do
     {:noreply, reload(socket)}
   end
 
-  # A follow can make or end a friendship, so the count of friends changes
+  # A follow changes the count of followers
   defp reload(socket) do
     socket
     |> assign(:profile, Players.profile(socket.assigns.public_id))

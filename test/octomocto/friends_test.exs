@@ -75,4 +75,15 @@ defmodule Octomocto.FriendsTest do
     assert pairs() == [{b, a}]
     assert Friends.friends(b) == []
   end
+
+  test "followers/1, following/1 and counts/1 give the follows of the user" do
+    [a, b, c] = for _ <- 1..3, do: user_fixture().id
+    Friends.follow(b, a)
+    Friends.follow(c, a)
+    Friends.follow(a, b)
+
+    assert a |> Friends.followers() |> Enum.map(& &1.id) |> Enum.sort() == Enum.sort([b, c])
+    assert [%{id: ^b}] = Friends.following(a)
+    assert Friends.counts(a) == %{followers: 2, following: 1}
+  end
 end

@@ -3,7 +3,7 @@ defmodule Octomocto.Players do
   The public profiles of users and guests, by their public id (see
   `Octomocto.PublicId`). A profile shows the name, the date of the first
   visit that the site saved, the games played, the time of the last
-  finished game and, for a user, the number of friends and whether the
+  finished game and, for a user, the numbers of followers and followed users and whether the
   user is online now (guests are never online, see
   `Octomocto.OnlineUsers`). A guest has a profile only after it has a row (see
   `Octomocto.Guests.Guest`).
@@ -20,7 +20,8 @@ defmodule Octomocto.Players do
 
   @doc """
   The profile of the user or the guest with the `public_id`, or nil. The
-  `:friends` count is nil for a guest: guests have no friends.
+  `:followers` and `:following` counts are nil for a guest: guests cannot
+  follow (see `Octomocto.Friends`).
   `:last_played_at` is nil for a player with no finished games.
   `:activity` has the games per day in the last #{@activity_days} days, by
   game (see `Octomocto.Stats.games_per_day_of/4`).
@@ -37,9 +38,9 @@ defmodule Octomocto.Players do
           games: Stats.games_of(:user_id, user.id),
           activity: Stats.games_per_day_of(:user_id, user.id, @activity_days),
           last_played_at: Stats.last_played_of(:user_id, user.id),
-          online: Map.has_key?(OnlineUsers.activities([user.id]), user.id),
-          friends: length(Friends.friends(user.id))
+          online: Map.has_key?(OnlineUsers.activities([user.id]), user.id)
         }
+        |> Map.merge(Friends.counts(user.id))
 
       guest = Repo.one(from g in Guest, where: g.public_id == ^public_id) ->
         %{
@@ -52,7 +53,8 @@ defmodule Octomocto.Players do
           activity: Stats.games_per_day_of(:guest_id, guest.id, @activity_days),
           last_played_at: Stats.last_played_of(:guest_id, guest.id),
           online: false,
-          friends: nil
+          followers: nil,
+          following: nil
         }
 
       true ->

@@ -33,6 +33,37 @@ defmodule Octomocto.Friends do
     )
   end
 
+  @doc "The users who follow the user. Friends are included."
+  def followers(user_id) do
+    Repo.all(
+      from u in User, join: f in Follow, on: f.follower_id == u.id and f.followed_id == ^user_id
+    )
+  end
+
+  @doc "The users that the user follows. Friends are included."
+  def following(user_id) do
+    Repo.all(
+      from u in User, join: f in Follow, on: f.followed_id == u.id and f.follower_id == ^user_id
+    )
+  end
+
+  @doc "The number of followers and of followed users of the user."
+  def counts(user_id) do
+    Repo.one(
+      from f in Follow,
+        where: f.follower_id == ^user_id or f.followed_id == ^user_id,
+        select: %{
+          followers: count(f.follower_id) |> filter(f.followed_id == ^user_id),
+          following: count(f.followed_id) |> filter(f.follower_id == ^user_id)
+        }
+    )
+  end
+
+  @doc "The ids of the users who follow the user. Friends are included."
+  def follower_ids(user_id) do
+    Repo.all(from f in Follow, where: f.followed_id == ^user_id, select: f.follower_id)
+  end
+
   @doc "True when the user `follower_id` follows the user `followed_id`."
   def following?(follower_id, followed_id) do
     Repo.exists?(

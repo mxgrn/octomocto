@@ -10,7 +10,7 @@ defmodule OctomoctoWeb.PlayerLiveTest do
 
   @settings %{"type" => "random", "mode" => "easy", "players" => 1}
 
-  test "shows the games of a user in each game and the friends", %{conn: conn} do
+  test "shows the games of a user in each game and the follows", %{conn: conn} do
     user = user_fixture()
     NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
 
@@ -18,7 +18,7 @@ defmodule OctomoctoWeb.PlayerLiveTest do
 
     assert view |> element("#player-games") |> render() =~ "1"
     assert has_element?(view, "#player-game-nimble-mosaic")
-    assert has_element?(view, "#player-friends")
+    assert has_element?(view, "#player-follows")
   end
 
   test "shows a graph of the last 30 days for each game", %{conn: conn} do
@@ -60,7 +60,7 @@ defmodule OctomoctoWeb.PlayerLiveTest do
     refute has_element?(view, "#player-initial")
   end
 
-  test "shows no friends for a guest", %{conn: conn} do
+  test "shows no follows for a guest", %{conn: conn} do
     guest_id = Ecto.UUID.generate()
 
     NimbleMosaic.save_results("a", @settings, 1000, [
@@ -70,7 +70,7 @@ defmodule OctomoctoWeb.PlayerLiveTest do
     {:ok, view, _html} = live(conn, ~p"/players/#{Repo.get!(Guest, guest_id).public_id}")
 
     assert has_element?(view, "#player-guest")
-    refute has_element?(view, "#player-friends")
+    refute has_element?(view, "#player-follows")
   end
 
   test "shows how long ago a player last played", %{conn: conn} do
@@ -169,7 +169,7 @@ defmodule OctomoctoWeb.PlayerLiveTest do
       assert view |> element("#follow-button") |> render() =~ "Follow back"
       view |> element("#follow-button") |> render_click()
 
-      assert view |> element("#player-friends-link") |> render() =~ "1"
+      assert view |> element("#player-following-link") |> render() =~ "1"
       assert view |> element("#unfollow-button[data-confirm]") |> render() =~ "Friends"
     end
 

@@ -10,7 +10,7 @@ defmodule Octomocto.PlayersTest do
 
   @settings %{"type" => "random", "mode" => "easy", "players" => 1}
 
-  test "profile/1 gives the games of a user in each game and the friends" do
+  test "profile/1 gives the games of a user in each game and the follow counts" do
     user = user_fixture()
     friend = user_fixture()
     now = DateTime.utc_now(:second)
@@ -24,7 +24,12 @@ defmodule Octomocto.PlayersTest do
     NimbleMosaic.save_results("b", @settings, 1000, [%{user_id: user.id, score: 90}])
     Snap.save_results("c", %{}, 0, [%{user_id: user.id, score: 5, correct: 5, wrong: 0}])
 
-    assert %{guest: false, games: %{"nimble-mosaic" => 2, "snap" => 1}, friends: 1} =
+    assert %{
+             guest: false,
+             games: %{"nimble-mosaic" => 2, "snap" => 1},
+             followers: 1,
+             following: 1
+           } =
              Players.profile(user.public_id)
   end
 
@@ -40,7 +45,7 @@ defmodule Octomocto.PlayersTest do
     assert Enum.sum(days) == 2
   end
 
-  test "profile/1 gives a guest with no friends count" do
+  test "profile/1 gives a guest with no follow counts" do
     guest_id = Ecto.UUID.generate()
 
     NimbleMosaic.save_results("a", @settings, 1000, [
@@ -49,7 +54,7 @@ defmodule Octomocto.PlayersTest do
 
     guest = Repo.get!(Guest, guest_id)
 
-    assert %{name: "Brave Otter", guest: true, games: %{"nimble-mosaic" => 1}, friends: nil} =
+    assert %{name: "Brave Otter", guest: true, games: %{"nimble-mosaic" => 1}, followers: nil} =
              Players.profile(guest.public_id)
   end
 
