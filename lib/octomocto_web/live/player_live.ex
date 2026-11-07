@@ -70,7 +70,8 @@ defmodule OctomoctoWeb.PlayerLive do
 
   # `follow` is nil when there is no Follow button: for a guest who looks,
   # for the profile of a guest, and for the user's own profile. Else it
-  # tells if the user follows the player, and if they are friends.
+  # tells if the user follows the player, if the player follows the user,
+  # and if they are friends (both follow).
   defp assign_follow(socket) do
     viewer_id = viewer_id(socket)
     player_id = socket.assigns.profile.user_id
@@ -78,7 +79,8 @@ defmodule OctomoctoWeb.PlayerLive do
     follow =
       if viewer_id && player_id && viewer_id != player_id do
         following = Friends.following?(viewer_id, player_id)
-        %{following: following, friends: following && Friends.following?(player_id, viewer_id)}
+        followed_by = Friends.following?(player_id, viewer_id)
+        %{following: following, followed_by: followed_by, friends: following && followed_by}
       end
 
     assign(socket, :follow, follow)

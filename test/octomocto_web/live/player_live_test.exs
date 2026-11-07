@@ -166,10 +166,11 @@ defmodule OctomoctoWeb.PlayerLiveTest do
       Octomocto.Friends.follow(player.id, user.id)
       {:ok, view, _html} = live(conn, ~p"/players/#{player.public_id}")
 
+      assert view |> element("#follow-button") |> render() =~ "Follow back"
       view |> element("#follow-button") |> render_click()
 
       assert view |> element("#player-friends-link") |> render() =~ "1"
-      assert has_element?(view, "#unfollow-button[data-confirm]")
+      assert view |> element("#unfollow-button[data-confirm]") |> render() =~ "Friends"
     end
 
     test "has no button on the own profile", %{conn: conn, user: user} do
