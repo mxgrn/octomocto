@@ -223,14 +223,36 @@ defmodule OctomoctoWeb.MemoryLive do
         _ -> min(highest + 1, length(levels))
       end
 
+    selected = Enum.at(levels, selected - 1)
+
+    # The themes with enough images for the level, in the order of Free play
+    names = selected |> Campaign.themes() |> MapSet.new(& &1.name)
+    themes = Enum.filter(socket.assigns.themes, &(&1.name in names))
+
+    # The choice stays in the links of the other levels. The level gives a
+    # random theme for a theme that it cannot use, see `Campaign.pick_theme/2`.
     theme = if Themes.visible?(params["theme"]), do: params["theme"], else: "random"
+    level_theme = if theme in names, do: theme, else: "random"
+
+    # The theme that the Random switch turns back to, as in Free play
+    last = socket.assigns[:campaign][:last_theme]
+
+    last_theme =
+      cond do
+        level_theme != "random" -> level_theme
+        last in names -> last
+        true -> hd(themes).name
+      end
 
     assign(socket,
       campaign: %{
         levels: levels,
-        selected: Enum.at(levels, selected - 1),
+        selected: selected,
         highest: highest,
+        themes: themes,
         theme: theme,
+        level_theme: level_theme,
+        last_theme: last_theme,
         leaderboard: Campaign.leaderboard()
       }
     )
@@ -291,11 +313,6 @@ defmodule OctomoctoWeb.MemoryLive do
   end
 
   def handle_event("play_level", _params, socket), do: {:noreply, socket}
-
-  def handle_event("campaign_theme", %{"theme" => theme}, socket) do
-    %{locale: locale, campaign: campaign} = socket.assigns
-    {:noreply, push_patch(socket, to: campaign_path(locale, campaign.selected.level, theme))}
-  end
 
   def handle_event("new_game", _params, socket) do
     id = Memory.create_game(socket.assigns.settings)
@@ -630,32 +647,102 @@ defmodule OctomoctoWeb.MemoryLive do
     end
   end
 
+  attr :themes, :list, required: true
+  attr :theme, :string, required: true, doc: "the name of the chosen theme, or \"random\""
+  attr :last_theme, :string, required: true, doc: "the theme that the Random switch turns back to"
+  attr :path, :any, required: true, doc: "a function that gives the path for a theme choice"
+
+  # The theme choice of Free play and of the campaign. Random is a switch
+  # next to the header, out of the grid, so that it does not look like a
+  # theme. The game picks the theme when it starts, and again for each new
+  # field. When the switch is on, the themes are hidden. Off, it goes back
+  # to the last chosen theme.
+  defp theme_picker(assigns) do
+    ~H"""
+    <div
+      id="theme-picker"
+      class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
+    >
+      <div class="flex items-center justify-between gap-2">
+        <.setting_header label={dgettext("memory", "Theme")} icon="hero-swatch" />
+        <.link
+          id="theme-random"
+          patch={@path.(if(@theme == "random", do: @last_theme, else: "random"))}
+          role="switch"
+          aria-checked={to_string(@theme == "random")}
+          class="group flex items-center gap-2 text-sm font-medium text-base-content/70 transition hover:text-base-content"
+        >
+          <img
+            src={~p"/images/memory/random.svg"}
+            alt=""
+            class="size-6 transition duration-300 group-hover:scale-110 group-hover:-rotate-12"
+          />
+          {dgettext("memory", "Random")}
+          <span class={[
+            "relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200",
+            if(@theme == "random",
+              do: "bg-octo-indigo",
+              else: "bg-base-content/20 group-hover:bg-base-content/30"
+            )
+          ]}>
+            <span class={[
+              "absolute top-0.5 start-0.5 size-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out group-active:scale-90",
+              @theme == "random" && "translate-x-4 rtl:-translate-x-4"
+            ]} />
+          </span>
+        </.link>
+      </div>
+      <p
+        :if={@theme == "random"}
+        id="theme-random-hint"
+        class="mt-1.5 text-start text-xs text-base-content/50"
+      >
+        {dgettext("memory", "A new theme for each game.")}
+      </p>
+      <div :if={@theme != "random"} class="memory-themes-box">
+        <div id="memory-themes" class="memory-themes grid gap-3">
+          <.link
+            :for={theme <- @themes}
+            id={"theme-#{theme.name}"}
+            patch={@path.(theme.name)}
+            aria-current={@theme == theme.name && "true"}
+            class={[
+              "group relative flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
+              if(@theme == theme.name,
+                do: "bg-octo-mist ring-2 ring-octo-indigo dark:bg-octo-indigo-light/10",
+                else: "ring-1 ring-base-content/5 hover:bg-base-200 hover:ring-base-content/15"
+              )
+            ]}
+          >
+            <span
+              :if={theme[:new]}
+              id={"theme-#{theme.name}-new"}
+              class="absolute -top-1.5 -end-1.5 z-10 rounded-full bg-octo-indigo px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white shadow-sm"
+            >
+              New
+            </span>
+            <img
+              src={~p"/images/memory/#{theme.name}/#{Themes.cover(theme.name)}"}
+              alt=""
+              class="aspect-square w-full p-1 transition group-hover:scale-105"
+            />
+            <span class="w-full truncate text-xs text-base-content/70">{theme_title(theme)}</span>
+          </.link>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   attr :level, :map, required: true
-  attr :theme, :string, required: true
   attr :highest, :integer, required: true
 
-  # The selected level: its grid, the theme choice and the Play button. It
-  # stays at the bottom of the screen while the map does not fit, so that
-  # the Play button is always in view.
+  # The selected level: its grid and the Play button. It stays at the
+  # bottom of the screen while the map does not fit, so that the Play
+  # button is always in view.
   defp level_card(assigns) do
     {columns, rows, gaps} = preview_layout(assigns.level.cards)
-
-    themes =
-      Enum.map(Campaign.themes(assigns.level), &{theme_title(&1), &1.name})
-      |> Enum.sort()
-
-    assigns =
-      assign(assigns,
-        columns: columns,
-        places: columns * rows,
-        gaps: gaps,
-        theme_options: [{dgettext("memory", "Random"), "random"} | themes],
-        theme_value:
-          if(Enum.any?(themes, &(elem(&1, 1) == assigns.theme)),
-            do: assigns.theme,
-            else: "random"
-          )
-      )
+    assigns = assign(assigns, columns: columns, places: columns * rows, gaps: gaps)
 
     ~H"""
     <div
@@ -704,24 +791,6 @@ defmodule OctomoctoWeb.MemoryLive do
         </p>
       <% else %>
         <div class="flex flex-wrap items-center gap-3">
-          <.form for={%{}} id="campaign-theme-form" phx-change="campaign_theme">
-            <label class="flex items-center gap-2 text-sm text-base-content/60">
-              {dgettext("memory", "Theme")}
-              <span class="relative">
-                <select
-                  id="campaign-theme"
-                  name="theme"
-                  class="cursor-pointer appearance-none rounded-full border-0 bg-base-200 py-1.5 pe-9 ps-4 text-sm font-medium text-base-content ring-1 ring-base-content/10 transition hover:ring-base-content/20 focus:ring-2 focus:ring-octo-indigo focus:outline-none"
-                >
-                  {Phoenix.HTML.Form.options_for_select(@theme_options, @theme_value)}
-                </select>
-                <.icon
-                  name="hero-chevron-down-mini"
-                  class="pointer-events-none absolute top-1/2 end-3 size-4 -translate-y-1/2 text-base-content/60"
-                />
-              </span>
-            </label>
-          </.form>
           <button
             id="play-level"
             type="button"

@@ -104,8 +104,15 @@
         <.level_card
           :if={@current_scope}
           level={@campaign.selected}
-          theme={@campaign.theme}
           highest={@campaign.highest}
+        />
+        <%!-- The themes depend on the selected level, thus they are below its card --%>
+        <.theme_picker
+          :if={@current_scope && @campaign.selected.status != :locked}
+          themes={@campaign.themes}
+          theme={@campaign.level_theme}
+          last_theme={@campaign.last_theme}
+          path={&campaign_path(@locale, @campaign.selected.level, &1)}
         />
         <.sign_in_overlay
           :if={!@current_scope}
@@ -199,86 +206,12 @@
               {n}
             </.option>
           </.setting>
-          <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
-            <%!--
-              Random is a switch next to the header, out of the grid, so that
-              it does not look like a theme. The game picks the theme when it
-              starts, and again for each new field. When the switch is on, the
-              themes are hidden. Off, it goes back to the last chosen theme.
-            --%>
-            <div class="flex items-center justify-between gap-2">
-              <.setting_header label={dgettext("memory", "Theme")} icon="hero-swatch" />
-              <.link
-                id="theme-random"
-                patch={
-                  settings_path(@locale, @settings,
-                    theme: if(@settings.theme == "random", do: @last_theme, else: "random")
-                  )
-                }
-                role="switch"
-                aria-checked={to_string(@settings.theme == "random")}
-                class="group flex items-center gap-2 text-sm font-medium text-base-content/70 transition hover:text-base-content"
-              >
-                <img
-                  src={~p"/images/memory/random.svg"}
-                  alt=""
-                  class="size-6 transition duration-300 group-hover:scale-110 group-hover:-rotate-12"
-                />
-                {dgettext("memory", "Random")}
-                <span class={[
-                  "relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200",
-                  if(@settings.theme == "random",
-                    do: "bg-octo-indigo",
-                    else: "bg-base-content/20 group-hover:bg-base-content/30"
-                  )
-                ]}>
-                  <span class={[
-                    "absolute top-0.5 start-0.5 size-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out group-active:scale-90",
-                    @settings.theme == "random" && "translate-x-4 rtl:-translate-x-4"
-                  ]} />
-                </span>
-              </.link>
-            </div>
-            <p
-              :if={@settings.theme == "random"}
-              id="theme-random-hint"
-              class="mt-1.5 text-start text-xs text-base-content/50"
-            >
-              {dgettext("memory", "A new theme for each game.")}
-            </p>
-            <div :if={@settings.theme != "random"} class="memory-themes-box">
-              <div id="memory-themes" class="memory-themes grid gap-3">
-                <.link
-                  :for={theme <- @themes}
-                  id={"theme-#{theme.name}"}
-                  patch={settings_path(@locale, @settings, theme: theme.name)}
-                  aria-current={@settings.theme == theme.name && "true"}
-                  class={[
-                    "group relative flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
-                    if(@settings.theme == theme.name,
-                      do: "bg-octo-mist ring-2 ring-octo-indigo dark:bg-octo-indigo-light/10",
-                      else:
-                        "ring-1 ring-base-content/5 hover:bg-base-200 hover:ring-base-content/15"
-                    )
-                  ]}
-                >
-                  <span
-                    :if={theme[:new]}
-                    id={"theme-#{theme.name}-new"}
-                    class="absolute -top-1.5 -end-1.5 z-10 rounded-full bg-octo-indigo px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white shadow-sm"
-                  >
-                    New
-                  </span>
-                  <img
-                    src={~p"/images/memory/#{theme.name}/#{Themes.cover(theme.name)}"}
-                    alt=""
-                    class="aspect-square w-full p-1 transition group-hover:scale-105"
-                  />
-                  <span class="w-full truncate text-xs text-base-content/70">{theme_title(theme)}</span>
-                </.link>
-              </div>
-            </div>
-          </div>
+          <.theme_picker
+            themes={@themes}
+            theme={@settings.theme}
+            last_theme={@last_theme}
+            path={&settings_path(@locale, @settings, theme: &1)}
+          />
           <.setting
             id="setting-look-for"
             label={dgettext("memory", "Look for")}
