@@ -188,7 +188,7 @@ defmodule OctomoctoWeb.GamePageComponents do
               id={"finished-#{game.id}"}
               class="shrink-0 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400"
             >
-              {gettext("Finished")}
+              {gettext("Paused")}
             </span>
             <.link
               :if={!game[:finished]}

@@ -52,8 +52,8 @@ msgid "Support the author"
 msgstr "Wesprzyj autora"
 
 #, elixir-autogen, elixir-format
-msgid "Finished"
-msgstr "Zakończona"
+msgid "Paused"
+msgstr "Wstrzymana"
 
 #, elixir-autogen, elixir-format
 msgid "Guest"

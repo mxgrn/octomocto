@@ -52,7 +52,7 @@ msgid "Support the author"
 msgstr ""
 
 #, elixir-autogen, elixir-format
-msgid "Finished"
+msgid "Paused"
 msgstr ""
 
 #, elixir-autogen, elixir-format
