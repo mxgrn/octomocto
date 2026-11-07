@@ -214,13 +214,13 @@ defmodule OctomoctoWeb.Layouts do
                   :if={@current_scope.user.avatar_url}
                   src={@current_scope.user.avatar_url}
                   alt=""
-                  class="size-6 rounded-full"
+                  class="size-8 rounded-full"
                 />
                 <span
                   :if={!@current_scope.user.avatar_url}
                   id="user-menu-initials"
                   aria-hidden="true"
-                  class="flex size-6 items-center justify-center rounded-full bg-octo-indigo text-[0.625rem] font-semibold text-white"
+                  class="flex size-8 items-center justify-center rounded-full bg-octo-indigo text-sm font-semibold text-white"
                 >
                   {initials(user_menu_name(@current_scope.user))}
                 </span>
@@ -559,21 +559,25 @@ defmodule OctomoctoWeb.Layouts do
   slot :label, required: true, doc: "the content of the button"
   slot :inner_block, required: true, doc: "the links below the theme toggle"
 
-  # The menu of the user or the guest in the header. It opens on hover and on focus.
+  # The menu of the user or the guest in the header. It opens on a click on the
+  # button (see app.js), which sets `aria-expanded`. The nav has
+  # phx-update="ignore", so that a LiveView update does not close the menu.
   defp account_menu(assigns) do
     ~H"""
-    <nav id={@id} class="group relative text-sm">
+    <nav id={@id} phx-update="ignore" data-account-menu class="relative text-sm">
       <button
         id={"#{@id}-button"}
         type="button"
-        class="flex cursor-default items-center gap-2 text-base-content/70 transition group-hover:text-base-content group-focus-within:text-base-content"
+        aria-expanded="false"
+        aria-controls={"#{@id}-dropdown"}
+        data-account-menu-button
+        class="peer flex cursor-pointer items-center gap-2 text-base-content/70 transition hover:text-base-content aria-expanded:text-base-content"
       >
         {render_slot(@label)}
       </button>
-      <%!-- pt-2 instead of a margin keeps the hover area unbroken between button and menu --%>
       <div
         id={"#{@id}-dropdown"}
-        class="invisible absolute end-0 z-30 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+        class="invisible absolute end-0 z-30 mt-2 opacity-0 transition peer-aria-expanded:visible peer-aria-expanded:opacity-100"
       >
         <div class="min-w-36 space-y-1 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg">
           <.theme_row :if={!@theme_last} />

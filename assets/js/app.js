@@ -171,6 +171,29 @@ document.addEventListener("click", e => {
   }
 })
 
+// The account menus in the header (`account_menu` in layouts.ex) open and
+// close on a click on the button. A click outside the menu, a click on a link
+// in the menu, the Escape key and a live navigation close the menu.
+const closeAccountMenus = except => {
+  for (const button of document.querySelectorAll("[data-account-menu-button]")) {
+    if (button !== except) button.setAttribute("aria-expanded", "false")
+  }
+}
+document.addEventListener("click", e => {
+  const button = e.target.closest("[data-account-menu-button]")
+  if (button) {
+    const open = button.getAttribute("aria-expanded") === "true"
+    button.setAttribute("aria-expanded", String(!open))
+    closeAccountMenus(button)
+  } else if (!e.target.closest("[data-account-menu]") || e.target.closest("a")) {
+    closeAccountMenus()
+  }
+})
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeAccountMenus()
+})
+window.addEventListener("phx:page-loading-start", () => closeAccountMenus())
+
 // Pick the eyes in the header wordmark that blink: the orange or the blue ones.
 // pointerenter does not bubble, so the listener is on the capture phase.
 document.addEventListener("pointerenter", e => {
