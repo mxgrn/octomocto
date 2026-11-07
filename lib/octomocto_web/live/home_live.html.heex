@@ -40,7 +40,7 @@
             replace
             aria-current={if(tag == @tag, do: "true")}
             class={[
-              "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium shadow-sm transition active:scale-95",
+              "inline-flex items-center rounded-full px-3.5 py-1.5 text-sm font-medium shadow-sm transition active:scale-95",
               if(tag == @tag,
                 do:
                   "cursor-default bg-[color-mix(in_oklab,var(--color-octo-indigo)_20%,var(--color-white))] text-[color-mix(in_oklab,var(--color-octo-indigo)_75%,var(--color-octo-navy))] ring-1 ring-octo-indigo/60 dark:bg-octo-indigo/20 dark:text-octo-indigo dark:ring-octo-indigo/50",
@@ -49,7 +49,6 @@
               )
             ]}
           >
-            <span :if={tag} class={["size-2 rounded-full", tag_dot_class(tag)]} />
             {if(tag, do: tag_name(tag), else: dgettext("home", "All games"))}
           </.link>
         </nav>
@@ -82,10 +81,13 @@
                   </h3>
                   <ul
                     id={"game-tags-#{game.id}"}
-                    class="mt-0.5 flex flex-wrap gap-x-2.5 gap-y-0.5 text-xs text-octo-navy/55 dark:text-base-content/55"
+                    class="mt-0.5 flex flex-wrap gap-y-0.5 text-xs text-octo-navy/55 dark:text-base-content/55"
                   >
-                    <li :for={tag <- game.tags} class="inline-flex items-center gap-1">
-                      <span class={["size-1.5 rounded-full", tag_dot_class(tag)]} />
+                    <%!-- A middle dot goes between the tags --%>
+                    <li
+                      :for={tag <- game.tags}
+                      class="flex not-first:before:mx-1.5 not-first:before:content-['·']"
+                    >
                       {tag_name(tag)}
                     </li>
                   </ul>

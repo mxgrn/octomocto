@@ -197,12 +197,6 @@ defmodule OctomoctoWeb.HomeLive do
   # one or more of these tags.
   @tags ["speed", "memory", "logic", "attention"]
 
-  # The color of the dot of each tag, on the filters and on the game cards
-  defp tag_dot_class("speed"), do: "bg-yellow-400"
-  defp tag_dot_class("memory"), do: "bg-violet-500"
-  defp tag_dot_class("logic"), do: "bg-fuchsia-500"
-  defp tag_dot_class("attention"), do: "bg-rose-500"
-
   # The names of the tags. A new tag needs a line here.
   defp tag_name("speed"), do: dgettext("home", "Speed")
   defp tag_name("memory"), do: dgettext("home", "Memory")
