@@ -958,7 +958,7 @@ viewGame model me game =
                             , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block lg:h-9" ] []
                             ]
                         , h1 [ class "mr-1 truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
-                            [ a [ id "echo-title-link", href model.indexUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text (t model.texts "Echo") ] ]
+                            [ a [ id "echo-title-link", href model.indexUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text (t model.texts "Echo Chamber") ] ]
                         , viewWatchers model.texts (me == Nothing) model.watchers
                         , viewShapesButton model.texts model.shapes
                         ]

@@ -75,18 +75,6 @@ msgid "Each round, the sequence gets one pad longer. One wrong pad, and the game
 msgstr ""
 
 #, elixir-autogen, elixir-format
-msgid "Echo"
-msgstr ""
-
-#, elixir-autogen, elixir-format
-msgid "Echo is a Simon-like game. Simon is a trademark of Hasbro. Octomocto is not affiliated with Hasbro."
-msgstr ""
-
-#, elixir-autogen, elixir-format
-msgid "Echo: a Simon-Like Memory Game Online"
-msgstr ""
-
-#, elixir-autogen, elixir-format
 msgid "{feed} to keep Octomocto ad-free."
 msgstr ""
 
@@ -409,3 +397,15 @@ msgstr "Gracz {color} zmienia ustawienia…"
 #, elixir-autogen, elixir-format
 msgid "{name} changes the settings…"
 msgstr "{name} zmienia ustawienia…"
+
+#, elixir-autogen, elixir-format
+msgid "Echo Chamber"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Echo Chamber is a Simon-like game. Simon is a trademark of Hasbro. Octomocto is not affiliated with Hasbro."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Echo Chamber: a Simon-Like Memory Game Online"
+msgstr ""

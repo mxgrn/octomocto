@@ -53,7 +53,7 @@ defmodule OctomoctoWeb.HomeLive do
     %{
       id: "graze",
       tags: ["speed", "attention"],
-      name: "Graze",
+      name: "Graze & Dodge",
       description:
         "Eat the black squares and keep away from the red ones, with up to 3 friends in one field.",
       path: "/graze",
@@ -99,7 +99,7 @@ defmodule OctomoctoWeb.HomeLive do
     %{
       id: "echo",
       tags: ["memory"],
-      name: "Echo",
+      name: "Echo Chamber",
       description:
         "A Simon-like game: repeat the sequence of colored pads. With friends, each player adds a pad.",
       path: "/echo",

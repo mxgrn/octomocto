@@ -74,18 +74,6 @@ msgid "Each round, the sequence gets one pad longer. One wrong pad, and the game
 msgstr "A cada rodada, a sequência ganha mais um botão. Um botão errado, e o jogo acaba."
 
 #, elixir-autogen, elixir-format
-msgid "Echo"
-msgstr "Echo"
-
-#, elixir-autogen, elixir-format
-msgid "Echo is a Simon-like game. Simon is a trademark of Hasbro. Octomocto is not affiliated with Hasbro."
-msgstr "Echo é um jogo parecido com o Genius. Genius é uma marca registrada da Estrela. O Octomocto não tem vínculo com a Estrela."
-
-#, elixir-autogen, elixir-format
-msgid "Echo: a Simon-Like Memory Game Online"
-msgstr "Echo: Jogo de Memória Online Parecido com o Genius"
-
-#, elixir-autogen, elixir-format
 msgid "{feed} to keep Octomocto ad-free."
 msgstr "{feed} para o Octomocto continuar sem anúncios."
 
@@ -408,3 +396,15 @@ msgstr "O jogador {color} está mudando as configurações…"
 #, elixir-autogen, elixir-format
 msgid "{name} changes the settings…"
 msgstr "{name} está mudando as configurações…"
+
+#, elixir-autogen, elixir-format
+msgid "Echo Chamber"
+msgstr "Echo Chamber"
+
+#, elixir-autogen, elixir-format
+msgid "Echo Chamber is a Simon-like game. Simon is a trademark of Hasbro. Octomocto is not affiliated with Hasbro."
+msgstr "Echo Chamber é um jogo parecido com o Genius. Genius é uma marca registrada da Estrela. O Octomocto não tem vínculo com a Estrela."
+
+#, elixir-autogen, elixir-format
+msgid "Echo Chamber: a Simon-Like Memory Game Online"
+msgstr "Echo Chamber: Jogo de Memória Online Parecido com o Genius"

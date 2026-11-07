@@ -16,7 +16,7 @@ defmodule OctomoctoWeb.EchoHTML do
       "Joining the game…" => dgettext("echo", "Joining the game…"),
       "Could not join the game: {reason}" =>
         dgettext("echo", "Could not join the game: {reason}"),
-      "Echo" => dgettext("echo", "Echo"),
+      "Echo Chamber" => dgettext("echo", "Echo Chamber"),
       "Watch the pads light up, then tap them in the same order." =>
         dgettext("echo", "Watch the pads light up, then tap them in the same order."),
       "Repeat the sequence, then add a pad of your choice." =>

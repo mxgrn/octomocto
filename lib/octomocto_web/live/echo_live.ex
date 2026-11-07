@@ -39,7 +39,7 @@ defmodule OctomoctoWeb.EchoLive do
   @doc "The title and the description of the Echo pages, for search engines."
   def seo do
     [
-      page_title: dgettext("echo", "Echo: a Simon-Like Memory Game Online"),
+      page_title: dgettext("echo", "Echo Chamber: a Simon-Like Memory Game Online"),
       page_description:
         dgettext(
           "echo",
@@ -161,7 +161,7 @@ defmodule OctomoctoWeb.EchoLive do
       dgettext("echo", "A player who taps a wrong pad is out. The last player who is in wins."),
       dgettext(
         "echo",
-        "Echo is a Simon-like game. Simon is a trademark of Hasbro. Octomocto is not affiliated with Hasbro."
+        "Echo Chamber is a Simon-like game. Simon is a trademark of Hasbro. Octomocto is not affiliated with Hasbro."
       )
     ]
   end

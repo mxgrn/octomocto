@@ -786,7 +786,7 @@ viewGame model me game =
                                 , href "/graze"
                                 , class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light"
                                 ]
-                                [ text "Graze" ]
+                                [ text "Graze & Dodge" ]
                             ]
                         , viewWatchers (me == Nothing) model.watchers
                         ]

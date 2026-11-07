@@ -28,7 +28,7 @@ defmodule OctomoctoWeb.GrazeLive do
   @doc "The title and the description of the Graze pages, for search engines."
   def seo do
     [
-      page_title: "Graze: Eat the Squares, Dodge the Red Ones",
+      page_title: "Graze & Dodge: Eat the Squares, Avoid the Red Ones",
       page_description:
         "A fast arcade game in your browser: your circle eats black squares to stay alive and keeps away from red ones. Play alone or with up to 3 friends in one field. Free."
     ]
