@@ -9,7 +9,7 @@ defmodule OctomoctoWeb.StatsLive do
   on_mount {OctomoctoWeb.SiteBanners, nil}
 
   alias Octomocto.Stats
-  alias OctomoctoWeb.{GameIcons, HomeLive}
+  alias OctomoctoWeb.{GameIcons, HomeLive, PlayerLive}
 
   @days 30
 
@@ -49,12 +49,13 @@ defmodule OctomoctoWeb.StatsLive do
     {:noreply, assign(socket, hidden: hidden)}
   end
 
-  # The games of the front page with their totals for all days, the most
-  # played first
+  # The games of the front page with their counts in each day and their
+  # totals for all days, the most played first
   defp games_by_count(days) do
     HomeLive.games()
     |> Enum.map(fn game ->
-      Map.put(game, :count, days |> Enum.map(&games_in(&1, game)) |> Enum.sum())
+      counts = Enum.map(days, &games_in(&1, game))
+      game |> Map.put(:days, counts) |> Map.put(:count, Enum.sum(counts))
     end)
     |> Enum.sort_by(& &1.count, :desc)
   end
