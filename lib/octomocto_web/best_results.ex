@@ -59,9 +59,10 @@ defmodule OctomoctoWeb.BestResults do
   @doc "The two buttons of the filter: All and Following."
   def filter(assigns) do
     ~H"""
-    <span
+    <OctomoctoWeb.SettingsComponents.option_slider
       id="best-results-filter"
-      class="flex items-center gap-0.5 rounded-full bg-base-200/70 p-0.5 text-xs font-medium"
+      light
+      class="items-center text-xs font-medium"
     >
       <button
         :for={{following, label} <- [{false, gettext("All")}, {true, gettext("Following")}]}
@@ -70,6 +71,7 @@ defmodule OctomoctoWeb.BestResults do
         phx-click="best_results_filter"
         phx-value-following={to_string(following)}
         aria-pressed={to_string(following == @following)}
+        aria-current={following == @following && "true"}
         class={[
           "rounded-full px-2.5 py-1 transition-colors",
           if(following == @following,
@@ -80,7 +82,7 @@ defmodule OctomoctoWeb.BestResults do
       >
         {label}
       </button>
-    </span>
+    </OctomoctoWeb.SettingsComponents.option_slider>
     """
   end
 

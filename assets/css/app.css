@@ -363,6 +363,11 @@ html:has(.is-playing) body {
   );
 }
 
+/* The small row with a white pill, as the filter of the best results */
+.option-slider-light[data-slider-ready]:has([aria-current])::before {
+  background-color: var(--color-base-100);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .option-slider[data-slider-ready]:has([aria-current])::before { transition: none; }
 }

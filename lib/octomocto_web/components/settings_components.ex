@@ -34,6 +34,11 @@ defmodule OctomoctoWeb.SettingsComponents do
 
   attr :id, :string, required: true
   attr :class, :any, default: nil
+
+  attr :light, :boolean,
+    default: false,
+    doc: "true for a small row with a white pill, as the filter of the best results"
+
   slot :inner_block, required: true
 
   @doc """
@@ -50,7 +55,14 @@ defmodule OctomoctoWeb.SettingsComponents do
     <div
       id={@id}
       phx-hook=".OptionSlider"
-      class={["option-slider flex gap-1 rounded-full bg-base-200 p-1", @class]}
+      class={[
+        "option-slider flex rounded-full",
+        if(@light,
+          do: "option-slider-light gap-0.5 bg-base-200/70 p-0.5",
+          else: "gap-1 bg-base-200 p-1"
+        ),
+        @class
+      ]}
     >
       {render_slot(@inner_block)}
     </div>
