@@ -77,16 +77,7 @@ defmodule OctomoctoWeb.Router do
     get "/astronaut", AstronautController, :index
     post "/astronaut", AstronautController, :create
     get "/astronaut/:id", AstronautController, :show
-    get "/nimble-mosaic/:id", NimbleMosaicController, :show
-    get "/schulte/:id", SchulteController, :show
-    get "/set/:id", SetGameController, :show
-    get "/sudoku/:id", SudokuController, :show
-    get "/echo/:id", EchoController, :show
-    get "/mahjong/:id", MahjongController, :show
-    get "/overlap/:id", OverlapController, :show
     get "/snap/:id", SnapController, :show
-    get "/afterglow/:id", AfterglowController, :show
-    get "/graze/:id", GrazeController, :show
     # The bar of banners sends each close, also for guests
     post "/banners/:id/close", BannerCloseController, :create
 
@@ -107,19 +98,28 @@ defmodule OctomoctoWeb.Router do
       live "/trains", TrainsLive, :index
       live "/trains/campaign", TrainsLive, :campaign
       live "/trains/lobby", TrainsLive, :lobby
-      live "/nimble-mosaic", NimbleMosaicLive
+      live "/nimble-mosaic", NimbleMosaicLive, :index
+      live "/nimble-mosaic/lobby", NimbleMosaicLive, :lobby
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
-      live "/set", SetGameLive
-      live "/sudoku", SudokuLive
-      live "/echo", EchoLive
-      live "/mahjong", MahjongLive
-      live "/overlap", OverlapLive
+      live "/set", SetGameLive, :index
+      live "/set/lobby", SetGameLive, :lobby
+      live "/sudoku", SudokuLive, :index
+      live "/sudoku/lobby", SudokuLive, :lobby
+      live "/echo", EchoLive, :index
+      live "/echo/lobby", EchoLive, :lobby
+      live "/mahjong", MahjongLive, :index
+      live "/mahjong/lobby", MahjongLive, :lobby
+      live "/overlap", OverlapLive, :index
+      live "/overlap/lobby", OverlapLive, :lobby
       live "/snap", SnapLive
-      live "/afterglow", AfterglowLive
-      live "/schulte", SchulteLive
-      live "/graze", GrazeLive
+      live "/afterglow", AfterglowLive, :index
+      live "/afterglow/lobby", AfterglowLive, :lobby
+      live "/schulte", SchulteLive, :index
+      live "/schulte/lobby", SchulteLive, :lobby
+      live "/graze", GrazeLive, :index
+      live "/graze/lobby", GrazeLive, :lobby
       live "/stats", StatsLive
       live "/stats/:game", GameStatsLive
       live "/stats/languages/:language", LanguageStatsLive
@@ -127,9 +127,18 @@ defmodule OctomoctoWeb.Router do
       live "/players/:public_id/friends", PlayerFriendsLive
     end
 
-    # After the live routes, so that "campaign" is not a game id
+    # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
     get "/trains/:id", TrainsController, :show
+    get "/nimble-mosaic/:id", NimbleMosaicController, :show
+    get "/schulte/:id", SchulteController, :show
+    get "/set/:id", SetGameController, :show
+    get "/sudoku/:id", SudokuController, :show
+    get "/echo/:id", EchoController, :show
+    get "/mahjong/:id", MahjongController, :show
+    get "/overlap/:id", OverlapController, :show
+    get "/afterglow/:id", AfterglowController, :show
+    get "/graze/:id", GrazeController, :show
   end
 
   # The pages in Portuguese, in the same pipeline as the English pages. Only
@@ -151,10 +160,11 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
-      live "/echo", EchoLive
+      live "/echo", EchoLive, :index
+      live "/echo/lobby", EchoLive, :lobby
     end
 
-    # After the live routes, so that "campaign" is not a game id
+    # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
     get "/echo/:id", EchoController, :show
 
@@ -182,7 +192,7 @@ defmodule OctomoctoWeb.Router do
       live "/memory/lobby", MemoryLive, :lobby
     end
 
-    # After the live routes, so that "campaign" is not a game id
+    # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
@@ -209,7 +219,7 @@ defmodule OctomoctoWeb.Router do
       live "/memory/lobby", MemoryLive, :lobby
     end
 
-    # After the live routes, so that "campaign" is not a game id
+    # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
@@ -236,7 +246,7 @@ defmodule OctomoctoWeb.Router do
       live "/memory/lobby", MemoryLive, :lobby
     end
 
-    # After the live routes, so that "campaign" is not a game id
+    # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
@@ -263,7 +273,7 @@ defmodule OctomoctoWeb.Router do
       live "/memory/lobby", MemoryLive, :lobby
     end
 
-    # After the live routes, so that "campaign" is not a game id
+    # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
@@ -290,7 +300,7 @@ defmodule OctomoctoWeb.Router do
       live "/memory/lobby", MemoryLive, :lobby
     end
 
-    # After the live routes, so that "campaign" is not a game id
+    # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
@@ -317,7 +327,7 @@ defmodule OctomoctoWeb.Router do
       live "/memory/lobby", MemoryLive, :lobby
     end
 
-    # After the live routes, so that "campaign" is not a game id
+    # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
@@ -344,7 +354,7 @@ defmodule OctomoctoWeb.Router do
       live "/memory/lobby", MemoryLive, :lobby
     end
 
-    # After the live routes, so that "campaign" is not a game id
+    # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
@@ -371,7 +381,7 @@ defmodule OctomoctoWeb.Router do
       live "/memory/lobby", MemoryLive, :lobby
     end
 
-    # After the live routes, so that "campaign" is not a game id
+    # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
@@ -398,7 +408,7 @@ defmodule OctomoctoWeb.Router do
       live "/memory/lobby", MemoryLive, :lobby
     end
 
-    # After the live routes, so that "campaign" is not a game id
+    # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
@@ -425,7 +435,7 @@ defmodule OctomoctoWeb.Router do
       live "/memory/lobby", MemoryLive, :lobby
     end
 
-    # After the live routes, so that "campaign" is not a game id
+    # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
@@ -452,7 +462,7 @@ defmodule OctomoctoWeb.Router do
       live "/memory/lobby", MemoryLive, :lobby
     end
 
-    # After the live routes, so that "campaign" is not a game id
+    # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate

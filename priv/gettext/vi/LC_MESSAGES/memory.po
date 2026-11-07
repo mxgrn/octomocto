@@ -45,10 +45,6 @@ msgid "Cards"
 msgstr "Thẻ"
 
 #, elixir-autogen, elixir-format
-msgid "Choose the settings and start a new game."
-msgstr "Chọn cài đặt và bắt đầu ván mới."
-
-#, elixir-autogen, elixir-format
 msgid "Copied!"
 msgstr "Đã sao chép!"
 
@@ -530,10 +526,6 @@ msgid "Turn a bomb that was seen, and you are out."
 msgstr "Lật trúng quả bom đã lộ là bạn bị loại."
 
 #, elixir-autogen, elixir-format
-msgid "Join a game, or watch one."
-msgstr "Vào một ván, hoặc xem người khác chơi."
-
-#, elixir-autogen, elixir-format
 msgid "Lobby"
 msgstr "Sảnh"
 
@@ -552,3 +544,7 @@ msgstr "Mỗi ván một chủ đề mới."
 #, elixir-autogen, elixir-format
 msgid "Menu"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The classic card game: turn over the cards and find the ones that match."
+msgstr "Trò chơi lật thẻ cổ điển: lật các thẻ và tìm những thẻ giống nhau."

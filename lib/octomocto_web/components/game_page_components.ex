@@ -9,8 +9,66 @@ defmodule OctomoctoWeb.GamePageComponents do
   use Gettext, backend: OctomoctoWeb.Gettext
 
   import OctomoctoWeb.CoreComponents, only: [icon: 1, show: 2, hide: 1, player_link: 1]
+  import OctomoctoWeb.SettingsComponents, only: [option: 1, option_slider: 1]
 
   alias Phoenix.LiveView.JS
+
+  attr :tab, :atom, required: true, doc: ":free, :campaign or :lobby"
+  attr :free_path, :string, required: true
+  attr :free_label, :string, required: true
+
+  attr :campaign_path, :string,
+    default: nil,
+    doc: "the path of the Campaign tab, or nil for a game with no campaign"
+
+  attr :campaign_label, :string, default: nil
+  attr :lobby_path, :string, required: true
+  attr :lobby_label, :string, required: true
+  attr :lobby_count, :integer, default: 0, doc: "the number of games that a player can join"
+
+  @doc """
+  The tabs of a settings page: the settings of a new game (Free play or
+  New game), the Campaign of a game with a campaign, and the Lobby with the
+  public games. The Lobby tab shows the number of games that a player can
+  join, when there are some.
+  """
+  def mode_tabs(assigns) do
+    ~H"""
+    <nav id="mode-tabs" class="flex justify-center">
+      <.option_slider id="mode-tabs-options">
+        <.option id="tab-free" patch={@free_path} selected={@tab == :free}>
+          {@free_label}
+        </.option>
+        <.option
+          :if={@campaign_path}
+          id="tab-campaign"
+          patch={@campaign_path}
+          selected={@tab == :campaign}
+        >
+          {@campaign_label}
+        </.option>
+        <.option id="tab-lobby" patch={@lobby_path} selected={@tab == :lobby}>
+          <span class="flex items-center gap-1.5">
+            {@lobby_label}
+            <span
+              :if={@lobby_count > 0}
+              id="tab-lobby-count"
+              class={[
+                "min-w-5 rounded-full px-1.5 text-xs leading-5 font-semibold tabular-nums transition-colors",
+                if(@tab == :lobby,
+                  do: "bg-white/25 text-white",
+                  else: "bg-octo-indigo text-white"
+                )
+              ]}
+            >
+              {@lobby_count}
+            </span>
+          </span>
+        </.option>
+      </.option_slider>
+    </nav>
+    """
+  end
 
   attr :games, :list, required: true, doc: "see `Octomocto.Lobby.games/1`"
 

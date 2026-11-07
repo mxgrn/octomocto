@@ -50,10 +50,6 @@ msgid "Cards"
 msgstr "البطاقات"
 
 #, elixir-autogen, elixir-format
-msgid "Choose the settings and start a new game."
-msgstr "اختر الإعدادات وابدأ لعبة جديدة."
-
-#, elixir-autogen, elixir-format
 msgid "Copied!"
 msgstr "تم النسخ!"
 
@@ -540,10 +536,6 @@ msgid "Turn a bomb that was seen, and you are out."
 msgstr "إذا قلبت قنبلة سبق أن ظهرت، تخرج من اللعبة."
 
 #, elixir-autogen, elixir-format
-msgid "Join a game, or watch one."
-msgstr "انضم إلى لعبة أو شاهد واحدة."
-
-#, elixir-autogen, elixir-format
 msgid "Lobby"
 msgstr "الردهة"
 
@@ -562,3 +554,7 @@ msgstr "موضوع جديد لكل لعبة."
 #, elixir-autogen, elixir-format
 msgid "Menu"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The classic card game: turn over the cards and find the ones that match."
+msgstr "لعبة البطاقات الكلاسيكية: اقلب البطاقات وابحث عن المتطابقة منها."

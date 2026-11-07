@@ -46,10 +46,6 @@ msgid "Cards"
 msgstr "Kartlar"
 
 #, elixir-autogen, elixir-format
-msgid "Choose the settings and start a new game."
-msgstr "Ayarları seç ve yeni bir oyun başlat."
-
-#, elixir-autogen, elixir-format
 msgid "Copied!"
 msgstr "Kopyalandı!"
 
@@ -532,10 +528,6 @@ msgid "Turn a bomb that was seen, and you are out."
 msgstr "Daha önce görülmüş bir bombayı çevirirsen elenirsin."
 
 #, elixir-autogen, elixir-format
-msgid "Join a game, or watch one."
-msgstr "Bir oyuna katıl ya da izle."
-
-#, elixir-autogen, elixir-format
 msgid "Lobby"
 msgstr "Lobi"
 
@@ -554,3 +546,7 @@ msgstr "Her oyunda yeni bir tema."
 #, elixir-autogen, elixir-format
 msgid "Menu"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The classic card game: turn over the cards and find the ones that match."
+msgstr "Klasik kart oyunu: kartları çevir ve birbirinin aynısı olanları bul."

@@ -29,10 +29,16 @@ defmodule OctomoctoWeb.OverlapLive do
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/overlap"), rules: rules(), themes: Themes.list()] ++ seo())
+     |> assign(
+       [canonical_url: canonical_url(socket), rules: rules(), themes: Themes.list()] ++ seo()
+     )
      |> assign_lobby(Lobby.entries(Game, Store))
      |> assign(watchers: Lobby.watchers(Game))}
   end
+
+  # The Lobby tab has its own URL
+  defp canonical_url(%{assigns: %{live_action: :lobby}}), do: url(~p"/overlap/lobby")
+  defp canonical_url(_socket), do: url(~p"/overlap")
 
   @doc "The title and the description of the overlap pages, for search engines."
   def seo do

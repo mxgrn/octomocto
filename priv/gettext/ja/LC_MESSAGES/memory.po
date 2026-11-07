@@ -45,10 +45,6 @@ msgid "Cards"
 msgstr "カード"
 
 #, elixir-autogen, elixir-format
-msgid "Choose the settings and start a new game."
-msgstr "設定を選んで、新しいゲームを始めよう。"
-
-#, elixir-autogen, elixir-format
 msgid "Copied!"
 msgstr "コピーした！"
 
@@ -530,10 +526,6 @@ msgid "Turn a bomb that was seen, and you are out."
 msgstr "一度見えた爆弾をめくったら脱落。"
 
 #, elixir-autogen, elixir-format
-msgid "Join a game, or watch one."
-msgstr "ゲームに参加するか、観戦しよう。"
-
-#, elixir-autogen, elixir-format
 msgid "Lobby"
 msgstr "ロビー"
 
@@ -552,3 +544,7 @@ msgstr "ゲームごとに新しいテーマ。"
 #, elixir-autogen, elixir-format
 msgid "Menu"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The classic card game: turn over the cards and find the ones that match."
+msgstr "定番のカードゲーム：カードをめくって、同じ絵のカードを見つけよう。"

@@ -1,60 +1,11 @@
 defmodule OctomoctoWeb.CampaignComponents do
   @moduledoc """
   The parts of the Campaign tab of a settings page that all games with a
-  campaign have: the Free play and Campaign tabs, the map of the levels,
+  campaign have: the map of the levels,
   and the call to sign in that covers the map for a guest. The game gives
   the texts, so that each game uses its own translations.
   """
   use OctomoctoWeb, :html
-
-  import OctomoctoWeb.SettingsComponents, only: [option: 1, option_slider: 1]
-
-  attr :tab, :atom, required: true, doc: ":free, :campaign or :lobby"
-  attr :free_path, :string, required: true
-  attr :campaign_path, :string, required: true
-  attr :free_label, :string, required: true
-  attr :campaign_label, :string, required: true
-  attr :lobby_path, :string, default: nil, doc: "the path of the Lobby tab, or nil for no tab"
-  attr :lobby_label, :string, default: nil
-  attr :lobby_count, :integer, default: 0, doc: "the number of games that a player can join"
-
-  @doc """
-  The Free play and Campaign tabs, and an optional Lobby tab, as the
-  options of a setting. The Lobby tab shows the number of games that a
-  player can join, when there are some.
-  """
-  def mode_tabs(assigns) do
-    ~H"""
-    <nav id="campaign-tabs" class="flex justify-center">
-      <.option_slider id="campaign-tabs-options">
-        <.option id="tab-free" patch={@free_path} selected={@tab == :free}>
-          {@free_label}
-        </.option>
-        <.option id="tab-campaign" patch={@campaign_path} selected={@tab == :campaign}>
-          {@campaign_label}
-        </.option>
-        <.option :if={@lobby_path} id="tab-lobby" patch={@lobby_path} selected={@tab == :lobby}>
-          <span class="flex items-center gap-1.5">
-            {@lobby_label}
-            <span
-              :if={@lobby_count > 0}
-              id="tab-lobby-count"
-              class={[
-                "min-w-5 rounded-full px-1.5 text-xs leading-5 font-semibold tabular-nums transition-colors",
-                if(@tab == :lobby,
-                  do: "bg-white/25 text-white",
-                  else: "bg-octo-indigo text-white"
-                )
-              ]}
-            >
-              {@lobby_count}
-            </span>
-          </span>
-        </.option>
-      </.option_slider>
-    </nav>
-    """
-  end
 
   # The height of a row of the map, and the place of the first row
   @map_row_height 104

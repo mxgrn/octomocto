@@ -63,14 +63,21 @@ defmodule OctomoctoWeb.EchoLive do
     filter = %{"pads" => settings.pads, "players" => settings.players}
 
     locale = socket.assigns.locale
+    lobby? = socket.assigns.live_action == :lobby
+    path = if lobby?, do: ~p"/echo/lobby", else: ~p"/echo"
 
     {:noreply,
      assign(socket,
        settings: settings,
-       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/echo"),
-       alternate_urls: Locale.alternate_urls("echo", ~p"/echo"),
-       # The other language keeps the settings
-       languages: Locale.languages("echo", locale, ~p"/echo?#{query(settings, [])}"),
+       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, path),
+       alternate_urls: Locale.alternate_urls("echo", path),
+       # The other language keeps the settings of the New game tab
+       languages:
+         Locale.languages(
+           "echo",
+           locale,
+           if(lobby?, do: path, else: ~p"/echo?#{query(settings, [])}")
+         ),
        user_results: user_results(socket.assigns.current_scope, filter)
      )
      |> OctomoctoWeb.BestResults.assign_best(Echo, filter)}

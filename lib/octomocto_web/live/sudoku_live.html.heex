@@ -9,10 +9,10 @@
 >
   <%!--
     Wider than the app container, so that the columns have room. One column
-    on a small screen: the title, the public games, the settings and the
-    results. Two columns on a large screen: the results go to the right.
-    Three columns on an extra large screen: the public games go to the left,
-    and the settings in the center are wider than the other columns. The
+    on a small screen: the title with the tabs, the tab and the results. Two
+    columns on a large screen: the results go to the right. Three columns on
+    an extra large screen: the tab in the center is wider than the other
+    columns, and the left column is empty, so that the tabs stay in place. The
     columns use the full width of the screen, with the side padding of the
     header.
     The last row takes the free height, so that the tall results column does
@@ -20,7 +20,7 @@
   --%>
   <div
     id="sudoku-index"
-    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[calc(100vw-4rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] xl:grid-rows-[auto_1fr]"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[calc(100vw-4rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] xl:grid-rows-[auto_1fr]"
   >
     <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 lg:max-w-none">
       <div class="flex items-center justify-center gap-3">
@@ -34,30 +34,43 @@
           Choose the settings of the next game.
         <% else %>
           Multiplayer sudoku: all players fill the same grid.
-          Choose the settings and start a new game.
         <% end %>
       </p>
       <.how_to_play />
+      <div :if={!@match} class="pt-2">
+        <.mode_tabs
+          tab={if(@live_action == :lobby, do: :lobby, else: :free)}
+          free_path={~p"/sudoku?#{query(@settings, [])}"}
+          free_label="New game"
+          lobby_path={~p"/sudoku/lobby"}
+          lobby_label="Lobby"
+          lobby_count={Enum.count(@lobby_games, &(&1.status == :open))}
+        />
+      </div>
     </div>
 
     <%!-- A match plays on with the same players, so it needs no other games --%>
     <div
-      :if={!@match}
+      :if={@live_action == :lobby}
       id="sudoku-lobby"
-      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 lg:max-w-none"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:col-start-2 lg:max-w-none"
     >
       <.lobby_games
         games={@lobby_games}
         watchers={@watchers}
         matches={&same_settings?(&1, @settings)}
         path={&~p"/sudoku/#{&1.id}"}
+        new_game_path={~p"/sudoku?#{query(@settings, [])}"}
       >
         <:icon :let={_game}><.grid_icon class="w-8 shrink-0" /></:icon>
         <:summary :let={game}>{game_summary(game)}</:summary>
       </.lobby_games>
     </div>
 
-    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 lg:max-w-none">
+    <div
+      :if={@live_action == :index}
+      class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-2 xl:col-start-2 xl:row-start-2 lg:max-w-none"
+    >
       <div id="sudoku-settings" class="flex w-full flex-col gap-4">
         <.match_score
           :if={@match}
@@ -129,7 +142,7 @@
 
     <div
       id="sudoku-leaderboard"
-      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 lg:max-w-none"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 xl:col-start-3 lg:max-w-none"
     >
       <.score_list
         id="your-results"

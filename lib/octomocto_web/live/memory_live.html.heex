@@ -38,15 +38,13 @@
         <h1 class="text-3xl font-semibold tracking-tight">{dgettext("memory", "Memory")}</h1>
       </div>
       <p class="text-base-content/70">
-        <%= cond do %>
-          <% @match -> %>
-            {dgettext("memory", "Choose the settings of the next game.")}
-          <% @live_action == :campaign -> %>
-            {dgettext("memory", "Get 100% accuracy to unlock the next level.")}
-          <% @live_action == :lobby -> %>
-            {dgettext("memory", "Join a game, or watch one.")}
-          <% true -> %>
-            {dgettext("memory", "Choose the settings and start a new game.")}
+        <%= if @match do %>
+          {dgettext("memory", "Choose the settings of the next game.")}
+        <% else %>
+          {dgettext(
+            "memory",
+            "The classic card game: turn over the cards and find the ones that match."
+          )}
         <% end %>
       </p>
       <.how_to_play />
@@ -82,6 +80,9 @@
               <span class="font-semibold tabular-nums">{@campaign.highest}</span>
             </span>
           </div>
+          <p id="campaign-rule" class="text-sm text-base-content/60">
+            {dgettext("memory", "Get 100% accuracy to unlock the next level.")}
+          </p>
           <.campaign_map
             levels={@campaign.levels}
             selected={@campaign.selected.level}

@@ -54,10 +54,6 @@ msgid "Blue"
 msgstr ""
 
 #, elixir-autogen, elixir-format
-msgid "Choose the settings and start a new game."
-msgstr ""
-
-#, elixir-autogen, elixir-format
 msgid "Copied!"
 msgstr ""
 
@@ -412,3 +408,11 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Echo Chamber: a Simon-Like Memory Game Online"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "الردهة"
+
+#, elixir-autogen, elixir-format
+msgid "New game"
+msgstr "لعبة جديدة"

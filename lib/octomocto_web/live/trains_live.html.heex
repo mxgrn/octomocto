@@ -35,15 +35,10 @@
         <h1 class="text-3xl font-semibold tracking-tight">Right on Track</h1>
       </div>
       <p class="text-base-content/70">
-        <%= cond do %>
-          <% @match -> %>
-            Choose the settings of the next game.
-          <% @live_action == :campaign -> %>
-            Get 90% of the trains home to unlock the next level.
-          <% @live_action == :lobby -> %>
-            Join a game, or watch one.
-          <% true -> %>
-            A train switching game: click the switches to send each train to the house with its colors.
+        <%= if @match do %>
+          Choose the settings of the next game.
+        <% else %>
+          A train switching game: click the switches to send each train to the house with its colors.
         <% end %>
       </p>
       <.how_to_play />
@@ -80,6 +75,9 @@
               <span class="font-semibold tabular-nums">{@campaign.highest}</span>
             </span>
           </div>
+          <p id="campaign-rule" class="text-sm text-base-content/60">
+            Get 90% of the trains home to unlock the next level.
+          </p>
           <.campaign_map
             levels={@campaign.levels}
             selected={@campaign.selected.level}

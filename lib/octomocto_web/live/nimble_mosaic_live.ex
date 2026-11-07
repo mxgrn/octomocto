@@ -18,10 +18,14 @@ defmodule OctomoctoWeb.NimbleMosaicLive do
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/nimble-mosaic"), rules: rules(), match: match] ++ seo())
+     |> assign([canonical_url: canonical_url(socket), rules: rules(), match: match] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))
      |> assign(watchers: Lobby.watchers(Game))}
   end
+
+  # The Lobby tab has its own URL
+  defp canonical_url(%{assigns: %{live_action: :lobby}}), do: url(~p"/nimble-mosaic/lobby")
+  defp canonical_url(_socket), do: url(~p"/nimble-mosaic")
 
   @doc "The title and the description of the Nimble Mosaic pages, for search engines."
   def seo do

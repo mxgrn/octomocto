@@ -30,10 +30,14 @@ defmodule OctomoctoWeb.SetGameLive do
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/set"), rules: rules(), match: match] ++ seo())
+     |> assign([canonical_url: canonical_url(socket), rules: rules(), match: match] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))
      |> assign(watchers: Lobby.watchers(Game))}
   end
+
+  # The Lobby tab has its own URL
+  defp canonical_url(%{assigns: %{live_action: :lobby}}), do: url(~p"/set/lobby")
+  defp canonical_url(_socket), do: url(~p"/set")
 
   @doc "The title and the description of the Set pages, for search engines."
   def seo do

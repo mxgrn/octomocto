@@ -50,7 +50,7 @@ defmodule OctomoctoWeb.AfterglowLive do
      socket
      |> assign(
        [
-         canonical_url: url(~p"/afterglow"),
+         canonical_url: canonical_url(socket),
          rules: rules(),
          match: match,
          start_level: level,
@@ -62,6 +62,10 @@ defmodule OctomoctoWeb.AfterglowLive do
      |> assign_lobby(Lobby.entries(TurnGame, TurnStore))
      |> assign(watchers: Lobby.watchers(TurnGame))}
   end
+
+  # The Lobby tab has its own URL
+  defp canonical_url(%{assigns: %{live_action: :lobby}}), do: url(~p"/afterglow/lobby")
+  defp canonical_url(_socket), do: url(~p"/afterglow")
 
   @doc "The title and the description of the Afterglow pages, for search engines."
   def seo do
