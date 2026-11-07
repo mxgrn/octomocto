@@ -681,7 +681,7 @@ defmodule OctomoctoWeb.MemoryLive do
           <span class={[
             "relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200",
             if(@theme == "random",
-              do: "bg-octo-indigo",
+              do: "bg-octo-teal",
               else: "bg-base-content/20 group-hover:bg-base-content/30"
             )
           ]}>
@@ -710,7 +710,7 @@ defmodule OctomoctoWeb.MemoryLive do
               "group relative flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
               if(@theme == theme.name,
                 do:
-                  "cursor-default bg-octo-mist ring-2 ring-octo-indigo dark:bg-octo-indigo-light/10",
+                  "cursor-default bg-octo-teal/10 ring-2 ring-octo-teal dark:bg-octo-teal-light/10 dark:ring-octo-teal-light",
                 else: "ring-1 ring-base-content/5 hover:bg-base-200 hover:ring-base-content/15"
               )
             ]}
@@ -718,7 +718,7 @@ defmodule OctomoctoWeb.MemoryLive do
             <span
               :if={theme[:new]}
               id={"theme-#{theme.name}-new"}
-              class="absolute -top-1.5 -end-1.5 z-10 rounded-full bg-octo-indigo px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white shadow-sm"
+              class="absolute -top-1.5 -end-1.5 z-10 rounded-full bg-octo-orange px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white shadow-sm"
             >
               New
             </span>

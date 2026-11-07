@@ -161,7 +161,7 @@ defmodule OctomoctoWeb.SettingsComponents do
       class={[
         "min-w-10 rounded-full px-4 py-1.5 text-sm font-medium transition",
         if(@selected,
-          do: "cursor-default bg-base-100 text-base-content shadow-sm dark:bg-white/12",
+          do: "cursor-default bg-white text-base-content shadow-sm dark:bg-white/12",
           else: "text-base-content/70 hover:text-base-content"
         )
       ]}

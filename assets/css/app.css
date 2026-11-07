@@ -98,9 +98,14 @@
   --color-octo-indigo: #1A9FCB;
   --color-octo-navy: #171532;
   --color-octo-mist: #EEF0FA;
+  /* The second accent: selected tags and themes, switches that are on,
+     range sliders, and the game badges. It is not for actions, which use
+     the indigo. */
+  --color-octo-teal: #3E9E92;
   /* Lighter versions for dark backgrounds, from the "on-dark" logos */
   --color-octo-orange-light: #FF8A3C;
   --color-octo-indigo-light: #8C8CFF;
+  --color-octo-teal-light: #3CCBB8;
 }
 
 /* Add variants based on LiveView classes */
@@ -368,7 +373,7 @@ html:has(.is-playing) body {
   border-radius: 9999px;
   /* White, so that the selected option does not look like the indigo
      action buttons, such as Start game */
-  background-color: var(--color-base-100);
+  background-color: var(--color-white);
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.1), 0 1px 2px rgb(0 0 0 / 0.1);
   transition: var(
     --pill-transition,

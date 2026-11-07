@@ -701,7 +701,7 @@ defmodule OctomoctoWeb.Layouts do
       class="group flex w-full cursor-pointer items-center justify-between gap-6 rounded-lg px-3 py-2 text-start text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
     >
       <span class="whitespace-nowrap">{@label}</span>
-      <span class="relative h-5 w-9 shrink-0 rounded-full bg-base-content/15 transition-colors duration-200 group-aria-checked:bg-octo-indigo">
+      <span class="relative h-5 w-9 shrink-0 rounded-full bg-base-content/15 transition-colors duration-200 group-aria-checked:bg-octo-teal">
         <span class="absolute top-0.5 start-0.5 size-4 rounded-full bg-white shadow-sm transition-[inset-inline-start] duration-200 group-aria-checked:start-4.5"></span>
       </span>
     </button>
