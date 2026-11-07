@@ -37,7 +37,7 @@ defmodule OctomoctoWeb.SettingsComponents do
 
   attr :light, :boolean,
     default: false,
-    doc: "true for a small row with a white pill, as the filter of the best results"
+    doc: "true for a small row, as the filter of the best results"
 
   slot :inner_block, required: true
 
@@ -161,8 +161,8 @@ defmodule OctomoctoWeb.SettingsComponents do
       class={[
         "min-w-10 rounded-full px-4 py-1.5 text-sm font-medium transition",
         if(@selected,
-          do: "cursor-default bg-octo-indigo text-white shadow-sm",
-          else: "text-base-content/70 hover:bg-base-100 hover:text-base-content"
+          do: "cursor-default bg-base-100 text-base-content shadow-sm dark:bg-white/12",
+          else: "text-base-content/70 hover:text-base-content"
         )
       ]}
     >

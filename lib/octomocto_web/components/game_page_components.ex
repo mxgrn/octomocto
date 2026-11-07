@@ -53,13 +53,7 @@ defmodule OctomoctoWeb.GamePageComponents do
             <span
               :if={@lobby_count > 0}
               id="tab-lobby-count"
-              class={[
-                "min-w-5 rounded-full px-1.5 text-xs leading-5 font-semibold tabular-nums transition-colors",
-                if(@tab == :lobby,
-                  do: "bg-white/25 text-white",
-                  else: "bg-octo-indigo text-white"
-                )
-              ]}
+              class="min-w-5 rounded-full bg-octo-indigo px-1.5 text-xs leading-5 font-semibold tabular-nums text-white"
             >
               {@lobby_count}
             </span>

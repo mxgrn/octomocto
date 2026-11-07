@@ -366,7 +366,9 @@ html:has(.is-playing) body {
   height: var(--pill-height);
   transform: translate(var(--pill-x), var(--pill-y));
   border-radius: 9999px;
-  background-color: var(--color-octo-indigo);
+  /* White, so that the selected option does not look like the indigo
+     action buttons, such as Start game */
+  background-color: var(--color-base-100);
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.1), 0 1px 2px rgb(0 0 0 / 0.1);
   transition: var(
     --pill-transition,
@@ -375,9 +377,9 @@ html:has(.is-playing) body {
   );
 }
 
-/* The small row with a white pill, as the filter of the best results */
-.option-slider-light[data-slider-ready]:has([aria-current])::before {
-  background-color: var(--color-base-100);
+/* In the dark theme, the card has the base-100 color too */
+[data-theme=dark] .option-slider[data-slider-ready]:has([aria-current])::before {
+  background-color: rgb(255 255 255 / 0.12);
 }
 
 @media (prefers-reduced-motion: reduce) {
