@@ -387,7 +387,9 @@ defmodule OctomoctoWeb.Layouts do
         </.link>
         <%!--
           The menu opens above the button, because the footer is at the bottom of
-          the page. The links are always in the HTML, so search engines find them.
+          the page. A link goes through /locale/:locale, which remembers the language
+          (see `OctomoctoWeb.LocaleRedirect`). Search engines find the pages in the
+          other languages through the hreflang links in the head.
         --%>
         <nav
           :if={@languages != []}
@@ -434,7 +436,8 @@ defmodule OctomoctoWeb.Layouts do
               <a
                 :if={!language.current}
                 id={"language-#{language.locale}"}
-                href={language.path}
+                href={~p"/locale/#{language.locale}?#{[to: language.path]}"}
+                rel="nofollow"
                 hreflang={language.locale}
                 lang={language.locale}
                 class="block rounded-lg px-3 py-1.5 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"

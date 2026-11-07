@@ -14,6 +14,7 @@ defmodule OctomoctoWeb.Router do
     plug :fetch_current_scope_for_user
     plug OctomoctoWeb.GuestName
     plug OctomoctoWeb.Locale, "en"
+    plug OctomoctoWeb.LocaleRedirect
   end
 
   pipeline :portuguese do
@@ -74,6 +75,8 @@ defmodule OctomoctoWeb.Router do
     get "/privacy", PageController, :privacy
     get "/terms", PageController, :terms
     get "/donate", PageController, :donate
+    # The language switcher in the footer
+    get "/locale/:locale", LocaleController, :switch
     get "/astronaut", AstronautController, :index
     post "/astronaut", AstronautController, :create
     get "/astronaut/:id", AstronautController, :show
@@ -92,7 +95,8 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
         OctomoctoWeb.UnreadNotifications,
-        {OctomoctoWeb.Locale, "en"}
+        {OctomoctoWeb.Locale, "en"},
+        OctomoctoWeb.LocaleRedirect
       ] do
       live "/", HomeLive
       live "/trains", TrainsLive, :index

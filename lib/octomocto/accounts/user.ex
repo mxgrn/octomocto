@@ -20,6 +20,9 @@ defmodule Octomocto.Accounts.User do
     # The first language of the browser in the last finished game, for
     # example "pt-BR" (see `Octomocto.Locales`). Only for statistics.
     field :locale, :string
+    # The language that the user picked in the footer, for example "pt" or
+    # "en" (see `OctomoctoWeb.LocaleRedirect`). Nil when the user did not pick one.
+    field :preferred_locale, :string
     # The notifications after this time are unread (see `Octomocto.Notifications`)
     field :notifications_seen_at, :utc_datetime_usec
     # Only admins can open the /admin pages. Set it in the database.

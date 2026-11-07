@@ -183,6 +183,14 @@ defmodule Octomocto.Accounts do
   end
 
   @doc """
+  Remembers the language that the user picked in the footer, for example
+  "pt" or "en".
+  """
+  def update_user_preferred_locale(user, locale) do
+    user |> Ecto.Changeset.change(preferred_locale: locale) |> Repo.update!()
+  end
+
+  @doc """
   Remembers the tab of the Trains page that the user used last, "free",
   "campaign" or "lobby". Gives the user with the new tab.
   """

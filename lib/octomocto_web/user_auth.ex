@@ -26,12 +26,24 @@ defmodule OctomoctoWeb.UserAuth do
   """
   def log_in_user(conn, user, params \\ %{}) do
     user_return_to = get_session(conn, :user_return_to)
+    user = keep_locale(conn, user)
 
     conn
     |> create_or_extend_session(user, params)
     |> delete_session(:user_return_to)
     |> redirect(to: user_return_to || signed_in_path(conn))
   end
+
+  # A user without a language of its own gets the language that the guest
+  # picked in the footer
+  defp keep_locale(conn, %{preferred_locale: nil} = user) do
+    case get_session(conn, OctomoctoWeb.LocaleRedirect.session_key()) do
+      nil -> user
+      locale -> Accounts.update_user_preferred_locale(user, locale)
+    end
+  end
+
+  defp keep_locale(_conn, user), do: user
 
   @doc """
   Logs the user out.
@@ -123,7 +135,8 @@ defmodule OctomoctoWeb.UserAuth do
   #
   defp renew_session(conn, _user) do
     delete_csrf_token()
-    guest = conn |> get_session() |> Map.take(OctomoctoWeb.GuestName.keys())
+    keys = [OctomoctoWeb.LocaleRedirect.session_key() | OctomoctoWeb.GuestName.keys()]
+    guest = conn |> get_session() |> Map.take(keys)
 
     conn
     |> configure_session(renew: true)

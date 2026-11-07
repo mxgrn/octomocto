@@ -20,6 +20,16 @@ defmodule OctomoctoWeb.UserAuthTest do
   end
 
   describe "log_in_user/3" do
+    test "keeps the language that the guest picked, also for the user", %{
+      conn: conn,
+      user: user
+    } do
+      conn = conn |> put_session("locale", "pt") |> UserAuth.log_in_user(user)
+
+      assert get_session(conn, "locale") == "pt"
+      assert Octomocto.Repo.reload!(user).preferred_locale == "pt"
+    end
+
     test "stores the user token in the session", %{conn: conn, user: user} do
       conn = UserAuth.log_in_user(conn, user)
       assert token = get_session(conn, :user_token)
