@@ -315,8 +315,8 @@ defmodule OctomoctoWeb.Layouts do
           {gettext("Suggest a game")}
         </a>
         <a
-          id="patreon-link"
-          href="https://patreon.com/mxgrn"
+          id="donate-link"
+          href={OctomoctoWeb.Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/donate")}
           class={[
             "group -my-1 inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-semibold transition",
             "bg-octo-orange/10 text-octo-orange ring-1 ring-octo-orange/30",
@@ -326,7 +326,7 @@ defmodule OctomoctoWeb.Layouts do
           ]}
         >
           <.icon name="hero-heart-solid" class="size-3.5 transition group-hover:scale-110" />
-          {gettext("Feed Octo & Mocto")}
+          {gettext("Support the author")}
         </a>
         <%!--
           The menu opens above the button, because the footer is at the bottom of

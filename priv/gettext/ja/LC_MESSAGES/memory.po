@@ -522,8 +522,8 @@ msgid "Enjoying Octomocto? {feed} to keep it ad-free."
 msgstr "Octomoctoを楽しんでる？広告なしで続けられるように、{feed}。"
 
 #, elixir-autogen, elixir-format
-msgid "Feed Octo & Mocto"
-msgstr "OctoとMoctoにごはんをあげよう"
+msgid "Support the author"
+msgstr "作者を応援しよう"
 
 #, elixir-autogen, elixir-format
 msgid "Turn a bomb that was seen, and you are out."

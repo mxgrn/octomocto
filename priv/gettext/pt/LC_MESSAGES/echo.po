@@ -90,8 +90,8 @@ msgid "Enjoying Octomocto? {feed} to keep it ad-free."
 msgstr "Curtindo o Octomocto? {feed} para ele continuar sem anúncios."
 
 #, elixir-autogen, elixir-format
-msgid "Feed Octo & Mocto"
-msgstr "Alimente Octo e Mocto"
+msgid "Support the author"
+msgstr "Apoie o autor"
 
 #, elixir-autogen, elixir-format
 msgid "Game over"

@@ -73,6 +73,7 @@ defmodule OctomoctoWeb.Router do
 
     get "/privacy", PageController, :privacy
     get "/terms", PageController, :terms
+    get "/donate", PageController, :donate
     get "/astronaut", AstronautController, :index
     post "/astronaut", AstronautController, :create
     get "/astronaut/:id", AstronautController, :show
@@ -153,6 +154,8 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
     get "/echo/:id", EchoController, :show
 
+    get "/donate", PageController, :donate
+
     get "/*path", LocaleController, :english
   end
 
@@ -175,6 +178,8 @@ defmodule OctomoctoWeb.Router do
 
     # After the live routes, so that "campaign" is not a game id
     get "/memory/:id", MemoryController, :show
+
+    get "/donate", PageController, :donate
 
     get "/*path", LocaleController, :english
   end
@@ -199,6 +204,8 @@ defmodule OctomoctoWeb.Router do
     # After the live routes, so that "campaign" is not a game id
     get "/memory/:id", MemoryController, :show
 
+    get "/donate", PageController, :donate
+
     get "/*path", LocaleController, :english
   end
 
@@ -221,6 +228,8 @@ defmodule OctomoctoWeb.Router do
 
     # After the live routes, so that "campaign" is not a game id
     get "/memory/:id", MemoryController, :show
+
+    get "/donate", PageController, :donate
 
     get "/*path", LocaleController, :english
   end
@@ -245,6 +254,8 @@ defmodule OctomoctoWeb.Router do
     # After the live routes, so that "campaign" is not a game id
     get "/memory/:id", MemoryController, :show
 
+    get "/donate", PageController, :donate
+
     get "/*path", LocaleController, :english
   end
 
@@ -267,6 +278,8 @@ defmodule OctomoctoWeb.Router do
 
     # After the live routes, so that "campaign" is not a game id
     get "/memory/:id", MemoryController, :show
+
+    get "/donate", PageController, :donate
 
     get "/*path", LocaleController, :english
   end
@@ -291,6 +304,8 @@ defmodule OctomoctoWeb.Router do
     # After the live routes, so that "campaign" is not a game id
     get "/memory/:id", MemoryController, :show
 
+    get "/donate", PageController, :donate
+
     get "/*path", LocaleController, :english
   end
 
@@ -313,6 +328,8 @@ defmodule OctomoctoWeb.Router do
 
     # After the live routes, so that "campaign" is not a game id
     get "/memory/:id", MemoryController, :show
+
+    get "/donate", PageController, :donate
 
     get "/*path", LocaleController, :english
   end
@@ -337,6 +354,8 @@ defmodule OctomoctoWeb.Router do
     # After the live routes, so that "campaign" is not a game id
     get "/memory/:id", MemoryController, :show
 
+    get "/donate", PageController, :donate
+
     get "/*path", LocaleController, :english
   end
 
@@ -359,6 +378,8 @@ defmodule OctomoctoWeb.Router do
 
     # After the live routes, so that "campaign" is not a game id
     get "/memory/:id", MemoryController, :show
+
+    get "/donate", PageController, :donate
 
     get "/*path", LocaleController, :english
   end
@@ -383,6 +404,8 @@ defmodule OctomoctoWeb.Router do
     # After the live routes, so that "campaign" is not a game id
     get "/memory/:id", MemoryController, :show
 
+    get "/donate", PageController, :donate
+
     get "/*path", LocaleController, :english
   end
 
@@ -405,6 +428,8 @@ defmodule OctomoctoWeb.Router do
 
     # After the live routes, so that "campaign" is not a game id
     get "/memory/:id", MemoryController, :show
+
+    get "/donate", PageController, :donate
 
     get "/*path", LocaleController, :english
   end

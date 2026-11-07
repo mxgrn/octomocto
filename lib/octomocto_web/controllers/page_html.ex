@@ -34,6 +34,30 @@ defmodule OctomoctoWeb.PageHTML do
     """
   end
 
+  @doc """
+  Renders the two octopi side by side. They float up and down around the
+  same line, in opposite directions.
+  """
+  attr :id, :string, required: true
+  attr :class, :any, default: nil
+
+  def octopi_side_by_side(assigns) do
+    ~H"""
+    <div id={@id} aria-hidden="true" class={["flex items-end", @class]}>
+      <svg viewBox="0 10 240 140" overflow="visible" class="octo-float h-full">
+        <g class="text-octo-orange dark:text-octo-orange-light"><.octopus /></g>
+      </svg>
+      <svg
+        viewBox="0 10 240 140"
+        overflow="visible"
+        class="octo-float octo-float-reverse ms-0.5 h-full"
+      >
+        <g class="text-octo-indigo dark:text-octo-indigo-light"><.octopus /></g>
+      </svg>
+    </div>
+    """
+  end
+
   defp octopus(assigns) do
     ~H"""
     <g fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round">

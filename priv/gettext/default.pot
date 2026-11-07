@@ -48,7 +48,7 @@ msgid "Email me a sign-in link"
 msgstr ""
 
 #, elixir-autogen, elixir-format
-msgid "Feed Octo & Mocto"
+msgid "Support the author"
 msgstr ""
 
 #, elixir-autogen, elixir-format
@@ -297,4 +297,16 @@ msgstr ""
 
 #, elixir-autogen, elixir-format
 msgid "Solo"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Hi! I'm Max, an indie developer, and I make Octomocto on my own. It has no ads, and your support pays for the servers and the time to make new games."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Support on Patreon"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Feed Octo & Mocto now!"
 msgstr ""

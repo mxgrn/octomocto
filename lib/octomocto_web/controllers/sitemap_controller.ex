@@ -33,7 +33,8 @@ defmodule OctomoctoWeb.SitemapController do
       url(~p"/graze"),
       url(~p"/astronaut"),
       url(~p"/privacy"),
-      url(~p"/terms")
+      url(~p"/terms"),
+      url(~p"/donate")
     ]
   end
 

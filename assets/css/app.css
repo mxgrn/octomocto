@@ -946,6 +946,18 @@ three times */
   .octo-top, .octo-bottom { animation: none; }
 }
 
+/* Donate page. The two octopi stand side by side and float around the same
+   line, in opposite directions: the second starts half a cycle later. */
+@keyframes octo-float {
+  0%, 100% { transform: translateY(-2px); }
+  50% { transform: translateY(2px); }
+}
+.octo-float { animation: octo-float 1.2s ease-in-out infinite; }
+.octo-float-reverse { animation-delay: -0.6s; }
+@media (prefers-reduced-motion: reduce) {
+  .octo-float { animation: none; }
+}
+
 /* The colors of the games on the stats page, one for each game in the order
    of the front page. A colorblind-safe chart palette, not the accent colors
    of the games. The dark theme has its own steps of the same hues. */

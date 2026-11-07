@@ -101,7 +101,7 @@ defmodule OctomoctoWeb.EchoHTML do
       "{sign_in} to keep your scores." => dgettext("echo", "{sign_in} to keep your scores."),
       "Enjoying Octomocto? {feed} to keep it ad-free." =>
         dgettext("echo", "Enjoying Octomocto? {feed} to keep it ad-free."),
-      "Feed Octo & Mocto" => dgettext("echo", "Feed Octo & Mocto")
+      "Support the author" => dgettext("echo", "Support the author")
     }
     |> Map.merge(
       Map.new(GamePageComponents.color_names(), &{&1, GamePageComponents.color_name(&1)})

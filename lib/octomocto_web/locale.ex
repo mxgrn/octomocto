@@ -190,7 +190,11 @@ defmodule OctomoctoWeb.Locale do
     end
   end
 
-  # English, then the languages with translations of the game
+  # English, then the languages with translations of the game. A page
+  # that is not a game, such as the donate page, is `:all`: it has all the
+  # languages.
+  defp locales(:all), do: ["en" | other_locales()]
+
   defp locales(game) do
     ["en" | for({locale, games} <- @games, game in games, do: locale)]
   end

@@ -496,7 +496,7 @@ if (memoryNode) {
   let muted = false
   try { muted = localStorage.getItem("memory-muted") === "true" } catch (_e) {}
 
-  const memory = window.Elm.Memory.init({node: memoryNode, flags: {gameUrl: window.location.href, indexUrl: memoryNode.dataset.indexUrl, settingsUrl: memoryNode.dataset.settingsUrl, changeSettingsUrl: memoryNode.dataset.changeSettingsUrl, nextGame: {name: memoryNode.dataset.nextGameName, path: memoryNode.dataset.nextGamePath}, guest: !memoryNode.dataset.userToken, muted, texts: JSON.parse(memoryNode.dataset.texts)}})
+  const memory = window.Elm.Memory.init({node: memoryNode, flags: {gameUrl: window.location.href, indexUrl: memoryNode.dataset.indexUrl, settingsUrl: memoryNode.dataset.settingsUrl, changeSettingsUrl: memoryNode.dataset.changeSettingsUrl, nextGame: {name: memoryNode.dataset.nextGameName, path: memoryNode.dataset.nextGamePath}, donateUrl: memoryNode.dataset.donateUrl, guest: !memoryNode.dataset.userToken, muted, texts: JSON.parse(memoryNode.dataset.texts)}})
   const socket = new Socket("/socket", {params: {user_token: memoryNode.dataset.userToken, _csrf_token: csrfToken}})
   socket.connect()
 
@@ -694,7 +694,7 @@ if (echoNode) {
     shapes = localStorage.getItem("echo-shapes") !== "false"
   } catch (_e) {}
 
-  const echo = window.Elm.Echo.init({node: echoNode, flags: {gameUrl: window.location.href, indexUrl: echoNode.dataset.indexUrl, settingsUrl: echoNode.dataset.settingsUrl, changeSettingsUrl: echoNode.dataset.changeSettingsUrl || null, nextGame: {name: echoNode.dataset.nextGameName, path: echoNode.dataset.nextGamePath}, guest: !echoNode.dataset.userToken, muted, shapes, texts: JSON.parse(echoNode.dataset.texts)}})
+  const echo = window.Elm.Echo.init({node: echoNode, flags: {gameUrl: window.location.href, indexUrl: echoNode.dataset.indexUrl, settingsUrl: echoNode.dataset.settingsUrl, changeSettingsUrl: echoNode.dataset.changeSettingsUrl || null, nextGame: {name: echoNode.dataset.nextGameName, path: echoNode.dataset.nextGamePath}, donateUrl: echoNode.dataset.donateUrl, guest: !echoNode.dataset.userToken, muted, shapes, texts: JSON.parse(echoNode.dataset.texts)}})
   const socket = new Socket("/socket", {params: {user_token: echoNode.dataset.userToken, _csrf_token: csrfToken}})
   socket.connect()
 

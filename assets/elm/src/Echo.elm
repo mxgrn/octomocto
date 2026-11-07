@@ -215,6 +215,9 @@ type alias Model =
     -- game with one player.
     , changeSettingsUrl : Maybe String
     , nextGame : NextGame
+
+    -- The page to support the author, in the language of the page
+    , donateUrl : String
     , guest : Bool
     , connection : Connection
     , copied : Bool
@@ -268,6 +271,9 @@ type alias Flags =
     -- game with one player.
     , changeSettingsUrl : Maybe String
     , nextGame : NextGame
+
+    -- The page to support the author, in the language of the page
+    , donateUrl : String
     , guest : Bool
     , muted : Bool
     , shapes : Bool
@@ -282,6 +288,7 @@ init flags =
       , settingsUrl = flags.settingsUrl
       , changeSettingsUrl = flags.changeSettingsUrl
       , nextGame = flags.nextGame
+      , donateUrl = flags.donateUrl
       , guest = flags.guest
       , connection = Connecting
       , copied = False
@@ -1826,27 +1833,27 @@ viewResult model me game =
 
           else
             text ""
-        , viewFeed texts
+        , viewFeed model.donateUrl texts
         ]
 
 
-{-| The call to support Octomocto on Patreon, at the bottom of a result.
+{-| The link to the page to support Octomocto, at the bottom of a result.
 The link opens in a new tab, so that the player stays in the game.
 -}
-viewFeed : Texts -> Html msg
-viewFeed texts =
+viewFeed : String -> Texts -> Html msg
+viewFeed donateUrl texts =
     p [ id "echo-feed", class "mt-2 max-w-sm border-t border-white/15 pt-4 text-center text-sm leading-10 text-balance text-white/80" ]
         (withLink texts
             "Enjoying Octomocto? {feed} to keep it ad-free."
             "feed"
             (a
-                [ href "https://patreon.com/mxgrn"
+                [ href donateUrl
                 , target "_blank"
                 , rel "noopener"
                 , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:bg-octo-orange-light"
                 ]
                 [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
-                , text (t texts "Feed Octo & Mocto")
+                , text (t texts "Support the author")
                 ]
             )
         )

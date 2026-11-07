@@ -1,0 +1,49 @@
+<Layouts.app
+  flash={@flash}
+  notifications={@notifications}
+  current_scope={@current_scope}
+  guest_name={@guest_name}
+  guest_public_id={@guest_public_id}
+  languages={@languages}
+>
+  <section id="donate" class="flex flex-col items-center gap-6 py-10 text-center sm:py-16">
+    <img
+      id="donate-avatar"
+      src={~p"/images/max.jpg"}
+      alt="Max Gorin"
+      width="128"
+      height="128"
+      class="size-28 rounded-full object-cover shadow-lg ring-4 ring-octo-orange/30 sm:size-32 dark:ring-octo-orange-light/30"
+    />
+
+    <h1 class="text-3xl font-semibold tracking-tight text-base-content">
+      {gettext("Support the author")}
+    </h1>
+
+    <p id="donate-intro" class="max-w-md text-balance leading-relaxed text-base-content/70">
+      {gettext(
+        "Hi! I'm Max, an indie developer, and I make Octomocto on my own. It has no ads, and your support pays for the servers and the time to make new games."
+      )}
+    </p>
+
+    <a
+      id="donate-patreon"
+      href="https://patreon.com/mxgrn"
+      class={[
+        "group mt-2 inline-flex items-center gap-2 rounded-full px-7 py-3 text-base font-semibold transition",
+        "bg-octo-orange text-white shadow-lg shadow-octo-orange/30",
+        "hover:bg-octo-orange-light hover:shadow-xl hover:shadow-octo-orange/30 active:scale-95",
+        "dark:bg-octo-orange-light dark:text-base-100 dark:hover:bg-octo-orange"
+      ]}
+    >
+      <.icon name="hero-heart-solid" class="size-5 transition group-hover:scale-110" />
+      {gettext("Support on Patreon")}
+    </a>
+
+    <.octopi_side_by_side id="donate-octopi" class="mt-4 h-10" />
+
+    <p id="donate-feed" class="-mt-3 text-sm italic text-base-content/50">
+      {gettext("Feed Octo & Mocto now!")}
+    </p>
+  </section>
+</Layouts.app>
