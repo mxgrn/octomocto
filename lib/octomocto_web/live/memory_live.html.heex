@@ -25,12 +25,12 @@
   <div
     id="memory-index"
     class={[
-      "relative start-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 rtl:translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)]",
+      "relative start-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 rtl:translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[calc(100vw-4rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)]",
       @live_action == :index &&
         "xl:h-[calc(100dvh-4rem)] xl:grid-rows-[auto_minmax(0,1fr)] xl:pb-6"
     ]}
   >
-    <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 xl:max-w-none">
+    <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 lg:max-w-none">
       <div class="flex items-center justify-center gap-3">
         <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
           <OctomoctoWeb.GameIcons.game_icon game="memory" class="size-9" />
@@ -67,7 +67,7 @@
     <%= if @live_action == :campaign do %>
       <div
         id="campaign"
-        class="relative mx-auto flex w-full max-w-md flex-col gap-4 lg:col-start-1 lg:row-start-2 xl:col-start-2 xl:max-w-none"
+        class="relative mx-auto flex w-full max-w-md flex-col gap-4 lg:col-start-1 lg:row-start-2 xl:col-start-2 lg:max-w-none"
       >
         <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100">
           <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -125,7 +125,7 @@
 
       <div
         id="campaign-results"
-        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 xl:col-start-3 xl:max-w-none"
+        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 xl:col-start-3 lg:max-w-none"
       >
         <.score_list
           id="campaign-leaderboard"
@@ -150,7 +150,7 @@
       <div
         :if={@live_action == :lobby}
         id="memory-lobby"
-        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:col-start-2 xl:max-w-none"
+        class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:col-start-2 lg:max-w-none"
       >
         <.lobby_games
           games={@lobby_games}
@@ -172,7 +172,7 @@
       <%!-- The padding keeps the rings of the boxes and the wide start bar in the scroll box --%>
       <div
         :if={@live_action == :index}
-        class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-2 xl:static xl:col-start-2 xl:-mx-2 xl:w-[calc(100%+1rem)] xl:max-w-none xl:self-stretch xl:overflow-y-auto xl:px-2 xl:pt-1"
+        class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-2 xl:static xl:col-start-2 xl:-mx-2 xl:w-[calc(100%+1rem)] lg:max-w-none xl:self-stretch xl:overflow-y-auto xl:px-2 xl:pt-1"
       >
         <div id="memory-settings" class="flex w-full flex-col gap-4">
           <.match_score
@@ -348,7 +348,7 @@
       <div
         id="memory-leaderboard"
         class={[
-          "mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 xl:col-start-3 xl:max-w-none",
+          "mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 xl:col-start-3 lg:max-w-none",
           @live_action == :index &&
             "xl:-mt-1 xl:content-start xl:self-stretch xl:overflow-y-clip xl:pt-1"
         ]}
