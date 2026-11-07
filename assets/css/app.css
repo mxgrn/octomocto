@@ -98,14 +98,9 @@
   --color-octo-indigo: #1A9FCB;
   --color-octo-navy: #171532;
   --color-octo-mist: #EEF0FA;
-  /* The second accent: selected tags and themes, switches that are on,
-     range sliders, and the game badges. It is not for actions, which use
-     the indigo. */
-  --color-octo-teal: #3E9E92;
   /* Lighter versions for dark backgrounds, from the "on-dark" logos */
   --color-octo-orange-light: #FF8A3C;
   --color-octo-indigo-light: #8C8CFF;
-  --color-octo-teal-light: #3CCBB8;
 }
 
 /* Add variants based on LiveView classes */

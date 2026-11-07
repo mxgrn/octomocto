@@ -681,7 +681,7 @@ defmodule OctomoctoWeb.MemoryLive do
           <span class={[
             "relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200",
             if(@theme == "random",
-              do: "bg-octo-teal",
+              do: "bg-octo-indigo",
               else: "bg-base-content/20 group-hover:bg-base-content/30"
             )
           ]}>
@@ -710,7 +710,7 @@ defmodule OctomoctoWeb.MemoryLive do
               "group relative flex flex-col items-center gap-1 rounded-xl p-1.5 transition",
               if(@theme == theme.name,
                 do:
-                  "cursor-default bg-octo-teal/10 ring-2 ring-octo-teal dark:bg-octo-teal-light/10 dark:ring-octo-teal-light",
+                  "cursor-default bg-octo-mist ring-2 ring-octo-indigo dark:bg-octo-indigo-light/10",
                 else: "ring-1 ring-base-content/5 hover:bg-base-200 hover:ring-base-content/15"
               )
             ]}
