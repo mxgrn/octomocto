@@ -45,7 +45,7 @@
             replace
             aria-current={if(tag == @tag, do: "true")}
             class={[
-              "rounded-full px-3.5 py-1.5 text-sm font-medium shadow-sm ring-1 transition active:scale-95",
+              "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium shadow-sm ring-1 transition active:scale-95",
               if(tag == @tag,
                 do:
                   "bg-octo-indigo text-white ring-octo-indigo dark:bg-octo-indigo-light dark:text-octo-navy dark:ring-octo-indigo-light",
@@ -54,7 +54,8 @@
               )
             ]}
           >
-            {tag || "all"}
+            <span :if={tag} class={["size-2 rounded-full", tag_dot_class(tag)]} />
+            {if(tag, do: String.capitalize(tag), else: "All games")}
           </.link>
         </nav>
         <ul
@@ -83,7 +84,18 @@
                 <div class="shrink-0 rounded-2xl bg-base-100">
                   <.game_icon game={game} />
                 </div>
-                <h3 class="font-semibold text-octo-navy dark:text-base-content">{game.name}</h3>
+                <div class="min-w-0">
+                  <h3 class="font-semibold text-octo-navy dark:text-base-content">{game.name}</h3>
+                  <ul
+                    id={"game-tags-#{game.id}"}
+                    class="mt-0.5 flex flex-wrap gap-x-2.5 gap-y-0.5 text-xs text-octo-navy/55 dark:text-base-content/55"
+                  >
+                    <li :for={tag <- game.tags} class="inline-flex items-center gap-1">
+                      <span class={["size-1.5 rounded-full", tag_dot_class(tag)]} />
+                      {String.capitalize(tag)}
+                    </li>
+                  </ul>
+                </div>
                 <%!-- A hint that friends can play this game together --%>
                 <span
                   :if={!game[:single_player]}
