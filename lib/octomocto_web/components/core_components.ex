@@ -66,13 +66,17 @@ defmodule OctomoctoWeb.CoreComponents do
     <div
       :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
       id={@id}
-      phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
+      phx-click={
+        JS.push("lv:clear-flash", value: %{key: @kind})
+        |> JS.add_class("flash-out", to: "##{@id} .alert")
+        |> JS.hide(to: "##{@id}", time: 250, transition: {"", "", ""})
+      }
       role="alert"
-      class="toast toast-top toast-end z-50"
+      class="toast toast-bottom toast-end z-50"
       {@rest}
     >
       <div class={[
-        "alert w-80 sm:w-96 max-w-80 sm:max-w-96 text-wrap",
+        "alert flash-in w-80 sm:w-96 max-w-80 sm:max-w-96 text-wrap",
         @kind == :info && "alert-info",
         @kind == :error && "alert-error"
       ]}>

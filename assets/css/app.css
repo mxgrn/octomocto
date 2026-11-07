@@ -117,6 +117,18 @@
 /* No reconnect error toast while the tab comes back from the background (see app.js) */
 [data-resuming] #client-error, [data-resuming] #server-error { display: none !important }
 
+/* Flash messages slide in from the right edge and slide out on close */
+@keyframes flash-slide-in {
+  from { transform: translateX(calc(100% + 1.5rem)); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.flash-in { animation: flash-slide-in 350ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes flash-slide-out {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(calc(100% + 1.5rem)); opacity: 0; }
+}
+.flash-out { animation: flash-slide-out 250ms ease-in both; }
+
 /* This file is for your main application CSS */
 
 /* Nimble Mosaic. The board is an SVG, so the shake distance is in board units. */
