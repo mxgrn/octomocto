@@ -190,7 +190,7 @@ defmodule OctomoctoWeb.Layouts do
             >
               <:label>
                 <.icon name="hero-user-circle" class="size-6" />
-                {@guest_name}
+                <span class="sr-only">{@guest_name}</span>
               </:label>
               <.link
                 :if={@guest_public_id}
@@ -216,8 +216,15 @@ defmodule OctomoctoWeb.Layouts do
                   alt=""
                   class="size-6 rounded-full"
                 />
-                {@current_scope.user.display_name || @current_scope.user.name ||
-                  @current_scope.user.email}
+                <span
+                  :if={!@current_scope.user.avatar_url}
+                  id="user-menu-initials"
+                  aria-hidden="true"
+                  class="flex size-6 items-center justify-center rounded-full bg-octo-indigo text-[0.625rem] font-semibold text-white"
+                >
+                  {initials(user_menu_name(@current_scope.user))}
+                </span>
+                <span class="sr-only">{user_menu_name(@current_scope.user)}</span>
               </:label>
               <.link
                 id="profile-link"
@@ -533,6 +540,17 @@ defmodule OctomoctoWeb.Layouts do
       gtag('config', 'G-95LZEBCCVE');
     </script>
     """
+  end
+
+  defp user_menu_name(user), do: user.display_name || user.name || user.email
+
+  # Up to two first letters of the name, for the menu button of a user without an avatar.
+  defp initials(name) do
+    name
+    |> String.split()
+    |> Enum.take(2)
+    |> Enum.map_join(&String.first/1)
+    |> String.upcase()
   end
 
   attr :id, :string, required: true

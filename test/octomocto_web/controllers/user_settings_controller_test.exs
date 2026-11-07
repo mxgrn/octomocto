@@ -19,12 +19,12 @@ defmodule OctomoctoWeb.UserSettingsControllerTest do
       assert Enum.any?(LazyHTML.query(document, "#telegram-connect"))
     end
 
-    test "shows the display name in the user menu", %{conn: conn, user: user} do
-      {:ok, _user} = Accounts.update_user_display_name(user, %{display_name: "Ada"})
+    test "shows the initials of the display name in the user menu", %{conn: conn, user: user} do
+      {:ok, _user} = Accounts.update_user_display_name(user, %{display_name: "Ada Byron King"})
 
       document = conn |> get(~p"/settings") |> html_response(200) |> LazyHTML.from_document()
 
-      assert document |> LazyHTML.query("#user-menu-button") |> LazyHTML.text() =~ "Ada"
+      assert document |> LazyHTML.query("#user-menu-initials") |> LazyHTML.text() =~ "AB"
     end
 
     test "redirects if the user is not signed in" do
