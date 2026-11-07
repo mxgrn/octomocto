@@ -27,19 +27,15 @@ defmodule OctomoctoWeb.PageControllerTest do
            ]
   end
 
-  test "GET / marks the games that friends can play together", %{conn: conn} do
+  test "GET / marks only the single-player games", %{conn: conn} do
     conn = get(conn, ~p"/")
 
-    document = LazyHTML.from_document(html_response(conn, 200))
-
     ids =
-      document
-      |> LazyHTML.query("#games [id^=game-multiplayer-]")
+      LazyHTML.from_document(html_response(conn, 200))
+      |> LazyHTML.query("#games [id^=game-single-player-]")
       |> LazyHTML.attribute("id")
 
-    assert "game-multiplayer-set" in ids
-    refute "game-multiplayer-snap" in ids
-    assert "game-multiplayer-afterglow" in ids
+    assert ids == ["game-single-player-snap"]
   end
 
   test "the header shows the slogan", %{conn: conn} do
