@@ -35,15 +35,21 @@ defmodule OctomoctoWeb.UserSessionHTML do
         class="flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-base-content/40"
       >
         <span class="h-px flex-1 bg-slate-200 dark:bg-white/10"></span>
-        or <span class="h-px flex-1 bg-slate-200 dark:bg-white/10"></span>
+        {gettext("or")} <span class="h-px flex-1 bg-slate-200 dark:bg-white/10"></span>
       </div>
 
-      <.form :if={@show_email?} for={@form} id="sign-in-form" action={~p"/signin"} class="space-y-3">
+      <.form
+        :if={@show_email?}
+        for={@form}
+        id="sign-in-form"
+        action={Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/signin")}
+        class="space-y-3"
+      >
         <.input
           field={@form[:email]}
           id="sign-in-email"
           type="email"
-          placeholder="you@example.com"
+          placeholder={gettext("you@example.com")}
           autocomplete="username"
           spellcheck="false"
           readonly={!!@user}
@@ -55,7 +61,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
           id="sign-in-submit"
           class="w-full rounded-xl bg-indigo-600 px-4 py-3 font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500"
         >
-          Email me a sign-in link
+          {gettext("Email me a sign-in link")}
         </button>
       </.form>
 
@@ -113,7 +119,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
         <.form
           for={@form}
           id="sign-in-form"
-          action={~p"/signin"}
+          action={Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/signin")}
           class="hidden w-full min-w-0 flex-col gap-2"
         >
           <div class="flex min-w-0 gap-2 rounded-2xl bg-base-100 p-1.5 shadow-sm ring-1 ring-base-content/10 transition focus-within:ring-2 focus-within:ring-indigo-500">

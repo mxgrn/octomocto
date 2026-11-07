@@ -35,9 +35,12 @@ defmodule OctomoctoWeb.HomeLive do
       tags: ["speed", "attention"],
       name: "Nimble Mosaic",
       description:
-        "Find the numbers in order. The first player to click the next number gets the point.",
+        dgettext_noop(
+          "home",
+          "Find the numbers in order. The first player to click the next number gets the point."
+        ),
       path: "/nimble-mosaic",
-      badge: {"Trending this week", "hero-fire-mini"},
+      badge: {dgettext_noop("home", "Trending this week"), "hero-fire-mini"},
       icon_class: "bg-octo-indigo/10 dark:bg-octo-indigo-light/15"
     },
     %{
@@ -45,7 +48,10 @@ defmodule OctomoctoWeb.HomeLive do
       tags: ["speed", "attention"],
       name: "Schulte Table",
       description:
-        "The classic Schulte table: find the numbers in order on a square grid, with your eyes on the center.",
+        dgettext_noop(
+          "home",
+          "The classic Schulte table: find the numbers in order on a square grid, with your eyes on the center."
+        ),
       path: "/schulte",
       badge: {"New", "hero-sparkles-mini"},
       icon_class: "bg-octo-indigo/10 dark:bg-octo-indigo-light/15"
@@ -55,16 +61,23 @@ defmodule OctomoctoWeb.HomeLive do
       tags: ["speed", "attention"],
       name: "Graze & Dodge",
       description:
-        "Eat the black squares and keep away from the red ones, with up to 3 friends in one field.",
+        dgettext_noop(
+          "home",
+          "Eat the black squares and keep away from the red ones, with up to 3 friends in one field."
+        ),
       path: "/graze",
-      badge: {"Beta", "hero-beaker-mini"},
+      badge: {dgettext_noop("home", "Beta"), "hero-beaker-mini"},
       icon_class: "bg-octo-indigo/10 dark:bg-octo-indigo-light/15"
     },
     %{
       id: "trains",
       tags: ["attention"],
       name: "Right on Track",
-      description: "Click the switches to send each train to the house with its colors.",
+      description:
+        dgettext_noop(
+          "home",
+          "Click the switches to send each train to the house with its colors."
+        ),
       path: "/trains",
       icon_class: "bg-octo-orange/10 dark:bg-octo-orange-light/15"
     },
@@ -73,9 +86,12 @@ defmodule OctomoctoWeb.HomeLive do
       tags: ["memory"],
       name: "Memory",
       description:
-        "Find the cards with the same image. Play alone against the clock, or take turns.",
+        dgettext_noop(
+          "home",
+          "Find the cards with the same image. Play alone against the clock, or take turns."
+        ),
       path: "/memory",
-      badge: {"Most popular", "hero-star-mini"},
+      badge: {dgettext_noop("home", "Most popular"), "hero-star-mini"},
       icon_class: "bg-sky-500/10 dark:bg-sky-400/15"
     },
     %{
@@ -83,7 +99,10 @@ defmodule OctomoctoWeb.HomeLive do
       tags: ["speed", "logic", "attention"],
       name: "Set",
       description:
-        "Find 3 cards where each feature is all the same or all different. Race your friends.",
+        dgettext_noop(
+          "home",
+          "Find 3 cards where each feature is all the same or all different. Race your friends."
+        ),
       path: "/set",
       icon_class: "bg-violet-500/10 dark:bg-violet-400/15"
     },
@@ -92,7 +111,10 @@ defmodule OctomoctoWeb.HomeLive do
       tags: ["speed", "logic"],
       name: "Sudoku Race",
       description:
-        "Fill the same sudoku with your friends. The first player to put the correct digit gets the point.",
+        dgettext_noop(
+          "home",
+          "Fill the same sudoku with your friends. The first player to put the correct digit gets the point."
+        ),
       path: "/sudoku",
       icon_class: "bg-rose-500/10 dark:bg-rose-400/15"
     },
@@ -101,7 +123,10 @@ defmodule OctomoctoWeb.HomeLive do
       tags: ["memory"],
       name: "Echo Chamber",
       description:
-        "A Simon-like game: repeat the sequence of colored pads. With friends, each player adds a pad.",
+        dgettext_noop(
+          "home",
+          "A Simon-like game: repeat the sequence of colored pads. With friends, each player adds a pad."
+        ),
       path: "/echo",
       icon_class: "bg-amber-500/10 dark:bg-amber-400/15"
     },
@@ -110,7 +135,10 @@ defmodule OctomoctoWeb.HomeLive do
       tags: ["speed"],
       name: "Mahjong Race",
       description:
-        "Remove pairs of free tiles from the Turtle. With friends, the first to take a pair gets the point.",
+        dgettext_noop(
+          "home",
+          "Remove pairs of free tiles from the Turtle. With friends, the first to take a pair gets the point."
+        ),
       path: "/mahjong",
       icon_class: "bg-emerald-500/10 dark:bg-emerald-400/15"
     },
@@ -119,7 +147,10 @@ defmodule OctomoctoWeb.HomeLive do
       tags: ["speed", "attention"],
       name: "Overlap",
       description:
-        "A Dobble-like game: any two cards have exactly one symbol in common. Spot it first.",
+        dgettext_noop(
+          "home",
+          "A Dobble-like game: any two cards have exactly one symbol in common. Spot it first."
+        ),
       path: "/overlap",
       icon_class: "bg-pink-500/10 dark:bg-pink-400/15"
     },
@@ -128,7 +159,10 @@ defmodule OctomoctoWeb.HomeLive do
       tags: ["speed", "memory"],
       name: "Snap",
       description:
-        "Is the new card the same as the card before it? You have 45 seconds. Make no mistakes to grow the multiplier up to x5.",
+        dgettext_noop(
+          "home",
+          "Is the new card the same as the card before it? You have 45 seconds. Make no mistakes to grow the multiplier up to x5."
+        ),
       path: "/snap",
       icon_class: "bg-teal-500/10 dark:bg-teal-400/15",
       # Not suggested at the end of a multiplayer game, see `OctomoctoWeb.NextGame`
@@ -139,7 +173,10 @@ defmodule OctomoctoWeb.HomeLive do
       tags: ["memory"],
       name: "Afterglow Memory",
       description:
-        "Tiles light up for a moment. Click the tiles that were lit. With friends, make one pattern in turns.",
+        dgettext_noop(
+          "home",
+          "Tiles light up for a moment. Click the tiles that were lit. With friends, make one pattern in turns."
+        ),
       path: "/afterglow",
       badge: {"New", "hero-sparkles-mini"},
       icon_class: "bg-fuchsia-500/10 dark:bg-fuchsia-400/15"
@@ -165,6 +202,31 @@ defmodule OctomoctoWeb.HomeLive do
   defp tag_dot_class("memory"), do: "bg-violet-500"
   defp tag_dot_class("logic"), do: "bg-fuchsia-500"
   defp tag_dot_class("attention"), do: "bg-rose-500"
+
+  # The names of the tags. A new tag needs a line here.
+  defp tag_name("speed"), do: dgettext("home", "Speed")
+  defp tag_name("memory"), do: dgettext("home", "Memory")
+  defp tag_name("logic"), do: dgettext("home", "Logic")
+  defp tag_name("attention"), do: dgettext("home", "Attention")
+
+  # The texts in @games are in the "home" domain. "New" stays in English in
+  # all languages.
+  defp badge_label("New"), do: "New"
+  defp badge_label(label), do: Gettext.dgettext(OctomoctoWeb.Gettext, "home", label)
+
+  defp game_description(game),
+    do: Gettext.dgettext(OctomoctoWeb.Gettext, "home", game.description)
+
+  @doc """
+  The name of the game in the language of the process. Only a game with
+  translations in the language has a translated name (in the domain of the
+  game), so that the name is the same as on the page of the game.
+  """
+  def game_name(game) do
+    if Locale.translated?(Gettext.get_locale(OctomoctoWeb.Gettext), game.id),
+      do: Gettext.dgettext(OctomoctoWeb.Gettext, game.id, game.name),
+      else: game.name
+  end
 
   @doc """
   The list of all games, as on the front page.
@@ -222,7 +284,12 @@ defmodule OctomoctoWeb.HomeLive do
 
     {:ok,
      socket
-     |> assign(canonical_url: url(~p"/"), tags: @tags, kinds: Map.new(@games, &{&1.id, &1}))
+     |> assign(
+       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(socket.assigns.locale, ~p"/"),
+       alternate_urls: Locale.alternate_urls(:all, ~p"/"),
+       tags: @tags,
+       kinds: Map.new(@games, &{&1.id, &1})
+     )
      |> assign_lobby(entries)
      |> assign(watchers: watchers())
      |> assign(friends: friends)
@@ -235,7 +302,14 @@ defmodule OctomoctoWeb.HomeLive do
     tag = if params["tag"] in @tags, do: params["tag"]
     games = if tag, do: Enum.filter(@games, &(tag in &1.tags)), else: @games
 
-    {:noreply, assign(socket, tag: tag, games: games)}
+    path = if tag, do: ~p"/?tag=#{tag}", else: ~p"/"
+
+    {:noreply,
+     assign(socket,
+       tag: tag,
+       games: games,
+       languages: Locale.languages(:all, socket.assigns.locale, path)
+     )}
   end
 
   def handle_info({:lobby_changed, game, id, entry}, socket) do
@@ -295,13 +369,14 @@ defmodule OctomoctoWeb.HomeLive do
 
   @doc ~S|The text of the activity of an online user, for example "Playing Memory".|
   def activity_text(%{kind: kind, doing: doing}) do
-    name = kind && Enum.find_value(@games, &(&1.id == kind && &1.name))
+    game = kind && Enum.find(@games, &(&1.id == kind))
+    name = game && game_name(game)
 
     case doing do
-      "playing" when name != nil -> "Playing #{name}"
-      "watching" when name != nil -> "Watching #{name}"
-      "settings" when name != nil -> "On the #{name} page"
-      _ -> "Online"
+      "playing" when name != nil -> dgettext("home", "Playing %{game}", game: name)
+      "watching" when name != nil -> dgettext("home", "Watching %{game}", game: name)
+      "settings" when name != nil -> dgettext("home", "On the %{game} page", game: name)
+      _ -> dgettext("home", "Online")
     end
   end
 
@@ -309,7 +384,11 @@ defmodule OctomoctoWeb.HomeLive do
     assign(socket, lobby: entries, lobby_games: Lobby.games(entries))
   end
 
-  defp game_path(game), do: "/#{game.kind}/#{game.id}"
+  # The page of a game, in the language when the game has translations
+  defp game_path(locale, game) do
+    path = "/#{game.kind}/#{game.id}"
+    if Locale.translated?(locale, game.kind), do: Locale.path(locale, path), else: path
+  end
 
   # The settings of a row, as on the settings page of its kind of game. Nil
   # for a kind of game whose settings never change.

@@ -1,0 +1,140 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#, elixir-autogen, elixir-format
+msgid "A Dobble-like game: any two cards have exactly one symbol in common. Spot it first."
+msgstr "ドブル風のゲーム：どの2枚のカードにも、共通のシンボルがちょうど1つある。先に見つけよう。"
+
+#, elixir-autogen, elixir-format
+msgid "A Simon-like game: repeat the sequence of colored pads. With friends, each player adds a pad."
+msgstr "サイモン風のゲーム：色付きのパッドの順番をくり返そう。友達と遊ぶときは、ひとりずつパッドを1つ足していくよ。"
+
+#, elixir-autogen, elixir-format
+msgid "All games"
+msgstr "すべてのゲーム"
+
+#, elixir-autogen, elixir-format
+msgid "Attention"
+msgstr "注意力"
+
+#, elixir-autogen, elixir-format
+msgid "Beta"
+msgstr "ベータ"
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors."
+msgstr "分岐器をクリックして、それぞれの列車を同じ色の家へ送ろう。"
+
+#, elixir-autogen, elixir-format
+msgid "Eat the black squares and keep away from the red ones, with up to 3 friends in one field."
+msgstr "黒い四角を食べて、赤い四角は避けよう。1つのフィールドで最大3人の友達と遊べるよ。"
+
+#, elixir-autogen, elixir-format
+msgid "Fill the same sudoku with your friends. The first player to put the correct digit gets the point."
+msgstr "友達と同じ数独を埋めよう。正しい数字を最初に入れた人がポイントをゲット。"
+
+#, elixir-autogen, elixir-format
+msgid "Filter games"
+msgstr "ゲームを絞り込む"
+
+#, elixir-autogen, elixir-format
+msgid "Find 3 cards where each feature is all the same or all different. Race your friends."
+msgstr "どの特徴もすべて同じか、すべて違う3枚のカードを見つけよう。友達と早さを競おう。"
+
+#, elixir-autogen, elixir-format
+msgid "Find the cards with the same image. Play alone against the clock, or take turns."
+msgstr "同じ絵のカードを見つけよう。ひとりでタイムに挑むか、交代で遊ぼう。"
+
+#, elixir-autogen, elixir-format
+msgid "Find the numbers in order. The first player to click the next number gets the point."
+msgstr "数字を順番に探そう。次の数字を最初にクリックした人がポイントをゲット。"
+
+#, elixir-autogen, elixir-format
+msgid "Friends online"
+msgstr "オンラインの友達"
+
+#, elixir-autogen, elixir-format
+msgid "Is the new card the same as the card before it? You have 45 seconds. Make no mistakes to grow the multiplier up to x5."
+msgstr "新しいカードは1つ前のカードと同じ？ 制限時間は45秒。ミスなしで続けると、倍率が最大x5まで上がるよ。"
+
+#, elixir-autogen, elixir-format
+msgid "Logic"
+msgstr "論理"
+
+#, elixir-autogen, elixir-format
+msgid "Memory"
+msgstr "記憶"
+
+#, elixir-autogen, elixir-format
+msgid "Most popular"
+msgstr "いちばん人気"
+
+#, elixir-autogen, elixir-format
+msgid "No friends online. You become friends when you finish a game from a link that one of you shared."
+msgstr "オンラインの友達はいないよ。どちらかが共有したリンクからゲームを最後まで遊ぶと、友達になれるよ。"
+
+#, elixir-autogen, elixir-format
+msgid "On the %{game} page"
+msgstr "%{game}のページにいる"
+
+#, elixir-autogen, elixir-format
+msgid "Online"
+msgstr "オンライン"
+
+#, elixir-autogen, elixir-format
+msgid "Playing %{game}"
+msgstr "%{game}をプレイ中"
+
+#, elixir-autogen, elixir-format
+msgid "Remove pairs of free tiles from the Turtle. With friends, the first to take a pair gets the point."
+msgstr "「タートル」から自由な牌のペアを取り除こう。友達と遊ぶときは、最初にペアを取った人がポイントをゲット。"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "ログイン"
+
+#, elixir-autogen, elixir-format
+msgid "Single-player only"
+msgstr "ひとり用のみ"
+
+#, elixir-autogen, elixir-format
+msgid "Sound for new games"
+msgstr "新しいゲームの通知音"
+
+#, elixir-autogen, elixir-format
+msgid "Speed"
+msgstr "スピード"
+
+#, elixir-autogen, elixir-format
+msgid "The classic Schulte table: find the numbers in order on a square grid, with your eyes on the center."
+msgstr "定番のシュルテ表：中央を見つめたまま、正方形のマスから数字を順番に探そう。"
+
+#, elixir-autogen, elixir-format
+msgid "Tiles light up for a moment. Click the tiles that were lit. With friends, make one pattern in turns."
+msgstr "タイルが一瞬だけ光る。光ったタイルをクリックしよう。友達と遊ぶときは、交代で1つのパターンを作ろう。"
+
+#, elixir-autogen, elixir-format
+msgid "Trending this week"
+msgstr "今週の注目"
+
+#, elixir-autogen, elixir-format
+msgid "Watching %{game}"
+msgstr "%{game}を観戦中"
+
+#, elixir-autogen, elixir-format
+msgid "What are we playing today?"
+msgstr "今日は何で遊ぶ？"
+
+#, elixir-autogen, elixir-format
+msgid "to see when your friends are online. You become friends when you finish a game from a link that one of you shared."
+msgstr "すると、友達がオンラインのときにわかるよ。どちらかが共有したリンクからゲームを最後まで遊ぶと、友達になれるよ。"

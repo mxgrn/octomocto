@@ -1,0 +1,140 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: uk\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100 != 11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10||n%100>=20) ? 1 : 2);\n"
+
+#, elixir-autogen, elixir-format
+msgid "A Dobble-like game: any two cards have exactly one symbol in common. Spot it first."
+msgstr "Гра на кшталт Dobble: у будь-яких двох карт рівно один спільний символ. Знайди його першим."
+
+#, elixir-autogen, elixir-format
+msgid "A Simon-like game: repeat the sequence of colored pads. With friends, each player adds a pad."
+msgstr "Гра на кшталт «Саймона»: повтори послідовність кольорових кнопок. З друзями кожен гравець додає по кнопці."
+
+#, elixir-autogen, elixir-format
+msgid "All games"
+msgstr "Усі ігри"
+
+#, elixir-autogen, elixir-format
+msgid "Attention"
+msgstr "Увага"
+
+#, elixir-autogen, elixir-format
+msgid "Beta"
+msgstr "Бета"
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors."
+msgstr "Перемикай стрілки, щоб кожен потяг приїхав до будинку своїх кольорів."
+
+#, elixir-autogen, elixir-format
+msgid "Eat the black squares and keep away from the red ones, with up to 3 friends in one field."
+msgstr "Їж чорні квадрати й тримайся подалі від червоних — до 3 друзів на одному полі."
+
+#, elixir-autogen, elixir-format
+msgid "Fill the same sudoku with your friends. The first player to put the correct digit gets the point."
+msgstr "Заповнюй одне судоку разом із друзями. Хто першим поставить правильну цифру, отримує очко."
+
+#, elixir-autogen, elixir-format
+msgid "Filter games"
+msgstr "Фільтр ігор"
+
+#, elixir-autogen, elixir-format
+msgid "Find 3 cards where each feature is all the same or all different. Race your friends."
+msgstr "Знайди 3 карти, у яких кожна ознака або всюди однакова, або всюди різна. Змагайся з друзями."
+
+#, elixir-autogen, elixir-format
+msgid "Find the cards with the same image. Play alone against the clock, or take turns."
+msgstr "Знайди карти з однаковими картинками. Грай сам на час або по черзі з друзями."
+
+#, elixir-autogen, elixir-format
+msgid "Find the numbers in order. The first player to click the next number gets the point."
+msgstr "Знайди числа по порядку. Хто першим натисне наступне число, отримує очко."
+
+#, elixir-autogen, elixir-format
+msgid "Friends online"
+msgstr "Друзі в мережі"
+
+#, elixir-autogen, elixir-format
+msgid "Is the new card the same as the card before it? You have 45 seconds. Make no mistakes to grow the multiplier up to x5."
+msgstr "Нова карта така сама, як попередня? У тебе 45 секунд. Не помиляйся, і множник зросте до x5."
+
+#, elixir-autogen, elixir-format
+msgid "Logic"
+msgstr "Логіка"
+
+#, elixir-autogen, elixir-format
+msgid "Memory"
+msgstr "Памʼять"
+
+#, elixir-autogen, elixir-format
+msgid "Most popular"
+msgstr "Найпопулярніша"
+
+#, elixir-autogen, elixir-format
+msgid "No friends online. You become friends when you finish a game from a link that one of you shared."
+msgstr "Немає друзів у мережі. Ви стаєте друзями, коли дограєте гру за посиланням, яким поділився один із вас."
+
+#, elixir-autogen, elixir-format
+msgid "On the %{game} page"
+msgstr "На сторінці «%{game}»"
+
+#, elixir-autogen, elixir-format
+msgid "Online"
+msgstr "У мережі"
+
+#, elixir-autogen, elixir-format
+msgid "Playing %{game}"
+msgstr "Грає в «%{game}»"
+
+#, elixir-autogen, elixir-format
+msgid "Remove pairs of free tiles from the Turtle. With friends, the first to take a pair gets the point."
+msgstr "Прибирай пари вільних кісток із «Черепахи». З друзями очко отримує той, хто першим візьме пару."
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Увійди"
+
+#, elixir-autogen, elixir-format
+msgid "Single-player only"
+msgstr "Лише для одного гравця"
+
+#, elixir-autogen, elixir-format
+msgid "Sound for new games"
+msgstr "Звук нових ігор"
+
+#, elixir-autogen, elixir-format
+msgid "Speed"
+msgstr "Швидкість"
+
+#, elixir-autogen, elixir-format
+msgid "The classic Schulte table: find the numbers in order on a square grid, with your eyes on the center."
+msgstr "Класична таблиця Шульте: знайди числа по порядку на квадратній сітці, не відводячи погляду від центру."
+
+#, elixir-autogen, elixir-format
+msgid "Tiles light up for a moment. Click the tiles that were lit. With friends, make one pattern in turns."
+msgstr "Плитки на мить спалахують. Натисни на плитки, які світилися. З друзями складайте один візерунок по черзі."
+
+#, elixir-autogen, elixir-format
+msgid "Trending this week"
+msgstr "Популярне цього тижня"
+
+#, elixir-autogen, elixir-format
+msgid "Watching %{game}"
+msgstr "Дивиться «%{game}»"
+
+#, elixir-autogen, elixir-format
+msgid "What are we playing today?"
+msgstr "У що граємо сьогодні?"
+
+#, elixir-autogen, elixir-format
+msgid "to see when your friends are online. You become friends when you finish a game from a link that one of you shared."
+msgstr "— і побачиш, коли друзі в мережі. Ви стаєте друзями, коли дограєте гру за посиланням, яким поділився один із вас."

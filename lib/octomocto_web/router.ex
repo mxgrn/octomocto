@@ -157,6 +157,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "pt"}
       ] do
+      live "/", HomeLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
@@ -169,6 +170,8 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
+    get "/signin", UserSessionController, :new
+    post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
   end
@@ -187,6 +190,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "de"}
       ] do
+      live "/", HomeLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
@@ -196,6 +200,8 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
+    get "/signin", UserSessionController, :new
+    post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
   end
@@ -214,6 +220,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "ru"}
       ] do
+      live "/", HomeLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
@@ -223,6 +230,8 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
+    get "/signin", UserSessionController, :new
+    post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
   end
@@ -241,6 +250,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "fr"}
       ] do
+      live "/", HomeLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
@@ -250,6 +260,8 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
+    get "/signin", UserSessionController, :new
+    post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
   end
@@ -268,6 +280,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "uk"}
       ] do
+      live "/", HomeLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
@@ -277,6 +290,8 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
+    get "/signin", UserSessionController, :new
+    post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
   end
@@ -295,6 +310,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "pl"}
       ] do
+      live "/", HomeLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
@@ -304,6 +320,8 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
+    get "/signin", UserSessionController, :new
+    post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
   end
@@ -322,6 +340,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "it"}
       ] do
+      live "/", HomeLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
@@ -331,6 +350,8 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
+    get "/signin", UserSessionController, :new
+    post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
   end
@@ -349,6 +370,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "es"}
       ] do
+      live "/", HomeLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
@@ -358,6 +380,8 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
+    get "/signin", UserSessionController, :new
+    post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
   end
@@ -376,6 +400,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "ja"}
       ] do
+      live "/", HomeLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
@@ -385,6 +410,8 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
+    get "/signin", UserSessionController, :new
+    post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
   end
@@ -403,6 +430,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "vi"}
       ] do
+      live "/", HomeLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
@@ -412,6 +440,8 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
+    get "/signin", UserSessionController, :new
+    post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
   end
@@ -430,6 +460,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "tr"}
       ] do
+      live "/", HomeLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
@@ -439,6 +470,8 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
+    get "/signin", UserSessionController, :new
+    post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
   end
@@ -457,6 +490,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "ar"}
       ] do
+      live "/", HomeLive
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
@@ -466,6 +500,8 @@ defmodule OctomoctoWeb.Router do
     get "/memory/:id", MemoryController, :show
 
     get "/donate", PageController, :donate
+    get "/signin", UserSessionController, :new
+    post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
   end

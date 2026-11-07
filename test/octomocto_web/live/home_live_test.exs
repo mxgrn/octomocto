@@ -99,4 +99,34 @@ defmodule OctomoctoWeb.HomeLiveTest do
 
     assert has_element?(view, ~s(#lobby-game-#{id} img[src^="/images/overlap/mix2/"]))
   end
+
+  describe "in a language" do
+    test "links a game with translations to its page in the language", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/pt")
+
+      assert has_element?(view, ~s(#game-memory[href="/pt/memory"]))
+      assert has_element?(view, ~s(#game-set[href="/set"]))
+    end
+
+    test "keeps the language in the tag filter", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/de")
+
+      view |> element("#game-tag-memory") |> render_click()
+
+      assert_patch(view, "/de?tag=memory")
+    end
+
+    test "the logo on a page in the language goes to the front page in the language",
+         %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/ru/memory")
+
+      assert has_element?(view, ~s(#home-link[href="/ru"]))
+    end
+
+    test "the sign-in link goes to the sign-in page in the language", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/de")
+
+      assert has_element?(view, ~s(#friends-online-sign-in[href="/de/signin"]))
+    end
+  end
 end

@@ -1,0 +1,140 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: vi\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#, elixir-autogen, elixir-format
+msgid "A Dobble-like game: any two cards have exactly one symbol in common. Spot it first."
+msgstr "Trò chơi kiểu Dobble: hai lá bài bất kỳ luôn có đúng một biểu tượng chung. Hãy tìm ra nó trước."
+
+#, elixir-autogen, elixir-format
+msgid "A Simon-like game: repeat the sequence of colored pads. With friends, each player adds a pad."
+msgstr "Trò chơi kiểu Simon: lặp lại chuỗi các nút màu. Khi chơi với bạn bè, mỗi người thêm một nút."
+
+#, elixir-autogen, elixir-format
+msgid "All games"
+msgstr "Tất cả trò chơi"
+
+#, elixir-autogen, elixir-format
+msgid "Attention"
+msgstr "Tập trung"
+
+#, elixir-autogen, elixir-format
+msgid "Beta"
+msgstr "Beta"
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors."
+msgstr "Bấm vào các bẻ ghi để đưa mỗi đoàn tàu về ngôi nhà cùng màu."
+
+#, elixir-autogen, elixir-format
+msgid "Eat the black squares and keep away from the red ones, with up to 3 friends in one field."
+msgstr "Ăn các ô vuông đen và tránh xa các ô đỏ, cùng tối đa 3 người bạn trên một sân."
+
+#, elixir-autogen, elixir-format
+msgid "Fill the same sudoku with your friends. The first player to put the correct digit gets the point."
+msgstr "Cùng bạn bè điền chung một bảng sudoku. Ai điền đúng số trước sẽ được điểm."
+
+#, elixir-autogen, elixir-format
+msgid "Filter games"
+msgstr "Lọc trò chơi"
+
+#, elixir-autogen, elixir-format
+msgid "Find 3 cards where each feature is all the same or all different. Race your friends."
+msgstr "Tìm 3 lá bài mà mỗi đặc điểm đều giống hệt nhau hoặc đều khác nhau. Thi đua với bạn bè."
+
+#, elixir-autogen, elixir-format
+msgid "Find the cards with the same image. Play alone against the clock, or take turns."
+msgstr "Tìm các lá bài có cùng hình. Chơi một mình đua với thời gian, hoặc chơi lần lượt."
+
+#, elixir-autogen, elixir-format
+msgid "Find the numbers in order. The first player to click the next number gets the point."
+msgstr "Tìm các số theo thứ tự. Ai bấm số tiếp theo trước sẽ được điểm."
+
+#, elixir-autogen, elixir-format
+msgid "Friends online"
+msgstr "Bạn bè đang online"
+
+#, elixir-autogen, elixir-format
+msgid "Is the new card the same as the card before it? You have 45 seconds. Make no mistakes to grow the multiplier up to x5."
+msgstr "Lá bài mới có giống lá trước không? Bạn có 45 giây. Đừng sai lần nào để tăng hệ số nhân lên đến x5."
+
+#, elixir-autogen, elixir-format
+msgid "Logic"
+msgstr "Logic"
+
+#, elixir-autogen, elixir-format
+msgid "Memory"
+msgstr "Trí nhớ"
+
+#, elixir-autogen, elixir-format
+msgid "Most popular"
+msgstr "Phổ biến nhất"
+
+#, elixir-autogen, elixir-format
+msgid "No friends online. You become friends when you finish a game from a link that one of you shared."
+msgstr "Không có bạn bè nào online. Các bạn trở thành bạn bè khi chơi xong một ván từ đường link mà một trong các bạn đã chia sẻ."
+
+#, elixir-autogen, elixir-format
+msgid "On the %{game} page"
+msgstr "Đang ở trang %{game}"
+
+#, elixir-autogen, elixir-format
+msgid "Online"
+msgstr "Online"
+
+#, elixir-autogen, elixir-format
+msgid "Playing %{game}"
+msgstr "Đang chơi %{game}"
+
+#, elixir-autogen, elixir-format
+msgid "Remove pairs of free tiles from the Turtle. With friends, the first to take a pair gets the point."
+msgstr "Gỡ các cặp quân trống khỏi hình Con rùa. Khi chơi với bạn bè, ai lấy được cặp trước sẽ được điểm."
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Đăng nhập"
+
+#, elixir-autogen, elixir-format
+msgid "Single-player only"
+msgstr "Chỉ chơi một mình"
+
+#, elixir-autogen, elixir-format
+msgid "Sound for new games"
+msgstr "Âm báo ván mới"
+
+#, elixir-autogen, elixir-format
+msgid "Speed"
+msgstr "Tốc độ"
+
+#, elixir-autogen, elixir-format
+msgid "The classic Schulte table: find the numbers in order on a square grid, with your eyes on the center."
+msgstr "Bảng Schulte cổ điển: tìm các số theo thứ tự trên lưới vuông, mắt luôn nhìn vào giữa."
+
+#, elixir-autogen, elixir-format
+msgid "Tiles light up for a moment. Click the tiles that were lit. With friends, make one pattern in turns."
+msgstr "Các ô sáng lên trong chốc lát. Bấm vào những ô đã sáng. Khi chơi với bạn bè, các bạn lần lượt tạo một hình mẫu."
+
+#, elixir-autogen, elixir-format
+msgid "Trending this week"
+msgstr "Nổi bật tuần này"
+
+#, elixir-autogen, elixir-format
+msgid "Watching %{game}"
+msgstr "Đang xem %{game}"
+
+#, elixir-autogen, elixir-format
+msgid "What are we playing today?"
+msgstr "Hôm nay chơi gì đây?"
+
+#, elixir-autogen, elixir-format
+msgid "to see when your friends are online. You become friends when you finish a game from a link that one of you shared."
+msgstr "để biết khi nào bạn bè của bạn online. Các bạn trở thành bạn bè khi chơi xong một ván từ đường link mà một trong các bạn đã chia sẻ."

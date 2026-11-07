@@ -1,0 +1,140 @@
+## This file is a PO Template file.
+##
+## "msgid"s here are often extracted from source code.
+## Add new messages manually only if they're dynamic
+## messages that can't be statically extracted.
+##
+## Run "mix gettext.extract" to bring this file up to
+## date. Leave "msgstr"s empty as changing them here has no
+## effect: edit them in PO (.po) files instead.
+#
+msgid ""
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "A Dobble-like game: any two cards have exactly one symbol in common. Spot it first."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "A Simon-like game: repeat the sequence of colored pads. With friends, each player adds a pad."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "All games"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Attention"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Beta"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Eat the black squares and keep away from the red ones, with up to 3 friends in one field."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Fill the same sudoku with your friends. The first player to put the correct digit gets the point."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Filter games"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Find 3 cards where each feature is all the same or all different. Race your friends."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Find the cards with the same image. Play alone against the clock, or take turns."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Find the numbers in order. The first player to click the next number gets the point."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Friends online"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Is the new card the same as the card before it? You have 45 seconds. Make no mistakes to grow the multiplier up to x5."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Logic"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Memory"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Most popular"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "No friends online. You become friends when you finish a game from a link that one of you shared."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "On the %{game} page"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Online"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Playing %{game}"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Remove pairs of free tiles from the Turtle. With friends, the first to take a pair gets the point."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Single-player only"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Sound for new games"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Speed"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The classic Schulte table: find the numbers in order on a square grid, with your eyes on the center."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Tiles light up for a moment. Click the tiles that were lit. With friends, make one pattern in turns."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Trending this week"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Watching %{game}"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "What are we playing today?"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "to see when your friends are online. You become friends when you finish a game from a link that one of you shared."
+msgstr ""

@@ -285,19 +285,19 @@ msgstr[1] ""
 
 #, elixir-autogen, elixir-format
 msgid "Private link"
-msgstr ""
+msgstr "Enlace privado"
 
 #, elixir-autogen, elixir-format
 msgid "Profile"
-msgstr ""
+msgstr "Perfil"
 
 #, elixir-autogen, elixir-format
 msgid "Public"
-msgstr ""
+msgstr "Pública"
 
 #, elixir-autogen, elixir-format
 msgid "Solo"
-msgstr ""
+msgstr "Solo"
 
 #, elixir-autogen, elixir-format
 msgid "Hi! I'm Max, an indie developer, and I make Octomocto on my own. It has no ads, and your support pays for the servers and the time to make new games."
@@ -317,16 +317,42 @@ msgstr "Todos los sonidos"
 
 #, elixir-autogen, elixir-format
 msgid "All"
-msgstr ""
+msgstr "Todos"
 
 #, elixir-autogen, elixir-format
 msgid "Following"
-msgstr ""
+msgstr "Siguiendo"
 
 #, elixir-autogen, elixir-format
 msgid "No results of you and the players you follow."
-msgstr ""
+msgstr "No hay resultados tuyos ni de los jugadores que sigues."
 
 #, elixir-autogen, elixir-format
 msgid "Notifications"
-msgstr ""
+msgstr "Notificaciones"
+
+#, elixir-autogen, elixir-format
+msgid "Enter a valid email."
+msgstr "Escribe un correo electrónico válido."
+
+#, elixir-autogen, elixir-format
+msgid "Please confirm that you are not a robot."
+msgstr "Confirma que no eres un robot."
+
+#, elixir-autogen, elixir-format
+msgid "Please sign in again before you change your account."
+msgstr "Vuelve a iniciar sesión antes de cambiar tu cuenta."
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Iniciar sesión"
+
+#, elixir-autogen, elixir-format
+msgid "We sent a sign-in link to %{email}. If you do not see it, look in your spam folder."
+msgstr "Enviamos un enlace para iniciar sesión a %{email}. Si no lo ves, revisa tu carpeta de spam."
+
+#, elixir-autogen, elixir-format
+msgid "game played"
+msgid_plural "games played"
+msgstr[0] "partida jugada"
+msgstr[1] "partidas jugadas"

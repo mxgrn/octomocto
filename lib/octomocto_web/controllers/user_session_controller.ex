@@ -3,6 +3,7 @@ defmodule OctomoctoWeb.UserSessionController do
 
   alias Octomocto.Accounts
   alias Octomocto.Accounts.TelegramAuth
+  alias OctomoctoWeb.Locale
   alias OctomoctoWeb.Turnstile
   alias OctomoctoWeb.UserAgent
   alias OctomoctoWeb.UserAuth
@@ -18,7 +19,10 @@ defmodule OctomoctoWeb.UserSessionController do
   # The home page has the same sign-in forms. This page is for the redirects
   # from pages that need a (recent) sign-in.
   def new(conn, _params) do
-    render(conn, :new)
+    render(conn, :new,
+      page_title: gettext("Sign in"),
+      languages: Locale.languages(:all, conn.assigns.locale, ~p"/signin")
+    )
   end
 
   # magic link sign-in
@@ -39,18 +43,21 @@ defmodule OctomoctoWeb.UserSessionController do
       |> put_resp_cookie(@magic_link_cookie, user.email, @magic_link_cookie_options)
       |> put_flash(
         :info,
-        "We sent a sign-in link to #{user.email}. If you do not see it, look in your spam folder."
+        gettext(
+          "We sent a sign-in link to %{email}. If you do not see it, look in your spam folder.",
+          email: user.email
+        )
       )
       |> redirect(to: return_path(conn))
     else
       {:error, :turnstile} ->
         conn
-        |> put_flash(:error, "Please confirm that you are not a robot.")
+        |> put_flash(:error, gettext("Please confirm that you are not a robot."))
         |> redirect(to: return_path(conn))
 
       {:error, _changeset} ->
         conn
-        |> put_flash(:error, "Enter a valid email.")
+        |> put_flash(:error, gettext("Enter a valid email."))
         |> redirect(to: return_path(conn))
     end
   end
@@ -126,8 +133,10 @@ defmodule OctomoctoWeb.UserSessionController do
     end
   end
 
-  # A signed-in user can open /signin to sign in again
+  # A signed-in user can open /signin to sign in again. The page is in the
+  # language of the form.
   defp return_path(conn) do
-    if conn.assigns.current_scope, do: ~p"/signin", else: ~p"/"
+    path = if conn.assigns.current_scope, do: ~p"/signin", else: ~p"/"
+    Locale.path(conn.assigns.locale, path)
   end
 end

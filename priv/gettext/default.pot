@@ -330,3 +330,29 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Notifications"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Enter a valid email."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Please confirm that you are not a robot."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Please sign in again before you change your account."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "We sent a sign-in link to %{email}. If you do not see it, look in your spam folder."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "game played"
+msgid_plural "games played"
+msgstr[0] ""
+msgstr[1] ""

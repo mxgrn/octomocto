@@ -1,0 +1,140 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: es\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#, elixir-autogen, elixir-format
+msgid "A Dobble-like game: any two cards have exactly one symbol in common. Spot it first."
+msgstr "Un juego como Dobble: dos cartas cualesquiera tienen exactamente un símbolo en común. Encuéntralo primero."
+
+#, elixir-autogen, elixir-format
+msgid "A Simon-like game: repeat the sequence of colored pads. With friends, each player adds a pad."
+msgstr "Un juego como Simon: repite la secuencia de botones de colores. Con amigos, cada jugador agrega un botón."
+
+#, elixir-autogen, elixir-format
+msgid "All games"
+msgstr "Todos los juegos"
+
+#, elixir-autogen, elixir-format
+msgid "Attention"
+msgstr "Atención"
+
+#, elixir-autogen, elixir-format
+msgid "Beta"
+msgstr "Beta"
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors."
+msgstr "Haz clic en los cambios de vía para mandar cada tren a la casa con sus colores."
+
+#, elixir-autogen, elixir-format
+msgid "Eat the black squares and keep away from the red ones, with up to 3 friends in one field."
+msgstr "Cómete los cuadrados negros y aléjate de los rojos, con hasta 3 amigos en el mismo campo."
+
+#, elixir-autogen, elixir-format
+msgid "Fill the same sudoku with your friends. The first player to put the correct digit gets the point."
+msgstr "Llena el mismo sudoku con tus amigos. Quien pone primero el dígito correcto se lleva el punto."
+
+#, elixir-autogen, elixir-format
+msgid "Filter games"
+msgstr "Filtrar juegos"
+
+#, elixir-autogen, elixir-format
+msgid "Find 3 cards where each feature is all the same or all different. Race your friends."
+msgstr "Encuentra 3 cartas en las que cada característica sea toda igual o toda distinta. Compite con tus amigos."
+
+#, elixir-autogen, elixir-format
+msgid "Find the cards with the same image. Play alone against the clock, or take turns."
+msgstr "Encuentra las cartas con la misma imagen. Juega solo contra el reloj o por turnos."
+
+#, elixir-autogen, elixir-format
+msgid "Find the numbers in order. The first player to click the next number gets the point."
+msgstr "Encuentra los números en orden. Quien haga clic primero en el siguiente número se lleva el punto."
+
+#, elixir-autogen, elixir-format
+msgid "Friends online"
+msgstr "Amigos en línea"
+
+#, elixir-autogen, elixir-format
+msgid "Is the new card the same as the card before it? You have 45 seconds. Make no mistakes to grow the multiplier up to x5."
+msgstr "¿La nueva carta es igual a la anterior? Tienes 45 segundos. No te equivoques y el multiplicador sube hasta x5."
+
+#, elixir-autogen, elixir-format
+msgid "Logic"
+msgstr "Lógica"
+
+#, elixir-autogen, elixir-format
+msgid "Memory"
+msgstr "Memoria"
+
+#, elixir-autogen, elixir-format
+msgid "Most popular"
+msgstr "El más popular"
+
+#, elixir-autogen, elixir-format
+msgid "No friends online. You become friends when you finish a game from a link that one of you shared."
+msgstr "No hay amigos en línea. Se vuelven amigos cuando terminan una partida desde un enlace que uno de ustedes compartió."
+
+#, elixir-autogen, elixir-format
+msgid "On the %{game} page"
+msgstr "En la página de %{game}"
+
+#, elixir-autogen, elixir-format
+msgid "Online"
+msgstr "En línea"
+
+#, elixir-autogen, elixir-format
+msgid "Playing %{game}"
+msgstr "Jugando %{game}"
+
+#, elixir-autogen, elixir-format
+msgid "Remove pairs of free tiles from the Turtle. With friends, the first to take a pair gets the point."
+msgstr "Quita pares de fichas libres de la Tortuga. Con amigos, quien toma primero un par se lleva el punto."
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Inicia sesión"
+
+#, elixir-autogen, elixir-format
+msgid "Single-player only"
+msgstr "Solo para un jugador"
+
+#, elixir-autogen, elixir-format
+msgid "Sound for new games"
+msgstr "Sonido para partidas nuevas"
+
+#, elixir-autogen, elixir-format
+msgid "Speed"
+msgstr "Velocidad"
+
+#, elixir-autogen, elixir-format
+msgid "The classic Schulte table: find the numbers in order on a square grid, with your eyes on the center."
+msgstr "La clásica tabla de Schulte: encuentra los números en orden en una cuadrícula, con la vista en el centro."
+
+#, elixir-autogen, elixir-format
+msgid "Tiles light up for a moment. Click the tiles that were lit. With friends, make one pattern in turns."
+msgstr "Unas casillas se iluminan un momento. Haz clic en las casillas que se iluminaron. Con amigos, armen un patrón por turnos."
+
+#, elixir-autogen, elixir-format
+msgid "Trending this week"
+msgstr "Tendencia esta semana"
+
+#, elixir-autogen, elixir-format
+msgid "Watching %{game}"
+msgstr "Mirando %{game}"
+
+#, elixir-autogen, elixir-format
+msgid "What are we playing today?"
+msgstr "¿A qué jugamos hoy?"
+
+#, elixir-autogen, elixir-format
+msgid "to see when your friends are online. You become friends when you finish a game from a link that one of you shared."
+msgstr "para ver cuándo tus amigos están en línea. Se vuelven amigos cuando terminan una partida desde un enlace que uno de ustedes compartió."

@@ -35,6 +35,12 @@ defmodule OctomoctoWeb.UserSessionControllerTest do
       assert has_element?(conn, "#telegram-sign-in")
       refute has_element?(conn, "#sign-in-form")
     end
+
+    test "in a language, the form sends to the page in the language", %{conn: conn} do
+      conn = get(conn, ~p"/pt/signin")
+
+      assert has_element?(conn, "#sign-in-panel #sign-in-form[action='/pt/signin']")
+    end
   end
 
   describe "GET /signin/:token" do
@@ -62,6 +68,12 @@ defmodule OctomoctoWeb.UserSessionControllerTest do
       assert redirected_to(conn) == ~p"/"
       user = Accounts.get_user_by_email(email)
       assert Octomocto.Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "login"
+    end
+
+    test "in a language, goes back to the front page in the language", %{conn: conn} do
+      conn = post(conn, ~p"/pt/signin", %{"user" => %{"email" => unique_user_email()}})
+
+      assert redirected_to(conn) == ~p"/pt"
     end
 
     test "rejects an invalid email", %{conn: conn} do

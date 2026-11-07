@@ -375,7 +375,7 @@ msgstr "{sign_in} para salvar seus resultados."
 
 #, elixir-autogen, elixir-format
 msgid "Menu"
-msgstr ""
+msgstr "Menu"
 
 #, elixir-autogen, elixir-format
 msgid "Change settings"

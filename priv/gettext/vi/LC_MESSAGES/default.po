@@ -283,19 +283,19 @@ msgstr[0] ""
 
 #, elixir-autogen, elixir-format
 msgid "Private link"
-msgstr ""
+msgstr "Link riêng tư"
 
 #, elixir-autogen, elixir-format
 msgid "Profile"
-msgstr ""
+msgstr "Hồ sơ"
 
 #, elixir-autogen, elixir-format
 msgid "Public"
-msgstr ""
+msgstr "Công khai"
 
 #, elixir-autogen, elixir-format
 msgid "Solo"
-msgstr ""
+msgstr "Chơi một mình"
 
 #, elixir-autogen, elixir-format
 msgid "Hi! I'm Max, an indie developer, and I make Octomocto on my own. It has no ads, and your support pays for the servers and the time to make new games."
@@ -315,16 +315,41 @@ msgstr "Tất cả âm thanh"
 
 #, elixir-autogen, elixir-format
 msgid "All"
-msgstr ""
+msgstr "Tất cả"
 
 #, elixir-autogen, elixir-format
 msgid "Following"
-msgstr ""
+msgstr "Đang theo dõi"
 
 #, elixir-autogen, elixir-format
 msgid "No results of you and the players you follow."
-msgstr ""
+msgstr "Chưa có kết quả của bạn và những người chơi bạn theo dõi."
 
 #, elixir-autogen, elixir-format
 msgid "Notifications"
-msgstr ""
+msgstr "Thông báo"
+
+#, elixir-autogen, elixir-format
+msgid "Enter a valid email."
+msgstr "Hãy nhập email hợp lệ."
+
+#, elixir-autogen, elixir-format
+msgid "Please confirm that you are not a robot."
+msgstr "Hãy xác nhận bạn không phải là robot."
+
+#, elixir-autogen, elixir-format
+msgid "Please sign in again before you change your account."
+msgstr "Hãy đăng nhập lại trước khi thay đổi tài khoản."
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Đăng nhập"
+
+#, elixir-autogen, elixir-format
+msgid "We sent a sign-in link to %{email}. If you do not see it, look in your spam folder."
+msgstr "Chúng tôi đã gửi link đăng nhập đến %{email}. Nếu không thấy, hãy xem trong thư mục spam."
+
+#, elixir-autogen, elixir-format
+msgid "game played"
+msgid_plural "games played"
+msgstr[0] "ván đã chơi"

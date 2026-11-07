@@ -283,19 +283,19 @@ msgstr[0] ""
 
 #, elixir-autogen, elixir-format
 msgid "Private link"
-msgstr ""
+msgstr "非公開リンク"
 
 #, elixir-autogen, elixir-format
 msgid "Profile"
-msgstr ""
+msgstr "プロフィール"
 
 #, elixir-autogen, elixir-format
 msgid "Public"
-msgstr ""
+msgstr "公開"
 
 #, elixir-autogen, elixir-format
 msgid "Solo"
-msgstr ""
+msgstr "ソロ"
 
 #, elixir-autogen, elixir-format
 msgid "Hi! I'm Max, an indie developer, and I make Octomocto on my own. It has no ads, and your support pays for the servers and the time to make new games."
@@ -315,16 +315,41 @@ msgstr "すべての音"
 
 #, elixir-autogen, elixir-format
 msgid "All"
-msgstr ""
+msgstr "すべて"
 
 #, elixir-autogen, elixir-format
 msgid "Following"
-msgstr ""
+msgstr "フォロー中"
 
 #, elixir-autogen, elixir-format
 msgid "No results of you and the players you follow."
-msgstr ""
+msgstr "あなたとフォロー中のプレイヤーの記録はまだないよ。"
 
 #, elixir-autogen, elixir-format
 msgid "Notifications"
-msgstr ""
+msgstr "お知らせ"
+
+#, elixir-autogen, elixir-format
+msgid "Enter a valid email."
+msgstr "正しいメールアドレスを入力してね。"
+
+#, elixir-autogen, elixir-format
+msgid "Please confirm that you are not a robot."
+msgstr "ロボットではないことを確認してね。"
+
+#, elixir-autogen, elixir-format
+msgid "Please sign in again before you change your account."
+msgstr "アカウントを変更する前に、もう一度ログインしてね。"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "ログイン"
+
+#, elixir-autogen, elixir-format
+msgid "We sent a sign-in link to %{email}. If you do not see it, look in your spam folder."
+msgstr "%{email} にログイン用リンクを送ったよ。見つからないときは迷惑メールフォルダを確認してね。"
+
+#, elixir-autogen, elixir-format
+msgid "game played"
+msgid_plural "games played"
+msgstr[0] "回のプレイ"

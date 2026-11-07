@@ -1,9 +1,14 @@
-<Layouts.app flash={@flash} banners={@banners} current_scope={@current_scope}>
+<Layouts.app
+  flash={@flash}
+  banners={@banners}
+  current_scope={@current_scope}
+  languages={@languages}
+>
   <div class="mx-auto max-w-sm space-y-6 py-10">
     <div class="space-y-2 text-center">
-      <h1 class="text-3xl font-semibold tracking-tight">Sign in</h1>
+      <h1 class="text-3xl font-semibold tracking-tight">{gettext("Sign in")}</h1>
       <p :if={@current_scope} class="text-base-content/60">
-        Please sign in again before you change your account.
+        {gettext("Please sign in again before you change your account.")}
       </p>
     </div>
 

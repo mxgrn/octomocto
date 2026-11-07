@@ -137,7 +137,7 @@ defmodule OctomoctoWeb.Layouts do
         <.link
           :if={@home}
           id="home-link"
-          navigate={~p"/"}
+          navigate={OctomoctoWeb.Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/")}
           class="group flex items-center gap-3 sm:gap-4"
         >
           <OctomoctoWeb.PageHTML.octopi class="h-[3.6rem] shrink-0 sm:h-[4.5rem] drop-shadow-sm" />
@@ -151,7 +151,12 @@ defmodule OctomoctoWeb.Layouts do
             </p>
           </div>
         </.link>
-        <.link :if={!@home} id="home-link" navigate={~p"/"} class="group flex items-center gap-2">
+        <.link
+          :if={!@home}
+          id="home-link"
+          navigate={OctomoctoWeb.Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/")}
+          class="group flex items-center gap-2"
+        >
           <OctomoctoWeb.PageHTML.octopi class="h-10 shrink-0 drop-shadow-sm" />
           <.wordmark class="h-6 -translate-y-0.5" />
         </.link>
@@ -360,7 +365,7 @@ defmodule OctomoctoWeb.Layouts do
           >
             {delimit(games_played(@games_played))}
           </span>
-          games played
+          {ngettext("game played", "games played", games_played(@games_played))}
         </.link>
         <a
           id="suggest-game-link"
@@ -379,20 +384,6 @@ defmodule OctomoctoWeb.Layouts do
         <.link id="terms-link" navigate={~p"/terms"} class="transition hover:text-base-content">
           {gettext("Terms of Service")}
         </.link>
-        <a
-          id="donate-link"
-          href={OctomoctoWeb.Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/donate")}
-          class={[
-            "group -my-1 inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-semibold transition",
-            "bg-octo-orange/10 text-octo-orange ring-1 ring-octo-orange/30",
-            " hover:bg-octo-orange hover:text-white hover:shadow-md hover:shadow-octo-orange/20 active:scale-95",
-            "dark:bg-octo-orange-light/10 dark:text-octo-orange-light dark:ring-octo-orange-light/30",
-            "dark:hover:bg-octo-orange-light dark:hover:text-base-100"
-          ]}
-        >
-          <.icon name="hero-heart-solid" class="size-3.5 transition group-hover:scale-110" />
-          {gettext("Support the author")}
-        </a>
         <%!--
           The menu opens above the button, because the footer is at the bottom of
           the page. The links are always in the HTML, so search engines find them.
@@ -452,6 +443,20 @@ defmodule OctomoctoWeb.Layouts do
             </li>
           </ul>
         </nav>
+        <a
+          id="donate-link"
+          href={OctomoctoWeb.Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/donate")}
+          class={[
+            "group -my-1 inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-semibold transition",
+            "bg-octo-orange/10 text-octo-orange ring-1 ring-octo-orange/30",
+            " hover:bg-octo-orange hover:text-white hover:shadow-md hover:shadow-octo-orange/20 active:scale-95",
+            "dark:bg-octo-orange-light/10 dark:text-octo-orange-light dark:ring-octo-orange-light/30",
+            "dark:hover:bg-octo-orange-light dark:hover:text-base-100"
+          ]}
+        >
+          <.icon name="hero-heart-solid" class="size-3.5 transition group-hover:scale-110" />
+          {gettext("Support the author")}
+        </a>
       </footer>
     </div>
 

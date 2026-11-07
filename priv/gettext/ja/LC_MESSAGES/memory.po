@@ -543,7 +543,7 @@ msgstr "ゲームごとに新しいテーマ。"
 
 #, elixir-autogen, elixir-format
 msgid "Menu"
-msgstr ""
+msgstr "メニュー"
 
 #, elixir-autogen, elixir-format
 msgid "The classic card game: turn over the cards and find the ones that match."

@@ -89,13 +89,23 @@ defmodule OctomoctoWeb.Locale do
   @doc "The languages other than English."
   def other_locales, do: Map.keys(@names) -- ["en"]
 
-  @doc "The path in the language, for example `/pt/memory` for `/memory`."
+  @doc """
+  The path in the language, for example `/pt/memory` for `/memory`. The
+  front page in a language has no slash at the end, for example `/pt` and
+  `/pt?tag=memory`.
+  """
   def path("en", path), do: path
+  def path(locale, "/"), do: "/" <> locale
+  def path(locale, "/?" <> query), do: "/" <> locale <> "?" <> query
   def path(locale, path), do: "/" <> locale <> path
+
+  @doc "True when the game has translations in the language. English is always true."
+  def translated?("en", _game), do: true
+  def translated?(locale, game), do: game in Map.get(@games, locale, [])
 
   @doc "The path of the page of a game in the language, or in English when the game has no translations."
   def game_path(locale, %{id: id, path: path}) do
-    if id in Map.get(@games, locale, []), do: path(locale, path), else: path
+    if translated?(locale, id), do: path(locale, path), else: path
   end
 
   @doc """

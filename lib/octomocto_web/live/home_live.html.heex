@@ -8,6 +8,7 @@
   home
   wide
   games_played={@games_played}
+  languages={@languages}
 >
   <div class="flex flex-col gap-8 pt-2 pb-4">
     <%!--
@@ -23,15 +24,19 @@
             id="catalog-title"
             class="text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content"
           >
-            What are we playing today?
+            {dgettext("home", "What are we playing today?")}
           </h2>
         </div>
         <%!-- One tag at a time; "all" clears the filter --%>
-        <nav id="game-tags" aria-label="Filter games" class="mb-6 flex flex-wrap gap-2">
+        <nav
+          id="game-tags"
+          aria-label={dgettext("home", "Filter games")}
+          class="mb-6 flex flex-wrap gap-2"
+        >
           <.link
             :for={tag <- [nil | @tags]}
             id={"game-tag-#{tag || "all"}"}
-            patch={if(tag, do: ~p"/?tag=#{tag}", else: ~p"/")}
+            patch={Locale.path(@locale, if(tag, do: ~p"/?tag=#{tag}", else: ~p"/"))}
             replace
             aria-current={if(tag == @tag, do: "true")}
             class={[
@@ -45,7 +50,7 @@
             ]}
           >
             <span :if={tag} class={["size-2 rounded-full", tag_dot_class(tag)]} />
-            {if(tag, do: String.capitalize(tag), else: "All games")}
+            {if(tag, do: tag_name(tag), else: dgettext("home", "All games"))}
           </.link>
         </nav>
         <ul
@@ -55,31 +60,33 @@
           <li :for={game <- @games}>
             <.link
               id={"game-#{game.id}"}
-              navigate={game.path}
+              navigate={Locale.game_path(@locale, game)}
               class="group relative flex h-full flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-base-content/10 transition hover:shadow-md hover:shadow-octo-orange/10 hover:ring-octo-orange/30 dark:bg-base-100 dark:hover:ring-octo-orange-light/40"
             >
               <span
                 :if={game[:badge]}
                 id={"game-badge-#{game.id}"}
                 class={[
-                  "absolute -top-2 -right-2 z-10 inline-flex items-center gap-1 whitespace-nowrap rounded-full py-1 pr-2 pl-1.5 text-[11px] leading-none font-semibold tracking-wide text-white uppercase shadow-sm",
+                  "absolute -top-2 -end-2 z-10 inline-flex items-center gap-1 whitespace-nowrap rounded-full py-1 pe-2 ps-1.5 text-[11px] leading-none font-semibold tracking-wide text-white uppercase shadow-sm",
                   if(elem(game.badge, 0) == "New", do: "bg-octo-orange", else: "bg-octo-indigo")
                 ]}
               >
                 <.icon name={elem(game.badge, 1)} class="size-3" />
-                {elem(game.badge, 0)}
+                {badge_label(elem(game.badge, 0))}
               </span>
               <div class="flex min-w-0 items-center gap-3">
                 <.game_icon game={game} />
                 <div class="min-w-0">
-                  <h3 class="font-semibold text-octo-navy dark:text-base-content">{game.name}</h3>
+                  <h3 class="font-semibold text-octo-navy dark:text-base-content">
+                    {game_name(game)}
+                  </h3>
                   <ul
                     id={"game-tags-#{game.id}"}
                     class="mt-0.5 flex flex-wrap gap-x-2.5 gap-y-0.5 text-xs text-octo-navy/55 dark:text-base-content/55"
                   >
                     <li :for={tag <- game.tags} class="inline-flex items-center gap-1">
                       <span class={["size-1.5 rounded-full", tag_dot_class(tag)]} />
-                      {String.capitalize(tag)}
+                      {tag_name(tag)}
                     </li>
                   </ul>
                 </div>
@@ -87,19 +94,19 @@
                 <span
                   :if={game[:single_player]}
                   id={"game-single-player-#{game.id}"}
-                  class="group/tip relative ml-auto flex shrink-0 text-octo-navy/35 transition group-hover:text-octo-indigo/70 dark:text-base-content/35 dark:group-hover:text-octo-indigo-light/80"
+                  class="group/tip relative ms-auto flex shrink-0 text-octo-navy/35 transition group-hover:text-octo-indigo/70 dark:text-base-content/35 dark:group-hover:text-octo-indigo-light/80"
                 >
                   <.icon name="hero-user-group" class="size-5" />
                   <%!-- The cross line; the ring in the card color makes a gap around it --%>
                   <span class="absolute top-1/2 left-1/2 h-[1.5px] w-6 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-current ring-2 ring-white dark:ring-base-100"></span>
                   <%!-- The tooltip; screen readers read it too --%>
-                  <span class="pointer-events-none absolute right-0 bottom-full z-20 mb-1.5 rounded-md bg-octo-navy px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 shadow-sm transition group-hover/tip:opacity-100 dark:bg-base-300 dark:text-base-content">
-                    Single-player only
+                  <span class="pointer-events-none absolute end-0 bottom-full z-20 mb-1.5 rounded-md bg-octo-navy px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 shadow-sm transition group-hover/tip:opacity-100 dark:bg-base-300 dark:text-base-content">
+                    {dgettext("home", "Single-player only")}
                   </span>
                 </span>
               </div>
               <p class="text-sm text-octo-navy/60 dark:text-base-content/60">
-                {game.description}
+                {game_description(game)}
               </p>
             </.link>
           </li>
@@ -110,7 +117,7 @@
         <.lobby_games
           games={@lobby_games}
           watchers={@watchers}
-          path={&game_path/1}
+          path={&game_path(@locale, &1)}
         >
           <:action>
             <%!-- The hook plays a sound for a new open game, see lobby_sounds.js --%>
@@ -120,7 +127,7 @@
               phx-hook="LobbySound"
               phx-update="ignore"
               aria-pressed="false"
-              aria-label="Sound for new games"
+              aria-label={dgettext("home", "Sound for new games")}
               class={[
                 "group -my-1 flex size-8 items-center justify-center rounded-full transition",
                 "text-base-content/40 hover:bg-base-200 hover:text-base-content/70 active:scale-90",
@@ -154,10 +161,10 @@
           <:summary :let={game}>
             <.link
               id={"lobby-game-name-#{game.id}"}
-              navigate={@kinds[game.kind].path}
+              navigate={Locale.game_path(@locale, @kinds[game.kind])}
               class="font-semibold transition hover:text-octo-indigo dark:hover:text-octo-indigo-light"
             >
-              {@kinds[game.kind].name}
+              {game_name(@kinds[game.kind])}
             </.link>
             <span :if={game_summary(game)} class="text-base-content/60">
               · {game_summary(game)}
@@ -170,23 +177,31 @@
           class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100"
         >
           <h3 class="mb-3 flex items-center gap-2 font-semibold">
-            <.icon name="hero-heart" class="size-4 text-octo-indigo" /> Friends online
+            <.icon name="hero-heart" class="size-4 text-octo-indigo" />
+            {dgettext("home", "Friends online")}
           </h3>
           <%= cond do %>
             <% @friends == nil -> %>
               <p id="friends-online-guest" class="py-2 text-center text-sm text-base-content/60">
                 <.link
                   id="friends-online-sign-in"
-                  href={~p"/signin"}
+                  href={Locale.path(@locale, ~p"/signin")}
                   class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 dark:text-octo-indigo-light"
                 >
-                  Sign in
+                  {dgettext("home", "Sign in")}
                 </.link>
-                to see when your friends are online. You become friends when you finish a game from a link that one of you shared.
+                <%!-- The text after the link "Sign in" --%>
+                {dgettext(
+                  "home",
+                  "to see when your friends are online. You become friends when you finish a game from a link that one of you shared."
+                )}
               </p>
             <% @friends_online == [] -> %>
               <p id="friends-online-empty" class="py-2 text-center text-sm text-base-content/50">
-                No friends online. You become friends when you finish a game from a link that one of you shared.
+                {dgettext(
+                  "home",
+                  "No friends online. You become friends when you finish a game from a link that one of you shared."
+                )}
               </p>
             <% true -> %>
               <ul id="friends-online-list" class="-mx-2 space-y-1">
@@ -215,7 +230,7 @@
                       {String.first(friend.name || "?") |> String.upcase()}
                     </span>
                     <%!-- Online --%>
-                    <span class="absolute -right-0.5 -bottom-0.5 size-3 rounded-full bg-emerald-500 ring-2 ring-base-100" />
+                    <span class="absolute -end-0.5 -bottom-0.5 size-3 rounded-full bg-emerald-500 ring-2 ring-base-100" />
                   </span>
                   <div class="min-w-0 flex-1">
                     <p class="truncate text-sm font-medium">

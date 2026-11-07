@@ -6,6 +6,18 @@ defmodule OctomoctoWeb.SitemapController do
   defp urls do
     [
       url(~p"/"),
+      url(~p"/pt"),
+      url(~p"/de"),
+      url(~p"/ru"),
+      url(~p"/fr"),
+      url(~p"/uk"),
+      url(~p"/pl"),
+      url(~p"/it"),
+      url(~p"/es"),
+      url(~p"/ja"),
+      url(~p"/vi"),
+      url(~p"/tr"),
+      url(~p"/ar"),
       url(~p"/trains"),
       url(~p"/nimble-mosaic"),
       url(~p"/schulte"),

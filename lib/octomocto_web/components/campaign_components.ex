@@ -256,7 +256,7 @@ defmodule OctomoctoWeb.CampaignComponents do
         <p class="mt-1 text-sm text-base-content/60">{@text}</p>
         <.link
           id="campaign-sign-in-link"
-          href={~p"/signin"}
+          href={OctomoctoWeb.Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/signin")}
           class="mt-4 inline-block rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/25 transition hover:bg-octo-indigo/90"
         >
           {@button}
