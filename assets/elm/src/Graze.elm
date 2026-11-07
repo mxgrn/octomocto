@@ -12,6 +12,8 @@ this browser knows it (see `offset`).
 
 The circle of this player follows the pointer (or the finger) with a top
 speed, and this module draws it at once, without a wait for the server.
+When it touches a food square, this module hides the square and plays the
+sound at once too (see `eaten`). The score comes from the server.
 It sends the place of the circle many times a second, with the time of the
 server when the player saw it. The server checks the circle at that time.
 The circles of the other players move to their places from the server
@@ -205,6 +207,12 @@ type alias Model =
     -- The places where this browser draws the other circles
     , others : Dict String ( Float, Float )
 
+    -- The food squares that my circle ate in this browser, before the
+    -- server confirms it: the square id and the local time. This browser
+    -- does not draw them. When the server still has a square after
+    -- `eatenWaitMs`, it comes back.
+    , eaten : Dict Int Float
+
     -- The countdown step that last played its beep (see `countdownStep`)
     , beepedStep : Maybe Int
     , muted : Bool
@@ -239,6 +247,7 @@ init flags =
       , mine = Nothing
       , lastSent = 0
       , others = Dict.empty
+      , eaten = Dict.empty
       , beepedStep = Nothing
       , muted = flags.muted
       , watchers = 0
@@ -305,10 +314,19 @@ update msg model =
                         Nothing ->
                             candidate
 
+                squareIds =
+                    List.map .id game.squares
+
+                -- The server took away a square that this browser ate. Then
+                -- the sound played already.
+                confirmed =
+                    List.any (\id -> not (List.member id squareIds)) (Dict.keys model.eaten)
+
                 sounds =
                     case model.connection of
                         Joined _ old ->
                             stateSounds me old game
+                                |> List.filter (\sound -> not (confirmed && sound == "found"))
 
                         _ ->
                             []
@@ -319,6 +337,7 @@ update msg model =
                         , offset = Just offset
                         , clockStart = local - toFloat game.elapsedMs
                         , now = local
+                        , eaten = Dict.filter (\id at -> List.member id squareIds && local - at < eatenWaitMs) model.eaten
                     }
                         |> followServer me game
             in
@@ -438,6 +457,28 @@ frame local model =
                 ease =
                     min 1 (dt / 80)
 
+                ate =
+                    case ( moved.mine, mine, moved.offset ) of
+                        ( Just from, Just to, Just _ ) ->
+                            if running moved game && alive then
+                                eatenOnWay game moved.eaten (serverNow moved) from to
+
+                            else
+                                []
+
+                        _ ->
+                            []
+
+                eaten =
+                    List.foldl (\id -> Dict.insert id local) moved.eaten ate
+
+                ateSound =
+                    if List.isEmpty ate then
+                        Cmd.none
+
+                    else
+                        playSounds moved [ "found" ]
+
                 others =
                     game.circles
                         |> List.filterMap
@@ -461,8 +502,8 @@ frame local model =
                         _ ->
                             ( model.lastSent, Cmd.none )
             in
-            beepCountdown { moved | mine = mine, others = others, lastSent = sent }
-                |> Tuple.mapSecond (\cmd -> Cmd.batch [ cmd, steer ])
+            beepCountdown { moved | mine = mine, others = others, lastSent = sent, eaten = eaten }
+                |> Tuple.mapSecond (\cmd -> Cmd.batch [ cmd, steer, ateSound ])
 
         _ ->
             ( model, Cmd.none )
@@ -487,6 +528,81 @@ moveToward game step ( fx, fy ) ( tx, ty ) =
 
     else
         ( fx + dx * step / distance, fy + dy * step / distance )
+
+
+{-| How long (in ms) this browser hides a square that my circle ate, while
+the server still has it.
+-}
+eatenWaitMs : Float
+eatenWaitMs =
+    1000
+
+
+{-| The food squares that my circle eats on its way from `from` to `to`, at
+the time `time` of the server. The check is the same as on the server (see
+`Octomocto.Graze.World`): points 10 units apart, a danger square first, and
+a danger square stops the way. The squares in `eaten` are gone already.
+-}
+eatenOnWay : Game -> Dict Int Float -> Float -> ( Float, Float ) -> ( Float, Float ) -> List Int
+eatenOnWay game eaten time ( fx, fy ) ( tx, ty ) =
+    let
+        steps =
+            clamp 1 40 (ceiling (sqrt ((tx - fx) * (tx - fx) + (ty - fy) * (ty - fy)) / 10))
+
+        check i ate =
+            if i > steps then
+                ate
+
+            else
+                let
+                    f =
+                        toFloat i / toFloat steps
+
+                    ( x, y ) =
+                        ( fx + (tx - fx) * f, fy + (ty - fy) * f )
+
+                    touched =
+                        game.squares
+                            |> List.filter
+                                (\s ->
+                                    time >= s.t
+                                        && not (Dict.member s.id eaten)
+                                        && not (List.member s.id ate)
+                                        && touches game s time x y
+                                )
+                in
+                if List.any (\s -> s.kind == Danger) touched then
+                    ate
+
+                else
+                    case touched of
+                        square :: _ ->
+                            check (i + 1) (square.id :: ate)
+
+                        [] ->
+                            check (i + 1) ate
+    in
+    check 1 []
+
+
+{-| True when a circle at `x`, `y` touches the square at the time `time`.
+-}
+touches : Game -> Square -> Float -> Float -> Float -> Bool
+touches game square time x y =
+    let
+        dt =
+            (time - square.t) / 1000
+
+        half =
+            square.size / 2
+
+        dx =
+            max 0 (abs (x - (square.x + square.vx * dt)) - half)
+
+        dy =
+            max 0 (abs (y - (square.y + square.vy * dt)) - half)
+    in
+    dx * dx + dy * dy < game.radius * game.radius
 
 
 myCircle : Me -> Game -> Maybe Circle
@@ -1129,7 +1245,12 @@ viewField model me game =
             ]
         , Svg.g [ SA.clipPath "url(#graze-board-shape)" ]
             [ Svg.rect [ SA.width side, SA.height side, SA.class "graze-board" ] []
-            , Svg.Keyed.node "g" [] (List.map (\s -> ( String.fromInt s.id, viewSquare time s )) game.squares)
+            , Svg.Keyed.node "g"
+                []
+                (game.squares
+                    |> List.filter (\s -> not (Dict.member s.id model.eaten))
+                    |> List.map (\s -> ( String.fromInt s.id, viewSquare time s ))
+                )
             , Svg.Keyed.node "g" [] (others ++ mine)
             ]
         , Svg.rect
