@@ -310,15 +310,6 @@ defmodule OctomoctoWeb.HomeLive do
     assign(socket, lobby: entries, lobby_games: Lobby.games(entries))
   end
 
-  # A number with a comma between each 3 digits, for example 5,195
-  defp delimit(n) do
-    n
-    |> Integer.to_string()
-    |> String.reverse()
-    |> String.replace(~r/(\d{3})(?=\d)/, "\\1,")
-    |> String.reverse()
-  end
-
   defp game_path(game), do: "/#{game.kind}/#{game.id}"
 
   # The settings of a row, as on the settings page of its kind of game. Nil

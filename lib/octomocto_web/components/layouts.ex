@@ -66,6 +66,10 @@ defmodule OctomoctoWeb.Layouts do
     default: [],
     doc: "the links to the page in each language (see `OctomoctoWeb.Locale.languages/3`)"
 
+  attr :games_played, :integer,
+    default: nil,
+    doc: "the count of all finished games, for a link to /stats in the footer (home page only)"
+
   slot :header,
     doc:
       "content between the wordmark and the theme toggle; on a small screen it goes into the menu"
@@ -304,6 +308,28 @@ defmodule OctomoctoWeb.Layouts do
             Max Gorin
           </a>
         </span>
+        <%!-- The count of all finished games, live (see `Octomocto.Stats`) --%>
+        <.link
+          :if={@games_played}
+          id="games-played"
+          navigate={~p"/stats"}
+          class="transition hover:text-base-content"
+        >
+          <span
+            id={"games-played-count-#{@games_played}"}
+            class="games-played-bump font-semibold tabular-nums"
+          >
+            {delimit(@games_played)}
+          </span>
+          games played
+        </.link>
+        <a
+          id="suggest-game-link"
+          href="mailto:hi@octomocto.com"
+          class="transition hover:text-base-content"
+        >
+          {gettext("Suggest a game")}
+        </a>
         <.link
           id="privacy-link"
           navigate={~p"/privacy"}
@@ -314,13 +340,6 @@ defmodule OctomoctoWeb.Layouts do
         <.link id="terms-link" navigate={~p"/terms"} class="transition hover:text-base-content">
           {gettext("Terms of Service")}
         </.link>
-        <a
-          id="suggest-game-link"
-          href="mailto:hi@octomocto.com"
-          class="transition hover:text-base-content"
-        >
-          {gettext("Suggest a game")}
-        </a>
         <a
           id="donate-link"
           href={OctomoctoWeb.Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/donate")}
@@ -744,5 +763,14 @@ defmodule OctomoctoWeb.Layouts do
       </.flash>
     </div>
     """
+  end
+
+  # A number with a comma between each 3 digits, for example 5,195
+  defp delimit(n) do
+    n
+    |> Integer.to_string()
+    |> String.reverse()
+    |> String.replace(~r/(\d{3})(?=\d)/, "\\1,")
+    |> String.reverse()
   end
 end

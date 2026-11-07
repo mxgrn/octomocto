@@ -7,6 +7,7 @@
   guest_public_id={@guest_public_id}
   home
   wide
+  games_played={@games_played}
 >
   <%!-- Soft brand-colored light behind the page --%>
   <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -33,24 +34,6 @@
           >
             What are we playing today?
           </h2>
-          <%!-- The count of all finished games, live (see `Octomocto.Stats`) --%>
-          <.link
-            id="games-played"
-            navigate={~p"/stats"}
-            class="group flex items-center gap-1.5 rounded-full bg-base-100 px-3 py-1 text-sm text-octo-navy/70 shadow-sm ring-1 ring-base-content/10 transition hover:text-octo-navy hover:ring-octo-indigo/40 dark:text-base-content/70 dark:hover:text-base-content dark:hover:ring-octo-indigo-light/40"
-          >
-            <span
-              id={"games-played-count-#{@games_played}"}
-              class="games-played-bump font-semibold text-octo-navy tabular-nums dark:text-base-content"
-            >
-              {delimit(@games_played)}
-            </span>
-            games played
-            <.icon
-              name="hero-arrow-right"
-              class="size-3.5 transition group-hover:translate-x-0.5"
-            />
-          </.link>
         </div>
         <%!-- One tag at a time; "all" clears the filter --%>
         <nav id="game-tags" aria-label="Filter games" class="mb-6 flex flex-wrap gap-2">
