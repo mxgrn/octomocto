@@ -61,7 +61,7 @@
             <.link
               id={"game-#{game.id}"}
               navigate={Locale.game_path(@locale, game)}
-              class="group relative flex h-full flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-base-content/10 transition hover:shadow-md hover:shadow-octo-orange/10 hover:ring-octo-orange/30 dark:bg-base-100 dark:hover:ring-octo-orange-light/40"
+              class="group relative flex h-full flex-col gap-2 rounded-2xl p-4 shadow-sm ring-1 ring-base-content/10 transition [--card-bg:var(--color-white)] bg-(--card-bg) hover:shadow-md hover:shadow-octo-indigo/15 hover:ring-octo-indigo/60 hover:[--card-bg:color-mix(in_oklab,var(--color-octo-indigo)_3%,var(--color-white))] dark:[--card-bg:var(--color-base-100)] dark:hover:ring-octo-indigo-light/60 dark:hover:[--card-bg:color-mix(in_oklab,var(--color-octo-indigo-light)_6%,var(--color-base-100))]"
             >
               <span
                 :if={game[:badge]}
@@ -98,7 +98,7 @@
                 >
                   <.icon name="hero-user-group" class="size-5" />
                   <%!-- The cross line; the ring in the card color makes a gap around it --%>
-                  <span class="absolute top-1/2 left-1/2 h-[1.5px] w-6 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-current ring-2 ring-white dark:ring-base-100"></span>
+                  <span class="absolute top-1/2 left-1/2 h-[1.5px] w-6 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-current ring-2 ring-(--card-bg) transition"></span>
                   <%!-- The tooltip; screen readers read it too --%>
                   <span class="pointer-events-none absolute end-0 bottom-full z-20 mb-1.5 rounded-md bg-octo-navy px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 shadow-sm transition group-hover/tip:opacity-100 dark:bg-base-300 dark:text-base-content">
                     {dgettext("home", "Single-player only")}

@@ -406,7 +406,7 @@ defmodule OctomoctoWeb.HomeLive do
       "flex shrink-0 items-center justify-center",
       if(@small,
         do: "size-9 rounded-xl",
-        else: "size-12 rounded-2xl transition group-hover:scale-105"
+        else: "size-12 rounded-2xl"
       ),
       @game.icon_class
     ]}>
