@@ -595,7 +595,10 @@ defmodule OctomoctoWeb.Layouts do
     ~H"""
     <div id={@id} phx-update="ignore" class={@class}>
       <.sound_switch :if={@invite_switch} kind="invites" label={gettext("Invite sound")} />
-      <.sound_switch kind="sounds" label={gettext("All other sounds")} />
+      <.sound_switch
+        kind="sounds"
+        label={if(@invite_switch, do: gettext("All other sounds"), else: gettext("All sounds"))}
+      />
     </div>
     """
   end

@@ -318,3 +318,7 @@ msgstr "ادعم على Patreon"
 #, elixir-autogen, elixir-format
 msgid "Feed Octo & Mocto now!"
 msgstr "أطعِم Octo & Mocto الآن!"
+
+#, elixir-autogen, elixir-format
+msgid "All sounds"
+msgstr "كل الأصوات"

@@ -308,3 +308,7 @@ msgstr "Patreonで応援する"
 #, elixir-autogen, elixir-format
 msgid "Feed Octo & Mocto now!"
 msgstr "OctoとMoctoに今すぐごはんをあげよう！"
+
+#, elixir-autogen, elixir-format
+msgid "All sounds"
+msgstr "すべての音"
