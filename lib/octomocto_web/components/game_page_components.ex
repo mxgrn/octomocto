@@ -28,10 +28,6 @@ defmodule OctomoctoWeb.GamePageComponents do
     default: %{},
     doc: "the number of watchers of each game by its id, see `Octomocto.Lobby.watchers/1`"
 
-  attr :bg_class, :string,
-    default: "bg-base-100",
-    doc: "the background of the panel; the front page makes it white"
-
   slot :icon, required: true, doc: "the image of a game, with the game as the argument"
 
   slot :summary,
@@ -51,7 +47,7 @@ defmodule OctomoctoWeb.GamePageComponents do
     ~H"""
     <section
       id="lobby-games"
-      class={["rounded-2xl p-5 shadow-sm ring-1 ring-base-content/10", @bg_class]}
+      class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100"
     >
       <div class="mb-3 flex items-center justify-between gap-2">
         <h3 class="flex items-center gap-2 font-semibold">
@@ -196,7 +192,7 @@ defmodule OctomoctoWeb.GamePageComponents do
     ~H"""
     <section
       id="match-score"
-      class="rounded-2xl bg-base-100 p-5 text-start shadow-sm ring-1 ring-base-content/10"
+      class="rounded-2xl bg-white p-5 text-start shadow-sm ring-1 ring-base-content/10 dark:bg-base-100"
     >
       <div class="flex items-center justify-between gap-2">
         <h3 class="flex items-center gap-2 font-semibold">
@@ -252,7 +248,8 @@ defmodule OctomoctoWeb.GamePageComponents do
   game, because other players must join before it starts. It sends
   `"new_game"`. It stays at the bottom of
   the screen while the settings above it do not fit, so that a new player
-  sees how to start. The settings go under it into the page color. It is
+  sees how to start. The settings go under it into a soft blur with a
+  tint of the page color, which works on the tinted background. It is
   wider than the settings, so that it also covers the borders of the
   cards, which are outside of the cards. Only the button takes clicks, so
   that the settings under the fade stay clickable.
@@ -261,7 +258,7 @@ defmodule OctomoctoWeb.GamePageComponents do
     ~H"""
     <div
       id="new-game-bar"
-      class="pointer-events-none sticky bottom-0 z-10 -mx-2 -mt-6 flex w-[calc(100%+1rem)] flex-col items-center gap-2 bg-linear-to-t from-base-100 from-70% to-transparent pt-8 pb-5"
+      class="pointer-events-none sticky bottom-0 z-10 -mx-2 -mt-6 flex w-[calc(100%+1rem)] flex-col items-center gap-2 bg-octo-mist/60 pt-8 pb-5 backdrop-blur-md [mask-image:linear-gradient(to_top,black_65%,transparent)] dark:bg-base-100/70"
     >
       <button
         id="new-game"

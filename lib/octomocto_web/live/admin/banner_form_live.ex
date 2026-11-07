@@ -88,7 +88,7 @@ defmodule OctomoctoWeb.Admin.BannerFormLive do
           id="banner-form"
           phx-change="validate"
           phx-submit="save"
-          class="space-y-4 rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10 sm:p-6"
+          class="space-y-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100 sm:p-6"
         >
           <.input
             field={@form[:text]}

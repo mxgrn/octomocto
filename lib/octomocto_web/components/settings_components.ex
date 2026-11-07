@@ -17,7 +17,10 @@ defmodule OctomoctoWeb.SettingsComponents do
   @doc "One setting of a new game: the header, and the options in a row below it."
   def setting(assigns) do
     ~H"""
-    <div id={@id} class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
+    <div
+      id={@id}
+      class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100"
+    >
       <.setting_header label={@label} icon={@icon} badge={@badge} badge_id={@badge_id} />
       <div class="mt-3 flex justify-center">
         <.option_slider id={"#{@id}-options"} class={@wide && "w-full"}>
@@ -168,7 +171,7 @@ defmodule OctomoctoWeb.SettingsComponents do
   @doc "A list of results. An empty list has one row with `empty_text`."
   def score_list(assigns) do
     ~H"""
-    <div class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10">
+    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100">
       <%!-- When the aside does not fit next to the title, it goes below it --%>
       <div class="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <h3 class="flex items-center gap-2 whitespace-nowrap font-semibold">

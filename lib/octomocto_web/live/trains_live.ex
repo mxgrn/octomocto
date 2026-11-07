@@ -470,7 +470,7 @@ defmodule OctomoctoWeb.TrainsLive do
     ~H"""
     <div
       id="level-card"
-      class="sticky bottom-3 z-10 flex w-full flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl bg-base-100 p-5 text-left shadow-lg ring-1 ring-base-content/10"
+      class="sticky bottom-3 z-10 flex w-full flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl bg-white p-5 text-left shadow-lg ring-1 ring-base-content/10 dark:bg-base-100"
     >
       <div class={[
         "grid size-12 shrink-0 place-items-center rounded-2xl",

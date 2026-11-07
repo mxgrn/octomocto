@@ -93,6 +93,21 @@ defmodule OctomoctoWeb.Layouts do
     ~H"""
     <%!-- The column keeps the footer at the bottom of a short page --%>
     <div class="flex min-h-dvh flex-col">
+      <%!-- Soft brand-colored light behind the page; not behind a game board --%>
+      <div
+        :if={!@game}
+        aria-hidden="true"
+        class="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      >
+        <div class="absolute inset-0 bg-gradient-to-b from-octo-mist to-octo-mist/60 dark:from-base-300 dark:via-base-100 dark:to-base-100">
+        </div>
+        <div class="absolute -top-32 left-1/2 size-[28rem] -translate-x-[85%] rounded-full bg-octo-orange/10 blur-3xl dark:bg-octo-orange-light/10">
+        </div>
+        <div class="absolute top-24 left-1/2 size-[28rem] -translate-x-[15%] rounded-full bg-octo-indigo/10 blur-3xl dark:bg-octo-indigo-light/10">
+        </div>
+        <div class="absolute -right-32 -bottom-32 size-[28rem] rounded-full bg-octo-orange/10 blur-3xl dark:bg-octo-orange-light/10">
+        </div>
+      </div>
       <div
         :if={@welcome}
         id="site-welcome"

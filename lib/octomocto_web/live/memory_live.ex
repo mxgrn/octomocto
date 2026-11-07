@@ -661,7 +661,7 @@ defmodule OctomoctoWeb.MemoryLive do
     ~H"""
     <div
       id="theme-picker"
-      class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
+      class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100"
     >
       <div class="flex items-center justify-between gap-2">
         <.setting_header label={dgettext("memory", "Theme")} icon="hero-swatch" />
@@ -747,7 +747,7 @@ defmodule OctomoctoWeb.MemoryLive do
     ~H"""
     <div
       id="level-card"
-      class="sticky bottom-3 z-10 flex w-full flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl bg-base-100 p-5 text-start shadow-lg ring-1 ring-base-content/10"
+      class="sticky bottom-3 z-10 flex w-full flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl bg-white p-5 text-start shadow-lg ring-1 ring-base-content/10 dark:bg-base-100"
     >
       <div
         class="grid shrink-0 gap-0.5"

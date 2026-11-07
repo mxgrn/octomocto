@@ -17,7 +17,7 @@ defmodule OctomoctoWeb.Admin.DashboardLive do
         <.link
           id="admin-banners-link"
           navigate={~p"/admin/banners"}
-          class="group flex items-center gap-4 rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10 transition hover:shadow-md hover:ring-octo-indigo/40"
+          class="group flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100 transition hover:shadow-md hover:ring-octo-indigo/40"
         >
           <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-octo-indigo/10 text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light">
             <.icon name="hero-megaphone" class="size-6" />

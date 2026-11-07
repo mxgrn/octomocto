@@ -70,7 +70,7 @@ defmodule OctomoctoWeb.Admin.BannersLive do
             :for={{id, banner} <- @streams.banners}
             id={id}
             class={[
-              "flex items-start gap-4 rounded-2xl bg-base-100 p-4 shadow-sm ring-1 ring-base-content/10 transition",
+              "flex items-start gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100 transition",
               expired?(banner, @now) && "opacity-60"
             ]}
           >
