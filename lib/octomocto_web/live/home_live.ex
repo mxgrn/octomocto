@@ -128,7 +128,7 @@ defmodule OctomoctoWeb.HomeLive do
       tags: ["speed", "memory"],
       name: "Snap",
       description:
-        "Is the new card the same as the card before it? Answer fast for 45 seconds to build a multiplier.",
+        "Is the new card the same as the card before it? You have 45 seconds. Make no mistakes to grow the multiplier up to x5.",
       path: "/snap",
       icon_class: "bg-teal-500/10 dark:bg-teal-400/15",
       # Not suggested at the end of a multiplayer game, see `OctomoctoWeb.NextGame`
