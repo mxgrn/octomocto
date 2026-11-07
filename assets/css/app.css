@@ -718,8 +718,21 @@ in, because the grid can change its size. */
   transition: background-color 900ms ease-out, box-shadow 900ms ease-out, transform 120ms ease-out;
   touch-action: manipulation;
 }
-.afterglow-tile.is-open { cursor: pointer; }
-.afterglow-tile.is-open:hover { background: rgb(26 159 203 / 0.16); transition-duration: 120ms; }
+/* The hover color is on a layer of its own with a fast transition, so
+that it goes away at once when the cursor leaves. The tile itself keeps
+the slow transition of the glow. */
+.afterglow-tile.is-open { cursor: pointer; position: relative; }
+.afterglow-tile.is-open::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgb(26 159 203 / 0.16);
+  opacity: 0;
+  transition: opacity 100ms ease-out;
+  pointer-events: none;
+}
+.afterglow-tile.is-open:hover::before { opacity: 1; }
 .afterglow-tile.is-open:active { transform: scale(0.94); }
 .afterglow-tile.is-lit {
   background: var(--color-octo-indigo);
@@ -739,8 +752,37 @@ in, because the grid can change its size. */
 .afterglow-dot.is-current { transform: scale(1.35); }
 #afterglow-root button { touch-action: manipulation; }
 
+/* Afterglow with turns. The grid of each turn shows at once, with no
+fade-in. After a new tile, the tiles of the pattern light up at once, stay
+lit for a moment and fade out slowly. */
+.afterglow-turns-grid {
+  animation: none;
+  /* Not a percentage: a percentage row gap does not count in the height
+  of the board, so the last row went out of the board */
+  gap: clamp(0.25rem, 1.5vmin, 0.625rem);
+}
+.afterglow-tile.is-blink { position: relative; }
+.afterglow-tile.is-blink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-octo-indigo);
+  box-shadow: 0 0 1.25rem 0.125rem rgb(26 159 203 / 0.55);
+  opacity: 0;
+  animation: afterglow-blink 1500ms ease-out;
+}
+[data-theme=dark] .afterglow-tile.is-blink::after {
+  background: var(--color-octo-indigo-light);
+  box-shadow: 0 0 1.25rem 0.125rem rgb(140 140 255 / 0.45);
+}
+@keyframes afterglow-blink {
+  0%, 20% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 [data-theme=dark] .afterglow-tile { background: rgb(255 255 255 / 0.07); }
-[data-theme=dark] .afterglow-tile.is-open:hover { background: rgb(140 140 255 / 0.18); }
+[data-theme=dark] .afterglow-tile.is-open::before { background: rgb(140 140 255 / 0.18); }
 [data-theme=dark] .afterglow-tile.is-lit,
 [data-theme=dark] .afterglow-tile.is-found { background: var(--color-octo-indigo-light); box-shadow: 0 0 1.25rem 0.125rem rgb(140 140 255 / 0.45); }
 [data-theme=dark] .afterglow-tile.is-wrong { background: #ef4444; }
@@ -765,6 +807,8 @@ in, because the grid can change its size. */
 
 @media (prefers-reduced-motion: reduce) {
   .afterglow-grid, .afterglow-tile, .afterglow-preview-lit { animation: none; }
+  /* The pattern only lights up, with no fade */
+  .afterglow-tile.is-blink::after { animation: none; opacity: 1; }
 }
 
 /* Echo. A shade over each pad makes it pale (light theme) or dark (dark

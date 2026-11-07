@@ -6,15 +6,12 @@
   guest_name={@guest_name}
   guest_public_id={@guest_public_id}
 >
-  <%!--
-    One column on a small screen: the title, the first round and the results.
-    Two columns on a large screen: the results go to the right.
-  --%>
+  <%!-- The same columns as on the Echo page --%>
   <div
     id="afterglow-index"
-    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:grid-cols-2 lg:grid-rows-[auto_auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:w-[calc(100vw-4rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] xl:grid-rows-[auto_1fr]"
   >
-    <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1">
+    <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 xl:max-w-none">
       <div class="flex items-center justify-center gap-3">
         <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
           <OctomoctoWeb.GameIcons.game_icon game="afterglow" class="size-9" />
@@ -22,57 +19,145 @@
         <h1 class="text-3xl font-semibold tracking-tight">Afterglow</h1>
       </div>
       <p class="text-base-content/70">
-        Tiles light up for a moment. When they go out, click the tiles that were lit.
+        <%= if @match do %>
+          Choose the settings of the next game.
+        <% else %>
+          Tiles light up for a moment. When they go out, click the tiles that were lit.
+        <% end %>
       </p>
       <.how_to_play />
     </div>
 
-    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-2">
-      <div
-        id="afterglow-first-round"
-        class="flex w-full items-center gap-5 rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
+    <%!-- A match plays on with the same players, so it needs no other games --%>
+    <div
+      :if={!@match}
+      id="afterglow-lobby"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-1 lg:row-start-2 xl:row-span-2 xl:row-start-1 xl:max-w-none"
+    >
+      <.lobby_games
+        games={@lobby_games}
+        watchers={@watchers}
+        matches={&same_settings?(&1, @settings)}
+        path={&~p"/afterglow/#{&1.id}"}
       >
-        <div
-          class="afterglow-preview grid size-24 shrink-0 gap-1"
-          style={"grid-template-columns: repeat(#{@preview.side}, minmax(0, 1fr))"}
-          aria-hidden="true"
+        <:icon>
+          <OctomoctoWeb.GameIcons.game_icon game="afterglow" class="size-9 shrink-0" />
+        </:icon>
+        <:summary :let={game}>{game_summary(game)}</:summary>
+      </.lobby_games>
+    </div>
+
+    <div class="mx-auto flex w-full max-w-md flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-3 xl:col-start-2 xl:row-start-2 xl:max-w-none">
+      <div id="afterglow-settings" class="flex w-full flex-col gap-4">
+        <.match_score
+          :if={@match}
+          players={@match.state.players}
+          ties={@match.state.ties}
+          me={@match.player_id}
+          back={~p"/afterglow/#{@match.id}"}
+        />
+        <.setting
+          :if={!@match}
+          id="setting-players"
+          label="Players"
+          icon="hero-users"
+          hint={players_hint(@settings.players)}
         >
-          <span
-            :for={cell <- 0..(@preview.side * @preview.side - 1)}
-            class={[
-              "rounded-[3px]",
-              if(MapSet.member?(@preview.lit, cell),
-                do: "afterglow-preview-lit bg-octo-indigo dark:bg-octo-indigo-light",
-                else: "bg-base-content/10"
-              )
-            ]}
-            style={"--delay: #{rem(cell * 37, 11) * 90}ms"}
-          />
+          <.option
+            :for={n <- 1..4}
+            id={"players-#{n}"}
+            selected={@settings.players == n}
+            patch={settings_path(@settings, players: n)}
+          >
+            {n}
+          </.option>
+        </.setting>
+
+        <div
+          :if={@settings.players == 1}
+          id="afterglow-first-round"
+          class="flex w-full items-center gap-5 rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
+        >
+          <div
+            class="afterglow-preview grid size-24 shrink-0 gap-1"
+            style={"grid-template-columns: repeat(#{@preview.side}, minmax(0, 1fr))"}
+            aria-hidden="true"
+          >
+            <span
+              :for={cell <- 0..(@preview.side * @preview.side - 1)}
+              class={[
+                "rounded-[3px]",
+                if(MapSet.member?(@preview.lit, cell),
+                  do: "afterglow-preview-lit bg-octo-indigo dark:bg-octo-indigo-light",
+                  else: "bg-base-content/10"
+                )
+              ]}
+              style={"--delay: #{rem(cell * 37, 11) * 90}ms"}
+            />
+          </div>
+          <div class="min-w-0 flex-1 space-y-1">
+            <.setting_header label="First round" icon="hero-squares-2x2" />
+            <p class="text-start">
+              <span id="afterglow-start-level" class="text-2xl font-semibold tabular-nums">
+                {@start_level}
+              </span>
+              <span class="text-base-content/60">tiles</span>
+            </p>
+            <p class="text-start text-xs text-base-content/50">
+              <%= if @first_game do %>
+                Each correct round adds a tile.
+              <% else %>
+                Your last game ended here.
+              <% end %>
+            </p>
+          </div>
         </div>
-        <div class="min-w-0 flex-1 space-y-1">
-          <.setting_header label="First round" icon="hero-squares-2x2" />
-          <p class="text-start">
-            <span id="afterglow-start-level" class="text-2xl font-semibold tabular-nums">
-              {@start_level}
-            </span>
-            <span class="text-base-content/60">tiles</span>
-          </p>
-          <p class="text-start text-xs text-base-content/50">
-            <%= if @first_game do %>
-              Each correct round adds a tile.
-            <% else %>
-              Your last game ended here.
-            <% end %>
-          </p>
-        </div>
+
+        <.setting
+          :if={@settings.players > 1}
+          id="setting-size"
+          label="Grid"
+          icon="hero-squares-2x2"
+          hint={"#{@settings.size}×#{@settings.size} tiles. The game ends when #{Octomocto.Afterglow.TurnGame.target(@settings.size)} tiles are in the pattern."}
+        >
+          <.option
+            :for={n <- Octomocto.Afterglow.TurnGame.min_size(@settings.players)..10}
+            id={"size-#{n}"}
+            selected={@settings.size == n}
+            patch={settings_path(@settings, size: n)}
+          >
+            {n}
+          </.option>
+        </.setting>
+        <.setting
+          :if={!@match and @settings.players > 1}
+          id="setting-visibility"
+          label="Visibility"
+          icon="hero-eye"
+          hint={visibility_hint(@settings)}
+        >
+          <.option
+            :for={
+              {value, public, label} <- [
+                {"public", true, "Public"},
+                {"private", false, "Private"}
+              ]
+            }
+            id={"visibility-#{value}"}
+            selected={@settings.public == public}
+            patch={settings_path(@settings, public: public)}
+          >
+            {label}
+          </.option>
+        </.setting>
       </div>
 
-      <.start_bar multiplayer={false} />
+      <.start_bar multiplayer={@settings.players > 1} match={@match != nil} />
     </div>
 
     <div
       id="afterglow-leaderboard"
-      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1"
+      class="mx-auto grid w-full max-w-md gap-4 lg:col-start-2 lg:row-span-3 lg:row-start-1 xl:col-start-3 xl:row-span-2 xl:max-w-none"
     >
       <.score_list
         id="your-results"
@@ -93,15 +178,19 @@
           </span>
         </:aside>
         <%= if @user_results do %>
-          <.result_row :for={result <- @user_results.latest}>
-            <span class="flex-1 font-medium">
+          <.result_row :for={%{result: result, players: players} <- @user_results.latest}>
+            <span :if={@settings.players == 1} class="flex-1 font-medium">
               {Calendar.strftime(result.inserted_at, "%b %-d")}
             </span>
             <span
+              :if={@settings.players == 1}
               class="text-xs text-base-content/50 tabular-nums"
               title="Most tiles in a correct round"
             >
               {if result.best_level, do: "#{result.best_level} tiles", else: "–"}
+            </span>
+            <span :if={@settings.players > 1} class="min-w-0 flex-1 font-medium">
+              <.player_list players={players} scores={false} />
             </span>
             <.result_pill best={@user_results.best != nil and result.id == @user_results.best.id}>
               {result.score}

@@ -39,7 +39,7 @@ defmodule OctomoctoWeb.PageControllerTest do
 
     assert "game-multiplayer-set" in ids
     refute "game-multiplayer-snap" in ids
-    refute "game-multiplayer-afterglow" in ids
+    assert "game-multiplayer-afterglow" in ids
   end
 
   test "the header shows the slogan", %{conn: conn} do

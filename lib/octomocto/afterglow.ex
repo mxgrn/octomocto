@@ -1,7 +1,8 @@
 defmodule Octomocto.Afterglow do
   @moduledoc """
-  Afterglow: a single-player game where the player remembers which tiles
-  of a grid lit up (see `Octomocto.Afterglow.Game`). Each game is a
+  Afterglow: a game where the player remembers which tiles of a grid lit
+  up (see `Octomocto.Afterglow.Game`). The game with turns for 2 to 4
+  players is in `Octomocto.Afterglow.Turns`. Each game is a
   `Octomocto.Afterglow.Game` process on one node of the cluster, found by
   its id. A copy of its state is in `Octomocto.Afterglow.Store`, so the
   game continues on another node when its node stops. Finished games are
@@ -82,10 +83,13 @@ defmodule Octomocto.Afterglow do
   def last_level(nil, nil), do: nil
 
   def last_level(user_id, guest_id) do
+    # Only the single-player games have rounds
+    solo = from(r in Result, where: r.settings == type(^%{"players" => 1}, :map))
+
     query =
       if user_id,
-        do: from(r in Result, where: r.user_id == ^user_id),
-        else: from(r in Result, where: r.guest_id == ^guest_id)
+        do: from(r in solo, where: r.user_id == ^user_id),
+        else: from(r in solo, where: r.guest_id == ^guest_id)
 
     from(r in query, order_by: [desc: r.inserted_at], limit: 1, select: r.last_level)
     |> Repo.one()
@@ -94,7 +98,7 @@ defmodule Octomocto.Afterglow do
   @doc """
   Saves one finished game. The player is a map with `:user_id` (nil for a
   guest), `:name`, `:guest_id` (see `Octomocto.Guests`), `:score`,
-  `:best_level`, `:last_level` and `:perfect`.
+  `:best_level`, `:last_level` (nil in a game with turns) and `:perfect`.
   """
   def save_results(game_id, settings, _elapsed_ms, players) do
     now = DateTime.utc_now()
@@ -122,8 +126,8 @@ defmodule Octomocto.Afterglow do
 
   @doc """
   Gives the results of the scope's user for the settings: the latest
-  results (the newest first) and the best result (nil when there are no
-  results).
+  results (the newest first, each with all players of its game, the user
+  first) and the best result (nil when there are no results).
   """
   def user_results(%{user: user}, settings) do
     user_query =
@@ -133,11 +137,31 @@ defmodule Octomocto.Afterglow do
       from(r in user_query, order_by: [desc: r.inserted_at], limit: @list_size)
       |> Repo.all()
 
+    players = game_players(Enum.map(latest, & &1.game_id))
+
+    latest =
+      Enum.map(latest, fn result ->
+        {mine, others} = Enum.split_with(players[result.game_id], &(&1.id == result.id))
+        %{result: result, players: mine ++ others}
+      end)
+
     best =
       from(r in user_query, order_by: [desc: r.score, asc: r.inserted_at], limit: 1)
       |> Repo.one()
 
     %{latest: latest, best: best}
+  end
+
+  # Gives the results of all players of the games, by game id, the best
+  # score first. The game id of a game with turns is the id of its field.
+  defp game_players(game_ids) do
+    from(r in Result,
+      where: r.game_id in ^game_ids,
+      order_by: [desc: r.score],
+      preload: [:user, :guest]
+    )
+    |> Repo.all()
+    |> Enum.group_by(& &1.game_id)
   end
 
   @doc """

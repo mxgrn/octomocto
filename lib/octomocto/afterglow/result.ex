@@ -4,7 +4,7 @@ defmodule Octomocto.Afterglow.Result do
   results can be compared, for example `%{"players" => 1}`. The
   `best_level` is the most tiles of a fully correct round (nil when no
   round was correct), and the `last_level` is the tiles of the last round,
-  where the next game of the player starts.
+  where the next game of the player starts (nil in a game with turns).
   """
   use Ecto.Schema
 

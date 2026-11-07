@@ -32,6 +32,10 @@ defmodule Octomocto.GameHelpers do
   @doc "An Echo game with 4 pads."
   def echo_game(id, config \\ []), do: game(Octomocto.Echo.Game, id, %{pads: 4}, config)
 
+  @doc "An Afterglow game with turns for 2 players on a 4 × 4 grid."
+  def afterglow_turns_game(id, config \\ []),
+    do: game(Octomocto.Afterglow.TurnGame, id, %{players: 2, size: 4}, config)
+
   @doc "A Memory game of pairs with the smallest field."
   def memory_game(id, config \\ []),
     do: game(Octomocto.Memory.Game, id, %{theme: "monsters", set: 2, cards: 16}, config)

@@ -15,6 +15,7 @@ defmodule OctomoctoWeb.HomeLive do
   alias Octomocto.Memory.Themes
 
   alias OctomoctoWeb.{
+    AfterglowLive,
     EchoLive,
     GameIcons,
     GrazeLive,
@@ -138,11 +139,10 @@ defmodule OctomoctoWeb.HomeLive do
       tags: ["memory"],
       name: "Afterglow",
       description:
-        "Tiles light up for a moment. Click the tiles that were lit. Each correct round adds a tile.",
+        "Tiles light up for a moment. Click the tiles that were lit. With friends, make one pattern in turns.",
       path: "/afterglow",
       badge: {"New", "hero-sparkles-mini"},
-      icon_class: "bg-fuchsia-500/10 dark:bg-fuchsia-400/15",
-      single_player: true
+      icon_class: "bg-fuchsia-500/10 dark:bg-fuchsia-400/15"
     }
     # Station Escape is archived: it is not on the front page and is not
     # suggested on the end screens. Do not change it for now.
@@ -179,7 +179,9 @@ defmodule OctomoctoWeb.HomeLive do
     "mahjong" => {Octomocto.Mahjong.Game, Octomocto.Mahjong.Store, MahjongLive},
     "overlap" => {Octomocto.Overlap.Game, Octomocto.Overlap.Store, OverlapLive},
     "schulte" => {Octomocto.Schulte.Game, Octomocto.Schulte.TableStore, SchulteLive},
-    "graze" => {Octomocto.Graze.Game, Octomocto.Graze.Store, GrazeLive}
+    "graze" => {Octomocto.Graze.Game, Octomocto.Graze.Store, GrazeLive},
+    # Only the games with turns: the single-player games are never in the lists
+    "afterglow" => {Octomocto.Afterglow.TurnGame, Octomocto.Afterglow.TurnStore, AfterglowLive}
   }
 
   @kinds_by_game Map.new(@lobbies, fn {kind, {game, _store, _page}} -> {game, kind} end)

@@ -27,6 +27,7 @@ defmodule Octomocto.Application do
       Octomocto.Lobby.Watchers,
       Octomocto.OnlineUsers,
       {DynamicSupervisor, name: Octomocto.Afterglow.GameSupervisor},
+      {DynamicSupervisor, name: Octomocto.Afterglow.TurnSupervisor},
       {DynamicSupervisor, name: Octomocto.Astronaut.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Echo.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Graze.GameSupervisor},

@@ -972,6 +972,65 @@ if (afterglowNode) {
   })
 }
 
+// Start the Afterglow game with turns and connect its ports to the game
+// channel. It works as the Echo game above. The token has the same key as
+// in the single-player game, so that the settings page of a match finds it.
+const afterglowTurnsNode = document.getElementById("afterglow-turns-main")
+if (afterglowTurnsNode) {
+  if (navigator.userActivation?.hasBeenActive) unlockAudio()
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  document.addEventListener("keydown", unlockAudio, {once: true})
+  let muted = false
+  try { muted = localStorage.getItem("afterglow-muted") === "true" } catch (_e) {}
+
+  const dataset = afterglowTurnsNode.dataset
+  const afterglow = window.Elm.AfterglowTurns.init({node: afterglowTurnsNode, flags: {gameUrl: window.location.href, settingsUrl: dataset.settingsUrl, changeSettingsUrl: dataset.changeSettingsUrl || null, nextGame: {name: dataset.nextGameName, path: dataset.nextGamePath}, guest: !dataset.userToken, muted}})
+  const socket = new Socket("/socket", {params: {user_token: dataset.userToken, _csrf_token: csrfToken}})
+  socket.connect()
+
+  const tokenKey = `afterglow-token:${dataset.gameId}`
+  let token = null
+  try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
+  const joined = reply => {
+    token = reply.token
+    try {
+      if (token) sessionStorage.setItem(tokenKey, token)
+      else sessionStorage.removeItem(tokenKey)
+    } catch (_e) {}
+    afterglow.ports.afterglowTurnsJoined.send(reply)
+    afterglow.ports.afterglowTurnsWatchers.send(reply.watchers ?? 0)
+  }
+  // A link with ?watch=1 only watches the game. The token of a player wins.
+  const watch = new URLSearchParams(window.location.search).has("watch")
+  // The menu of the game page joins its channel on this socket
+  setGameMenu({kind: "afterglow", id: dataset.gameId, socket})
+  const channel = socket.channel(`afterglow_turns:${dataset.gameId}`, () => token ? {token} : (watch ? {watch} : lobbyParams))
+  channel.on("state", state => afterglow.ports.afterglowTurnsState.send(state))
+  channel.on("flash", ({pattern}) => afterglow.ports.afterglowTurnsFlash.send(pattern))
+  channel.on("joined", joined)
+  channel.on("watchers", ({count}) => afterglow.ports.afterglowTurnsWatchers.send(count))
+  channel.join()
+    .receive("ok", joined)
+    .receive("error", ({reason}) => {
+      // The server of the game stopped a moment ago. The channel tries again.
+      if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
+      channel.leave()
+      afterglow.ports.afterglowTurnsJoinFailed.send(reason)
+    })
+
+  afterglow.ports.afterglowTurnsTap.subscribe(cell => channel.push("tap", {cell}))
+  afterglow.ports.afterglowTurnsRestart.subscribe(() => channel.push("restart", {}))
+  afterglow.ports.afterglowTurnsPlayLarger.subscribe(() => channel.push("play_larger", {}))
+  connectNextGame(afterglow.ports.afterglowTurnsNextGame, channel, afterglowTurnsNode)
+  afterglow.ports.afterglowTurnsCopyText.subscribe(text => navigator.clipboard.writeText(text))
+  afterglow.ports.afterglowTurnsPlaySound.subscribe(playAfterglowSound)
+  afterglow.ports.afterglowTurnsSaveMuted.subscribe(value => {
+    try { localStorage.setItem("afterglow-muted", String(value)) } catch (_e) {}
+  })
+}
+
 // Show the Telegram Login Widget. The widget script puts its iframe in the
 // place of the script tag, so we add the script into each container.
 // Telegram needs a full URL to send the user back to. A container that has

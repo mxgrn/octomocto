@@ -37,6 +37,7 @@ config :mnesiac,
     Octomocto.Overlap.Store,
     Octomocto.Snap.Store,
     Octomocto.Afterglow.Store,
+    Octomocto.Afterglow.TurnStore,
     Octomocto.Schulte.TableStore,
     Octomocto.Graze.Store
   ]

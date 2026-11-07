@@ -4,6 +4,7 @@ defmodule OctomoctoWeb.UserSocket do
   require Logger
 
   channel "afterglow:*", OctomoctoWeb.AfterglowChannel
+  channel "afterglow_turns:*", OctomoctoWeb.AfterglowTurnsChannel
   channel "astronaut:*", OctomoctoWeb.AstronautChannel
   channel "invites:*", OctomoctoWeb.InviteChannel
   channel "echo:*", OctomoctoWeb.EchoChannel
