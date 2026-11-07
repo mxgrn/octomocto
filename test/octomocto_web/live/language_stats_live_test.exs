@@ -25,6 +25,11 @@ defmodule OctomoctoWeb.LanguageStatsLiveTest do
 
     assert view |> element("#language-game-nimble-mosaic .tabular-nums") |> render() =~
              ~r/>\s*1\s*</
+
+    assert has_element?(
+             view,
+             ~s|#language-activity-nimble-mosaic[aria-label="1 game in the last 30 days"]|
+           )
   end
 
   test "does not count the games from before the last 30 days", %{conn: conn} do

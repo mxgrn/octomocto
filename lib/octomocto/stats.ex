@@ -124,32 +124,27 @@ defmodule Octomocto.Stats do
   end
 
   @doc """
-  The number of games in the last `days` days, today included, in each
-  game with players of the `language`, by the game id of the front page. The language is as in
-  `games_by_language/2`, for example "pt". A game with no games in the
-  language is not in the map.
+  The number of games in each of the last `days` days, today included,
+  oldest first, in each game with players of the `language`, by the game
+  id of the front page. The language is as in `games_by_language/2`, for
+  example "pt". A game with no games in the language is not in the map.
   """
   def games_in_language(language, days, today \\ Date.utc_today()) do
-    since = since(Date.add(today, 1 - days))
+    first = Date.add(today, 1 - days)
+    since = since(first)
 
     @results
     |> Enum.map(fn {game, schema} ->
-      from r in schema,
+      from r in daily_counts(game, schema, since),
         left_join: u in User,
         on: u.id == r.user_id,
         left_join: g in Guest,
         on: g.id == r.guest_id,
-        where: r.inserted_at >= ^since,
-        where: fragment("split_part(coalesce(?, ?), '-', 1)", u.locale, g.locale) == ^language,
-        select: %{
-          game: type(^game, :string),
-          count: count(fragment("DISTINCT (?, ?)", r.game_id, r.inserted_at))
-        }
+        where: fragment("split_part(coalesce(?, ?), '-', 1)", u.locale, g.locale) == ^language
     end)
     |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
     |> Repo.all()
-    |> Enum.reject(&(&1.count == 0))
-    |> Map.new(&{&1.game, &1.count})
+    |> per_day(first, today)
   end
 
   @doc """
@@ -184,16 +179,21 @@ defmodule Octomocto.Stats do
     first = Date.add(today, 1 - days)
     since = since(first)
 
-    counts =
-      @results
-      |> Enum.map(fn {game, schema} ->
-        game |> daily_counts(schema, since) |> where([r], field(r, ^field) == ^id)
-      end)
-      |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
-      |> Repo.all()
-      |> Enum.group_by(& &1.game, &{&1.date, &1.count})
+    @results
+    |> Enum.map(fn {game, schema} ->
+      game |> daily_counts(schema, since) |> where([r], field(r, ^field) == ^id)
+    end)
+    |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
+    |> Repo.all()
+    |> per_day(first, today)
+  end
 
-    Map.new(counts, fn {game, by_date} ->
+  # The rows of `daily_counts/3` as the counts of each game in each day
+  # from `first` to `today`, by the game id
+  defp per_day(rows, first, today) do
+    rows
+    |> Enum.group_by(& &1.game, &{&1.date, &1.count})
+    |> Map.new(fn {game, by_date} ->
       by_date = Map.new(by_date)
       {game, for(date <- Date.range(first, today), do: Map.get(by_date, date, 0))}
     end)
