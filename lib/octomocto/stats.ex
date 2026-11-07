@@ -188,11 +188,11 @@ defmodule Octomocto.Stats do
     |> per_day(first, today)
   end
 
-  # The rows of `daily_counts/3` as the counts of each game in each day
-  # from `first` to `today`, by the game id
-  defp per_day(rows, first, today) do
+  # The rows of `daily_counts/3` as the counts in each day from `first` to
+  # `today`, by the game id (or by another `key` of the rows)
+  defp per_day(rows, first, today, key \\ & &1.game) do
     rows
-    |> Enum.group_by(& &1.game, &{&1.date, &1.count})
+    |> Enum.group_by(key, &{&1.date, &1.count})
     |> Map.new(fn {game, by_date} ->
       by_date = Map.new(by_date)
       {game, for(date <- Date.range(first, today), do: Map.get(by_date, date, 0))}
@@ -217,15 +217,17 @@ defmodule Octomocto.Stats do
   The 10 players with the most games in the last `days` days, today
   included, in the game with the id `game` of the front page, the most
   games first. Each item is
-  `%{user: user, guest: guest, count: n}`, with a user or a guest and the
-  other nil. Two players with the same count are in the order of their
+  `%{user: user, guest: guest, count: n, days: counts}`, with a user or a
+  guest and the other nil, and the counts of the player in each day, oldest
+  first. Two players with the same count are in the order of their
   first game. The rows of a user count for the user, also when they have a
   guest id. The results of guests from before the guest ids have no
   player, so they are not counted.
   """
   def top_players(game, days, today \\ Date.utc_today()) do
     schema = Map.fetch!(@results, game)
-    since = since(Date.add(today, 1 - days))
+    first = Date.add(today, 1 - days)
+    since = since(first)
 
     rows =
       from(r in schema,
@@ -246,12 +248,43 @@ defmodule Octomocto.Stats do
       )
       |> Repo.all()
 
-    users = by_id(User, rows |> Enum.map(& &1.user_id) |> Enum.reject(&is_nil/1))
-    guests = by_id(Guest, rows |> Enum.map(& &1.guest_id) |> Enum.reject(&is_nil/1))
+    user_ids = rows |> Enum.map(& &1.user_id) |> Enum.reject(&is_nil/1)
+    guest_ids = rows |> Enum.map(& &1.guest_id) |> Enum.reject(&is_nil/1)
+    users = by_id(User, user_ids)
+    guests = by_id(Guest, guest_ids)
+    per_day = players_per_day(schema, since, user_ids, guest_ids, first, today)
 
     Enum.map(rows, fn row ->
-      %{user: users[row.user_id], guest: guests[row.guest_id], count: row.count}
+      %{
+        user: users[row.user_id],
+        guest: guests[row.guest_id],
+        count: row.count,
+        days: Map.fetch!(per_day, {row.user_id, row.guest_id})
+      }
     end)
+  end
+
+  # The counts of the players in each day from `first` to `today`, by
+  # `{user_id, guest_id}` as in `top_players/3`
+  defp players_per_day(schema, since, user_ids, guest_ids, first, today) do
+    from(r in schema,
+      where: r.inserted_at >= ^since,
+      where: r.user_id in ^user_ids or (is_nil(r.user_id) and r.guest_id in ^guest_ids),
+      group_by: [
+        r.user_id,
+        fragment("CASE WHEN ? IS NULL THEN ? END", r.user_id, r.guest_id),
+        fragment("?::date", r.inserted_at)
+      ],
+      select: %{
+        player:
+          {r.user_id,
+           type(fragment("CASE WHEN ? IS NULL THEN ? END", r.user_id, r.guest_id), Ecto.UUID)},
+        date: fragment("?::date", r.inserted_at),
+        count: count(fragment("DISTINCT (?, ?)", r.game_id, r.inserted_at))
+      }
+    )
+    |> Repo.all()
+    |> per_day(first, today, & &1.player)
   end
 
   defp by_id(schema, ids),

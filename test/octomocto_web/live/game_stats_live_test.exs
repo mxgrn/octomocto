@@ -27,6 +27,18 @@ defmodule OctomoctoWeb.GameStatsLiveTest do
     assert has_element?(view, ~s|#top-player-2 a[href="/players/#{user.public_id}"]|)
   end
 
+  test "shows a graph of the games per day of each player", %{conn: conn} do
+    user = user_fixture()
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+
+    {:ok, view, _html} = live(conn, ~p"/stats/nimble-mosaic")
+
+    assert has_element?(
+             view,
+             ~s|#top-player-activity-1[aria-label="1 game in the last 30 days"]|
+           )
+  end
+
   test "does not count the games from before the last 30 days", %{conn: conn} do
     user = user_fixture()
     NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])

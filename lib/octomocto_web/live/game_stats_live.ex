@@ -2,7 +2,8 @@ defmodule OctomoctoWeb.GameStatsLive do
   @moduledoc """
   The stats page of one game, at `/stats/:game`: the 10 players, users and
   guests, with the most games in the game in the days of `StatsLive` (see
-  `Octomocto.Stats.top_players/3`). The names link to the profiles.
+  `Octomocto.Stats.top_players/3`), each with a graph of their games per
+  day. The names link to the profiles.
   """
   use OctomoctoWeb, :live_view
 
@@ -11,7 +12,7 @@ defmodule OctomoctoWeb.GameStatsLive do
   on_mount {OctomoctoWeb.SiteBanners, nil}
 
   alias Octomocto.Stats
-  alias OctomoctoWeb.{GameIcons, HomeLive, NotFoundError, StatsLive}
+  alias OctomoctoWeb.{GameIcons, HomeLive, NotFoundError, PlayerLive, StatsLive}
 
   def mount(%{"game" => id}, _session, socket) do
     game = Enum.find(HomeLive.games(), &(&1.id == id))

@@ -47,7 +47,10 @@
       id="top-players"
       class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100 sm:p-6"
     >
-      <h2 class="mb-4 font-semibold text-octo-navy dark:text-base-content">Top players</h2>
+      <div class="mb-4 flex items-baseline justify-between gap-4">
+        <h2 class="font-semibold text-octo-navy dark:text-base-content">Top players</h2>
+        <span :if={@players != []} class="text-xs text-base-content/50">Last {@days} days</span>
+      </div>
       <p :if={@players == []} id="top-players-empty" class="text-sm text-base-content/60">
         No games yet.
       </p>
@@ -68,15 +71,18 @@
             {place}
           </span>
           <div class="min-w-0 flex-1">
-            <div class="flex items-baseline justify-between gap-4">
+            <div class="flex items-center justify-between gap-4">
               <span class="min-w-0 truncate font-medium text-octo-navy dark:text-base-content">
                 <.player_link player={player.user || player.guest}>{name(player)}</.player_link>
                 <span :if={!player.user} class="ml-1 text-xs font-normal text-base-content/50">
                   Guest
                 </span>
               </span>
-              <span class="font-semibold text-octo-navy tabular-nums dark:text-base-content">
-                {player.count}
+              <span class="flex shrink-0 items-center gap-3">
+                <PlayerLive.sparkline id={"top-player-activity-#{place}"} days={player.days} />
+                <span class="min-w-[4ch] text-right font-semibold text-octo-navy tabular-nums dark:text-base-content">
+                  {player.count}
+                </span>
               </span>
             </div>
             <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-base-content/5">
