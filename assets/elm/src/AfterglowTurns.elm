@@ -560,7 +560,7 @@ viewGame model me game =
                             , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block lg:h-9" ] []
                             ]
                         , h1 [ class "mr-1 truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
-                            [ a [ id "afterglow-title-link", href model.settingsUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Afterglow" ] ]
+                            [ a [ id "afterglow-title-link", href model.settingsUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Afterglow Memory" ] ]
                         , viewWatchers (me == Nothing) model.watchers
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
@@ -1083,7 +1083,7 @@ viewResult model me game =
             , action
             , disabled locked
             , attribute "data-ga-link" "or_try"
-            , attribute "data-ga-from" "Afterglow"
+            , attribute "data-ga-from" "Afterglow Memory"
             , attribute "data-ga-to" nextGame.name
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:no-underline"
             ]

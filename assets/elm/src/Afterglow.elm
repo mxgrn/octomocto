@@ -700,7 +700,7 @@ viewHeader model me =
             , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block lg:h-9" ] []
             ]
         , h1 [ class "text-xl font-semibold tracking-tight lg:text-2xl" ]
-            [ a [ id "afterglow-title-link", href model.settingsUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Afterglow" ] ]
+            [ a [ id "afterglow-title-link", href model.settingsUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Afterglow Memory" ] ]
         , if me == Nothing then
             span
                 [ id "afterglow-watching"
@@ -1045,7 +1045,7 @@ viewResult model watching game =
             [ id "afterglow-next-game"
             , href model.nextGame.path
             , attribute "data-ga-link" "or_try"
-            , attribute "data-ga-from" "Afterglow"
+            , attribute "data-ga-from" "Afterglow Memory"
             , attribute "data-ga-to" model.nextGame.name
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]

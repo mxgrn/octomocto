@@ -66,7 +66,7 @@ defmodule OctomoctoWeb.AfterglowLive do
   @doc "The title and the description of the Afterglow pages, for search engines."
   def seo do
     [
-      page_title: "Afterglow: a Memory Matrix-Like Brain Game Online",
+      page_title: "Afterglow Memory: a Memory Matrix-Like Brain Game Online",
       page_description:
         "A free brain game like Memory Matrix from Lumosity: tiles light up for a moment, then click the tiles that were lit. Play alone or with up to 3 friends. No sign-up."
     ]
@@ -195,7 +195,7 @@ defmodule OctomoctoWeb.AfterglowLive do
       "With friends, you take turns and make one pattern together. The first player adds a tile. In your turn, click all tiles of the pattern in any order, then add a new tile.",
       "The pattern does not show again: watch the turns of the others. A wrong tile puts you out. The last player who is in wins.",
       "When half of the grid is in the pattern, all players who are still in share the win.",
-      "Afterglow is a Memory Matrix-like game. Lumosity and Memory Matrix are trademarks of Lumos Labs, Inc. Octomocto is not affiliated with Lumos Labs."
+      "Afterglow Memory is a Memory Matrix-like game. Lumosity and Memory Matrix are trademarks of Lumos Labs, Inc. Octomocto is not affiliated with Lumos Labs."
     ]
   end
 

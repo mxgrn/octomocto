@@ -137,7 +137,7 @@ defmodule OctomoctoWeb.HomeLive do
     %{
       id: "afterglow",
       tags: ["memory"],
-      name: "Afterglow",
+      name: "Afterglow Memory",
       description:
         "Tiles light up for a moment. Click the tiles that were lit. With friends, make one pattern in turns.",
       path: "/afterglow",
