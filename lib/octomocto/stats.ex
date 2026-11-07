@@ -91,20 +91,29 @@ defmodule Octomocto.Stats do
   Gives the games played in the last `days` days, today included, for each
   language of the players, the most played first. The language is the first
   part of the browser locale, for example "pt" for "pt-BR". Each item is
-  `%{language: language, count: n}`. A game with players of two languages
+  `%{language: language, count: n, days: counts}`, with the counts in each
+  day, oldest first. A game with players of two languages
   counts once for each language. The players without a known locale are not
   counted.
   """
   def games_by_language(days, today \\ Date.utc_today()) do
-    since = since(Date.add(today, 1 - days))
+    first = Date.add(today, 1 - days)
+    since = since(first)
 
     @results
     |> Map.values()
     |> Enum.map(&language_counts(&1, since))
     |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
     |> Repo.all()
-    |> Enum.group_by(& &1.language, & &1.count)
-    |> Enum.map(fn {language, counts} -> %{language: language, count: Enum.sum(counts)} end)
+    # One row for each language and day, with the counts of all games added
+    |> Enum.group_by(&{&1.language, &1.date}, & &1.count)
+    |> Enum.map(fn {{language, date}, counts} ->
+      %{language: language, date: date, count: Enum.sum(counts)}
+    end)
+    |> per_day(first, today, & &1.language)
+    |> Enum.map(fn {language, counts} ->
+      %{language: language, count: Enum.sum(counts), days: counts}
+    end)
     |> Enum.sort_by(& &1.count, :desc)
   end
 
@@ -116,9 +125,13 @@ defmodule Octomocto.Stats do
       on: g.id == r.guest_id,
       where: r.inserted_at >= ^since,
       where: not is_nil(fragment("coalesce(?, ?)", u.locale, g.locale)),
-      group_by: fragment("split_part(coalesce(?, ?), '-', 1)", u.locale, g.locale),
+      group_by: [
+        fragment("split_part(coalesce(?, ?), '-', 1)", u.locale, g.locale),
+        fragment("?::date", r.inserted_at)
+      ],
       select: %{
         language: fragment("split_part(coalesce(?, ?), '-', 1)", u.locale, g.locale),
+        date: fragment("?::date", r.inserted_at),
         count: count(fragment("DISTINCT (?, ?)", r.game_id, r.inserted_at))
       }
   end
