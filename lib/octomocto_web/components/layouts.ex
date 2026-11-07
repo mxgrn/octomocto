@@ -81,11 +81,12 @@ defmodule OctomoctoWeb.Layouts do
     default: [],
     doc: """
     the notices of the user (see `OctomoctoWeb.Notices`). The first one
-    floats over the top of the page. A game page shows them in its bar.
+    floats over the top of the page. A game page shows them with its
+    `game_notices` slot.
     """
 
-  slot :bar,
-    doc: "the bar at the top of a game page (see `OctomoctoWeb.GameBarLive`)"
+  slot :game_notices,
+    doc: "the notices of a game page (see `OctomoctoWeb.GameNoticesLive`)"
 
   slot :inner_block, required: true
 
@@ -302,7 +303,7 @@ defmodule OctomoctoWeb.Layouts do
         </div>
       </header>
 
-      {render_slot(@bar)}
+      {render_slot(@game_notices)}
 
       <div
         :if={@notices != []}

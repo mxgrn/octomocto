@@ -278,26 +278,8 @@ msgid "All other sounds"
 msgstr "Todos os outros sons"
 
 #, elixir-autogen, elixir-format
-msgid "%{count} player"
-msgid_plural "%{count} players"
-msgstr[0] ""
-msgstr[1] ""
-
-#, elixir-autogen, elixir-format
-msgid "Private link"
-msgstr "Link privado"
-
-#, elixir-autogen, elixir-format
 msgid "Profile"
 msgstr "Perfil"
-
-#, elixir-autogen, elixir-format
-msgid "Public"
-msgstr "Público"
-
-#, elixir-autogen, elixir-format
-msgid "Solo"
-msgstr "Solo"
 
 #, elixir-autogen, elixir-format
 msgid "Hi! I'm Max, an indie developer, and I make Octomocto on my own. It has no ads, and your support pays for the servers and the time to make new games."

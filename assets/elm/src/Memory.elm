@@ -27,7 +27,6 @@ import Browser
 import Browser.Dom
 import Browser.Events
 import Dict exposing (Dict)
-import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
@@ -874,23 +873,10 @@ cardSize (( width, height ) as space) layout =
         ((height - gap * toFloat (layout.rows - 1)) / toFloat layout.rows)
 
 
-{-| The height in pixels of the screen that is not for the field. The page
-of a game has no header and no footer. On a large screen, it is the 1.5rem
-padding of the page at the top and at the bottom, and the 0.5rem padding of
-the board on each side. On a small
-screen, it is the 0.5rem padding of the page at the top and at the bottom,
-and the rows of the panel with the 0.5rem gaps between them. The heights of
-the rows are approximate, because the scores can wrap.
+{-| The height of the page around the field.
 -}
 reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
-    GameBar.height + reservedPageHeight model me game
-
-
-{-| The height of the page around the field, without the bar at the top.
--}
-reservedPageHeight : Model -> Me -> Game -> Float
-reservedPageHeight model me game =
     if Tuple.first model.viewport >= largeScreen then
         64
 

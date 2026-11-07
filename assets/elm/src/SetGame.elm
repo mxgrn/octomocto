@@ -31,7 +31,6 @@ the same name in one bundle.
 import Browser
 import Browser.Dom
 import Browser.Events
-import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
@@ -1042,28 +1041,10 @@ cardGap model =
         8
 
 
-{-| The height in pixels of the screen that is not for the table. The page
-of a game has no header and no footer. On a large screen, the panel is at
-the left, so it is the 1.5rem padding of the page at the top and at the
-bottom. On a small screen that is wider than tall, the panel is also at the
-left, so it is the 0.5rem padding of the page at the top and at the bottom.
-On other small screens, it is the padding, and the rows of the panel with
-the 0.5rem gaps between them.
-
-On all screens, the clues and the reason for a wrong set are under the
-table. A clue has one line, and a reason has 2 lines on a narrow screen.
-The heights of the rows are approximate, because the text can wrap.
-
+{-| The height of the page around the field.
 -}
 reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
-    GameBar.height + reservedPageHeight model me game
-
-
-{-| The height of the page around the field, without the bar at the top.
--}
-reservedPageHeight : Model -> Me -> Game -> Float
-reservedPageHeight model me game =
     let
         width =
             Tuple.first model.viewport

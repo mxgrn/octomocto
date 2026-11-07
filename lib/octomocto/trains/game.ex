@@ -164,8 +164,7 @@ defmodule Octomocto.Trains.Game do
   def lobby_entry(_state), do: nil
 
   @doc """
-  The settings of the game in its row of the lists, and in the bar of the
-  game page (see `OctomoctoWeb.GameBarLive`).
+  The settings of the game in its row of the lists.
   """
   def lobby_settings(state) do
     settings = %{

@@ -31,7 +31,6 @@ import Browser
 import Browser.Dom
 import Browser.Events
 import Dict exposing (Dict)
-import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
@@ -970,8 +969,8 @@ largeScreen =
 
 
 {-| The height in pixels of the screen that is not for the board, as in
-Schulte: the bar at the top, the padding of the page, and on a small screen
-that is taller than wide, the rows of the panel above the board.
+Schulte: the padding of the page, and on a small screen that is taller
+than wide, the rows of the panel above the board.
 -}
 reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
@@ -1002,7 +1001,7 @@ reservedHeight model me game =
                         0
                       )
     in
-    GameBar.height + page
+    page
 
 
 {-| The board is square. Make it as wide as possible, but small enough that

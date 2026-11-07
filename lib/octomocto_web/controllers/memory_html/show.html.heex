@@ -1,10 +1,10 @@
 <Layouts.app flash={@flash} current_scope={@current_scope} welcome={@welcome} wide game>
-  <:bar>
-    {live_render(@conn, OctomoctoWeb.GameBarLive,
-      id: "game-bar-live",
-      session: %{"kind" => "memory", "id" => @id, "locale" => @locale}
+  <:game_notices>
+    {live_render(@conn, OctomoctoWeb.GameNoticesLive,
+      id: "game-notices-live",
+      session: %{"locale" => @locale}
     )}
-  </:bar>
+  </:game_notices>
   <div
     id="memory-main"
     data-game-id={@id}

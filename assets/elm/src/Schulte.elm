@@ -30,7 +30,6 @@ with the same name in one bundle.
 import Browser
 import Browser.Dom
 import Browser.Events
-import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
@@ -713,15 +712,7 @@ sideways model =
     width < largeScreen && width > height
 
 
-{-| The height in pixels of the screen that is not for the board: the bar
-at the top, and the page around the board.
--}
-reservedHeight : Model -> Me -> Game -> Float
-reservedHeight model me game =
-    GameBar.height + reservedPageHeight model me game
-
-
-{-| The height of the page around the board, without the bar at the top.
+{-| The height of the page around the board.
 On a large screen, it is the 1.5rem padding of the page at the top and at
 the bottom. On a small screen, it is the 0.5rem padding of the page at the
 top and at the bottom, and the rows of the panel (the compact row, the link
@@ -731,8 +722,8 @@ approximate, because the scores can wrap. On a small screen that is wider
 than tall, the panel is at the left, so only the padding is not for the
 board.
 -}
-reservedPageHeight : Model -> Me -> Game -> Float
-reservedPageHeight model me game =
+reservedHeight : Model -> Me -> Game -> Float
+reservedHeight model me game =
     if Tuple.first model.viewport >= largeScreen then
         48
 

@@ -28,7 +28,6 @@ import Array exposing (Array)
 import Browser
 import Browser.Dom
 import Browser.Events
-import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
@@ -906,30 +905,10 @@ sideways model =
     width < largeScreen && width > height
 
 
-{-| The height in pixels of the screen that is not for the grid. On a large
-screen, it is the 1.5rem padding of the page at the top and at the bottom,
-and the pad (4rem) with the 1rem gap above it. On a small screen, it is the
-0.5rem padding of the page at the top and at the bottom, the rows of the
-panel (the compact row, the link and the scores for a game with more
-players, and maybe the message for a watcher), the pad and the 0.5rem gaps
-between them. The heights of the rows are approximate, because the scores
-can wrap. On a small screen that is wider than tall, the panel and the pad
-are at the sides of the grid, so only the padding is not for the grid.
-
-The pad shows only during a puzzle, but there is always space for it, so
-that the grid does not change its size when the puzzle starts. A watcher
-has no pad.
-
+{-| The height of the page around the field.
 -}
 reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
-    GameBar.height + reservedPageHeight model me game
-
-
-{-| The height of the page around the field, without the bar at the top.
--}
-reservedPageHeight : Model -> Me -> Game -> Float
-reservedPageHeight model me game =
     let
         pad gap =
             if me == Nothing then

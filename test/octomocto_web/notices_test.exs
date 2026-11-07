@@ -108,16 +108,14 @@ defmodule OctomoctoWeb.NoticesTest do
       assert has_element?(view, "#user-menu #sound-switch-sounds")
     end
 
-    test "sees a notice in the bar of a game page in place of the settings",
+    test "sees a notice on a game page",
          %{conn: conn, user: user} do
       {:ok, view, _html} =
-        live_isolated(conn, OctomoctoWeb.GameBarLive,
-          session: %{"kind" => "snap", "id" => "game", "locale" => "en"}
-        )
+        live_isolated(conn, OctomoctoWeb.GameNoticesLive, session: %{"locale" => "en"})
 
       Notices.push({:user, user.id}, notice("first"))
 
-      assert has_element?(view, "#game-bar #notice-first")
+      assert has_element?(view, "#game-notice #notice-first")
     end
   end
 end

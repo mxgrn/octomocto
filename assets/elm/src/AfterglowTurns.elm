@@ -18,7 +18,6 @@ does not allow two ports with the same name in one bundle.
 -}
 
 import Browser
-import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
@@ -613,9 +612,8 @@ viewGame model me game =
 
 {-| Make the board as wide as possible, but small enough that it is all on
 the screen. The board is square, so its width is also its height. The
-height that is not for the board is approximate: the bar at the top, the
-padding of the page, the rows of the panel on a small screen, and the
-status line.
+height that is not for the board is approximate: the padding of the
+page, the rows of the panel on a small screen, and the status line.
 -}
 boardWidth : Me -> String
 boardWidth me =
@@ -628,7 +626,7 @@ boardWidth me =
                 0
     in
     "min(100%, 40rem, calc(100dvh - "
-        ++ String.fromFloat (GameBar.height + 200 + watcherRow)
+        ++ String.fromFloat (200 + watcherRow)
         ++ "px))"
 
 

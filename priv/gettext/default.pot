@@ -278,25 +278,7 @@ msgid "All other sounds"
 msgstr ""
 
 #, elixir-autogen, elixir-format
-msgid "%{count} player"
-msgid_plural "%{count} players"
-msgstr[0] ""
-msgstr[1] ""
-
-#, elixir-autogen, elixir-format
-msgid "Private link"
-msgstr ""
-
-#, elixir-autogen, elixir-format
 msgid "Profile"
-msgstr ""
-
-#, elixir-autogen, elixir-format
-msgid "Public"
-msgstr ""
-
-#, elixir-autogen, elixir-format
-msgid "Solo"
 msgstr ""
 
 #, elixir-autogen, elixir-format

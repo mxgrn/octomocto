@@ -40,7 +40,6 @@ import Browser
 import Browser.Dom
 import Browser.Events
 import Dict exposing (Dict)
-import GameBar
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, p, span, text, ul)
 import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
@@ -2094,24 +2093,10 @@ sideways model =
     width < largeScreen && width > height
 
 
-{-| The height in pixels of the screen that is not for the board. On a large
-screen, it is the 1.5rem padding of the page at the top and at the bottom.
-The page of a game has no header and no footer. On a small screen that is wider than tall, the panel is at the
-left, so it is only the 0.5rem padding of the page at the top and at the
-bottom. On other small screens, it is also the rows of the panel (the
-compact row, the link and the players for a game with more players, and
-maybe the message for a watcher) with the 0.5rem gaps between them. The
-heights of the rows are approximate, because the players can wrap.
+{-| The height of the page around the field.
 -}
 reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
-    GameBar.height + reservedPageHeight model me game
-
-
-{-| The height of the page around the field, without the bar at the top.
--}
-reservedPageHeight : Model -> Me -> Game -> Float
-reservedPageHeight model me game =
     if Tuple.first model.viewport >= largeScreen then
         48
 
