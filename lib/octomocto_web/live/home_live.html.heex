@@ -11,11 +11,13 @@
 >
   <%!-- Soft brand-colored light behind the page --%>
   <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-b from-octo-mist via-white to-white dark:from-base-300 dark:via-base-100 dark:to-base-100">
+    <div class="absolute inset-0 bg-gradient-to-b from-octo-mist to-octo-mist/60 dark:from-base-300 dark:via-base-100 dark:to-base-100">
     </div>
     <div class="absolute -top-32 left-1/2 size-[28rem] -translate-x-[85%] rounded-full bg-octo-orange/10 blur-3xl dark:bg-octo-orange-light/10">
     </div>
     <div class="absolute top-24 left-1/2 size-[28rem] -translate-x-[15%] rounded-full bg-octo-indigo/10 blur-3xl dark:bg-octo-indigo-light/10">
+    </div>
+    <div class="absolute -right-32 -bottom-32 size-[28rem] rounded-full bg-octo-orange/10 blur-3xl dark:bg-octo-orange-light/10">
     </div>
   </div>
 
@@ -66,7 +68,7 @@
             <.link
               id={"game-#{game.id}"}
               navigate={game.path}
-              class="group relative flex h-full flex-col gap-2 rounded-3xl bg-octo-indigo/[0.10] p-4 transition-colors hover:bg-octo-indigo/[0.17] dark:bg-octo-indigo-light/10 dark:hover:bg-octo-indigo-light/[0.17]"
+              class="group relative flex h-full flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-base-content/10 transition hover:shadow-md hover:shadow-octo-orange/10 hover:ring-octo-orange/30 dark:bg-base-100 dark:hover:ring-octo-orange-light/40"
             >
               <span
                 :if={game[:badge]}
@@ -80,10 +82,7 @@
                 {elem(game.badge, 0)}
               </span>
               <div class="flex min-w-0 items-center gap-3">
-                <%!-- A solid base, so the tint of the icon does not mix with the tint of the card --%>
-                <div class="shrink-0 rounded-2xl bg-base-100">
-                  <.game_icon game={game} />
-                </div>
+                <.game_icon game={game} />
                 <div class="min-w-0">
                   <h3 class="font-semibold text-octo-navy dark:text-base-content">{game.name}</h3>
                   <ul
@@ -118,7 +117,12 @@
       </section>
 
       <div id="lobby" class="grid grid-cols-1 gap-4 sm:col-start-1 sm:row-start-1">
-        <.lobby_games games={@lobby_games} watchers={@watchers} path={&game_path/1}>
+        <.lobby_games
+          games={@lobby_games}
+          watchers={@watchers}
+          path={&game_path/1}
+          bg_class="bg-white dark:bg-base-100"
+        >
           <:action>
             <%!-- The hook plays a sound for a new open game, see lobby_sounds.js --%>
             <button
@@ -174,7 +178,7 @@
 
         <section
           id="friends-online"
-          class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
+          class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100"
         >
           <h3 class="mb-3 flex items-center gap-2 font-semibold">
             <.icon name="hero-heart" class="size-4 text-octo-indigo" /> Friends online

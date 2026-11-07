@@ -28,6 +28,10 @@ defmodule OctomoctoWeb.GamePageComponents do
     default: %{},
     doc: "the number of watchers of each game by its id, see `Octomocto.Lobby.watchers/1`"
 
+  attr :bg_class, :string,
+    default: "bg-base-100",
+    doc: "the background of the panel; the front page makes it white"
+
   slot :icon, required: true, doc: "the image of a game, with the game as the argument"
 
   slot :summary,
@@ -47,7 +51,7 @@ defmodule OctomoctoWeb.GamePageComponents do
     ~H"""
     <section
       id="lobby-games"
-      class="rounded-2xl bg-base-100 p-5 shadow-sm ring-1 ring-base-content/10"
+      class={["rounded-2xl p-5 shadow-sm ring-1 ring-base-content/10", @bg_class]}
     >
       <div class="mb-3 flex items-center justify-between gap-2">
         <h3 class="flex items-center gap-2 font-semibold">

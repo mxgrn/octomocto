@@ -125,12 +125,12 @@ defmodule OctomoctoWeb.Layouts do
           navigate={~p"/"}
           class="group flex items-center gap-3 sm:gap-4"
         >
-          <OctomoctoWeb.PageHTML.octopi class="h-16 shrink-0 sm:h-20 drop-shadow-sm" />
+          <OctomoctoWeb.PageHTML.octopi class="h-[3.6rem] shrink-0 sm:h-[4.5rem] drop-shadow-sm" />
           <div class="flex flex-col gap-1">
-            <.wordmark class="h-7 sm:h-8" />
+            <.wordmark class="h-[1.575rem] sm:h-[1.8rem]" />
             <p
               id="slogan"
-              class="text-base font-medium tracking-tight text-octo-navy/70 sm:text-lg dark:text-base-content/70"
+              class="text-[0.9rem] font-medium tracking-tight text-octo-navy/70 sm:text-[1.0125rem] dark:text-base-content/70"
             >
               {gettext("Use your heads")}
             </p>
@@ -502,7 +502,7 @@ defmodule OctomoctoWeb.Layouts do
         <g class="text-octo-orange dark:text-octo-orange-light">
           <.octo_letters />
         </g>
-        <g class="text-octo-navy dark:text-white">
+        <g class="text-octo-indigo dark:text-octo-indigo-light">
           <path d="M292 48V100" />
           <path d="M292 70A22 22 0 0 1 336 70V100" />
           <path d="M336 70A22 22 0 0 1 380 70V100" />
