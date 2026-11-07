@@ -1173,9 +1173,9 @@ viewSquare time square =
         []
 
 
-{-| A circle with its energy ring. The ring starts at the top and goes
-clockwise. An almost empty ring of my circle blinks. Another player's
-circle has the name above it.
+{-| A circle with its energy ring on the inner edge. The ring starts at the
+top and goes clockwise. An almost empty ring of my circle blinks. Another player's
+circle has the initials of the name inside it.
 -}
 viewCircle : Game -> Bool -> Maybe String -> Float -> Float -> Bool -> Float -> Svg Msg
 viewCircle game isMine name x y alive energy =
@@ -1186,8 +1186,9 @@ viewCircle game isMine name x y alive energy =
         cy =
             String.fromFloat y
 
+        -- The ring is on the inner edge of the circle, with a small gap.
         ringRadius =
-            game.radius + 7
+            game.radius - 4
 
         ring attrs =
             Svg.circle
@@ -1195,7 +1196,7 @@ viewCircle game isMine name x y alive energy =
                  , SA.cy cy
                  , SA.r (String.fromFloat ringRadius)
                  , SA.fill "none"
-                 , SA.strokeWidth "5"
+                 , SA.strokeWidth "4"
                  , attribute "pathLength" "100"
                  ]
                     ++ attrs
@@ -1219,7 +1220,8 @@ viewCircle game isMine name x y alive energy =
                 ]
             )
         ]
-        [ ring [ SA.class "graze-ring-track" ]
+        [ Svg.circle [ SA.cx cx, SA.cy cy, SA.r (String.fromFloat game.radius), SA.class "graze-body" ] []
+        , ring [ SA.class "graze-ring-track" ]
         , if alive then
             ring
                 [ SA.class
@@ -1236,21 +1238,33 @@ viewCircle game isMine name x y alive energy =
 
           else
             text ""
-        , Svg.circle [ SA.cx cx, SA.cy cy, SA.r (String.fromFloat game.radius), SA.class "graze-body" ] []
         , case name of
             Just label ->
                 Svg.text_
                     [ SA.x cx
-                    , SA.y (String.fromFloat (y - ringRadius - 12))
+                    , SA.y cy
                     , SA.textAnchor "middle"
-                    , SA.fontSize "26"
+                    , SA.dominantBaseline "central"
+                    , SA.fontSize "15"
                     , SA.class "graze-name"
                     ]
-                    [ Svg.text label ]
+                    [ Svg.text (initials label) ]
 
             Nothing ->
                 text ""
         ]
+
+
+{-| Up to two first letters of the name, as in the header menu of the site.
+-}
+initials : String -> String
+initials name =
+    name
+        |> String.words
+        |> List.take 2
+        |> List.map (String.left 1)
+        |> String.concat
+        |> String.toUpper
 
 
 {-| Covers the empty field until all players are in.

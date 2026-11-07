@@ -235,8 +235,8 @@
 
 /* Graze: a white field with black food squares and red danger squares.
    My circle is black, the others are gray. In the dark theme, the field is
-   dark, and my circle and the food are white. The ring around a circle is
-   its energy. */
+   dark, and my circle and the food are white. The ring on the inner edge of
+   a circle is its energy. */
 .graze-board { fill: #ffffff; }
 .graze-border { stroke: #474d50; }
 .graze-food { fill: #1f2933; }
@@ -244,10 +244,10 @@
 .graze-me .graze-body { fill: #111827; }
 .graze-other .graze-body { fill: #9ca3af; }
 .graze-ring { stroke: var(--color-octo-indigo); }
-.graze-other .graze-ring { stroke: #9ca3af; }
-.graze-ring-track { stroke: #e5e7eb; }
+.graze-other .graze-ring { stroke: #374151; }
+.graze-ring-track { stroke: rgba(255, 255, 255, 0.25); }
 .graze-circle.is-out { opacity: 0.25; }
-.graze-name { fill: #6b7280; font-family: ui-sans-serif, system-ui, sans-serif; font-weight: 600; }
+.graze-name { fill: #111827; font-family: ui-sans-serif, system-ui, sans-serif; font-weight: 700; pointer-events: none; }
 .graze-dot-me { background: #111827; }
 .graze-dot-other { background: #9ca3af; }
 
@@ -258,9 +258,9 @@
 [data-theme=dark] .graze-me .graze-body { fill: #ffffff; }
 [data-theme=dark] .graze-other .graze-body { fill: #6b7280; }
 [data-theme=dark] .graze-ring { stroke: var(--color-octo-indigo-light); }
-[data-theme=dark] .graze-other .graze-ring { stroke: #6b7280; }
-[data-theme=dark] .graze-ring-track { stroke: #2f3548; }
-[data-theme=dark] .graze-name { fill: #9ca3af; }
+[data-theme=dark] .graze-other .graze-ring { stroke: #f1f5f9; }
+[data-theme=dark] .graze-ring-track { stroke: rgba(0, 0, 0, 0.15); }
+[data-theme=dark] .graze-name { fill: #ffffff; }
 [data-theme=dark] .graze-dot-me { background: #ffffff; }
 [data-theme=dark] .graze-dot-other { background: #6b7280; }
 
