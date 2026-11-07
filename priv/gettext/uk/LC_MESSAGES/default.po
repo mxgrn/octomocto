@@ -316,3 +316,19 @@ msgstr "Нагодуй Octo і Mocto просто зараз!"
 #, elixir-autogen, elixir-format
 msgid "All sounds"
 msgstr "Усі звуки"
+
+#, elixir-autogen, elixir-format
+msgid "All"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Following"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "No results of you and the players you follow."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Notifications"
+msgstr ""

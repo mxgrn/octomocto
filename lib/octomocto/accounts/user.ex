@@ -20,6 +20,8 @@ defmodule Octomocto.Accounts.User do
     # The first language of the browser in the last finished game, for
     # example "pt-BR" (see `Octomocto.Locales`). Only for statistics.
     field :locale, :string
+    # The notifications after this time are unread (see `Octomocto.Notifications`)
+    field :notifications_seen_at, :utc_datetime_usec
     # Only admins can open the /admin pages. Set it in the database.
     field :role, Ecto.Enum, values: [:user, :admin], default: :user
     # The id in the URL of the profile page (see `Octomocto.PublicId`)

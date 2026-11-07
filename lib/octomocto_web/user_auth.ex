@@ -6,6 +6,7 @@ defmodule OctomoctoWeb.UserAuth do
 
   alias Octomocto.Accounts
   alias Octomocto.Accounts.Scope
+  alias Octomocto.Notifications
 
   # Session tokens do not expire, but browsers limit cookies to 400 days.
   # Thus we write the cookie again on each request, see `fetch_current_scope_for_user/2`.
@@ -60,7 +61,7 @@ defmodule OctomoctoWeb.UserAuth do
     with {token, conn} <- ensure_user_token(conn),
          {user, _token_inserted_at} <- Accounts.get_user_by_session_token(token) do
       conn
-      |> assign(:current_scope, Scope.for_user(user))
+      |> assign(:current_scope, page_scope(user))
       |> maybe_write_remember_me_cookie(token, %{}, get_session(conn, :user_remember_me))
     else
       nil -> assign(conn, :current_scope, Scope.for_user(nil))
@@ -170,8 +171,16 @@ defmodule OctomoctoWeb.UserAuth do
            Accounts.get_user_by_session_token(token)
          end || {nil, nil}
 
-       Scope.for_user(user)
+       page_scope(user)
      end)}
+  end
+
+  # Sends a guest to the sign-in page. Use it in a `live_session` after
+  # `:mount_current_scope`, for live navigation.
+  def on_mount(:require_authenticated, _params, _session, socket) do
+    if socket.assigns.current_scope,
+      do: {:cont, socket},
+      else: {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/signin")}
   end
 
   # Gives a 404 page to all users who are not admins, also to guests. Use it
@@ -227,4 +236,12 @@ defmodule OctomoctoWeb.UserAuth do
   end
 
   defp maybe_store_return_to(conn), do: conn
+
+  # The scope of a page also has the count of unread notifications, for the header
+  defp page_scope(user) do
+    case Scope.for_user(user) do
+      nil -> nil
+      scope -> %{scope | unread_notifications: Notifications.unread_count(user.id)}
+    end
+  end
 end

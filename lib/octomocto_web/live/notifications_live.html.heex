@@ -1,0 +1,79 @@
+<Layouts.app
+  notices={@notices}
+  flash={@flash}
+  games_played={@games_played}
+  banners={@banners}
+  current_scope={@current_scope}
+  guest_name={@guest_name}
+  guest_public_id={@guest_public_id}
+>
+  <div id="notifications-page" class="mx-auto flex w-full max-w-2xl flex-col gap-6 pt-2 pb-4">
+    <h1 class="text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
+      Notifications
+    </h1>
+
+    <section class="rounded-2xl bg-base-100 p-3 shadow-sm ring-1 ring-base-content/10 sm:p-4">
+      <p
+        :if={@empty?}
+        id="notifications-empty"
+        class="py-6 text-center text-sm text-base-content/50"
+      >
+        No notifications yet. When someone follows you, you see it here.
+      </p>
+      <ul id="notifications-list" phx-update="stream" class="space-y-1">
+        <li
+          :for={{dom_id, notification} <- @streams.notifications}
+          id={dom_id}
+          data-new={to_string(new?(notification, @seen_at))}
+          class={[
+            "flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors",
+            if(new?(notification, @seen_at),
+              do: "bg-orange-500/[0.06] dark:bg-orange-400/[0.08]",
+              else: "hover:bg-base-200/60"
+            )
+          ]}
+        >
+          <% actor = notification.actor %>
+          <.link navigate={~p"/players/#{actor.public_id}"} class="shrink-0">
+            <img
+              :if={actor.avatar_url}
+              src={actor.avatar_url}
+              alt=""
+              class="size-10 rounded-full object-cover"
+            />
+            <span
+              :if={!actor.avatar_url}
+              class="flex size-10 items-center justify-center rounded-full bg-octo-indigo/10 font-semibold text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light"
+            >
+              {String.first(name(actor)) |> String.upcase()}
+            </span>
+          </.link>
+          <p class="min-w-0 flex-1 text-sm">
+            <.player_link player={actor} class="font-medium">{name(actor)}</.player_link>
+            <span class="text-base-content/70">followed you</span>
+            <span class="ms-1 whitespace-nowrap text-xs text-base-content/45 tabular-nums">
+              {ago(notification.inserted_at)}
+            </span>
+          </p>
+          <button
+            :if={actor.id not in @followed_ids}
+            id={"follow-back-#{notification.id}"}
+            type="button"
+            phx-click="follow_back"
+            phx-value-id={notification.id}
+            class="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-octo-indigo px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-octo-indigo/85 active:scale-95"
+          >
+            <.icon name="hero-user-plus" class="size-4" /> Follow back
+          </button>
+          <span
+            :if={actor.id in @followed_ids}
+            id={"following-#{notification.id}"}
+            class="flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium text-base-content/60 ring-1 ring-base-content/15"
+          >
+            <.icon name="hero-check" class="size-4" /> Following
+          </span>
+        </li>
+      </ul>
+    </section>
+  </div>
+</Layouts.app>

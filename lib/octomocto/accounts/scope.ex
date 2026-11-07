@@ -18,7 +18,10 @@ defmodule Octomocto.Accounts.Scope do
 
   alias Octomocto.Accounts.User
 
-  defstruct user: nil
+  # `unread_notifications` is for the dot on the avatar in the header. Only
+  # the pages set it (see `OctomoctoWeb.UserAuth`), so that the other
+  # callers do not read the database.
+  defstruct user: nil, unread_notifications: 0
 
   @doc """
   Creates a scope for the given user.

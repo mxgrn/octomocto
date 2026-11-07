@@ -19,6 +19,7 @@ defmodule Octomocto.Friends do
 
   alias Octomocto.Accounts.User
   alias Octomocto.Friends.Follow
+  alias Octomocto.Notifications
   alias Octomocto.Repo
 
   @doc "The friends of the user: the users who follow the user back."
@@ -45,24 +46,28 @@ defmodule Octomocto.Friends do
   end
 
   @doc """
-  The user `follower_id` follows the user `followed_id`. A follow that
-  exists stays the same. A user cannot follow themself.
+  The user `follower_id` follows the user `followed_id`, and the user
+  `followed_id` gets a notification. A follow that exists stays the same.
+  A user cannot follow themself.
   """
   def follow(same_id, same_id), do: :ok
 
   def follow(follower_id, followed_id) do
-    Repo.insert_all(
-      Follow,
-      [
-        %{
-          follower_id: follower_id,
-          followed_id: followed_id,
-          inserted_at: DateTime.utc_now(:second)
-        }
-      ],
-      on_conflict: :nothing
-    )
+    {count, _} =
+      Repo.insert_all(
+        Follow,
+        [
+          %{
+            follower_id: follower_id,
+            followed_id: followed_id,
+            inserted_at: DateTime.utc_now(:second)
+          }
+        ],
+        on_conflict: :nothing
+      )
 
+    # Only a new follow notifies (see `Octomocto.Notifications`)
+    if count > 0, do: Notifications.followed(follower_id, followed_id)
     :ok
   end
 
@@ -75,6 +80,7 @@ defmodule Octomocto.Friends do
       from f in Follow, where: f.follower_id == ^follower_id and f.followed_id == ^followed_id
     )
 
+    Notifications.unfollowed(follower_id, followed_id)
     :ok
   end
 

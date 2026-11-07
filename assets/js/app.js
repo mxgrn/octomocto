@@ -1118,6 +1118,18 @@ document.querySelectorAll("[data-turnstile-sitekey]").forEach(showTurnstile)
 // On a page without a LiveView
 document.querySelectorAll("#site-banners").forEach(showSiteBanner)
 
+// The dot on the avatar and the count in the menu of the header, which
+// LiveView does not change (see `OctomoctoWeb.UnreadNotifications`)
+window.addEventListener("phx:unread-notifications", ({detail: {count}}) => {
+  const dot = document.getElementById("notifications-dot")
+  const badge = document.getElementById("notifications-count")
+  if (dot) dot.hidden = count === 0
+  if (badge) {
+    badge.hidden = count === 0
+    badge.textContent = count
+  }
+})
+
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 

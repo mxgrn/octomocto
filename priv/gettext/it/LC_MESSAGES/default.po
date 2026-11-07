@@ -314,3 +314,19 @@ msgstr "Dai da mangiare a Octo e Mocto adesso!"
 #, elixir-autogen, elixir-format
 msgid "All sounds"
 msgstr "Tutti i suoni"
+
+#, elixir-autogen, elixir-format
+msgid "All"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Following"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "No results of you and the players you follow."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Notifications"
+msgstr ""

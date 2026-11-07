@@ -100,6 +100,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "en"}
       ] do
       live "/", HomeLive
@@ -144,6 +145,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "pt"}
       ] do
       live "/memory", MemoryLive, :index
@@ -172,6 +174,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "de"}
       ] do
       live "/memory", MemoryLive, :index
@@ -198,6 +201,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "ru"}
       ] do
       live "/memory", MemoryLive, :index
@@ -224,6 +228,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "fr"}
       ] do
       live "/memory", MemoryLive, :index
@@ -250,6 +255,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "uk"}
       ] do
       live "/memory", MemoryLive, :index
@@ -276,6 +282,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "pl"}
       ] do
       live "/memory", MemoryLive, :index
@@ -302,6 +309,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "it"}
       ] do
       live "/memory", MemoryLive, :index
@@ -328,6 +336,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "es"}
       ] do
       live "/memory", MemoryLive, :index
@@ -354,6 +363,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "ja"}
       ] do
       live "/memory", MemoryLive, :index
@@ -380,6 +390,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "vi"}
       ] do
       live "/memory", MemoryLive, :index
@@ -406,6 +417,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "tr"}
       ] do
       live "/memory", MemoryLive, :index
@@ -432,6 +444,7 @@ defmodule OctomoctoWeb.Router do
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
         OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.Locale, "ar"}
       ] do
       live "/memory", MemoryLive, :index
@@ -456,6 +469,7 @@ defmodule OctomoctoWeb.Router do
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GamesPlayed,
+        OctomoctoWeb.UnreadNotifications,
         {OctomoctoWeb.UserAuth, :require_admin}
       ] do
       live "/", DashboardLive
@@ -505,6 +519,22 @@ defmodule OctomoctoWeb.Router do
     put "/settings", UserSettingsController, :update
     get "/settings/confirm-email/:token", UserSettingsController, :confirm_email
     get "/settings/telegram", UserSettingsController, :connect_telegram
+
+    # Only for signed-in users: guests have no notifications. In English
+    # only, as the profile pages.
+    live_session :authenticated,
+      on_mount: [
+        {OctomoctoWeb.UserAuth, :mount_current_scope},
+        {OctomoctoWeb.UserAuth, :require_authenticated},
+        OctomoctoWeb.GamesPlayed,
+        OctomoctoWeb.GuestName,
+        OctomoctoWeb.OnlineUsers,
+        OctomoctoWeb.Notices,
+        OctomoctoWeb.UnreadNotifications,
+        {OctomoctoWeb.Locale, "en"}
+      ] do
+      live "/notifications", NotificationsLive
+    end
   end
 
   scope "/", OctomoctoWeb do

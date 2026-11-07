@@ -312,3 +312,19 @@ msgstr "OctoとMoctoに今すぐごはんをあげよう！"
 #, elixir-autogen, elixir-format
 msgid "All sounds"
 msgstr "すべての音"
+
+#, elixir-autogen, elixir-format
+msgid "All"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Following"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "No results of you and the players you follow."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Notifications"
+msgstr ""

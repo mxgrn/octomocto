@@ -217,22 +217,44 @@ defmodule OctomoctoWeb.Layouts do
 
             <.account_menu :if={@current_scope} id="user-menu">
               <:label>
-                <img
-                  :if={@current_scope.user.avatar_url}
-                  src={@current_scope.user.avatar_url}
-                  alt=""
-                  class="size-8 rounded-full"
-                />
-                <span
-                  :if={!@current_scope.user.avatar_url}
-                  id="user-menu-initials"
-                  aria-hidden="true"
-                  class="flex size-8 items-center justify-center rounded-full bg-octo-indigo text-sm font-semibold text-white"
-                >
-                  {initials(user_menu_name(@current_scope.user))}
+                <span class="relative">
+                  <img
+                    :if={@current_scope.user.avatar_url}
+                    src={@current_scope.user.avatar_url}
+                    alt=""
+                    class="size-8 rounded-full"
+                  />
+                  <span
+                    :if={!@current_scope.user.avatar_url}
+                    id="user-menu-initials"
+                    aria-hidden="true"
+                    class="flex size-8 items-center justify-center rounded-full bg-octo-indigo text-sm font-semibold text-white"
+                  >
+                    {initials(user_menu_name(@current_scope.user))}
+                  </span>
+                  <%!-- `app.js` shows and hides it (see `OctomoctoWeb.UnreadNotifications`) --%>
+                  <span
+                    id="notifications-dot"
+                    hidden={@current_scope.unread_notifications == 0}
+                    class="absolute -end-0.5 -top-0.5 size-3 rounded-full bg-orange-500 ring-2 ring-base-100"
+                  />
                 </span>
                 <span class="sr-only">{user_menu_name(@current_scope.user)}</span>
               </:label>
+              <.link
+                id="notifications-link"
+                href={~p"/notifications"}
+                class="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+              >
+                {gettext("Notifications")}
+                <span
+                  id="notifications-count"
+                  hidden={@current_scope.unread_notifications == 0}
+                  class="min-w-5 rounded-full bg-orange-500 px-1.5 text-center text-xs font-semibold leading-5 text-white tabular-nums"
+                >
+                  {@current_scope.unread_notifications}
+                </span>
+              </.link>
               <.link
                 id="profile-link"
                 navigate={~p"/players/#{@current_scope.user.public_id}"}
