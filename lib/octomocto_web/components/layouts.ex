@@ -220,6 +220,17 @@ defmodule OctomoctoWeb.Layouts do
                 <.icon name="hero-user-circle" class="-m-1 size-10" />
                 <span class="sr-only">{@guest_name}</span>
               </:label>
+              <div class="border-b border-base-300 pb-1">
+                <.link
+                  id="sign-in-link"
+                  href={
+                    OctomoctoWeb.Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/signin")
+                  }
+                  class="block rounded-lg px-3 py-2 font-medium text-octo-indigo transition hover:bg-base-200"
+                >
+                  {gettext("Sign in")}
+                </.link>
+              </div>
               <%!-- Notifications and Settings show the sign-in forms to a guest --%>
               <.link
                 id="notifications-link"
@@ -657,7 +668,8 @@ defmodule OctomoctoWeb.Layouts do
             class="border-b border-base-300 pb-1"
           />
           {render_slot(@inner_block)}
-          <.theme_row :if={@theme_last} class="border-t border-base-300 pt-3" />
+          <%!-- The help links above it have the divider --%>
+          <.theme_row :if={@theme_last} />
           <.sound_rows :if={@theme_last} id={"#{@id}-sounds"} invite_switch={@invite_switch} />
         </div>
       </div>

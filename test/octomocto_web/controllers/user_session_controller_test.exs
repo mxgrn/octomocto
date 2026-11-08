@@ -20,6 +20,13 @@ defmodule OctomoctoWeb.UserSessionControllerTest do
       refute has_element?(conn, "#sign-in-form")
     end
 
+    test "the guest menu links to the sign-in page in the language of the page", %{conn: conn} do
+      document = conn |> get(~p"/de") |> html_response(200) |> LazyHTML.from_document()
+
+      assert document |> LazyHTML.query("#guest-menu #sign-in-link") |> LazyHTML.attribute("href") ==
+               ["/de/signin"]
+    end
+
     test "does not show the sign-in forms to a signed-in user", %{conn: conn} do
       conn = conn |> log_in_user(user_fixture()) |> get(~p"/")
 
