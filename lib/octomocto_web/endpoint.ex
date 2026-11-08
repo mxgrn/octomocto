@@ -23,13 +23,15 @@ defmodule OctomoctoWeb.Endpoint do
     websocket: [connect_info: [:user_agent, session: @session_options]],
     longpoll: false
 
-  # The Overlap images do not change (new images get new names), and the Elm
-  # code links them by their plain names. So the browser keeps them for one
-  # week and does not ask the server again before it shows them.
+  # The images of the Overlap and Memory cards do not change (new images get
+  # new names), and the game code links them by their plain names. So the
+  # browser keeps them for one week and does not ask the server again before
+  # it shows them.
   plug Plug.Static,
-    at: "/images/overlap",
-    from: {:octomocto, "priv/static/images/overlap"},
+    at: "/images",
+    from: {:octomocto, "priv/static/images"},
     gzip: not code_reloading?,
+    only: ~w(overlap memory),
     cache_control_for_etags: "public, max-age=604800"
 
   # Serve at "/" the static files from "priv/static" directory.
