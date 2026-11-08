@@ -354,3 +354,7 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "We cannot find this page"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "FAQ"
+msgstr ""

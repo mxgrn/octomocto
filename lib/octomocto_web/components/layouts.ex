@@ -228,6 +228,7 @@ defmodule OctomoctoWeb.Layouts do
               >
                 {gettext("Profile")}
               </.link>
+              <.help_links />
               <div id="guest-sign-in" class="space-y-3 px-3 pt-1 pb-3">
                 <p class="text-center text-base-content/70">
                   {gettext("Sign in to change your name")}
@@ -290,6 +291,7 @@ defmodule OctomoctoWeb.Layouts do
               >
                 {gettext("Settings")}
               </.link>
+              <.help_links />
               <.link
                 id="sign-out-link"
                 href={~p"/signout"}
@@ -368,13 +370,6 @@ defmodule OctomoctoWeb.Layouts do
           </span>
           {ngettext("game played", "games played", games_played(@games_played))}
         </.link>
-        <a
-          id="suggest-game-link"
-          href="mailto:hi@octomocto.com"
-          class="transition hover:text-base-content"
-        >
-          {gettext("Suggest a game")}
-        </a>
         <.link
           id="privacy-link"
           navigate={~p"/privacy"}
@@ -658,6 +653,28 @@ defmodule OctomoctoWeb.Layouts do
         </div>
       </div>
     </nav>
+    """
+  end
+
+  # The help links of the account menu, in their own section
+  defp help_links(assigns) do
+    ~H"""
+    <div id="help-links" class="space-y-1 border-y border-base-300 py-1 first:border-t-0 first:pt-0">
+      <.link
+        id="faq-link"
+        href={OctomoctoWeb.Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/faq")}
+        class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+      >
+        {gettext("FAQ")}
+      </.link>
+      <a
+        id="suggest-game-link"
+        href="mailto:hi@octomocto.com"
+        class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+      >
+        {gettext("Suggest a game")}
+      </a>
+    </div>
     """
   end
 

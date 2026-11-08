@@ -1,0 +1,140 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#, elixir-autogen, elixir-format
+msgid "A private game shows nowhere. Only people with the link can join it."
+msgstr "Ein privates Spiel erscheint nirgends. Nur Leute mit dem Link können beitreten."
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "Beste Ergebnisse"
+
+#, elixir-autogen, elixir-format
+msgid "Can I suggest a game or report a bug?"
+msgstr "Kann ich ein Spiel vorschlagen oder einen Fehler melden?"
+
+#, elixir-autogen, elixir-format
+msgid "Follow other players and compare your best results with theirs. Get a notification when someone follows you."
+msgstr "Folge anderen Spielern und vergleiche deine besten Ergebnisse mit ihren. Du bekommst eine Benachrichtigung, wenn dir jemand folgt."
+
+#, elixir-autogen, elixir-format
+msgid "Follow players"
+msgstr "Spielern folgen"
+
+#, elixir-autogen, elixir-format
+msgid "Frequently asked questions"
+msgstr "Häufige Fragen"
+
+#, elixir-autogen, elixir-format
+msgid "Friends"
+msgstr "Freunde"
+
+#, elixir-autogen, elixir-format
+msgid "Friends need an account. When you join a game from a link that another player sent you, you two become friends at the end of the game. A game from the list of open games does not make friends, because there you play with strangers."
+msgstr "Für Freunde brauchst du ein Konto. Wenn du einem Spiel über einen Link beitrittst, den dir ein anderer Spieler geschickt hat, werdet ihr am Ende des Spiels Freunde. Ein Spiel aus der Liste offener Spiele macht keine Freunde, denn dort spielst du mit Fremden."
+
+#, elixir-autogen, elixir-format
+msgid "Guests get a random name. Choose your own name and a short link to your profile, with your results in all games."
+msgstr "Gäste bekommen einen zufälligen Namen. Wähle deinen eigenen Namen und einen kurzen Link zu deinem Profil, mit deinen Ergebnissen in allen Spielen."
+
+#, elixir-autogen, elixir-format
+msgid "How do I play with a friend?"
+msgstr "Wie spiele ich mit einem Freund?"
+
+#, elixir-autogen, elixir-format
+msgid "How do friends and follows work?"
+msgstr "Wie funktionieren Freunde und Folgen?"
+
+#, elixir-autogen, elixir-format
+msgid "Is Octomocto free?"
+msgstr "Ist Octomocto kostenlos?"
+
+#, elixir-autogen, elixir-format
+msgid "Only friends see when you are online, and only friends can invite you to a game."
+msgstr "Nur Freunde sehen, wann du online bist, und nur Freunde können dich zu einem Spiel einladen."
+
+#, elixir-autogen, elixir-format
+msgid "Open a game, set the number of players and click \"Create game\". Then copy the link of the game and send it to your friends. When they open the link, they join your game. Nobody needs an account."
+msgstr "Öffne ein Spiel, wähle die Zahl der Spieler und klicke auf „Spiel erstellen“. Dann kopiere den Link des Spiels und schick ihn deinen Freunden. Wenn sie den Link öffnen, treten sie deinem Spiel bei. Niemand braucht ein Konto."
+
+#, elixir-autogen, elixir-format
+msgid "Play from a shared game link, and you become friends with the player who sent it. See which friends are online and invite them to your game."
+msgstr "Spiel über einen geteilten Link, und du wirst mit dem Spieler befreundet, der ihn geschickt hat. Sieh, welche Freunde online sind, und lade sie zu deinem Spiel ein."
+
+#, elixir-autogen, elixir-format
+msgid "Questions"
+msgstr "Fragen"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Anmelden"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in on your phone, tablet and computer, and continue where you stopped. Your results, campaign levels and friends go with you."
+msgstr "Melde dich auf Handy, Tablet und Computer an und mach dort weiter, wo du aufgehört hast. Deine Ergebnisse, Kampagnenlevel und Freunde kommen mit."
+
+#, elixir-autogen, elixir-format
+msgid "Sign-in is free and takes a few seconds. Sign in with Telegram, or get a sign-in link by email. You do not need a password."
+msgstr "Die Anmeldung ist kostenlos und dauert ein paar Sekunden. Melde dich mit Telegram an oder hol dir einen Anmeldelink per E-Mail. Du brauchst kein Passwort."
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "Unterstütze den Autor"
+
+#, elixir-autogen, elixir-format
+msgid "We keep as little data as possible."
+msgstr "Wir speichern so wenige Daten wie möglich."
+
+#, elixir-autogen, elixir-format
+msgid "What are public and private games?"
+msgstr "Was sind öffentliche und private Spiele?"
+
+#, elixir-autogen, elixir-format
+msgid "When you create a game, you choose \"Public\" or \"Private\". A public game shows in the list of open games until it is full, so anyone can join it. Other people can also watch it while you play."
+msgstr "Wenn du ein Spiel erstellst, wählst du „Öffentlich“ oder „Privat“. Ein öffentliches Spiel steht in der Liste offener Spiele, bis es voll ist, also kann jeder beitreten. Andere können auch zuschauen, während du spielst."
+
+#, elixir-autogen, elixir-format
+msgid "Why sign in?"
+msgstr "Warum anmelden?"
+
+#, elixir-autogen, elixir-format
+msgid "Yes, please! Send an email with your idea or with the steps that cause the bug. You can also click \"Suggest a game\" in the menu."
+msgstr "Ja, gern! Schick eine E-Mail mit deiner Idee oder mit den Schritten, die zum Fehler führen. Du kannst auch im Menü auf „Spiel vorschlagen“ klicken."
+
+#, elixir-autogen, elixir-format
+msgid "Yes. All games are free, with no ads and no paid features. Octomocto is made by one indie developer, and support on Patreon pays for the servers and the time to make new games."
+msgstr "Ja. Alle Spiele sind kostenlos, ohne Werbung und ohne bezahlte Funktionen. Octomocto macht ein einzelner Indie-Entwickler, und die Unterstützung auf Patreon bezahlt die Server und die Zeit für neue Spiele."
+
+#, elixir-autogen, elixir-format
+msgid "You can also follow any player: click \"Follow\" on their profile. A follow is one-way. It adds the player to the \"Following\" filter of the best results, so you can compare your results with theirs. When two players follow each other, they are friends too."
+msgstr "Du kannst auch jedem Spieler folgen: Klicke auf seinem Profil auf „Follow“. Folgen geht nur in eine Richtung. Der Spieler kommt in den Filter „Gefolgt“ der besten Ergebnisse, damit du deine Ergebnisse mit seinen vergleichen kannst. Wenn zwei Spieler einander folgen, sind sie auch Freunde."
+
+#, elixir-autogen, elixir-format
+msgid "You can also play with other people: join a game from the list of open games on the front page or on the page of a game."
+msgstr "Du kannst auch mit anderen spielen: Tritt einem Spiel aus der Liste offener Spiele auf der Startseite oder auf der Seite eines Spiels bei."
+
+#, elixir-autogen, elixir-format
+msgid "You can play all games as a guest. But a guest exists only in one browser: when you clear its data or open Octomocto on another device, you start again as a new guest. When you sign in, you get these benefits:"
+msgstr "Du kannst alle Spiele als Gast spielen. Aber ein Gast existiert nur in einem Browser: Wenn du seine Daten löschst oder Octomocto auf einem anderen Gerät öffnest, fängst du als neuer Gast von vorn an. Wenn du dich anmeldest, bekommst du diese Vorteile:"
+
+#, elixir-autogen, elixir-format
+msgid "Your best results go into the leaderboard of each game. Guest results show only in the latest games."
+msgstr "Deine besten Ergebnisse kommen in die Bestenliste jedes Spiels. Ergebnisse von Gästen erscheinen nur bei den letzten Spielen."
+
+#, elixir-autogen, elixir-format
+msgid "Your name and profile"
+msgstr "Dein Name und Profil"
+
+#, elixir-autogen, elixir-format
+msgid "Your progress on all devices"
+msgstr "Dein Fortschritt auf allen Geräten"

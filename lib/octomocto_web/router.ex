@@ -75,6 +75,7 @@ defmodule OctomoctoWeb.Router do
     get "/privacy", PageController, :privacy
     get "/terms", PageController, :terms
     get "/donate", PageController, :donate
+    get "/faq", PageController, :faq
     # The language switcher in the footer
     get "/locale/:locale", LocaleController, :switch
     get "/astronaut", AstronautController, :index
@@ -175,6 +176,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
+    get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
     post "/signin", UserSessionController, :create
 
@@ -208,6 +210,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
+    get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
     post "/signin", UserSessionController, :create
 
@@ -241,6 +244,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
+    get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
     post "/signin", UserSessionController, :create
 
@@ -274,6 +278,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
+    get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
     post "/signin", UserSessionController, :create
 
@@ -307,6 +312,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
+    get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
     post "/signin", UserSessionController, :create
 
@@ -340,6 +346,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
+    get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
     post "/signin", UserSessionController, :create
 
@@ -373,6 +380,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
+    get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
     post "/signin", UserSessionController, :create
 
@@ -406,6 +414,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
+    get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
     post "/signin", UserSessionController, :create
 
@@ -439,6 +448,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
+    get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
     post "/signin", UserSessionController, :create
 
@@ -472,6 +482,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
+    get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
     post "/signin", UserSessionController, :create
 
@@ -505,6 +516,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
+    get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
     post "/signin", UserSessionController, :create
 
@@ -538,6 +550,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
+    get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
     post "/signin", UserSessionController, :create
 

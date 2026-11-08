@@ -56,7 +56,20 @@ defmodule OctomoctoWeb.SitemapController do
       url(~p"/graze"),
       url(~p"/privacy"),
       url(~p"/terms"),
-      url(~p"/donate")
+      url(~p"/donate"),
+      url(~p"/faq"),
+      url(~p"/pt/faq"),
+      url(~p"/de/faq"),
+      url(~p"/ru/faq"),
+      url(~p"/fr/faq"),
+      url(~p"/uk/faq"),
+      url(~p"/pl/faq"),
+      url(~p"/it/faq"),
+      url(~p"/es/faq"),
+      url(~p"/ja/faq"),
+      url(~p"/vi/faq"),
+      url(~p"/tr/faq"),
+      url(~p"/ar/faq")
     ]
   end
 

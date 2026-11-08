@@ -109,4 +109,88 @@ defmodule OctomoctoWeb.PageHTML do
     </article>
     """
   end
+
+  @doc """
+  Renders one benefit in a list of the FAQ page, with an icon, a title and a
+  short text.
+  """
+  attr :id, :string, required: true
+  attr :icon, :string, required: true
+  slot :title, required: true
+  slot :inner_block, required: true
+
+  def faq_benefit(assigns) do
+    ~H"""
+    <li
+      id={@id}
+      class="flex gap-3 rounded-2xl bg-base-200/60 p-4 ring-1 ring-base-content/5 transition hover:bg-base-200"
+    >
+      <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-octo-indigo/10 text-octo-indigo dark:text-octo-indigo-light">
+        <.icon name={@icon} class="size-5" />
+      </span>
+      <div class="space-y-1">
+        <h3 class="font-semibold text-base-content">{render_slot(@title)}</h3>
+        <p class="text-sm leading-relaxed text-base-content/70">{render_slot(@inner_block)}</p>
+      </div>
+    </li>
+    """
+  end
+
+  @doc """
+  The questions of the FAQ page as `{id, question}`, in the order of the
+  page. The table of contents and the headings of the answers use them.
+  """
+  def faq_questions do
+    [
+      {"faq-free", dgettext("faq", "Is Octomocto free?")},
+      {"faq-play-with-friends", dgettext("faq", "How do I play with a friend?")},
+      {"faq-public-private", dgettext("faq", "What are public and private games?")},
+      {"faq-why-sign-in", dgettext("faq", "Why sign in?")},
+      {"faq-friends-follow", dgettext("faq", "How do friends and follows work?")},
+      {"faq-suggest", dgettext("faq", "Can I suggest a game or report a bug?")}
+    ]
+  end
+
+  @doc """
+  Renders one question of the FAQ page, with the question as a heading that
+  links to itself and the answer below.
+  """
+  attr :id, :string, required: true
+  slot :inner_block, required: true
+
+  def faq_question(assigns) do
+    assigns = assign(assigns, :question, :proplists.get_value(assigns.id, faq_questions()))
+
+    ~H"""
+    <section
+      id={@id}
+      class="scroll-mt-6 space-y-3 border-t border-base-content/10 pt-8 leading-relaxed text-base-content/70"
+    >
+      <h2 class="text-xl font-semibold tracking-tight text-base-content">
+        <a
+          href={"##{@id}"}
+          class="transition hover:text-octo-indigo dark:hover:text-octo-indigo-light"
+        >
+          {@question}
+        </a>
+      </h2>
+      {render_slot(@inner_block)}
+    </section>
+    """
+  end
+
+  @doc "Renders a link inside an answer of the FAQ page."
+  attr :href, :string, required: true
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def faq_link(assigns) do
+    ~H"""
+    <.link
+      href={@href}
+      class="font-medium text-octo-indigo underline underline-offset-2 transition hover:text-octo-indigo/80 dark:text-octo-indigo-light"
+      {@rest}
+    >{render_slot(@inner_block)}</.link>
+    """
+  end
 end

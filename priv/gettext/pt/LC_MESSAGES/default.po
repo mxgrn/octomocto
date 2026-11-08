@@ -338,3 +338,23 @@ msgid "game played"
 msgid_plural "games played"
 msgstr[0] "jogo jogado"
 msgstr[1] "jogos jogados"
+
+#, elixir-autogen, elixir-format
+msgid "Go to the home page"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Page not found"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The link is incorrect, or the page does not exist any more."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "We cannot find this page"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "FAQ"
+msgstr "Perguntas frequentes"
