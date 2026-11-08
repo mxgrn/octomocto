@@ -74,7 +74,8 @@ defmodule OctomoctoWeb.TrainsLive do
   def handle_params(params, _uri, socket) do
     tab = last_tab(socket.assigns.current_scope)
 
-    if tab in ["campaign", "lobby"] and not Enum.any?(@settings_params, &Map.has_key?(params, &1)) do
+    # The Campaign tab is hidden for now, so only the Lobby tab opens again
+    if tab == "lobby" and not Enum.any?(@settings_params, &Map.has_key?(params, &1)) do
       {:noreply, push_patch(socket, to: ~p"/trains/#{tab}")}
     else
       new_socket =
