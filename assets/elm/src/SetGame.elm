@@ -31,6 +31,7 @@ the same name in one bundle.
 import Browser
 import Browser.Dom
 import Browser.Events
+import Dict exposing (Dict)
 import Html exposing (Html, a, aside, button, div, h1, img, input, li, ol, p, span, text, ul)
 import Html.Attributes exposing (alt, attribute, class, classList, disabled, href, id, readonly, rel, src, style, target, value)
 import Html.Events exposing (onClick)
@@ -158,13 +159,16 @@ type alias NextGame =
 
 type alias Model =
     { gameUrl : String
+    , indexUrl : String
     , settingsUrl : String
 
     -- The settings page of the next game of the match. Nothing for a
     -- game with one player.
     , changeSettingsUrl : Maybe String
     , nextGame : NextGame
+    , donateUrl : String
     , guest : Bool
+    , texts : Texts
     , connection : Connection
     , copied : Bool
 
@@ -210,26 +214,50 @@ type alias Clue =
     }
 
 
+{-| The texts in the language of the page, by the English text (see
+`OctomoctoWeb.SetGameHTML.elm_texts/0`), and the name of each card by its
+number (see `OctomoctoWeb.SetGameHTML.card_names/0`)
+-}
+type alias Texts =
+    { strings : Dict String String
+    , cardNames : Dict Int String
+    }
+
+
 type alias Flags =
     { gameUrl : String
+    , indexUrl : String
     , settingsUrl : String
 
     -- The settings page of the next game of the match. Nothing for a
     -- game with one player.
     , changeSettingsUrl : Maybe String
     , nextGame : NextGame
+    , donateUrl : String
     , guest : Bool
     , muted : Bool
+    , texts : Decode.Value
+    , cardNames : Decode.Value
     }
 
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { gameUrl = flags.gameUrl
+      , indexUrl = flags.indexUrl
       , settingsUrl = flags.settingsUrl
       , changeSettingsUrl = flags.changeSettingsUrl
       , nextGame = flags.nextGame
+      , donateUrl = flags.donateUrl
       , guest = flags.guest
+      , texts =
+            { strings = Decode.decodeValue (Decode.dict Decode.string) flags.texts |> Result.withDefault Dict.empty
+            , cardNames =
+                Decode.decodeValue (Decode.list Decode.string) flags.cardNames
+                    |> Result.withDefault []
+                    |> List.indexedMap Tuple.pair
+                    |> Dict.fromList
+            }
       , connection = Connecting
       , copied = False
       , selected = []
@@ -455,7 +483,9 @@ newClue first others =
 
 
 {-| One clue for each feature of a set, for example "Each of them is red"
-or "Each of them has a different shape"
+or "Each of them has a different shape". The clues are in English, and the
+view translates them. Thus each clue must also be in
+`OctomoctoWeb.SetGameHTML.elm_texts/0`.
 -}
 clues : List Card -> List String
 clues cards =
@@ -527,7 +557,8 @@ tails cards =
 
 
 {-| One sentence for each feature that two cards have and the third card
-does not have, for example "Two cards are red, but one is green."
+does not have, for example "Two cards are red, but one is green." The
+sentences are in English, as the clues are (see `clues`).
 -}
 hints : List Card -> List String
 hints cards =
@@ -816,14 +847,43 @@ subscriptions model =
 -- VIEW
 
 
+{-| The text in the language of the page. Without a translation, the text
+is in English.
+-}
+t : Texts -> String -> String
+t texts english =
+    Dict.get english texts.strings |> Maybe.withDefault english
+
+
+{-| The text in the language of the page, with the values in its `{name}`
+parts.
+-}
+tf : Texts -> String -> List ( String, String ) -> String
+tf texts english values =
+    List.foldl (\( name, value ) result -> String.replace ("{" ++ name ++ "}") value result) (t texts english) values
+
+
+{-| The text in the language of the page, with the link in its `{name}`
+part
+-}
+withLink : Texts -> String -> String -> Html msg -> List (Html msg)
+withLink texts english name link =
+    case String.split ("{" ++ name ++ "}") (t texts english) of
+        [ before, after ] ->
+            [ text before, link, text after ]
+
+        _ ->
+            [ text (t texts english), link ]
+
+
 view : Model -> Html Msg
 view model =
     case model.connection of
         Connecting ->
-            p [ id "set-connecting", class "py-24 text-center opacity-60" ] [ text "Joining the game…" ]
+            p [ id "set-connecting", class "py-24 text-center opacity-60" ] [ text (t model.texts "Joining the game…") ]
 
         Failed reason ->
-            p [ id "set-failed", class "py-24 text-center text-red-600" ] [ text ("Could not join the game: " ++ reason) ]
+            p [ id "set-failed", class "py-24 text-center text-red-600" ] [ text (tf model.texts "Could not join the game: {reason}" [ ( "reason", reason ) ]) ]
 
         Joined me game ->
             viewGame model me game
@@ -832,6 +892,9 @@ view model =
 viewGame : Model -> Me -> Game -> Html Msg
 viewGame model me game =
     let
+        texts =
+            model.texts
+
         layout =
             tableLayout model game
 
@@ -860,25 +923,25 @@ viewGame model me game =
                         [ a
                             [ id "set-home"
                             , href "/"
-                            , class "mr-1 shrink-0 transition lg:mr-0"
+                            , class "me-1 shrink-0 transition lg:me-0"
                             ]
                             [ img [ src "/images/mark.svg", alt "octomocto", class "h-8 w-auto dark:hidden lg:h-9" ] []
                             , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block lg:h-9" ] []
                             ]
                         , h1 [ class "text-xl font-semibold tracking-tight lg:text-2xl" ]
-                            [ a [ id "set-title-link", href "/set", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Set" ] ]
-                        , viewWatchers (me == Nothing) model.watchers
+                            [ a [ id "set-title-link", href model.indexUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text (t texts "Set") ] ]
+                        , viewWatchers texts (me == Nothing) model.watchers
                         ]
                     , p [ class "hidden text-sm opacity-60 lg:block" ]
-                        [ text "Find 3 cards where each feature is all the same or all different." ]
+                        [ text (t texts "Find 3 cards where each feature is all the same or all different.") ]
                     ]
                 , viewClock model game
                 , if canPlay me game then
-                    viewClueButton model.clue
+                    viewClueButton texts model.clue
 
                   else
                     text ""
-                , viewMenu (game.editing /= Nothing) model.muted (me /= Nothing)
+                , viewMenu texts (game.editing /= Nothing) model.muted (me /= Nothing)
                 ]
 
             -- The link is only for the players who did not join yet
@@ -888,20 +951,20 @@ viewGame model me game =
               else
                 text ""
             , if List.length game.players > 1 then
-                viewScores me game
+                viewScores texts me game
 
               else
                 text ""
-            , viewLastSet me game
+            , viewLastSet texts me game
             ]
         , div [ class "min-w-0 flex-1" ]
             [ div [ class "relative mx-auto", style "width" width ]
                 [ viewTable model me game layout
                 , if game.waiting then
-                    viewWaiting game
+                    viewWaiting texts game
 
                   else if game.finished then
-                    viewResult model.settingsUrl model.changeSettingsUrl model.nextGame model.guest me game
+                    viewResult model me game
 
                   else if countdown > 0 || game.table == [] then
                     viewCountdown countdown
@@ -930,7 +993,7 @@ viewNotes model me game width =
     let
         clue =
             if canPlay me game then
-                viewClues model.clue
+                viewClues model.texts model.clue
 
             else
                 text ""
@@ -940,7 +1003,7 @@ viewNotes model me game width =
 
     else
         div [ class "mx-auto mt-2 flex flex-col gap-2", style "width" width ]
-            [ clue, viewHint model.hint ]
+            [ clue, viewHint model.texts model.hint ]
 
 
 {-| The number of clues on the screen
@@ -957,16 +1020,16 @@ clueLines model me game =
 {-| Why the last wrong set is not a set. It is keyed, so that it pops in
 again for each wrong set.
 -}
-viewHint : Maybe ( Int, String ) -> Html Msg
-viewHint hint =
+viewHint : Texts -> Maybe ( Int, String ) -> Html Msg
+viewHint texts hint =
     case hint of
         Just ( count, sentence ) ->
             Html.Keyed.node "div"
                 []
                 [ ( String.fromInt count
                   , p [ id "set-hint", class "set-last-pop text-center text-sm text-slate-500 dark:text-slate-400" ]
-                        [ span [ class "hero-light-bulb mr-1 size-4 align-[-3px] text-amber-500" ] []
-                        , text sentence
+                        [ span [ class "hero-light-bulb me-1 size-4 align-[-3px] text-amber-500" ] []
+                        , text (t texts sentence)
                         ]
                   )
                 ]
@@ -1116,8 +1179,8 @@ tableWidth model me game layout =
 
 {-| The number of browsers that only watch the game, when there are any.
 -}
-viewWatchers : Bool -> Int -> Html Msg
-viewWatchers watching count =
+viewWatchers : Texts -> Bool -> Int -> Html Msg
+viewWatchers texts watching count =
     if watching || count > 0 then
         span
             [ id "set-watchers"
@@ -1128,10 +1191,10 @@ viewWatchers watching count =
                 ]
             , Html.Attributes.title
                 (if watching then
-                    "You are watching this game."
+                    t texts "You are watching this game."
 
                  else
-                    "Watchers: " ++ String.fromInt count
+                    tf texts "Watchers: {count}" [ ( "count", String.fromInt count ) ]
                 )
             ]
             [ span [ class "hero-eye size-4" ] [], text (String.fromInt (max count 1)) ]
@@ -1144,8 +1207,8 @@ viewWatchers watching count =
 On a small screen, only the icon shows, but not in the column of a screen
 that is wider than tall.
 -}
-viewClueButton : Maybe Clue -> Html Msg
-viewClueButton clue =
+viewClueButton : Texts -> Maybe Clue -> Html Msg
+viewClueButton texts clue =
     let
         shown =
             Maybe.map .shown clue |> Maybe.withDefault []
@@ -1154,14 +1217,16 @@ viewClueButton clue =
             Maybe.map (\c -> c.next /= []) clue |> Maybe.withDefault True
 
         label =
-            if shown == [] then
-                "Hint"
+            t texts
+                (if shown == [] then
+                    "Hint"
 
-            else if more then
-                "Next hint"
+                 else if more then
+                    "Next hint"
 
-            else
-                "No more hints"
+                 else
+                    "No more hints"
+                )
     in
     button
         [ id "set-hint-button"
@@ -1178,29 +1243,29 @@ viewClueButton clue =
 {-| The clues from the Hint button. Each clue is keyed, so that only the new
 clue pops in.
 -}
-viewClues : Maybe Clue -> Html Msg
-viewClues clue =
+viewClues : Texts -> Maybe Clue -> Html Msg
+viewClues texts clue =
     case Maybe.map .shown clue |> Maybe.withDefault [] of
         [] ->
             text ""
 
         shown ->
             Html.Keyed.ul [ id "set-clues", class "flex flex-col gap-1 rounded-2xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25" ]
-                (List.map (\sentence -> ( sentence, li [ class "set-last-pop" ] [ text sentence ] )) shown)
+                (List.map (\sentence -> ( sentence, li [ class "set-last-pop" ] [ text (t texts sentence) ] )) shown)
 
 
 {-| Starts a new table for all players, also during a game. On a small
 screen, only the icon shows, but not in the column of a screen that is wider
 than tall.
 -}
-viewMenu : Bool -> Bool -> Bool -> Html Msg
-viewMenu locked muted player =
+viewMenu : Texts -> Bool -> Bool -> Bool -> Html Msg
+viewMenu texts locked muted player =
     Html.node "octo-game-menu"
         [ class "relative shrink-0 lg:order-7 lg:self-start"
-        , attribute "menu-label" "Menu"
-        , attribute "restart-label" "Restart game"
-        , attribute "sound-on-label" "Turn the sounds on"
-        , attribute "sound-off-label" "Turn the sounds off"
+        , attribute "menu-label" (t texts "Menu")
+        , attribute "restart-label" (t texts "Restart game")
+        , attribute "sound-on-label" (t texts "Turn the sounds on")
+        , attribute "sound-off-label" (t texts "Turn the sounds off")
         , attribute "locked" (boolAttribute locked)
         , attribute "muted" (boolAttribute muted)
         , attribute "player" (boolAttribute player)
@@ -1212,7 +1277,7 @@ viewMenu locked muted player =
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:order-3 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 ps-4 text-sm ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:order-3 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:ps-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "set-link"
             , readonly True
@@ -1226,11 +1291,13 @@ viewShareLink model =
             , onClick CopyLink
             ]
             [ text
-                (if model.copied then
-                    "Copied!"
+                (t model.texts
+                    (if model.copied then
+                        "Copied!"
 
-                 else
-                    "Copy link"
+                     else
+                        "Copy link"
+                    )
                 )
             ]
         ]
@@ -1260,9 +1327,9 @@ viewClock model game =
                 , span [ id valueId, class ("text-lg leading-tight tabular-nums lg:text-3xl " ++ valueClass) ] [ text value ]
                 ]
     in
-    div [ id "set-clock", class "ml-auto flex gap-4 pr-2 max-lg:landscape:ml-0 max-lg:landscape:gap-6 max-lg:landscape:pr-0 max-lg:landscape:pl-2 lg:order-2 lg:ml-0 lg:grid lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10" ]
-        [ stat "time" "set-time" "font-light text-slate-700 dark:text-slate-100" (formatTime elapsedMs)
-        , stat "deck" "set-deck-left" "font-bold text-octo-indigo dark:text-octo-indigo-light" (String.fromInt game.deckLeft)
+    div [ id "set-clock", class "ms-auto flex gap-4 pe-2 max-lg:landscape:ms-0 max-lg:landscape:gap-6 max-lg:landscape:pe-0 max-lg:landscape:ps-2 lg:order-2 lg:ms-0 lg:grid lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pe-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10" ]
+        [ stat (t model.texts "time") "set-time" "font-light text-slate-700 dark:text-slate-100" (formatTime elapsedMs)
+        , stat (t model.texts "deck") "set-deck-left" "font-bold text-octo-indigo dark:text-octo-indigo-light" (String.fromInt game.deckLeft)
         ]
 
 
@@ -1279,8 +1346,8 @@ formatTime ms =
 
 {-| The players in the order in which they joined, with the sets they found
 -}
-viewScores : Me -> Game -> Html Msg
-viewScores me game =
+viewScores : Texts -> Me -> Game -> Html Msg
+viewScores texts me game =
     ul [ id "set-scores", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:order-4 lg:flex-col" ]
         (List.map
             (\player ->
@@ -1290,7 +1357,7 @@ viewScores me game =
                     , classList [ ( "opacity-50", player.away ) ]
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "max-lg:landscape:flex-1 lg:flex-1" ] [ text (playerName me player) ]
+                    , span [ class "max-lg:landscape:flex-1 lg:flex-1" ] [ text (playerName texts me player) ]
                     , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
                     ]
             )
@@ -1298,13 +1365,20 @@ viewScores me game =
         )
 
 
-playerName : Me -> Player -> String
-playerName me player =
+playerName : Texts -> Me -> Player -> String
+playerName texts me player =
     if isMe me player then
-        Maybe.withDefault player.colorName player.name ++ " (you)"
+        tf texts "{name} (you)" [ ( "name", shortName texts player ) ]
 
     else
-        Maybe.withDefault player.colorName player.name
+        shortName texts player
+
+
+{-| The name of a signed-in player, or the color of a guest
+-}
+shortName : Texts -> Player -> String
+shortName texts player =
+    Maybe.withDefault (t texts player.colorName) player.name
 
 
 {-| The last set that a player found, in small cards. With more than one
@@ -1312,8 +1386,8 @@ player, a dot in the color of the player shows who found it. The set is
 keyed, so that it pops in again for each new set. On a small screen that is
 taller than wide, the label is at the left of the cards, so the box is low.
 -}
-viewLastSet : Me -> Game -> Html Msg
-viewLastSet me game =
+viewLastSet : Texts -> Me -> Game -> Html Msg
+viewLastSet texts me game =
     case game.lastSet of
         Just found ->
             let
@@ -1322,11 +1396,11 @@ viewLastSet me game =
             in
             div [ id "set-last", class "flex items-center gap-3 rounded-2xl bg-white p-2 shadow-sm max-lg:landscape:block max-lg:landscape:p-3 lg:order-6 lg:block lg:p-3 ring-1 ring-slate-200 dark:bg-white/5 dark:shadow-none dark:ring-white/10" ]
                 [ p [ class "flex min-w-0 flex-1 items-center gap-2 text-xs font-medium max-lg:landscape:mb-2 lg:mb-2 tracking-wide text-slate-400 uppercase" ]
-                    (text "last set"
+                    (text (t texts "last set")
                         :: (case ( finder, List.length game.players > 1 ) of
                                 ( Just player, True ) ->
                                     [ span [ class "size-2 rounded-full", style "background" player.color ] []
-                                    , span [ class "truncate tracking-normal normal-case text-slate-500 dark:text-slate-400" ] [ text (playerName me player) ]
+                                    , span [ class "truncate tracking-normal normal-case text-slate-500 dark:text-slate-400" ] [ text (playerName texts me player) ]
                                     ]
 
                                 _ ->
@@ -1390,34 +1464,17 @@ viewCard model playable card =
             ]
         , Press.onPress (Pick card)
         , Press.onKeyClick (Pick card)
-        , Html.Attributes.attribute "aria-label" (cardName card)
+        , Html.Attributes.attribute "aria-label" (cardName model.texts card)
         ]
         [ div [ class "set-card-face" ] [ cardImage card ] ]
 
 
-{-| For example, "2 green striped ovals"
+{-| For example, "2 green striped ovals". The names come from the server
+in the language of the page.
 -}
-cardName : Card -> String
-cardName card =
-    let
-        count =
-            feature 0 card + 1
-
-        pick3 index names =
-            List.drop (feature index card) names |> List.head |> Maybe.withDefault ""
-    in
-    String.join " "
-        [ String.fromInt count
-        , pick3 3 [ "red", "green", "purple" ]
-        , pick3 2 [ "solid", "striped", "open" ]
-        , pick3 1 [ "diamond", "oval", "squiggle" ]
-            ++ (if count > 1 then
-                    "s"
-
-                else
-                    ""
-               )
-        ]
+cardName : Texts -> Card -> String
+cardName texts card =
+    Dict.get card texts.cardNames |> Maybe.withDefault ""
 
 
 
@@ -1523,22 +1580,23 @@ shape index attributes =
 
 {-| Covers the table until all players are in.
 -}
-viewWaiting : Game -> Html Msg
-viewWaiting game =
+viewWaiting : Texts -> Game -> Html Msg
+viewWaiting texts game =
     div
         [ id "set-waiting"
         , class "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-octo-navy/80 p-4 text-center text-white"
         ]
-        [ p [ class "text-3xl font-semibold" ] [ text "Waiting for players" ]
+        [ p [ class "text-3xl font-semibold" ] [ text (t texts "Waiting for players") ]
         , p [ id "set-waiting-count", class "text-lg tabular-nums opacity-80" ]
             [ text
-                (String.fromInt (List.length game.players)
-                    ++ " of "
-                    ++ String.fromInt game.playersNeeded
-                    ++ " players are in"
+                (tf texts
+                    "{players} of {needed} players are in"
+                    [ ( "players", String.fromInt (List.length game.players) )
+                    , ( "needed", String.fromInt game.playersNeeded )
+                    ]
                 )
             ]
-        , p [ class "text-sm opacity-60" ] [ text "Send the link to the other players. The game starts when all of them are in." ]
+        , p [ class "text-sm opacity-60" ] [ text (t texts "Send the link to the other players. The game starts when all of them are in.") ]
         ]
 
 
@@ -1567,9 +1625,15 @@ viewCountdown seconds =
         ]
 
 
-viewResult : String -> Maybe String -> NextGame -> Bool -> Me -> Game -> Html Msg
-viewResult settingsUrl changeSettingsUrl nextGame guest me game =
+viewResult : Model -> Me -> Game -> Html Msg
+viewResult model me game =
     let
+        texts =
+            model.texts
+
+        nextGame =
+            model.nextGame
+
         players =
             game.players
 
@@ -1579,22 +1643,22 @@ viewResult settingsUrl changeSettingsUrl nextGame guest me game =
         message =
             case ( solo, winners players ) of
                 ( True, _ ) ->
-                    "Done!"
+                    t texts "Done!"
 
                 ( False, [ winner ] ) ->
                     if isMe me winner then
-                        "You win!"
+                        t texts "You win!"
 
                     else
                         case winner.name of
                             Just name ->
-                                name ++ " wins!"
+                                tf texts "{name} wins!" [ ( "name", name ) ]
 
                             Nothing ->
-                                "The " ++ winner.colorName ++ " player wins!"
+                                tf texts "The {color} player wins!" [ ( "color", t texts winner.colorName ) ]
 
                 ( False, _ ) ->
-                    "It's a tie!"
+                    t texts "It's a tie!"
 
         ranked =
             List.reverse (List.sortBy .score players)
@@ -1614,7 +1678,7 @@ viewResult settingsUrl changeSettingsUrl nextGame guest me game =
         ]
         [ p [ class "text-3xl font-semibold" ] [ text message ]
         , p [ id "set-final-time", class "text-lg tabular-nums opacity-80" ]
-            [ text ("Time " ++ formatTime game.elapsedMs) ]
+            [ text (tf texts "Time {time}" [ ( "time", formatTime game.elapsedMs ) ]) ]
         , if solo then
             text ""
 
@@ -1624,8 +1688,8 @@ viewResult settingsUrl changeSettingsUrl nextGame guest me game =
                     (\player ->
                         li [ class "flex items-center gap-2" ]
                             [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                            , span [ class "flex-1" ] [ text (playerName me player) ]
-                            , span [ class "pl-6 font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
+                            , span [ class "flex-1" ] [ text (playerName texts me player) ]
+                            , span [ class "ps-6 font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
                             ]
                     )
                     ranked
@@ -1636,10 +1700,10 @@ viewResult settingsUrl changeSettingsUrl nextGame guest me game =
                     [ text
                         (case player.name of
                             Just name ->
-                                name ++ " changes the settings…"
+                                tf texts "{name} changes the settings…" [ ( "name", name ) ]
 
                             Nothing ->
-                                "The " ++ player.colorName ++ " player changes the settings…"
+                                tf texts "The {color} player changes the settings…" [ ( "color", t texts player.colorName ) ]
                         )
                     ]
 
@@ -1656,8 +1720,8 @@ viewResult settingsUrl changeSettingsUrl nextGame guest me game =
                     , onClick Restart
                     , disabled locked
                     ]
-                    [ text "Play again" ]
-                , case changeSettingsUrl of
+                    [ text (t texts "Play again") ]
+                , case model.changeSettingsUrl of
                     Nothing ->
                         text ""
 
@@ -1668,7 +1732,7 @@ viewResult settingsUrl changeSettingsUrl nextGame guest me game =
                                 , attribute "aria-disabled" "true"
                                 , class "cursor-not-allowed rounded-full px-5 py-2.5 font-medium text-white opacity-50 ring-1 ring-white/40"
                                 ]
-                                [ text "Change settings" ]
+                                [ text (t texts "Change settings") ]
 
                         else
                             a
@@ -1676,14 +1740,14 @@ viewResult settingsUrl changeSettingsUrl nextGame guest me game =
                                 , href url
                                 , class "rounded-full px-5 py-2.5 font-medium text-white ring-1 ring-white/40 transition hover:bg-white/10"
                                 ]
-                                [ text "Change settings" ]
+                                [ text (t texts "Change settings") ]
                 ]
         , a
             [ id "set-leaderboards-link"
-            , href settingsUrl
+            , href model.settingsUrl
             , class "text-sm font-medium text-white/80 underline-offset-4 transition hover:text-white hover:underline"
             ]
-            [ text "Best results" ]
+            [ text (t texts "Best results") ]
         , let
             -- In a game with other players, a player starts the next game for all of them
             ( element, action ) =
@@ -1702,44 +1766,50 @@ viewResult settingsUrl changeSettingsUrl nextGame guest me game =
             , attribute "data-ga-to" nextGame.name
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:no-underline"
             ]
-            [ text ("Or try " ++ nextGame.name ++ " ")
-            , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
+            [ text (tf texts "Or try {game}" [ ( "game", nextGame.name ) ] ++ " ")
+            , span [ class "inline-block transition group-hover:translate-x-0.5 rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5" ] [ text "→" ]
             ]
 
         -- Only a guest who played gets the call to sign in, not a spectator
-        , if guest && me /= Nothing then
+        , if model.guest && me /= Nothing then
             p [ id "set-sign-in", class "text-sm text-white/70" ]
-                [ a
-                    [ href "/signin"
-                    , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
-                    ]
-                    [ text "Sign in" ]
-                , text " to keep your scores."
-                ]
+                (withLink texts
+                    "{sign_in} to keep your scores."
+                    "sign_in"
+                    (a
+                        [ href "/signin"
+                        , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
+                        ]
+                        [ text (t texts "Sign in") ]
+                    )
+                )
 
           else
             text ""
-        , viewFeed
+        , viewFeed model.donateUrl texts
         ]
 
 
 {-| The link to the page to support Octomocto, at the bottom of a result.
 The link opens in a new tab, so that the player stays in the game.
 -}
-viewFeed : Html msg
-viewFeed =
+viewFeed : String -> Texts -> Html msg
+viewFeed donateUrl texts =
     p [ id "set-feed", class "mt-2 max-w-sm border-t border-white/15 pt-4 text-center text-sm leading-10 text-balance text-white/80" ]
-        [ a
-            [ href "/donate"
-            , target "_blank"
-            , rel "noopener"
-            , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:bg-octo-orange-light"
-            ]
-            [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
-            , text "Support the author"
-            ]
-        , text " to keep Octomocto ad-free."
-        ]
+        (withLink texts
+            "{feed} to keep Octomocto ad-free."
+            "feed"
+            (a
+                [ href donateUrl
+                , target "_blank"
+                , rel "noopener"
+                , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:bg-octo-orange-light"
+                ]
+                [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
+                , text (t texts "Support the author")
+                ]
+            )
+        )
 
 
 

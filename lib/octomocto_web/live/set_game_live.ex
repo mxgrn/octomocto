@@ -30,21 +30,20 @@ defmodule OctomoctoWeb.SetGameLive do
 
     {:ok,
      socket
-     |> assign([canonical_url: canonical_url(socket), rules: rules(), match: match] ++ seo())
+     |> assign([rules: rules(), match: match] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))
      |> assign(watchers: Lobby.watchers(Game))}
   end
 
-  # The Lobby tab has its own URL
-  defp canonical_url(%{assigns: %{live_action: :lobby}}), do: url(~p"/set/lobby")
-  defp canonical_url(_socket), do: url(~p"/set")
-
   @doc "The title and the description of the Set pages, for search engines."
   def seo do
     [
-      page_title: "Set Card Game Online: Solo or Multiplayer",
+      page_title: dgettext("set", "Set Card Game Online: Solo or Multiplayer"),
       page_description:
-        "Play the Set card game online: find 3 cards where each feature is all the same or all different. Solo against the clock or race up to 3 friends. Free."
+        dgettext(
+          "set",
+          "Play the Set card game online: find 3 cards where each feature is all the same or all different. Solo against the clock or race up to 3 friends. Free."
+        )
     ]
   end
 
@@ -62,9 +61,22 @@ defmodule OctomoctoWeb.SetGameLive do
 
     filter = %{"mode" => settings.mode, "players" => settings.players}
 
+    locale = socket.assigns.locale
+    lobby? = socket.assigns.live_action == :lobby
+    path = if lobby?, do: ~p"/set/lobby", else: ~p"/set"
+
     {:noreply,
      assign(socket,
        settings: settings,
+       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, path),
+       alternate_urls: Locale.alternate_urls("set", path),
+       # The other language keeps the settings of the New game tab
+       languages:
+         Locale.languages(
+           "set",
+           locale,
+           if(lobby?, do: path, else: ~p"/set?#{query(settings, [])}")
+         ),
        user_results: user_results(socket.assigns.current_scope, filter)
      )
      |> OctomoctoWeb.BestResults.assign_best(SetGame, filter)}
@@ -110,12 +122,12 @@ defmodule OctomoctoWeb.SetGameLive do
 
     MatchPage.start(Game, match, Map.take(settings, [:mode]))
 
-    {:noreply, redirect(socket, to: ~p"/set/#{match.id}")}
+    {:noreply, redirect(socket, to: Locale.path(socket.assigns.locale, ~p"/set/#{match.id}"))}
   end
 
   def handle_event("new_game", _params, socket) do
     id = SetGame.create_game(socket.assigns.settings)
-    {:noreply, redirect(socket, to: ~p"/set/#{id}")}
+    {:noreply, redirect(socket, to: Locale.path(socket.assigns.locale, ~p"/set/#{id}"))}
   end
 
   # One player, the normal mode and a public game, when the params do not
@@ -142,14 +154,38 @@ defmodule OctomoctoWeb.SetGameLive do
 
   defp rules do
     [
-      "Each card has 4 features: the number of shapes (1, 2 or 3), the shape (diamond, oval or squiggle), the shading (solid, striped or open) and the color (red, green or purple).",
-      "A set is 3 cards where each feature is the same on all 3 cards, or different on all 3 cards.",
-      "For example, 1 red solid diamond, 2 red striped ovals and 3 red open squiggles are a set: the color is the same on all cards, and the number, the shape and the shading are different on all cards.",
-      "Click 3 cards to claim a set. A correct set goes off the table, and new cards take its place. A wrong set changes nothing.",
-      "When the table has no set, 3 more cards come from the deck.",
-      "All players look at the same table. The first player who claims a set gets the point.",
-      "The game ends when the deck is empty and the table has no set. Alone, find all sets as fast as you can. With other players, find the most sets.",
-      "In the easy mode, the deck has only 27 cards. One feature is the same on all of them, for example the color. The game picks this feature and its value at random."
+      dgettext(
+        "set",
+        "Each card has 4 features: the number of shapes (1, 2 or 3), the shape (diamond, oval or squiggle), the shading (solid, striped or open) and the color (red, green or purple)."
+      ),
+      dgettext(
+        "set",
+        "A set is 3 cards where each feature is the same on all 3 cards, or different on all 3 cards."
+      ),
+      dgettext(
+        "set",
+        "For example, 1 red solid diamond, 2 red striped ovals and 3 red open squiggles are a set: the color is the same on all cards, and the number, the shape and the shading are different on all cards."
+      ),
+      dgettext(
+        "set",
+        "Click 3 cards to claim a set. A correct set goes off the table, and new cards take its place. A wrong set changes nothing."
+      ),
+      dgettext(
+        "set",
+        "When the table has no set, 3 more cards come from the deck."
+      ),
+      dgettext(
+        "set",
+        "All players look at the same table. The first player who claims a set gets the point."
+      ),
+      dgettext(
+        "set",
+        "The game ends when the deck is empty and the table has no set. Alone, find all sets as fast as you can. With other players, find the most sets."
+      ),
+      dgettext(
+        "set",
+        "In the easy mode, the deck has only 27 cards. One feature is the same on all of them, for example the color. The game picks this feature and its value at random."
+      )
     ]
   end
 
@@ -177,8 +213,8 @@ defmodule OctomoctoWeb.SetGameLive do
     """
   end
 
-  @doc "The path of this page with the settings of the game in the given state."
-  def settings_path(state) do
+  @doc "The path of this page in the language with the settings of the game in the given state."
+  def settings_path(locale, state) do
     settings = %{
       players: state.needed,
       mode: Map.get(state, :mode, "normal"),
@@ -186,11 +222,21 @@ defmodule OctomoctoWeb.SetGameLive do
       match: nil
     }
 
-    ~p"/set?#{query(settings, [])}"
+    settings_path(locale, settings, [])
   end
 
-  @doc "The path of the Change settings button of the game, see `OctomoctoWeb.MatchPage.path/2`."
-  def match_path(state), do: MatchPage.path(~p"/set", state)
+  @doc """
+  The path of the Change settings button of the game in the language, see
+  `OctomoctoWeb.MatchPage.path/2`.
+  """
+  def match_path(locale, state) do
+    if path = MatchPage.path(~p"/set", state), do: Locale.path(locale, path)
+  end
+
+  # The path of this page in the language for the settings, with some of them changed
+  defp settings_path(locale, settings, changes) do
+    Locale.path(locale, ~p"/set?#{query(settings, changes)}")
+  end
 
   # The query of the page for the settings, with some of them changed
   defp query(settings, changes) do
@@ -207,10 +253,21 @@ defmodule OctomoctoWeb.SetGameLive do
     game.players_needed == settings.players and game.settings.mode == settings.mode
   end
 
-  defp mode_hint("easy"), do: "27 cards, one feature is the same."
-  defp mode_hint("normal"), do: "All 81 cards."
+  defp mode_hint("easy"), do: dgettext("set", "27 cards, one feature is the same.")
+  defp mode_hint("normal"), do: dgettext("set", "All 81 cards.")
+
+  defp mode_name("easy"), do: dgettext("set", "Easy")
+  defp mode_name("normal"), do: dgettext("set", "Normal")
+
+  defp players_hint(1), do: nil
+
+  defp players_hint(_players),
+    do:
+      dgettext(
+        "set",
+        "All players race on the same table. The game starts when all players are in."
+      )
 
   @doc "The settings of a game in the list of public games."
-  def game_summary(%{settings: %{mode: "easy"}}), do: "Easy"
-  def game_summary(_game), do: "Normal"
+  def game_summary(game), do: mode_name(Map.get(game.settings, :mode, "normal"))
 end

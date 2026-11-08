@@ -105,7 +105,8 @@ defmodule OctomoctoWeb.HomeLiveTest do
       {:ok, view, _html} = live(conn, ~p"/pt")
 
       assert has_element?(view, ~s(#game-memory[href="/pt/memory"]))
-      assert has_element?(view, ~s(#game-set[href="/set"]))
+      assert has_element?(view, ~s(#game-set[href="/pt/set"]))
+      assert has_element?(view, ~s(#game-sudoku[href="/sudoku"]))
     end
 
     test "keeps the language in the tag filter", %{conn: conn} do

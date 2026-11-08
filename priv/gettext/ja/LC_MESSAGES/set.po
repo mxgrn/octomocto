@@ -1,0 +1,479 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} diamond"
+msgid_plural "%{count} %{color} %{shading} diamonds"
+msgstr[0] "%{color}・%{shading}のひし形%{count}個"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} oval"
+msgid_plural "%{count} %{color} %{shading} ovals"
+msgstr[0] "%{color}・%{shading}の楕円%{count}個"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} squiggle"
+msgid_plural "%{count} %{color} %{shading} squiggles"
+msgstr[0] "%{color}・%{shading}の波形%{count}個"
+
+#, elixir-autogen, elixir-format
+msgid "27 cards, one feature is the same."
+msgstr "27枚。1つの特徴が全部同じ。"
+
+#, elixir-autogen, elixir-format
+msgid "A set is 3 cards where each feature is the same on all 3 cards, or different on all 3 cards."
+msgstr "セットとは、どの特徴も3枚すべてで同じか、3枚すべてで違う3枚のカードのこと。"
+
+#, elixir-autogen, elixir-format
+msgid "All 81 cards."
+msgstr "81枚すべて。"
+
+#, elixir-autogen, elixir-format
+msgid "All players look at the same table. The first player who claims a set gets the point."
+msgstr "全員が同じ場を見る。最初にセットを取ったプレイヤーに1点。"
+
+#, elixir-autogen, elixir-format
+msgid "All players race on the same table. The game starts when all players are in."
+msgstr "全員が同じ場で早さを競う。全員がそろったらゲーム開始。"
+
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "ベスト"
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "ベスト記録"
+
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "設定を変える"
+
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "次のゲームの設定を選ぼう。"
+
+#, elixir-autogen, elixir-format
+msgid "Click 3 cards to claim a set. A correct set goes off the table, and new cards take its place. A wrong set changes nothing."
+msgstr "3枚のカードを選んでセットを取ろう。正しいセットは場から消えて、新しいカードが補充される。間違ったセットでは何も起きない。"
+
+#, elixir-autogen, elixir-format
+msgid "Copied!"
+msgstr "コピーした！"
+
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr "リンクをコピー"
+
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "ゲームに参加できなかった：{reason}"
+
+#, elixir-autogen, elixir-format
+msgid "Done!"
+msgstr "クリア！"
+
+#, elixir-autogen, elixir-format
+msgid "Each card has 4 features: the number of shapes (1, 2 or 3), the shape (diamond, oval or squiggle), the shading (solid, striped or open) and the color (red, green or purple)."
+msgstr "カードには4つの特徴がある：図形の数（1、2、3）、形（ひし形、楕円、波形）、塗り（塗りつぶし、しま模様、白抜き）、色（赤、緑、紫）。"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 1 shape"
+msgstr "どのカードも図形が1個"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 2 shapes"
+msgstr "どのカードも図形が2個"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 3 shapes"
+msgstr "どのカードも図形が3個"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different color"
+msgstr "どのカードも色が違う"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different number of shapes"
+msgstr "どのカードも図形の数が違う"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different shading"
+msgstr "どのカードも塗りが違う"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different shape"
+msgstr "どのカードも形が違う"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the diamond shape"
+msgstr "どのカードもひし形"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the oval shape"
+msgstr "どのカードも楕円"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the squiggle shape"
+msgstr "どのカードも波形"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is green"
+msgstr "どのカードも緑"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is open"
+msgstr "どのカードも白抜き"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is purple"
+msgstr "どのカードも紫"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is red"
+msgstr "どのカードも赤"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is solid"
+msgstr "どのカードも塗りつぶし"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is striped"
+msgstr "どのカードもしま模様"
+
+#, elixir-autogen, elixir-format
+msgid "Easy"
+msgstr "かんたん"
+
+#, elixir-autogen, elixir-format
+msgid "Find 3 cards where each feature is all the same or all different."
+msgstr "どの特徴もすべて同じか、すべて違う3枚のカードを見つけよう。"
+
+#, elixir-autogen, elixir-format
+msgid "For example, 1 red solid diamond, 2 red striped ovals and 3 red open squiggles are a set: the color is the same on all cards, and the number, the shape and the shading are different on all cards."
+msgstr "たとえば、赤・塗りつぶしのひし形1個、赤・しま模様の楕円2個、赤・白抜きの波形3個はセットになる。色は全部同じで、数・形・塗りは全部違うからだ。"
+
+#, elixir-autogen, elixir-format
+msgid "Hint"
+msgstr "ヒント"
+
+#, elixir-autogen, elixir-format
+msgid "In the easy mode, the deck has only 27 cards. One feature is the same on all of them, for example the color. The game picks this feature and its value at random."
+msgstr "かんたんモードでは、山札は27枚だけ。そのすべてで1つの特徴が同じになる（たとえば色）。どの特徴と値になるかはランダムに決まる。"
+
+#, elixir-autogen, elixir-format
+msgid "It's a tie!"
+msgstr "引き分け！"
+
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "ゲームに参加中…"
+
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "ロビー"
+
+#, elixir-autogen, elixir-format
+msgid "Menu"
+msgstr "メニュー"
+
+#, elixir-autogen, elixir-format
+msgid "Mode"
+msgstr "モード"
+
+#, elixir-autogen, elixir-format
+msgid "New game"
+msgstr "新しいゲーム"
+
+#, elixir-autogen, elixir-format
+msgid "Next hint"
+msgstr "次のヒント"
+
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "まだゲームはない。"
+
+#, elixir-autogen, elixir-format
+msgid "No more hints"
+msgstr "ヒントはもうない"
+
+#, elixir-autogen, elixir-format
+msgid "Normal"
+msgstr "ふつう"
+
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "{game}も遊んでみよう"
+
+#, elixir-autogen, elixir-format
+msgid "Play again"
+msgstr "もう一度遊ぶ"
+
+#, elixir-autogen, elixir-format
+msgid "Play the Set card game online: find 3 cards where each feature is all the same or all different. Solo against the clock or race up to 3 friends. Free."
+msgstr "カードで遊ぶパズルゲームSetをオンラインで。どの特徴もすべて同じか、すべて違う3枚のカードを見つけよう。ひとりでタイムに挑むか、最大3人の友達と競争。無料。"
+
+#, elixir-autogen, elixir-format
+msgid "Players"
+msgstr "プレイヤー"
+
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "非公開"
+
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "公開"
+
+#, elixir-autogen, elixir-format
+msgid "Restart game"
+msgstr "やり直す"
+
+#, elixir-autogen, elixir-format
+msgid "Send the link to the other players. The game starts when all of them are in."
+msgstr "ほかのプレイヤーにリンクを送ろう。全員がそろったらゲーム開始。"
+
+#, elixir-autogen, elixir-format
+msgid "Set"
+msgstr "Set"
+
+#, elixir-autogen, elixir-format
+msgid "Set Card Game Online: Solo or Multiplayer"
+msgstr "Set：カードで遊ぶパズルゲーム、ひとりでも友達とでも"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "ログイン"
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "作者を応援しよう"
+
+#, elixir-autogen, elixir-format
+msgid "The Set card game: find 3 cards where each feature is all the same or all different."
+msgstr "カードゲームSet：どの特徴もすべて同じか、すべて違う3枚のカードを見つけよう。"
+
+#, elixir-autogen, elixir-format
+msgid "The game ends when the deck is empty and the table has no set. Alone, find all sets as fast as you can. With other players, find the most sets."
+msgstr "山札がなくなり、場にセットがなくなったらゲーム終了。ひとりなら、すべてのセットをできるだけ早く見つけよう。ほかのプレイヤーとなら、いちばん多くのセットを見つけよう。"
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "{color}のプレイヤーが設定を変更中…"
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player wins!"
+msgstr "{color}のプレイヤーの勝ち！"
+
+#, elixir-autogen, elixir-format
+msgid "Time {time}"
+msgstr "タイム {time}"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "音をオフにする"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "音をオンにする"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are green, but one is purple."
+msgstr "2枚は緑なのに、残りの1枚は紫。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are green, but one is red."
+msgstr "2枚は緑なのに、残りの1枚は赤。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are open, but one is solid."
+msgstr "2枚は白抜きなのに、残りの1枚は塗りつぶし。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are open, but one is striped."
+msgstr "2枚は白抜きなのに、残りの1枚はしま模様。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are purple, but one is green."
+msgstr "2枚は紫なのに、残りの1枚は緑。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are purple, but one is red."
+msgstr "2枚は紫なのに、残りの1枚は赤。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are red, but one is green."
+msgstr "2枚は赤なのに、残りの1枚は緑。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are red, but one is purple."
+msgstr "2枚は赤なのに、残りの1枚は紫。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are solid, but one is open."
+msgstr "2枚は塗りつぶしなのに、残りの1枚は白抜き。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are solid, but one is striped."
+msgstr "2枚は塗りつぶしなのに、残りの1枚はしま模様。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are striped, but one is open."
+msgstr "2枚はしま模様なのに、残りの1枚は白抜き。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are striped, but one is solid."
+msgstr "2枚はしま模様なのに、残りの1枚は塗りつぶし。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 1 shape, but one has 2 shapes."
+msgstr "2枚は図形が1個なのに、残りの1枚は2個。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 1 shape, but one has 3 shapes."
+msgstr "2枚は図形が1個なのに、残りの1枚は3個。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 2 shapes, but one has 1 shape."
+msgstr "2枚は図形が2個なのに、残りの1枚は1個。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 2 shapes, but one has 3 shapes."
+msgstr "2枚は図形が2個なのに、残りの1枚は3個。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 3 shapes, but one has 1 shape."
+msgstr "2枚は図形が3個なのに、残りの1枚は1個。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 3 shapes, but one has 2 shapes."
+msgstr "2枚は図形が3個なのに、残りの1枚は2個。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have diamonds, but one has ovals."
+msgstr "2枚はひし形なのに、残りの1枚は楕円。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have diamonds, but one has squiggles."
+msgstr "2枚はひし形なのに、残りの1枚は波形。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have ovals, but one has diamonds."
+msgstr "2枚は楕円なのに、残りの1枚はひし形。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have ovals, but one has squiggles."
+msgstr "2枚は楕円なのに、残りの1枚は波形。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have squiggles, but one has diamonds."
+msgstr "2枚は波形なのに、残りの1枚はひし形。"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have squiggles, but one has ovals."
+msgstr "2枚は波形なのに、残りの1枚は楕円。"
+
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "公開設定"
+
+#, elixir-autogen, elixir-format
+msgid "Waiting for players"
+msgstr "プレイヤー待ち"
+
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "観戦者：{count}"
+
+#, elixir-autogen, elixir-format
+msgid "When the table has no set, 3 more cards come from the deck."
+msgstr "場にセットがないときは、山札からカードが3枚追加される。"
+
+#, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "このゲームを観戦中です。"
+
+#, elixir-autogen, elixir-format
+msgid "You win!"
+msgstr "勝ち！"
+
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "自分の記録"
+
+#, elixir-autogen, elixir-format
+msgid "deck"
+msgstr "山札"
+
+#, elixir-autogen, elixir-format
+msgid "green"
+msgstr "緑"
+
+#, elixir-autogen, elixir-format
+msgid "last set"
+msgstr "直前のセット"
+
+#, elixir-autogen, elixir-format
+msgid "open"
+msgstr "白抜き"
+
+#, elixir-autogen, elixir-format
+msgid "purple"
+msgstr "紫"
+
+#, elixir-autogen, elixir-format
+msgid "red"
+msgstr "赤"
+
+#, elixir-autogen, elixir-format
+msgid "solid"
+msgstr "塗りつぶし"
+
+#, elixir-autogen, elixir-format
+msgid "striped"
+msgstr "しま模様"
+
+#, elixir-autogen, elixir-format
+msgid "time"
+msgstr "タイム"
+
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "してランキングに載ろう"
+
+#, elixir-autogen, elixir-format
+msgid "to start saving your results."
+msgstr "して、記録を保存しよう。"
+
+#, elixir-autogen, elixir-format
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "Octomoctoを広告なしで続けるために、{feed}。"
+
+#, elixir-autogen, elixir-format
+msgid "{name} (you)"
+msgstr "{name}（自分）"
+
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name}が設定を変更中…"
+
+#, elixir-autogen, elixir-format
+msgid "{name} wins!"
+msgstr "{name}の勝ち！"
+
+#, elixir-autogen, elixir-format
+msgid "{players} of {needed} players are in"
+msgstr "参加者：{players}/{needed}人"
+
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in}して、スコアを残そう。"

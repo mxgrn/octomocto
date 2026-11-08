@@ -1,0 +1,479 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: vi\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} diamond"
+msgid_plural "%{count} %{color} %{shading} diamonds"
+msgstr[0] "%{count} hình thoi %{color} %{shading}"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} oval"
+msgid_plural "%{count} %{color} %{shading} ovals"
+msgstr[0] "%{count} hình bầu dục %{color} %{shading}"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} squiggle"
+msgid_plural "%{count} %{color} %{shading} squiggles"
+msgstr[0] "%{count} hình gợn sóng %{color} %{shading}"
+
+#, elixir-autogen, elixir-format
+msgid "27 cards, one feature is the same."
+msgstr "27 lá, một đặc điểm giống nhau."
+
+#, elixir-autogen, elixir-format
+msgid "A set is 3 cards where each feature is the same on all 3 cards, or different on all 3 cards."
+msgstr "Một bộ là 3 lá bài mà mỗi đặc điểm đều giống nhau trên cả 3 lá, hoặc đều khác nhau trên cả 3 lá."
+
+#, elixir-autogen, elixir-format
+msgid "All 81 cards."
+msgstr "Đủ cả 81 lá."
+
+#, elixir-autogen, elixir-format
+msgid "All players look at the same table. The first player who claims a set gets the point."
+msgstr "Mọi người chơi cùng nhìn một bàn. Ai lấy được bộ trước sẽ được điểm."
+
+#, elixir-autogen, elixir-format
+msgid "All players race on the same table. The game starts when all players are in."
+msgstr "Mọi người chơi thi đua trên cùng một bàn. Ván bắt đầu khi tất cả người chơi đã vào."
+
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "Tốt nhất"
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "Kết quả tốt nhất"
+
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "Đổi cài đặt"
+
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "Chọn cài đặt cho ván tiếp theo."
+
+#, elixir-autogen, elixir-format
+msgid "Click 3 cards to claim a set. A correct set goes off the table, and new cards take its place. A wrong set changes nothing."
+msgstr "Chọn 3 lá bài để lấy một bộ. Bộ đúng sẽ rời khỏi bàn và các lá mới sẽ thế chỗ. Bộ sai thì không có gì thay đổi."
+
+#, elixir-autogen, elixir-format
+msgid "Copied!"
+msgstr "Đã sao chép!"
+
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr "Sao chép liên kết"
+
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "Không vào được ván: {reason}"
+
+#, elixir-autogen, elixir-format
+msgid "Done!"
+msgstr "Xong!"
+
+#, elixir-autogen, elixir-format
+msgid "Each card has 4 features: the number of shapes (1, 2 or 3), the shape (diamond, oval or squiggle), the shading (solid, striped or open) and the color (red, green or purple)."
+msgstr "Mỗi lá bài có 4 đặc điểm: số hình (1, 2 hoặc 3), hình dạng (hình thoi, hình bầu dục hoặc hình gợn sóng), kiểu tô (tô đặc, kẻ sọc hoặc để trống) và màu (đỏ, xanh lá hoặc tím)."
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 1 shape"
+msgstr "Lá nào cũng có 1 hình"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 2 shapes"
+msgstr "Lá nào cũng có 2 hình"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 3 shapes"
+msgstr "Lá nào cũng có 3 hình"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different color"
+msgstr "Mỗi lá một màu khác nhau"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different number of shapes"
+msgstr "Mỗi lá có số hình khác nhau"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different shading"
+msgstr "Mỗi lá một kiểu tô khác nhau"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different shape"
+msgstr "Mỗi lá một hình dạng khác nhau"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the diamond shape"
+msgstr "Lá nào cũng là hình thoi"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the oval shape"
+msgstr "Lá nào cũng là hình bầu dục"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the squiggle shape"
+msgstr "Lá nào cũng là hình gợn sóng"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is green"
+msgstr "Lá nào cũng màu xanh lá"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is open"
+msgstr "Lá nào cũng để trống"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is purple"
+msgstr "Lá nào cũng màu tím"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is red"
+msgstr "Lá nào cũng màu đỏ"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is solid"
+msgstr "Lá nào cũng tô đặc"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is striped"
+msgstr "Lá nào cũng kẻ sọc"
+
+#, elixir-autogen, elixir-format
+msgid "Easy"
+msgstr "Dễ"
+
+#, elixir-autogen, elixir-format
+msgid "Find 3 cards where each feature is all the same or all different."
+msgstr "Tìm 3 lá bài mà mỗi đặc điểm đều giống hệt nhau hoặc đều khác nhau."
+
+#, elixir-autogen, elixir-format
+msgid "For example, 1 red solid diamond, 2 red striped ovals and 3 red open squiggles are a set: the color is the same on all cards, and the number, the shape and the shading are different on all cards."
+msgstr "Ví dụ, 1 hình thoi đỏ tô đặc, 2 hình bầu dục đỏ kẻ sọc và 3 hình gợn sóng đỏ để trống là một bộ: màu giống nhau trên mọi lá, còn số hình, hình dạng và kiểu tô đều khác nhau trên mọi lá."
+
+#, elixir-autogen, elixir-format
+msgid "Hint"
+msgstr "Gợi ý"
+
+#, elixir-autogen, elixir-format
+msgid "In the easy mode, the deck has only 27 cards. One feature is the same on all of them, for example the color. The game picks this feature and its value at random."
+msgstr "Ở chế độ dễ, bộ bài chỉ có 27 lá. Một đặc điểm giống nhau trên tất cả các lá, ví dụ màu. Trò chơi chọn ngẫu nhiên đặc điểm này và giá trị của nó."
+
+#, elixir-autogen, elixir-format
+msgid "It's a tie!"
+msgstr "Hòa!"
+
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "Đang vào ván…"
+
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "Sảnh"
+
+#, elixir-autogen, elixir-format
+msgid "Menu"
+msgstr "Menu"
+
+#, elixir-autogen, elixir-format
+msgid "Mode"
+msgstr "Chế độ"
+
+#, elixir-autogen, elixir-format
+msgid "New game"
+msgstr "Ván mới"
+
+#, elixir-autogen, elixir-format
+msgid "Next hint"
+msgstr "Gợi ý tiếp"
+
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "Chưa có ván nào."
+
+#, elixir-autogen, elixir-format
+msgid "No more hints"
+msgstr "Hết gợi ý"
+
+#, elixir-autogen, elixir-format
+msgid "Normal"
+msgstr "Thường"
+
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "Hoặc thử {game}"
+
+#, elixir-autogen, elixir-format
+msgid "Play again"
+msgstr "Chơi lại"
+
+#, elixir-autogen, elixir-format
+msgid "Play the Set card game online: find 3 cards where each feature is all the same or all different. Solo against the clock or race up to 3 friends. Free."
+msgstr "Chơi Set, game giải đố với lá bài online: tìm 3 lá có mỗi đặc điểm đều giống hoặc đều khác nhau. Đua với thời gian hoặc với tối đa 3 bạn. Miễn phí."
+
+#, elixir-autogen, elixir-format
+msgid "Players"
+msgstr "Người chơi"
+
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "Riêng tư"
+
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "Công khai"
+
+#, elixir-autogen, elixir-format
+msgid "Restart game"
+msgstr "Chơi lại từ đầu"
+
+#, elixir-autogen, elixir-format
+msgid "Send the link to the other players. The game starts when all of them are in."
+msgstr "Gửi liên kết cho những người chơi khác. Ván bắt đầu khi mọi người đã vào."
+
+#, elixir-autogen, elixir-format
+msgid "Set"
+msgstr "Set"
+
+#, elixir-autogen, elixir-format
+msgid "Set Card Game Online: Solo or Multiplayer"
+msgstr "Set: game giải đố với lá bài online, chơi một mình hoặc cùng bạn bè"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Đăng nhập"
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "Ủng hộ tác giả"
+
+#, elixir-autogen, elixir-format
+msgid "The Set card game: find 3 cards where each feature is all the same or all different."
+msgstr "Trò chơi bài Set: tìm 3 lá bài mà mỗi đặc điểm đều giống hệt nhau hoặc đều khác nhau."
+
+#, elixir-autogen, elixir-format
+msgid "The game ends when the deck is empty and the table has no set. Alone, find all sets as fast as you can. With other players, find the most sets."
+msgstr "Ván kết thúc khi bộ bài đã hết và trên bàn không còn bộ nào. Chơi một mình, hãy tìm tất cả các bộ nhanh nhất có thể. Chơi với người khác, hãy tìm được nhiều bộ nhất."
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "Người chơi màu {color} đang đổi cài đặt…"
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player wins!"
+msgstr "Người chơi màu {color} thắng!"
+
+#, elixir-autogen, elixir-format
+msgid "Time {time}"
+msgstr "Thời gian {time}"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "Tắt âm thanh"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "Bật âm thanh"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are green, but one is purple."
+msgstr "Hai lá màu xanh lá, nhưng một lá màu tím."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are green, but one is red."
+msgstr "Hai lá màu xanh lá, nhưng một lá màu đỏ."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are open, but one is solid."
+msgstr "Hai lá để trống, nhưng một lá tô đặc."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are open, but one is striped."
+msgstr "Hai lá để trống, nhưng một lá kẻ sọc."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are purple, but one is green."
+msgstr "Hai lá màu tím, nhưng một lá màu xanh lá."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are purple, but one is red."
+msgstr "Hai lá màu tím, nhưng một lá màu đỏ."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are red, but one is green."
+msgstr "Hai lá màu đỏ, nhưng một lá màu xanh lá."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are red, but one is purple."
+msgstr "Hai lá màu đỏ, nhưng một lá màu tím."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are solid, but one is open."
+msgstr "Hai lá tô đặc, nhưng một lá để trống."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are solid, but one is striped."
+msgstr "Hai lá tô đặc, nhưng một lá kẻ sọc."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are striped, but one is open."
+msgstr "Hai lá kẻ sọc, nhưng một lá để trống."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are striped, but one is solid."
+msgstr "Hai lá kẻ sọc, nhưng một lá tô đặc."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 1 shape, but one has 2 shapes."
+msgstr "Hai lá có 1 hình, nhưng một lá có 2 hình."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 1 shape, but one has 3 shapes."
+msgstr "Hai lá có 1 hình, nhưng một lá có 3 hình."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 2 shapes, but one has 1 shape."
+msgstr "Hai lá có 2 hình, nhưng một lá có 1 hình."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 2 shapes, but one has 3 shapes."
+msgstr "Hai lá có 2 hình, nhưng một lá có 3 hình."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 3 shapes, but one has 1 shape."
+msgstr "Hai lá có 3 hình, nhưng một lá có 1 hình."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 3 shapes, but one has 2 shapes."
+msgstr "Hai lá có 3 hình, nhưng một lá có 2 hình."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have diamonds, but one has ovals."
+msgstr "Hai lá có hình thoi, nhưng một lá có hình bầu dục."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have diamonds, but one has squiggles."
+msgstr "Hai lá có hình thoi, nhưng một lá có hình gợn sóng."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have ovals, but one has diamonds."
+msgstr "Hai lá có hình bầu dục, nhưng một lá có hình thoi."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have ovals, but one has squiggles."
+msgstr "Hai lá có hình bầu dục, nhưng một lá có hình gợn sóng."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have squiggles, but one has diamonds."
+msgstr "Hai lá có hình gợn sóng, nhưng một lá có hình thoi."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have squiggles, but one has ovals."
+msgstr "Hai lá có hình gợn sóng, nhưng một lá có hình bầu dục."
+
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "Hiển thị"
+
+#, elixir-autogen, elixir-format
+msgid "Waiting for players"
+msgstr "Đang chờ người chơi"
+
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "Người xem: {count}"
+
+#, elixir-autogen, elixir-format
+msgid "When the table has no set, 3 more cards come from the deck."
+msgstr "Khi trên bàn không có bộ nào, 3 lá nữa được rút từ bộ bài."
+
+#, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "Bạn đang xem ván này."
+
+#, elixir-autogen, elixir-format
+msgid "You win!"
+msgstr "Bạn thắng!"
+
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "Kết quả của bạn"
+
+#, elixir-autogen, elixir-format
+msgid "deck"
+msgstr "bộ bài"
+
+#, elixir-autogen, elixir-format
+msgid "green"
+msgstr "xanh lá"
+
+#, elixir-autogen, elixir-format
+msgid "last set"
+msgstr "bộ vừa tìm"
+
+#, elixir-autogen, elixir-format
+msgid "open"
+msgstr "để trống"
+
+#, elixir-autogen, elixir-format
+msgid "purple"
+msgstr "tím"
+
+#, elixir-autogen, elixir-format
+msgid "red"
+msgstr "đỏ"
+
+#, elixir-autogen, elixir-format
+msgid "solid"
+msgstr "tô đặc"
+
+#, elixir-autogen, elixir-format
+msgid "striped"
+msgstr "kẻ sọc"
+
+#, elixir-autogen, elixir-format
+msgid "time"
+msgstr "thời gian"
+
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "để có tên trong bảng"
+
+#, elixir-autogen, elixir-format
+msgid "to start saving your results."
+msgstr "để bắt đầu lưu kết quả."
+
+#, elixir-autogen, elixir-format
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "{feed} để Octomocto luôn không có quảng cáo."
+
+#, elixir-autogen, elixir-format
+msgid "{name} (you)"
+msgstr "{name} (bạn)"
+
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name} đang đổi cài đặt…"
+
+#, elixir-autogen, elixir-format
+msgid "{name} wins!"
+msgstr "{name} thắng!"
+
+#, elixir-autogen, elixir-format
+msgid "{players} of {needed} players are in"
+msgstr "Đã có {players}/{needed} người chơi"
+
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in} để lưu điểm của bạn."

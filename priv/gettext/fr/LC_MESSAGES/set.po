@@ -1,0 +1,482 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} diamond"
+msgid_plural "%{count} %{color} %{shading} diamonds"
+msgstr[0] "%{count} losange, %{color}, %{shading}"
+msgstr[1] "%{count} losanges, %{color}, %{shading}"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} oval"
+msgid_plural "%{count} %{color} %{shading} ovals"
+msgstr[0] "%{count} ovale, %{color}, %{shading}"
+msgstr[1] "%{count} ovales, %{color}, %{shading}"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} squiggle"
+msgid_plural "%{count} %{color} %{shading} squiggles"
+msgstr[0] "%{count} vague, %{color}, %{shading}"
+msgstr[1] "%{count} vagues, %{color}, %{shading}"
+
+#, elixir-autogen, elixir-format
+msgid "27 cards, one feature is the same."
+msgstr "27 cartes, une caractéristique est toujours pareille."
+
+#, elixir-autogen, elixir-format
+msgid "A set is 3 cards where each feature is the same on all 3 cards, or different on all 3 cards."
+msgstr "Un set, c'est 3 cartes où chaque caractéristique est pareille sur les 3 cartes, ou différente sur les 3 cartes."
+
+#, elixir-autogen, elixir-format
+msgid "All 81 cards."
+msgstr "Les 81 cartes."
+
+#, elixir-autogen, elixir-format
+msgid "All players look at the same table. The first player who claims a set gets the point."
+msgstr "Tous les joueurs voient la même table. Le premier qui annonce un set gagne le point."
+
+#, elixir-autogen, elixir-format
+msgid "All players race on the same table. The game starts when all players are in."
+msgstr "Tous les joueurs s'affrontent sur la même table. La partie commence quand tout le monde est là."
+
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "Record"
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "Meilleurs résultats"
+
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "Changer les paramètres"
+
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "Choisis les paramètres de la partie suivante."
+
+#, elixir-autogen, elixir-format
+msgid "Click 3 cards to claim a set. A correct set goes off the table, and new cards take its place. A wrong set changes nothing."
+msgstr "Clique sur 3 cartes pour annoncer un set. Un set correct quitte la table, et de nouvelles cartes prennent sa place. Un set faux ne change rien."
+
+#, elixir-autogen, elixir-format
+msgid "Copied!"
+msgstr "Copié !"
+
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr "Copier le lien"
+
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "Impossible de rejoindre la partie : {reason}"
+
+#, elixir-autogen, elixir-format
+msgid "Done!"
+msgstr "Terminé !"
+
+#, elixir-autogen, elixir-format
+msgid "Each card has 4 features: the number of shapes (1, 2 or 3), the shape (diamond, oval or squiggle), the shading (solid, striped or open) and the color (red, green or purple)."
+msgstr "Chaque carte a 4 caractéristiques : le nombre de formes (1, 2 ou 3), la forme (losange, ovale ou vague), le remplissage (plein, rayé ou vide) et la couleur (rouge, vert ou violet)."
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 1 shape"
+msgstr "Chaque carte a 1 forme"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 2 shapes"
+msgstr "Chaque carte a 2 formes"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 3 shapes"
+msgstr "Chaque carte a 3 formes"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different color"
+msgstr "Chaque carte a une couleur différente"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different number of shapes"
+msgstr "Chaque carte a un nombre de formes différent"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different shading"
+msgstr "Chaque carte a un remplissage différent"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different shape"
+msgstr "Chaque carte a une forme différente"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the diamond shape"
+msgstr "Chaque carte a des losanges"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the oval shape"
+msgstr "Chaque carte a des ovales"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the squiggle shape"
+msgstr "Chaque carte a des vagues"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is green"
+msgstr "Chaque carte est verte"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is open"
+msgstr "Chaque carte est vide"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is purple"
+msgstr "Chaque carte est violette"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is red"
+msgstr "Chaque carte est rouge"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is solid"
+msgstr "Chaque carte est pleine"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is striped"
+msgstr "Chaque carte est rayée"
+
+#, elixir-autogen, elixir-format
+msgid "Easy"
+msgstr "Facile"
+
+#, elixir-autogen, elixir-format
+msgid "Find 3 cards where each feature is all the same or all different."
+msgstr "Trouve 3 cartes où chaque caractéristique est soit toute pareille, soit toute différente."
+
+#, elixir-autogen, elixir-format
+msgid "For example, 1 red solid diamond, 2 red striped ovals and 3 red open squiggles are a set: the color is the same on all cards, and the number, the shape and the shading are different on all cards."
+msgstr "Par exemple, 1 losange rouge plein, 2 ovales rouges rayés et 3 vagues rouges vides forment un set : la couleur est pareille sur toutes les cartes, et le nombre, la forme et le remplissage sont différents sur toutes les cartes."
+
+#, elixir-autogen, elixir-format
+msgid "Hint"
+msgstr "Indice"
+
+#, elixir-autogen, elixir-format
+msgid "In the easy mode, the deck has only 27 cards. One feature is the same on all of them, for example the color. The game picks this feature and its value at random."
+msgstr "En mode facile, la pioche n'a que 27 cartes. Une caractéristique est pareille sur toutes, par exemple la couleur. Le jeu choisit cette caractéristique et sa valeur au hasard."
+
+#, elixir-autogen, elixir-format
+msgid "It's a tie!"
+msgstr "Égalité !"
+
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "Connexion à la partie…"
+
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "Salon"
+
+#, elixir-autogen, elixir-format
+msgid "Menu"
+msgstr "Menu"
+
+#, elixir-autogen, elixir-format
+msgid "Mode"
+msgstr "Mode"
+
+#, elixir-autogen, elixir-format
+msgid "New game"
+msgstr "Nouvelle partie"
+
+#, elixir-autogen, elixir-format
+msgid "Next hint"
+msgstr "Indice suivant"
+
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "Aucune partie pour l’instant."
+
+#, elixir-autogen, elixir-format
+msgid "No more hints"
+msgstr "Plus d'indices"
+
+#, elixir-autogen, elixir-format
+msgid "Normal"
+msgstr "Normal"
+
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "Ou essaie {game}"
+
+#, elixir-autogen, elixir-format
+msgid "Play again"
+msgstr "Rejouer"
+
+#, elixir-autogen, elixir-format
+msgid "Play the Set card game online: find 3 cards where each feature is all the same or all different. Solo against the clock or race up to 3 friends. Free."
+msgstr "Joue à Set, un jeu de logique en ligne : trouve 3 cartes où chaque caractéristique est pareille ou différente. Seul contre la montre ou avec 3 amis. Gratuit."
+
+#, elixir-autogen, elixir-format
+msgid "Players"
+msgstr "Joueurs"
+
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "Privée"
+
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "Publique"
+
+#, elixir-autogen, elixir-format
+msgid "Restart game"
+msgstr "Recommencer la partie"
+
+#, elixir-autogen, elixir-format
+msgid "Send the link to the other players. The game starts when all of them are in."
+msgstr "Envoie le lien aux autres joueurs. La partie commence quand tout le monde est là."
+
+#, elixir-autogen, elixir-format
+msgid "Set"
+msgstr "Set"
+
+#, elixir-autogen, elixir-format
+msgid "Set Card Game Online: Solo or Multiplayer"
+msgstr "Set : jeu de logique en ligne avec des cartes, seul ou à plusieurs"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Connecte-toi"
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "Soutiens l'auteur"
+
+#, elixir-autogen, elixir-format
+msgid "The Set card game: find 3 cards where each feature is all the same or all different."
+msgstr "Le jeu de cartes Set : trouve 3 cartes où chaque caractéristique est soit toute pareille, soit toute différente."
+
+#, elixir-autogen, elixir-format
+msgid "The game ends when the deck is empty and the table has no set. Alone, find all sets as fast as you can. With other players, find the most sets."
+msgstr "La partie se termine quand la pioche est vide et qu'il n'y a plus de set sur la table. Seul, trouve tous les sets le plus vite possible. À plusieurs, trouve le plus de sets."
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "{color} change les paramètres…"
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player wins!"
+msgstr "{color} gagne !"
+
+#, elixir-autogen, elixir-format
+msgid "Time {time}"
+msgstr "Temps {time}"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "Couper le son"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "Activer le son"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are green, but one is purple."
+msgstr "Deux cartes sont vertes, mais une est violette."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are green, but one is red."
+msgstr "Deux cartes sont vertes, mais une est rouge."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are open, but one is solid."
+msgstr "Deux cartes sont vides, mais une est pleine."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are open, but one is striped."
+msgstr "Deux cartes sont vides, mais une est rayée."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are purple, but one is green."
+msgstr "Deux cartes sont violettes, mais une est verte."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are purple, but one is red."
+msgstr "Deux cartes sont violettes, mais une est rouge."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are red, but one is green."
+msgstr "Deux cartes sont rouges, mais une est verte."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are red, but one is purple."
+msgstr "Deux cartes sont rouges, mais une est violette."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are solid, but one is open."
+msgstr "Deux cartes sont pleines, mais une est vide."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are solid, but one is striped."
+msgstr "Deux cartes sont pleines, mais une est rayée."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are striped, but one is open."
+msgstr "Deux cartes sont rayées, mais une est vide."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are striped, but one is solid."
+msgstr "Deux cartes sont rayées, mais une est pleine."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 1 shape, but one has 2 shapes."
+msgstr "Deux cartes ont 1 forme, mais une a 2 formes."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 1 shape, but one has 3 shapes."
+msgstr "Deux cartes ont 1 forme, mais une a 3 formes."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 2 shapes, but one has 1 shape."
+msgstr "Deux cartes ont 2 formes, mais une a 1 forme."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 2 shapes, but one has 3 shapes."
+msgstr "Deux cartes ont 2 formes, mais une a 3 formes."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 3 shapes, but one has 1 shape."
+msgstr "Deux cartes ont 3 formes, mais une a 1 forme."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 3 shapes, but one has 2 shapes."
+msgstr "Deux cartes ont 3 formes, mais une a 2 formes."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have diamonds, but one has ovals."
+msgstr "Deux cartes ont des losanges, mais une a des ovales."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have diamonds, but one has squiggles."
+msgstr "Deux cartes ont des losanges, mais une a des vagues."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have ovals, but one has diamonds."
+msgstr "Deux cartes ont des ovales, mais une a des losanges."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have ovals, but one has squiggles."
+msgstr "Deux cartes ont des ovales, mais une a des vagues."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have squiggles, but one has diamonds."
+msgstr "Deux cartes ont des vagues, mais une a des losanges."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have squiggles, but one has ovals."
+msgstr "Deux cartes ont des vagues, mais une a des ovales."
+
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "Visibilité"
+
+#, elixir-autogen, elixir-format
+msgid "Waiting for players"
+msgstr "En attente des joueurs"
+
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "Spectateurs : {count}"
+
+#, elixir-autogen, elixir-format
+msgid "When the table has no set, 3 more cards come from the deck."
+msgstr "Quand il n'y a pas de set sur la table, 3 cartes de plus sortent de la pioche."
+
+#, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "Tu regardes cette partie."
+
+#, elixir-autogen, elixir-format
+msgid "You win!"
+msgstr "Tu as gagné !"
+
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "Tes résultats"
+
+#, elixir-autogen, elixir-format
+msgid "deck"
+msgstr "pioche"
+
+#, elixir-autogen, elixir-format
+msgid "green"
+msgstr "vert"
+
+#, elixir-autogen, elixir-format
+msgid "last set"
+msgstr "dernier set"
+
+#, elixir-autogen, elixir-format
+msgid "open"
+msgstr "vide"
+
+#, elixir-autogen, elixir-format
+msgid "purple"
+msgstr "violet"
+
+#, elixir-autogen, elixir-format
+msgid "red"
+msgstr "rouge"
+
+#, elixir-autogen, elixir-format
+msgid "solid"
+msgstr "plein"
+
+#, elixir-autogen, elixir-format
+msgid "striped"
+msgstr "rayé"
+
+#, elixir-autogen, elixir-format
+msgid "time"
+msgstr "temps"
+
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "pour être classé"
+
+#, elixir-autogen, elixir-format
+msgid "to start saving your results."
+msgstr "pour commencer à enregistrer tes résultats."
+
+#, elixir-autogen, elixir-format
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "{feed} pour qu'Octomocto reste sans pub."
+
+#, elixir-autogen, elixir-format
+msgid "{name} (you)"
+msgstr "{name} (toi)"
+
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name} change les paramètres…"
+
+#, elixir-autogen, elixir-format
+msgid "{name} wins!"
+msgstr "{name} gagne !"
+
+#, elixir-autogen, elixir-format
+msgid "{players} of {needed} players are in"
+msgstr "Joueurs présents : {players} sur {needed}"
+
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in} pour garder tes scores."

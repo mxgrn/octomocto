@@ -603,7 +603,7 @@ if (setNode) {
   let muted = false
   try { muted = localStorage.getItem("set-muted") === "true" } catch (_e) {}
 
-  const setGame = window.Elm.SetGame.init({node: setNode, flags: {gameUrl: window.location.href, settingsUrl: setNode.dataset.settingsUrl, changeSettingsUrl: setNode.dataset.changeSettingsUrl || null, nextGame: {name: setNode.dataset.nextGameName, path: setNode.dataset.nextGamePath}, guest: !setNode.dataset.userToken, muted}})
+  const setGame = window.Elm.SetGame.init({node: setNode, flags: {gameUrl: window.location.href, indexUrl: setNode.dataset.indexUrl, settingsUrl: setNode.dataset.settingsUrl, changeSettingsUrl: setNode.dataset.changeSettingsUrl || null, nextGame: {name: setNode.dataset.nextGameName, path: setNode.dataset.nextGamePath}, donateUrl: setNode.dataset.donateUrl, guest: !setNode.dataset.userToken, muted, texts: JSON.parse(setNode.dataset.texts), cardNames: JSON.parse(setNode.dataset.cardNames)}})
   const socket = new Socket("/socket", {params: {user_token: setNode.dataset.userToken, _csrf_token: csrfToken}})
   socket.connect()
 

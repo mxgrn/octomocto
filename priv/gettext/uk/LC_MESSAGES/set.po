@@ -1,0 +1,485 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: uk\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100 != 11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10||n%100>=20) ? 1 : 2);\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} diamond"
+msgid_plural "%{count} %{color} %{shading} diamonds"
+msgstr[0] "%{count} ромб, %{color}, %{shading}"
+msgstr[1] "%{count} ромби, %{color}, %{shading}"
+msgstr[2] "%{count} ромбів, %{color}, %{shading}"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} oval"
+msgid_plural "%{count} %{color} %{shading} ovals"
+msgstr[0] "%{count} овал, %{color}, %{shading}"
+msgstr[1] "%{count} овали, %{color}, %{shading}"
+msgstr[2] "%{count} овалів, %{color}, %{shading}"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} squiggle"
+msgid_plural "%{count} %{color} %{shading} squiggles"
+msgstr[0] "%{count} хвиля, %{color}, %{shading}"
+msgstr[1] "%{count} хвилі, %{color}, %{shading}"
+msgstr[2] "%{count} хвиль, %{color}, %{shading}"
+
+#, elixir-autogen, elixir-format
+msgid "27 cards, one feature is the same."
+msgstr "27 карт, одна ознака в усіх однакова."
+
+#, elixir-autogen, elixir-format
+msgid "A set is 3 cards where each feature is the same on all 3 cards, or different on all 3 cards."
+msgstr "Сет — це 3 карти, у яких кожна ознака або однакова на всіх 3 картах, або різна на всіх 3 картах."
+
+#, elixir-autogen, elixir-format
+msgid "All 81 cards."
+msgstr "Усі 81 карта."
+
+#, elixir-autogen, elixir-format
+msgid "All players look at the same table. The first player who claims a set gets the point."
+msgstr "Усі гравці дивляться на той самий стіл. Очко отримує той, хто першим позначить сет."
+
+#, elixir-autogen, elixir-format
+msgid "All players race on the same table. The game starts when all players are in."
+msgstr "Усі гравці змагаються за одним столом. Гра почнеться, коли всі увійдуть."
+
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "Рекорд"
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "Найкращі результати"
+
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "Змінити налаштування"
+
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "Вибери налаштування наступної гри."
+
+#, elixir-autogen, elixir-format
+msgid "Click 3 cards to claim a set. A correct set goes off the table, and new cards take its place. A wrong set changes nothing."
+msgstr "Натисни на 3 карти, щоб позначити сет. Правильний сет зникає зі столу, а на його місце викладаються нові карти. Неправильний сет нічого не змінює."
+
+#, elixir-autogen, elixir-format
+msgid "Copied!"
+msgstr "Скопійовано!"
+
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr "Копіювати посилання"
+
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "Не вдалося увійти в гру: {reason}"
+
+#, elixir-autogen, elixir-format
+msgid "Done!"
+msgstr "Готово!"
+
+#, elixir-autogen, elixir-format
+msgid "Each card has 4 features: the number of shapes (1, 2 or 3), the shape (diamond, oval or squiggle), the shading (solid, striped or open) and the color (red, green or purple)."
+msgstr "Кожна карта має 4 ознаки: кількість фігур (1, 2 або 3), фігура (ромб, овал або хвиля), заливка (суцільна, у смужку або порожня) і колір (червоний, зелений або фіолетовий)."
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 1 shape"
+msgstr "На кожній з них 1 фігура"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 2 shapes"
+msgstr "На кожній з них 2 фігури"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 3 shapes"
+msgstr "На кожній з них 3 фігури"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different color"
+msgstr "У кожної з них свій колір"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different number of shapes"
+msgstr "У кожної з них своя кількість фігур"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different shading"
+msgstr "У кожної з них своя заливка"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different shape"
+msgstr "У кожної з них своя фігура"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the diamond shape"
+msgstr "На кожній з них ромби"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the oval shape"
+msgstr "На кожній з них овали"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the squiggle shape"
+msgstr "На кожній з них хвилі"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is green"
+msgstr "Кожна з них зелена"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is open"
+msgstr "Кожна з них без заливки"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is purple"
+msgstr "Кожна з них фіолетова"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is red"
+msgstr "Кожна з них червона"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is solid"
+msgstr "Кожна з них із суцільною заливкою"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is striped"
+msgstr "Кожна з них у смужку"
+
+#, elixir-autogen, elixir-format
+msgid "Easy"
+msgstr "Легкий"
+
+#, elixir-autogen, elixir-format
+msgid "Find 3 cards where each feature is all the same or all different."
+msgstr "Знайди 3 карти, у яких кожна ознака або всюди однакова, або всюди різна."
+
+#, elixir-autogen, elixir-format
+msgid "For example, 1 red solid diamond, 2 red striped ovals and 3 red open squiggles are a set: the color is the same on all cards, and the number, the shape and the shading are different on all cards."
+msgstr "Наприклад, 1 червоний ромб із суцільною заливкою, 2 червоні овали у смужку і 3 червоні порожні хвилі — це сет: колір на всіх картах однаковий, а кількість, фігура і заливка на всіх картах різні."
+
+#, elixir-autogen, elixir-format
+msgid "Hint"
+msgstr "Підказка"
+
+#, elixir-autogen, elixir-format
+msgid "In the easy mode, the deck has only 27 cards. One feature is the same on all of them, for example the color. The game picks this feature and its value at random."
+msgstr "У легкому режимі в колоді лише 27 карт. Одна ознака в усіх однакова, наприклад колір. Гра вибирає цю ознаку та її значення випадково."
+
+#, elixir-autogen, elixir-format
+msgid "It's a tie!"
+msgstr "Нічия!"
+
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "Входимо в гру…"
+
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "Лобі"
+
+#, elixir-autogen, elixir-format
+msgid "Menu"
+msgstr "Меню"
+
+#, elixir-autogen, elixir-format
+msgid "Mode"
+msgstr "Режим"
+
+#, elixir-autogen, elixir-format
+msgid "New game"
+msgstr "Нова гра"
+
+#, elixir-autogen, elixir-format
+msgid "Next hint"
+msgstr "Ще підказка"
+
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "Ігор поки немає."
+
+#, elixir-autogen, elixir-format
+msgid "No more hints"
+msgstr "Підказок немає"
+
+#, elixir-autogen, elixir-format
+msgid "Normal"
+msgstr "Звичайний"
+
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "Або спробуй {game}"
+
+#, elixir-autogen, elixir-format
+msgid "Play again"
+msgstr "Зіграти ще"
+
+#, elixir-autogen, elixir-format
+msgid "Play the Set card game online: find 3 cards where each feature is all the same or all different. Solo against the clock or race up to 3 friends. Free."
+msgstr "Set — карткова головоломка онлайн: знайди 3 карти, де кожна ознака всюди однакова або всюди різна. Соло на час або з друзями. Безкоштовно."
+
+#, elixir-autogen, elixir-format
+msgid "Players"
+msgstr "Гравці"
+
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "Закрита"
+
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "Відкрита"
+
+#, elixir-autogen, elixir-format
+msgid "Restart game"
+msgstr "Почати знову"
+
+#, elixir-autogen, elixir-format
+msgid "Send the link to the other players. The game starts when all of them are in."
+msgstr "Надішли посилання іншим гравцям. Гра почнеться, коли всі увійдуть."
+
+#, elixir-autogen, elixir-format
+msgid "Set"
+msgstr "Set"
+
+#, elixir-autogen, elixir-format
+msgid "Set Card Game Online: Solo or Multiplayer"
+msgstr "Set: карткова головоломка онлайн, соло або з друзями"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Увійди"
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "Підтримай автора"
+
+#, elixir-autogen, elixir-format
+msgid "The Set card game: find 3 cards where each feature is all the same or all different."
+msgstr "Карткова гра Set: знайди 3 карти, у яких кожна ознака або всюди однакова, або всюди різна."
+
+#, elixir-autogen, elixir-format
+msgid "The game ends when the deck is empty and the table has no set. Alone, find all sets as fast as you can. With other players, find the most sets."
+msgstr "Гра закінчується, коли колода порожня і на столі немає сету. Наодинці знайди всі сети якнайшвидше. З іншими гравцями знайди найбільше сетів."
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "{color} змінює налаштування…"
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player wins!"
+msgstr "Перемагає {color}!"
+
+#, elixir-autogen, elixir-format
+msgid "Time {time}"
+msgstr "Час {time}"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "Вимкнути звук"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "Увімкнути звук"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are green, but one is purple."
+msgstr "Дві карти зелені, а одна фіолетова."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are green, but one is red."
+msgstr "Дві карти зелені, а одна червона."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are open, but one is solid."
+msgstr "Дві карти без заливки, а одна із суцільною заливкою."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are open, but one is striped."
+msgstr "Дві карти без заливки, а одна у смужку."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are purple, but one is green."
+msgstr "Дві карти фіолетові, а одна зелена."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are purple, but one is red."
+msgstr "Дві карти фіолетові, а одна червона."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are red, but one is green."
+msgstr "Дві карти червоні, а одна зелена."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are red, but one is purple."
+msgstr "Дві карти червоні, а одна фіолетова."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are solid, but one is open."
+msgstr "Дві карти із суцільною заливкою, а одна без заливки."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are solid, but one is striped."
+msgstr "Дві карти із суцільною заливкою, а одна у смужку."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are striped, but one is open."
+msgstr "Дві карти у смужку, а одна без заливки."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are striped, but one is solid."
+msgstr "Дві карти у смужку, а одна із суцільною заливкою."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 1 shape, but one has 2 shapes."
+msgstr "На двох картах 1 фігура, а на одній 2 фігури."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 1 shape, but one has 3 shapes."
+msgstr "На двох картах 1 фігура, а на одній 3 фігури."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 2 shapes, but one has 1 shape."
+msgstr "На двох картах 2 фігури, а на одній 1 фігура."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 2 shapes, but one has 3 shapes."
+msgstr "На двох картах 2 фігури, а на одній 3 фігури."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 3 shapes, but one has 1 shape."
+msgstr "На двох картах 3 фігури, а на одній 1 фігура."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 3 shapes, but one has 2 shapes."
+msgstr "На двох картах 3 фігури, а на одній 2 фігури."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have diamonds, but one has ovals."
+msgstr "На двох картах ромби, а на одній овали."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have diamonds, but one has squiggles."
+msgstr "На двох картах ромби, а на одній хвилі."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have ovals, but one has diamonds."
+msgstr "На двох картах овали, а на одній ромби."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have ovals, but one has squiggles."
+msgstr "На двох картах овали, а на одній хвилі."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have squiggles, but one has diamonds."
+msgstr "На двох картах хвилі, а на одній ромби."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have squiggles, but one has ovals."
+msgstr "На двох картах хвилі, а на одній овали."
+
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "Доступ"
+
+#, elixir-autogen, elixir-format
+msgid "Waiting for players"
+msgstr "Чекаємо на гравців"
+
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "Глядачі: {count}"
+
+#, elixir-autogen, elixir-format
+msgid "When the table has no set, 3 more cards come from the deck."
+msgstr "Коли на столі немає сету, з колоди викладаються ще 3 карти."
+
+#, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "Ти спостерігаєш за цією грою."
+
+#, elixir-autogen, elixir-format
+msgid "You win!"
+msgstr "Перемога!"
+
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "Твої результати"
+
+#, elixir-autogen, elixir-format
+msgid "deck"
+msgstr "колода"
+
+#, elixir-autogen, elixir-format
+msgid "green"
+msgstr "зелений колір"
+
+#, elixir-autogen, elixir-format
+msgid "last set"
+msgstr "останній сет"
+
+#, elixir-autogen, elixir-format
+msgid "open"
+msgstr "без заливки"
+
+#, elixir-autogen, elixir-format
+msgid "purple"
+msgstr "фіолетовий колір"
+
+#, elixir-autogen, elixir-format
+msgid "red"
+msgstr "червоний колір"
+
+#, elixir-autogen, elixir-format
+msgid "solid"
+msgstr "суцільна заливка"
+
+#, elixir-autogen, elixir-format
+msgid "striped"
+msgstr "у смужку"
+
+#, elixir-autogen, elixir-format
+msgid "time"
+msgstr "час"
+
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "і потрап до списку"
+
+#, elixir-autogen, elixir-format
+msgid "to start saving your results."
+msgstr "і почни зберігати свої результати."
+
+#, elixir-autogen, elixir-format
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "{feed}, щоб в Octomocto не було реклами."
+
+#, elixir-autogen, elixir-format
+msgid "{name} (you)"
+msgstr "{name} (ти)"
+
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name} змінює налаштування…"
+
+#, elixir-autogen, elixir-format
+msgid "{name} wins!"
+msgstr "Перемагає {name}!"
+
+#, elixir-autogen, elixir-format
+msgid "{players} of {needed} players are in"
+msgstr "Гравців у грі: {players} з {needed}"
+
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in} і зберігай свої результати."

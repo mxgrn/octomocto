@@ -6,6 +6,7 @@
   current_scope={@current_scope}
   guest_name={@guest_name}
   guest_public_id={@guest_public_id}
+  languages={@languages}
 >
   <%!--
     Wider than the app container, so that the columns have room. One column
@@ -20,30 +21,33 @@
   --%>
   <div
     id="set-index"
-    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[calc(100vw-4rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] xl:grid-rows-[auto_1fr]"
+    class="relative start-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 rtl:translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[calc(100vw-4rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] xl:grid-rows-[auto_1fr]"
   >
     <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 lg:max-w-none">
       <div class="flex items-center justify-center gap-3">
         <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
           <OctomoctoWeb.GameIcons.game_icon game="set" class="size-9" />
         </div>
-        <h1 class="text-3xl font-semibold tracking-tight">Set</h1>
+        <h1 class="text-3xl font-semibold tracking-tight">{dgettext("set", "Set")}</h1>
       </div>
       <p class="text-base-content/70">
         <%= if @match do %>
-          Choose the settings of the next game.
+          {dgettext("set", "Choose the settings of the next game.")}
         <% else %>
-          The Set card game: find 3 cards where each feature is all the same or all different.
+          {dgettext(
+            "set",
+            "The Set card game: find 3 cards where each feature is all the same or all different."
+          )}
         <% end %>
       </p>
       <.how_to_play />
       <div :if={!@match} class="pt-2">
         <.mode_tabs
           tab={if(@live_action == :lobby, do: :lobby, else: :free)}
-          free_path={~p"/set?#{query(@settings, [])}"}
-          free_label="New game"
-          lobby_path={~p"/set/lobby"}
-          lobby_label="Lobby"
+          free_path={settings_path(@locale, @settings, [])}
+          free_label={dgettext("set", "New game")}
+          lobby_path={Locale.path(@locale, ~p"/set/lobby")}
+          lobby_label={dgettext("set", "Lobby")}
           lobby_count={Enum.count(@lobby_games, &(&1.status == :open))}
         />
       </div>
@@ -59,8 +63,8 @@
         games={@lobby_games}
         watchers={@watchers}
         matches={&same_settings?(&1, @settings)}
-        path={&~p"/set/#{&1.id}"}
-        new_game_path={~p"/set?#{query(@settings, [])}"}
+        path={&Locale.path(@locale, ~p"/set/#{&1.id}")}
+        new_game_path={settings_path(@locale, @settings, [])}
       >
         <:icon :let={_game}><.card_icon class="w-9 shrink-0" /></:icon>
         <:summary :let={game}>{game_summary(game)}</:summary>
@@ -77,31 +81,27 @@
           players={@match.state.players}
           ties={@match.state.ties}
           me={@match.player_id}
-          back={~p"/set/#{@match.id}"}
+          back={Locale.path(@locale, ~p"/set/#{@match.id}")}
         />
         <.setting
           :if={!@match}
           id="setting-players"
-          label="Players"
+          label={dgettext("set", "Players")}
           icon="hero-users"
-          hint={
-            if(@settings.players > 1,
-              do: "All players race on the same table. The game starts when all players are in."
-            )
-          }
+          hint={players_hint(@settings.players)}
         >
           <.option
             :for={n <- 1..4}
             id={"players-#{n}"}
             selected={@settings.players == n}
-            patch={~p"/set?#{query(@settings, players: n)}"}
+            patch={settings_path(@locale, @settings, players: n)}
           >
             {n}
           </.option>
         </.setting>
         <.setting
           id="setting-mode"
-          label="Mode"
+          label={dgettext("set", "Mode")}
           icon="hero-adjustments-horizontal"
           hint={mode_hint(@settings.mode)}
         >
@@ -109,28 +109,28 @@
             :for={mode <- Deck.modes()}
             id={"mode-#{mode}"}
             selected={@settings.mode == mode}
-            patch={~p"/set?#{query(@settings, mode: mode)}"}
+            patch={settings_path(@locale, @settings, mode: mode)}
           >
-            {String.capitalize(mode)}
+            {mode_name(mode)}
           </.option>
         </.setting>
         <.setting
           :if={!@match}
           id="setting-visibility"
-          label="Visibility"
+          label={dgettext("set", "Visibility")}
           icon="hero-eye"
           hint={visibility_hint(@settings)}
         >
           <.option
             :for={
               {value, public, label} <- [
-                {"public", true, "Public"},
-                {"private", false, "Private"}
+                {"public", true, dgettext("set", "Public")},
+                {"private", false, dgettext("set", "Private")}
               ]
             }
             id={"visibility-#{value}"}
             selected={@settings.public == public}
-            patch={~p"/set?#{query(@settings, public: public)}"}
+            patch={settings_path(@locale, @settings, public: public)}
           >
             {label}
           </.option>
@@ -148,9 +148,9 @@
         id="your-results"
         icon="hero-user"
         icon_class="text-octo-indigo"
-        title="Your results"
+        title={dgettext("set", "Your results")}
         empty={@user_results != nil and @user_results.latest == []}
-        empty_text="No games yet."
+        empty_text={dgettext("set", "No games yet.")}
       >
         <:aside :if={@user_results && @user_results.best}>
           <span
@@ -158,7 +158,7 @@
             class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
           >
             <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
-            <span class="text-base-content/60">Best</span>
+            <span class="text-base-content/60">{dgettext("set", "Best")}</span>
             <span class="font-semibold tabular-nums">
               {format_time(@user_results.best.elapsed_ms)}
             </span>
@@ -167,7 +167,7 @@
         <%= if @user_results do %>
           <.result_row :for={%{result: result, players: players} <- @user_results.latest}>
             <span :if={@settings.players == 1} class="flex-1 font-medium">
-              {Calendar.strftime(result.inserted_at, "%b %-d")}
+              {Locale.short_date(result.inserted_at)}
             </span>
             <span :if={@settings.players > 1} class="min-w-0 flex-1 font-medium">
               <.player_list players={players} scores />
@@ -183,9 +183,9 @@
               href={Locale.path(@locale, ~p"/signin")}
               class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
             >
-              Sign in
+              {dgettext("set", "Sign in")}
             </.link>
-            to start saving your results.
+            {dgettext("set", "to start saving your results.")}
           </li>
         <% end %>
       </.score_list>
@@ -193,7 +193,7 @@
         id="best-results"
         icon="hero-trophy"
         icon_class="text-amber-500"
-        title="Best results"
+        title={dgettext("set", "Best results")}
         empty={@best_results == []}
         empty_text={OctomoctoWeb.BestResults.empty_text(@best_following)}
       >
@@ -207,13 +207,13 @@
               href={Locale.path(@locale, ~p"/signin")}
               class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
             >
-              Sign in
+              {dgettext("set", "Sign in")}
             </.link>
-            to get listed
+            {dgettext("set", "to get listed")}
           </span>
         </:aside>
         <.result_row :for={{result, place} <- Enum.with_index(@best_results, 1)}>
-          <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+          <span class="w-4 shrink-0 text-end tabular-nums text-base-content/40">{place}</span>
           <span class="min-w-0 flex-1 truncate font-medium"><.player_link player={result.user}>{player_name(
             result.user
           )}</.player_link></span>

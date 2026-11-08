@@ -1,0 +1,494 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ar\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5);\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} diamond"
+msgid_plural "%{count} %{color} %{shading} diamonds"
+msgstr[0] "%{count} معيّن، %{color}، %{shading}"
+msgstr[1] "%{count} معيّن، %{color}، %{shading}"
+msgstr[2] "%{count} معيّنان، %{color}، %{shading}"
+msgstr[3] "%{count} معيّنات، %{color}، %{shading}"
+msgstr[4] "%{count} معيّنًا، %{color}، %{shading}"
+msgstr[5] "%{count} معيّن، %{color}، %{shading}"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} oval"
+msgid_plural "%{count} %{color} %{shading} ovals"
+msgstr[0] "%{count} شكل بيضاوي، %{color}، %{shading}"
+msgstr[1] "%{count} شكل بيضاوي، %{color}، %{shading}"
+msgstr[2] "%{count} شكلان بيضاويان، %{color}، %{shading}"
+msgstr[3] "%{count} أشكال بيضاوية، %{color}، %{shading}"
+msgstr[4] "%{count} شكلًا بيضاويًا، %{color}، %{shading}"
+msgstr[5] "%{count} شكل بيضاوي، %{color}، %{shading}"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} squiggle"
+msgid_plural "%{count} %{color} %{shading} squiggles"
+msgstr[0] "%{count} شكل متعرّج، %{color}، %{shading}"
+msgstr[1] "%{count} شكل متعرّج، %{color}، %{shading}"
+msgstr[2] "%{count} شكلان متعرّجان، %{color}، %{shading}"
+msgstr[3] "%{count} أشكال متعرّجة، %{color}، %{shading}"
+msgstr[4] "%{count} شكلًا متعرّجًا، %{color}، %{shading}"
+msgstr[5] "%{count} شكل متعرّج، %{color}، %{shading}"
+
+#, elixir-autogen, elixir-format
+msgid "27 cards, one feature is the same."
+msgstr "27 بطاقة، وصفة واحدة متطابقة فيها كلها."
+
+#, elixir-autogen, elixir-format
+msgid "A set is 3 cards where each feature is the same on all 3 cards, or different on all 3 cards."
+msgstr "المجموعة هي 3 بطاقات تكون فيها كل صفة متطابقة في البطاقات الثلاث، أو مختلفة في البطاقات الثلاث."
+
+#, elixir-autogen, elixir-format
+msgid "All 81 cards."
+msgstr "جميع البطاقات الـ81."
+
+#, elixir-autogen, elixir-format
+msgid "All players look at the same table. The first player who claims a set gets the point."
+msgstr "يرى جميع اللاعبين الطاولة نفسها. أول لاعب يأخذ مجموعة يحصل على النقطة."
+
+#, elixir-autogen, elixir-format
+msgid "All players race on the same table. The game starts when all players are in."
+msgstr "يتسابق جميع اللاعبين على الطاولة نفسها. تبدأ اللعبة عندما ينضم جميع اللاعبين."
+
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "الأفضل"
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "أفضل النتائج"
+
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "غيّر الإعدادات"
+
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "اختر إعدادات اللعبة التالية."
+
+#, elixir-autogen, elixir-format
+msgid "Click 3 cards to claim a set. A correct set goes off the table, and new cards take its place. A wrong set changes nothing."
+msgstr "اضغط على 3 بطاقات لتأخذ مجموعة. المجموعة الصحيحة تخرج من الطاولة وتحلّ محلها بطاقات جديدة. المجموعة الخاطئة لا تغيّر شيئًا."
+
+#, elixir-autogen, elixir-format
+msgid "Copied!"
+msgstr "تم النسخ!"
+
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr "انسخ الرابط"
+
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "تعذّر الانضمام إلى اللعبة: {reason}"
+
+#, elixir-autogen, elixir-format
+msgid "Done!"
+msgstr "انتهيت!"
+
+#, elixir-autogen, elixir-format
+msgid "Each card has 4 features: the number of shapes (1, 2 or 3), the shape (diamond, oval or squiggle), the shading (solid, striped or open) and the color (red, green or purple)."
+msgstr "لكل بطاقة 4 صفات: عدد الأشكال (1 أو 2 أو 3)، والشكل (معيّن أو بيضاوي أو متعرّج)، والتعبئة (كاملة أو مخطّطة أو فارغة)، واللون (أحمر أو أخضر أو بنفسجي)."
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 1 shape"
+msgstr "على كل بطاقة شكل واحد"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 2 shapes"
+msgstr "على كل بطاقة شكلان"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 3 shapes"
+msgstr "على كل بطاقة 3 أشكال"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different color"
+msgstr "لكل بطاقة لون مختلف"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different number of shapes"
+msgstr "على كل بطاقة عدد مختلف من الأشكال"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different shading"
+msgstr "لكل بطاقة تعبئة مختلفة"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different shape"
+msgstr "لكل بطاقة شكل مختلف"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the diamond shape"
+msgstr "كل البطاقات عليها معيّنات"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the oval shape"
+msgstr "كل البطاقات عليها أشكال بيضاوية"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the squiggle shape"
+msgstr "كل البطاقات عليها أشكال متعرّجة"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is green"
+msgstr "كل البطاقات باللون الأخضر"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is open"
+msgstr "كل البطاقات بلا تعبئة"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is purple"
+msgstr "كل البطاقات باللون البنفسجي"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is red"
+msgstr "كل البطاقات باللون الأحمر"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is solid"
+msgstr "كل البطاقات بتعبئة كاملة"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is striped"
+msgstr "كل البطاقات بتعبئة مخطّطة"
+
+#, elixir-autogen, elixir-format
+msgid "Easy"
+msgstr "سهل"
+
+#, elixir-autogen, elixir-format
+msgid "Find 3 cards where each feature is all the same or all different."
+msgstr "اعثر على 3 بطاقات تكون فيها كل صفة متطابقة في الكل أو مختلفة في الكل."
+
+#, elixir-autogen, elixir-format
+msgid "For example, 1 red solid diamond, 2 red striped ovals and 3 red open squiggles are a set: the color is the same on all cards, and the number, the shape and the shading are different on all cards."
+msgstr "مثلًا، البطاقات التي عليها معيّن أحمر واحد بتعبئة كاملة، وشكلان بيضاويان أحمران بتعبئة مخطّطة، و3 أشكال متعرّجة حمراء بلا تعبئة تشكّل مجموعة: اللون متطابق في كل البطاقات، أما العدد والشكل والتعبئة فمختلفة في كل البطاقات."
+
+#, elixir-autogen, elixir-format
+msgid "Hint"
+msgstr "تلميح"
+
+#, elixir-autogen, elixir-format
+msgid "In the easy mode, the deck has only 27 cards. One feature is the same on all of them, for example the color. The game picks this feature and its value at random."
+msgstr "في الوضع السهل، تحتوي الرزمة على 27 بطاقة فقط. صفة واحدة متطابقة فيها كلها، مثل اللون. تختار اللعبة هذه الصفة وقيمتها عشوائيًا."
+
+#, elixir-autogen, elixir-format
+msgid "It's a tie!"
+msgstr "تعادل!"
+
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "جارٍ الانضمام إلى اللعبة…"
+
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "الردهة"
+
+#, elixir-autogen, elixir-format
+msgid "Menu"
+msgstr "القائمة"
+
+#, elixir-autogen, elixir-format
+msgid "Mode"
+msgstr "الوضع"
+
+#, elixir-autogen, elixir-format
+msgid "New game"
+msgstr "لعبة جديدة"
+
+#, elixir-autogen, elixir-format
+msgid "Next hint"
+msgstr "التلميح التالي"
+
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "لا توجد ألعاب بعد."
+
+#, elixir-autogen, elixir-format
+msgid "No more hints"
+msgstr "لا مزيد من التلميحات"
+
+#, elixir-autogen, elixir-format
+msgid "Normal"
+msgstr "عادي"
+
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "أو جرّب {game}"
+
+#, elixir-autogen, elixir-format
+msgid "Play again"
+msgstr "العب مجددًا"
+
+#, elixir-autogen, elixir-format
+msgid "Play the Set card game online: find 3 cards where each feature is all the same or all different. Solo against the clock or race up to 3 friends. Free."
+msgstr "العب Set، لعبة ألغاز بالبطاقات أونلاين: اعثر على 3 بطاقات كل صفة فيها متطابقة في الكل أو مختلفة في الكل. وحدك ضد الوقت أو مع حتى 3 أصدقاء. مجانًا."
+
+#, elixir-autogen, elixir-format
+msgid "Players"
+msgstr "اللاعبون"
+
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "خاصة"
+
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "عامة"
+
+#, elixir-autogen, elixir-format
+msgid "Restart game"
+msgstr "أعد بدء اللعبة"
+
+#, elixir-autogen, elixir-format
+msgid "Send the link to the other players. The game starts when all of them are in."
+msgstr "أرسل الرابط إلى اللاعبين الآخرين. تبدأ اللعبة عندما ينضم الجميع."
+
+#, elixir-autogen, elixir-format
+msgid "Set"
+msgstr "Set"
+
+#, elixir-autogen, elixir-format
+msgid "Set Card Game Online: Solo or Multiplayer"
+msgstr "Set: لعبة ألغاز بالبطاقات أونلاين، وحدك أو مع أصدقائك"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "سجّل الدخول"
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "ادعم المبدع"
+
+#, elixir-autogen, elixir-format
+msgid "The Set card game: find 3 cards where each feature is all the same or all different."
+msgstr "لعبة البطاقات Set: اعثر على 3 بطاقات تكون فيها كل صفة متطابقة في الكل أو مختلفة في الكل."
+
+#, elixir-autogen, elixir-format
+msgid "The game ends when the deck is empty and the table has no set. Alone, find all sets as fast as you can. With other players, find the most sets."
+msgstr "تنتهي اللعبة عندما تفرغ الرزمة ولا توجد مجموعة على الطاولة. وحدك، اعثر على كل المجموعات بأسرع ما يمكن. مع لاعبين آخرين، اعثر على أكبر عدد من المجموعات."
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "اللاعب {color} يغيّر الإعدادات…"
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player wins!"
+msgstr "فاز اللاعب {color}!"
+
+#, elixir-autogen, elixir-format
+msgid "Time {time}"
+msgstr "الوقت {time}"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "أوقف الأصوات"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "شغّل الأصوات"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are green, but one is purple."
+msgstr "بطاقتان باللون الأخضر، لكن الثالثة باللون البنفسجي."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are green, but one is red."
+msgstr "بطاقتان باللون الأخضر، لكن الثالثة باللون الأحمر."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are open, but one is solid."
+msgstr "بطاقتان بلا تعبئة، لكن الثالثة بتعبئة كاملة."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are open, but one is striped."
+msgstr "بطاقتان بلا تعبئة، لكن الثالثة بتعبئة مخطّطة."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are purple, but one is green."
+msgstr "بطاقتان باللون البنفسجي، لكن الثالثة باللون الأخضر."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are purple, but one is red."
+msgstr "بطاقتان باللون البنفسجي، لكن الثالثة باللون الأحمر."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are red, but one is green."
+msgstr "بطاقتان باللون الأحمر، لكن الثالثة باللون الأخضر."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are red, but one is purple."
+msgstr "بطاقتان باللون الأحمر، لكن الثالثة باللون البنفسجي."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are solid, but one is open."
+msgstr "بطاقتان بتعبئة كاملة، لكن الثالثة بلا تعبئة."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are solid, but one is striped."
+msgstr "بطاقتان بتعبئة كاملة، لكن الثالثة بتعبئة مخطّطة."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are striped, but one is open."
+msgstr "بطاقتان بتعبئة مخطّطة، لكن الثالثة بلا تعبئة."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are striped, but one is solid."
+msgstr "بطاقتان بتعبئة مخطّطة، لكن الثالثة بتعبئة كاملة."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 1 shape, but one has 2 shapes."
+msgstr "بطاقتان عليهما شكل واحد، لكن الثالثة عليها شكلان."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 1 shape, but one has 3 shapes."
+msgstr "بطاقتان عليهما شكل واحد، لكن الثالثة عليها 3 أشكال."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 2 shapes, but one has 1 shape."
+msgstr "بطاقتان عليهما شكلان، لكن الثالثة عليها شكل واحد."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 2 shapes, but one has 3 shapes."
+msgstr "بطاقتان عليهما شكلان، لكن الثالثة عليها 3 أشكال."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 3 shapes, but one has 1 shape."
+msgstr "بطاقتان عليهما 3 أشكال، لكن الثالثة عليها شكل واحد."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 3 shapes, but one has 2 shapes."
+msgstr "بطاقتان عليهما 3 أشكال، لكن الثالثة عليها شكلان."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have diamonds, but one has ovals."
+msgstr "بطاقتان عليهما معيّنات، لكن الثالثة عليها أشكال بيضاوية."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have diamonds, but one has squiggles."
+msgstr "بطاقتان عليهما معيّنات، لكن الثالثة عليها أشكال متعرّجة."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have ovals, but one has diamonds."
+msgstr "بطاقتان عليهما أشكال بيضاوية، لكن الثالثة عليها معيّنات."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have ovals, but one has squiggles."
+msgstr "بطاقتان عليهما أشكال بيضاوية، لكن الثالثة عليها أشكال متعرّجة."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have squiggles, but one has diamonds."
+msgstr "بطاقتان عليهما أشكال متعرّجة، لكن الثالثة عليها معيّنات."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have squiggles, but one has ovals."
+msgstr "بطاقتان عليهما أشكال متعرّجة، لكن الثالثة عليها أشكال بيضاوية."
+
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "الظهور"
+
+#, elixir-autogen, elixir-format
+msgid "Waiting for players"
+msgstr "بانتظار اللاعبين"
+
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "المشاهدون: {count}"
+
+#, elixir-autogen, elixir-format
+msgid "When the table has no set, 3 more cards come from the deck."
+msgstr "عندما لا توجد مجموعة على الطاولة، تأتي 3 بطاقات إضافية من الرزمة."
+
+#, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "أنت تشاهد هذه اللعبة."
+
+#, elixir-autogen, elixir-format
+msgid "You win!"
+msgstr "فزت!"
+
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "نتائجك"
+
+#, elixir-autogen, elixir-format
+msgid "deck"
+msgstr "الرزمة"
+
+#, elixir-autogen, elixir-format
+msgid "green"
+msgstr "لون أخضر"
+
+#, elixir-autogen, elixir-format
+msgid "last set"
+msgstr "آخر مجموعة"
+
+#, elixir-autogen, elixir-format
+msgid "open"
+msgstr "بلا تعبئة"
+
+#, elixir-autogen, elixir-format
+msgid "purple"
+msgstr "لون بنفسجي"
+
+#, elixir-autogen, elixir-format
+msgid "red"
+msgstr "لون أحمر"
+
+#, elixir-autogen, elixir-format
+msgid "solid"
+msgstr "تعبئة كاملة"
+
+#, elixir-autogen, elixir-format
+msgid "striped"
+msgstr "تعبئة مخطّطة"
+
+#, elixir-autogen, elixir-format
+msgid "time"
+msgstr "الوقت"
+
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "لتظهر في القائمة"
+
+#, elixir-autogen, elixir-format
+msgid "to start saving your results."
+msgstr "لتبدأ حفظ نتائجك."
+
+#, elixir-autogen, elixir-format
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "{feed} ليبقى Octomocto بلا إعلانات."
+
+#, elixir-autogen, elixir-format
+msgid "{name} (you)"
+msgstr "{name} (أنت)"
+
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name} يغيّر الإعدادات…"
+
+#, elixir-autogen, elixir-format
+msgid "{name} wins!"
+msgstr "فاز {name}!"
+
+#, elixir-autogen, elixir-format
+msgid "{players} of {needed} players are in"
+msgstr "انضم {players} من {needed} لاعبين"
+
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in} لتحفظ نتائجك."

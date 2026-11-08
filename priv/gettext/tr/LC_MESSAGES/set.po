@@ -1,0 +1,482 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: tr\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} diamond"
+msgid_plural "%{count} %{color} %{shading} diamonds"
+msgstr[0] "%{count} %{color} %{shading} elmas"
+msgstr[1] "%{count} %{color} %{shading} elmas"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} oval"
+msgid_plural "%{count} %{color} %{shading} ovals"
+msgstr[0] "%{count} %{color} %{shading} oval"
+msgstr[1] "%{count} %{color} %{shading} oval"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} %{color} %{shading} squiggle"
+msgid_plural "%{count} %{color} %{shading} squiggles"
+msgstr[0] "%{count} %{color} %{shading} dalga"
+msgstr[1] "%{count} %{color} %{shading} dalga"
+
+#, elixir-autogen, elixir-format
+msgid "27 cards, one feature is the same."
+msgstr "27 kart, bir özellik hepsinde aynı."
+
+#, elixir-autogen, elixir-format
+msgid "A set is 3 cards where each feature is the same on all 3 cards, or different on all 3 cards."
+msgstr "Set, her özelliğin ya 3 kartta da aynı ya da 3 kartta da farklı olduğu 3 karttır."
+
+#, elixir-autogen, elixir-format
+msgid "All 81 cards."
+msgstr "81 kartın tamamı."
+
+#, elixir-autogen, elixir-format
+msgid "All players look at the same table. The first player who claims a set gets the point."
+msgstr "Tüm oyuncular aynı masaya bakar. Bir seti ilk alan oyuncu puanı kazanır."
+
+#, elixir-autogen, elixir-format
+msgid "All players race on the same table. The game starts when all players are in."
+msgstr "Tüm oyuncular aynı masada yarışır. Herkes katılınca oyun başlar."
+
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "En iyi"
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "En iyi sonuçlar"
+
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "Ayarları değiştir"
+
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "Sonraki oyunun ayarlarını seç."
+
+#, elixir-autogen, elixir-format
+msgid "Click 3 cards to claim a set. A correct set goes off the table, and new cards take its place. A wrong set changes nothing."
+msgstr "Bir seti almak için 3 karta dokun. Doğru set masadan kalkar ve yerine yeni kartlar gelir. Yanlış set hiçbir şeyi değiştirmez."
+
+#, elixir-autogen, elixir-format
+msgid "Copied!"
+msgstr "Kopyalandı!"
+
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr "Bağlantıyı kopyala"
+
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "Oyuna katılınamadı: {reason}"
+
+#, elixir-autogen, elixir-format
+msgid "Done!"
+msgstr "Bitti!"
+
+#, elixir-autogen, elixir-format
+msgid "Each card has 4 features: the number of shapes (1, 2 or 3), the shape (diamond, oval or squiggle), the shading (solid, striped or open) and the color (red, green or purple)."
+msgstr "Her kartın 4 özelliği vardır: şekil sayısı (1, 2 veya 3), şekil (elmas, oval veya dalga), dolgu (dolu, çizgili veya boş) ve renk (kırmızı, yeşil veya mor)."
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 1 shape"
+msgstr "Hepsinde 1 şekil var"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 2 shapes"
+msgstr "Hepsinde 2 şekil var"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has 3 shapes"
+msgstr "Hepsinde 3 şekil var"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different color"
+msgstr "Hepsinin rengi farklı"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different number of shapes"
+msgstr "Hepsinin şekil sayısı farklı"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different shading"
+msgstr "Hepsinin dolgusu farklı"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has a different shape"
+msgstr "Hepsinin şekli farklı"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the diamond shape"
+msgstr "Hepsinde elmas var"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the oval shape"
+msgstr "Hepsinde oval var"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them has the squiggle shape"
+msgstr "Hepsinde dalga var"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is green"
+msgstr "Hepsi yeşil"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is open"
+msgstr "Hepsi boş"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is purple"
+msgstr "Hepsi mor"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is red"
+msgstr "Hepsi kırmızı"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is solid"
+msgstr "Hepsi dolu"
+
+#, elixir-autogen, elixir-format
+msgid "Each of them is striped"
+msgstr "Hepsi çizgili"
+
+#, elixir-autogen, elixir-format
+msgid "Easy"
+msgstr "Kolay"
+
+#, elixir-autogen, elixir-format
+msgid "Find 3 cards where each feature is all the same or all different."
+msgstr "Her özelliğin ya tamamen aynı ya da tamamen farklı olduğu 3 kart bul."
+
+#, elixir-autogen, elixir-format
+msgid "For example, 1 red solid diamond, 2 red striped ovals and 3 red open squiggles are a set: the color is the same on all cards, and the number, the shape and the shading are different on all cards."
+msgstr "Örneğin 1 kırmızı dolu elmas, 2 kırmızı çizgili oval ve 3 kırmızı boş dalga bir settir: renk tüm kartlarda aynı; sayı, şekil ve dolgu ise tüm kartlarda farklı."
+
+#, elixir-autogen, elixir-format
+msgid "Hint"
+msgstr "İpucu"
+
+#, elixir-autogen, elixir-format
+msgid "In the easy mode, the deck has only 27 cards. One feature is the same on all of them, for example the color. The game picks this feature and its value at random."
+msgstr "Kolay modda destede yalnızca 27 kart var. Bir özellik hepsinde aynı, örneğin renk. Oyun bu özelliği ve değerini rastgele seçer."
+
+#, elixir-autogen, elixir-format
+msgid "It's a tie!"
+msgstr "Berabere!"
+
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "Oyuna katılınıyor…"
+
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "Lobi"
+
+#, elixir-autogen, elixir-format
+msgid "Menu"
+msgstr "Menü"
+
+#, elixir-autogen, elixir-format
+msgid "Mode"
+msgstr "Mod"
+
+#, elixir-autogen, elixir-format
+msgid "New game"
+msgstr "Yeni oyun"
+
+#, elixir-autogen, elixir-format
+msgid "Next hint"
+msgstr "Sonraki ipucu"
+
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "Henüz oyun yok."
+
+#, elixir-autogen, elixir-format
+msgid "No more hints"
+msgstr "İpucu kalmadı"
+
+#, elixir-autogen, elixir-format
+msgid "Normal"
+msgstr "Normal"
+
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "Ya da şunu dene: {game}"
+
+#, elixir-autogen, elixir-format
+msgid "Play again"
+msgstr "Tekrar oyna"
+
+#, elixir-autogen, elixir-format
+msgid "Play the Set card game online: find 3 cards where each feature is all the same or all different. Solo against the clock or race up to 3 friends. Free."
+msgstr "Set, kartlarla akıl oyunu: her özelliğin ya tamamen aynı ya da tamamen farklı olduğu 3 kart bul. Tek başına süreye karşı veya 3 arkadaşınla yarış. Ücretsiz."
+
+#, elixir-autogen, elixir-format
+msgid "Players"
+msgstr "Oyuncular"
+
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "Özel"
+
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "Herkese açık"
+
+#, elixir-autogen, elixir-format
+msgid "Restart game"
+msgstr "Oyunu yeniden başlat"
+
+#, elixir-autogen, elixir-format
+msgid "Send the link to the other players. The game starts when all of them are in."
+msgstr "Bağlantıyı diğer oyunculara gönder. Herkes katılınca oyun başlar."
+
+#, elixir-autogen, elixir-format
+msgid "Set"
+msgstr "Set"
+
+#, elixir-autogen, elixir-format
+msgid "Set Card Game Online: Solo or Multiplayer"
+msgstr "Set: kartlarla akıl oyunu, tek başına veya arkadaşlarınla"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Giriş yap"
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "Yapımcıyı destekle"
+
+#, elixir-autogen, elixir-format
+msgid "The Set card game: find 3 cards where each feature is all the same or all different."
+msgstr "Set kart oyunu: her özelliğin ya tamamen aynı ya da tamamen farklı olduğu 3 kart bul."
+
+#, elixir-autogen, elixir-format
+msgid "The game ends when the deck is empty and the table has no set. Alone, find all sets as fast as you can. With other players, find the most sets."
+msgstr "Deste bittiğinde ve masada set kalmadığında oyun biter. Tek başına tüm setleri olabildiğince hızlı bul. Diğer oyuncularla en çok seti bulmaya çalış."
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "Ayarları {color} oyuncu değiştiriyor…"
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player wins!"
+msgstr "Kazanan: {color} oyuncu!"
+
+#, elixir-autogen, elixir-format
+msgid "Time {time}"
+msgstr "Süre {time}"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "Sesleri kapat"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "Sesleri aç"
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are green, but one is purple."
+msgstr "İki kart yeşil, ama biri mor."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are green, but one is red."
+msgstr "İki kart yeşil, ama biri kırmızı."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are open, but one is solid."
+msgstr "İki kart boş, ama biri dolu."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are open, but one is striped."
+msgstr "İki kart boş, ama biri çizgili."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are purple, but one is green."
+msgstr "İki kart mor, ama biri yeşil."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are purple, but one is red."
+msgstr "İki kart mor, ama biri kırmızı."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are red, but one is green."
+msgstr "İki kart kırmızı, ama biri yeşil."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are red, but one is purple."
+msgstr "İki kart kırmızı, ama biri mor."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are solid, but one is open."
+msgstr "İki kart dolu, ama biri boş."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are solid, but one is striped."
+msgstr "İki kart dolu, ama biri çizgili."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are striped, but one is open."
+msgstr "İki kart çizgili, ama biri boş."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards are striped, but one is solid."
+msgstr "İki kart çizgili, ama biri dolu."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 1 shape, but one has 2 shapes."
+msgstr "İki kartta 1 şekil var, ama birinde 2 şekil var."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 1 shape, but one has 3 shapes."
+msgstr "İki kartta 1 şekil var, ama birinde 3 şekil var."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 2 shapes, but one has 1 shape."
+msgstr "İki kartta 2 şekil var, ama birinde 1 şekil var."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 2 shapes, but one has 3 shapes."
+msgstr "İki kartta 2 şekil var, ama birinde 3 şekil var."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 3 shapes, but one has 1 shape."
+msgstr "İki kartta 3 şekil var, ama birinde 1 şekil var."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have 3 shapes, but one has 2 shapes."
+msgstr "İki kartta 3 şekil var, ama birinde 2 şekil var."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have diamonds, but one has ovals."
+msgstr "İki kartta elmas var, ama birinde oval var."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have diamonds, but one has squiggles."
+msgstr "İki kartta elmas var, ama birinde dalga var."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have ovals, but one has diamonds."
+msgstr "İki kartta oval var, ama birinde elmas var."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have ovals, but one has squiggles."
+msgstr "İki kartta oval var, ama birinde dalga var."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have squiggles, but one has diamonds."
+msgstr "İki kartta dalga var, ama birinde elmas var."
+
+#, elixir-autogen, elixir-format
+msgid "Two cards have squiggles, but one has ovals."
+msgstr "İki kartta dalga var, ama birinde oval var."
+
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "Görünürlük"
+
+#, elixir-autogen, elixir-format
+msgid "Waiting for players"
+msgstr "Oyuncular bekleniyor"
+
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "İzleyenler: {count}"
+
+#, elixir-autogen, elixir-format
+msgid "When the table has no set, 3 more cards come from the deck."
+msgstr "Masada set olmadığında desteden 3 kart daha gelir."
+
+#, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "Bu oyunu izliyorsun."
+
+#, elixir-autogen, elixir-format
+msgid "You win!"
+msgstr "Kazandın!"
+
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "Sonuçların"
+
+#, elixir-autogen, elixir-format
+msgid "deck"
+msgstr "deste"
+
+#, elixir-autogen, elixir-format
+msgid "green"
+msgstr "yeşil"
+
+#, elixir-autogen, elixir-format
+msgid "last set"
+msgstr "son set"
+
+#, elixir-autogen, elixir-format
+msgid "open"
+msgstr "boş"
+
+#, elixir-autogen, elixir-format
+msgid "purple"
+msgstr "mor"
+
+#, elixir-autogen, elixir-format
+msgid "red"
+msgstr "kırmızı"
+
+#, elixir-autogen, elixir-format
+msgid "solid"
+msgstr "dolu"
+
+#, elixir-autogen, elixir-format
+msgid "striped"
+msgstr "çizgili"
+
+#, elixir-autogen, elixir-format
+msgid "time"
+msgstr "süre"
+
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "ve listeye gir"
+
+#, elixir-autogen, elixir-format
+msgid "to start saving your results."
+msgstr "ve sonuçlarını kaydetmeye başla."
+
+#, elixir-autogen, elixir-format
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "Octomocto'nun reklamsız kalması için {feed}."
+
+#, elixir-autogen, elixir-format
+msgid "{name} (you)"
+msgstr "{name} (sen)"
+
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name} ayarları değiştiriyor…"
+
+#, elixir-autogen, elixir-format
+msgid "{name} wins!"
+msgstr "Kazanan: {name}!"
+
+#, elixir-autogen, elixir-format
+msgid "{players} of {needed} players are in"
+msgstr "{players}/{needed} oyuncu katıldı"
+
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in} ve skorların kaydedilsin."
