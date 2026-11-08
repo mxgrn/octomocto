@@ -25,7 +25,7 @@ defmodule OctomoctoWeb.PageHTML do
       <g class="octo-top text-octo-orange dark:text-octo-orange-light">
         <.octopus />
       </g>
-      <g class="octo-bottom text-octo-indigo dark:text-octo-indigo-light">
+      <g class="octo-bottom text-octo-indigo">
         <g transform="translate(0 300) scale(1 -1)">
           <.octopus />
         </g>
@@ -52,7 +52,7 @@ defmodule OctomoctoWeb.PageHTML do
         overflow="visible"
         class="octo-float octo-float-reverse ms-0.5 h-full"
       >
-        <g class="text-octo-indigo dark:text-octo-indigo-light"><.octopus /></g>
+        <g class="text-octo-indigo"><.octopus /></g>
       </svg>
     </div>
     """

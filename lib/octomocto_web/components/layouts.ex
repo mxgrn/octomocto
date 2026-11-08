@@ -526,12 +526,12 @@ defmodule OctomoctoWeb.Layouts do
         <g class="text-octo-orange dark:text-octo-orange-light">
           <.octo_letters />
         </g>
-        <g class="text-octo-indigo dark:text-octo-indigo-light">
+        <g class="text-octo-indigo">
           <path d="M292 48V100" />
           <path d="M292 70A22 22 0 0 1 336 70V100" />
           <path d="M336 70A22 22 0 0 1 380 70V100" />
         </g>
-        <g class="text-octo-indigo dark:text-octo-indigo-light" transform="translate(408 0)">
+        <g class="text-octo-indigo" transform="translate(408 0)">
           <.octo_letters />
         </g>
       </g>

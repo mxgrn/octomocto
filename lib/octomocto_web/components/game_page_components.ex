@@ -196,7 +196,7 @@ defmodule OctomoctoWeb.GamePageComponents do
               href={@path.(game) <> "?watch=1"}
               class={[
                 "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ring-1 transition",
-                "text-octo-indigo ring-octo-indigo/30 hover:bg-octo-mist dark:text-octo-indigo-light dark:hover:bg-octo-indigo-light/10"
+                "text-octo-indigo ring-octo-indigo/30 hover:bg-octo-mist dark:hover:bg-octo-indigo/10"
               ]}
             >
               {gettext("Watch")}
