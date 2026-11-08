@@ -217,7 +217,7 @@ defmodule OctomoctoWeb.Layouts do
               invite_switch={false}
             >
               <:label>
-                <.icon name="hero-user-circle" class="size-6" />
+                <.icon name="hero-user-circle" class="-m-1 size-10" />
                 <span class="sr-only">{@guest_name}</span>
               </:label>
               <.link
