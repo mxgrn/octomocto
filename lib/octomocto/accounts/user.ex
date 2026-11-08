@@ -130,7 +130,7 @@ defmodule Octomocto.Accounts.User do
   end
 
   @doc """
-  A user changeset for changing the handle. The handle has 3 to 20
+  A user changeset for changing the handle. The handle has 3 to 32
   lowercase letters, digits and "_", and starts with a letter. It is
   stored in lowercase. A blank handle removes it. A handle cannot be the
   same as a public id of a user or a guest, because both open the profile
@@ -143,7 +143,7 @@ defmodule Octomocto.Accounts.User do
     # name before this one keeps blank strings.
     |> cast(attrs, [:handle], empty_values: empty_values())
     |> update_change(:handle, &(&1 && &1 |> String.trim() |> String.downcase()))
-    |> validate_length(:handle, min: 3, max: 20)
+    |> validate_length(:handle, min: 3, max: 32)
     |> validate_format(:handle, ~r/^[a-z][a-z0-9_]*$/,
       message: "must start with a letter and have only letters, digits and _"
     )

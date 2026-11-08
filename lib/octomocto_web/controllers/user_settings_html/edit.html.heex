@@ -48,13 +48,13 @@
             >{String.replace(url(~p"/"), ~r"^https?://|/$", "")}/players/<span
                 data-handle-preview
                 data-empty="your_handle"
-              >{@profile_form[:handle].value || "your_handle"}</span></span>. Use 3 to 20 lowercase letters, digits and _.
+              >{@profile_form[:handle].value || "your_handle"}</span></span>. Use 3 to 32 lowercase letters, digits and _.
           </p>
           <.input
             field={@profile_form[:handle]}
             type="text"
             placeholder="your_handle"
-            maxlength="20"
+            maxlength="32"
             autocomplete="off"
             autocapitalize="none"
             spellcheck="false"
