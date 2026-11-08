@@ -28,6 +28,17 @@ defmodule OctomoctoWeb.PlayerFollowsLiveTest do
            )
   end
 
+  test "opens the lists at the handle of the user", %{conn: conn} do
+    {:ok, user} = Octomocto.Accounts.update_user_profile(user_fixture(), %{handle: "ada"})
+
+    {:ok, view, _html} = live(conn, ~p"/players/ada/followers")
+
+    assert has_element?(view, ~s|a[href="/players/ada/following"]|)
+
+    assert {:error, {:live_redirect, %{to: "/players/ada/following"}}} =
+             live(conn, ~p"/players/#{user.public_id}/following")
+  end
+
   test "shows the followers and the followed users", %{conn: conn} do
     user = user_fixture()
     follower = user_fixture()

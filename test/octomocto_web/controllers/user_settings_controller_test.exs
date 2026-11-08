@@ -20,7 +20,7 @@ defmodule OctomoctoWeb.UserSettingsControllerTest do
     end
 
     test "shows the initials of the display name in the user menu", %{conn: conn, user: user} do
-      {:ok, _user} = Accounts.update_user_display_name(user, %{display_name: "Ada Byron King"})
+      {:ok, _user} = Accounts.update_user_profile(user, %{display_name: "Ada Byron King"})
 
       document = conn |> get(~p"/settings") |> html_response(200) |> LazyHTML.from_document()
 
@@ -62,13 +62,13 @@ defmodule OctomoctoWeb.UserSettingsControllerTest do
     end
   end
 
-  describe "PUT /settings (change name form)" do
+  describe "PUT /settings (profile form, name)" do
     setup :register_and_log_in_user
 
     test "changes the display name", %{conn: conn, user: user} do
       conn =
         put(conn, ~p"/settings", %{
-          "action" => "update_display_name",
+          "action" => "update_profile",
           "user" => %{"display_name" => "Ada"}
         })
 
@@ -79,12 +79,47 @@ defmodule OctomoctoWeb.UserSettingsControllerTest do
     test "rejects a name longer than 30 characters", %{conn: conn} do
       conn =
         put(conn, ~p"/settings", %{
-          "action" => "update_display_name",
+          "action" => "update_profile",
           "user" => %{"display_name" => String.duplicate("a", 31)}
         })
 
       document = conn |> html_response(200) |> LazyHTML.from_document()
-      assert Enum.any?(LazyHTML.query(document, "#update_display_name p.text-error"))
+      assert Enum.any?(LazyHTML.query(document, "#update_profile p.text-error"))
+    end
+  end
+
+  describe "PUT /settings (profile form, handle)" do
+    setup :register_and_log_in_user
+
+    test "changes the handle", %{conn: conn, user: user} do
+      conn =
+        put(conn, ~p"/settings", %{"action" => "update_profile", "user" => %{"handle" => "ada"}})
+
+      assert redirected_to(conn) == ~p"/settings"
+      assert Accounts.get_user!(user.id).handle == "ada"
+    end
+
+    test "shows an error for a handle that is taken", %{conn: conn} do
+      {:ok, _user} = Accounts.update_user_profile(user_fixture(), %{handle: "ada"})
+
+      conn =
+        put(conn, ~p"/settings", %{"action" => "update_profile", "user" => %{"handle" => "ada"}})
+
+      document = conn |> html_response(200) |> LazyHTML.from_document()
+      assert Enum.any?(LazyHTML.query(document, "#update_profile p.text-error"))
+    end
+  end
+
+  describe "PUT /settings (profile form)" do
+    setup :register_and_log_in_user
+
+    test "saves no name when the handle is not valid", %{conn: conn, user: user} do
+      put(conn, ~p"/settings", %{
+        "action" => "update_profile",
+        "user" => %{"display_name" => "Ada", "handle" => "a"}
+      })
+
+      refute Accounts.get_user!(user.id).display_name == "Ada"
     end
   end
 

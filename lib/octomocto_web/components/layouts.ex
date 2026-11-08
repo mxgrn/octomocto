@@ -278,7 +278,7 @@ defmodule OctomoctoWeb.Layouts do
               </.link>
               <.link
                 id="profile-link"
-                navigate={~p"/players/#{@current_scope.user.public_id}"}
+                navigate={~p"/players/#{profile_id(@current_scope.user)}"}
                 class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
               >
                 {gettext("Profile")}

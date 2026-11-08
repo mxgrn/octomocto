@@ -34,7 +34,7 @@
           ]}
         >
           <% actor = notification.actor %>
-          <.link navigate={~p"/players/#{actor.public_id}"} class="shrink-0">
+          <.link navigate={~p"/players/#{profile_id(actor)}"} class="shrink-0">
             <img
               :if={actor.avatar_url}
               src={actor.avatar_url}

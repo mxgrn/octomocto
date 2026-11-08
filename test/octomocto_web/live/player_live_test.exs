@@ -115,6 +115,26 @@ defmodule OctomoctoWeb.PlayerLiveTest do
     assert PlayerLive.ago(~U[2024-11-04 12:00:00Z], now) == "2 years ago"
   end
 
+  test "opens the profile of a user at the handle", %{conn: conn} do
+    {:ok, user} = Octomocto.Accounts.update_user_profile(user_fixture(), %{handle: "ada"})
+
+    {:ok, view, _html} = live(conn, ~p"/players/ada")
+
+    assert has_element?(view, ~s|#player-followers-link[href="/players/ada/followers"]|)
+
+    assert {:error, {:live_redirect, %{to: "/players/ada"}}} =
+             live(conn, ~p"/players/#{user.public_id}")
+  end
+
+  test "the results link to the handle of the user", %{conn: conn} do
+    {:ok, user} = Octomocto.Accounts.update_user_profile(user_fixture(), %{handle: "ada"})
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+
+    {:ok, view, _html} = live(conn, ~p"/nimble-mosaic?board=random")
+
+    assert has_element?(view, ~s|#best-results a[href="/players/ada"]|)
+  end
+
   test "gives 404 for an unknown public id", %{conn: conn} do
     assert_error_sent 404, fn -> get(conn, ~p"/players/unknown1") end
   end
@@ -143,6 +163,14 @@ defmodule OctomoctoWeb.PlayerLiveTest do
       {:ok, view, _html} = live(conn, ~p"/")
 
       assert has_element?(view, ~s|#profile-link[href="/players/#{user.public_id}"]|)
+    end
+
+    test "has a link to the own handle in the menu", %{conn: conn, user: user} do
+      {:ok, _user} = Octomocto.Accounts.update_user_profile(user, %{handle: "ada"})
+
+      {:ok, view, _html} = live(conn, ~p"/")
+
+      assert has_element?(view, ~s|#profile-link[href="/players/ada"]|)
     end
   end
 

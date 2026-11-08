@@ -1,6 +1,7 @@
 defmodule Octomocto.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query, only: [from: 2]
 
   schema "users" do
     field :email, :string
@@ -29,6 +30,9 @@ defmodule Octomocto.Accounts.User do
     field :role, Ecto.Enum, values: [:user, :admin], default: :user
     # The id in the URL of the profile page (see `Octomocto.PublicId`)
     field :public_id, :string, autogenerate: {Octomocto.PublicId, :generate, []}
+    # The name in the URL of the profile page, instead of the public id, for
+    # example "ada_99". Nil until the user picks one.
+    field :handle, :string
     # Copied from the session token (see `UserToken`). Nothing reads it now.
     field :authenticated_at, :utc_datetime, virtual: true
 
@@ -116,6 +120,46 @@ defmodule Octomocto.Accounts.User do
     |> update_change(:display_name, &(&1 && String.trim(&1)))
     |> put_random_display_name_if_empty()
     |> validate_length(:display_name, max: @display_name_max)
+  end
+
+  @doc "A user changeset for changing the display name and the handle together."
+  def profile_changeset(user, attrs) do
+    user
+    |> display_name_changeset(attrs)
+    |> handle_changeset(attrs)
+  end
+
+  @doc """
+  A user changeset for changing the handle. The handle has 3 to 20
+  lowercase letters, digits and "_", and starts with a letter. It is
+  stored in lowercase. A blank handle removes it. A handle cannot be the
+  same as a public id of a user or a guest, because both open the profile
+  at `/players/:id` (new public ids always have a capital letter, see
+  `Octomocto.PublicId`).
+  """
+  def handle_changeset(user, attrs) do
+    user
+    # A blank handle is nil. Set it here, because a cast for the display
+    # name before this one keeps blank strings.
+    |> cast(attrs, [:handle], empty_values: empty_values())
+    |> update_change(:handle, &(&1 && &1 |> String.trim() |> String.downcase()))
+    |> validate_length(:handle, min: 3, max: 20)
+    |> validate_format(:handle, ~r/^[a-z][a-z0-9_]*$/,
+      message: "must start with a letter and have only letters, digits and _"
+    )
+    |> validate_not_a_public_id()
+    |> unsafe_validate_unique(:handle, Octomocto.Repo)
+    |> unique_constraint(:handle)
+  end
+
+  defp validate_not_a_public_id(changeset) do
+    validate_change(changeset, :handle, fn :handle, handle ->
+      taken? =
+        Octomocto.Repo.exists?(from u in __MODULE__, where: u.public_id == ^handle) or
+          Octomocto.Repo.exists?(from g in Octomocto.Guests.Guest, where: g.public_id == ^handle)
+
+      if taken?, do: [handle: "has already been taken"], else: []
+    end)
   end
 
   defp put_random_display_name_if_empty(changeset) do

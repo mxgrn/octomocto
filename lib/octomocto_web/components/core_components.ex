@@ -95,10 +95,18 @@ defmodule OctomoctoWeb.CoreComponents do
     """
   end
 
+  @doc """
+  The id in the URL of the profile page of a user, a guest or a player map:
+  the handle when the user has one, else the public id (see
+  `Octomocto.Players`).
+  """
+  def profile_id(player), do: Map.get(player, :handle) || Map.get(player, :public_id)
+
   attr :player, :map,
     default: nil,
     doc: """
-    a user, a guest or a player map with `:public_id`. Nil, or no public id
+    a user, a guest or a player map with `:public_id`, and `:handle` for a
+    user with a handle (the link then uses the handle). Nil, or no public id
     (a guest without a row, see `Octomocto.Players`), gives plain text.
     """
 
@@ -107,7 +115,7 @@ defmodule OctomoctoWeb.CoreComponents do
 
   @doc "The name of a player as a link to the profile page of the player."
   def player_link(assigns) do
-    assigns = assign(assigns, :public_id, assigns.player && Map.get(assigns.player, :public_id))
+    assigns = assign(assigns, :public_id, assigns.player && profile_id(assigns.player))
 
     ~H"""
     <.link

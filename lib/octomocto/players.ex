@@ -28,11 +28,13 @@ defmodule Octomocto.Players do
   """
   def profile(public_id) when is_binary(public_id) do
     cond do
-      user = Repo.one(from u in User, where: u.public_id == ^public_id) ->
+      user = user(public_id) ->
         %{
           name: Accounts.public_name(user) || "Guest",
           guest: false,
           user_id: user.id,
+          public_id: user.public_id,
+          handle: user.handle,
           avatar_url: user.avatar_url,
           joined_at: user.inserted_at,
           games: Stats.games_of(:user_id, user.id),
@@ -47,6 +49,8 @@ defmodule Octomocto.Players do
           name: guest.name,
           guest: true,
           user_id: nil,
+          public_id: guest.public_id,
+          handle: nil,
           avatar_url: nil,
           joined_at: guest.inserted_at,
           games: Stats.games_of(:guest_id, guest.id),
@@ -62,9 +66,13 @@ defmodule Octomocto.Players do
     end
   end
 
-  @doc "The user with the `public_id`, or nil. A guest has no user."
+  @doc """
+  The user with the `public_id` or the handle, or nil. A guest has no user.
+  A handle is never the public id of a different player (see
+  `Octomocto.Accounts.User.handle_changeset/2`).
+  """
   def user(public_id) when is_binary(public_id),
-    do: Repo.one(from u in User, where: u.public_id == ^public_id)
+    do: Repo.one(from u in User, where: u.public_id == ^public_id or u.handle == ^public_id)
 
   @doc """
   The public id of the user `user_id` or of the guest `guest_id`, or nil

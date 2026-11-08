@@ -9,38 +9,66 @@
     <h1 class="text-center text-3xl font-semibold tracking-tight">Settings</h1>
 
     <section
-      id="name-settings"
-      class="space-y-3 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-base-200 dark:ring-white/10"
+      id="profile-settings"
+      class="space-y-4 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-base-200 dark:ring-white/10"
     >
-      <div>
-        <h2 class="font-semibold">Name</h2>
-        <p class="text-sm text-base-content/60">
-          Other players see this name in games. Without a name, you get a random ocean name.
-        </p>
-      </div>
+      <h2 class="font-semibold">Profile</h2>
 
       <.form
-        for={@display_name_form}
-        id="update_display_name"
+        for={@profile_form}
+        id="update_profile"
         action={~p"/settings"}
         method="put"
-        class="space-y-3"
+        class="space-y-4"
       >
-        <input type="hidden" name="action" value="update_display_name" />
-        <.input
-          field={@display_name_form[:display_name]}
-          type="text"
-          placeholder="Your name"
-          maxlength="30"
-          autocomplete="nickname"
-          class="w-full rounded-xl border-0 bg-slate-50 px-4 py-3 ring-1 ring-slate-200 transition placeholder:text-base-content/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-base-300 dark:ring-white/10 dark:focus:bg-base-300"
-          error_class="ring-red-400"
-        />
+        <input type="hidden" name="action" value="update_profile" />
+
+        <div class="space-y-1.5">
+          <label for={@profile_form[:display_name].id} class="text-sm font-medium">Name</label>
+          <p class="text-sm text-base-content/60">
+            Other players see this name in games. Without a name, you get a random ocean name.
+          </p>
+          <.input
+            field={@profile_form[:display_name]}
+            type="text"
+            placeholder="Your name"
+            maxlength="30"
+            autocomplete="nickname"
+            class="w-full rounded-xl border-0 bg-slate-50 px-4 py-3 ring-1 ring-slate-200 transition placeholder:text-base-content/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-base-300 dark:ring-white/10 dark:focus:bg-base-300"
+            error_class="ring-red-400"
+          />
+        </div>
+
+        <div class="space-y-1.5">
+          <label for={@profile_form[:handle].id} class="text-sm font-medium">Handle</label>
+          <p class="text-sm text-base-content/60">
+            Your profile link: <span
+              id="handle-preview"
+              class="break-all font-medium text-base-content/80"
+            >{String.replace(url(~p"/"), ~r"^https?://|/$", "")}/players/<span
+                data-handle-preview
+                data-empty="your_handle"
+              >{@profile_form[:handle].value || "your_handle"}</span></span>. Use 3 to 20 lowercase letters, digits and _.
+          </p>
+          <.input
+            field={@profile_form[:handle]}
+            type="text"
+            placeholder="your_handle"
+            maxlength="20"
+            autocomplete="off"
+            autocapitalize="none"
+            spellcheck="false"
+            data-handle-input
+            class="w-full rounded-xl border-0 bg-slate-50 px-4 py-3 ring-1 ring-slate-200 transition placeholder:text-base-content/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-base-300 dark:ring-white/10 dark:focus:bg-base-300"
+            error_class="ring-red-400"
+          />
+        </div>
+
         <button
-          id="update-display-name-button"
+          id="update-profile-button"
           class="rounded-xl bg-indigo-600 px-4 py-2.5 font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500"
         >
-          Save name
+          Save
         </button>
       </.form>
     </section>

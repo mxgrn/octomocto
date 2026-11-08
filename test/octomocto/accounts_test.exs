@@ -331,24 +331,24 @@ defmodule Octomocto.AccountsTest do
 
     test "keeps the display name of an existing user" do
       user = telegram_user_fixture(%{"id" => "42", "first_name" => "Ada"})
-      {:ok, _user} = Accounts.update_user_display_name(user, %{display_name: "Countess"})
+      {:ok, _user} = Accounts.update_user_profile(user, %{display_name: "Countess"})
 
       assert {:ok, %User{display_name: "Countess"}} =
                Accounts.sign_in_with_telegram(%{telegram_id: 42, first_name: "Ada"})
     end
   end
 
-  describe "update_user_display_name/2" do
+  describe "update_user_profile/2 (name)" do
     test "trims the name" do
       assert {:ok, %User{display_name: "Ada"}} =
-               Accounts.update_user_display_name(user_fixture(), %{display_name: " Ada "})
+               Accounts.update_user_profile(user_fixture(), %{display_name: " Ada "})
     end
 
     test "changes a blank name to a random ocean name" do
       user = telegram_user_fixture(%{"first_name" => "Ada"})
 
       assert {:ok, %User{display_name: name}} =
-               Accounts.update_user_display_name(user, %{display_name: " "})
+               Accounts.update_user_profile(user, %{display_name: " "})
 
       assert name =~ ~r/^\w+ \w+$/
     end
@@ -356,8 +356,54 @@ defmodule Octomocto.AccountsTest do
     test "rejects a name longer than 30 characters" do
       attrs = %{display_name: String.duplicate("a", 31)}
 
-      assert {:error, changeset} = Accounts.update_user_display_name(user_fixture(), attrs)
+      assert {:error, changeset} = Accounts.update_user_profile(user_fixture(), attrs)
       assert "should be at most 30 character(s)" in errors_on(changeset).display_name
+    end
+  end
+
+  describe "update_user_profile/2 (handle)" do
+    test "trims the handle and makes it lowercase" do
+      assert {:ok, %User{handle: "ada_99"}} =
+               Accounts.update_user_profile(user_fixture(), %{handle: " Ada_99 "})
+    end
+
+    test "removes the handle when it is blank" do
+      {:ok, user} = Accounts.update_user_profile(user_fixture(), %{handle: "ada"})
+
+      assert {:ok, %User{handle: nil}} = Accounts.update_user_profile(user, %{handle: " "})
+    end
+
+    test "rejects a handle with wrong characters or length" do
+      for handle <- ["ab", String.duplicate("a", 21), "9lives", "ada-b", "adá"] do
+        assert {:error, changeset} =
+                 Accounts.update_user_profile(user_fixture(), %{handle: handle})
+
+        assert errors_on(changeset).handle != []
+      end
+    end
+
+    test "rejects the handle of a different user" do
+      {:ok, _user} = Accounts.update_user_profile(user_fixture(), %{handle: "ada"})
+
+      assert {:error, changeset} = Accounts.update_user_profile(user_fixture(), %{handle: "ADA"})
+      assert "has already been taken" in errors_on(changeset).handle
+    end
+
+    test "rejects the public id of a user or a guest" do
+      other = user_fixture() |> Ecto.Changeset.change(public_id: "abcd1234") |> Repo.update!()
+
+      Repo.insert!(%Octomocto.Guests.Guest{
+        id: Ecto.UUID.generate(),
+        name: "Brave Otter",
+        public_id: "efgh5678"
+      })
+
+      for handle <- [other.public_id, "efgh5678"] do
+        assert {:error, changeset} =
+                 Accounts.update_user_profile(user_fixture(), %{handle: handle})
+
+        assert "has already been taken" in errors_on(changeset).handle
+      end
     end
   end
 
@@ -378,6 +424,13 @@ defmodule Octomocto.AccountsTest do
       assert merged.email == user.email
       assert merged.confirmed_at
       refute Repo.get(User, user.id)
+    end
+
+    test "keeps the handle of the newer user when the older user has none" do
+      telegram_user_fixture(%{"id" => "42"})
+      {:ok, user} = Accounts.update_user_profile(user_fixture(), %{handle: "ada"})
+
+      assert {:ok, %User{handle: "ada"}} = Accounts.connect_telegram(user, %{telegram_id: 42})
     end
 
     test "does not merge with a Telegram user that has an email" do

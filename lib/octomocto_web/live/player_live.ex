@@ -22,9 +22,16 @@ defmodule OctomoctoWeb.PlayerLive do
   @width 100
   @height 24
 
-  def mount(%{"public_id" => public_id}, _session, socket) do
-    profile = Players.profile(public_id) || raise NotFoundError
+  def mount(%{"public_id" => id}, _session, socket) do
+    profile = Players.profile(id) || raise NotFoundError
 
+    # A user with a handle has the profile at the handle
+    if profile.handle && id != profile.handle,
+      do: {:ok, push_navigate(socket, to: ~p"/players/#{profile.handle}")},
+      else: mount_profile(profile, socket)
+  end
+
+  defp mount_profile(profile, socket) do
     # Only the games played in the last 30 days, with their counts in these days
     games =
       HomeLive.games()
@@ -41,7 +48,7 @@ defmodule OctomoctoWeb.PlayerLive do
        page_title: profile.name,
        noindex: true,
        profile: profile,
-       public_id: public_id,
+       public_id: profile.handle || profile.public_id,
        games: games,
        days: @days,
        total: profile.games |> Map.values() |> Enum.sum()

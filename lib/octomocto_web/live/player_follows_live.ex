@@ -17,8 +17,19 @@ defmodule OctomoctoWeb.PlayerFollowsLive do
   alias Octomocto.{Accounts, Friends, OnlineUsers, Players}
   alias OctomoctoWeb.{HomeLive, NotFoundError}
 
-  def mount(%{"public_id" => public_id}, _session, socket) do
-    user = Players.user(public_id) || raise NotFoundError
+  def mount(%{"public_id" => id}, _session, socket) do
+    user = Players.user(id) || raise NotFoundError
+
+    # A user with a handle has the lists at the handle
+    if user.handle && id != user.handle,
+      do: {:ok, push_navigate(socket, to: list_path(user.handle, socket.assigns.live_action))},
+      else: mount_lists(user, socket)
+  end
+
+  defp list_path(id, :followers), do: ~p"/players/#{id}/followers"
+  defp list_path(id, :following), do: ~p"/players/#{id}/following"
+
+  defp mount_lists(user, socket) do
     name = Accounts.public_name(user) || "Guest"
 
     if connected?(socket) and socket.assigns.current_scope, do: OnlineUsers.subscribe()
@@ -28,7 +39,7 @@ defmodule OctomoctoWeb.PlayerFollowsLive do
        noindex: true,
        user_id: user.id,
        name: name,
-       public_id: public_id,
+       public_id: user.handle || user.public_id,
        viewer_id: viewer_id(socket)
      )}
   end
@@ -45,7 +56,8 @@ defmodule OctomoctoWeb.PlayerFollowsLive do
           id: &1.id,
           name: Accounts.public_name(&1),
           avatar_url: &1.avatar_url,
-          public_id: &1.public_id
+          public_id: &1.public_id,
+          handle: &1.handle
         }
       )
       |> Enum.sort_by(&String.downcase(&1.name || ""))

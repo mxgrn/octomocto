@@ -352,7 +352,8 @@ defmodule OctomoctoWeb.HomeLive do
           id: friend.id,
           name: Accounts.public_name(friend),
           avatar_url: friend.avatar_url,
-          public_id: friend.public_id
+          public_id: friend.public_id,
+          handle: friend.handle
         }
         |> Map.put(:activity, activity)
       end

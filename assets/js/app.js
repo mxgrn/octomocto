@@ -133,6 +133,13 @@ document.addEventListener("visibilitychange", markResuming)
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
+// Settings: the profile link example follows the handle while the user types
+document.addEventListener("input", e => {
+  if (!e.target.matches("[data-handle-input]")) return
+  const preview = document.querySelector("[data-handle-preview]")
+  if (preview) preview.textContent = e.target.value.trim().toLowerCase() || preview.dataset.empty
+})
+
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 

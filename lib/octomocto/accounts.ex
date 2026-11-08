@@ -137,6 +137,7 @@ defmodule Octomocto.Accounts do
         :telegram_username,
         :name,
         :display_name,
+        :handle,
         :avatar_url
       ]
 
@@ -159,18 +160,19 @@ defmodule Octomocto.Accounts do
   ## Settings
 
   @doc """
-  Returns an `%Ecto.Changeset{}` for changing the display name.
+  Returns an `%Ecto.Changeset{}` for changing the display name and the handle.
   """
-  def change_user_display_name(user, attrs \\ %{}) do
-    User.display_name_changeset(user, attrs)
+  def change_user_profile(user, attrs \\ %{}) do
+    User.profile_changeset(user, attrs)
   end
 
   @doc """
-  Changes the display name, which other players see in games.
+  Changes the display name and the handle together: when one of them is
+  not valid, nothing changes.
   """
-  def update_user_display_name(user, attrs) do
+  def update_user_profile(user, attrs) do
     user
-    |> User.display_name_changeset(attrs)
+    |> User.profile_changeset(attrs)
     |> Repo.update()
   end
 
