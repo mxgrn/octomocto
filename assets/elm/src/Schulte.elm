@@ -14,6 +14,11 @@ to a Phoenix channel.
 A click on a wrong number does nothing, but its number shakes for this
 player only.
 
+A click on the right number shows at once, before the server confirms it:
+the number flashes and is marked, the sound plays and the score goes up
+(see `optimistic`). When another player was faster, the next state of the
+server corrects it.
+
 The module compares each new state with the old one and sends the names
 of the sounds to play out through a port. The player can mute the sounds.
 
@@ -307,7 +312,9 @@ update msg model =
                         ( model, Cmd.none )
 
                     else if number == expectedNext model game then
-                        ( { model | sent = number }, schultePick number )
+                        ( { model | sent = number }
+                        , Cmd.batch [ schultePick number, playSounds model [ "found" ] ]
+                        )
 
                     else if number > expectedNext model game || not game.marks then
                         let
@@ -383,6 +390,49 @@ expectedNext model game =
         game.next
 
 
+{-| The game with the numbers that this browser sent, but the server did
+not confirm yet, as found by me: they flash and are marked, and my score
+counts them.
+-}
+optimistic : Model -> Me -> Game -> Game
+optimistic model me game =
+    case me of
+        Just id ->
+            if model.sent >= game.next && not (finished game) then
+                let
+                    pending number =
+                        number >= game.next && number <= model.sent
+                in
+                { game
+                    | cells =
+                        List.map
+                            (\cell ->
+                                if pending cell.number then
+                                    { cell | foundBy = Just id }
+
+                                else
+                                    cell
+                            )
+                            game.cells
+                    , players =
+                        List.map
+                            (\player ->
+                                if player.id == id then
+                                    { player | score = player.score + model.sent - game.next + 1 }
+
+                                else
+                                    player
+                            )
+                            game.players
+                }
+
+            else
+                game
+
+        Nothing ->
+            game
+
+
 {-| The seconds left in the countdown (3, 2, 1), 0 after it, and Nothing
 when no field runs. The step is right only after the clock is in sync.
 -}
@@ -442,8 +492,8 @@ playSounds model names =
 
 
 {-| The sounds for the change from the old state to the new one: the start
-of the game, a found number (by this player or by another one), and the end
-of the game.
+of the game, a number found by another player, and the end of the game. My
+own found numbers play their sound on the click, see `optimistic`.
 -}
 stateSounds : Me -> Game -> Game -> List String
 stateSounds me old new =
@@ -460,10 +510,7 @@ stateSounds me old new =
             newFinders old new
 
         foundSound =
-            if List.any (\id -> me == Just id) finders then
-                [ "found" ]
-
-            else if finders /= [] then
+            if List.any (\id -> me /= Just id) finders then
                 [ "other_found" ]
 
             else
@@ -614,7 +661,7 @@ view model =
             p [ id "schulte-failed", class "py-24 text-center text-red-600 dark:text-red-400" ] [ text ("Could not join the game: " ++ reason) ]
 
         Joined me game ->
-            viewGame model me game
+            viewGame model me (optimistic model me game)
 
 
 viewGame : Model -> Me -> Game -> Html Msg
@@ -949,7 +996,9 @@ viewField model game =
 
             -- The flashes are on top of all cells, so that the next cells
             -- do not cover them. Each flash is keyed, so that it runs one
-            -- time, when its number is found.
+            -- time, when its number is found. The key has the finder, so
+            -- that the flash runs again in the right color when another
+            -- player was faster than my click (see `optimistic`).
             , Svg.Keyed.node "g"
                 [ SA.pointerEvents "none" ]
                 (game.cells
@@ -959,7 +1008,7 @@ viewField model game =
                             cell.foundBy
                                 |> Maybe.map
                                     (\finder ->
-                                        ( String.fromInt cell.number
+                                        ( String.fromInt cell.number ++ "-" ++ finder
                                         , Svg.rect
                                             [ SA.x (String.fromFloat (toFloat (modBy game.size index) * cellSize))
                                             , SA.y (String.fromFloat (toFloat (index // game.size) * cellSize))
