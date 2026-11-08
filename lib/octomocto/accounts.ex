@@ -86,55 +86,30 @@ defmodule Octomocto.Accounts do
   @doc """
   Signs in with the verified data from the Telegram Login Widget.
 
-  Registers a new user if no user has this Telegram ID. A new user gets
-  the Telegram username as the handle (see `put_telegram_handle/1`).
+  Registers a new user if no user has this Telegram ID.
   """
   def sign_in_with_telegram(%{telegram_id: telegram_id} = attrs) do
-    case get_user_by_telegram_id(telegram_id) do
-      nil ->
-        with {:ok, user} <- %User{} |> User.telegram_changeset(attrs) |> Repo.insert(),
-             do: put_telegram_handle(user)
-
-      user ->
-        user |> User.telegram_changeset(attrs) |> Repo.update()
-    end
+    (get_user_by_telegram_id(telegram_id) || %User{})
+    |> User.telegram_changeset(attrs)
+    |> Repo.insert_or_update()
   end
 
   @doc """
   Connects a Telegram account to the user.
 
   If a different user already has this Telegram ID, the two users are merged,
-  and the older user stays. Returns the user that stays. Without a merge, a
-  user with no handle gets the Telegram username as the handle (see
-  `put_telegram_handle/1`).
+  and the older user stays. Returns the user that stays.
   """
   def connect_telegram(%User{telegram_id: nil} = user, %{telegram_id: telegram_id} = attrs) do
     Repo.transact(fn ->
       case get_user_by_telegram_id(telegram_id) do
-        nil ->
-          with {:ok, user} <- user |> User.telegram_changeset(attrs) |> Repo.update(),
-               do: put_telegram_handle(user)
-
-        other ->
-          merge_users(user, other)
+        nil -> user |> User.telegram_changeset(attrs) |> Repo.update()
+        other -> merge_users(user, other)
       end
     end)
   end
 
   def connect_telegram(%User{}, _attrs), do: {:error, :conflict}
-
-  # Gives the Telegram username as the handle to a user without a handle.
-  # When the username cannot be a handle (for example, a different user has
-  # it), the user stays without a handle: the user can pick one in Settings.
-  defp put_telegram_handle(%User{handle: nil, telegram_username: username} = user)
-       when is_binary(username) do
-    case user |> User.handle_changeset(%{handle: username}) |> Repo.update() do
-      {:ok, user} -> {:ok, user}
-      {:error, _changeset} -> {:ok, user}
-    end
-  end
-
-  defp put_telegram_handle(user), do: {:ok, user}
 
   ## Merging
 

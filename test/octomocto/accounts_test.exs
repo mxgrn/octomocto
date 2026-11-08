@@ -316,27 +316,6 @@ defmodule Octomocto.AccountsTest do
                Accounts.sign_in_with_telegram(attrs)
     end
 
-    test "gives a new user the Telegram username as the handle" do
-      attrs = %{telegram_id: 42, telegram_username: "Ada_" <> String.duplicate("b", 28)}
-
-      assert {:ok, %User{handle: "ada_" <> _}} = Accounts.sign_in_with_telegram(attrs)
-    end
-
-    test "gives a new user no handle when the Telegram username is taken" do
-      {:ok, _user} = Accounts.update_user_profile(user_fixture(), %{handle: "ada"})
-
-      assert {:ok, %User{handle: nil}} =
-               Accounts.sign_in_with_telegram(%{telegram_id: 42, telegram_username: "ada"})
-    end
-
-    test "does not give the handle again to an existing user" do
-      user = telegram_user_fixture(%{"id" => "42", "username" => "ada"})
-      {:ok, _user} = Accounts.update_user_profile(user, %{handle: ""})
-
-      assert {:ok, %User{handle: nil}} =
-               Accounts.sign_in_with_telegram(%{telegram_id: 42, telegram_username: "ada"})
-    end
-
     test "sets the display name to the first name" do
       attrs = %{telegram_id: 42, first_name: "Ada"}
 
@@ -434,21 +413,6 @@ defmodule Octomocto.AccountsTest do
 
       assert {:ok, %User{telegram_id: 42}} =
                Accounts.connect_telegram(user, %{telegram_id: 42})
-    end
-
-    test "gives the Telegram username as the handle to a user without one" do
-      assert {:ok, %User{handle: "ada"}} =
-               Accounts.connect_telegram(user_fixture(), %{
-                 telegram_id: 42,
-                 telegram_username: "ada"
-               })
-    end
-
-    test "keeps the handle of a user that has one" do
-      {:ok, user} = Accounts.update_user_profile(user_fixture(), %{handle: "countess"})
-
-      assert {:ok, %User{handle: "countess"}} =
-               Accounts.connect_telegram(user, %{telegram_id: 42, telegram_username: "ada"})
     end
 
     test "merges with an older Telegram user, which stays" do
