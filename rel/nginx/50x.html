@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Octomocto is taking a short break</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 300'%3E%3Ccircle cx='120' cy='88' r='62' fill='%23F26A1B'/%3E%3Ccircle cx='120' cy='212' r='62' fill='%231A9FCB'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --orange: #F26A1B;
+      --indigo: #1A9FCB;
+      --navy: #171532;
+      --bg: #EEF0FA;
+      --card: #ffffff;
+      --text: #171532;
+      --muted: #5b5a73;
+      --ring: rgb(26 159 203 / 0.25);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #12112a;
+        --card: #1c1b3a;
+        --text: #EEF0FA;
+        --muted: #a9a8c4;
+        --indigo: #8C8CFF;
+        --ring: rgb(140 140 255 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: grid;
+      place-items: center;
+      padding: 24px 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    main {
+      width: 100%;
+      max-width: 440px;
+      padding: 40px 32px 32px;
+      background: var(--card);
+      border-radius: 24px;
+      box-shadow: 0 1px 2px rgb(23 21 50 / 0.06), 0 12px 32px rgb(23 21 50 / 0.08);
+      text-align: center;
+    }
+    .mark {
+      width: 96px;
+      height: 125px;
+      margin: 0 auto 20px;
+    }
+    /* Each octopus blinks on its own cycle, so the blinks rarely line up. */
+    .mark .eyes {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: blink 4.7s infinite;
+    }
+    .mark .bottom .eyes { animation-duration: 6.3s; animation-delay: 1.9s; }
+    @keyframes blink {
+      0%, 94%, 100% { transform: scaleY(1); }
+      97% { transform: scaleY(0.1); }
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 1.5rem;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+    p {
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .retry {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--orange);
+      color: #fff;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 150ms ease, box-shadow 150ms ease;
+    }
+    .retry:hover { background: #FF8A3C; }
+    .retry:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--ring); }
+    .retry svg { width: 18px; height: 18px; }
+    .code {
+      margin-top: 28px;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0.7;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .mark .eyes { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <svg class="mark" viewBox="0 -6 240 312" aria-hidden="true">
+      <g class="top" transform="translate(0 -6)">
+        <g fill="none" stroke="#F26A1B" stroke-width="18" stroke-linecap="round"><path d="M78 120C52 128 34 112 30 86"/><path d="M92 134C64 142 30 140 10 118"/><path d="M162 120C188 128 206 112 210 86"/><path d="M148 134C176 142 210 140 230 118"/></g>
+        <circle cx="120" cy="88" r="62" fill="#F26A1B"/><g class="eyes"><circle cx="98" cy="84" r="15" fill="#fff"/><circle cx="142" cy="84" r="15" fill="#fff"/><circle cx="98" cy="90" r="7" fill="#171532"/><circle cx="142" cy="90" r="7" fill="#171532"/></g><path d="M110 116Q120 108 130 116" fill="none" stroke="#171532" stroke-width="5" stroke-linecap="round"/>
+      </g>
+      <g class="bottom" transform="translate(0 6)">
+        <g transform="translate(0 300) scale(1 -1)">
+          <g fill="none" stroke="#1A9FCB" stroke-width="18" stroke-linecap="round"><path d="M78 120C52 128 34 112 30 86"/><path d="M92 134C64 142 30 140 10 118"/><path d="M162 120C188 128 206 112 210 86"/><path d="M148 134C176 142 210 140 230 118"/></g>
+          <circle cx="120" cy="88" r="62" fill="#1A9FCB"/><g class="eyes"><circle cx="98" cy="84" r="15" fill="#fff"/><circle cx="142" cy="84" r="15" fill="#fff"/><circle cx="98" cy="90" r="7" fill="#171532"/><circle cx="142" cy="90" r="7" fill="#171532"/></g><path d="M110 116Q120 108 130 116" fill="none" stroke="#171532" stroke-width="5" stroke-linecap="round"/>
+        </g>
+      </g>
+    </svg>
+
+    <h1>We will be back soon</h1>
+    <p>Octomocto is not available at the moment. We are working on it. Please try again in a few minutes.</p>
+
+    <button class="retry" type="button" onclick="location.reload()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      Try again
+    </button>
+
+    <div class="code">Server error</div>
+  </main>
+
+</body>
+</html>
