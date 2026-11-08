@@ -36,8 +36,8 @@ msgid "Click the switches to send each train to the house with its colors."
 msgstr "Klick auf die Weichen, damit jeder Zug zum Haus mit seinen Farben fährt."
 
 #, elixir-autogen, elixir-format
-msgid "Eat the black squares and keep away from the red ones, with up to 3 friends in one field."
-msgstr "Friss die schwarzen Quadrate und halte dich von den roten fern, mit bis zu 3 Freunden auf einem Feld."
+msgid "Eat the squares but keep away from the red ones, with up to 3 friends in one field."
+msgstr "Friss die Quadrate, aber halte dich von den roten fern, mit bis zu 3 Freunden auf einem Feld."
 
 #, elixir-autogen, elixir-format
 msgid "Fill the same sudoku with your friends. The first player to put the correct digit gets the point."

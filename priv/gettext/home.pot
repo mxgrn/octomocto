@@ -36,7 +36,7 @@ msgid "Click the switches to send each train to the house with its colors."
 msgstr ""
 
 #, elixir-autogen, elixir-format
-msgid "Eat the black squares and keep away from the red ones, with up to 3 friends in one field."
+msgid "Eat the squares but keep away from the red ones, with up to 3 friends in one field."
 msgstr ""
 
 #, elixir-autogen, elixir-format

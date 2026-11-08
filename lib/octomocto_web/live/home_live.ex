@@ -63,7 +63,7 @@ defmodule OctomoctoWeb.HomeLive do
       description:
         dgettext_noop(
           "home",
-          "Eat the black squares and keep away from the red ones, with up to 3 friends in one field."
+          "Eat the squares but keep away from the red ones, with up to 3 friends in one field."
         ),
       path: "/graze",
       badge: {dgettext_noop("home", "Beta"), "hero-beaker-mini"},

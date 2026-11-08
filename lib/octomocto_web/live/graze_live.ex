@@ -34,7 +34,7 @@ defmodule OctomoctoWeb.GrazeLive do
     [
       page_title: "Graze & Dodge: Eat the Squares, Avoid the Red Ones",
       page_description:
-        "A fast arcade game in your browser: your circle eats black squares to stay alive and keeps away from red ones. Play alone or with up to 3 friends in one field. Free."
+        "A fast arcade game in your browser: your circle eats squares to stay alive but keeps away from red ones. Play alone or with up to 3 friends in one field. Free."
     ]
   end
 
@@ -104,11 +104,11 @@ defmodule OctomoctoWeb.GrazeLive do
 
   defp rules do
     [
-      "Your circle follows the pointer. Move it over the black squares to eat them. Each black square is one point.",
-      "Keep away from the red squares. One touch, and you are out.",
-      "The ring around your circle is its energy. It goes down all the time, faster and faster. Each black square fills part of it. When the ring is empty, you are out.",
+      "Your circle follows the pointer. Move it over the squares to eat them. Each square is one point.",
+      "But keep away from the red squares. One touch, and you are out.",
+      "The ring around your circle is its energy. It goes down all the time, faster and faster. Each square that you eat fills part of it. When the ring is empty, you are out.",
       "More and more red squares come, and they get faster.",
-      "With other players, all circles are in the same field and go through each other. The first circle to touch a black square eats it.",
+      "With other players, all circles are in the same field and go through each other. The first circle to touch a square eats it.",
       "When you are out, your score stays. The game ends when all circles are out. The highest score wins.",
       "The game starts after a countdown, when all players are in."
     ]

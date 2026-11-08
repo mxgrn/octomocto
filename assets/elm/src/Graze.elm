@@ -1,7 +1,7 @@
 port module Graze exposing (main)
 
 {-| Graze: each player is a circle in one shared field. A circle eats the
-black squares (food) for points and energy, and keeps away from the red
+squares (food) for points and energy, and keeps away from the red
 squares (danger). The circles go through each other.
 
 The server owns the game: it moves the squares, checks each circle and
@@ -905,7 +905,7 @@ viewGame model me game =
                             ]
                         , viewWatchers (me == Nothing) model.watchers
                         ]
-                    , p [ class "hidden text-sm opacity-60 lg:block" ] [ text "Eat the black squares. Keep away from the red ones." ]
+                    , p [ class "hidden text-sm opacity-60 lg:block" ] [ text "Eat the squares, but keep away from the red ones." ]
                     ]
                 , viewClock model me game
                 , viewMenu model.muted (me /= Nothing)
