@@ -43,7 +43,6 @@ defmodule OctomoctoWeb.SitemapController do
       url(~p"/snap"),
       url(~p"/afterglow"),
       url(~p"/graze"),
-      url(~p"/astronaut"),
       url(~p"/privacy"),
       url(~p"/terms"),
       url(~p"/donate")
