@@ -258,7 +258,7 @@ defmodule OctomoctoWeb.Layouts do
                   <span
                     id="notifications-dot"
                     hidden={@current_scope.unread_notifications == 0}
-                    class="absolute -end-0.5 -top-0.5 size-3 rounded-full bg-orange-500 ring-2 ring-base-100"
+                    class="absolute -end-0.5 -top-0.5 size-3 rounded-full bg-octo-indigo ring-2 ring-base-100"
                   />
                 </span>
                 <span class="sr-only">{user_menu_name(@current_scope.user)}</span>
@@ -272,7 +272,7 @@ defmodule OctomoctoWeb.Layouts do
                 <span
                   id="notifications-count"
                   hidden={@current_scope.unread_notifications == 0}
-                  class="min-w-5 rounded-full bg-orange-500 px-1.5 text-center text-xs font-semibold leading-5 text-white tabular-nums"
+                  class="min-w-5 rounded-full bg-octo-indigo px-1.5 text-center text-xs font-semibold leading-5 text-white tabular-nums"
                 >
                   {@current_scope.unread_notifications}
                 </span>
