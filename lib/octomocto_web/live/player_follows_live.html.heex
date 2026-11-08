@@ -76,14 +76,14 @@
             >
               {String.first(player.name || "?") |> String.upcase()}
             </span>
-            <%!-- Only for a friend of the viewer --%>
+            <%!-- Only for a friend of the viewer; visible only when online --%>
             <span
               :if={shared}
               id={"player-follow-status-#{player.id}"}
               data-online={to_string(activity != nil)}
               class={[
-                "absolute -right-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-base-100 transition-colors",
-                if(activity, do: "bg-emerald-500", else: "bg-base-content/25")
+                "absolute -right-0.5 -bottom-0.5 size-3 rounded-full bg-emerald-500 ring-2 ring-base-100",
+                !activity && "hidden"
               ]}
             />
           </span>
