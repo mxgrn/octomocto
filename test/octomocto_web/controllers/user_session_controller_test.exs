@@ -36,6 +36,10 @@ defmodule OctomoctoWeb.UserSessionControllerTest do
   end
 
   describe "GET /signin" do
+    test "shows the guest menu to a guest", %{conn: conn} do
+      assert conn |> get(~p"/signin") |> has_element?("#guest-menu")
+    end
+
     test "shows only the methods that a signed-in Telegram user has", %{conn: conn} do
       conn = conn |> log_in_user(telegram_user_fixture()) |> get(~p"/signin")
 
