@@ -148,7 +148,7 @@ defmodule OctomoctoWeb.SchulteLive do
     [
       "The table is a square grid with the numbers from 1 to the number of cells, in a random order. A 5×5 table has the numbers from 1 to 25.",
       "Click the numbers in order: 1, 2, 3 and so on.",
-      "Keep your eyes on the dot in the center of the table, and find the numbers with your peripheral vision. Do not move your eyes from cell to cell.",
+      "Keep your eyes on the center of the table, and find the numbers with your peripheral vision. Do not move your eyes from cell to cell.",
       "With other players, all players look for the same next number. The first player to click it gets the point. The player with the most points wins.",
       "Alone, find all numbers as fast as you can.",
       "The race starts after a countdown, when all players are in.",

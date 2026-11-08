@@ -213,7 +213,6 @@
 .schulte-number.is-found { opacity: 0.18; }
 .schulte-line line { stroke: #9aa5b1; stroke-width: 2; }
 .schulte-border { stroke: #474d50; }
-.schulte-dot { fill: var(--color-octo-indigo); }
 
 [data-theme=dark] .schulte-board,
 [data-theme=dark] .schulte-cell,
@@ -223,7 +222,6 @@
 [data-theme=dark] .schulte-number { fill: #e5e7eb; }
 [data-theme=dark] .schulte-line line { stroke: #3b4256; }
 [data-theme=dark] .schulte-border { stroke: #11131a; }
-[data-theme=dark] .schulte-dot { fill: var(--color-octo-indigo-light); }
 
 /* The number shakes from its own center after a wrong click */
 .schulte-shake {

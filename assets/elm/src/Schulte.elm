@@ -6,8 +6,7 @@ The server owns the game: a square grid with the numbers from 1 to
 size², the next number and the scores. The first player to click the next
 number gets a point. A found number flashes in the color of its finder.
 With marks, it then stays pale. Without marks (the classic rule), it looks
-the same as the other numbers. A dot in the center of the grid helps the
-player to keep the eyes there. This module draws the state that comes in
+the same as the other numbers. This module draws the state that comes in
 through ports and sends the player's clicks out. app.js connects the ports
 to a Phoenix channel.
 
@@ -699,7 +698,7 @@ viewGame model me game =
                             ]
                         , viewWatchers (me == Nothing) model.watchers
                         ]
-                    , p [ class "hidden text-sm opacity-60 lg:block" ] [ text "Keep your eyes on the center dot. Click the numbers in order." ]
+                    , p [ class "hidden text-sm opacity-60 lg:block" ] [ text "Keep your eyes on the center of the table. Click the numbers in order." ]
                     ]
                 , viewClock model game
                 , viewMenu (game.editing /= Nothing) model.muted (me /= Nothing)
@@ -939,7 +938,7 @@ cellSize =
     100
 
 
-{-| The grid of cells, the center dot, and the flashes of the found numbers
+{-| The grid of cells, and the flashes of the found numbers
 on top of all cells. The colors are in the CSS, for the light and the dark
 theme.
 -}
@@ -1024,17 +1023,6 @@ viewField model game =
                 )
             , Svg.g [ SA.class "schulte-line", SA.pointerEvents "none" ]
                 (List.map (\x -> line x 0 x side) inner ++ List.map (\y -> line 0 y side y) inner)
-
-            -- The dot is under the numbers: in a grid with an odd size, it
-            -- is in the center cell, and its number must stay readable.
-            , Svg.circle
-                [ SA.cx (String.fromFloat (side / 2))
-                , SA.cy (String.fromFloat (side / 2))
-                , SA.r "9"
-                , SA.class "schulte-dot"
-                , SA.pointerEvents "none"
-                ]
-                []
             , Svg.g [] (List.indexedMap (viewNumber model game) game.cells)
             ]
         , boardRect 1.5 (cornerRadius - 1.5) [ SA.class "schulte-border", SA.fill "none", SA.strokeWidth "3", SA.pointerEvents "none" ]
@@ -1111,7 +1099,7 @@ marked game cell =
 
 
 {-| The square of a cell, which gets the clicks. Its number is in a layer
-above the center dot, see `viewNumber`.
+above the flashes and the lines, see `viewNumber`.
 -}
 viewCell : Game -> Int -> Cell -> Svg Msg
 viewCell game index cell =

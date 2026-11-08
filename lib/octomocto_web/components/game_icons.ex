@@ -362,8 +362,7 @@ defmodule OctomoctoWeb.GameIcons do
   end
 
   # The classic Schulte table, as on its board: white cells with thin gray
-  # lines, a dark border and the center dot. The dot is paler and larger
-  # than on the board, so the middle number stays clear at a small size.
+  # lines and a dark border.
   def game_icon(%{game: "schulte"} = assigns) do
     ~H"""
     <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
@@ -373,7 +372,6 @@ defmodule OctomoctoWeb.GameIcons do
         stroke="#9aa5b1"
         stroke-width="1.2"
       />
-      <circle cx="24" cy="24" r="5.2" fill="#1A9FCB" fill-opacity="0.25" />
       <text
         :for={{digit, x, y} <- schulte_cells()}
         x={x}
