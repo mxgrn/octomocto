@@ -146,3 +146,15 @@ msgstr "Zekâ oyunları: tek başına ya da çok oyunculu"
 #, elixir-autogen, elixir-format
 msgid "Free online brain games for memory, logic and speed. Play solo or multiplayer: no sign-up, nothing to install."
 msgstr "Hafıza, mantık ve hız için ücretsiz çevrim içi zekâ oyunları. Tek başına ya da çok oyunculu oyna: kayıt yok, kurulum yok."
+
+#, elixir-autogen, elixir-format
+msgid "Recent"
+msgstr "Son oynananlar"
+
+#, elixir-autogen, elixir-format
+msgid "Your recent games show here after you finish a game."
+msgstr "Bir oyunu bitirdiğinde son oyunların burada görünür."
+
+#, elixir-autogen, elixir-format
+msgid "to see your recent games here."
+msgstr "son oyunlarını burada görmek için."

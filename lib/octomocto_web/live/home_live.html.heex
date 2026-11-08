@@ -35,20 +35,21 @@
             </p>
           </div>
         </div>
-        <%!-- One tag at a time; "all" clears the filter --%>
+        <%!-- One tag at a time; "all" clears the filter. A click saves the tag. --%>
         <nav
           id="game-tags"
           aria-label={dgettext("home", "Filter games")}
           class="mb-6 flex flex-wrap gap-2"
         >
-          <.link
-            :for={tag <- [nil | @tags]}
+          <button
+            :for={tag <- @filters}
+            type="button"
             id={"game-tag-#{tag || "all"}"}
-            patch={Locale.path(@locale, if(tag, do: ~p"/?tag=#{tag}", else: ~p"/"))}
-            replace
-            aria-current={if(tag == @tag, do: "true")}
+            phx-click="select_tag"
+            phx-value-tag={tag}
+            aria-pressed={to_string(tag == @tag)}
             class={[
-              "inline-flex items-center rounded-full px-3.5 py-1.5 text-sm font-medium shadow-sm transition active:scale-95",
+              "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium shadow-sm transition active:scale-95",
               if(tag == @tag,
                 do:
                   "cursor-default bg-[color-mix(in_oklab,var(--color-octo-indigo)_20%,var(--color-white))] text-[color-mix(in_oklab,var(--color-octo-indigo)_75%,var(--color-octo-navy))] ring-1 ring-octo-indigo/60 dark:bg-octo-indigo/20 dark:text-octo-indigo dark:ring-octo-indigo/50",
@@ -57,9 +58,34 @@
               )
             ]}
           >
-            {if(tag, do: tag_name(tag), else: dgettext("home", "All games"))}
-          </.link>
+            <.icon :if={tag_icon(tag)} name={tag_icon(tag)} class="size-4 opacity-70" />
+            {tag_name(tag)}
+          </button>
         </nav>
+        <%= if @tag == "recent" do %>
+          <p
+            :if={!@current_scope}
+            id="recent-guest"
+            class="rounded-2xl bg-white p-5 text-center text-sm text-base-content/60 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100"
+          >
+            <.link
+              id="recent-sign-in"
+              href={Locale.path(@locale, ~p"/signin")}
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 dark:text-octo-indigo-light"
+            >
+              {dgettext("home", "Sign in")}
+            </.link>
+            <%!-- The text after the link "Sign in" --%>
+            {dgettext("home", "to see your recent games here.")}
+          </p>
+          <p
+            :if={@current_scope && @games == []}
+            id="recent-empty"
+            class="rounded-2xl bg-white p-5 text-center text-sm text-base-content/50 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100"
+          >
+            {dgettext("home", "Your recent games show here after you finish a game.")}
+          </p>
+        <% end %>
         <ul
           id="games"
           class="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3"

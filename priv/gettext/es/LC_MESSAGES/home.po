@@ -146,3 +146,15 @@ msgstr "Juegos de ingenio: solo o multijugador"
 #, elixir-autogen, elixir-format
 msgid "Free online brain games for memory, logic and speed. Play solo or multiplayer: no sign-up, nothing to install."
 msgstr "Juegos de ingenio online y gratis para memoria, lógica y velocidad. Juega solo o en multijugador: sin registro, sin instalar nada."
+
+#, elixir-autogen, elixir-format
+msgid "Recent"
+msgstr "Recientes"
+
+#, elixir-autogen, elixir-format
+msgid "Your recent games show here after you finish a game."
+msgstr "Tus juegos recientes aparecen aquí cuando terminas una partida."
+
+#, elixir-autogen, elixir-format
+msgid "to see your recent games here."
+msgstr "para ver tus juegos recientes aquí."

@@ -146,3 +146,15 @@ msgstr "Trò chơi trí tuệ: chơi đơn hoặc nhiều người"
 #, elixir-autogen, elixir-format
 msgid "Free online brain games for memory, logic and speed. Play solo or multiplayer: no sign-up, nothing to install."
 msgstr "Trò chơi trí tuệ trực tuyến miễn phí cho trí nhớ, logic và tốc độ. Chơi một mình hoặc nhiều người: không cần đăng ký, không cần cài đặt."
+
+#, elixir-autogen, elixir-format
+msgid "Recent"
+msgstr "Gần đây"
+
+#, elixir-autogen, elixir-format
+msgid "Your recent games show here after you finish a game."
+msgstr "Các trò chơi gần đây của bạn sẽ hiện ở đây khi bạn chơi xong một ván."
+
+#, elixir-autogen, elixir-format
+msgid "to see your recent games here."
+msgstr "để xem các trò chơi gần đây của bạn ở đây."

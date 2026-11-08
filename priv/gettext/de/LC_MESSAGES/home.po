@@ -146,3 +146,15 @@ msgstr "Denkspiele: allein oder im Mehrspielermodus"
 #, elixir-autogen, elixir-format
 msgid "Free online brain games for memory, logic and speed. Play solo or multiplayer: no sign-up, nothing to install."
 msgstr "Kostenlose Online-Denkspiele für Gedächtnis, Logik und Tempo. Spiel allein oder mit mehreren: ohne Anmeldung, ohne Installation."
+
+#, elixir-autogen, elixir-format
+msgid "Recent"
+msgstr "Zuletzt"
+
+#, elixir-autogen, elixir-format
+msgid "Your recent games show here after you finish a game."
+msgstr "Deine letzten Spiele erscheinen hier, wenn du ein Spiel beendest."
+
+#, elixir-autogen, elixir-format
+msgid "to see your recent games here."
+msgstr "um deine letzten Spiele hier zu sehen."

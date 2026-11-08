@@ -146,3 +146,15 @@ msgstr "Игры для ума: в одиночку или с друзьями"
 #, elixir-autogen, elixir-format
 msgid "Free online brain games for memory, logic and speed. Play solo or multiplayer: no sign-up, nothing to install."
 msgstr "Бесплатные онлайн-игры для ума: память, логика и скорость. Играйте в одиночку или с другими: без регистрации и установки."
+
+#, elixir-autogen, elixir-format
+msgid "Recent"
+msgstr "Недавние"
+
+#, elixir-autogen, elixir-format
+msgid "Your recent games show here after you finish a game."
+msgstr "Здесь появятся твои недавние игры, когда ты доиграешь партию."
+
+#, elixir-autogen, elixir-format
+msgid "to see your recent games here."
+msgstr "— и здесь появятся твои недавние игры."

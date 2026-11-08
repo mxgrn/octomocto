@@ -11,7 +11,7 @@ defmodule OctomoctoWeb.HomeLive do
 
   import OctomoctoWeb.GamePageComponents
 
-  alias Octomocto.{Accounts, Friends, Lobby, OnlineUsers}
+  alias Octomocto.{Accounts, Friends, GameSettings, Lobby, OnlineUsers, Stats}
   alias Octomocto.Memory.Themes
 
   alias OctomoctoWeb.{
@@ -197,7 +197,22 @@ defmodule OctomoctoWeb.HomeLive do
   # one or more of these tags.
   @tags ["speed", "memory", "logic", "attention"]
 
+  # The tags that are not tags of games: they show the games of the user,
+  # for example /?tag=recent. They go between "All games" and the other
+  # tags, in this order. A new one needs a line in `tag_name/1`,
+  # `tag_icon/1` and `filter_games/2`.
+  @lists ["recent"]
+
+  # All the buttons above the games: nil is "All games"
+  @filters [nil | @lists ++ @tags]
+
+  # The lists have an icon, so they look different from the tags
+  defp tag_icon("recent"), do: "hero-clock-mini"
+  defp tag_icon(_tag), do: nil
+
   # The names of the tags. A new tag needs a line here.
+  defp tag_name(nil), do: dgettext("home", "All games")
+  defp tag_name("recent"), do: dgettext("home", "Recent")
   defp tag_name("speed"), do: dgettext("home", "Speed")
   defp tag_name("memory"), do: dgettext("home", "Memory")
   defp tag_name("logic"), do: dgettext("home", "Logic")
@@ -287,7 +302,7 @@ defmodule OctomoctoWeb.HomeLive do
          ),
        canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(socket.assigns.locale, ~p"/"),
        alternate_urls: Locale.alternate_urls(:all, ~p"/"),
-       tags: @tags,
+       filters: @filters,
        kinds: Map.new(@games, &{&1.id, &1})
      )
      |> assign_lobby(entries)
@@ -296,21 +311,64 @@ defmodule OctomoctoWeb.HomeLive do
      |> assign_friends_online()}
   end
 
-  # The tag filter is in the URL, for example /?tag=memory. An unknown tag
-  # shows all games.
+  # The tag is in the URL, for example /?tag=memory. An unknown tag shows
+  # all games. The front page with no tag goes to the tag that the user
+  # or the guest clicked last (see `GameSettings`).
   def handle_params(params, _uri, socket) do
-    tag = if params["tag"] in @tags, do: params["tag"]
-    games = if tag, do: Enum.filter(@games, &(tag in &1.tags)), else: @games
+    case {Map.fetch(params, "tag"), saved_tag(socket)} do
+      {:error, saved} when saved != nil ->
+        {:noreply, push_patch(socket, to: tag_path(socket, saved), replace: true)}
 
-    path = if tag, do: ~p"/?tag=#{tag}", else: ~p"/"
+      {tag, _saved} ->
+        tag = valid_tag(with({:ok, tag} <- tag, do: tag))
 
-    {:noreply,
-     assign(socket,
-       tag: tag,
-       games: games,
-       languages: Locale.languages(:all, socket.assigns.locale, path)
-     )}
+        {:noreply,
+         assign(socket,
+           tag: tag,
+           games: filter_games(tag, socket.assigns.current_scope),
+           languages: Locale.languages(:all, socket.assigns.locale, path(tag))
+         )}
+    end
   end
+
+  # Only a click saves the tag, not a link with a tag. "All games" has no
+  # tag.
+  def handle_event("select_tag", params, socket) do
+    tag = valid_tag(params["tag"])
+
+    GameSettings.put(socket.assigns.current_scope, socket.assigns.guest_id, "home", %{
+      "tag" => tag
+    })
+
+    {:noreply, push_patch(socket, to: tag_path(socket, tag), replace: true)}
+  end
+
+  defp valid_tag(tag) when tag in @filters, do: tag
+  defp valid_tag(_tag), do: nil
+
+  defp saved_tag(socket) do
+    case GameSettings.get(socket.assigns.current_scope, socket.assigns.guest_id, "home") do
+      %{"tag" => tag} -> valid_tag(tag)
+      _ -> nil
+    end
+  end
+
+  defp filter_games(nil, _scope), do: @games
+
+  # A guest sees a text that asks to sign in, so no games
+  defp filter_games("recent", nil), do: []
+
+  defp filter_games("recent", %{user: user}) do
+    by_id = Map.new(@games, &{&1.id, &1})
+    for id <- Stats.recent_games_of(:user_id, user.id), game = by_id[id], do: game
+  end
+
+  defp filter_games(tag, _scope), do: Enum.filter(@games, &(tag in &1.tags))
+
+  defp path(nil), do: ~p"/"
+  defp path(tag), do: ~p"/?tag=#{tag}"
+
+  defp tag_path(socket, tag), do: Locale.path(socket.assigns.locale, path(tag))
 
   def handle_info({:lobby_changed, game, id, entry}, socket) do
     entry = entry && Map.put(entry, :kind, Map.fetch!(@kinds_by_game, game))

@@ -227,6 +227,24 @@ defmodule Octomocto.Stats do
   end
 
   @doc """
+  The game ids of the front page that the user (`field` is `:user_id`) or
+  the guest (`:guest_id`) `id` played, the last played game first.
+  """
+  def recent_games_of(field, id) when field in [:user_id, :guest_id] do
+    @results
+    |> Enum.map(fn {game, schema} ->
+      from r in schema,
+        where: field(r, ^field) == ^id,
+        select: %{game: type(^game, :string), at: max(r.inserted_at)}
+    end)
+    |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
+    |> Repo.all()
+    |> Enum.reject(&is_nil(&1.at))
+    |> Enum.sort_by(& &1.at, {:desc, DateTime})
+    |> Enum.map(& &1.game)
+  end
+
+  @doc """
   The 10 players with the most games in the last `days` days, today
   included, in the game with the id `game` of the front page, the most
   games first. Each item is

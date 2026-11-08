@@ -146,3 +146,15 @@ msgstr "ألعاب ذهنية: بمفردك أو مع آخرين"
 #, elixir-autogen, elixir-format
 msgid "Free online brain games for memory, logic and speed. Play solo or multiplayer: no sign-up, nothing to install."
 msgstr "ألعاب ذهنية مجانية على الإنترنت للذاكرة والمنطق والسرعة. العب بمفردك أو مع آخرين: بلا تسجيل ولا تثبيت."
+
+#, elixir-autogen, elixir-format
+msgid "Recent"
+msgstr "الأخيرة"
+
+#, elixir-autogen, elixir-format
+msgid "Your recent games show here after you finish a game."
+msgstr "ستظهر ألعابك الأخيرة هنا عندما تُنهي لعبة."
+
+#, elixir-autogen, elixir-format
+msgid "to see your recent games here."
+msgstr "لترى ألعابك الأخيرة هنا."

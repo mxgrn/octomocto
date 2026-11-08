@@ -146,3 +146,15 @@ msgstr "Giochi di logica: da soli o in multigiocatore"
 #, elixir-autogen, elixir-format
 msgid "Free online brain games for memory, logic and speed. Play solo or multiplayer: no sign-up, nothing to install."
 msgstr "Giochi di logica online gratuiti per memoria, ragionamento e velocità. Gioca da solo o in multigiocatore: senza registrazione, niente da installare."
+
+#, elixir-autogen, elixir-format
+msgid "Recent"
+msgstr "Recenti"
+
+#, elixir-autogen, elixir-format
+msgid "Your recent games show here after you finish a game."
+msgstr "I tuoi giochi recenti compaiono qui quando finisci una partita."
+
+#, elixir-autogen, elixir-format
+msgid "to see your recent games here."
+msgstr "per vedere qui i tuoi giochi recenti."

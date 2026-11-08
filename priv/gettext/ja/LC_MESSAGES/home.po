@@ -146,3 +146,15 @@ msgstr "頭脳ゲーム：ひとりでもマルチプレイでも"
 #, elixir-autogen, elixir-format
 msgid "Free online brain games for memory, logic and speed. Play solo or multiplayer: no sign-up, nothing to install."
 msgstr "記憶力・論理・スピードを鍛える無料のオンライン頭脳ゲーム。ひとりでもマルチプレイでも。登録もインストールも不要です。"
+
+#, elixir-autogen, elixir-format
+msgid "Recent"
+msgstr "最近"
+
+#, elixir-autogen, elixir-format
+msgid "Your recent games show here after you finish a game."
+msgstr "ゲームを最後まで遊ぶと、最近のゲームがここに表示されるよ。"
+
+#, elixir-autogen, elixir-format
+msgid "to see your recent games here."
+msgstr "すると、最近遊んだゲームがここに表示されるよ。"

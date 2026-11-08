@@ -5,7 +5,7 @@ defmodule OctomoctoWeb.HomeLiveTest do
   import Octomocto.AccountsFixtures
 
   alias Octomocto.Friends.Follow
-  alias Octomocto.{OnlineUsers, Repo}
+  alias Octomocto.{NimbleMosaic, OnlineUsers, Repo, Snap}
 
   defp make_friends(user, friend) do
     Repo.insert_all(Follow, [
@@ -40,16 +40,73 @@ defmodule OctomoctoWeb.HomeLiveTest do
       assert has_element?(view, "#game-schulte")
     end
 
+    test "recent asks a guest to sign in", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/")
+
+      view |> element("#game-tag-recent") |> render_click()
+
+      assert_patch(view, ~p"/?tag=recent")
+      assert has_element?(view, "#recent-sign-in")
+      refute has_element?(view, "#games li")
+    end
+
     test "an unknown tag shows all games", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/?tag=unknown")
 
-      assert has_element?(view, "#game-tag-all[aria-current]")
+      assert has_element?(view, "#game-tag-all[aria-pressed=true]")
       assert has_element?(view, "#game-schulte")
     end
   end
 
   describe "a signed-in user" do
     setup :register_and_log_in_user
+
+    test "sees the played games in the recent list, the last played first",
+         %{conn: conn, user: user} do
+      snap = %{user_id: user.id, score: 5, correct: 5, wrong: 0}
+      mosaic_settings = %{"type" => "random", "mode" => "easy", "players" => 1}
+      Snap.save_results("a", %{}, 0, [snap])
+      NimbleMosaic.save_results("b", mosaic_settings, 1000, [%{user_id: user.id, score: 90}])
+      Snap.save_results("c", %{}, 0, [snap])
+
+      {:ok, view, _html} = live(conn, ~p"/?tag=recent")
+
+      ids =
+        view
+        |> render()
+        |> LazyHTML.from_fragment()
+        |> LazyHTML.query("#games > li > a")
+        |> LazyHTML.attribute("id")
+
+      assert ids == ["game-snap", "game-nimble-mosaic"]
+    end
+
+    test "gets the tag they clicked last when they open the front page", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/")
+      view |> element("#game-tag-memory") |> render_click()
+
+      assert {:error, {:live_redirect, %{to: "/?tag=memory"}}} = live(conn, ~p"/")
+    end
+
+    test "gets all games after they click all games", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/")
+      view |> element("#game-tag-memory") |> render_click()
+      view |> element("#game-tag-all") |> render_click()
+
+      assert {:ok, _view, _html} = live(conn, ~p"/")
+    end
+
+    test "does not save a tag that they only opened from a link", %{conn: conn} do
+      {:ok, _view, _html} = live(conn, ~p"/?tag=memory")
+
+      assert {:ok, _view, _html} = live(conn, ~p"/")
+    end
+
+    test "sees a text in the recent list when they played no games", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/?tag=recent")
+
+      assert has_element?(view, "#recent-empty")
+    end
 
     test "sees that no friend is online", %{conn: conn, user: user} do
       make_friends(user, user_fixture())
