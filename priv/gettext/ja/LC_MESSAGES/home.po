@@ -138,3 +138,11 @@ msgstr "今日は何で遊ぶ？"
 #, elixir-autogen, elixir-format
 msgid "to see when your friends are online. You become friends when you finish a game from a link that one of you shared."
 msgstr "すると、友達がオンラインのときにわかるよ。どちらかが共有したリンクからゲームを最後まで遊ぶと、友達になれるよ。"
+
+#, elixir-autogen, elixir-format
+msgid "Brain games: solo or multiplayer"
+msgstr "頭脳ゲーム：ひとりでもマルチプレイでも"
+
+#, elixir-autogen, elixir-format
+msgid "Free online brain games for memory, logic and speed. Play solo or multiplayer: no sign-up, nothing to install."
+msgstr "記憶力・論理・スピードを鍛える無料のオンライン頭脳ゲーム。ひとりでもマルチプレイでも。登録もインストールも不要です。"

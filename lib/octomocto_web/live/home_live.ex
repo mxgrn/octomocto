@@ -279,6 +279,12 @@ defmodule OctomoctoWeb.HomeLive do
     {:ok,
      socket
      |> assign(
+       page_title: dgettext("home", "Brain games: solo or multiplayer") <> " · Octomocto",
+       page_description:
+         dgettext(
+           "home",
+           "Free online brain games for memory, logic and speed. Play solo or multiplayer: no sign-up, nothing to install."
+         ),
        canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(socket.assigns.locale, ~p"/"),
        alternate_urls: Locale.alternate_urls(:all, ~p"/"),
        tags: @tags,

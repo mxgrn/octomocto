@@ -138,3 +138,11 @@ msgstr "Hôm nay chơi gì đây?"
 #, elixir-autogen, elixir-format
 msgid "to see when your friends are online. You become friends when you finish a game from a link that one of you shared."
 msgstr "để biết khi nào bạn bè của bạn online. Các bạn trở thành bạn bè khi chơi xong một ván từ đường link mà một trong các bạn đã chia sẻ."
+
+#, elixir-autogen, elixir-format
+msgid "Brain games: solo or multiplayer"
+msgstr "Trò chơi trí tuệ: chơi đơn hoặc nhiều người"
+
+#, elixir-autogen, elixir-format
+msgid "Free online brain games for memory, logic and speed. Play solo or multiplayer: no sign-up, nothing to install."
+msgstr "Trò chơi trí tuệ trực tuyến miễn phí cho trí nhớ, logic và tốc độ. Chơi một mình hoặc nhiều người: không cần đăng ký, không cần cài đặt."
