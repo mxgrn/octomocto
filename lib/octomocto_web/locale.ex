@@ -54,17 +54,17 @@ defmodule OctomoctoWeb.Locale do
   # The games with translations, by language
   @games %{
     "pt" => ["memory", "echo"],
-    "de" => ["memory"],
-    "ru" => ["memory"],
-    "fr" => ["memory"],
-    "uk" => ["memory"],
-    "pl" => ["memory"],
-    "it" => ["memory"],
-    "es" => ["memory"],
-    "ja" => ["memory"],
-    "vi" => ["memory"],
-    "tr" => ["memory"],
-    "ar" => ["memory"]
+    "de" => ["memory", "echo"],
+    "ru" => ["memory", "echo"],
+    "fr" => ["memory", "echo"],
+    "uk" => ["memory", "echo"],
+    "pl" => ["memory", "echo"],
+    "it" => ["memory", "echo"],
+    "es" => ["memory", "echo"],
+    "ja" => ["memory", "echo"],
+    "vi" => ["memory", "echo"],
+    "tr" => ["memory", "echo"],
+    "ar" => ["memory", "echo"]
   }
 
   def init(locale), do: locale

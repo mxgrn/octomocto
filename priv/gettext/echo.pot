@@ -18,14 +18,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 #, elixir-autogen, elixir-format
-msgid "1 pad"
-msgstr ""
-
-#, elixir-autogen, elixir-format
-msgid "1 tap"
-msgstr ""
-
-#, elixir-autogen, elixir-format
 msgid "A Simon-like game: repeat the sequence of colored pads."
 msgstr ""
 
@@ -338,14 +330,6 @@ msgid "{color} pad, {shape}"
 msgstr ""
 
 #, elixir-autogen, elixir-format
-msgid "{count} pads"
-msgstr ""
-
-#, elixir-autogen, elixir-format
-msgid "{count} taps"
-msgstr ""
-
-#, elixir-autogen, elixir-format
 msgid "{name} (you)"
 msgstr ""
 
@@ -412,3 +396,9 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "New game"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "%{count} tap"
+msgid_plural "%{count} taps"
+msgstr[0] ""
+msgstr[1] ""

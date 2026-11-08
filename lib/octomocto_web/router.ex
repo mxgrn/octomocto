@@ -199,10 +199,13 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
+      live "/echo", EchoLive, :index
+      live "/echo/lobby", EchoLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
+    get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
     get "/signin", UserSessionController, :new
@@ -229,10 +232,13 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
+      live "/echo", EchoLive, :index
+      live "/echo/lobby", EchoLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
+    get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
     get "/signin", UserSessionController, :new
@@ -259,10 +265,13 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
+      live "/echo", EchoLive, :index
+      live "/echo/lobby", EchoLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
+    get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
     get "/signin", UserSessionController, :new
@@ -289,10 +298,13 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
+      live "/echo", EchoLive, :index
+      live "/echo/lobby", EchoLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
+    get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
     get "/signin", UserSessionController, :new
@@ -319,10 +331,13 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
+      live "/echo", EchoLive, :index
+      live "/echo/lobby", EchoLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
+    get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
     get "/signin", UserSessionController, :new
@@ -349,10 +364,13 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
+      live "/echo", EchoLive, :index
+      live "/echo/lobby", EchoLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
+    get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
     get "/signin", UserSessionController, :new
@@ -379,10 +397,13 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
+      live "/echo", EchoLive, :index
+      live "/echo/lobby", EchoLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
+    get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
     get "/signin", UserSessionController, :new
@@ -409,10 +430,13 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
+      live "/echo", EchoLive, :index
+      live "/echo/lobby", EchoLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
+    get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
     get "/signin", UserSessionController, :new
@@ -439,10 +463,13 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
+      live "/echo", EchoLive, :index
+      live "/echo/lobby", EchoLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
+    get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
     get "/signin", UserSessionController, :new
@@ -469,10 +496,13 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
+      live "/echo", EchoLive, :index
+      live "/echo/lobby", EchoLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
+    get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
     get "/signin", UserSessionController, :new
@@ -499,10 +529,13 @@ defmodule OctomoctoWeb.Router do
       live "/memory", MemoryLive, :index
       live "/memory/campaign", MemoryLive, :campaign
       live "/memory/lobby", MemoryLive, :lobby
+      live "/echo", EchoLive, :index
+      live "/echo/lobby", EchoLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
     get "/memory/:id", MemoryController, :show
+    get "/echo/:id", EchoController, :show
 
     get "/donate", PageController, :donate
     get "/signin", UserSessionController, :new

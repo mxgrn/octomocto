@@ -11,7 +11,7 @@
   <%!-- The same columns as on the Memory page --%>
   <div
     id="echo-index"
-    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[calc(100vw-4rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] xl:grid-rows-[auto_1fr]"
+    class="relative start-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 rtl:translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[calc(100vw-4rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] xl:grid-rows-[auto_1fr]"
   >
     <div class="mx-auto w-full max-w-md space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2 lg:max-w-none">
       <div class="flex items-center justify-center gap-3">
@@ -195,7 +195,7 @@
           </span>
         </:aside>
         <.result_row :for={{result, place} <- Enum.with_index(@best_results, 1)}>
-          <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+          <span class="w-4 shrink-0 text-end tabular-nums text-base-content/40">{place}</span>
           <span class="min-w-0 flex-1 truncate font-medium"><.player_link player={result.user}>{player_name(
             result.user
           )}</.player_link></span>

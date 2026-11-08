@@ -247,10 +247,14 @@ type alias Model =
 
 
 {-| The texts in the language of the page, by the English text (see
-`OctomoctoWeb.EchoHTML.elm_texts/0`).
+`OctomoctoWeb.EchoHTML.elm_texts/0`). The `plurals` have each plural form
+of the `locale` (see `OctomoctoWeb.EchoHTML.elm_plurals/0`).
 -}
 type alias Texts =
-    Dict String String
+    { strings : Dict String String
+    , plurals : Dict String (List String)
+    , locale : String
+    }
 
 
 {-| The other game that the end screen invites the player to try
@@ -277,6 +281,8 @@ type alias Flags =
     , muted : Bool
     , shapes : Bool
     , texts : Decode.Value
+    , plurals : Decode.Value
+    , locale : String
     }
 
 
@@ -303,7 +309,11 @@ init flags =
       , flashId = 0
       , shaking = False
       , viewport = ( 1024, 768 )
-      , texts = Decode.decodeValue (Decode.dict Decode.string) flags.texts |> Result.withDefault Dict.empty
+      , texts =
+            { strings = Decode.decodeValue (Decode.dict Decode.string) flags.texts |> Result.withDefault Dict.empty
+            , plurals = Decode.decodeValue (Decode.dict (Decode.list Decode.string)) flags.plurals |> Result.withDefault Dict.empty
+            , locale = flags.locale
+            }
       }
     , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
     )
@@ -907,7 +917,7 @@ stays in English.
 -}
 t : Texts -> String -> String
 t texts english =
-    Dict.get english texts |> Maybe.withDefault english
+    Dict.get english texts.strings |> Maybe.withDefault english
 
 
 {-| The text in the language of the page, with the values in its `{name}`
@@ -951,12 +961,12 @@ viewGame model me game =
                         [ a
                             [ id "echo-home"
                             , href "/"
-                            , class "mr-1 shrink-0 transition lg:mr-0"
+                            , class "me-1 shrink-0 transition lg:me-0"
                             ]
                             [ img [ src "/images/mark.svg", alt "octomocto", class "h-8 w-auto dark:hidden lg:h-9" ] []
                             , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block lg:h-9" ] []
                             ]
-                        , h1 [ class "mr-1 truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
+                        , h1 [ class "me-1 truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
                             [ a [ id "echo-title-link", href model.indexUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text (t model.texts "Echo Chamber") ] ]
                         , viewWatchers model.texts (me == Nothing) model.watchers
                         , viewShapesButton model.texts model.shapes
@@ -1152,7 +1162,7 @@ viewMenu texts locked muted player =
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:order-3 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 ps-4 text-sm ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:order-3 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:ps-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "echo-link"
             , readonly True
@@ -1237,7 +1247,7 @@ viewTurnTimer model game =
             in
             if left < shownMs then
                 span
-                    [ class "absolute bottom-0 left-0 h-0.5 bg-current transition-[width] duration-200 ease-linear"
+                    [ class "absolute bottom-0 start-0 h-0.5 bg-current transition-[width] duration-200 ease-linear"
                     , style "width" (String.fromFloat (100 * toFloat (max 0 left) / shownMs) ++ "%")
                     , style "color" "var(--player-color)"
                     ]
@@ -1337,16 +1347,97 @@ status model me game =
                 ""
 
 
-{-| The texts have one form for 1 and one for more, as in English and
-Portuguese
--}
 taps : Texts -> Int -> String
 taps texts n =
-    if n == 1 then
-        t texts "1 tap"
+    plural texts "{count} taps" n
+
+
+{-| The text with the number in the plural form of the language. Without
+the forms, the text is in English.
+-}
+plural : Texts -> String -> Int -> String
+plural texts english n =
+    Dict.get english texts.plurals
+        |> Maybe.andThen (List.drop (pluralForm texts.locale n) >> List.head)
+        |> Maybe.withDefault english
+        |> String.replace "{count}" (String.fromInt n)
+
+
+{-| The index of the plural form of the number in the language. The rules
+are the same as in `Gettext.Plural` on the server.
+-}
+pluralForm : String -> Int -> Int
+pluralForm locale n =
+    let
+        ones =
+            modBy 10 n
+
+        hundreds =
+            modBy 100 n
+
+        few =
+            ones >= 2 && ones <= 4 && (hundreds < 10 || hundreds >= 20)
+    in
+    case locale of
+        "ru" ->
+            slavicForm (ones == 1 && hundreds /= 11) few
+
+        "uk" ->
+            slavicForm (ones == 1 && hundreds /= 11) few
+
+        "pl" ->
+            slavicForm (n == 1) few
+
+        "ar" ->
+            if n <= 2 then
+                n
+
+            else if hundreds >= 3 && hundreds <= 10 then
+                3
+
+            else if hundreds >= 11 then
+                4
+
+            else
+                5
+
+        "fr" ->
+            boolToInt (n > 1)
+
+        "tr" ->
+            boolToInt (n > 1)
+
+        "ja" ->
+            0
+
+        "vi" ->
+            0
+
+        _ ->
+            boolToInt (n /= 1)
+
+
+{-| The form for one, for a few, or for many
+-}
+slavicForm : Bool -> Bool -> Int
+slavicForm one few =
+    if one then
+        0
+
+    else if few then
+        1
 
     else
-        tf texts "{count} taps" [ ( "count", String.fromInt n ) ]
+        2
+
+
+boolToInt : Bool -> Int
+boolToInt value =
+    if value then
+        1
+
+    else
+        0
 
 
 
@@ -1725,7 +1816,7 @@ viewResult model me game =
                         li [ class "flex items-center gap-2" ]
                             [ span [ class "size-3 rounded-full", style "background" player.color ] []
                             , span [ class "flex-1 text-left" ] [ text (playerName texts me player) ]
-                            , span [ class "pl-6 font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
+                            , span [ class "ps-6 font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
                             ]
                     )
                     (ranking game.players)
@@ -1797,7 +1888,7 @@ viewResult model me game =
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:no-underline"
             ]
             [ text (tf texts "Or try {game}" [ ( "game", nextGame.name ) ] ++ " ")
-            , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
+            , span [ class "inline-block transition group-hover:translate-x-0.5 rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5" ] [ text "→" ]
             ]
 
         -- Only a guest who played gets the call to sign in, not a spectator
@@ -1855,16 +1946,9 @@ withLink texts english name link =
             [ text (t texts english), link ]
 
 
-{-| The texts have one form for 1 and one for more, as in English and
-Portuguese
--}
 padsText : Texts -> Int -> String
 padsText texts n =
-    if n == 1 then
-        t texts "1 pad"
-
-    else
-        tf texts "{count} pads" [ ( "count", String.fromInt n ) ]
+    plural texts "{count} pads" n
 
 
 

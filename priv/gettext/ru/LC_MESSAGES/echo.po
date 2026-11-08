@@ -14,369 +14,353 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "%{count} pad"
 msgid_plural "%{count} pads"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-
-#, elixir-autogen, elixir-format
-msgid "1 pad"
-msgstr ""
-
-#, elixir-autogen, elixir-format
-msgid "1 tap"
-msgstr ""
+msgstr[0] "%{count} кнопка"
+msgstr[1] "%{count} кнопки"
+msgstr[2] "%{count} кнопок"
 
 #, elixir-autogen, elixir-format
 msgid "A Simon-like game: repeat the sequence of colored pads."
-msgstr ""
+msgstr "Игра в духе «Саймона»: повтори последовательность цветных кнопок."
 
 #, elixir-autogen, elixir-format
 msgid "A free game like Simon: repeat the sequence of colored pads. Play alone or with up to 3 friends. No sign-up."
-msgstr ""
+msgstr "Бесплатная игра для развития памяти: повтори последовательность цветных кнопок. Играй один или с компанией до 3 друзей. Без регистрации."
 
 #, elixir-autogen, elixir-format
 msgid "A player who taps a wrong pad is out. The last player who is in wins."
-msgstr ""
+msgstr "Кто нажмёт не ту кнопку, выбывает. Побеждает последний оставшийся игрок."
 
 #, elixir-autogen, elixir-format
 msgid "Best"
-msgstr ""
+msgstr "Рекорд"
 
 #, elixir-autogen, elixir-format
 msgid "Best results"
-msgstr ""
+msgstr "Лучшие результаты"
 
 #, elixir-autogen, elixir-format
 msgid "Blue"
-msgstr ""
+msgstr "Синий"
 
 #, elixir-autogen, elixir-format
 msgid "Copied!"
-msgstr ""
+msgstr "Скопировано!"
 
 #, elixir-autogen, elixir-format
 msgid "Copy link"
-msgstr ""
+msgstr "Копировать ссылку"
 
 #, elixir-autogen, elixir-format
 msgid "Could not join the game: {reason}"
-msgstr ""
+msgstr "Не удалось войти в игру: {reason}"
 
 #, elixir-autogen, elixir-format
 msgid "Each player repeats the sequence and adds a pad. The game starts when all players are in."
-msgstr ""
+msgstr "Каждый игрок повторяет последовательность и добавляет кнопку. Игра начнётся, когда все войдут."
 
 #, elixir-autogen, elixir-format
 msgid "Each round, the sequence gets one pad longer. One wrong pad, and the game ends."
-msgstr ""
+msgstr "С каждым раундом последовательность становится на одну кнопку длиннее. Не та кнопка — и игра окончена."
 
 #, elixir-autogen, elixir-format
 msgid "{feed} to keep Octomocto ad-free."
-msgstr ""
+msgstr "{feed}, чтобы в Octomocto не было рекламы."
 
 #, elixir-autogen, elixir-format
 msgid "Support the author"
-msgstr ""
+msgstr "Поддержи автора"
 
 #, elixir-autogen, elixir-format
 msgid "Game over"
-msgstr ""
+msgstr "Игра окончена"
 
 #, elixir-autogen, elixir-format
 msgid "Go"
-msgstr ""
+msgstr "Старт"
 
 #, elixir-autogen, elixir-format
 msgid "Hide the shapes on the pads"
-msgstr ""
+msgstr "Скрыть фигуры на кнопках"
 
 #, elixir-autogen, elixir-format
 msgid "Joining the game…"
-msgstr ""
+msgstr "Входим в игру…"
 
 #, elixir-autogen, elixir-format
 msgid "Level {level}"
-msgstr ""
+msgstr "Уровень {level}"
 
 #, elixir-autogen, elixir-format
 msgid "Lime"
-msgstr ""
+msgstr "Лаймовый"
 
 #, elixir-autogen, elixir-format
 msgid "No games yet."
-msgstr ""
+msgstr "Игр пока нет."
 
 #, elixir-autogen, elixir-format
 msgid "Now add a pad of your choice."
-msgstr ""
+msgstr "Теперь добавь кнопку на свой выбор."
 
 #, elixir-autogen, elixir-format
 msgid "Or try {game}"
-msgstr ""
+msgstr "Или попробуй {game}"
 
 #, elixir-autogen, elixir-format
 msgid "Orange"
-msgstr ""
+msgstr "Оранжевый"
 
 #, elixir-autogen, elixir-format
 msgid "Pads"
-msgstr ""
+msgstr "Кнопки"
 
 #, elixir-autogen, elixir-format
 msgid "Pink"
-msgstr ""
+msgstr "Розовый"
 
 #, elixir-autogen, elixir-format
 msgid "Play again"
-msgstr ""
+msgstr "Сыграть ещё"
 
 #, elixir-autogen, elixir-format
 msgid "Players"
-msgstr ""
+msgstr "Игроки"
 
 #, elixir-autogen, elixir-format
 msgid "Private"
-msgstr ""
+msgstr "Закрытая"
 
 #, elixir-autogen, elixir-format
 msgid "Public"
-msgstr ""
+msgstr "Открытая"
 
 #, elixir-autogen, elixir-format
 msgid "Red"
-msgstr ""
+msgstr "Красный"
 
 #, elixir-autogen, elixir-format
 msgid "Repeat the sequence, then add a pad of your choice."
-msgstr ""
+msgstr "Повтори последовательность, затем добавь кнопку на свой выбор."
 
 #, elixir-autogen, elixir-format
 msgid "Restart game"
-msgstr ""
+msgstr "Начать заново"
 
 #, elixir-autogen, elixir-format
 msgid "Send the link to the other players. The game starts when all of them are in."
-msgstr ""
+msgstr "Отправь ссылку другим игрокам. Игра начнётся, когда все войдут."
 
 #, elixir-autogen, elixir-format
 msgid "Show the shapes on the pads"
-msgstr ""
+msgstr "Показать фигуры на кнопках"
 
 #, elixir-autogen, elixir-format
 msgid "Sign in"
-msgstr ""
+msgstr "Войди"
 
 #, elixir-autogen, elixir-format
 msgid "Start game"
-msgstr ""
+msgstr "Начать игру"
 
 #, elixir-autogen, elixir-format
 msgid "Tap Go to start."
-msgstr ""
+msgstr "Нажми «Старт», чтобы начать."
 
 #, elixir-autogen, elixir-format
 msgid "Teal"
-msgstr ""
+msgstr "Бирюзовый"
 
 #, elixir-autogen, elixir-format
 msgid "The game adds a random pad each round."
-msgstr ""
+msgstr "Каждый раунд игра добавляет случайную кнопку."
 
 #, elixir-autogen, elixir-format
 msgid "The pads light up one by one. Tap them in the same order."
-msgstr ""
+msgstr "Кнопки загораются одна за другой. Нажимай их в том же порядке."
 
 #, elixir-autogen, elixir-format
 msgid "The sequence had {pads}."
-msgstr ""
+msgstr "Длина последовательности: {pads}."
 
 #, elixir-autogen, elixir-format
 msgid "The {color} player"
-msgstr ""
+msgstr "Игрок {color}"
 
 #, elixir-autogen, elixir-format
 msgid "Turn the sounds off"
-msgstr ""
+msgstr "Выключить звук"
 
 #, elixir-autogen, elixir-format
 msgid "Turn the sounds on"
-msgstr ""
+msgstr "Включить звук"
 
 #, elixir-autogen, elixir-format
 msgid "Violet"
-msgstr ""
+msgstr "Фиолетовый"
 
 #, elixir-autogen, elixir-format
 msgid "Visibility"
-msgstr ""
+msgstr "Доступ"
 
 #, elixir-autogen, elixir-format
 msgid "Waiting for players"
-msgstr ""
+msgstr "Ждём игроков"
 
 #, elixir-autogen, elixir-format
 msgid "Watch closely…"
-msgstr ""
+msgstr "Смотри внимательно…"
 
 #, elixir-autogen, elixir-format
 msgid "Watch the pads light up, then tap them in the same order."
-msgstr ""
+msgstr "Смотри, как загораются кнопки, и нажимай их в том же порядке."
 
 #, elixir-autogen, elixir-format
 msgid "Watchers: {count}"
-msgstr ""
+msgstr "Зрители: {count}"
 
 #, elixir-autogen, elixir-format
 msgid "With friends, there is no playback: watch the taps of the others. In your turn, repeat the sequence, then add a pad of your choice."
-msgstr ""
+msgstr "С друзьями последовательность заново не показывается: следи за нажатиями других. В свой ход повтори последовательность, затем добавь кнопку на свой выбор."
 
 #, elixir-autogen, elixir-format
 msgid "Yellow"
-msgstr ""
+msgstr "Жёлтый"
 
 #, elixir-autogen, elixir-format
 msgid "You are out. Watch the others play."
-msgstr ""
+msgstr "Ты вне игры. Смотри, как играют остальные."
 
 #, elixir-autogen, elixir-format
 msgid "You are watching this game."
-msgstr ""
+msgstr "Ты наблюдаешь за этой игрой."
 
 #, elixir-autogen, elixir-format
 msgid "You repeated {pads}."
-msgstr ""
+msgstr "Твой результат: {pads}."
 
 #, elixir-autogen, elixir-format
 msgid "You start. Tap any pad to add it to the sequence."
-msgstr ""
+msgstr "Ты начинаешь. Нажми любую кнопку, чтобы добавить её в последовательность."
 
 #, elixir-autogen, elixir-format
 msgid "You win!"
-msgstr ""
+msgstr "Победа!"
 
 #, elixir-autogen, elixir-format
 msgid "Your results"
-msgstr ""
+msgstr "Твои результаты"
 
 #, elixir-autogen, elixir-format
 msgid "Your turn: repeat the sequence. {taps} to go."
-msgstr ""
+msgstr "Твой ход: повтори последовательность. Осталось {taps}."
 
 #, elixir-autogen, elixir-format
 msgid "Your turn: {taps} to go."
-msgstr ""
+msgstr "Твой ход: осталось {taps}."
 
 #, elixir-autogen, elixir-format
 msgid "add a pad"
-msgstr ""
+msgstr "добавь"
 
 #, elixir-autogen, elixir-format
 msgid "circle"
-msgstr ""
+msgstr "круг"
 
 #, elixir-autogen, elixir-format
 msgid "cross"
-msgstr ""
+msgstr "крестик"
 
 #, elixir-autogen, elixir-format
 msgid "diamond"
-msgstr ""
+msgstr "ромб"
 
 #, elixir-autogen, elixir-format
 msgid "hexagon"
-msgstr ""
+msgstr "шестиугольник"
 
 #, elixir-autogen, elixir-format
 msgid "out"
-msgstr ""
+msgstr "вне игры"
 
 #, elixir-autogen, elixir-format
 msgid "plus"
-msgstr ""
+msgstr "плюс"
 
 #, elixir-autogen, elixir-format
 msgid "repeat"
-msgstr ""
+msgstr "повтори"
 
 #, elixir-autogen, elixir-format
 msgid "square"
-msgstr ""
+msgstr "квадрат"
 
 #, elixir-autogen, elixir-format
 msgid "star"
-msgstr ""
+msgstr "звезда"
 
 #, elixir-autogen, elixir-format
 msgid "tap to play"
-msgstr ""
+msgstr "нажми и играй"
 
 #, elixir-autogen, elixir-format
 msgid "to get listed"
-msgstr ""
+msgstr "и попади в список"
 
 #, elixir-autogen, elixir-format
 msgid "to start saving your results."
-msgstr ""
+msgstr "и начни сохранять свои результаты."
 
 #, elixir-autogen, elixir-format
 msgid "triangle"
-msgstr ""
+msgstr "треугольник"
 
 #, elixir-autogen, elixir-format
 msgid "turn"
-msgstr ""
+msgstr "ходит"
 
 #, elixir-autogen, elixir-format
 msgid "watch"
-msgstr ""
+msgstr "смотри"
 
 #, elixir-autogen, elixir-format
 msgid "your turn"
-msgstr ""
+msgstr "твой ход"
 
 #, elixir-autogen, elixir-format
 msgid "{color} pad, {shape}"
-msgstr ""
-
-#, elixir-autogen, elixir-format
-msgid "{count} pads"
-msgstr ""
-
-#, elixir-autogen, elixir-format
-msgid "{count} taps"
-msgstr ""
+msgstr "Кнопка «{color}», {shape}"
 
 #, elixir-autogen, elixir-format
 msgid "{name} (you)"
-msgstr ""
+msgstr "{name} (ты)"
 
 #, elixir-autogen, elixir-format
 msgid "{name} adds a pad."
-msgstr ""
+msgstr "{name} добавляет кнопку."
 
 #, elixir-autogen, elixir-format
 msgid "{name} repeats the sequence."
-msgstr ""
+msgstr "{name} повторяет последовательность."
 
 #, elixir-autogen, elixir-format
 msgid "{name} starts the sequence."
-msgstr ""
+msgstr "{name} начинает последовательность."
 
 #, elixir-autogen, elixir-format
 msgid "{name} wins!"
-msgstr ""
+msgstr "Побеждает {name}!"
 
 #, elixir-autogen, elixir-format
 msgid "{players} of {needed} players are in"
-msgstr ""
+msgstr "Игроков в игре: {players} из {needed}"
 
 #, elixir-autogen, elixir-format
 msgid "{sign_in} to keep your scores."
-msgstr ""
+msgstr "{sign_in} и сохраняй свои результаты."
 
 #, elixir-autogen, elixir-format
 msgid "Menu"
-msgstr ""
+msgstr "Меню"
 
 #, elixir-autogen, elixir-format
 msgid "Change settings"
@@ -396,15 +380,15 @@ msgstr "{name} меняет настройки…"
 
 #, elixir-autogen, elixir-format
 msgid "Echo Chamber"
-msgstr ""
+msgstr "Echo Chamber"
 
 #, elixir-autogen, elixir-format
 msgid "Echo Chamber is a Simon-like game. Simon is a trademark of Hasbro. Octomocto is not affiliated with Hasbro."
-msgstr ""
+msgstr "Echo Chamber — игра в духе Simon. Simon — товарный знак компании Hasbro. Octomocto не связан с Hasbro."
 
 #, elixir-autogen, elixir-format
 msgid "Echo Chamber: a Simon-Like Memory Game Online"
-msgstr ""
+msgstr "Echo Chamber: игра для развития памяти — повтори цвета"
 
 #, elixir-autogen, elixir-format
 msgid "Lobby"
@@ -413,3 +397,10 @@ msgstr "Лобби"
 #, elixir-autogen, elixir-format
 msgid "New game"
 msgstr "Новая игра"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} tap"
+msgid_plural "%{count} taps"
+msgstr[0] "%{count} нажатие"
+msgstr[1] "%{count} нажатия"
+msgstr[2] "%{count} нажатий"

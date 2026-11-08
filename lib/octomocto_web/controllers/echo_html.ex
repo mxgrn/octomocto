@@ -49,10 +49,6 @@ defmodule OctomoctoWeb.EchoHTML do
       "{name} starts the sequence." => dgettext("echo", "{name} starts the sequence."),
       "{name} repeats the sequence." => dgettext("echo", "{name} repeats the sequence."),
       "{name} adds a pad." => dgettext("echo", "{name} adds a pad."),
-      "1 tap" => dgettext("echo", "1 tap"),
-      "{count} taps" => dgettext("echo", "{count} taps"),
-      "1 pad" => dgettext("echo", "1 pad"),
-      "{count} pads" => dgettext("echo", "{count} pads"),
       "{color} pad, {shape}" => dgettext("echo", "{color} pad, {shape}"),
       "Orange" => dgettext("echo", "Orange"),
       "Blue" => dgettext("echo", "Blue"),
@@ -106,5 +102,30 @@ defmodule OctomoctoWeb.EchoHTML do
     |> Map.merge(
       Map.new(GamePageComponents.color_names(), &{&1, GamePageComponents.color_name(&1)})
     )
+  end
+
+  @doc """
+  The texts with a number in the language of the page, for `Echo.elm`:
+  each plural form of the language, by its index in the plural rule (see
+  `Gettext.Plural`). The game puts the number into the `{count}` part.
+  """
+  def elm_plurals do
+    %{
+      "{count} taps" => plural_forms(dngettext_noop("echo", "%{count} tap", "%{count} taps")),
+      "{count} pads" => plural_forms(dngettext_noop("echo", "%{count} pad", "%{count} pads"))
+    }
+  end
+
+  # For each form, a number that has this form gives the text of the form
+  defp plural_forms({singular, plural}) do
+    locale = Gettext.get_locale(OctomoctoWeb.Gettext)
+
+    for form <- 0..(Gettext.Plural.nplurals(locale) - 1) do
+      n = Enum.find(0..200, &(Gettext.Plural.plural(locale, &1) == form))
+
+      OctomoctoWeb.Gettext
+      |> Gettext.dngettext("echo", singular, plural, n)
+      |> String.replace(Integer.to_string(n), "{count}")
+    end
   end
 end

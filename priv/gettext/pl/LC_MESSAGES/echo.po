@@ -14,369 +14,353 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "%{count} pad"
 msgid_plural "%{count} pads"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-
-#, elixir-autogen, elixir-format
-msgid "1 pad"
-msgstr ""
-
-#, elixir-autogen, elixir-format
-msgid "1 tap"
-msgstr ""
+msgstr[0] "%{count} pole"
+msgstr[1] "%{count} pola"
+msgstr[2] "%{count} pól"
 
 #, elixir-autogen, elixir-format
 msgid "A Simon-like game: repeat the sequence of colored pads."
-msgstr ""
+msgstr "Gra w stylu Simona: powtórz sekwencję kolorowych pól."
 
 #, elixir-autogen, elixir-format
 msgid "A free game like Simon: repeat the sequence of colored pads. Play alone or with up to 3 friends. No sign-up."
-msgstr ""
+msgstr "Darmowa gra Simon: powtórz sekwencję kolorowych pól. Graj w pojedynkę lub z maksymalnie 3 znajomymi. Bez rejestracji."
 
 #, elixir-autogen, elixir-format
 msgid "A player who taps a wrong pad is out. The last player who is in wins."
-msgstr ""
+msgstr "Kto dotknie złego pola, odpada. Wygrywa ostatni gracz, który zostanie w grze."
 
 #, elixir-autogen, elixir-format
 msgid "Best"
-msgstr ""
+msgstr "Rekord"
 
 #, elixir-autogen, elixir-format
 msgid "Best results"
-msgstr ""
+msgstr "Najlepsze wyniki"
 
 #, elixir-autogen, elixir-format
 msgid "Blue"
-msgstr ""
+msgstr "niebieskie"
 
 #, elixir-autogen, elixir-format
 msgid "Copied!"
-msgstr ""
+msgstr "Skopiowano!"
 
 #, elixir-autogen, elixir-format
 msgid "Copy link"
-msgstr ""
+msgstr "Kopiuj link"
 
 #, elixir-autogen, elixir-format
 msgid "Could not join the game: {reason}"
-msgstr ""
+msgstr "Nie udało się dołączyć do gry: {reason}"
 
 #, elixir-autogen, elixir-format
 msgid "Each player repeats the sequence and adds a pad. The game starts when all players are in."
-msgstr ""
+msgstr "Każdy gracz powtarza sekwencję i dodaje jedno pole. Gra zacznie się, gdy wszyscy dołączą."
 
 #, elixir-autogen, elixir-format
 msgid "Each round, the sequence gets one pad longer. One wrong pad, and the game ends."
-msgstr ""
+msgstr "W każdej rundzie sekwencja wydłuża się o jedno pole. Jedno złe pole i gra się kończy."
 
 #, elixir-autogen, elixir-format
 msgid "{feed} to keep Octomocto ad-free."
-msgstr ""
+msgstr "{feed}, żeby Octomocto nadal było bez reklam."
 
 #, elixir-autogen, elixir-format
 msgid "Support the author"
-msgstr ""
+msgstr "Wesprzyj autora"
 
 #, elixir-autogen, elixir-format
 msgid "Game over"
-msgstr ""
+msgstr "Koniec gry"
 
 #, elixir-autogen, elixir-format
 msgid "Go"
-msgstr ""
+msgstr "Start"
 
 #, elixir-autogen, elixir-format
 msgid "Hide the shapes on the pads"
-msgstr ""
+msgstr "Ukryj kształty na polach"
 
 #, elixir-autogen, elixir-format
 msgid "Joining the game…"
-msgstr ""
+msgstr "Dołączanie do gry…"
 
 #, elixir-autogen, elixir-format
 msgid "Level {level}"
-msgstr ""
+msgstr "Poziom {level}"
 
 #, elixir-autogen, elixir-format
 msgid "Lime"
-msgstr ""
+msgstr "limonkowe"
 
 #, elixir-autogen, elixir-format
 msgid "No games yet."
-msgstr ""
+msgstr "Na razie nie ma gier."
 
 #, elixir-autogen, elixir-format
 msgid "Now add a pad of your choice."
-msgstr ""
+msgstr "Teraz dodaj dowolne pole."
 
 #, elixir-autogen, elixir-format
 msgid "Or try {game}"
-msgstr ""
+msgstr "Albo zagraj w {game}"
 
 #, elixir-autogen, elixir-format
 msgid "Orange"
-msgstr ""
+msgstr "pomarańczowe"
 
 #, elixir-autogen, elixir-format
 msgid "Pads"
-msgstr ""
+msgstr "Pola"
 
 #, elixir-autogen, elixir-format
 msgid "Pink"
-msgstr ""
+msgstr "różowe"
 
 #, elixir-autogen, elixir-format
 msgid "Play again"
-msgstr ""
+msgstr "Zagraj jeszcze raz"
 
 #, elixir-autogen, elixir-format
 msgid "Players"
-msgstr ""
+msgstr "Gracze"
 
 #, elixir-autogen, elixir-format
 msgid "Private"
-msgstr ""
+msgstr "Prywatna"
 
 #, elixir-autogen, elixir-format
 msgid "Public"
-msgstr ""
+msgstr "Publiczna"
 
 #, elixir-autogen, elixir-format
 msgid "Red"
-msgstr ""
+msgstr "czerwone"
 
 #, elixir-autogen, elixir-format
 msgid "Repeat the sequence, then add a pad of your choice."
-msgstr ""
+msgstr "Powtórz sekwencję, a potem dodaj dowolne pole."
 
 #, elixir-autogen, elixir-format
 msgid "Restart game"
-msgstr ""
+msgstr "Zacznij grę od nowa"
 
 #, elixir-autogen, elixir-format
 msgid "Send the link to the other players. The game starts when all of them are in."
-msgstr ""
+msgstr "Wyślij link innym graczom. Gra zacznie się, gdy wszyscy dołączą."
 
 #, elixir-autogen, elixir-format
 msgid "Show the shapes on the pads"
-msgstr ""
+msgstr "Pokaż kształty na polach"
 
 #, elixir-autogen, elixir-format
 msgid "Sign in"
-msgstr ""
+msgstr "Zaloguj się"
 
 #, elixir-autogen, elixir-format
 msgid "Start game"
-msgstr ""
+msgstr "Zacznij grę"
 
 #, elixir-autogen, elixir-format
 msgid "Tap Go to start."
-msgstr ""
+msgstr "Dotknij Start, aby zacząć."
 
 #, elixir-autogen, elixir-format
 msgid "Teal"
-msgstr ""
+msgstr "turkusowe"
 
 #, elixir-autogen, elixir-format
 msgid "The game adds a random pad each round."
-msgstr ""
+msgstr "W każdej rundzie gra dodaje losowe pole."
 
 #, elixir-autogen, elixir-format
 msgid "The pads light up one by one. Tap them in the same order."
-msgstr ""
+msgstr "Pola zapalają się jedno po drugim. Dotknij ich w tej samej kolejności."
 
 #, elixir-autogen, elixir-format
 msgid "The sequence had {pads}."
-msgstr ""
+msgstr "Sekwencja miała {pads}."
 
 #, elixir-autogen, elixir-format
 msgid "The {color} player"
-msgstr ""
+msgstr "gracz {color}"
 
 #, elixir-autogen, elixir-format
 msgid "Turn the sounds off"
-msgstr ""
+msgstr "Wyłącz dźwięk"
 
 #, elixir-autogen, elixir-format
 msgid "Turn the sounds on"
-msgstr ""
+msgstr "Włącz dźwięk"
 
 #, elixir-autogen, elixir-format
 msgid "Violet"
-msgstr ""
+msgstr "fioletowe"
 
 #, elixir-autogen, elixir-format
 msgid "Visibility"
-msgstr ""
+msgstr "Widoczność"
 
 #, elixir-autogen, elixir-format
 msgid "Waiting for players"
-msgstr ""
+msgstr "Czekamy na graczy"
 
 #, elixir-autogen, elixir-format
 msgid "Watch closely…"
-msgstr ""
+msgstr "Patrz uważnie…"
 
 #, elixir-autogen, elixir-format
 msgid "Watch the pads light up, then tap them in the same order."
-msgstr ""
+msgstr "Patrz, jak pola się zapalają, a potem dotknij ich w tej samej kolejności."
 
 #, elixir-autogen, elixir-format
 msgid "Watchers: {count}"
-msgstr ""
+msgstr "Widzowie: {count}"
 
 #, elixir-autogen, elixir-format
 msgid "With friends, there is no playback: watch the taps of the others. In your turn, repeat the sequence, then add a pad of your choice."
-msgstr ""
+msgstr "Ze znajomymi sekwencja nie jest odtwarzana: patrz, czego dotykają inni. W swoim ruchu powtórz sekwencję, a potem dodaj dowolne pole."
 
 #, elixir-autogen, elixir-format
 msgid "Yellow"
-msgstr ""
+msgstr "żółte"
 
 #, elixir-autogen, elixir-format
 msgid "You are out. Watch the others play."
-msgstr ""
+msgstr "Odpadasz. Patrz, jak grają inni."
 
 #, elixir-autogen, elixir-format
 msgid "You are watching this game."
-msgstr ""
+msgstr "Oglądasz tę grę."
 
 #, elixir-autogen, elixir-format
 msgid "You repeated {pads}."
-msgstr ""
+msgstr "Twój wynik: {pads}."
 
 #, elixir-autogen, elixir-format
 msgid "You start. Tap any pad to add it to the sequence."
-msgstr ""
+msgstr "Zaczynasz. Dotknij dowolnego pola, aby dodać je do sekwencji."
 
 #, elixir-autogen, elixir-format
 msgid "You win!"
-msgstr ""
+msgstr "Wygrywasz!"
 
 #, elixir-autogen, elixir-format
 msgid "Your results"
-msgstr ""
+msgstr "Twoje wyniki"
 
 #, elixir-autogen, elixir-format
 msgid "Your turn: repeat the sequence. {taps} to go."
-msgstr ""
+msgstr "Twój ruch: powtórz sekwencję. Jeszcze {taps}."
 
 #, elixir-autogen, elixir-format
 msgid "Your turn: {taps} to go."
-msgstr ""
+msgstr "Twój ruch: jeszcze {taps}."
 
 #, elixir-autogen, elixir-format
 msgid "add a pad"
-msgstr ""
+msgstr "dodaj"
 
 #, elixir-autogen, elixir-format
 msgid "circle"
-msgstr ""
+msgstr "koło"
 
 #, elixir-autogen, elixir-format
 msgid "cross"
-msgstr ""
+msgstr "krzyżyk"
 
 #, elixir-autogen, elixir-format
 msgid "diamond"
-msgstr ""
+msgstr "romb"
 
 #, elixir-autogen, elixir-format
 msgid "hexagon"
-msgstr ""
+msgstr "sześciokąt"
 
 #, elixir-autogen, elixir-format
 msgid "out"
-msgstr ""
+msgstr "poza grą"
 
 #, elixir-autogen, elixir-format
 msgid "plus"
-msgstr ""
+msgstr "plus"
 
 #, elixir-autogen, elixir-format
 msgid "repeat"
-msgstr ""
+msgstr "powtórz"
 
 #, elixir-autogen, elixir-format
 msgid "square"
-msgstr ""
+msgstr "kwadrat"
 
 #, elixir-autogen, elixir-format
 msgid "star"
-msgstr ""
+msgstr "gwiazda"
 
 #, elixir-autogen, elixir-format
 msgid "tap to play"
-msgstr ""
+msgstr "dotknij, aby grać"
 
 #, elixir-autogen, elixir-format
 msgid "to get listed"
-msgstr ""
+msgstr "i trafisz na listę"
 
 #, elixir-autogen, elixir-format
 msgid "to start saving your results."
-msgstr ""
+msgstr "i zacznij zapisywać swoje wyniki."
 
 #, elixir-autogen, elixir-format
 msgid "triangle"
-msgstr ""
+msgstr "trójkąt"
 
 #, elixir-autogen, elixir-format
 msgid "turn"
-msgstr ""
+msgstr "ruch"
 
 #, elixir-autogen, elixir-format
 msgid "watch"
-msgstr ""
+msgstr "patrz"
 
 #, elixir-autogen, elixir-format
 msgid "your turn"
-msgstr ""
+msgstr "twój ruch"
 
 #, elixir-autogen, elixir-format
 msgid "{color} pad, {shape}"
-msgstr ""
-
-#, elixir-autogen, elixir-format
-msgid "{count} pads"
-msgstr ""
-
-#, elixir-autogen, elixir-format
-msgid "{count} taps"
-msgstr ""
+msgstr "Pole {color}, {shape}"
 
 #, elixir-autogen, elixir-format
 msgid "{name} (you)"
-msgstr ""
+msgstr "{name} (ty)"
 
 #, elixir-autogen, elixir-format
 msgid "{name} adds a pad."
-msgstr ""
+msgstr "Nowe pole dodaje {name}."
 
 #, elixir-autogen, elixir-format
 msgid "{name} repeats the sequence."
-msgstr ""
+msgstr "Sekwencję powtarza {name}."
 
 #, elixir-autogen, elixir-format
 msgid "{name} starts the sequence."
-msgstr ""
+msgstr "Sekwencję zaczyna {name}."
 
 #, elixir-autogen, elixir-format
 msgid "{name} wins!"
-msgstr ""
+msgstr "Wygrywa {name}!"
 
 #, elixir-autogen, elixir-format
 msgid "{players} of {needed} players are in"
-msgstr ""
+msgstr "Dołączyło graczy: {players} z {needed}"
 
 #, elixir-autogen, elixir-format
 msgid "{sign_in} to keep your scores."
-msgstr ""
+msgstr "{sign_in} i zachowaj swoje wyniki."
 
 #, elixir-autogen, elixir-format
 msgid "Menu"
-msgstr ""
+msgstr "Menu"
 
 #, elixir-autogen, elixir-format
 msgid "Change settings"
@@ -396,15 +380,15 @@ msgstr "{name} zmienia ustawienia…"
 
 #, elixir-autogen, elixir-format
 msgid "Echo Chamber"
-msgstr ""
+msgstr "Echo Chamber"
 
 #, elixir-autogen, elixir-format
 msgid "Echo Chamber is a Simon-like game. Simon is a trademark of Hasbro. Octomocto is not affiliated with Hasbro."
-msgstr ""
+msgstr "Echo Chamber to gra w stylu Simona. Simon jest znakiem towarowym firmy Hasbro. Octomocto nie jest powiązane z firmą Hasbro."
 
 #, elixir-autogen, elixir-format
 msgid "Echo Chamber: a Simon-Like Memory Game Online"
-msgstr ""
+msgstr "Echo Chamber: gra Simon online"
 
 #, elixir-autogen, elixir-format
 msgid "Lobby"
@@ -413,3 +397,10 @@ msgstr "Lobby"
 #, elixir-autogen, elixir-format
 msgid "New game"
 msgstr "Nowa gra"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} tap"
+msgid_plural "%{count} taps"
+msgstr[0] "%{count} dotknięcie"
+msgstr[1] "%{count} dotknięcia"
+msgstr[2] "%{count} dotknięć"

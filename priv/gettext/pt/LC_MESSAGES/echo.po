@@ -18,14 +18,6 @@ msgstr[0] "%{count} botão"
 msgstr[1] "%{count} botões"
 
 #, elixir-autogen, elixir-format
-msgid "1 pad"
-msgstr "1 botão"
-
-#, elixir-autogen, elixir-format
-msgid "1 tap"
-msgstr "1 toque"
-
-#, elixir-autogen, elixir-format
 msgid "A Simon-like game: repeat the sequence of colored pads."
 msgstr "Um jogo parecido com o Genius: repita a sequência de botões coloridos."
 
@@ -338,14 +330,6 @@ msgid "{color} pad, {shape}"
 msgstr "Botão {color}, {shape}"
 
 #, elixir-autogen, elixir-format
-msgid "{count} pads"
-msgstr "{count} botões"
-
-#, elixir-autogen, elixir-format
-msgid "{count} taps"
-msgstr "{count} toques"
-
-#, elixir-autogen, elixir-format
 msgid "{name} (you)"
 msgstr "{name} (você)"
 
@@ -412,3 +396,9 @@ msgstr "Lobby"
 #, elixir-autogen, elixir-format
 msgid "New game"
 msgstr "Novo jogo"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} tap"
+msgid_plural "%{count} taps"
+msgstr[0] "%{count} toque"
+msgstr[1] "%{count} toques"

@@ -16,6 +16,8 @@
     data-next-game-path={Locale.game_path(@locale, @next_game)}
     data-donate-url={Locale.path(@locale, ~p"/donate")}
     data-texts={Jason.encode!(elm_texts())}
+    data-plurals={Jason.encode!(elm_plurals())}
+    data-locale={@locale}
   >
   </div>
 </Layouts.app>

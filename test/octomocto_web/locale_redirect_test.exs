@@ -49,7 +49,7 @@ defmodule OctomoctoWeb.LocaleRedirectTest do
       conn
       |> init_test_session(%{"locale" => "ru"})
       |> browser("pt-BR")
-      |> get(~p"/echo")
+      |> get(~p"/trains")
 
     assert html_response(conn, 200)
   end
