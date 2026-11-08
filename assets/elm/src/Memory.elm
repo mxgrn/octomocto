@@ -1667,7 +1667,7 @@ viewCampaignResult model me game campaign =
     in
     div
         [ id "memory-result"
-        , class "absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl bg-octo-navy/70 p-4 text-center text-white backdrop-blur-sm"
+        , class "absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl bg-octo-navy/70 p-4 text-center text-white backdrop-blur-[2px]"
         ]
         [ p [ class "text-3xl font-semibold" ] [ text message ]
         , p [ id "memory-final-time", class "text-lg tabular-nums opacity-80" ] [ text details ]
