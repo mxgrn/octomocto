@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang={OctomoctoWeb.Locale.html_lang()} dir={OctomoctoWeb.Locale.html_dir()}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{gettext("Page not found")} · Octomocto</title>
+    <link rel="icon" href={~p"/favicon.ico"} sizes="48x48" />
+    <link rel="icon" href={~p"/favicon.svg"} type="image/svg+xml" />
+    <link rel="stylesheet" href={~p"/assets/css/app.css"} />
+    <%!-- The same theme as on the other pages: "system", "light" or "dark" --%>
+    <script>
+      (() => {
+        let mode = "system";
+        try {
+          mode = localStorage.getItem("phx:theme") || "system";
+        } catch {}
+        const dark =
+          mode === "dark" || (mode === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+      })();
+    </script>
+  </head>
+  <body>
+    <main
+      id="not-found"
+      class="relative grid min-h-dvh place-items-center overflow-hidden bg-gradient-to-b from-octo-mist to-octo-mist/60 px-4 py-12 dark:from-base-300 dark:via-base-100 dark:to-base-100"
+    >
+      <%!-- Soft brand-colored light behind the card, as on the other pages --%>
+      <div aria-hidden="true" class="pointer-events-none absolute inset-0">
+        <div class="absolute -top-32 left-1/2 size-[28rem] -translate-x-[85%] rounded-full bg-octo-orange/10 blur-3xl dark:bg-octo-orange-light/10">
+        </div>
+        <div class="absolute top-24 left-1/2 size-[28rem] -translate-x-[15%] rounded-full bg-octo-indigo/10 blur-3xl dark:bg-octo-indigo-light/10">
+        </div>
+      </div>
+
+      <div class="relative w-full max-w-md rounded-3xl bg-base-100 px-8 pt-10 pb-8 text-center shadow-xl shadow-octo-navy/5 ring-1 ring-octo-navy/5 dark:ring-white/5">
+        <%!-- The same floating octopi as on the front page --%>
+        <OctomoctoWeb.PageHTML.octopi class="mx-auto mb-6 h-28 drop-shadow-sm" />
+        <p class="mb-2 text-sm font-semibold tracking-[0.2em] text-octo-indigo dark:text-octo-indigo-light">
+          404
+        </p>
+        <h1 class="mb-3 text-2xl font-bold tracking-tight text-octo-navy dark:text-base-content">
+          {gettext("We cannot find this page")}
+        </h1>
+        <p class="mb-8 leading-relaxed text-octo-navy/70 dark:text-base-content/70">
+          {gettext("The link is incorrect, or the page does not exist any more.")}
+        </p>
+        <a
+          id="not-found-home-link"
+          href={OctomoctoWeb.Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/")}
+          class="inline-flex items-center gap-2 rounded-full bg-octo-orange px-6 py-3 font-semibold text-white shadow-lg shadow-octo-orange/30 transition-colors hover:bg-octo-orange-light focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-octo-orange/30"
+        >
+          <.icon name="hero-home-mini" class="size-5" />
+          {gettext("Go to the home page")}
+        </a>
+      </div>
+    </main>
+  </body>
+</html>
