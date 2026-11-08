@@ -726,8 +726,10 @@ multiplier pops when it changes. */
 each tile leaves a short glow. A correct tile pops, a wrong tile shakes,
 and after a wrong tile the missed tiles show as rings. Each round fades
 in, because the grid can change its size. */
-.afterglow-stage { width: min(26rem, 92vw, 52dvh); }
-.afterglow-grid { display: grid; gap: clamp(0.25rem, 2.2%, 0.625rem); animation: afterglow-grid-in 250ms ease-out; }
+.afterglow-stage { width: min(26rem, 92vw, 52dvh); container-type: inline-size; }
+/* Not a percentage gap: a percentage row gap does not count in the
+height of the grid, so the last row went out of the board */
+.afterglow-grid { display: grid; gap: clamp(0.25rem, 2.2cqi, 0.625rem); animation: afterglow-grid-in 250ms ease-out; }
 .afterglow-tile {
   aspect-ratio: 1;
   border-radius: 18%;
@@ -749,7 +751,11 @@ the slow transition of the glow. */
   transition: opacity 100ms ease-out;
   pointer-events: none;
 }
-.afterglow-tile.is-open:hover::before { opacity: 1; }
+/* Only with a mouse: on a touch screen the hover stays on the last tapped
+place, so a tile of the next round at that place showed a weak glow */
+@media (hover: hover) and (pointer: fine) {
+  .afterglow-tile.is-open:hover::before { opacity: 1; }
+}
 .afterglow-tile.is-open:active { transform: scale(0.94); }
 .afterglow-tile.is-lit {
   background: var(--color-octo-indigo);
