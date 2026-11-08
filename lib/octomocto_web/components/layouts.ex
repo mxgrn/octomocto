@@ -220,6 +220,14 @@ defmodule OctomoctoWeb.Layouts do
                 <.icon name="hero-user-circle" class="-m-1 size-10" />
                 <span class="sr-only">{@guest_name}</span>
               </:label>
+              <%!-- Notifications and Settings show the sign-in forms to a guest --%>
+              <.link
+                id="notifications-link"
+                href={~p"/notifications"}
+                class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+              >
+                {gettext("Notifications")}
+              </.link>
               <.link
                 :if={@guest_public_id}
                 id="profile-link"
@@ -228,13 +236,14 @@ defmodule OctomoctoWeb.Layouts do
               >
                 {gettext("Profile")}
               </.link>
+              <.link
+                id="settings-link"
+                href={~p"/settings"}
+                class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+              >
+                {gettext("Settings")}
+              </.link>
               <.help_links />
-              <div id="guest-sign-in" class="space-y-3 px-3 pt-1 pb-3">
-                <p class="text-center text-base-content/70">
-                  {gettext("Sign in to change your name")}
-                </p>
-                <OctomoctoWeb.UserSessionHTML.sign_in_bar />
-              </div>
             </.account_menu>
 
             <.account_menu :if={@current_scope} id="user-menu">

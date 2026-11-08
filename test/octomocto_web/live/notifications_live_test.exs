@@ -6,8 +6,23 @@ defmodule OctomoctoWeb.NotificationsLiveTest do
 
   alias Octomocto.{Friends, Notifications}
 
-  test "a guest goes to the sign-in page", %{conn: conn} do
-    assert {:error, {:redirect, %{to: "/signin"}}} = live(conn, ~p"/notifications")
+  describe "a guest" do
+    test "has the Notifications link in the menu", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/")
+      assert has_element?(view, ~s(#guest-menu #notifications-link[href="/notifications"]))
+    end
+
+    test "sees the sign-in forms on the page", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/notifications")
+
+      assert has_element?(view, "#guest-sign-in-page #sign-in-panel")
+      refute has_element?(view, "#notifications-list")
+    end
+
+    test "comes back to the page after sign-in", %{conn: conn} do
+      conn = get(conn, ~p"/notifications")
+      assert get_session(conn, :user_return_to) == "/notifications"
+    end
   end
 
   describe "a signed-in user" do

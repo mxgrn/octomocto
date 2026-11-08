@@ -188,14 +188,6 @@ defmodule OctomoctoWeb.UserAuth do
      end)}
   end
 
-  # Sends a guest to the sign-in page. Use it in a `live_session` after
-  # `:mount_current_scope`, for live navigation.
-  def on_mount(:require_authenticated, _params, _session, socket) do
-    if socket.assigns.current_scope,
-      do: {:cont, socket},
-      else: {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/signin")}
-  end
-
   # Gives a 404 page to all users who are not admins, also to guests. Use it
   # in a `live_session` after `:mount_current_scope`, for live navigation.
   def on_mount(:require_admin, _params, _session, socket) do
@@ -232,6 +224,14 @@ defmodule OctomoctoWeb.UserAuth do
       |> redirect(to: ~p"/signin")
       |> halt()
     end
+  end
+
+  @doc """
+  Plug for the pages of signed-in users that also show a page to guests.
+  After sign-in, the guest comes back to the page.
+  """
+  def store_return_to_for_guest(conn, _opts) do
+    if conn.assigns.current_scope, do: conn, else: maybe_store_return_to(conn)
   end
 
   @doc """

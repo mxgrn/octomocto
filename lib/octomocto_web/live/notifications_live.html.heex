@@ -7,7 +7,18 @@
   guest_name={@guest_name}
   guest_public_id={@guest_public_id}
 >
-  <div id="notifications-page" class="mx-auto flex w-full max-w-2xl flex-col gap-6 pt-2 pb-4">
+  <OctomoctoWeb.UserSessionHTML.guest_page
+    :if={!@current_scope}
+    title="Notifications"
+  >
+    Sign in to see who follows you and get updates about your favorite games.
+  </OctomoctoWeb.UserSessionHTML.guest_page>
+
+  <div
+    :if={@current_scope}
+    id="notifications-page"
+    class="mx-auto flex w-full max-w-2xl flex-col gap-6 pt-2 pb-4"
+  >
     <h1 class="text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
       Notifications
     </h1>

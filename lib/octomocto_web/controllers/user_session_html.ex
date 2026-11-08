@@ -73,80 +73,20 @@ defmodule OctomoctoWeb.UserSessionHTML do
   end
 
   @doc """
-  Renders the sign-in forms of a guest in one column: the Telegram Login
-  Widget and the magic link form. For the guest menu in the header.
+  Renders a page of signed-in users as a guest sees it: what the page gives
+  after sign-in, and the sign-in forms.
   """
-  def sign_in_bar(assigns) do
-    assigns =
-      assign(assigns,
-        form: to_form(%{}, as: "user"),
-        telegram?: TelegramAuth.bot_username() != nil,
-        turnstile?: Turnstile.enabled?()
-      )
+  attr :title, :string, required: true
+  slot :inner_block, required: true, doc: "what the page gives after sign-in"
 
+  def guest_page(assigns) do
     ~H"""
-    <%!-- The Turnstile widget needs a width of at least 300px --%>
-    <div
-      id="sign-in-bar"
-      class={["flex flex-col items-center gap-2", if(@turnstile?, do: "w-76", else: "w-64")]}
-    >
-      <div class="flex w-full flex-col items-center gap-3">
-        <.telegram_widget
-          :if={@telegram?}
-          id="telegram-sign-in"
-          auth_path={~p"/auth/telegram"}
-          class="shrink-0 justify-center"
-        />
-        <span
-          :if={@telegram?}
-          class="text-xs font-medium uppercase tracking-wider text-base-content/40"
-        >
-          {gettext("or")}
-        </span>
-        <%!-- The form shows only after a click, so that the menu stays short --%>
-        <button
-          id="sign-in-email-toggle"
-          type="button"
-          phx-click={
-            JS.hide()
-            |> JS.show(to: "#sign-in-form", display: "flex")
-            |> JS.focus(to: "#sign-in-email")
-          }
-          class="w-full shrink-0 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:bg-indigo-500"
-        >
-          {gettext("Email me a sign-in link")}
-        </button>
-        <.form
-          for={@form}
-          id="sign-in-form"
-          action={Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/signin")}
-          class="hidden w-full min-w-0 flex-col gap-2"
-        >
-          <div class="flex min-w-0 gap-2 rounded-2xl bg-base-100 p-1.5 shadow-sm ring-1 ring-base-content/10 transition focus-within:ring-2 focus-within:ring-indigo-500">
-            <input
-              type="email"
-              name={@form[:email].name}
-              id="sign-in-email"
-              placeholder={gettext("you@example.com")}
-              autocomplete="username"
-              spellcheck="false"
-              aria-label={gettext("Email")}
-              required
-              class="min-w-0 flex-1 border-0 bg-transparent px-3 text-sm placeholder:text-base-content/30 focus:outline-none"
-            />
-            <button
-              id="sign-in-submit"
-              class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition hover:bg-indigo-500"
-            >
-              {gettext("Send")}
-            </button>
-          </div>
-          <.turnstile_widget id="sign-in-bar-turnstile" />
-        </.form>
+    <div id="guest-sign-in-page" class="mx-auto max-w-md space-y-6 py-10">
+      <div class="space-y-3 text-center">
+        <h1 class="text-3xl font-semibold tracking-tight">{@title}</h1>
+        <p class="text-base-content/70">{render_slot(@inner_block)}</p>
       </div>
-      <p :if={local_mail_adapter?()} class="text-xs text-base-content/50">
-        Dev: see sent emails in <.link href="/dev/mailbox" class="underline">the mailbox</.link>.
-      </p>
+      <.sign_in_panel />
     </div>
     """
   end

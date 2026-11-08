@@ -11,6 +11,10 @@ defmodule OctomoctoWeb.UserSettingsController do
   plug :assign_profile_form
   plug OctomoctoWeb.SiteBanners when action in [:edit, :update]
 
+  def edit(%{assigns: %{current_scope: nil}} = conn, _params) do
+    render(conn, :guest)
+  end
+
   def edit(conn, _params) do
     render(conn, :edit)
   end
@@ -104,10 +108,15 @@ defmodule OctomoctoWeb.UserSettingsController do
     end
   end
 
+  # A guest has no forms, see `edit/2`
+  defp assign_profile_form(%{assigns: %{current_scope: nil}} = conn, _opts), do: conn
+
   defp assign_profile_form(conn, _opts) do
     user = conn.assigns.current_scope.user
     assign(conn, :profile_form, to_form(Accounts.change_user_profile(user)))
   end
+
+  defp assign_email_form(%{assigns: %{current_scope: nil}} = conn, _opts), do: conn
 
   defp assign_email_form(conn, _opts) do
     user = conn.assigns.current_scope.user

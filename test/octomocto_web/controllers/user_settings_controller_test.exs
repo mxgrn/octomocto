@@ -26,10 +26,30 @@ defmodule OctomoctoWeb.UserSettingsControllerTest do
 
       assert document |> LazyHTML.query("#user-menu-initials") |> LazyHTML.text() =~ "AB"
     end
+  end
 
-    test "redirects if the user is not signed in" do
-      conn = get(build_conn(), ~p"/settings")
-      assert redirected_to(conn) == ~p"/signin"
+  describe "GET /settings for a guest" do
+    test "the guest menu links to the page", %{conn: conn} do
+      document = conn |> get(~p"/") |> html_response(200) |> LazyHTML.from_document()
+
+      assert document
+             |> LazyHTML.query("#guest-menu #settings-link")
+             |> LazyHTML.attribute("href") ==
+               ["/settings"]
+    end
+
+    test "shows the sign-in forms and keeps the page for after sign-in", %{conn: conn} do
+      conn = get(conn, ~p"/settings")
+      document = conn |> html_response(200) |> LazyHTML.from_document()
+
+      assert Enum.any?(LazyHTML.query(document, "#guest-sign-in-page #sign-in-form"))
+
+      assert Enum.any?(
+               LazyHTML.query(document, "#telegram-sign-in[data-auth-path='/auth/telegram']")
+             )
+
+      assert Enum.empty?(LazyHTML.query(document, "#update_profile"))
+      assert get_session(conn, :user_return_to) == "/settings"
     end
   end
 

@@ -13,11 +13,11 @@ defmodule OctomoctoWeb.UserSessionControllerTest do
   end
 
   describe "GET /" do
-    test "shows the sign-in forms to a guest", %{conn: conn} do
+    test "does not show the sign-in forms in the menu of a guest", %{conn: conn} do
       conn = get(conn, ~p"/")
 
-      assert has_element?(conn, "#sign-in-form")
-      assert has_element?(conn, "#telegram-sign-in[data-auth-path='/auth/telegram']")
+      assert has_element?(conn, "#guest-menu")
+      refute has_element?(conn, "#sign-in-form")
     end
 
     test "does not show the sign-in forms to a signed-in user", %{conn: conn} do

@@ -7,6 +7,8 @@ defmodule OctomoctoWeb.NotificationsLive do
 
   A follow notification has a "Follow back" button, or "Following" when
   the user already follows the follower.
+
+  A guest sees what the page gives after sign-in, and the sign-in forms.
   """
   use OctomoctoWeb, :live_view
 
@@ -14,6 +16,11 @@ defmodule OctomoctoWeb.NotificationsLive do
 
   alias Octomocto.{Accounts, Friends, Notifications}
   alias OctomoctoWeb.Locale
+
+  # A guest sees what the page gives after sign-in, and the sign-in forms
+  def mount(_params, _session, %{assigns: %{current_scope: nil}} = socket) do
+    {:ok, assign(socket, page_title: "Notifications", noindex: true)}
+  end
 
   def mount(_params, _session, socket) do
     user_id = socket.assigns.current_scope.user.id

@@ -648,17 +648,22 @@ defmodule OctomoctoWeb.Router do
   scope "/", OctomoctoWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    get "/settings", UserSettingsController, :edit
     put "/settings", UserSettingsController, :update
     get "/settings/confirm-email/:token", UserSettingsController, :confirm_email
     get "/settings/telegram", UserSettingsController, :connect_telegram
+  end
 
-    # Only for signed-in users: guests have no notifications. In English
-    # only, as the profile pages.
+  # Pages of signed-in users that a guest also can open from the menu. A
+  # guest sees what the page gives after sign-in, and the sign-in forms.
+  # In English only, as the profile pages.
+  scope "/", OctomoctoWeb do
+    pipe_through [:browser, :store_return_to_for_guest]
+
+    get "/settings", UserSettingsController, :edit
+
     live_session :authenticated,
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
-        {OctomoctoWeb.UserAuth, :require_authenticated},
         OctomoctoWeb.GamesPlayed,
         OctomoctoWeb.GuestName,
         OctomoctoWeb.OnlineUsers,
