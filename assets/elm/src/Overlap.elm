@@ -737,6 +737,7 @@ viewGame model me game =
         , div [ class "min-w-0 flex-1" ]
             [ div [ class "relative mx-auto", style "width" width ]
                 [ viewTable model me game
+                , viewPreload game.theme
                 , if game.waiting then
                     viewWaiting game
 
@@ -1000,6 +1001,23 @@ playerName me player =
 -- CARDS
 
 
+{-| The path of the image of a symbol of a theme.
+-}
+symbolSrc : String -> Int -> String
+symbolSrc theme symbol =
+    "/images/overlap/" ++ theme ++ "/" ++ String.fromInt symbol ++ ".svg"
+
+
+{-| All 57 images of the theme, hidden. The browser loads them while the
+players wait, so that the cards show their symbols at once. The server tells
+the browser to keep them for one week.
+-}
+viewPreload : String -> Html Msg
+viewPreload theme =
+    div [ id "overlap-preload", class "hidden", attribute "aria-hidden" "true" ]
+        (List.map (\symbol -> img [ src (symbolSrc theme symbol), alt "" ] []) (List.range 0 56))
+
+
 {-| The pile and the card to win. Before the start, two empty places keep
 the size of the table under the cover.
 
@@ -1170,7 +1188,7 @@ viewSymbol model theme playable highlight card index placed =
 
             Nothing ->
                 text ""
-        , img [ src ("/images/overlap/" ++ theme ++ "/" ++ String.fromInt placed.symbol ++ ".svg"), alt "", Html.Attributes.attribute "draggable" "false" ] []
+        , img [ src (symbolSrc theme placed.symbol), alt "", Html.Attributes.attribute "draggable" "false" ] []
         ]
 
 
