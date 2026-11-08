@@ -23,9 +23,6 @@ end
 config :octomocto, OctomoctoWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
-# The date of the deploy (YYYY-MM-DD), set by deploy.yml. The sitemap uses it as lastmod.
-config :octomocto, :deployed_on, System.get_env("DEPLOYED_ON")
-
 if config_env() == :dev do
   # Reload browser tabs when matching files change.
   config :octomocto, OctomoctoWeb.Endpoint,

@@ -86,15 +86,7 @@ defmodule OctomoctoWeb.SitemapController do
   end
 
   def show(conn, _params) do
-    # The deploy sets DEPLOYED_ON (see deploy.yml), so every URL gets the date
-    # of the last deploy. Without it (dev, test), there is no lastmod.
-    lastmod =
-      case Application.get_env(:octomocto, :deployed_on) do
-        nil -> ""
-        date -> "<lastmod>#{date}</lastmod>"
-      end
-
-    urls = Enum.map_join(urls(), "\n", &"  <url><loc>#{&1}</loc>#{lastmod}</url>")
+    urls = Enum.map_join(urls(), "\n", &"  <url><loc>#{&1}</loc></url>")
 
     conn
     |> put_resp_content_type("application/xml")

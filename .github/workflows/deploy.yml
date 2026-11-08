@@ -44,11 +44,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # One date for all hosts. The sitemap shows it as lastmod.
-      - name: Set deploy date
-        id: deploy_date
-        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
-
       # One host at a time (sync), so that the other node keeps the Nimble Mosaic
       # games. A new node gets the games from the other node before its
       # health check passes.
@@ -83,7 +78,6 @@ jobs:
               -e GOOGLE_API_KEY=${{secrets.GOOGLE_API_KEY}} \
               -e DATABASE_URL=${{secrets.DATABASE_URL}} \
               -e GITHUB_SHA=${{github.sha}} \
-              -e DEPLOYED_ON=${{steps.deploy_date.outputs.date}} \
               -e PHX_HOST=octomocto.com \
               -e RESEND_API_KEY=${{secrets.RESEND_API_KEY}} \
               -e TELEGRAM_BOT_TOKEN=${{secrets.TELEGRAM_BOT_TOKEN}} \
