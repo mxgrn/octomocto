@@ -451,13 +451,17 @@ defmodule OctomoctoWeb.TrainsLive do
   defp trains_hint(%{switch_count: switches, trains_per_house: n}),
     do: "#{n * (switches + 1)} trains."
 
-  defp pace_hint("easy"), do: "A train every 8 seconds."
+  defp pace_hint("easy"),
+    do: "The trains come a bit faster and faster: from 8 down to 6 seconds apart."
 
   defp pace_hint("normal"),
-    do: "The trains come faster and faster: from 8 down to 2 seconds apart."
+    do: "The trains come faster and faster: from 6 down to 4 seconds apart."
 
-  defp pace_hint("hard"), do: "The trains get fast early in the game."
-  defp pace_hint("expert"), do: "The trains get very fast very early in the game."
+  defp pace_hint("hard"),
+    do: "From 5 down to 3 seconds apart. The trains get fast early in the game."
+
+  defp pace_hint("expert"),
+    do: "From 4 down to 2 seconds apart. The trains get very fast very early in the game."
 
   attr :level, :map, required: true
   attr :highest, :integer, required: true

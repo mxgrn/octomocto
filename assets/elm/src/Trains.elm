@@ -171,18 +171,23 @@ trainCount board =
     board.trainsPerHouse * (board.switches + 1)
 
 
-{-| Except in the easy pace, the pause between trains gets shorter after
-each train: from the pause after the first train to the pause before the
-last train (see `pauseAfter`).
+{-| The pause after the first train and the pause before the last train,
+in milliseconds (see `pauseAfter`).
 -}
-firstPauseMs : Float
-firstPauseMs =
-    8000
+pauseRangeMs : Pace -> ( Float, Float )
+pauseRangeMs pace =
+    case pace of
+        Easy ->
+            ( 8000, 6000 )
 
+        Normal ->
+            ( 6000, 4000 )
 
-lastPauseMs : Float
-lastPauseMs =
-    2000
+        Hard ->
+            ( 5000, 3000 )
+
+        Expert ->
+            ( 4000, 2000 )
 
 
 {-| Time for a train to go through one cell on a straight track.
@@ -1457,14 +1462,17 @@ pickNumbers counts last picked =
                 Random.constant Nothing
 
 
-{-| The pause after the train with the index `sent` (from 0). Easy keeps
-the first pause. The other paces go from the first pause to the last pause:
-normal on a line, hard on a square curve, and expert on a steep exponential
-curve. The harder curves get short sooner.
+{-| The pause after the train with the index `sent` (from 0). Each pace
+goes from its first pause to its last pause (see `pauseRangeMs`): easy
+and normal on a line, hard on a square curve, and expert on a steep
+exponential curve. The harder curves get short sooner.
 -}
 pauseAfter : Board -> Int -> Float
 pauseAfter board sent =
     let
+        ( firstPauseMs, lastPauseMs ) =
+            pauseRangeMs board.pace
+
         pauses =
             trainCount board - 1
 
@@ -1480,7 +1488,7 @@ pauseAfter board sent =
         left =
             case board.pace of
                 Easy ->
-                    1
+                    1 - x
 
                 Normal ->
                     1 - x

@@ -17,10 +17,11 @@ defmodule Octomocto.Trains do
   @list_size 5
 
   @doc """
-  How the pause between trains changes: it stays at 8 s (`"easy"`), or it
-  goes from 8 s down to 2 s evenly (`"normal"`), along a square curve
-  (`"hard"`) or along an exponential curve (`"expert"`). The harder curves
-  get short sooner.
+  How the pause between trains changes: it goes from 8 s down to 6 s
+  evenly (`"easy"`), from 6 s down to 4 s evenly (`"normal"`), from 5 s
+  down to 3 s along a square curve (`"hard"`), or from 4 s down to 2 s
+  along an exponential curve (`"expert"`). The harder curves get short
+  sooner.
   """
   def paces, do: @paces
 
