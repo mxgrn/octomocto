@@ -18,13 +18,17 @@ defmodule OctomoctoWeb.GameStatsLive do
     game = Enum.find(HomeLive.games(), &(&1.id == id))
     if !game or !Stats.game?(id), do: raise(NotFoundError)
 
-    {:ok,
+    {:ok, assign(socket, page_title: "#{game.name} stats", noindex: true, game: game)}
+  end
+
+  def handle_params(params, _uri, socket) do
+    today? = StatsLive.today?(params)
+    {count, last} = StatsLive.period(today?)
+
+    {:noreply,
      assign(socket,
-       page_title: "#{game.name} stats",
-       noindex: true,
-       game: game,
-       days: StatsLive.days(),
-       players: Stats.top_players(id, StatsLive.days())
+       today?: today?,
+       players: Stats.top_players(socket.assigns.game.id, count, last)
      )}
   end
 

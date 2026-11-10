@@ -12,7 +12,7 @@ defmodule OctomoctoWeb.StatsLiveTest do
     user = user_fixture()
     NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
 
-    {:ok, view, _html} = live(conn, ~p"/stats")
+    {:ok, view, _html} = live(conn, ~p"/stats?today=1")
 
     assert has_element?(
              view,
@@ -25,10 +25,47 @@ defmodule OctomoctoWeb.StatsLiveTest do
     user = user_fixture()
     NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
 
-    {:ok, view, _html} = live(conn, ~p"/stats")
+    {:ok, view, _html} = live(conn, ~p"/stats?today=1")
 
     assert has_element?(view, ~s|#legend-nimble-mosaic span[style$="var(--series-1)"]|)
     refute has_element?(view, ~s|#games-chart path[stroke="var(--series-11)"]|)
+  end
+
+  test "does not count the games of today until the toggle includes them", %{conn: conn} do
+    user = user_fixture()
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+
+    {:ok, view, _html} = live(conn, ~p"/stats")
+
+    assert has_element?(
+             view,
+             ~s|#stats-activity-nimble-mosaic[aria-label="0 games in the last 29 days"]|
+           )
+
+    view |> element("#include-today") |> render_click()
+
+    assert_patch(view, ~p"/stats?today=1")
+    assert has_element?(view, ~s|#include-today[aria-checked="true"]|)
+
+    assert has_element?(
+             view,
+             ~s|#stats-activity-nimble-mosaic[aria-label="1 game in the last 30 days"]|
+           )
+  end
+
+  test "always shows the games of today in the Today number", %{conn: conn} do
+    user = user_fixture()
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+
+    {:ok, view, _html} = live(conn, ~p"/stats")
+
+    assert view |> element("#games-today") |> render() =~ ~r/>\s*1\s*</
+  end
+
+  test "keeps the toggle in the links to the game stats pages", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/stats?today=1")
+
+    assert has_element?(view, ~s|#stats-memory a[href="/stats/memory?today=1"]|)
   end
 
   test "shows a total line in the chart that a click on its legend hides", %{conn: conn} do
@@ -47,7 +84,7 @@ defmodule OctomoctoWeb.StatsLiveTest do
     Locales.put(user.id, nil, "pt-BR")
     NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
 
-    {:ok, view, _html} = live(conn, ~p"/stats")
+    {:ok, view, _html} = live(conn, ~p"/stats?today=1")
 
     assert has_element?(
              view,

@@ -11,13 +11,16 @@
   <% most = @by_game |> Enum.map(& &1.count) |> Enum.max(fn -> 0 end) %>
 
   <div id="stats" class="flex flex-col gap-6 pt-2 pb-4">
-    <div>
-      <h1 class="text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
-        Stats
-      </h1>
-      <p class="mt-1 text-sm text-base-content/60">
-        Finished games in the last {length(@days)} days. The days are in UTC.
-      </p>
+    <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
+          Stats
+        </h1>
+        <p class="mt-1 text-sm text-base-content/60">
+          Finished games in {period_text(@today?)}. The days are in UTC.
+        </p>
+      </div>
+      <.today_toggle on={@today?} path={~p"/stats"} />
     </div>
 
     <section
@@ -34,8 +37,11 @@
         <dl class="flex gap-8 text-sm">
           <div>
             <dt class="text-base-content/60">Today</dt>
-            <dd class="mt-0.5 text-lg font-semibold text-octo-navy dark:text-base-content">
-              {List.last(@days).total}
+            <dd
+              id="games-today"
+              class="mt-0.5 text-lg font-semibold text-octo-navy dark:text-base-content"
+            >
+              {@today_total}
             </dd>
           </div>
           <div>
@@ -65,7 +71,7 @@
     >
       <div class="mb-4 flex items-baseline justify-between gap-4">
         <h2 class="font-semibold text-octo-navy dark:text-base-content">By game</h2>
-        <span class="text-xs text-base-content/50">Last {length(@days)} days</span>
+        <span class="text-xs text-base-content/50">{period_label(@today?)}</span>
       </div>
       <ul class="flex flex-col gap-3">
         <li :for={game <- @by_game} id={"stats-#{game.id}"} class="flex items-center gap-3">
@@ -78,7 +84,7 @@
           <div class="min-w-0 flex-1">
             <div class="flex items-center justify-between gap-4 text-sm">
               <.link
-                navigate={~p"/stats/#{game.id}"}
+                navigate={stats_path(~p"/stats/#{game.id}", @today?)}
                 class="font-medium text-octo-navy transition hover:text-octo-indigo dark:text-base-content dark:hover:text-octo-indigo-light"
               >
                 {game.name}
@@ -109,7 +115,7 @@
       <% most_language = @by_language |> Enum.map(& &1.count) |> Enum.max(fn -> 0 end) %>
       <div class="flex items-baseline justify-between gap-4">
         <h2 class="font-semibold text-octo-navy dark:text-base-content">By language</h2>
-        <span class="text-xs text-base-content/50">Last {length(@days)} days</span>
+        <span class="text-xs text-base-content/50">{period_label(@today?)}</span>
       </div>
       <p class="mt-1 mb-4 text-sm text-base-content/60">
         The browser language of the players. A game with players of two languages counts for each.
@@ -119,7 +125,7 @@
         <li :for={item <- @by_language} id={"stats-language-#{item.language}"} class="text-sm">
           <div class="flex items-center justify-between gap-4">
             <.link
-              navigate={~p"/stats/languages/#{item.language}"}
+              navigate={stats_path(~p"/stats/languages/#{item.language}", @today?)}
               class="font-medium text-octo-navy transition hover:text-octo-indigo dark:text-base-content dark:hover:text-octo-indigo-light"
             >
               {item.language}

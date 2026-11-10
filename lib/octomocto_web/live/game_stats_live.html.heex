@@ -11,13 +11,16 @@
 
   <div id="game-stats" class="mx-auto flex w-full max-w-2xl flex-col gap-6 pt-2 pb-4">
     <div>
-      <.link
-        navigate={~p"/stats"}
-        id="game-stats-back"
-        class="inline-flex items-center gap-1 text-sm text-base-content/60 transition hover:text-octo-indigo dark:hover:text-octo-indigo-light"
-      >
-        <.icon name="hero-arrow-left" class="size-4" /> Stats
-      </.link>
+      <div class="flex items-center justify-between gap-4">
+        <.link
+          navigate={StatsLive.stats_path(~p"/stats", @today?)}
+          id="game-stats-back"
+          class="inline-flex items-center gap-1 text-sm text-base-content/60 transition hover:text-octo-indigo dark:hover:text-octo-indigo-light"
+        >
+          <.icon name="hero-arrow-left" class="size-4" /> Stats
+        </.link>
+        <StatsLive.today_toggle on={@today?} path={~p"/stats/#{@game.id}"} />
+      </div>
       <div class="mt-3 flex items-center gap-3">
         <div class={[
           "flex size-11 shrink-0 items-center justify-center rounded-xl",
@@ -30,7 +33,7 @@
             {@game.name}
           </h1>
           <p class="text-sm text-base-content/60">
-            The players with the most games in the last {@days} days.
+            The players with the most games in {StatsLive.period_text(@today?)}.
           </p>
         </div>
         <.link
@@ -49,7 +52,9 @@
     >
       <div class="mb-4 flex items-baseline justify-between gap-4">
         <h2 class="font-semibold text-octo-navy dark:text-base-content">Top players</h2>
-        <span :if={@players != []} class="text-xs text-base-content/50">Last {@days} days</span>
+        <span :if={@players != []} class="text-xs text-base-content/50">{StatsLive.period_label(
+          @today?
+        )}</span>
       </div>
       <p :if={@players == []} id="top-players-empty" class="text-sm text-base-content/60">
         No games yet.

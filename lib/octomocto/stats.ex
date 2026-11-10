@@ -55,17 +55,17 @@ defmodule Octomocto.Stats do
   end
 
   @doc """
-  Gives the games played in each of the last `days` days, today included.
+  Gives the games played in each of the `days` days that end on `today`
+  (the current day by default), `today` included.
   Each day is `%{date: date, total: n, by_game: %{game_id => n}}`, oldest
   first. A day without games has a total of 0.
   """
   def games_per_day(days, today \\ Date.utc_today()) do
     first = Date.add(today, 1 - days)
-    since = since(first)
 
     counts =
       @results
-      |> Enum.map(fn {game, schema} -> daily_counts(game, schema, since) end)
+      |> Enum.map(fn {game, schema} -> daily_counts(game, schema, first, today) end)
       |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
       |> Repo.all()
       |> Enum.group_by(& &1.date, &{&1.game, &1.count})
@@ -76,9 +76,9 @@ defmodule Octomocto.Stats do
     end
   end
 
-  defp daily_counts(game, schema, since) do
+  defp daily_counts(game, schema, first, today) do
     from r in schema,
-      where: r.inserted_at >= ^since,
+      where: r.inserted_at >= ^since(first) and r.inserted_at < ^until(today),
       group_by: fragment("?::date", r.inserted_at),
       select: %{
         game: type(^game, :string),
@@ -88,7 +88,7 @@ defmodule Octomocto.Stats do
   end
 
   @doc """
-  Gives the games played in the last `days` days, today included, for each
+  Gives the games played in the `days` days that end on `today`, for each
   language of the players, the most played first. The language is the first
   part of the browser locale, for example "pt" for "pt-BR". Each item is
   `%{language: language, count: n, days: counts}`, with the counts in each
@@ -98,11 +98,10 @@ defmodule Octomocto.Stats do
   """
   def games_by_language(days, today \\ Date.utc_today()) do
     first = Date.add(today, 1 - days)
-    since = since(first)
 
     @results
     |> Map.values()
-    |> Enum.map(&language_counts(&1, since))
+    |> Enum.map(&language_counts(&1, first, today))
     |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
     |> Repo.all()
     # One row for each language and day, with the counts of all games added
@@ -117,13 +116,13 @@ defmodule Octomocto.Stats do
     |> Enum.sort_by(& &1.count, :desc)
   end
 
-  defp language_counts(schema, since) do
+  defp language_counts(schema, first, today) do
     from r in schema,
       left_join: u in User,
       on: u.id == r.user_id,
       left_join: g in Guest,
       on: g.id == r.guest_id,
-      where: r.inserted_at >= ^since,
+      where: r.inserted_at >= ^since(first) and r.inserted_at < ^until(today),
       where: not is_nil(fragment("coalesce(?, ?)", u.locale, g.locale)),
       group_by: [
         fragment("split_part(coalesce(?, ?), '-', 1)", u.locale, g.locale),
@@ -137,18 +136,17 @@ defmodule Octomocto.Stats do
   end
 
   @doc """
-  The number of games in each of the last `days` days, today included,
+  The number of games in each of the `days` days that end on `today`,
   oldest first, in each game with players of the `language`, by the game
   id of the front page. The language is as in `games_by_language/2`, for
   example "pt". A game with no games in the language is not in the map.
   """
   def games_in_language(language, days, today \\ Date.utc_today()) do
     first = Date.add(today, 1 - days)
-    since = since(first)
 
     @results
     |> Enum.map(fn {game, schema} ->
-      from r in daily_counts(game, schema, since),
+      from r in daily_counts(game, schema, first, today),
         left_join: u in User,
         on: u.id == r.user_id,
         left_join: g in Guest,
@@ -182,19 +180,18 @@ defmodule Octomocto.Stats do
   end
 
   @doc """
-  The number of games of one player in each of the last `days` days, today
-  included, by the game id of the front page. The `field` is `:user_id` or
+  The number of games of one player in each of the `days` days that end on
+  `today`, by the game id of the front page. The `field` is `:user_id` or
   `:guest_id`. Each value is a list of `days` counts, oldest first. A game
   with no results of the player in these days is not in the map.
   """
   def games_per_day_of(field, id, days, today \\ Date.utc_today())
       when field in [:user_id, :guest_id] do
     first = Date.add(today, 1 - days)
-    since = since(first)
 
     @results
     |> Enum.map(fn {game, schema} ->
-      game |> daily_counts(schema, since) |> where([r], field(r, ^field) == ^id)
+      game |> daily_counts(schema, first, today) |> where([r], field(r, ^field) == ^id)
     end)
     |> Enum.reduce(fn query, acc -> union_all(acc, ^query) end)
     |> Repo.all()
@@ -245,8 +242,8 @@ defmodule Octomocto.Stats do
   end
 
   @doc """
-  The 10 players with the most games in the last `days` days, today
-  included, in the game with the id `game` of the front page, the most
+  The 10 players with the most games in the `days` days that end on
+  `today`, in the game with the id `game` of the front page, the most
   games first. Each item is
   `%{user: user, guest: guest, count: n, days: counts}`, with a user or a
   guest and the other nil, and the counts of the player in each day, oldest
@@ -258,11 +255,10 @@ defmodule Octomocto.Stats do
   def top_players(game, days, today \\ Date.utc_today()) do
     schema = Map.fetch!(@results, game)
     first = Date.add(today, 1 - days)
-    since = since(first)
 
     rows =
       from(r in schema,
-        where: r.inserted_at >= ^since,
+        where: r.inserted_at >= ^since(first) and r.inserted_at < ^until(today),
         where: not is_nil(r.user_id) or not is_nil(r.guest_id),
         group_by: [r.user_id, fragment("CASE WHEN ? IS NULL THEN ? END", r.user_id, r.guest_id)],
         order_by: [
@@ -283,7 +279,7 @@ defmodule Octomocto.Stats do
     guest_ids = rows |> Enum.map(& &1.guest_id) |> Enum.reject(&is_nil/1)
     users = by_id(User, user_ids)
     guests = by_id(Guest, guest_ids)
-    per_day = players_per_day(schema, since, user_ids, guest_ids, first, today)
+    per_day = players_per_day(schema, user_ids, guest_ids, first, today)
 
     Enum.map(rows, fn row ->
       %{
@@ -297,9 +293,9 @@ defmodule Octomocto.Stats do
 
   # The counts of the players in each day from `first` to `today`, by
   # `{user_id, guest_id}` as in `top_players/3`
-  defp players_per_day(schema, since, user_ids, guest_ids, first, today) do
+  defp players_per_day(schema, user_ids, guest_ids, first, today) do
     from(r in schema,
-      where: r.inserted_at >= ^since,
+      where: r.inserted_at >= ^since(first) and r.inserted_at < ^until(today),
       where: r.user_id in ^user_ids or (is_nil(r.user_id) and r.guest_id in ^guest_ids),
       group_by: [
         r.user_id,
@@ -324,5 +320,7 @@ defmodule Octomocto.Stats do
   @doc "True when the game id of the front page has results."
   def game?(game), do: Map.has_key?(@results, game)
 
+  # The start of the day `first` and the end of the day `today`, in UTC
   defp since(first), do: DateTime.new!(first, ~T[00:00:00], "Etc/UTC")
+  defp until(today), do: today |> Date.add(1) |> since()
 end

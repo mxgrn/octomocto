@@ -13,7 +13,13 @@ defmodule OctomoctoWeb.LanguageStatsLive do
   alias OctomoctoWeb.{GameIcons, HomeLive, PlayerLive, StatsLive}
 
   def mount(%{"language" => language}, _session, socket) do
-    activity = Stats.games_in_language(language, StatsLive.days())
+    {:ok, assign(socket, page_title: "#{language} stats", noindex: true, language: language)}
+  end
+
+  def handle_params(params, _uri, socket) do
+    today? = StatsLive.today?(params)
+    {count, last} = StatsLive.period(today?)
+    activity = Stats.games_in_language(socket.assigns.language, count, last)
 
     games =
       HomeLive.games()
@@ -24,13 +30,6 @@ defmodule OctomoctoWeb.LanguageStatsLive do
       end)
       |> Enum.sort_by(& &1.count, :desc)
 
-    {:ok,
-     assign(socket,
-       page_title: "#{language} stats",
-       noindex: true,
-       language: language,
-       days: StatsLive.days(),
-       games: games
-     )}
+    {:noreply, assign(socket, today?: today?, games: games)}
   end
 end

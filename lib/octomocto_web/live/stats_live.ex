@@ -3,6 +3,11 @@ defmodule OctomoctoWeb.StatsLive do
   The page with the number of games played in each of the last days. A
   LiveView, so that a click on a game in the legend of the chart adds or
   removes its line, and the chart fits the lines that stay.
+
+  All stats pages show the days before today, because the counts of today
+  are not complete. The "Include today" toggle (`today_toggle/1`) adds
+  `?today=1` to the URL, and then the pages show the last days with today.
+  The links between the stats pages keep the toggle.
   """
   use OctomoctoWeb, :live_view
 
@@ -11,10 +16,8 @@ defmodule OctomoctoWeb.StatsLive do
   alias Octomocto.Stats
   alias OctomoctoWeb.{GameIcons, HomeLive, PlayerLive}
 
+  # The number of days of all stats pages with today
   @days 30
-
-  @doc "The number of days of all stats pages, today included."
-  def days, do: @days
 
   # The size of the SVG coordinates of the chart. The SVG stretches to the
   # size of the plot, so only the proportions of the values are important.
@@ -28,17 +31,22 @@ defmodule OctomoctoWeb.StatsLive do
   @colors 10
 
   def mount(_params, _session, socket) do
-    days = Stats.games_per_day(@days)
+    {:ok, assign(socket, page_title: "Stats", noindex: true, hidden: MapSet.new())}
+  end
 
-    {:ok,
+  def handle_params(params, _uri, socket) do
+    today? = today?(params)
+    {count, last} = period(today?)
+    days = Stats.games_per_day(count, last)
+
+    {:noreply,
      assign(socket,
-       page_title: "Stats",
-       noindex: true,
+       today?: today?,
        days: days,
        total: days |> Enum.map(& &1.total) |> Enum.sum(),
+       today_total: if(today?, do: List.last(days), else: hd(Stats.games_per_day(1))).total,
        by_game: games_by_count(days),
-       by_language: Stats.games_by_language(@days),
-       hidden: MapSet.new()
+       by_language: Stats.games_by_language(count, last)
      )}
   end
 
@@ -49,6 +57,62 @@ defmodule OctomoctoWeb.StatsLive do
       if MapSet.member?(hidden, id), do: MapSet.delete(hidden, id), else: MapSet.put(hidden, id)
 
     {:noreply, assign(socket, hidden: hidden)}
+  end
+
+  @doc "True when the URL `params` of a stats page include today."
+  def today?(params), do: params["today"] == "1"
+
+  @doc """
+  The days of the stats pages as `{count, last day}`: the last #{@days} days
+  with today, or the #{@days - 1} days before today without it.
+  """
+  def period(true = _today?), do: {@days, Date.utc_today()}
+  def period(false), do: {@days - 1, Date.add(Date.utc_today(), -1)}
+
+  @doc "The `path` of a stats page, with `?today=1` when it includes today."
+  def stats_path(path, true = _today?), do: path <> "?today=1"
+  def stats_path(path, false), do: path
+
+  @doc "The days of the stats pages in a sentence, for example \"the last 30 days\"."
+  def period_text(true = _today?), do: "the last #{@days} days"
+  def period_text(false), do: "the #{@days - 1} days before today"
+
+  @doc "The days of the stats pages as a short label, for example \"Last 30 days\"."
+  def period_label(true = _today?), do: "Last #{@days} days"
+  def period_label(false), do: "#{@days - 1} days before today"
+
+  @doc """
+  Renders the "Include today" switch of the stats pages. A click patches
+  the page to the URL with the other state of the switch.
+  """
+  attr :on, :boolean, required: true, doc: "true when the page includes today"
+  attr :path, :string, required: true, doc: "the path of the page, without `?today=1`"
+
+  def today_toggle(assigns) do
+    ~H"""
+    <.link
+      id="include-today"
+      patch={stats_path(@path, not @on)}
+      replace
+      role="switch"
+      aria-checked={to_string(@on)}
+      class="group inline-flex shrink-0 items-center gap-2 rounded-full py-1 text-sm text-base-content/70 transition hover:text-base-content"
+    >
+      <span class={[
+        "relative h-5 w-9 rounded-full transition-colors duration-200",
+        if(@on,
+          do: "bg-octo-indigo dark:bg-octo-indigo-light",
+          else: "bg-base-content/20 group-hover:bg-base-content/30"
+        )
+      ]}>
+        <span class={[
+          "absolute top-0.5 left-0.5 size-4 rounded-full bg-white shadow-sm transition-transform duration-200",
+          @on && "translate-x-4"
+        ]}></span>
+      </span>
+      Include today
+    </.link>
+    """
   end
 
   # The games of the front page with their counts in each day and their

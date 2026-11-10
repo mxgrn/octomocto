@@ -19,7 +19,7 @@ defmodule OctomoctoWeb.GameStatsLiveTest do
     NimbleMosaic.save_results("b", @settings, 1000, [guest])
     NimbleMosaic.save_results("c", @settings, 1000, [guest])
 
-    {:ok, view, _html} = live(conn, ~p"/stats/nimble-mosaic")
+    {:ok, view, _html} = live(conn, ~p"/stats/nimble-mosaic?today=1")
 
     guest_public_id = Repo.get!(Guest, guest_id).public_id
     assert has_element?(view, ~s|#top-player-1 a[href="/players/#{guest_public_id}"]|)
@@ -31,7 +31,7 @@ defmodule OctomoctoWeb.GameStatsLiveTest do
     user = user_fixture()
     NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
 
-    {:ok, view, _html} = live(conn, ~p"/stats/nimble-mosaic")
+    {:ok, view, _html} = live(conn, ~p"/stats/nimble-mosaic?today=1")
 
     assert has_element?(
              view,
@@ -47,6 +47,26 @@ defmodule OctomoctoWeb.GameStatsLiveTest do
     {:ok, view, _html} = live(conn, ~p"/stats/nimble-mosaic")
 
     assert has_element?(view, "#top-players-empty")
+  end
+
+  test "does not count the games of today until the toggle includes them", %{conn: conn} do
+    user = user_fixture()
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+
+    {:ok, view, _html} = live(conn, ~p"/stats/nimble-mosaic")
+
+    assert has_element?(view, "#top-players-empty")
+
+    view |> element("#include-today") |> render_click()
+
+    assert_patch(view, ~p"/stats/nimble-mosaic?today=1")
+    assert has_element?(view, "#top-player-1")
+  end
+
+  test "keeps the toggle in the link back to the stats page", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/stats/memory?today=1")
+
+    assert has_element?(view, ~s|#game-stats-back[href="/stats?today=1"]|)
   end
 
   test "shows an empty list for a game without results", %{conn: conn} do

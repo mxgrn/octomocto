@@ -19,9 +19,12 @@ defmodule OctomoctoWeb.LanguageStatsLiveTest do
     NimbleMosaic.save_results("b", @settings, 1000, [%{user_id: german.id, score: 90}])
     NimbleMosaic.save_results("c", @settings, 1000, [%{user_id: german.id, score: 90}])
 
-    {:ok, view, _html} = live(conn, ~p"/stats/languages/pt")
+    {:ok, view, _html} = live(conn, ~p"/stats/languages/pt?today=1")
 
-    assert has_element?(view, ~s|#language-game-nimble-mosaic a[href="/stats/nimble-mosaic"]|)
+    assert has_element?(
+             view,
+             ~s|#language-game-nimble-mosaic a[href="/stats/nimble-mosaic?today=1"]|
+           )
 
     assert view |> element("#language-game-nimble-mosaic .tabular-nums") |> render() =~
              ~r/>\s*1\s*</
@@ -43,6 +46,21 @@ defmodule OctomoctoWeb.LanguageStatsLiveTest do
     assert has_element?(view, "#language-games-empty")
   end
 
+  test "does not count the games of today until the toggle includes them", %{conn: conn} do
+    user = user_fixture()
+    Locales.put(user.id, nil, "pt-BR")
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+
+    {:ok, view, _html} = live(conn, ~p"/stats/languages/pt")
+
+    assert has_element?(view, "#language-games-empty")
+
+    view |> element("#include-today") |> render_click()
+
+    assert_patch(view, ~p"/stats/languages/pt?today=1")
+    assert has_element?(view, "#language-game-nimble-mosaic")
+  end
+
   test "shows an empty list for a language without games", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/stats/languages/pt")
 
@@ -54,8 +72,8 @@ defmodule OctomoctoWeb.LanguageStatsLiveTest do
     Locales.put(user.id, nil, "pt-BR")
     NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
 
-    {:ok, view, _html} = live(conn, ~p"/stats")
+    {:ok, view, _html} = live(conn, ~p"/stats?today=1")
 
-    assert has_element?(view, ~s|#stats-language-pt a[href="/stats/languages/pt"]|)
+    assert has_element?(view, ~s|#stats-language-pt a[href="/stats/languages/pt?today=1"]|)
   end
 end
