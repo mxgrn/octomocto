@@ -35,11 +35,11 @@ defmodule OctomoctoWeb.LanguageStatsLiveTest do
            )
   end
 
-  test "does not count the games from before the last 30 days", %{conn: conn} do
+  test "does not count the games from before the 30 days before today", %{conn: conn} do
     user = user_fixture()
     Locales.put(user.id, nil, "pt-BR")
     NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
-    Repo.update_all(Result, set: [inserted_at: DateTime.add(DateTime.utc_now(), -30, :day)])
+    Repo.update_all(Result, set: [inserted_at: DateTime.add(DateTime.utc_now(), -31, :day)])
 
     {:ok, view, _html} = live(conn, ~p"/stats/languages/pt")
 

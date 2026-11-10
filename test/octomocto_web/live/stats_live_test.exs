@@ -4,7 +4,8 @@ defmodule OctomoctoWeb.StatsLiveTest do
   import Phoenix.LiveViewTest
   import Octomocto.AccountsFixtures
 
-  alias Octomocto.{Locales, NimbleMosaic}
+  alias Octomocto.{Locales, NimbleMosaic, Repo}
+  alias Octomocto.NimbleMosaic.Result
 
   @settings %{"type" => "random", "mode" => "easy", "players" => 1}
 
@@ -39,7 +40,7 @@ defmodule OctomoctoWeb.StatsLiveTest do
 
     assert has_element?(
              view,
-             ~s|#stats-activity-nimble-mosaic[aria-label="0 games in the last 29 days"]|
+             ~s|#stats-activity-nimble-mosaic[aria-label="0 games in the last 30 days"]|
            )
 
     view |> element("#include-today") |> render_click()
@@ -51,6 +52,16 @@ defmodule OctomoctoWeb.StatsLiveTest do
              view,
              ~s|#stats-activity-nimble-mosaic[aria-label="1 game in the last 30 days"]|
            )
+  end
+
+  test "counts the games of the 30 days before today", %{conn: conn} do
+    user = user_fixture()
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+    Repo.update_all(Result, set: [inserted_at: DateTime.add(DateTime.utc_now(), -30, :day)])
+
+    {:ok, view, _html} = live(conn, ~p"/stats")
+
+    assert view |> element("#games-total") |> render() =~ ~r/>\s*1\s*</
   end
 
   test "always shows the games of today in the Today number", %{conn: conn} do

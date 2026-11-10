@@ -4,10 +4,10 @@ defmodule OctomoctoWeb.StatsLive do
   LiveView, so that a click on a game in the legend of the chart adds or
   removes its line, and the chart fits the lines that stay.
 
-  All stats pages show the days before today, because the counts of today
+  All stats pages show the 30 days before today, because the counts of today
   are not complete. The "Include today" toggle (`today_toggle/1`) adds
-  `?today=1` to the URL, and then the pages show the last days with today.
-  The links between the stats pages keep the toggle.
+  `?today=1` to the URL, and then the pages show the last 30 days with
+  today. The links between the stats pages keep the toggle.
   """
   use OctomoctoWeb, :live_view
 
@@ -16,7 +16,7 @@ defmodule OctomoctoWeb.StatsLive do
   alias Octomocto.Stats
   alias OctomoctoWeb.{GameIcons, HomeLive, PlayerLive}
 
-  # The number of days of all stats pages with today
+  # The number of days of all stats pages
   @days 30
 
   # The size of the SVG coordinates of the chart. The SVG stretches to the
@@ -31,7 +31,7 @@ defmodule OctomoctoWeb.StatsLive do
   @colors 10
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, page_title: "Stats", noindex: true, hidden: MapSet.new())}
+    {:ok, assign(socket, page_title: "30-day stats", noindex: true, hidden: MapSet.new())}
   end
 
   def handle_params(params, _uri, socket) do
@@ -64,10 +64,10 @@ defmodule OctomoctoWeb.StatsLive do
 
   @doc """
   The days of the stats pages as `{count, last day}`: the last #{@days} days
-  with today, or the #{@days - 1} days before today without it.
+  with today, or the #{@days} days before today without it.
   """
   def period(true = _today?), do: {@days, Date.utc_today()}
-  def period(false), do: {@days - 1, Date.add(Date.utc_today(), -1)}
+  def period(false), do: {@days, Date.add(Date.utc_today(), -1)}
 
   @doc "The `path` of a stats page, with `?today=1` when it includes today."
   def stats_path(path, true = _today?), do: path <> "?today=1"
@@ -75,11 +75,11 @@ defmodule OctomoctoWeb.StatsLive do
 
   @doc "The days of the stats pages in a sentence, for example \"the last 30 days\"."
   def period_text(true = _today?), do: "the last #{@days} days"
-  def period_text(false), do: "the #{@days - 1} days before today"
+  def period_text(false), do: "the #{@days} days before today"
 
   @doc "The days of the stats pages as a short label, for example \"Last 30 days\"."
   def period_label(true = _today?), do: "Last #{@days} days"
-  def period_label(false), do: "#{@days - 1} days before today"
+  def period_label(false), do: "#{@days} days before today"
 
   @doc """
   Renders the "Include today" switch of the stats pages. A click patches
