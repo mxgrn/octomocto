@@ -24,6 +24,9 @@ defmodule OctomoctoWeb.StatsLive do
   # The number of horizontal lines above the zero line
   @ticks 4
 
+  # The number of line colors, `--series-1` to `--series-10` in `app.css`
+  @colors 10
+
   def mount(_params, _session, socket) do
     days = Stats.games_per_day(@days)
 
@@ -33,7 +36,6 @@ defmodule OctomoctoWeb.StatsLive do
        noindex: true,
        days: days,
        total: days |> Enum.map(& &1.total) |> Enum.sum(),
-       games: HomeLive.games(),
        by_game: games_by_count(days),
        by_language: Stats.games_by_language(@days),
        hidden: MapSet.new()
@@ -65,19 +67,34 @@ defmodule OctomoctoWeb.StatsLive do
   A pointer on a day (or the keyboard focus) shows a vertical line, a dot on
   each game with games in the day, and the counts of all games in the day.
   Each game has a fixed color (see `--series-1` to `--series-10` in
-  `app.css`), in the order of the games on the front page. A click on a
+  `app.css`), in the order of the games, the most played first. After the
+  tenth game the colors start again, so the games with the same color are
+  far apart in the number of games. A click on a
   game in the legend sends `toggle_game` with the id of the game. The
   hidden games have no line, and the y-axis fits the other games. A pointer
   on a shown game in the legend (or the keyboard focus) makes the lines of
-  the other games pale (see `#games-chart` in `app.css`).
+  the other games pale (see `#games-chart` in `app.css`). The first item of
+  the legend is the total: a line with the sum of the shown games in each
+  day. A click on it sends `toggle_game` with the id `"total"`. When the
+  total line is shown, the y-axis fits it.
   """
   attr :days, :list, required: true, doc: "the days of `Octomocto.Stats.games_per_day/2`"
-  attr :games, :list, required: true, doc: "the games of the front page, in their order"
-  attr :hidden, :any, required: true, doc: "the ids of the games without a line, a MapSet"
+  attr :games, :list, required: true, doc: "the games of the front page, the most played first"
+
+  attr :hidden, :any,
+    required: true,
+    doc: ~s|the ids of the games without a line, and "total" without the total line, a MapSet|
 
   def games_chart(assigns) do
     visible = Enum.reject(assigns.games, &MapSet.member?(assigns.hidden, &1.id))
-    step = days_step(assigns.days, visible)
+    total? = not MapSet.member?(assigns.hidden, "total")
+    totals = Enum.map(assigns.days, fn day -> Enum.sum_by(visible, &games_in(day, &1)) end)
+
+    counts =
+      for(day <- assigns.days, game <- visible, do: games_in(day, game)) ++
+        if total?, do: totals, else: []
+
+    step = days_step(counts)
     max = step * @ticks
     count = length(assigns.days)
 
@@ -94,8 +111,18 @@ defmodule OctomoctoWeb.StatsLive do
             {(i + 0.5) * @width / count, @height - games_in(day, game) / max * @height}
           end)
 
-        %{game: game, n: n, color: "var(--series-#{n})", line: line_path(points)}
+        %{game: game, n: n, color: series_color(n), line: line_path(points)}
       end)
+
+    total_line =
+      if total? do
+        totals
+        |> Enum.with_index()
+        |> Enum.map(fn {total, i} ->
+          {(i + 0.5) * @width / count, @height - total / max * @height}
+        end)
+        |> line_path()
+      end
 
     assigns =
       assign(assigns,
@@ -103,6 +130,8 @@ defmodule OctomoctoWeb.StatsLive do
         ticks: Enum.map(0..@ticks, &(&1 * step)),
         count: count,
         series: series,
+        total?: total?,
+        total_line: total_line,
         colors: Enum.with_index(assigns.games, 1),
         view_box: "0 0 #{@width} #{@height}"
       )
@@ -110,6 +139,23 @@ defmodule OctomoctoWeb.StatsLive do
     ~H"""
     <div id="games-chart" class="select-none">
       <ul id="games-legend" class="mt-6 -ml-2 flex flex-wrap gap-1 text-xs">
+        <li>
+          <button
+            id="legend-total"
+            type="button"
+            phx-click="toggle_game"
+            phx-value-id="total"
+            data-legend="total"
+            aria-pressed={to_string(@total?)}
+            class={[
+              "flex items-center gap-1.5 rounded-full px-2 py-1 font-medium transition",
+              "text-base-content/70 hover:bg-base-200 hover:text-base-content active:scale-95",
+              "aria-[pressed=false]:text-base-content/35 aria-[pressed=false]:line-through"
+            ]}
+          >
+            <span class="h-0.5 w-3 rounded-full bg-current transition"></span> Total
+          </button>
+        </li>
         <li :for={{game, n} <- @colors}>
           <button
             id={"legend-#{game.id}"}
@@ -129,7 +175,7 @@ defmodule OctomoctoWeb.StatsLive do
               style={
                 if MapSet.member?(@hidden, game.id),
                   do: "background-color: currentColor",
-                  else: "background-color: var(--series-#{n})"
+                  else: "background-color: #{series_color(n)}"
               }
             ></span>
             {game.name}
@@ -165,6 +211,20 @@ defmodule OctomoctoWeb.StatsLive do
             stroke-linecap="round"
             vector-effect="non-scaling-stroke"
           />
+          <path
+            :if={@total?}
+            d={@total_line}
+            data-series="total"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-dasharray="4 4"
+            stroke-opacity="0.6"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+            vector-effect="non-scaling-stroke"
+            class="text-octo-navy dark:text-base-content"
+          />
         </svg>
 
         <div class="absolute inset-0 flex" role="group" aria-label="Games played per day">
@@ -177,6 +237,12 @@ defmodule OctomoctoWeb.StatsLive do
             class="group relative h-full flex-1 outline-none"
           >
             <div class="absolute inset-y-0 left-1/2 w-px bg-base-content/25 opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
+            </div>
+            <div
+              :if={@total? and series_total(day, @series) > 0}
+              class="absolute left-1/2 size-2.5 -translate-x-1/2 translate-y-1/2 rounded-full bg-octo-navy opacity-0 ring-2 ring-base-100 transition group-hover:opacity-100 group-focus-visible:opacity-100 dark:bg-base-content"
+              style={"bottom: #{percent(series_total(day, @series), @max)}%"}
+            >
             </div>
             <div
               :for={s <- @series}
@@ -228,6 +294,9 @@ defmodule OctomoctoWeb.StatsLive do
     """
   end
 
+  # The color of the line of the game `n` of the legend
+  defp series_color(n), do: "var(--series-#{rem(n - 1, @colors) + 1})"
+
   # The number of the games in a day of the games with a line
   defp series_total(day, series), do: series |> Enum.map(&games_in(day, &1.game)) |> Enum.sum()
 
@@ -235,9 +304,9 @@ defmodule OctomoctoWeb.StatsLive do
   defp games_in(day, game), do: Map.get(day.by_game, game.id, 0)
 
   # The distance between two horizontal lines: a round number, so that the
-  # top line is at the most games of one shown kind in a day or above it
-  defp days_step(days, games) do
-    most = for(day <- days, game <- games, do: games_in(day, game)) |> Enum.max(fn -> 0 end)
+  # top line is at the largest of the counts or above it
+  defp days_step(counts) do
+    most = Enum.max(counts, fn -> 0 end)
     raw = max(most / @ticks, 1)
     magnitude = 10 ** floor(:math.log10(raw))
 

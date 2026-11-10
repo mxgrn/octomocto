@@ -1055,7 +1055,8 @@ three times */
 
 /* A pointer on a shown game in the legend of the stats chart (or the
    keyboard focus) makes the lines of the other games pale. One rule for each
-   color above, because CSS cannot compare the values of two attributes. */
+   place in the legend (up to 16 games), because CSS cannot compare the values
+   of two attributes. */
 #games-chart path[data-series] {
   transition: opacity 150ms ease, stroke-width 150ms ease;
 }
@@ -1071,7 +1072,14 @@ three times */
 #games-chart:has([data-legend="7"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="7"],
 #games-chart:has([data-legend="8"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="8"],
 #games-chart:has([data-legend="9"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="9"],
-#games-chart:has([data-legend="10"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="10"] {
+#games-chart:has([data-legend="10"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="10"],
+#games-chart:has([data-legend="11"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="11"],
+#games-chart:has([data-legend="12"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="12"],
+#games-chart:has([data-legend="13"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="13"],
+#games-chart:has([data-legend="14"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="14"],
+#games-chart:has([data-legend="15"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="15"],
+#games-chart:has([data-legend="16"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="16"],
+#games-chart:has([data-legend="total"][aria-pressed=true]:is(:hover, :focus-visible)) path[data-series="total"] {
   opacity: 1;
   stroke-width: 3;
 }
