@@ -8,6 +8,8 @@ defmodule Octomocto.Accounts.User do
     field :confirmed_at, :utc_datetime
     field :telegram_id, :integer
     field :telegram_username, :string
+    # The "sub" claim of the Google ID token (see `Accounts.GoogleAuth`)
+    field :google_id, :string
     field :name, :string
     # The name that other players see in games. A random ocean name until
     # the user changes it (see `Octomocto.GuestName`), never blank.
@@ -101,10 +103,29 @@ defmodule Octomocto.Accounts.User do
     |> put_random_display_name_if_empty()
   end
 
-  @doc "A changeset for a new user that signs in with the email. The display name is a random ocean name."
-  def registration_changeset(user, attrs) do
+  @doc """
+  A user changeset for the data that we get from Google (see
+  `Accounts.GoogleAuth`). Google verified the email, so the account is
+  confirmed. The name and the photo are set only when they are empty.
+  """
+  def google_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:google_id])
+    |> validate_required([:google_id])
+    |> unique_constraint(:google_id)
+    |> put_name_if_empty(attrs)
+    |> put_avatar_url_if_empty(attrs)
+    |> then(&if(get_field(&1, :confirmed_at), do: &1, else: confirm_changeset(&1)))
+  end
+
+  @doc """
+  A changeset for a new user that signs in with the email. The display name
+  is the given name (the guest name), or a random ocean name.
+  """
+  def registration_changeset(user, attrs, display_name \\ nil) do
     user
     |> email_changeset(attrs)
+    |> put_change(:display_name, display_name)
     |> put_random_display_name_if_empty()
   end
 
@@ -176,6 +197,14 @@ defmodule Octomocto.Accounts.User do
     end
   end
 
+  defp put_avatar_url_if_empty(changeset, attrs) do
+    if get_field(changeset, :avatar_url) do
+      changeset
+    else
+      cast(changeset, attrs, [:avatar_url])
+    end
+  end
+
   defp put_display_name_if_empty(changeset, attrs) do
     first_name = attrs[:first_name]
 
@@ -193,8 +222,8 @@ defmodule Octomocto.Accounts.User do
   @doc """
   Confirms the account by setting `confirmed_at`.
   """
-  def confirm_changeset(user) do
+  def confirm_changeset(user_or_changeset) do
     now = DateTime.utc_now(:second)
-    change(user, confirmed_at: now)
+    change(user_or_changeset, confirmed_at: now)
   end
 end

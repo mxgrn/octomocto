@@ -7,7 +7,7 @@ defmodule Octomocto.AccountsFixtures do
   import Ecto.Query
 
   alias Octomocto.Accounts
-  alias Octomocto.Accounts.{Scope, TelegramAuth}
+  alias Octomocto.Accounts.{GoogleAuth, Scope, TelegramAuth}
 
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
 
@@ -58,6 +58,30 @@ defmodule Octomocto.AccountsFixtures do
     {:ok, telegram_attrs} = TelegramAuth.verify(telegram_params(attrs))
     {:ok, user} = Accounts.sign_in_with_telegram(telegram_attrs)
     user
+  end
+
+  @doc """
+  Returns an ID token as Google gives it, with the test client ID as the
+  audience. The signature is not real, because we do not check it (see
+  `GoogleAuth`).
+  """
+  def google_id_token(claims \\ %{}) do
+    claims =
+      Enum.into(claims, %{
+        "iss" => "https://accounts.google.com",
+        "aud" => GoogleAuth.client_id(),
+        "sub" => to_string(System.unique_integer([:positive])),
+        "email" => unique_user_email(),
+        "email_verified" => true
+      })
+
+    encode = &Base.url_encode64(Jason.encode!(&1), padding: false)
+    Enum.join([encode.(%{"alg" => "RS256"}), encode.(claims), "signature"], ".")
+  end
+
+  @doc "Makes the Google token endpoint give an ID token with the claims."
+  def stub_google_token(claims \\ %{}) do
+    Req.Test.stub(GoogleAuth, &Req.Test.json(&1, %{"id_token" => google_id_token(claims)}))
   end
 
   def user_scope_fixture do

@@ -296,6 +296,46 @@ defmodule Octomocto.AccountsTest do
       %{id: id, email: email} = user_fixture()
       assert {:ok, %User{id: ^id}} = Accounts.get_or_register_user(email)
     end
+
+    test "gives the display name to a new user" do
+      assert {:ok, %User{display_name: "Salty Squid"}} =
+               Accounts.get_or_register_user(unique_user_email(), "Salty Squid")
+    end
+  end
+
+  describe "sign_in_with_google/2" do
+    @attrs %{google_id: "123", email: "ada@example.com", name: "Ada Lovelace"}
+
+    test "registers a confirmed user with the display name" do
+      assert {:ok, user} = Accounts.sign_in_with_google(@attrs, "Salty Squid")
+
+      assert %User{google_id: "123", email: "ada@example.com", name: "Ada Lovelace"} = user
+      assert user.display_name == "Salty Squid"
+      assert user.confirmed_at
+    end
+
+    test "signs in the user with the Google ID, also when the Google email changed" do
+      {:ok, %{id: id}} = Accounts.sign_in_with_google(@attrs, "Salty Squid")
+
+      assert {:ok, %User{id: ^id, email: "ada@example.com", display_name: "Salty Squid"}} =
+               Accounts.sign_in_with_google(%{@attrs | email: "new@example.com"}, "Sleepy Seal")
+    end
+
+    test "connects Google to the unconfirmed user with the same email" do
+      %{id: id, email: email} = unconfirmed_user_fixture()
+
+      assert {:ok, %User{id: ^id, google_id: "123"} = user} =
+               Accounts.sign_in_with_google(%{@attrs | email: email}, "Salty Squid")
+
+      assert user.confirmed_at
+    end
+
+    test "rejects the email of a user with a different Google account" do
+      {:ok, _user} = Accounts.sign_in_with_google(@attrs, "Salty Squid")
+
+      assert Accounts.sign_in_with_google(%{@attrs | google_id: "456"}, "Salty Squid") ==
+               {:error, :conflict}
+    end
   end
 
   describe "sign_in_with_telegram/1" do
@@ -431,6 +471,15 @@ defmodule Octomocto.AccountsTest do
       {:ok, user} = Accounts.update_user_profile(user_fixture(), %{handle: "ada"})
 
       assert {:ok, %User{handle: "ada"}} = Accounts.connect_telegram(user, %{telegram_id: 42})
+    end
+
+    test "keeps the Google account of the newer user" do
+      telegram_user_fixture(%{"id" => "42"})
+
+      {:ok, user} =
+        Accounts.sign_in_with_google(%{google_id: "123", email: unique_user_email()}, nil)
+
+      assert {:ok, %User{google_id: "123"}} = Accounts.connect_telegram(user, %{telegram_id: 42})
     end
 
     test "does not merge with a Telegram user that has an email" do

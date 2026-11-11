@@ -63,21 +63,51 @@ defmodule Octomocto.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def register_user(attrs) do
+  def register_user(attrs, display_name \\ nil) do
     %User{}
-    |> User.registration_changeset(attrs)
+    |> User.registration_changeset(attrs, display_name)
     |> Repo.insert()
   end
 
   @doc """
-  Gets the user with the given email, or registers a new one.
+  Gets the user with the given email, or registers a new one with the
+  display name (the guest name), or with a random ocean name.
 
   Sign-in and sign-up use the same form, so a new email registers a user.
   """
-  def get_or_register_user(email) when is_binary(email) do
+  def get_or_register_user(email, display_name \\ nil) when is_binary(email) do
     case get_user_by_email(email) do
-      nil -> register_user(%{email: email})
+      nil -> register_user(%{email: email}, display_name)
       user -> {:ok, user}
+    end
+  end
+
+  ## Google
+
+  @doc """
+  Signs in with the verified data from Google (see `Accounts.GoogleAuth`).
+
+  Finds the user by the Google ID, and then by the email. A user with this
+  email gets the Google ID, because Google verified the email. Else
+  registers a new user with the display name (the guest name). Returns
+  `{:error, :conflict}` when the user with this email has a different
+  Google account.
+  """
+  def sign_in_with_google(%{google_id: google_id, email: email} = attrs, display_name) do
+    case Repo.get_by(User, google_id: google_id) || get_user_by_email(email) do
+      nil ->
+        %User{}
+        |> User.registration_changeset(%{email: email}, display_name)
+        |> User.google_changeset(attrs)
+        |> Repo.insert()
+
+      %User{google_id: other_id} when other_id not in [nil, google_id] ->
+        {:error, :conflict}
+
+      user ->
+        user
+        |> User.google_changeset(attrs)
+        |> Repo.update()
     end
   end
 
@@ -135,6 +165,7 @@ defmodule Octomocto.Accounts do
         :confirmed_at,
         :telegram_id,
         :telegram_username,
+        :google_id,
         :name,
         :display_name,
         :handle,

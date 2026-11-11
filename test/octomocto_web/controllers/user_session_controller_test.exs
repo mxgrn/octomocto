@@ -45,6 +45,11 @@ defmodule OctomoctoWeb.UserSessionControllerTest do
 
       assert has_element?(conn, "#telegram-sign-in")
       refute has_element?(conn, "#sign-in-form")
+      refute has_element?(conn, "#google-sign-in")
+    end
+
+    test "shows the Google button to a guest", %{conn: conn} do
+      assert conn |> get(~p"/signin") |> has_element?("#google-sign-in")
     end
 
     test "in a language, the form sends to the page in the language", %{conn: conn} do
@@ -79,6 +84,14 @@ defmodule OctomoctoWeb.UserSessionControllerTest do
       assert redirected_to(conn) == ~p"/"
       user = Accounts.get_user_by_email(email)
       assert Octomocto.Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "login"
+    end
+
+    test "gives the guest name to a new user", %{conn: conn} do
+      email = unique_user_email()
+
+      conn = post(conn, ~p"/signin", %{"user" => %{"email" => email}})
+
+      assert Accounts.get_user_by_email(email).display_name == conn.assigns.guest_name
     end
 
     test "in a language, goes back to the front page in the language", %{conn: conn} do
@@ -137,6 +150,44 @@ defmodule OctomoctoWeb.UserSessionControllerTest do
 
       refute get_session(conn, :user_token)
       refute Accounts.get_user_by_telegram_id(42)
+    end
+  end
+
+  describe "GET /auth/google" do
+    test "sends the user to Google with a state from the session", %{conn: conn} do
+      conn = get(conn, ~p"/auth/google")
+
+      state = get_session(conn, :google_auth_state)
+      assert redirected_to(conn) =~ "https://accounts.google.com/"
+      assert redirected_to(conn) =~ "state=#{state}"
+    end
+  end
+
+  describe "GET /auth/google/callback" do
+    test "registers a new user with the guest name and signs in", %{conn: conn} do
+      conn = get(conn, ~p"/auth/google")
+      guest_name = conn.assigns.guest_name
+      stub_google_token(%{"email" => "ada@example.com"})
+
+      conn =
+        get(conn, ~p"/auth/google/callback", %{
+          "state" => get_session(conn, :google_auth_state),
+          "code" => "the-code"
+        })
+
+      assert get_session(conn, :user_token)
+      assert conn.resp_cookies["_octomocto_web_user_remember_me"]
+      assert Accounts.get_user_by_email("ada@example.com").display_name == guest_name
+    end
+
+    test "rejects a wrong state", %{conn: conn} do
+      conn = get(conn, ~p"/auth/google")
+      stub_google_token(%{"email" => "ada@example.com"})
+
+      conn = get(conn, ~p"/auth/google/callback", %{"state" => "wrong", "code" => "the-code"})
+
+      refute get_session(conn, :user_token)
+      refute Accounts.get_user_by_email("ada@example.com")
     end
   end
 

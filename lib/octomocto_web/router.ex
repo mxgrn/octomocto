@@ -682,6 +682,8 @@ defmodule OctomoctoWeb.Router do
     get "/signin/:token", UserSessionController, :confirm
     post "/signin", UserSessionController, :create
     get "/auth/telegram", UserSessionController, :telegram
+    get "/auth/google", UserSessionController, :google
+    get "/auth/google/callback", UserSessionController, :google_callback
     delete "/signout", UserSessionController, :delete
   end
 end

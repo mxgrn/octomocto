@@ -2,6 +2,7 @@ defmodule OctomoctoWeb.UserSessionController do
   use OctomoctoWeb, :controller
 
   alias Octomocto.Accounts
+  alias Octomocto.Accounts.GoogleAuth
   alias Octomocto.Accounts.TelegramAuth
   alias OctomoctoWeb.Locale
   alias OctomoctoWeb.Turnstile
@@ -35,7 +36,7 @@ defmodule OctomoctoWeb.UserSessionController do
   # magic link request
   def create(conn, %{"user" => %{"email" => email}} = params) do
     with :ok <- Turnstile.verify(params),
-         {:ok, user} <- Accounts.get_or_register_user(email) do
+         {:ok, user} <- Accounts.get_or_register_user(email, conn.assigns.guest_name) do
       device = conn |> get_req_header("user-agent") |> List.first() |> UserAgent.describe()
       Accounts.deliver_login_instructions(user, &url(~p"/signin/#{&1}"), device)
 
@@ -110,6 +111,52 @@ defmodule OctomoctoWeb.UserSessionController do
         |> redirect(to: ~p"/")
     end
   end
+
+  # The "Continue with Google" button sends the user here. The state in
+  # the session makes sure that the callback comes from a sign-in that
+  # this browser started.
+  def google(conn, _params) do
+    state = Base.url_encode64(:crypto.strong_rand_bytes(32), padding: false)
+
+    conn
+    |> put_session(:google_auth_state, state)
+    |> redirect(external: GoogleAuth.authorize_url(google_redirect_uri(), state))
+  end
+
+  # Google sends the user here after the user picks an account
+  def google_callback(conn, %{"state" => state, "code" => code}) do
+    saved_state = get_session(conn, :google_auth_state)
+    conn = delete_session(conn, :google_auth_state)
+
+    with true <- is_binary(saved_state) and Plug.Crypto.secure_compare(saved_state, state),
+         {:ok, attrs} <- GoogleAuth.fetch_user(code, google_redirect_uri()),
+         {:ok, user} <- Accounts.sign_in_with_google(attrs, conn.assigns.guest_name) do
+      conn
+      |> put_flash(:info, "Welcome!")
+      |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
+    else
+      {:error, :conflict} ->
+        conn
+        |> put_flash(:error, "This email belongs to an account with a different Google account.")
+        |> redirect(to: ~p"/")
+
+      _ ->
+        google_failed(conn)
+    end
+  end
+
+  # The user cancelled on the Google page
+  def google_callback(conn, %{"error" => "access_denied"}), do: redirect(conn, to: ~p"/")
+
+  def google_callback(conn, _params), do: google_failed(conn)
+
+  defp google_failed(conn) do
+    conn
+    |> put_flash(:error, "Google sign-in failed. Please try again.")
+    |> redirect(to: ~p"/")
+  end
+
+  defp google_redirect_uri, do: url(~p"/auth/google/callback")
 
   def delete(conn, _params) do
     conn

@@ -2,6 +2,11 @@ import Config
 
 config :octomocto, :telegram, bot_token: "test-bot-token", bot_username: "test_bot"
 
+config :octomocto, :google,
+  client_id: "test-client-id",
+  client_secret: "test-client-secret",
+  req_options: [plug: {Req.Test, Octomocto.Accounts.GoogleAuth}]
+
 # Do not send the banners to the LLM
 config :octomocto, :translate_banners, false
 config :understudy, async: false, memory_cache: false

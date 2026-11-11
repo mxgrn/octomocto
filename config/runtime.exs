@@ -48,6 +48,15 @@ if config_env() != :test do
     bot_username: System.get_env("TELEGRAM_BOT_USERNAME")
 end
 
+# The OAuth client for "Continue with Google" (Google Cloud Console). Add
+# <host>/auth/google/callback to its authorized redirect URIs. Without the
+# two values, the Google button is not shown.
+if config_env() != :test do
+  config :octomocto, :google,
+    client_id: System.get_env("GOOGLE_CLIENT_ID"),
+    client_secret: System.get_env("GOOGLE_CLIENT_SECRET")
+end
+
 if config_env() == :prod do
   # Staging also builds with MIX_ENV=prod, so PROD_ENV tells the two apart
   prod_env = System.get_env("PROD_ENV", "prod")
