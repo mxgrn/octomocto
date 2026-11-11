@@ -32,7 +32,9 @@ defmodule Octomocto.Graze.World do
   # Sometimes a perk square comes in place of a food square: larger and
   # faster. It is food, and it also gives a perk for `@perk_ms`. Only one
   # perk square is in the field at a time, and no perk square comes for
-  # half of `@perk_ms` after a circle eats one.
+  # half of `@perk_ms` after a circle eats one, or in the first
+  # `@perk_delay_ms` of the field.
+  @perk_delay_ms 10_000
   @perk_food_odds 30
   @perk_food_size 44
   @perk_food_speedup 1.6
@@ -60,6 +62,7 @@ defmodule Octomocto.Graze.World do
   def max_speed, do: @max_speed
   def perk_ms, do: @perk_ms
   def perk_pause_ms, do: div(@perk_ms, 2)
+  def perk_delay_ms, do: @perk_delay_ms
 
   @doc "The place of the center of the square at the time `t`."
   def position(square, t) do

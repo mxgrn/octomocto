@@ -183,7 +183,8 @@ defmodule Octomocto.Graze.Game do
       state
       | players: players,
         placed: true,
-        next_danger_at: state.started_at + World.danger_delay_ms()
+        next_danger_at: state.started_at + World.danger_delay_ms(),
+        perk_paused_until: state.started_at + World.perk_delay_ms()
     }
   end
 

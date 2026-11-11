@@ -64,6 +64,13 @@ defmodule Octomocto.GrazeTest do
     refute Enum.any?(state.squares, &(&1.id == -1))
   end
 
+  test "no perk square comes in the first 10 seconds", %{id: id, pid: pid} do
+    join_and_start(id)
+
+    {_game, state} = :sys.get_state(pid)
+    assert state.perk_paused_until == state.started_at + 10_000
+  end
+
   test "a perk square gives a point and makes the circle invisible", %{id: id, pid: pid} do
     player_id = join_and_start(id)
     put_square(pid, Map.put(square(:food, 560, 500), :perk, :invisible))
