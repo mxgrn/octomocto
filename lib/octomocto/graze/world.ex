@@ -185,7 +185,7 @@ defmodule Octomocto.Graze.World do
         true -> 23 + :rand.uniform(21)
       end
 
-    speed = min(140 + 4 * elapsed_s, 420) * (0.8 + :rand.uniform() * 0.45)
+    speed = min(250 + 4 * elapsed_s, 420) * (0.8 + :rand.uniform() * 0.45)
     speed = if perk, do: speed * @perk_food_speedup, else: speed
 
     half = size / 2
