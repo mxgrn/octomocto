@@ -39,6 +39,10 @@ defmodule OctomoctoWeb.Layouts do
     default: nil,
     doc: "the public id of the guest (see `Octomocto.Players`), for the link to the profile page"
 
+  attr :guest_unread_notifications, :integer,
+    default: 0,
+    doc: "the number of unread notifications of a guest (see `OctomoctoWeb.UnreadNotifications`)"
+
   attr :home, :boolean,
     default: false,
     doc: "shows the octopi, a larger wordmark and the slogan in the header"
@@ -217,7 +221,15 @@ defmodule OctomoctoWeb.Layouts do
               invite_switch={false}
             >
               <:label>
-                <.icon name="hero-user-circle" class="-m-1 size-10" />
+                <span class="relative">
+                  <.icon name="hero-user-circle" class="-m-1 size-10" />
+                  <%!-- `app.js` shows and hides it (see `OctomoctoWeb.UnreadNotifications`) --%>
+                  <span
+                    id="notifications-dot"
+                    hidden={@guest_unread_notifications == 0}
+                    class="absolute -end-0.5 -top-0.5 size-3 rounded-full bg-octo-indigo ring-2 ring-base-100"
+                  />
+                </span>
                 <span class="sr-only">{@guest_name}</span>
               </:label>
               <div class="border-b border-base-300 pb-1">
@@ -231,18 +243,33 @@ defmodule OctomoctoWeb.Layouts do
                   {gettext("Sign in")}
                 </.link>
               </div>
-              <%!-- Notifications and Settings show the sign-in forms to a guest --%>
               <.link
                 id="notifications-link"
                 href={~p"/notifications"}
-                class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+                class="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
               >
                 {gettext("Notifications")}
+                <span
+                  id="notifications-count"
+                  hidden={@guest_unread_notifications == 0}
+                  class="min-w-5 rounded-full bg-octo-indigo px-1.5 text-center text-xs font-semibold leading-5 text-white tabular-nums"
+                >
+                  {@guest_unread_notifications}
+                </span>
               </.link>
+              <%!-- Without results, Profile and Settings show the sign-in forms to a guest --%>
               <.link
                 :if={@guest_public_id}
                 id="profile-link"
                 navigate={~p"/players/#{@guest_public_id}"}
+                class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
+              >
+                {gettext("Profile")}
+              </.link>
+              <.link
+                :if={!@guest_public_id}
+                id="profile-link"
+                href={~p"/profile"}
                 class="block rounded-lg px-3 py-2 text-base-content/70 transition hover:bg-base-200 hover:text-base-content"
               >
                 {gettext("Profile")}

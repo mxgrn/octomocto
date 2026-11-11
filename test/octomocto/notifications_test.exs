@@ -3,7 +3,10 @@ defmodule Octomocto.NotificationsTest do
 
   import Octomocto.AccountsFixtures
 
-  alias Octomocto.{Friends, Notifications}
+  import Ecto.Query
+
+  alias Octomocto.{Friends, Notifications, Repo}
+  alias Octomocto.Notifications.Broadcast
 
   setup do
     %{follower: user_fixture().id, user: user_fixture().id}
@@ -58,5 +61,57 @@ defmodule Octomocto.NotificationsTest do
 
     assert Notifications.unread_count(user) == 0
     assert Notifications.unread_count(creator) == 0
+  end
+
+  describe "broadcasts" do
+    test "a broadcast notifies the users who signed up before it", %{user: user} do
+      Notifications.subscribe_broadcasts()
+
+      {:ok, broadcast} = Notifications.create_broadcast(%{text: "New game"})
+
+      assert_receive :broadcast_added
+      assert Notifications.unread_count(user) == 1
+      assert [%Broadcast{id: id}] = Notifications.list(user)
+      assert id == broadcast.id
+    end
+
+    test "a user does not get the broadcasts from before the signup" do
+      {:ok, broadcast} = Notifications.create_broadcast(%{text: "Old news"})
+      backdate(broadcast)
+
+      user = user_fixture().id
+
+      assert Notifications.unread_count(user) == 0
+      assert Notifications.list(user) == []
+    end
+
+    test "mark_seen/1 also makes the broadcasts read", %{user: user} do
+      Notifications.create_broadcast(%{text: "New game"})
+
+      Notifications.mark_seen(user)
+
+      assert Notifications.unread_count(user) == 0
+    end
+
+    test "a guest gets the broadcasts after the given time" do
+      {:ok, broadcast} = Notifications.create_broadcast(%{text: "New game"})
+      before = DateTime.add(broadcast.inserted_at, -1, :second)
+
+      assert Notifications.guest_unread_count(before) == 1
+      assert Notifications.guest_unread_count(broadcast.inserted_at) == 0
+      assert [%Broadcast{}] = Notifications.guest_list(before)
+      assert Notifications.guest_list(broadcast.inserted_at) == []
+    end
+
+    test "a broadcast must be on one line" do
+      assert {:error, changeset} = Notifications.create_broadcast(%{text: "a\nb"})
+      assert "must be on one line" in errors_on(changeset).text
+    end
+  end
+
+  defp backdate(broadcast) do
+    Repo.update_all(from(b in Broadcast, where: b.id == ^broadcast.id),
+      set: [inserted_at: DateTime.add(DateTime.utc_now(), -1, :day)]
+    )
   end
 end

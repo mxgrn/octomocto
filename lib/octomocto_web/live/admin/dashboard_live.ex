@@ -35,6 +35,28 @@ defmodule OctomoctoWeb.Admin.DashboardLive do
             class="size-5 text-base-content/40 transition group-hover:translate-x-0.5 group-hover:text-octo-indigo"
           />
         </.link>
+
+        <.link
+          id="admin-notifications-link"
+          navigate={~p"/admin/notifications"}
+          class="group flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100 transition hover:shadow-md hover:ring-octo-indigo/40"
+        >
+          <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-octo-indigo/10 text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light">
+            <.icon name="hero-bell" class="size-6" />
+          </span>
+          <span class="flex-1">
+            <span class="block font-semibold text-octo-navy dark:text-base-content">
+              Notifications
+            </span>
+            <span class="block text-sm text-base-content/60">
+              Messages in the Notifications page of all users and guests
+            </span>
+          </span>
+          <.icon
+            name="hero-chevron-right"
+            class="size-5 text-base-content/40 transition group-hover:translate-x-0.5 group-hover:text-octo-indigo"
+          />
+        </.link>
       </div>
     </Layouts.app>
     """

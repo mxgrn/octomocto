@@ -6,16 +6,9 @@
   current_scope={@current_scope}
   guest_name={@guest_name}
   guest_public_id={@guest_public_id}
+  guest_unread_notifications={@guest_unread_notifications}
 >
-  <OctomoctoWeb.UserSessionHTML.guest_page
-    :if={!@current_scope}
-    title="Notifications"
-  >
-    Sign in to see who follows you and get updates about your favorite games.
-  </OctomoctoWeb.UserSessionHTML.guest_page>
-
   <div
-    :if={@current_scope}
     id="notifications-page"
     class="mx-auto flex w-full max-w-2xl flex-col gap-6 pt-2 pb-4"
   >
@@ -29,7 +22,11 @@
         id="notifications-empty"
         class="py-6 text-center text-sm text-base-content/50"
       >
-        No notifications yet. When someone follows you, you see it here.
+        <%= if @current_scope do %>
+          No notifications yet. When someone follows you, you see it here.
+        <% else %>
+          No notifications yet. News about the site and new games show here.
+        <% end %>
       </p>
       <ul id="notifications-list" phx-update="stream" class="space-y-1">
         <li
@@ -44,47 +41,79 @@
             )
           ]}
         >
-          <% actor = notification.actor %>
-          <.link navigate={~p"/players/#{profile_id(actor)}"} class="shrink-0">
-            <img
-              :if={actor.avatar_url}
-              src={actor.avatar_url}
-              alt=""
-              class="size-10 rounded-full object-cover"
-            />
-            <span
-              :if={!actor.avatar_url}
-              class="flex size-10 items-center justify-center rounded-full bg-octo-indigo/10 font-semibold text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light"
-            >
-              {String.first(name(actor)) |> String.upcase()}
-            </span>
-          </.link>
-          <p class="min-w-0 flex-1 text-sm">
-            <.player_link player={actor} class="font-medium">{name(actor)}</.player_link>
-            <span class="text-base-content/70">followed you</span>
-            <span class="ms-1 whitespace-nowrap text-xs text-base-content/45 tabular-nums">
-              {ago(notification.inserted_at)}
-            </span>
-          </p>
-          <button
-            :if={actor.id not in @followed_ids}
-            id={"follow-back-#{notification.id}"}
-            type="button"
-            phx-click="follow_back"
-            phx-value-id={notification.id}
-            class="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-octo-indigo px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-octo-indigo/85 active:scale-95"
-          >
-            <.icon name="hero-user-plus" class="size-4" /> Follow back
-          </button>
-          <span
-            :if={actor.id in @followed_ids}
-            id={"following-#{notification.id}"}
-            class="flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium text-base-content/60 ring-1 ring-base-content/15"
-          >
-            <.icon name="hero-check" class="size-4" /> Following
-          </span>
+          <%= case notification do %>
+            <% %Notification{actor: actor} -> %>
+              <.link navigate={~p"/players/#{profile_id(actor)}"} class="shrink-0">
+                <img
+                  :if={actor.avatar_url}
+                  src={actor.avatar_url}
+                  alt=""
+                  class="size-10 rounded-full object-cover"
+                />
+                <span
+                  :if={!actor.avatar_url}
+                  class="flex size-10 items-center justify-center rounded-full bg-octo-indigo/10 font-semibold text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light"
+                >
+                  {String.first(name(actor)) |> String.upcase()}
+                </span>
+              </.link>
+              <p class="min-w-0 flex-1 text-sm">
+                <.player_link player={actor} class="font-medium">{name(actor)}</.player_link>
+                <span class="text-base-content/70">followed you</span>
+                <span class="ms-1 whitespace-nowrap text-xs text-base-content/45 tabular-nums">
+                  {ago(notification.inserted_at)}
+                </span>
+              </p>
+              <button
+                :if={actor.id not in @followed_ids}
+                id={"follow-back-#{notification.id}"}
+                type="button"
+                phx-click="follow_back"
+                phx-value-id={notification.id}
+                class="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-octo-indigo px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-octo-indigo/85 active:scale-95"
+              >
+                <.icon name="hero-user-plus" class="size-4" /> Follow back
+              </button>
+              <span
+                :if={actor.id in @followed_ids}
+                id={"following-#{notification.id}"}
+                class="flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium text-base-content/60 ring-1 ring-base-content/15"
+              >
+                <.icon name="hero-check" class="size-4" /> Following
+              </span>
+            <% %Broadcast{} -> %>
+              <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-octo-indigo/10 text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light">
+                <.icon name="hero-megaphone" class="size-5" />
+              </span>
+              <p class="min-w-0 flex-1 text-sm text-base-content/80 [&_a]:font-semibold [&_a]:text-octo-indigo [&_a]:underline [&_a]:decoration-octo-indigo/40 [&_a]:underline-offset-2 [&_a]:transition [&_a:hover]:decoration-octo-indigo dark:[&_a]:text-octo-indigo-light">
+                {broadcast_html(notification)}
+                <span class="ms-1 whitespace-nowrap text-xs text-base-content/45 tabular-nums">
+                  {ago(notification.inserted_at)}
+                </span>
+              </p>
+          <% end %>
         </li>
       </ul>
+    </section>
+
+    <section
+      :if={!@current_scope}
+      id="notifications-sign-in"
+      class="flex flex-col items-center gap-3 rounded-2xl bg-octo-indigo/[0.06] p-5 text-center dark:bg-octo-indigo-light/[0.08] sm:flex-row sm:text-start"
+    >
+      <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-octo-indigo shadow-sm dark:bg-base-100 dark:text-octo-indigo-light">
+        <.icon name="hero-user-plus" class="size-5" />
+      </span>
+      <p class="flex-1 text-sm text-base-content/70">
+        Sign in to see who follows you, and to get your notifications on all your devices.
+      </p>
+      <.link
+        id="notifications-sign-in-link"
+        href={~p"/signin"}
+        class="shrink-0 rounded-full bg-octo-indigo px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-octo-indigo/85 active:scale-95"
+      >
+        Sign in
+      </.link>
     </section>
   </div>
 </Layouts.app>

@@ -135,7 +135,11 @@ defmodule OctomoctoWeb.UserAuth do
   #
   defp renew_session(conn, _user) do
     delete_csrf_token()
-    keys = [OctomoctoWeb.LocaleRedirect.session_key() | OctomoctoWeb.GuestName.keys()]
+
+    keys =
+      [OctomoctoWeb.LocaleRedirect.session_key() | OctomoctoWeb.GuestName.keys()] ++
+        OctomoctoWeb.UnreadNotifications.keys()
+
     guest = conn |> get_session() |> Map.take(keys)
 
     conn

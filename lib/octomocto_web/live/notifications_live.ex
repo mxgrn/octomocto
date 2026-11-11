@@ -1,25 +1,43 @@
 defmodule OctomoctoWeb.NotificationsLive do
   @moduledoc """
-  The notifications of the signed-in user, at `/notifications` (see
-  `Octomocto.Notifications`). When the page connects, all notifications
-  are read and the dot in the header goes away. The ones that were unread
-  stay marked on the page until the next visit.
+  The notifications of the user or the guest, at `/notifications` (see
+  `Octomocto.Notifications`). When the page opens, all notifications are
+  read and the dot in the header goes away. The ones that were unread stay
+  marked on the page until the next visit.
 
   A follow notification has a "Follow back" button, or "Following" when
   the user already follows the follower.
 
-  A guest sees what the page gives after sign-in, and the sign-in forms.
+  A guest gets only the broadcasts, and a link to sign in. The session of
+  the guest keeps the read state (see `OctomoctoWeb.UnreadNotifications`).
   """
   use OctomoctoWeb, :live_view
 
   on_mount {OctomoctoWeb.SiteBanners, nil}
 
   alias Octomocto.{Accounts, Friends, Notifications}
-  alias OctomoctoWeb.Locale
+  alias Octomocto.Notifications.{Broadcast, Notification}
+  alias OctomoctoWeb.{Locale, SiteBanners, UnreadNotifications}
 
-  # A guest sees what the page gives after sign-in, and the sign-in forms
-  def mount(_params, _session, %{assigns: %{current_scope: nil}} = socket) do
-    {:ok, assign(socket, page_title: "Notifications", noindex: true)}
+  # The plug of the route marked the broadcasts read (see
+  # `UnreadNotifications.mark_guest_seen/2`)
+  def mount(_params, session, %{assigns: %{current_scope: nil}} = socket) do
+    notifications =
+      case UnreadNotifications.first_visit(session) do
+        nil -> []
+        first_visit -> Notifications.guest_list(first_visit)
+      end
+
+    {:ok,
+     socket
+     |> assign(
+       page_title: "Notifications",
+       noindex: true,
+       seen_at: UnreadNotifications.seen_before(session),
+       followed_ids: MapSet.new(),
+       empty?: notifications == []
+     )
+     |> stream_notifications(notifications)}
   end
 
   def mount(_params, _session, socket) do
@@ -50,12 +68,23 @@ defmodule OctomoctoWeb.NotificationsLive do
        followed_ids: MapSet.new(Friends.followed_ids(user_id)),
        empty?: notifications == []
      )
-     |> stream(:notifications, notifications)}
+     |> stream_notifications(notifications)}
   end
+
+  defp stream_notifications(socket, notifications) do
+    socket
+    |> stream_configure(:notifications, dom_id: &dom_id/1)
+    |> stream(:notifications, notifications)
+  end
+
+  defp dom_id(%Notification{id: id}), do: "notifications-follow-#{id}"
+  defp dom_id(%Broadcast{id: id}), do: "notifications-broadcast-#{id}"
 
   def handle_event("follow_back", %{"id" => id}, socket) do
     me = socket.assigns.current_scope.user.id
-    notification = Enum.find(Notifications.list(me), &(to_string(&1.id) == id))
+
+    notification =
+      Enum.find(Notifications.list(me), &(match?(%Notification{}, &1) and to_string(&1.id) == id))
 
     if notification do
       Friends.follow(me, notification.actor_id)
@@ -88,4 +117,6 @@ defmodule OctomoctoWeb.NotificationsLive do
   end
 
   defp name(user), do: Accounts.public_name(user) || "Someone"
+
+  defp broadcast_html(broadcast), do: Phoenix.HTML.raw(SiteBanners.to_html(broadcast.text))
 end

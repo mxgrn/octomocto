@@ -2,6 +2,7 @@ defmodule OctomoctoWeb.Router do
   use OctomoctoWeb, :router
 
   import OctomoctoWeb.UserAuth
+  import OctomoctoWeb.UnreadNotifications, only: [mark_guest_seen: 2]
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -13,6 +14,7 @@ defmodule OctomoctoWeb.Router do
     plug :put_secure_browser_headers
     plug :fetch_current_scope_for_user
     plug OctomoctoWeb.GuestName
+    plug OctomoctoWeb.UnreadNotifications
     plug OctomoctoWeb.Locale, "en"
     plug OctomoctoWeb.LocaleRedirect
   end
@@ -609,6 +611,9 @@ defmodule OctomoctoWeb.Router do
       live "/banners", BannersLive
       live "/banners/new", BannerFormLive, :new
       live "/banners/:id/edit", BannerFormLive, :edit
+      live "/notifications", BroadcastsLive
+      live "/notifications/new", BroadcastFormLive, :new
+      live "/notifications/:id/edit", BroadcastFormLive, :edit
     end
   end
 
@@ -660,8 +665,15 @@ defmodule OctomoctoWeb.Router do
     pipe_through [:browser, :store_return_to_for_guest]
 
     get "/settings", UserSettingsController, :edit
+    get "/profile", ProfileController, :show
+  end
+
+  # The notifications of users and guests. Opening the page reads them all.
+  scope "/", OctomoctoWeb do
+    pipe_through [:browser, :store_return_to_for_guest, :mark_guest_seen]
 
     live_session :authenticated,
+      session: {OctomoctoWeb.UnreadNotifications, :live_session, []},
       on_mount: [
         {OctomoctoWeb.UserAuth, :mount_current_scope},
         OctomoctoWeb.GamesPlayed,
