@@ -31,18 +31,10 @@ defmodule OctomoctoWeb.UserSessionHTML do
       id="sign-in-panel"
       class="space-y-5 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-base-200 dark:ring-white/10"
     >
-      <div :if={@show_google? || @show_telegram?} class="space-y-3">
-        <.google_button :if={@show_google?} />
-        <.telegram_widget :if={@show_telegram?} id="telegram-sign-in" auth_path={~p"/auth/telegram"} />
-      </div>
-
-      <div
-        :if={(@show_google? || @show_telegram?) && @show_email?}
-        class="flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-base-content/40"
-      >
-        <span class="h-px flex-1 bg-slate-200 dark:bg-white/10"></span>
-        {gettext("or")} <span class="h-px flex-1 bg-slate-200 dark:bg-white/10"></span>
-      </div>
+      <.google_button :if={@show_google?} />
+      <.or_divider :if={@show_google? && @show_telegram?} />
+      <.telegram_widget :if={@show_telegram?} id="telegram-sign-in" auth_path={~p"/auth/telegram"} />
+      <.or_divider :if={(@show_google? || @show_telegram?) && @show_email?} />
 
       <.form
         :if={@show_email?}
@@ -74,6 +66,15 @@ defmodule OctomoctoWeb.UserSessionHTML do
       <p :if={local_mail_adapter?()} class="text-center text-xs text-base-content/50">
         Dev: see sent emails in <.link href="/dev/mailbox" class="underline">the mailbox</.link>.
       </p>
+    </div>
+    """
+  end
+
+  defp or_divider(assigns) do
+    ~H"""
+    <div class="flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-base-content/40">
+      <span class="h-px flex-1 bg-slate-200 dark:bg-white/10"></span>
+      {gettext("or")} <span class="h-px flex-1 bg-slate-200 dark:bg-white/10"></span>
     </div>
     """
   end
