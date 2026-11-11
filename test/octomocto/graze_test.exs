@@ -81,9 +81,9 @@ defmodule Octomocto.GrazeTest do
     assert_receive {:graze_state, %{players: [%{score: 1}], circles: [circle]}}, 1000
     assert circle.invisible_until > t + 9000
 
-    # No new perk square comes for half of the perk time
+    # No new perk square comes while the perk is active
     {_game, state} = :sys.get_state(pid)
-    assert state.perk_paused_until > t + 4000
+    assert state.perk_paused_until == circle.invisible_until
   end
 
   test "an invisible circle goes through a danger square until the perk ends",

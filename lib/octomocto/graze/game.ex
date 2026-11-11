@@ -292,9 +292,11 @@ defmodule Octomocto.Graze.Game do
     # A square of a game that started before the perks has no perk key
     case Map.get(square, :perk) do
       :invisible ->
+        until = t + World.perk_ms()
+
         state
-        |> put_in([:players, id, :invisible_until], t + World.perk_ms())
-        |> Map.put(:perk_paused_until, t + World.perk_pause_ms())
+        |> put_in([:players, id, :invisible_until], until)
+        |> Map.put(:perk_paused_until, until)
 
       nil ->
         state
