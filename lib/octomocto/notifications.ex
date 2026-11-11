@@ -195,6 +195,34 @@ defmodule Octomocto.Notifications do
 
   def delete_broadcast(%Broadcast{} = broadcast), do: Repo.delete(broadcast)
 
+  @doc """
+  Translates the text of a broadcast into all languages other than
+  English with the LLM (see `config :understudy`). Understudy translates in
+  the background. Call it when an admin saves a broadcast, so that the
+  translations are ready before the pages ask for them.
+  """
+  def translate(%Broadcast{text: text}) do
+    if Application.get_env(:octomocto, :translate_broadcasts, true) do
+      Task.Supervisor.start_child(Octomocto.TaskSupervisor, fn ->
+        OctomoctoWeb.Locale.other_locales()
+        |> Enum.each(&Understudy.translate(text, locale: &1, domain: "broadcasts"))
+      end)
+    end
+
+    :ok
+  end
+
+  @doc """
+  Gives the text of a broadcast in the language of the process. If the
+  translation is not ready yet, or the LLM failed, it gives the English text.
+  """
+  def localized_text(%Broadcast{text: text}) do
+    Understudy.translate(text,
+      locale: Gettext.get_locale(OctomoctoWeb.Gettext),
+      domain: "broadcasts"
+    )
+  end
+
   def change_broadcast(%Broadcast{} = broadcast, attrs \\ %{}),
     do: Broadcast.changeset(broadcast, attrs)
 end

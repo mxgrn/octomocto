@@ -7,8 +7,9 @@ config :octomocto, :google,
   client_secret: "test-client-secret",
   req_options: [plug: {Req.Test, Octomocto.Accounts.GoogleAuth}]
 
-# Do not send the banners to the LLM
+# Do not send the banners and the broadcasts to the LLM
 config :octomocto, :translate_banners, false
+config :octomocto, :translate_broadcasts, false
 config :understudy, async: false, memory_cache: false
 
 # The games counter starts at zero and does not query the database at start

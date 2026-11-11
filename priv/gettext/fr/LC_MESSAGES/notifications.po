@@ -1,0 +1,56 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}d"
+msgstr "%{count} j"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}h"
+msgstr "%{count} h"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}m"
+msgstr "%{count} min"
+
+#, elixir-autogen, elixir-format
+msgid "Follow back"
+msgstr "Suivre en retour"
+
+#, elixir-autogen, elixir-format
+msgid "Following"
+msgstr "Suivi(e)"
+
+#, elixir-autogen, elixir-format
+msgid "No notifications yet. News about the site and new games show here."
+msgstr "Aucune notification pour l'instant. Les nouvelles du site et les nouveaux jeux s'affichent ici."
+
+#, elixir-autogen, elixir-format
+msgid "No notifications yet. When someone follows you, you see it here."
+msgstr "Aucune notification pour l'instant. Quand quelqu'un te suit, tu le vois ici."
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to see who follows you, and to get your notifications on all your devices."
+msgstr "Connecte-toi pour voir qui te suit et recevoir tes notifications sur tous tes appareils."
+
+#, elixir-autogen, elixir-format
+msgid "Someone"
+msgstr "Quelqu'un"
+
+#, elixir-autogen, elixir-format
+msgid "followed you"
+msgstr "te suit"
+
+#, elixir-autogen, elixir-format
+msgid "now"
+msgstr "maintenant"

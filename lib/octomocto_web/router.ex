@@ -149,6 +149,42 @@ defmodule OctomoctoWeb.Router do
     get "/graze/:id", GrazeController, :show
   end
 
+  # The notifications in each language, the same as the English
+  # `/notifications` below. Before the scopes of the languages, because
+  # each one ends with a route for all other paths.
+  for {locale, language} <- [
+        pt: :portuguese,
+        de: :german,
+        ru: :russian,
+        fr: :french,
+        uk: :ukrainian,
+        pl: :polish,
+        it: :italian,
+        es: :spanish,
+        ja: :japanese,
+        vi: :vietnamese,
+        tr: :turkish,
+        ar: :arabic
+      ] do
+    scope "/#{locale}", OctomoctoWeb do
+      pipe_through [:browser, language, :store_return_to_for_guest, :mark_guest_seen]
+
+      live_session :"#{language}_notifications",
+        session: {OctomoctoWeb.UnreadNotifications, :live_session, []},
+        on_mount: [
+          {OctomoctoWeb.UserAuth, :mount_current_scope},
+          OctomoctoWeb.GamesPlayed,
+          OctomoctoWeb.GuestName,
+          OctomoctoWeb.OnlineUsers,
+          OctomoctoWeb.Notices,
+          OctomoctoWeb.UnreadNotifications,
+          {OctomoctoWeb.Locale, to_string(locale)}
+        ] do
+        live "/notifications", NotificationsLive
+      end
+    end
+  end
+
   # The pages in Portuguese, in the same pipeline as the English pages. Only
   # the games with translations are here (see `OctomoctoWeb.Locale`). The
   # other URLs with the prefix go to the English pages.
@@ -669,6 +705,7 @@ defmodule OctomoctoWeb.Router do
   end
 
   # The notifications of users and guests. Opening the page reads them all.
+  # The pages in the other languages are above.
   scope "/", OctomoctoWeb do
     pipe_through [:browser, :store_return_to_for_guest, :mark_guest_seen]
 

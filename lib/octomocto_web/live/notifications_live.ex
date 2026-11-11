@@ -1,6 +1,7 @@
 defmodule OctomoctoWeb.NotificationsLive do
   @moduledoc """
-  The notifications of the user or the guest, at `/notifications` (see
+  The notifications of the user or the guest, at `/notifications` and in
+  each language, for example `/pt/notifications` (see
   `Octomocto.Notifications`). When the page opens, all notifications are
   read and the dot in the header goes away. The ones that were unread stay
   marked on the page until the next visit.
@@ -31,8 +32,9 @@ defmodule OctomoctoWeb.NotificationsLive do
     {:ok,
      socket
      |> assign(
-       page_title: "Notifications",
+       page_title: gettext("Notifications"),
        noindex: true,
+       languages: languages(socket),
        seen_at: UnreadNotifications.seen_before(session),
        followed_ids: MapSet.new(),
        empty?: notifications == []
@@ -62,14 +64,19 @@ defmodule OctomoctoWeb.NotificationsLive do
     {:ok,
      socket
      |> assign(
-       page_title: "Notifications",
+       page_title: gettext("Notifications"),
        noindex: true,
+       languages: languages(socket),
        seen_at: seen_at,
        followed_ids: MapSet.new(Friends.followed_ids(user_id)),
        empty?: notifications == []
      )
      |> stream_notifications(notifications)}
   end
+
+  # The page has no hreflang links, because search engines do not index it
+  defp languages(socket),
+    do: Locale.languages(:all, socket.assigns.locale, ~p"/notifications")
 
   defp stream_notifications(socket, notifications) do
     socket
@@ -103,20 +110,24 @@ defmodule OctomoctoWeb.NotificationsLive do
   defp new?(notification, seen_at),
     do: DateTime.compare(notification.inserted_at, seen_at) == :gt
 
-  @doc "A short time from now: \"now\", \"5m\", \"3h\", \"2d\", or a date."
+  @doc """
+  A short time from now in the language of the process: "now", "5m",
+  "3h", "2d", or a date.
+  """
   def ago(time, now \\ DateTime.utc_now()) do
     seconds = DateTime.diff(now, time)
 
     cond do
-      seconds < 60 -> "now"
-      seconds < 3600 -> "#{div(seconds, 60)}m"
-      seconds < 86_400 -> "#{div(seconds, 3600)}h"
-      seconds < 7 * 86_400 -> "#{div(seconds, 86_400)}d"
+      seconds < 60 -> dgettext("notifications", "now")
+      seconds < 3600 -> dgettext("notifications", "%{count}m", count: div(seconds, 60))
+      seconds < 86_400 -> dgettext("notifications", "%{count}h", count: div(seconds, 3600))
+      seconds < 7 * 86_400 -> dgettext("notifications", "%{count}d", count: div(seconds, 86_400))
       true -> Locale.short_date(time)
     end
   end
 
-  defp name(user), do: Accounts.public_name(user) || "Someone"
+  defp name(user), do: Accounts.public_name(user) || dgettext("notifications", "Someone")
 
-  defp broadcast_html(broadcast), do: Phoenix.HTML.raw(SiteBanners.to_html(broadcast.text))
+  defp broadcast_html(broadcast),
+    do: Phoenix.HTML.raw(SiteBanners.to_html(Notifications.localized_text(broadcast)))
 end

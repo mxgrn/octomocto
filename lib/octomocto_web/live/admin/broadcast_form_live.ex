@@ -34,7 +34,9 @@ defmodule OctomoctoWeb.Admin.BroadcastFormLive do
 
   def handle_event("save", %{"broadcast" => params}, socket) do
     case save(socket.assigns.live_action, socket.assigns.broadcast, params) do
-      {:ok, _broadcast} ->
+      {:ok, broadcast} ->
+        Notifications.translate(broadcast)
+
         {:noreply,
          socket
          |> put_flash(:info, saved_message(socket.assigns.live_action))

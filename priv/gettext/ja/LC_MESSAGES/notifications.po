@@ -1,0 +1,56 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}d"
+msgstr "%{count}日"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}h"
+msgstr "%{count}時間"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}m"
+msgstr "%{count}分"
+
+#, elixir-autogen, elixir-format
+msgid "Follow back"
+msgstr "フォローバック"
+
+#, elixir-autogen, elixir-format
+msgid "Following"
+msgstr "フォロー中"
+
+#, elixir-autogen, elixir-format
+msgid "No notifications yet. News about the site and new games show here."
+msgstr "お知らせはまだないよ。サイトのニュースや新しいゲームはここに表示されるよ。"
+
+#, elixir-autogen, elixir-format
+msgid "No notifications yet. When someone follows you, you see it here."
+msgstr "お知らせはまだないよ。誰かにフォローされると、ここに表示されるよ。"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to see who follows you, and to get your notifications on all your devices."
+msgstr "ログインすると、誰にフォローされているかが分かって、どの端末でもお知らせを受け取れるよ。"
+
+#, elixir-autogen, elixir-format
+msgid "Someone"
+msgstr "誰か"
+
+#, elixir-autogen, elixir-format
+msgid "followed you"
+msgstr "にフォローされたよ"
+
+#, elixir-autogen, elixir-format
+msgid "now"
+msgstr "今"

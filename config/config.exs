@@ -68,7 +68,8 @@ config :phoenix_live_view,
 config :octomocto, Octomocto.Mailer, adapter: Swoosh.Adapters.Local
 
 # Translates the texts that admins write, such as banners, with an LLM
-# (see `Octomocto.Banners.translate/1`). The translations are cached in
+# (see `Octomocto.Banners.translate/1` and
+# `Octomocto.Notifications.translate/1`). The translations are cached in
 # the database. The static texts use `OctomoctoWeb.Gettext`.
 config :understudy,
   repo: Octomocto.Repo,

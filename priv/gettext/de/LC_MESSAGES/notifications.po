@@ -1,0 +1,56 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}d"
+msgstr "%{count} T."
+
+#, elixir-autogen, elixir-format
+msgid "%{count}h"
+msgstr "%{count} Std."
+
+#, elixir-autogen, elixir-format
+msgid "%{count}m"
+msgstr "%{count} Min."
+
+#, elixir-autogen, elixir-format
+msgid "Follow back"
+msgstr "Zurückfolgen"
+
+#, elixir-autogen, elixir-format
+msgid "Following"
+msgstr "Gefolgt"
+
+#, elixir-autogen, elixir-format
+msgid "No notifications yet. News about the site and new games show here."
+msgstr "Noch keine Benachrichtigungen. Neuigkeiten zur Seite und neue Spiele erscheinen hier."
+
+#, elixir-autogen, elixir-format
+msgid "No notifications yet. When someone follows you, you see it here."
+msgstr "Noch keine Benachrichtigungen. Wenn dir jemand folgt, siehst du es hier."
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to see who follows you, and to get your notifications on all your devices."
+msgstr "Melde dich an, um zu sehen, wer dir folgt, und deine Benachrichtigungen auf all deinen Geräten zu bekommen."
+
+#, elixir-autogen, elixir-format
+msgid "Someone"
+msgstr "Jemand"
+
+#, elixir-autogen, elixir-format
+msgid "followed you"
+msgstr "folgt dir jetzt"
+
+#, elixir-autogen, elixir-format
+msgid "now"
+msgstr "jetzt"

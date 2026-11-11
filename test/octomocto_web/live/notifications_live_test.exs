@@ -117,4 +117,59 @@ defmodule OctomoctoWeb.NotificationsLiveTest do
       refute has_element?(view, "#notifications-sign-in")
     end
   end
+
+  describe "in a language" do
+    test "a guest sees the broadcasts in the language", %{conn: conn} do
+      conn = get(conn, ~p"/pt")
+      {:ok, broadcast} = Notifications.create_broadcast(%{text: "New game"})
+      add_translation("pt", "New game", "Jogo novo")
+
+      {:ok, view, _html} = live(conn, ~p"/pt/notifications")
+
+      assert has_element?(view, "#notifications-broadcast-#{broadcast.id}", "Jogo novo")
+      assert has_element?(view, ~s(#notifications-sign-in-link[href="/pt/signin"]))
+    end
+
+    test "the language selector links to the page in the other languages", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/pt/notifications")
+
+      assert has_element?(
+               view,
+               ~s|#language-switcher #language-en[href="#{~p"/locale/en?#{[to: "/notifications"]}"}"]|
+             )
+
+      assert has_element?(
+               view,
+               ~s|#language-switcher #language-de[href="#{~p"/locale/de?#{[to: "/de/notifications"]}"}"]|
+             )
+    end
+
+    test "the menu links to the notifications in the language", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/pt")
+      assert has_element?(view, ~s(#notifications-link[href="/pt/notifications"]))
+    end
+
+    test "a browser in the language goes to the notifications in the language",
+         %{conn: conn} do
+      conn =
+        conn
+        |> put_req_header("user-agent", "Mozilla/5.0")
+        |> put_req_header("accept-language", "pt-BR")
+        |> get(~p"/notifications")
+
+      assert redirected_to(conn) == "/pt/notifications"
+    end
+  end
+
+  # The translation that the LLM gives (see `Octomocto.Notifications.translate/1`)
+  defp add_translation(locale, text, value) do
+    Octomocto.Repo.insert!(%Understudy.Translation{
+      locale: locale,
+      domain: "broadcasts",
+      text: text,
+      text_hash: :crypto.hash(:sha256, text),
+      value: value,
+      last_used_at: NaiveDateTime.utc_now(:second)
+    })
+  end
 end

@@ -7,13 +7,14 @@
   guest_name={@guest_name}
   guest_public_id={@guest_public_id}
   guest_unread_notifications={@guest_unread_notifications}
+  languages={@languages}
 >
   <div
     id="notifications-page"
     class="mx-auto flex w-full max-w-2xl flex-col gap-6 pt-2 pb-4"
   >
     <h1 class="text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
-      Notifications
+      {gettext("Notifications")}
     </h1>
 
     <section class="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100 sm:p-4">
@@ -23,9 +24,15 @@
         class="py-6 text-center text-sm text-base-content/50"
       >
         <%= if @current_scope do %>
-          No notifications yet. When someone follows you, you see it here.
+          {dgettext(
+            "notifications",
+            "No notifications yet. When someone follows you, you see it here."
+          )}
         <% else %>
-          No notifications yet. News about the site and new games show here.
+          {dgettext(
+            "notifications",
+            "No notifications yet. News about the site and new games show here."
+          )}
         <% end %>
       </p>
       <ul id="notifications-list" phx-update="stream" class="space-y-1">
@@ -59,7 +66,9 @@
               </.link>
               <p class="min-w-0 flex-1 text-sm">
                 <.player_link player={actor} class="font-medium">{name(actor)}</.player_link>
-                <span class="text-base-content/70">followed you</span>
+                <span class="text-base-content/70">
+                  {dgettext("notifications", "followed you")}
+                </span>
                 <span class="ms-1 whitespace-nowrap text-xs text-base-content/45 tabular-nums">
                   {ago(notification.inserted_at)}
                 </span>
@@ -72,14 +81,15 @@
                 phx-value-id={notification.id}
                 class="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-octo-indigo px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-octo-indigo/85 active:scale-95"
               >
-                <.icon name="hero-user-plus" class="size-4" /> Follow back
+                <.icon name="hero-user-plus" class="size-4" />
+                {dgettext("notifications", "Follow back")}
               </button>
               <span
                 :if={actor.id in @followed_ids}
                 id={"following-#{notification.id}"}
                 class="flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium text-base-content/60 ring-1 ring-base-content/15"
               >
-                <.icon name="hero-check" class="size-4" /> Following
+                <.icon name="hero-check" class="size-4" /> {dgettext("notifications", "Following")}
               </span>
             <% %Broadcast{} -> %>
               <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-octo-indigo/10 text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light">
@@ -105,14 +115,17 @@
         <.icon name="hero-user-plus" class="size-5" />
       </span>
       <p class="flex-1 text-sm text-base-content/70">
-        Sign in to see who follows you, and to get your notifications on all your devices.
+        {dgettext(
+          "notifications",
+          "Sign in to see who follows you, and to get your notifications on all your devices."
+        )}
       </p>
       <.link
         id="notifications-sign-in-link"
-        href={~p"/signin"}
+        href={Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/signin")}
         class="shrink-0 rounded-full bg-octo-indigo px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-octo-indigo/85 active:scale-95"
       >
-        Sign in
+        {gettext("Sign in")}
       </.link>
     </section>
   </div>

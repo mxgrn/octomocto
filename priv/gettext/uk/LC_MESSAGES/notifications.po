@@ -1,0 +1,56 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: uk\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100 != 11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10||n%100>=20) ? 1 : 2);\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}d"
+msgstr "%{count} д"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}h"
+msgstr "%{count} год"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}m"
+msgstr "%{count} хв"
+
+#, elixir-autogen, elixir-format
+msgid "Follow back"
+msgstr "Підписатися у відповідь"
+
+#, elixir-autogen, elixir-format
+msgid "Following"
+msgstr "У підписках"
+
+#, elixir-autogen, elixir-format
+msgid "No notifications yet. News about the site and new games show here."
+msgstr "Сповіщень поки немає. Тут з'являться новини сайту й нові ігри."
+
+#, elixir-autogen, elixir-format
+msgid "No notifications yet. When someone follows you, you see it here."
+msgstr "Сповіщень поки немає. Коли хтось підпишеться на тебе, ти побачиш це тут."
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to see who follows you, and to get your notifications on all your devices."
+msgstr "Увійди, щоб бачити, хто на тебе підписаний, і отримувати сповіщення на всіх своїх пристроях."
+
+#, elixir-autogen, elixir-format
+msgid "Someone"
+msgstr "Хтось"
+
+#, elixir-autogen, elixir-format
+msgid "followed you"
+msgstr "підписується на тебе"
+
+#, elixir-autogen, elixir-format
+msgid "now"
+msgstr "зараз"
