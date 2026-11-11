@@ -1074,6 +1074,9 @@ function showTelegramLogin(node) {
   script.dataset.size = "large"
   // Telegram shows a checkbox that lets the bot send messages to the user
   script.dataset.requestAccess = "write"
+  // The text of the button is in the language of the page. Telegram has the
+  // same codes as our locales; for ja and vi it shows English.
+  if (node.dataset.lang) script.dataset.lang = node.dataset.lang
   script.dataset.authUrl = new URL(node.dataset.authPath, window.location.href).href
   node.appendChild(script)
 }

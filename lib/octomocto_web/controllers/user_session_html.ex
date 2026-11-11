@@ -188,6 +188,7 @@ defmodule OctomoctoWeb.UserSessionHTML do
       phx-update="ignore"
       data-telegram-login={@bot_username}
       data-auth-path={@auth_path}
+      data-lang={Gettext.get_locale(OctomoctoWeb.Gettext)}
     >
     </div>
     """
