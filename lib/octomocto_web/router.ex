@@ -219,6 +219,7 @@ defmodule OctomoctoWeb.Router do
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
+    get "/reauth", UserSessionController, :reauth
     post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
@@ -256,6 +257,7 @@ defmodule OctomoctoWeb.Router do
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
+    get "/reauth", UserSessionController, :reauth
     post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
@@ -293,6 +295,7 @@ defmodule OctomoctoWeb.Router do
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
+    get "/reauth", UserSessionController, :reauth
     post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
@@ -330,6 +333,7 @@ defmodule OctomoctoWeb.Router do
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
+    get "/reauth", UserSessionController, :reauth
     post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
@@ -367,6 +371,7 @@ defmodule OctomoctoWeb.Router do
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
+    get "/reauth", UserSessionController, :reauth
     post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
@@ -404,6 +409,7 @@ defmodule OctomoctoWeb.Router do
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
+    get "/reauth", UserSessionController, :reauth
     post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
@@ -441,6 +447,7 @@ defmodule OctomoctoWeb.Router do
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
+    get "/reauth", UserSessionController, :reauth
     post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
@@ -478,6 +485,7 @@ defmodule OctomoctoWeb.Router do
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
+    get "/reauth", UserSessionController, :reauth
     post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
@@ -515,6 +523,7 @@ defmodule OctomoctoWeb.Router do
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
+    get "/reauth", UserSessionController, :reauth
     post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
@@ -552,6 +561,7 @@ defmodule OctomoctoWeb.Router do
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
+    get "/reauth", UserSessionController, :reauth
     post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
@@ -589,6 +599,7 @@ defmodule OctomoctoWeb.Router do
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
+    get "/reauth", UserSessionController, :reauth
     post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
@@ -626,6 +637,7 @@ defmodule OctomoctoWeb.Router do
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
     get "/signin", UserSessionController, :new
+    get "/reauth", UserSessionController, :reauth
     post "/signin", UserSessionController, :create
 
     get "/*path", LocaleController, :english
@@ -728,6 +740,7 @@ defmodule OctomoctoWeb.Router do
     pipe_through [:browser]
 
     get "/signin", UserSessionController, :new
+    get "/reauth", UserSessionController, :reauth
     get "/signin/:token", UserSessionController, :confirm
     post "/signin", UserSessionController, :create
     get "/auth/telegram", UserSessionController, :telegram

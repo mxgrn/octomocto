@@ -9,7 +9,7 @@ defmodule OctomoctoWeb.UserSessionController do
   alias OctomoctoWeb.UserAgent
   alias OctomoctoWeb.UserAuth
 
-  plug OctomoctoWeb.SiteBanners when action in [:new, :confirm]
+  plug OctomoctoWeb.SiteBanners when action in [:new, :reauth, :confirm]
 
   # Marks the browser that asked for a magic link. When the link opens in the same
   # browser, we sign the user in at once. Email link scanners do not have this cookie,
@@ -18,11 +18,25 @@ defmodule OctomoctoWeb.UserSessionController do
   @magic_link_cookie_options [sign: true, max_age: 24 * 60 * 60, same_site: "Lax"]
 
   # The home page has the same sign-in forms. This page is for the redirects
-  # from pages that need a (recent) sign-in.
+  # from pages that need a sign-in. A signed-in user goes to the home page.
   def new(conn, _params) do
+    if conn.assigns.current_scope,
+      do: redirect(conn, to: Locale.path(conn.assigns.locale, ~p"/")),
+      else: render_sign_in(conn, ~p"/signin")
+  end
+
+  # A signed-in user signs in again here, with only the methods that the user
+  # has. A guest goes to the sign-in page.
+  def reauth(conn, _params) do
+    if conn.assigns.current_scope,
+      do: render_sign_in(conn, ~p"/reauth"),
+      else: redirect(conn, to: Locale.path(conn.assigns.locale, ~p"/signin"))
+  end
+
+  defp render_sign_in(conn, path) do
     render(conn, :new,
       page_title: gettext("Sign in"),
-      languages: Locale.languages(:all, conn.assigns.locale, ~p"/signin")
+      languages: Locale.languages(:all, conn.assigns.locale, path)
     )
   end
 
@@ -180,10 +194,10 @@ defmodule OctomoctoWeb.UserSessionController do
     end
   end
 
-  # A signed-in user can open /signin to sign in again. The page is in the
-  # language of the form.
+  # A signed-in user signs in again on /reauth. The page is in the language
+  # of the form.
   defp return_path(conn) do
-    path = if conn.assigns.current_scope, do: ~p"/signin", else: ~p"/"
+    path = if conn.assigns.current_scope, do: ~p"/reauth", else: ~p"/"
     Locale.path(conn.assigns.locale, path)
   end
 end

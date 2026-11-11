@@ -40,12 +40,18 @@ defmodule OctomoctoWeb.UserSessionControllerTest do
       assert conn |> get(~p"/signin") |> has_element?("#guest-menu")
     end
 
-    test "shows only the methods that a signed-in Telegram user has", %{conn: conn} do
-      conn = conn |> log_in_user(telegram_user_fixture()) |> get(~p"/signin")
+    test "sends a signed-in user to the front page", %{conn: conn} do
+      conn = conn |> log_in_user(user_fixture()) |> get(~p"/signin")
 
-      assert has_element?(conn, "#telegram-sign-in")
-      refute has_element?(conn, "#sign-in-form")
-      refute has_element?(conn, "#google-sign-in")
+      assert redirected_to(conn) == ~p"/"
+    end
+
+    test "in a language, sends a signed-in user to the front page in the language", %{
+      conn: conn
+    } do
+      conn = conn |> log_in_user(user_fixture()) |> get(~p"/pt/signin")
+
+      assert redirected_to(conn) == ~p"/pt"
     end
 
     test "shows the Google button to a guest", %{conn: conn} do
@@ -64,6 +70,22 @@ defmodule OctomoctoWeb.UserSessionControllerTest do
       conn = get(conn, ~p"/pt/signin")
 
       assert has_element?(conn, "#sign-in-panel #sign-in-form[action='/pt/signin']")
+    end
+  end
+
+  describe "GET /reauth" do
+    test "shows only the methods that a signed-in Telegram user has", %{conn: conn} do
+      conn = conn |> log_in_user(telegram_user_fixture()) |> get(~p"/reauth")
+
+      assert has_element?(conn, "#telegram-sign-in")
+      refute has_element?(conn, "#sign-in-form")
+      refute has_element?(conn, "#google-sign-in")
+    end
+
+    test "in a language, sends a guest to the sign-in page in the language", %{conn: conn} do
+      conn = get(conn, ~p"/pt/reauth")
+
+      assert redirected_to(conn) == ~p"/pt/signin"
     end
   end
 
@@ -106,6 +128,14 @@ defmodule OctomoctoWeb.UserSessionControllerTest do
       conn = post(conn, ~p"/pt/signin", %{"user" => %{"email" => unique_user_email()}})
 
       assert redirected_to(conn) == ~p"/pt"
+    end
+
+    test "a signed-in user goes back to the sign-in-again page", %{conn: conn} do
+      user = user_fixture()
+
+      conn = conn |> log_in_user(user) |> post(~p"/signin", %{"user" => %{"email" => user.email}})
+
+      assert redirected_to(conn) == ~p"/reauth"
     end
 
     test "rejects an invalid email", %{conn: conn} do
