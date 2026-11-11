@@ -58,6 +58,20 @@ defmodule OctomoctoWeb.PageHTML do
     """
   end
 
+  @doc """
+  Renders Mocto, the blue octopus, alone. For example, as the avatar of the
+  messages from the site.
+  """
+  attr :class, :any, default: nil
+
+  def mocto(assigns) do
+    ~H"""
+    <svg viewBox="0 10 240 140" aria-hidden="true" class={@class}>
+      <g class="text-octo-indigo"><.octopus /></g>
+    </svg>
+    """
+  end
+
   defp octopus(assigns) do
     ~H"""
     <g fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round">

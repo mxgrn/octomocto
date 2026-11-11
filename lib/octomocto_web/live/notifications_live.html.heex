@@ -92,8 +92,8 @@
                 <.icon name="hero-check" class="size-4" /> {dgettext("notifications", "Following")}
               </span>
             <% %Broadcast{} -> %>
-              <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-octo-indigo/10 text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light">
-                <.icon name="hero-megaphone" class="size-5" />
+              <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-octo-indigo/10 dark:bg-octo-indigo-light/15">
+                <OctomoctoWeb.PageHTML.mocto class="w-8" />
               </span>
               <p class="min-w-0 flex-1 text-sm text-base-content/80 [&_a]:font-semibold [&_a]:text-octo-indigo [&_a]:underline [&_a]:decoration-octo-indigo/40 [&_a]:underline-offset-2 [&_a]:transition [&_a:hover]:decoration-octo-indigo dark:[&_a]:text-octo-indigo-light">
                 {broadcast_html(notification)}
