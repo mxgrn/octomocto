@@ -2007,28 +2007,26 @@ viewGame model me game =
     in
     div
         [ id "trains-root"
-        , class "flex w-full flex-col gap-2 select-none max-lg:landscape:flex-row max-lg:landscape:items-start max-lg:landscape:gap-3 lg:flex-row lg:items-start lg:gap-8"
+        , class "flex w-full flex-col gap-2 select-none xl:flex-row xl:items-start xl:gap-8"
         , classList [ ( "is-playing", phase model game /= Waiting && phase model game /= Over ) ]
         ]
-        [ aside [ id "trains-panel", class "flex flex-col gap-2 max-lg:landscape:w-56 max-lg:landscape:shrink-0 max-lg:landscape:gap-4 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:gap-5" ]
-            -- On a small screen, the title, the stats and the restart button
-            -- are in one compact row. On a small screen that is wider than
-            -- tall, they are in a narrow column at the left of the board, so
-            -- the board can be as tall as the screen. On a large screen, the
-            -- row is not a box (`contents`), so its items are in the column
-            -- of the panel.
-            [ div [ class "flex items-center gap-1 max-lg:landscape:flex-col max-lg:landscape:items-start max-lg:landscape:gap-4 lg:contents" ]
-                [ div [ class "min-w-0 lg:order-1" ]
-                    [ div [ class "flex items-center gap-1 lg:gap-2" ]
+        [ aside [ id "trains-panel", class "flex flex-col gap-2 xl:sticky xl:top-6 xl:w-72 xl:shrink-0 xl:gap-5" ]
+            -- Below the xl width, the title, the stats and the menu are in
+            -- one compact row above the board, so that the board fills the
+            -- rest of the screen. On an xl screen, the row is not a box
+            -- (`contents`), so its items are in the column of the panel.
+            [ div [ class "flex items-center gap-1 xl:contents" ]
+                [ div [ class "min-w-0 xl:order-1" ]
+                    [ div [ class "flex items-center gap-1 xl:gap-2" ]
                         [ a
                             [ id "trains-home"
                             , href "/"
-                            , class "mr-1 shrink-0 transition lg:mr-0"
+                            , class "mr-1 shrink-0 transition xl:mr-0"
                             ]
-                            [ img [ src "/images/mark.svg", alt "octomocto", class "h-8 w-auto dark:hidden lg:h-9" ] []
-                            , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block lg:h-9" ] []
+                            [ img [ src "/images/mark.svg", alt "octomocto", class "h-8 w-auto dark:hidden xl:h-9" ] []
+                            , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block xl:h-9" ] []
                             ]
-                        , h1 [ class "truncate text-xl font-semibold tracking-tight lg:text-2xl" ]
+                        , h1 [ class "truncate text-xl font-semibold tracking-tight xl:text-2xl" ]
                             [ a [ id "trains-title-link", href "/trains", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Right on Track" ] ]
                         , case game.campaign of
                             Just campaign ->
@@ -2043,7 +2041,7 @@ viewGame model me game =
                                 text ""
                         , viewWatchers (me == Nothing) model.watchers
                         ]
-                    , p [ class "hidden text-sm opacity-60 lg:block" ]
+                    , p [ class "hidden text-sm opacity-60 xl:block" ]
                         [ text
                             (if solo then
                                 "Click the switches to send each train to the house with its colors."
@@ -2081,24 +2079,13 @@ viewGame model me game =
         ]
 
 
-{-| The width of the screen from which the panel is at the left of the
-board. On a smaller screen, the panel is a compact row above the board.
+{-| The width of the screen (Tailwind `xl`) from which the panel is at the
+left of the board. On a smaller screen, the panel is a compact row above
+the board, also when the screen is wider than tall.
 -}
 largeScreen : Float
 largeScreen =
-    1024
-
-
-{-| A small screen that is wider than tall. The panel is a narrow column at
-the left of the board, as the `max-lg:landscape:` classes make it.
--}
-sideways : Model -> Bool
-sideways model =
-    let
-        ( width, height ) =
-            model.viewport
-    in
-    width < largeScreen && width > height
+    1280
 
 
 {-| The height of the page around the field.
@@ -2107,9 +2094,6 @@ reservedHeight : Model -> Me -> Game -> Float
 reservedHeight model me game =
     if Tuple.first model.viewport >= largeScreen then
         48
-
-    else if sideways model then
-        16
 
     else
         16
@@ -2179,12 +2163,12 @@ viewStats : Round -> Html Msg
 viewStats round =
     let
         stat label valueId valueClass value =
-            div [ class "flex flex-col items-center justify-center max-lg:landscape:items-start" ]
-                [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text label ]
-                , span [ id valueId, class ("text-lg leading-tight tabular-nums lg:text-3xl " ++ valueClass) ] [ text value ]
+            div [ class "flex flex-col items-center justify-center" ]
+                [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase xl:text-xs" ] [ text label ]
+                , span [ id valueId, class ("text-lg leading-tight tabular-nums xl:text-3xl " ++ valueClass) ] [ text value ]
                 ]
     in
-    div [ id "trains-stats", class "ml-auto flex gap-4 pr-2 max-lg:landscape:ml-0 max-lg:landscape:gap-6 max-lg:landscape:pr-0 max-lg:landscape:pl-2 lg:order-2 lg:ml-0 lg:grid lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-slate-200 lg:rounded-2xl lg:bg-white lg:py-3 lg:pr-0 lg:shadow-sm lg:ring-1 lg:ring-slate-200 dark:lg:divide-white/10 dark:lg:bg-white/5 dark:lg:shadow-none dark:lg:ring-white/10" ]
+    div [ id "trains-stats", class "ml-auto flex gap-4 pr-2 xl:order-2 xl:ml-0 xl:grid xl:grid-cols-2 xl:gap-0 xl:divide-x xl:divide-slate-200 xl:rounded-2xl xl:bg-white xl:py-3 xl:pr-0 xl:shadow-sm xl:ring-1 xl:ring-slate-200 dark:xl:divide-white/10 dark:xl:bg-white/5 dark:xl:shadow-none dark:xl:ring-white/10" ]
         [ stat "correct" "trains-correct" "font-semibold text-emerald-600 dark:text-emerald-400" (String.fromInt round.correct)
         , stat "train" "trains-sent" "font-light text-slate-700 dark:text-slate-100" (String.fromInt round.sent ++ "/" ++ String.fromInt (trainCount round.layout.board))
         ]
@@ -2192,12 +2176,12 @@ viewStats round =
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 max-lg:landscape:flex-col max-lg:landscape:items-stretch max-lg:landscape:rounded-2xl max-lg:landscape:p-2 lg:order-3 lg:flex-col lg:items-stretch lg:rounded-2xl lg:p-2 lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 xl:order-3 xl:flex-col xl:items-stretch xl:rounded-2xl xl:p-2 xl:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "trains-link"
             , readonly True
             , value model.gameUrl
-            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none max-lg:landscape:px-2 max-lg:landscape:py-1 lg:px-2 lg:py-1 dark:text-slate-100"
+            , class "min-w-0 flex-1 truncate bg-transparent text-octo-navy outline-none xl:px-2 xl:py-1 dark:text-slate-100"
             ]
             []
         , button
@@ -2225,7 +2209,7 @@ viewPlayers me game owned =
         playerErrors =
             errors game.round
     in
-    Html.Keyed.ul [ id "trains-players", class "flex flex-wrap gap-2 max-lg:landscape:flex-col lg:order-4 lg:flex-col" ]
+    Html.Keyed.ul [ id "trains-players", class "flex flex-wrap gap-2 xl:order-4 xl:flex-col" ]
         (List.map
             (\player ->
                 let
@@ -2238,7 +2222,7 @@ viewPlayers me game owned =
                     , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200 dark:bg-white/5 dark:text-slate-100 dark:shadow-none dark:ring-white/10"
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "max-lg:landscape:flex-1 lg:flex-1" ] [ text (playerName me player) ]
+                    , span [ class " xl:flex-1" ] [ text (playerName me player) ]
                     , span [ class "text-xs text-slate-500 tabular-nums dark:text-slate-400" ]
                         [ text
                             (String.fromInt count
@@ -2294,14 +2278,15 @@ playerName me player =
 
 
 {-| Starts a new round with a new board for all players, also during a
-round. On a small screen, only the icon shows, but not in the column of a
-screen that is wider than tall. It is disabled while a player changes
+round. Below the xl width, only the icon of the menu shows, also when the
+screen is wider than tall. It is disabled while a player changes
 the settings.
 -}
 viewMenu : Bool -> Bool -> Bool -> Html Msg
 viewMenu locked muted player =
     Html.node "octo-game-menu"
-        [ class "relative shrink-0 lg:order-5 lg:self-start"
+        [ class "relative shrink-0 xl:order-5 xl:self-start"
+        , attribute "large-from" "xl"
         , attribute "menu-label" "Menu"
         , attribute "restart-label" "New board"
         , attribute "locked" (boolAttribute locked)

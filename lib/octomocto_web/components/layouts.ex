@@ -55,6 +55,10 @@ defmodule OctomoctoWeb.Layouts do
     default: false,
     doc: "removes the header and the footer, so that the game uses all of the screen"
 
+  attr :compact_until_xl, :boolean,
+    default: false,
+    doc: "on a game page, keeps the small padding of a phone below the xl width"
+
   attr :welcome, :string,
     default: nil,
     doc: "a message in a bar above the header, which the user can close"
@@ -391,7 +395,11 @@ defmodule OctomoctoWeb.Layouts do
 
       <main class={[
         "flex-1",
-        if(@game, do: "px-2 py-2 lg:px-8 lg:py-6", else: "px-4 pb-6 sm:px-6 lg:px-8")
+        cond do
+          @game && @compact_until_xl -> "px-2 py-2 xl:px-8 xl:py-6"
+          @game -> "px-2 py-2 lg:px-8 lg:py-6"
+          true -> "px-4 pb-6 sm:px-6 lg:px-8"
+        end
       ]}>
         <div class={["space-y-4", if(@wide, do: "w-full", else: "mx-auto max-w-2xl")]}>
           {render_slot(@inner_block)}

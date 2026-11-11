@@ -40,8 +40,13 @@ const h = (tag, attrs = {}, children = []) => {
 
 const icon = name => h("span", {class: `${name} size-4`})
 
-// The same as `lg` of Tailwind
-const largeScreen = window.matchMedia("(min-width: 64rem)")
+// The same as `lg` and `xl` of Tailwind. A game sets large-from="xl" when
+// its panel is a row above the board below the xl width, also on a screen
+// that is wider than tall.
+const largeScreens = {
+  lg: window.matchMedia("(min-width: 64rem)"),
+  xl: window.matchMedia("(min-width: 80rem)")
+}
 
 // The round outline button of the panel, as the old Restart button
 const panelButton = "group flex size-9 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 disabled:pointer-events-none disabled:opacity-50 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
@@ -52,6 +57,8 @@ class OctoGameMenu extends HTMLElement {
   ]
 
   connectedCallback() {
+    // The large-from attribute must be set when the element is made
+    this.screen = largeScreens[this.getAttribute("large-from")] || largeScreens.lg
     this.open = false
     this.menu = null
     this.onOutside = e => { if (this.open && !this.contains(e.target)) this.toggle(false) }
@@ -59,14 +66,14 @@ class OctoGameMenu extends HTMLElement {
     this.onResize = () => { this.open = false; this.render() }
     document.addEventListener("click", this.onOutside)
     document.addEventListener("keydown", this.onKey)
-    largeScreen.addEventListener("change", this.onResize)
+    this.screen.addEventListener("change", this.onResize)
     this.render()
   }
 
   disconnectedCallback() {
     document.removeEventListener("click", this.onOutside)
     document.removeEventListener("keydown", this.onKey)
-    largeScreen.removeEventListener("change", this.onResize)
+    this.screen.removeEventListener("change", this.onResize)
     if (this.channel) this.channel.leave()
     this.channel = null
   }
@@ -83,7 +90,7 @@ class OctoGameMenu extends HTMLElement {
   // A player needs the friends on a large screen, or in an open dropdown
   maybeJoin() {
     const player = this.getAttribute("player") === "true"
-    if (player && !this.channel && game && (largeScreen.matches || this.open)) this.join()
+    if (player && !this.channel && game && (this.screen.matches || this.open)) this.join()
   }
 
   join() {
@@ -101,7 +108,7 @@ class OctoGameMenu extends HTMLElement {
   render() {
     this.maybeJoin()
 
-    if (largeScreen.matches) {
+    if (this.screen.matches) {
       // The host has `self-start` from Elm, so that the burger keeps its size
       this.style.alignSelf = "stretch"
       this.replaceChildren(this.panel())
@@ -166,11 +173,13 @@ class OctoGameMenu extends HTMLElement {
       title: label,
       "aria-haspopup": "true",
       "aria-expanded": String(this.open),
-      class: `${panelButton} max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2`,
+      class: this.screen === largeScreens.xl
+        ? panelButton
+        : `${panelButton} max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2`,
       onclick: e => { e.stopPropagation(); this.toggle(!this.open) }
     }, [
       icon("hero-bars-3"),
-      h("span", {class: "hidden max-lg:landscape:inline"}, label)
+      this.screen === largeScreens.xl ? null : h("span", {class: "hidden max-lg:landscape:inline"}, label)
     ])
   }
 
