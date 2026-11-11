@@ -81,10 +81,12 @@ defmodule OctomoctoWeb.PageHTML do
       <path d="M148 134C176 142 210 140 230 118" />
     </g>
     <circle cx="120" cy="88" r="62" fill="currentColor" />
-    <circle cx="98" cy="84" r="15" fill="#fff" />
-    <circle cx="142" cy="84" r="15" fill="#fff" />
-    <circle cx="98" cy="90" r="7" fill="#171532" />
-    <circle cx="142" cy="90" r="7" fill="#171532" />
+    <g class="octo-eyes">
+      <circle cx="98" cy="84" r="15" fill="#fff" />
+      <circle cx="142" cy="84" r="15" fill="#fff" />
+      <circle cx="98" cy="90" r="7" fill="#171532" />
+      <circle cx="142" cy="90" r="7" fill="#171532" />
+    </g>
     <path
       d="M110 112Q120 120 130 112"
       fill="none"

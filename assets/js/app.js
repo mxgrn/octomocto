@@ -201,7 +201,7 @@ document.addEventListener("keydown", e => {
 })
 window.addEventListener("phx:page-loading-start", () => closeAccountMenus())
 
-// Pick the eyes in the header wordmark that blink: the orange or the blue ones.
+// Pick the octopus in the header that blinks: the orange or the blue one.
 // pointerenter does not bubble, so the listener is on the capture phase.
 document.addEventListener("pointerenter", e => {
   if (e.target.id === "home-link") {

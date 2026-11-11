@@ -1033,15 +1033,16 @@ three times */
   .sudoku-cell.is-wrong .sudoku-digit, .sudoku-pop { animation: none; }
 }
 
-/* Header. The eyes in the wordmark blink one time when the pointer moves onto it.
-   Only the orange or only the blue eyes blink. app.js sets data-blink at random. */
-@keyframes wordmark-blink {
+/* Header. The eyes of one octopus blink one time when the pointer moves onto
+   the home link. Only the orange or only the blue octopus blinks. app.js sets
+   data-blink at random. */
+@keyframes octo-blink {
   0%, 100% { transform: scaleY(1); }
   50% { transform: scaleY(0.1); }
 }
-.wordmark-eye-orange, .wordmark-eye-blue { transform-box: fill-box; transform-origin: center; }
-.group[data-blink="orange"]:hover .wordmark-eye-orange,
-.group[data-blink="blue"]:hover .wordmark-eye-blue { animation: wordmark-blink 250ms ease-in-out; }
+.octo-eyes { transform-box: fill-box; transform-origin: center; }
+.group[data-blink="orange"]:hover .octo-top .octo-eyes,
+.group[data-blink="blue"]:hover .octo-bottom .octo-eyes { animation: octo-blink 250ms ease-in-out; }
 
 /* Home page. The two octopi move apart and then come back together. In the
    mark the heads touch, so at their closest point the octopi keep a small gap
