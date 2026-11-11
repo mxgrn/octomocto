@@ -33,7 +33,10 @@ defmodule OctomoctoWeb.UserSessionHTML do
     >
       <.google_button :if={@show_google?} />
       <.or_divider :if={@show_google? && @show_telegram?} />
-      <.telegram_widget :if={@show_telegram?} id="telegram-sign-in" auth_path={~p"/auth/telegram"} />
+      <div :if={@show_telegram?} class="space-y-2">
+        <.telegram_widget id="telegram-sign-in" auth_path={~p"/auth/telegram"} />
+        <.telegram_no_sms_note :if={TelegramAuth.bot_username()} />
+      </div>
       <.or_divider :if={(@show_google? || @show_telegram?) && @show_email?} />
 
       <.form
@@ -67,6 +70,36 @@ defmodule OctomoctoWeb.UserSessionHTML do
         Dev: see sent emails in <.link href="/dev/mailbox" class="underline">the mailbox</.link>.
       </p>
     </div>
+    """
+  end
+
+  # Many people think that Telegram sign-in sends an SMS code. The tooltip
+  # shows on hover and on focus; on phones, a tap shows it.
+  defp telegram_no_sms_note(assigns) do
+    ~H"""
+    <p
+      id="telegram-no-sms"
+      class="flex items-center justify-center gap-1 text-xs text-base-content/50"
+    >
+      {gettext("No SMS required")}
+      <button
+        type="button"
+        aria-describedby="telegram-no-sms-tip"
+        aria-label={gettext("How Telegram sign-in works")}
+        class="group/tip relative flex rounded-full text-base-content/40 transition hover:text-octo-indigo focus-visible:text-octo-indigo focus-visible:outline-none dark:hover:text-octo-indigo-light dark:focus-visible:text-octo-indigo-light"
+      >
+        <.icon name="hero-information-circle" class="size-4" />
+        <span
+          id="telegram-no-sms-tip"
+          role="tooltip"
+          class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1.5 w-60 -translate-x-1/2 rounded-md bg-octo-navy px-2.5 py-1.5 text-start text-xs leading-snug text-white opacity-0 shadow-sm transition group-hover/tip:opacity-100 group-focus-visible/tip:opacity-100 dark:bg-base-300 dark:text-base-content"
+        >
+          {gettext(
+            "Telegram sends no code. You only confirm the sign-in in the Telegram app, on a device where you are already signed in."
+          )}
+        </span>
+      </button>
+    </p>
     """
   end
 

@@ -52,6 +52,10 @@ defmodule OctomoctoWeb.UserSessionControllerTest do
       assert conn |> get(~p"/signin") |> has_element?("#google-sign-in")
     end
 
+    test "shows the no-SMS note under the Telegram button", %{conn: conn} do
+      assert conn |> get(~p"/signin") |> has_element?("#telegram-no-sms [role='tooltip']")
+    end
+
     test "in a language, the form sends to the page in the language", %{conn: conn} do
       conn = get(conn, ~p"/pt/signin")
 
