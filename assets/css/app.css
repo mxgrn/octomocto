@@ -296,6 +296,22 @@
 
 .graze-ring-low { animation: graze-ring-low 400ms ease-in-out infinite; }
 
+/* "Invisible!" under the field pops in, stays, and fades out */
+@keyframes graze-hint-flash {
+  0% { opacity: 0; transform: scale(0.7); }
+  6% { opacity: 1; transform: scale(1.15); }
+  11% { transform: scale(1); }
+  87.5% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes graze-hint-fade {
+  0%, 87.5% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.graze-hint-flash { display: inline-block; animation: graze-hint-flash 3200ms ease-out forwards; }
+
 /* In the last seconds of a perk, the circle blinks */
 @keyframes graze-perk-ending {
   50% { opacity: 0.3; }
@@ -341,6 +357,7 @@ html:has(.is-playing) body {
   .schulte-hit { animation: none; }
   .graze-ring-low { animation: none; }
   .graze-perk-ending { animation: none; }
+  .graze-hint-flash { animation: graze-hint-fade 3200ms linear forwards; }
   .graze-score { animation: none; }
   .countdown-pop { animation: none; }
   .turn-phone { animation: none; }

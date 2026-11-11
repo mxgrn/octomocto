@@ -965,7 +965,7 @@ viewGame model me game =
               else
                 text ""
             ]
-        , div [ class "min-w-0 flex-1" ] [ viewBoard model me game ]
+        , div [ class "min-w-0 flex-1" ] [ viewBoard model me game, viewHint model me game ]
         ]
 
 
@@ -1002,6 +1002,47 @@ viewBoard model me game =
           else
             text ""
         ]
+
+
+{-| The line under the board, as in Echo Chamber. When my circle gets the
+perk, "Invisible!" pops in and fades out (see the CSS). The line is keyed by
+the end of the perk, so a new perk shows it again. The line always has its
+height (`hintHeight`), so that the board does not move.
+-}
+viewHint : Model -> Me -> Game -> Html Msg
+viewHint model me game =
+    let
+        circle =
+            myCircle me game
+
+        content =
+            case circle of
+                Just c ->
+                    if c.alive && invisibleLeft model circle > 0 then
+                        [ ( String.fromFloat c.invisibleUntil
+                          , span [ class "graze-hint-flash text-base font-semibold text-octo-indigo dark:text-octo-indigo-light" ] [ text "Invisible!" ]
+                          )
+                        ]
+
+                    else
+                        []
+
+                Nothing ->
+                    []
+    in
+    Html.Keyed.node "p"
+        [ id "graze-hint"
+        , class "mx-auto flex items-center justify-center"
+        , style "width" (fieldWidth model me game)
+        , style "height" (String.fromFloat hintHeight ++ "px")
+        , attribute "aria-live" "polite"
+        ]
+        content
+
+
+hintHeight : Float
+hintHeight =
+    36
 
 
 {-| The width of the screen from which the panel is at the left of the
@@ -1045,7 +1086,7 @@ reservedHeight model me game =
                         0
                       )
     in
-    page
+    page + hintHeight
 
 
 {-| The board is square. Make it as wide as possible, but small enough that
