@@ -54,3 +54,11 @@ msgstr "đã theo dõi bạn"
 #, elixir-autogen, elixir-format
 msgid "now"
 msgstr "vừa xong"
+
+#, elixir-autogen, elixir-format
+msgid "Win it back"
+msgstr "Giành lại"
+
+#, elixir-autogen, elixir-format
+msgid "took your #1 place in %{game}"
+msgstr "đã chiếm hạng 1 của bạn trong %{game}"

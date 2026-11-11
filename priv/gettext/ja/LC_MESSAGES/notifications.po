@@ -54,3 +54,11 @@ msgstr "にフォローされたよ"
 #, elixir-autogen, elixir-format
 msgid "now"
 msgstr "今"
+
+#, elixir-autogen, elixir-format
+msgid "Win it back"
+msgstr "取り返す"
+
+#, elixir-autogen, elixir-format
+msgid "took your #1 place in %{game}"
+msgstr "が%{game}であなたの1位を奪いました"

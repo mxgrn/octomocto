@@ -54,3 +54,11 @@ msgstr "folgt dir jetzt"
 #, elixir-autogen, elixir-format
 msgid "now"
 msgstr "jetzt"
+
+#, elixir-autogen, elixir-format
+msgid "Win it back"
+msgstr "Hol ihn dir zurück"
+
+#, elixir-autogen, elixir-format
+msgid "took your #1 place in %{game}"
+msgstr "hat dir Platz 1 in %{game} abgenommen"

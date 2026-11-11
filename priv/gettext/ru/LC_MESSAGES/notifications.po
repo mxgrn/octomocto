@@ -54,3 +54,11 @@ msgstr "подписывается на тебя"
 #, elixir-autogen, elixir-format
 msgid "now"
 msgstr "сейчас"
+
+#, elixir-autogen, elixir-format
+msgid "Win it back"
+msgstr "Вернуть"
+
+#, elixir-autogen, elixir-format
+msgid "took your #1 place in %{game}"
+msgstr "забирает твоё 1-е место в %{game}"

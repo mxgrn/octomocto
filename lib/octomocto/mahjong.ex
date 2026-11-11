@@ -123,7 +123,11 @@ defmodule Octomocto.Mahjong do
       end)
 
     Octomocto.Guests.save(players, now)
-    Repo.insert_all(Result, rows)
+
+    Octomocto.Notifications.watch_top(__MODULE__, "mahjong", settings, players, fn ->
+      Repo.insert_all(Result, rows)
+    end)
+
     Octomocto.Locales.broadcast_saved(players)
     Octomocto.Stats.broadcast_game_finished()
   end

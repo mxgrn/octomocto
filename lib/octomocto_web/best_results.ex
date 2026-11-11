@@ -86,6 +86,45 @@ defmodule OctomoctoWeb.BestResults do
     """
   end
 
+  @doc """
+  The path of the settings page of the `game` (the game id of the front
+  page) that shows the Best results of the `settings` of the results.
+  The page takes only the params, not the settings that the user saved.
+  """
+  def path(game, settings), do: "/#{game}?" <> URI.encode_query(params(game, settings))
+
+  defp params("snap", %{"back" => back}), do: [back: back]
+  defp params("mahjong", %{"players" => players}), do: [players: players]
+  defp params("overlap", %{"players" => players}), do: [players: players]
+  defp params("graze", %{"players" => players}), do: [players: players]
+  defp params("echo", s), do: [pads: s["pads"], players: s["players"]]
+  defp params("set", s), do: [players: s["players"], mode: s["mode"]]
+  defp params("sudoku", s), do: [players: s["players"], difficulty: s["difficulty"]]
+
+  defp params("afterglow", %{"players" => 1}), do: [players: 1]
+  defp params("afterglow", s), do: [players: s["players"], size: s["size"]]
+
+  defp params("nimble-mosaic", s),
+    do: [board: s["type"], mode: s["mode"], players: s["players"]]
+
+  defp params("schulte", s),
+    do: [size: s["size"], marks: if(s["marks"], do: "on", else: "off"), players: s["players"]]
+
+  defp params("memory", s) do
+    set = if s["set"] == 3, do: "triplets", else: "pairs"
+    params = [set: set, cards: s["cards"], players: s["players"]]
+    if s["bombs"], do: params ++ [bombs: s["bombs"]], else: params
+  end
+
+  defp params("trains", s) do
+    [
+      players: s["players"],
+      switches: s["switch_count"],
+      trains: s["trains_per_house"],
+      pace: s["pace"]
+    ]
+  end
+
   @doc "The text of an empty list, by the filter."
   def empty_text(true), do: gettext("No results of you and the players you follow.")
   def empty_text(false), do: nil

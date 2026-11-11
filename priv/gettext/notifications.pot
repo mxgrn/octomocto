@@ -54,3 +54,11 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "now"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Win it back"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "took your #1 place in %{game}"
+msgstr ""

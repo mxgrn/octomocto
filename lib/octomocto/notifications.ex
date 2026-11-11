@@ -6,11 +6,15 @@ defmodule Octomocto.Notifications do
 
   There are two types:
 
-    * `Octomocto.Notifications.Notification`, to one user. The only kind
-      now is `:followed`: a user clicked Follow on the profile (see
-      `Octomocto.Friends.follow/2`). The follows from a shared game link
-      make no notification. There is one notification for each follower:
-      a second follow from the same user does not notify again.
+    * `Octomocto.Notifications.Notification`, to one user, of these kinds:
+      * `:followed`: a user clicked Follow on the profile (see
+        `Octomocto.Friends.follow/2`). The follows from a shared game link
+        make no notification. There is one notification for each
+        follower: a second follow from the same user does not notify
+        again.
+      * `:lost_top`: a user took the first place of the user in the Best
+        results of a game (see `watch_top/5`). Each lost first place is a
+        new notification.
     * `Octomocto.Notifications.Broadcast`, from the admins to all users
       and guests (at `/admin/notifications`). A user gets the broadcasts
       from after the signup. A guest gets the broadcasts from after the
@@ -71,6 +75,54 @@ defmodule Octomocto.Notifications do
   end
 
   @doc """
+  Runs `save`, the insert of the results of one field of the `game`, and
+  notifies the user who was first in the Best results of the `settings`
+  (all players) before the insert, when another user is first after it.
+  The `context` gives the Best results (`best_results/1`). A campaign run
+  is not in the Best results, and a field with no signed-in players
+  cannot change the first place, so they skip the check. Gives the value
+  of `save`.
+  """
+  def watch_top(context, game, settings, players, save) do
+    if Map.has_key?(settings, "campaign") or not Enum.any?(players, &Map.get(&1, :user_id)) do
+      save.()
+    else
+      before = top_user_id(context, settings)
+      result = save.()
+      now = top_user_id(context, settings)
+      if before && now != before, do: lost_top(before, now, game, settings)
+      result
+    end
+  end
+
+  defp top_user_id(context, settings) do
+    case context.best_results(settings) do
+      [first | _] -> first.user_id
+      [] -> nil
+    end
+  end
+
+  @doc """
+  Notifies the user `user_id` that the user `actor_id` took the first
+  place in the Best results of the `game` with the `settings`.
+  """
+  def lost_top(user_id, actor_id, game, settings) do
+    Repo.insert_all(Notification, [
+      %{
+        user_id: user_id,
+        kind: :lost_top,
+        actor_id: actor_id,
+        game: game,
+        settings: settings,
+        inserted_at: DateTime.utc_now()
+      }
+    ])
+
+    broadcast_count(user_id)
+    :ok
+  end
+
+  @doc """
   Removes the notification of the follow, when the user `followed_id` did
   not read it yet. A read one stays, so that a new follow does not notify
   again.
@@ -123,23 +175,29 @@ defmodule Octomocto.Notifications do
   while the follow exists.
   """
   def list(user_id) do
+    newest =
+      from n in Notification,
+        where: n.user_id == ^user_id,
+        order_by: [desc: n.inserted_at, desc: n.id],
+        limit: ^limit(),
+        preload: :actor
+
     follows =
       Repo.all(
-        from n in Notification,
+        from n in newest,
           join: f in Follow,
           on: f.follower_id == n.actor_id and f.followed_id == n.user_id,
-          where: n.user_id == ^user_id,
-          order_by: [desc: n.inserted_at, desc: n.id],
-          limit: ^limit(),
-          preload: :actor
+          where: n.kind == :followed
       )
+
+    lost_tops = Repo.all(from n in newest, where: n.kind == :lost_top)
 
     broadcasts =
       Repo.all(
         from b in user_broadcasts(user_id), order_by: [desc: b.inserted_at], limit: ^limit()
       )
 
-    (follows ++ broadcasts)
+    (follows ++ lost_tops ++ broadcasts)
     |> Enum.sort_by(& &1.inserted_at, {:desc, DateTime})
     |> Enum.take(limit())
   end

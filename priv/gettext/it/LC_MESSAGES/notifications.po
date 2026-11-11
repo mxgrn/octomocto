@@ -54,3 +54,11 @@ msgstr "ha iniziato a seguirti"
 #, elixir-autogen, elixir-format
 msgid "now"
 msgstr "ora"
+
+#, elixir-autogen, elixir-format
+msgid "Win it back"
+msgstr "Riprenditelo"
+
+#, elixir-autogen, elixir-format
+msgid "took your #1 place in %{game}"
+msgstr "ti ha tolto il 1º posto in %{game}"

@@ -54,3 +54,11 @@ msgstr "بدأ بمتابعتك"
 #, elixir-autogen, elixir-format
 msgid "now"
 msgstr "الآن"
+
+#, elixir-autogen, elixir-format
+msgid "Win it back"
+msgstr "استعِده"
+
+#, elixir-autogen, elixir-format
+msgid "took your #1 place in %{game}"
+msgstr "أخذ مركزك الأول في %{game}"

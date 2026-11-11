@@ -63,6 +63,70 @@ defmodule Octomocto.NotificationsTest do
     assert Notifications.unread_count(creator) == 0
   end
 
+  describe "a lost first place" do
+    @back2 %{"back" => 2, "players" => 1}
+
+    test "a new #1 of the Best results notifies the old #1", %{follower: rival, user: user} do
+      snap(user, 10)
+      Notifications.subscribe(user)
+
+      snap(rival, 20)
+
+      assert_receive {:unread_notifications, 1}
+
+      assert [%{kind: :lost_top, actor_id: ^rival, game: "snap", settings: @back2}] =
+               Notifications.list(user)
+    end
+
+    test "a better result of the #1 notifies nobody", %{user: user} do
+      snap(user, 10)
+
+      snap(user, 20)
+
+      assert Notifications.list(user) == []
+    end
+
+    test "a result below #1 notifies nobody", %{follower: rival, user: user} do
+      snap(user, 20)
+
+      snap(rival, 10)
+
+      assert Notifications.list(user) == []
+    end
+
+    test "each new push notifies again", %{follower: rival, user: user} do
+      snap(user, 10)
+      snap(rival, 20)
+      snap(user, 30)
+
+      snap(rival, 40)
+
+      assert [_, _] = Notifications.list(user)
+    end
+
+    test "a campaign run notifies nobody", %{follower: rival, user: user} do
+      settings = %{
+        "switch_count" => 6,
+        "trains_per_house" => 2,
+        "pace" => "normal",
+        "players" => 1,
+        "campaign" => 1
+      }
+
+      Octomocto.Trains.save_results("a", settings, 5, [%{user_id: user}])
+
+      Octomocto.Trains.save_results("b", settings, 9, [%{user_id: rival}])
+
+      assert Notifications.list(user) == []
+    end
+
+    defp snap(user_id, score) do
+      Octomocto.Snap.save_results("game", %{"back" => 2, "players" => 1}, 0, [
+        %{user_id: user_id, score: score, correct: score, wrong: 0}
+      ])
+    end
+  end
+
   describe "broadcasts" do
     test "a broadcast notifies the users who signed up before it", %{user: user} do
       Notifications.subscribe_broadcasts()

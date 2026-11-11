@@ -7,7 +7,9 @@ defmodule OctomoctoWeb.NotificationsLive do
   marked on the page until the next visit.
 
   A follow notification has a "Follow back" button, or "Following" when
-  the user already follows the follower.
+  the user already follows the follower. A lost first place has a "Win it
+  back" link to the settings page of the game with the settings of the
+  Best results (see `OctomoctoWeb.BestResults.path/2`).
 
   A guest gets only the broadcasts, and a link to sign in. The session of
   the guest keeps the read state (see `OctomoctoWeb.UnreadNotifications`).
@@ -18,7 +20,7 @@ defmodule OctomoctoWeb.NotificationsLive do
 
   alias Octomocto.{Accounts, Friends, Notifications}
   alias Octomocto.Notifications.{Broadcast, Notification}
-  alias OctomoctoWeb.{Locale, SiteBanners, UnreadNotifications}
+  alias OctomoctoWeb.{BestResults, HomeLive, Locale, SiteBanners, UnreadNotifications}
 
   # The plug of the route marked the broadcasts read (see
   # `UnreadNotifications.mark_guest_seen/2`)
@@ -84,6 +86,7 @@ defmodule OctomoctoWeb.NotificationsLive do
     |> stream(:notifications, notifications)
   end
 
+  defp dom_id(%Notification{kind: :lost_top, id: id}), do: "notifications-lost-top-#{id}"
   defp dom_id(%Notification{id: id}), do: "notifications-follow-#{id}"
   defp dom_id(%Broadcast{id: id}), do: "notifications-broadcast-#{id}"
 
@@ -125,6 +128,35 @@ defmodule OctomoctoWeb.NotificationsLive do
       true -> Locale.short_date(time)
     end
   end
+
+  attr :actor, :map, required: true
+
+  defp avatar(assigns) do
+    ~H"""
+    <.link navigate={~p"/players/#{profile_id(@actor)}"} class="shrink-0">
+      <img
+        :if={@actor.avatar_url}
+        src={@actor.avatar_url}
+        alt=""
+        class="size-10 rounded-full object-cover"
+      />
+      <span
+        :if={!@actor.avatar_url}
+        class="flex size-10 items-center justify-center rounded-full bg-octo-indigo/10 font-semibold text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light"
+      >
+        {String.first(name(@actor)) |> String.upcase()}
+      </span>
+    </.link>
+    """
+  end
+
+  # In the language of the page, when the game has translations
+  defp game_name(game),
+    do: HomeLive.games() |> Enum.find(&(&1.id == game)) |> HomeLive.game_name()
+
+  # In the language of the page, when the game has translations
+  defp game_path(%Notification{game: game, settings: settings}, locale),
+    do: Locale.game_path(locale, %{id: game, path: BestResults.path(game, settings)})
 
   defp name(user), do: Accounts.public_name(user) || dgettext("notifications", "Someone")
 

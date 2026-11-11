@@ -108,6 +108,40 @@ defmodule OctomoctoWeb.NotificationsLiveTest do
       assert Friends.following?(user.id, follower.id)
     end
 
+    test "sees a lost first place with a link to the game", %{conn: conn, user: user} do
+      Notifications.lost_top(user.id, user_fixture().id, "memory", %{
+        "set" => 3,
+        "cards" => 24,
+        "players" => 1,
+        "bombs" => 3
+      })
+
+      [notification] = Notifications.list(user.id)
+
+      {:ok, view, _html} = live(conn, ~p"/notifications")
+
+      assert has_element?(
+               view,
+               ~s|#notifications-lost-top-#{notification.id} a[href="/memory?set=triplets&cards=24&players=1&bombs=3"]|
+             )
+    end
+
+    test "sees the link to the game in the language", %{conn: conn, user: user} do
+      Notifications.lost_top(user.id, user_fixture().id, "set", %{
+        "mode" => "normal",
+        "players" => 1
+      })
+
+      [notification] = Notifications.list(user.id)
+
+      {:ok, view, _html} = live(conn, ~p"/pt/notifications")
+
+      assert has_element?(
+               view,
+               ~s|#notifications-lost-top-#{notification.id} a[href="/pt/set?players=1&mode=normal"]|
+             )
+    end
+
     test "sees the broadcasts on the page", %{conn: conn} do
       {:ok, broadcast} = Notifications.create_broadcast(%{text: "New game"})
 
