@@ -2,8 +2,10 @@ defmodule Octomocto.Graze.Game do
   @moduledoc """
   One game of Graze: each player is a circle in one shared field (see
   `Octomocto.Graze.World`). The circles go through each other. A circle
-  eats the food squares for points and energy. A circle that touches a
-  danger square, or that has no energy left, is out, and its score stays.
+  eats the food squares for points and energy. A perk square is food that
+  also makes the circle invisible to the danger squares for some seconds.
+  A circle that touches a danger square, or that has no energy left, is
+  out, and its score stays.
   The field is finished when all circles are out. The player with the
   most points wins.
 
@@ -54,7 +56,8 @@ defmodule Octomocto.Graze.Game do
       squares: [],
       next_square_id: 1,
       next_danger_at: nil,
-      placed: false
+      placed: false,
+      perk_paused_until: 0
     })
   end
 
@@ -66,7 +69,17 @@ defmodule Octomocto.Graze.Game do
 
   defp circle do
     center = World.size() / 2
-    %{x: center, y: center, t: 0, alive: true, energy: 1.0, energy_at: 0, survived_ms: 0}
+
+    %{
+      x: center,
+      y: center,
+      t: 0,
+      alive: true,
+      energy: 1.0,
+      energy_at: 0,
+      survived_ms: 0,
+      invisible_until: 0
+    }
   end
 
   # The game starts again on another node: its ticks were on the old node
@@ -159,7 +172,8 @@ defmodule Octomocto.Graze.Game do
             alive: true,
             energy: 1.0,
             energy_at: state.started_at,
-            survived_ms: 0
+            survived_ms: 0,
+            invisible_until: 0
           })
 
         {id, player}
@@ -215,7 +229,10 @@ defmodule Octomocto.Graze.Game do
     wanted = max(World.food_count(), dangers)
 
     Enum.reduce(food..(wanted - 1)//1, state, fn _, state ->
-      add(state, :food, now)
+      # A game that started before the perks has no pause
+      paused_until = Map.get(state, :perk_paused_until, 0)
+      perk = if World.perk_food?(state.squares, now, paused_until), do: :invisible
+      add(state, :food, now, perk: perk)
     end)
   end
 
@@ -235,8 +252,9 @@ defmodule Octomocto.Graze.Game do
     end
   end
 
-  defp add(state, kind, t) do
-    square = World.spawn(kind, state.next_square_id, t, (t - state.started_at) / 1000)
+  defp add(state, kind, t, opts \\ []) do
+    elapsed_s = (t - state.started_at) / 1000
+    square = World.spawn(kind, state.next_square_id, t, elapsed_s, opts)
     %{state | squares: state.squares ++ [square], next_square_id: state.next_square_id + 1}
   end
 
@@ -249,8 +267,9 @@ defmodule Octomocto.Graze.Game do
     World.path({player.x, player.y, player.t}, {x, y, t})
     |> Enum.reduce_while({state, false}, fn {px, py, pt}, {state, changed} ->
       state = update_in(state.players[id], &%{&1 | x: px, y: py, t: pt})
+      invisible = pt < invisible_until(state.players[id])
 
-      case World.hit(state.squares, px, py, pt) do
+      case World.hit(state.squares, px, py, pt, invisible) do
         %{kind: :danger} ->
           {:halt, {out(state, id, pt), true}}
 
@@ -264,12 +283,24 @@ defmodule Octomocto.Graze.Game do
   end
 
   defp eat(state, id, square, t) do
-    state
-    |> Map.update!(:squares, &Enum.reject(&1, fn s -> s.id == square.id end))
-    |> update_in([:players, id], fn player ->
-      %{World.eat(player, t, state.started_at) | score: player.score + 1}
-    end)
+    state =
+      state
+      |> Map.update!(:squares, &Enum.reject(&1, fn s -> s.id == square.id end))
+      |> update_in([:players, id], &%{World.eat(&1, t, state.started_at) | score: &1.score + 1})
+
+    # A square of a game that started before the perks has no perk key
+    case Map.get(square, :perk) do
+      :invisible ->
+        state
+        |> put_in([:players, id, :invisible_until], t + World.perk_ms())
+        |> Map.put(:perk_paused_until, t + World.perk_pause_ms())
+
+      nil ->
+        state
+    end
   end
+
+  defp invisible_until(player), do: Map.get(player, :invisible_until, 0)
 
   defp starve(state, id, t) do
     if World.energy(state.players[id], t, state.started_at) <= 0,
@@ -306,7 +337,8 @@ defmodule Octomocto.Graze.Game do
           y: round1(p.y),
           alive: p.alive,
           energy: if(state.placed, do: round3(World.energy(p, now, started_at)), else: 1.0),
-          survived_ms: p.survived_ms
+          survived_ms: p.survived_ms,
+          invisible_until: invisible_until(p)
         }
       end
 
@@ -330,7 +362,8 @@ defmodule Octomocto.Graze.Game do
       y: round1(square.y),
       vx: round1(square.vx),
       vy: round1(square.vy),
-      t: square.t
+      t: square.t,
+      perk: Map.get(square, :perk)
     }
   end
 

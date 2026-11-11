@@ -29,6 +29,15 @@ defmodule Octomocto.Graze.World do
   @food_size 28
   @eat_energy 0.3
 
+  # Sometimes a perk square comes in place of a food square: larger and
+  # faster. It is food, and it also gives a perk for `@perk_ms`. Only one
+  # perk square is in the field at a time, and no perk square comes for
+  # half of `@perk_ms` after a circle eats one.
+  @perk_food_odds 30
+  @perk_food_size 44
+  @perk_food_speedup 1.6
+  @perk_ms 10_000
+
   # The energy goes down by `@drain_base` per second at the start, and the
   # rate goes up by `@drain_growth` each second. A circle with full energy
   # that eats nothing lasts about 11 seconds at the start.
@@ -49,6 +58,8 @@ defmodule Octomocto.Graze.World do
   def food_count, do: @food_count
   def danger_delay_ms, do: @danger_delay_ms
   def max_speed, do: @max_speed
+  def perk_ms, do: @perk_ms
+  def perk_pause_ms, do: div(@perk_ms, 2)
 
   @doc "The place of the center of the square at the time `t`."
   def position(square, t) do
@@ -61,10 +72,16 @@ defmodule Octomocto.Graze.World do
 
   @doc """
   The square that a circle at `x`, `y` touches at the time `t`: a danger
-  square first, then a food square. Nil when it touches no square.
+  square first, then a food square. Nil when it touches no square. An
+  `invisible` circle does not see the danger squares.
   """
-  def hit(squares, x, y, t) do
-    touched = Enum.filter(squares, &(present?(&1, t) and touches?(&1, x, y, t)))
+  def hit(squares, x, y, t, invisible \\ false) do
+    touched =
+      Enum.filter(
+        squares,
+        &(present?(&1, t) and not (invisible and &1.kind == :danger) and touches?(&1, x, y, t))
+      )
+
     Enum.find(touched, &(&1.kind == :danger)) || List.first(touched)
   end
 
@@ -125,6 +142,16 @@ defmodule Octomocto.Graze.World do
     %{player | energy: min(energy(player, t, started_at) + @eat_energy, 1.0), energy_at: t}
   end
 
+  @doc """
+  True when the next food square at the time `t` must be a perk square: by
+  chance, only when no perk square is in `squares`, and not before
+  `paused_until`.
+  """
+  def perk_food?(squares, t, paused_until) do
+    t >= paused_until and not Enum.any?(squares, &Map.get(&1, :perk)) and
+      :rand.uniform(@perk_food_odds) == 1
+  end
+
   @doc "The energy that a circle loses each second at the time `t`."
   def drain_rate(t, started_at), do: @drain_base + @drain_growth * max(t - started_at, 0) / 1000
 
@@ -142,12 +169,21 @@ defmodule Octomocto.Graze.World do
   the time `t`, `elapsed_s` seconds after the start. It starts just out of
   a random edge and flies straight across the field: vertically from the
   top or the bottom edge, horizontally from the left or the right edge.
-  All squares get faster and faster.
+  All squares get faster and faster. With `perk: perk` (only
+  `:invisible` now), a food square is a perk square.
   """
-  def spawn(kind, id, t, elapsed_s) do
-    size = if kind == :food, do: @food_size, else: 23 + :rand.uniform(21)
+  def spawn(kind, id, t, elapsed_s, opts \\ []) do
+    perk = if kind == :food, do: Keyword.get(opts, :perk)
+
+    size =
+      cond do
+        perk -> @perk_food_size
+        kind == :food -> @food_size
+        true -> 23 + :rand.uniform(21)
+      end
 
     speed = min(140 + 4 * elapsed_s, 420) * (0.8 + :rand.uniform() * 0.45)
+    speed = if perk, do: speed * @perk_food_speedup, else: speed
 
     half = size / 2
     # Anywhere along the edge, so that no strip of the field is safe
@@ -173,7 +209,8 @@ defmodule Octomocto.Graze.World do
       vx: vx,
       vy: vy,
       t: t,
-      until: t + round(exit_s * 1000)
+      until: t + round(exit_s * 1000),
+      perk: perk
     }
   end
 

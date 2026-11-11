@@ -64,6 +64,36 @@ defmodule Octomocto.GrazeTest do
     refute Enum.any?(state.squares, &(&1.id == -1))
   end
 
+  test "a perk square gives a point and makes the circle invisible", %{id: id, pid: pid} do
+    player_id = join_and_start(id)
+    put_square(pid, Map.put(square(:food, 560, 500), :perk, :invisible))
+
+    t = System.system_time(:millisecond)
+    Graze.steer(id, player_id, 560, 500, t)
+
+    assert_receive {:graze_state, %{players: [%{score: 1}], circles: [circle]}}, 1000
+    assert circle.invisible_until > t + 9000
+
+    # No new perk square comes for half of the perk time
+    {_game, state} = :sys.get_state(pid)
+    assert state.perk_paused_until > t + 4000
+  end
+
+  test "an invisible circle goes through a danger square until the perk ends",
+       %{id: id, pid: pid} do
+    player_id = join_and_start(id)
+    now = System.system_time(:millisecond)
+
+    :sys.replace_state(pid, fn {game, state} ->
+      state = put_in(state.players[player_id].invisible_until, now + 500)
+      {game, %{state | squares: [square(:danger, 500, 500)]}}
+    end)
+
+    # The circle is in the danger square, and still in the field
+    assert_receive {:graze_state, %{circles: [%{alive: true}], squares: [%{id: -1} | _]}}, 1000
+    assert_receive {:graze_state, %{circles: [%{alive: false}]}}, 1500
+  end
+
   test "a danger square ends the field and saves the result", %{id: id, pid: pid} do
     user = user_fixture()
     player_id = join_and_start(id, user.id)

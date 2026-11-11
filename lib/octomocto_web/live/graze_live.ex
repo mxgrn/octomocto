@@ -108,6 +108,7 @@ defmodule OctomoctoWeb.GrazeLive do
       "But keep away from the red squares. One touch, and you are out.",
       "The ring around your circle is its energy. It goes down all the time, faster and faster. Each square that you eat fills part of it. When the ring is empty, you are out.",
       "More and more red squares come, and they get faster.",
+      "Sometimes a colored square with an icon comes. It is faster than the others. It is food, and it also gives a perk for 10 seconds. With the crossed-out eye, the red squares cannot touch you. Your circle blinks just before the perk ends. When it ends in a red square, you are out.",
       "With other players, all circles are in the same field and go through each other. The first circle to touch a square eats it.",
       "When you are out, your score stays. The game ends when all circles are out. The highest score wins.",
       "The game starts after a countdown, when all players are in."

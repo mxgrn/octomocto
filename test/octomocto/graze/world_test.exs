@@ -52,4 +52,34 @@ defmodule Octomocto.Graze.WorldTest do
 
     assert speed.(World.spawn(:food, 1, 0, 60)) > speed.(World.spawn(:food, 1, 0, 0))
   end
+
+  test "a perk square is larger and faster than a food square" do
+    speed = fn %{vx: vx, vy: vy} -> abs(vx) + abs(vy) end
+    average = fn squares -> Enum.sum_by(squares, speed) / length(squares) end
+
+    food = for _ <- 1..100, do: World.spawn(:food, 1, 0, 0)
+    perks = for _ <- 1..100, do: World.spawn(:food, 1, 0, 0, perk: :invisible)
+
+    assert %{size: 44, perk: :invisible} = hd(perks)
+    assert %{size: 28, perk: nil} = hd(food)
+    assert average.(perks) > average.(food)
+  end
+
+  test "perk_food?/3 is false while a perk square is in the field" do
+    squares = [Map.put(square(:food, 500, 500), :perk, :invisible)]
+
+    refute Enum.any?(1..1000, fn _ -> World.perk_food?(squares, 1000, 0) end)
+    assert Enum.any?(1..1000, fn _ -> World.perk_food?([], 1000, 0) end)
+  end
+
+  test "perk_food?/3 is false until the pause ends" do
+    refute Enum.any?(1..1000, fn _ -> World.perk_food?([], 1000, 1001) end)
+  end
+
+  test "hit/5 does not see danger squares for an invisible circle" do
+    squares = [square(:danger, 500, 500)]
+
+    assert World.hit(squares, 500, 500, 1000, true) == nil
+    assert %{kind: :danger} = World.hit(squares, 500, 500, 1000, false)
+  end
 end

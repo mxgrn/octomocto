@@ -261,6 +261,12 @@
 .graze-other .graze-ring { stroke: #374151; }
 .graze-ring-track { stroke: rgba(255, 255, 255, 0.25); }
 .graze-circle.is-out { opacity: 0.25; }
+.graze-perk { fill: var(--color-octo-indigo); }
+.graze-perk-icon { stroke: #ffffff; }
+/* An invisible circle glows */
+.graze-circle.is-glowing {
+  filter: drop-shadow(0 0 6px var(--color-octo-indigo)) drop-shadow(0 0 16px var(--color-octo-indigo));
+}
 .graze-name { fill: #111827; font-family: ui-sans-serif, system-ui, sans-serif; font-weight: 700; pointer-events: none; }
 .graze-dot-me { background: #111827; }
 .graze-dot-other { background: #9ca3af; }
@@ -275,6 +281,11 @@
 [data-theme=dark] .graze-other .graze-ring { stroke: #f1f5f9; }
 [data-theme=dark] .graze-ring-track { stroke: rgba(0, 0, 0, 0.15); }
 [data-theme=dark] .graze-name { fill: #ffffff; }
+[data-theme=dark] .graze-perk { fill: var(--color-octo-indigo-light); }
+[data-theme=dark] .graze-perk-icon { stroke: #1e2230; }
+[data-theme=dark] .graze-circle.is-glowing {
+  filter: drop-shadow(0 0 6px var(--color-octo-indigo-light)) drop-shadow(0 0 16px var(--color-octo-indigo-light));
+}
 [data-theme=dark] .graze-dot-me { background: #ffffff; }
 [data-theme=dark] .graze-dot-other { background: #6b7280; }
 
@@ -284,6 +295,13 @@
 }
 
 .graze-ring-low { animation: graze-ring-low 400ms ease-in-out infinite; }
+
+/* In the last seconds of a perk, the circle blinks */
+@keyframes graze-perk-ending {
+  50% { opacity: 0.3; }
+}
+
+.graze-perk-ending { animation: graze-perk-ending 300ms ease-in-out infinite; }
 
 /* As the next number of Nimble Mosaic: the new score pops in */
 .graze-score { animation: nimble-mosaic-next-in 200ms ease-out; }
@@ -322,6 +340,7 @@ html:has(.is-playing) body {
   .schulte-next { animation: none; }
   .schulte-hit { animation: none; }
   .graze-ring-low { animation: none; }
+  .graze-perk-ending { animation: none; }
   .graze-score { animation: none; }
   .countdown-pop { animation: none; }
   .turn-phone { animation: none; }

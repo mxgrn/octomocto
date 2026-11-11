@@ -22,6 +22,11 @@ softly.
 The ring around a circle is its energy. It goes down all the time. When it
 is empty, the circle is out.
 
+A perk square (indigo, with an icon) is food that also gives a perk for some
+seconds. Now the only perk is invisibility: the red squares do not see the
+circle. An invisible circle glows. It blinks in the last seconds of the
+perk.
+
 The port names start with "graze", because Elm does not allow two ports
 with the same name in one bundle.
 
@@ -108,12 +113,20 @@ type alias Circle =
     , alive : Bool
     , energy : Float
     , survivedMs : Int
+
+    -- The time of the server until which the red squares do not see the
+    -- circle. 0 when the circle never was invisible.
+    , invisibleUntil : Float
     }
 
 
 type Kind
     = Food
     | Danger
+
+
+type Perk
+    = Invisible
 
 
 {-| A square is at `x`, `y` at the time `t` of the server, and moves `vx`,
@@ -128,6 +141,9 @@ type alias Square =
     , vx : Float
     , vy : Float
     , t : Float
+
+    -- A perk square is a food square that also gives a perk
+    , perk : Maybe Perk
     }
 
 
@@ -411,7 +427,6 @@ followServer me game model =
                         )
                     )
                 |> Dict.fromList
-
     in
     { model | mine = mine, others = others }
 
@@ -460,7 +475,7 @@ frame local model =
                     case ( moved.mine, mine, moved.offset ) of
                         ( Just from, Just to, Just _ ) ->
                             if running moved game && alive then
-                                eatenOnWay game moved.eaten (serverNow moved) from to
+                                eatenOnWay game moved.eaten (invisibleLeft moved (myCircle me game) > 0) (serverNow moved) from to
 
                             else
                                 []
@@ -540,10 +555,11 @@ eatenWaitMs =
 {-| The food squares that my circle eats on its way from `from` to `to`, at
 the time `time` of the server. The check is the same as on the server (see
 `Octomocto.Graze.World`): points 10 units apart, a danger square first, and
-a danger square stops the way. The squares in `eaten` are gone already.
+a danger square stops the way. The squares in `eaten` are gone already. An
+`invisible` circle does not see the danger squares.
 -}
-eatenOnWay : Game -> Dict Int Float -> Float -> ( Float, Float ) -> ( Float, Float ) -> List Int
-eatenOnWay game eaten time ( fx, fy ) ( tx, ty ) =
+eatenOnWay : Game -> Dict Int Float -> Bool -> Float -> ( Float, Float ) -> ( Float, Float ) -> List Int
+eatenOnWay game eaten invisible time ( fx, fy ) ( tx, ty ) =
     let
         steps =
             clamp 1 40 (ceiling (sqrt ((tx - fx) * (tx - fx) + (ty - fy) * (ty - fy)) / 10))
@@ -564,7 +580,9 @@ eatenOnWay game eaten time ( fx, fy ) ( tx, ty ) =
                         game.squares
                             |> List.filter
                                 (\s ->
-                                    time >= s.t
+                                    time
+                                        >= s.t
+                                        && not (invisible && s.kind == Danger)
                                         && not (Dict.member s.id eaten)
                                         && not (List.member s.id ate)
                                         && touches game s time x y
@@ -602,6 +620,19 @@ touches game square time x y =
             max 0 (abs (y - (square.y + square.vy * dt)) - half)
     in
     dx * dx + dy * dy < game.radius * game.radius
+
+
+{-| The milliseconds until the red squares see the circle again, at the
+time of the server that this browser draws now. 0 when it is not invisible.
+-}
+invisibleLeft : Model -> Maybe Circle -> Float
+invisibleLeft model circle =
+    case circle of
+        Just c ->
+            max 0 (c.invisibleUntil - serverNow model)
+
+        Nothing ->
+            0
 
 
 myCircle : Me -> Game -> Maybe Circle
@@ -785,35 +816,48 @@ playerDecoder =
 
 circleDecoder : Decoder Circle
 circleDecoder =
-    Decode.map6 Circle
+    Decode.map7 Circle
         (Decode.field "id" Decode.string)
         (Decode.field "x" Decode.float)
         (Decode.field "y" Decode.float)
         (Decode.field "alive" Decode.bool)
         (Decode.field "energy" Decode.float)
         (Decode.field "survived_ms" Decode.int)
+        (Decode.field "invisible_until" Decode.float)
 
 
 squareDecoder : Decoder Square
 squareDecoder =
-    Decode.map8 Square
-        (Decode.field "id" Decode.int)
-        (Decode.field "kind" Decode.string
-            |> Decode.map
-                (\kind ->
-                    if kind == "food" then
-                        Food
+    Decode.succeed Square
+        |> andMap (Decode.field "id" Decode.int)
+        |> andMap
+            (Decode.field "kind" Decode.string
+                |> Decode.map
+                    (\kind ->
+                        if kind == "food" then
+                            Food
 
-                    else
-                        Danger
-                )
-        )
-        (Decode.field "size" Decode.float)
-        (Decode.field "x" Decode.float)
-        (Decode.field "y" Decode.float)
-        (Decode.field "vx" Decode.float)
-        (Decode.field "vy" Decode.float)
-        (Decode.field "t" Decode.float)
+                        else
+                            Danger
+                    )
+            )
+        |> andMap (Decode.field "size" Decode.float)
+        |> andMap (Decode.field "x" Decode.float)
+        |> andMap (Decode.field "y" Decode.float)
+        |> andMap (Decode.field "vx" Decode.float)
+        |> andMap (Decode.field "vy" Decode.float)
+        |> andMap (Decode.field "t" Decode.float)
+        |> andMap
+            (Decode.field "perk" (Decode.nullable Decode.string)
+                |> Decode.map
+                    (\perk ->
+                        if perk == Just "invisible" then
+                            Just Invisible
+
+                        else
+                            Nothing
+                    )
+            )
 
 
 {-| The place of the pointer in the field, from a pointer event on the layer
@@ -1222,13 +1266,13 @@ viewField model me game =
                                     |> Maybe.map (\p -> Maybe.withDefault p.colorName p.name)
                                     |> Maybe.withDefault ""
                         in
-                        ( c.id, viewCircle game False (Just name) x y c.alive (energyOf c) )
+                        ( c.id, viewCircle game False (Just name) x y c.alive (energyOf c) (invisibleLeft model (Just c)) )
                     )
 
         mine =
             case ( myCircle me game, model.mine ) of
                 ( Just c, Just ( x, y ) ) ->
-                    [ ( c.id, viewCircle game True Nothing x y c.alive (energyOf c) ) ]
+                    [ ( c.id, viewCircle game True Nothing x y c.alive (energyOf c) (invisibleLeft model (Just c)) ) ]
 
                 _ ->
                     []
@@ -1274,31 +1318,68 @@ viewSquare time square =
 
         ( x, y ) =
             ( square.x + square.vx * dt, square.y + square.vy * dt )
-    in
-    Svg.rect
-        [ SA.x (String.fromFloat (x - square.size / 2))
-        , SA.y (String.fromFloat (y - square.size / 2))
-        , SA.width (String.fromFloat square.size)
-        , SA.height (String.fromFloat square.size)
-        , SA.rx "3"
-        , SA.class
-            (case square.kind of
-                Food ->
-                    "graze-food"
 
-                Danger ->
-                    "graze-danger"
+        rect class =
+            Svg.rect
+                [ SA.x (String.fromFloat (x - square.size / 2))
+                , SA.y (String.fromFloat (y - square.size / 2))
+                , SA.width (String.fromFloat square.size)
+                , SA.height (String.fromFloat square.size)
+                , SA.rx "3"
+                , SA.class class
+                ]
+                []
+    in
+    case ( square.kind, square.perk ) of
+        ( Food, Just Invisible ) ->
+            Svg.g [] [ rect "graze-perk", viewPerkIcon x y (square.size * 0.65) eyeSlashPath ]
+
+        ( Food, Nothing ) ->
+            rect "graze-food"
+
+        ( Danger, _ ) ->
+            rect "graze-danger"
+
+
+{-| An outline icon (24 × 24, as the Heroicons) with its center at `x`, `y`
+and the side `side`.
+-}
+viewPerkIcon : Float -> Float -> Float -> String -> Svg Msg
+viewPerkIcon x y side path =
+    Svg.path
+        [ SA.d path
+        , SA.class "graze-perk-icon"
+        , SA.fill "none"
+        , SA.strokeWidth "2"
+        , SA.strokeLinecap "round"
+        , SA.strokeLinejoin "round"
+        , SA.transform
+            ("translate("
+                ++ String.fromFloat (x - side / 2)
+                ++ " "
+                ++ String.fromFloat (y - side / 2)
+                ++ ") scale("
+                ++ String.fromFloat (side / 24)
+                ++ ")"
             )
         ]
         []
 
 
+{-| The "eye-slash" icon of Heroicons (outline)
+-}
+eyeSlashPath : String
+eyeSlashPath =
+    "M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
+
+
 {-| A circle with its energy ring on the inner edge. The ring starts at the
 top and goes clockwise. An almost empty ring of my circle blinks. Another player's
-circle has the initials of the name inside it.
+circle has the initials of the name inside it. An invisible circle
+(`invisible` ms left) glows, and it blinks near the end.
 -}
-viewCircle : Game -> Bool -> Maybe String -> Float -> Float -> Bool -> Float -> Svg Msg
-viewCircle game isMine name x y alive energy =
+viewCircle : Game -> Bool -> Maybe String -> Float -> Float -> Bool -> Float -> Float -> Svg Msg
+viewCircle game isMine name x y alive energy invisible =
     let
         cx =
             String.fromFloat x
@@ -1337,6 +1418,16 @@ viewCircle game isMine name x y alive energy =
 
                   else
                     "is-out"
+                , if alive && invisible > 0 then
+                    "is-glowing"
+
+                  else
+                    ""
+                , if alive && invisible > 0 && invisible < perkEndingMs then
+                    "graze-perk-ending"
+
+                  else
+                    ""
                 ]
             )
         ]
@@ -1442,6 +1533,13 @@ viewOut me game =
             ]
             [ text ("You are out with " ++ pointsText score ++ ". The others still play.") ]
         ]
+
+
+{-| In the last milliseconds of a perk, the circle blinks.
+-}
+perkEndingMs : Float
+perkEndingMs =
+    2000
 
 
 pointsText : Int -> String
