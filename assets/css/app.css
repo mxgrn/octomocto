@@ -261,7 +261,12 @@
 .graze-other .graze-ring { stroke: #374151; }
 .graze-ring-track { stroke: rgba(255, 255, 255, 0.25); }
 .graze-circle.is-out { opacity: 0.25; }
-.graze-perk { fill: var(--color-octo-indigo); }
+/* A perk square has the color of a food square, and it spins */
+@keyframes graze-perk-spin {
+  to { transform: rotate(360deg); }
+}
+
+.graze-perk { transform-box: fill-box; transform-origin: center; animation: graze-perk-spin 800ms linear infinite; }
 .graze-perk-icon { stroke: #ffffff; }
 /* An invisible circle glows */
 .graze-circle.is-glowing {
@@ -281,7 +286,6 @@
 [data-theme=dark] .graze-other .graze-ring { stroke: #f1f5f9; }
 [data-theme=dark] .graze-ring-track { stroke: rgba(0, 0, 0, 0.15); }
 [data-theme=dark] .graze-name { fill: #ffffff; }
-[data-theme=dark] .graze-perk { fill: var(--color-octo-indigo-light); }
 [data-theme=dark] .graze-perk-icon { stroke: #1e2230; }
 [data-theme=dark] .graze-circle.is-glowing {
   filter: drop-shadow(0 0 6px var(--color-octo-indigo-light)) drop-shadow(0 0 16px var(--color-octo-indigo-light));
@@ -357,6 +361,7 @@ html:has(.is-playing) body {
   .schulte-hit { animation: none; }
   .graze-ring-low { animation: none; }
   .graze-perk-ending { animation: none; }
+  .graze-perk { animation: none; }
   .graze-hint-flash { animation: graze-hint-fade 3200ms linear forwards; }
   .graze-score { animation: none; }
   .countdown-pop { animation: none; }
