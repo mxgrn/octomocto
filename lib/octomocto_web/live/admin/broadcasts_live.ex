@@ -39,7 +39,7 @@ defmodule OctomoctoWeb.Admin.BroadcastsLive do
               Notifications
             </h1>
             <p class="mt-1 text-sm text-base-content/60">
-              For all users and guests. A user gets the ones from after the signup, a guest the ones from after the first visit.
+              For all users and guests. A user gets the ones from after the signup, a guest the ones from after the first visit. A test goes only to the admins.
             </p>
           </div>
           <.link
@@ -67,10 +67,20 @@ defmodule OctomoctoWeb.Admin.BroadcastsLive do
               <p class="text-sm font-medium text-octo-navy dark:text-base-content [&_a]:font-semibold [&_a]:text-octo-indigo [&_a]:underline [&_a]:decoration-octo-indigo/40 [&_a]:underline-offset-2 [&_a]:transition [&_a:hover]:decoration-octo-indigo dark:[&_a]:text-octo-indigo-light">
                 {Phoenix.HTML.raw(SiteBanners.to_html(broadcast.text))}
               </p>
-              <span class="inline-flex items-center gap-1 text-xs text-base-content/70">
-                <.icon name="hero-clock-micro" class="size-3.5" />
-                Sent {Calendar.strftime(broadcast.inserted_at, "%Y-%m-%d %H:%M")} UTC
-              </span>
+              <div class="flex flex-wrap items-center gap-2">
+                <span
+                  :if={broadcast.status == :test}
+                  id={"status-badge-#{broadcast.id}"}
+                  class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-500/20 dark:text-amber-300"
+                >
+                  <.icon name="hero-beaker-micro" class="size-3.5" /> Test
+                </span>
+                <span class="inline-flex items-center gap-1 text-xs text-base-content/70">
+                  <.icon name="hero-clock-micro" class="size-3.5" />
+                  {if broadcast.status == :test, do: "Sent to the admins", else: "Sent"}
+                  {Calendar.strftime(broadcast.inserted_at, "%Y-%m-%d %H:%M")} UTC
+                </span>
+              </div>
             </div>
             <div class="flex shrink-0 items-center gap-1">
               <.link

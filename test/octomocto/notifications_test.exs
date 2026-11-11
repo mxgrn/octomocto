@@ -103,6 +103,31 @@ defmodule Octomocto.NotificationsTest do
       assert Notifications.guest_list(broadcast.inserted_at) == []
     end
 
+    test "a test broadcast goes only to the admins", %{user: user} do
+      admin = user_fixture() |> Ecto.Changeset.change(role: :admin) |> Repo.update!()
+
+      {:ok, broadcast} = Notifications.send_test_broadcast(%Broadcast{}, %{text: "New game"})
+      before = DateTime.add(broadcast.inserted_at, -1, :second)
+
+      assert Notifications.unread_count(admin.id) == 1
+      assert Notifications.unread_count(user) == 0
+      assert Notifications.guest_unread_count(before) == 0
+      assert Notifications.guest_list(before) == []
+    end
+
+    test "a test broadcast sent to all gets the new text and time", %{user: user} do
+      {:ok, test} = Notifications.send_test_broadcast(%Broadcast{}, %{text: "Typo"})
+      backdate(test)
+      test = Repo.reload!(test)
+
+      {:ok, broadcast} = Notifications.send_broadcast(test, %{text: "Fixed"})
+
+      assert broadcast.id == test.id
+      assert broadcast.status == :sent
+      assert DateTime.after?(broadcast.inserted_at, test.inserted_at)
+      assert [%Broadcast{text: "Fixed"}] = Notifications.list(user)
+    end
+
     test "a broadcast must be on one line" do
       assert {:error, changeset} = Notifications.create_broadcast(%{text: "a\nb"})
       assert "must be on one line" in errors_on(changeset).text

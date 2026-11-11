@@ -14,7 +14,8 @@ defmodule Octomocto.Notifications do
     * `Octomocto.Notifications.Broadcast`, from the admins to all users
       and guests (at `/admin/notifications`). A user gets the broadcasts
       from after the signup. A guest gets the broadcasts from after the
-      first visit.
+      first visit. A broadcast with the status `:test` goes only to the
+      admins, until an admin sends it to all.
 
   For a user, the notifications after `users.notifications_seen_at` are
   unread. A guest keeps the time of the first visit and the time when the
@@ -109,7 +110,8 @@ defmodule Octomocto.Notifications do
       join: u in User,
       as: :user,
       on: u.id == ^user_id,
-      where: b.inserted_at > u.inserted_at
+      where: b.inserted_at > u.inserted_at,
+      where: b.status == :sent or (b.status == :test and u.role == :admin)
   end
 
   @doc """
@@ -148,7 +150,8 @@ defmodule Octomocto.Notifications do
     Repo.all(from b in broadcasts_after(since), order_by: [desc: b.inserted_at], limit: ^limit())
   end
 
-  defp broadcasts_after(since), do: from(b in Broadcast, where: b.inserted_at > ^since)
+  defp broadcasts_after(since),
+    do: from(b in Broadcast, where: b.status == :sent and b.inserted_at > ^since)
 
   @doc """
   Marks all notifications of the user as read. Gives the time when the
@@ -178,9 +181,33 @@ defmodule Octomocto.Notifications do
 
   def get_broadcast!(id), do: Repo.get!(Broadcast, id)
 
-  @doc "Adds a broadcast. The open pages of all users and guests get the new count."
-  def create_broadcast(attrs) do
-    with {:ok, broadcast} <- %Broadcast{} |> Broadcast.changeset(attrs) |> Repo.insert() do
+  @doc "Adds a broadcast and sends it to all users and guests."
+  def create_broadcast(attrs), do: send_broadcast(%Broadcast{}, attrs)
+
+  @doc """
+  Sends the broadcast to all users and guests. A new one is added. A test
+  one (see `send_test_broadcast/2`) gets the new text and the time of now,
+  so that it is unread again for the admins.
+  """
+  def send_broadcast(%Broadcast{} = broadcast, attrs), do: deliver(broadcast, attrs, :sent)
+
+  @doc """
+  Sends the broadcast only to the admins, so that they can see it before
+  it goes to all. A test broadcast that is sent again gets the new text
+  and the time of now.
+  """
+  def send_test_broadcast(%Broadcast{} = broadcast, attrs), do: deliver(broadcast, attrs, :test)
+
+  # The open pages of all users and guests get the new count
+  defp deliver(broadcast, attrs, status) do
+    changeset = broadcast |> Broadcast.changeset(attrs) |> Ecto.Changeset.change(status: status)
+
+    changeset =
+      if broadcast.id,
+        do: Ecto.Changeset.change(changeset, inserted_at: DateTime.utc_now()),
+        else: changeset
+
+    with {:ok, broadcast} <- Repo.insert_or_update(changeset) do
       Phoenix.PubSub.broadcast(Octomocto.PubSub, @broadcasts_topic, :broadcast_added)
       {:ok, broadcast}
     end

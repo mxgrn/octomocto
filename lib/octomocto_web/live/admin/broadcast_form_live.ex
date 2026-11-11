@@ -1,7 +1,9 @@
 defmodule OctomoctoWeb.Admin.BroadcastFormLive do
   @moduledoc """
   The form to send a notification to all users and guests, or to change
-  the text of one. A change does not make it unread again.
+  the text of one. A change does not make it unread again. "Send test"
+  sends it only to the admins and keeps the form open. Then "Send to all"
+  sends the same notification to all, with the time of now.
   """
   use OctomoctoWeb, :live_view
 
@@ -32,26 +34,53 @@ defmodule OctomoctoWeb.Admin.BroadcastFormLive do
     {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
   end
 
-  def handle_event("save", %{"broadcast" => params}, socket) do
-    case save(socket.assigns.live_action, socket.assigns.broadcast, params) do
+  # The button that submits the form gives "status": "test" or "sent". A
+  # broadcast that was sent to all has only the Save button.
+  def handle_event("save", %{"broadcast" => params} = form_params, socket) do
+    broadcast = socket.assigns.broadcast
+    action = action(broadcast, form_params["status"])
+
+    case save(action, broadcast, params) do
       {:ok, broadcast} ->
         Notifications.translate(broadcast)
-
-        {:noreply,
-         socket
-         |> put_flash(:info, saved_message(socket.assigns.live_action))
-         |> push_navigate(to: ~p"/admin/notifications")}
+        {:noreply, saved(socket, action, broadcast)}
 
       {:error, changeset} ->
         {:noreply, assign_form(socket, changeset)}
     end
   end
 
-  defp save(:new, _broadcast, params), do: Notifications.create_broadcast(params)
-  defp save(:edit, broadcast, params), do: Notifications.update_broadcast(broadcast, params)
+  defp action(broadcast, status) do
+    cond do
+      sent?(broadcast) -> :save
+      status == "sent" -> :send
+      # Enter in the text field also sends a test: it is the first button
+      true -> :send_test
+    end
+  end
 
-  defp saved_message(:new), do: "Notification sent"
-  defp saved_message(:edit), do: "Notification saved"
+  defp save(:save, broadcast, params), do: Notifications.update_broadcast(broadcast, params)
+  defp save(:send, broadcast, params), do: Notifications.send_broadcast(broadcast, params)
+
+  defp save(:send_test, broadcast, params),
+    do: Notifications.send_test_broadcast(broadcast, params)
+
+  # After a test the form stays open, so that the admin can send it to all
+  defp saved(socket, :send_test, broadcast) do
+    socket
+    |> put_flash(:info, "Test sent to the admins")
+    |> assign(broadcast: broadcast)
+    |> assign_form(Notifications.change_broadcast(broadcast))
+  end
+
+  defp saved(socket, action, _broadcast) do
+    socket
+    |> put_flash(:info, if(action == :send, do: "Notification sent", else: "Notification saved"))
+    |> push_navigate(to: ~p"/admin/notifications")
+  end
+
+  defp sent?(%Broadcast{status: :sent, id: id}), do: not is_nil(id)
+  defp sent?(_broadcast), do: false
 
   defp assign_form(socket, changeset), do: assign(socket, :form, to_form(changeset))
 
@@ -94,14 +123,37 @@ defmodule OctomoctoWeb.Admin.BroadcastFormLive do
             >
               Cancel
             </.link>
-            <button
-              id="save-broadcast"
-              type="submit"
-              phx-disable-with="Saving..."
-              class="rounded-full bg-octo-indigo px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-octo-indigo/20 active:scale-95"
-            >
-              {if @live_action == :new, do: "Send to all", else: "Save"}
-            </button>
+            <%= if sent?(@broadcast) do %>
+              <button
+                id="save-broadcast"
+                type="submit"
+                phx-disable-with="Saving..."
+                class="rounded-full bg-octo-indigo px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-octo-indigo/20 active:scale-95"
+              >
+                Save
+              </button>
+            <% else %>
+              <button
+                id="send-test-broadcast"
+                type="submit"
+                name="status"
+                value="test"
+                phx-disable-with="Sending..."
+                class="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-octo-indigo ring-1 ring-octo-indigo/30 transition hover:bg-octo-indigo/5 hover:ring-octo-indigo/50 active:scale-95 dark:text-octo-indigo-light"
+              >
+                <.icon name="hero-beaker-micro" class="size-4" /> Send test
+              </button>
+              <button
+                id="save-broadcast"
+                type="submit"
+                name="status"
+                value="sent"
+                phx-disable-with="Sending..."
+                class="rounded-full bg-octo-indigo px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-octo-indigo/20 active:scale-95"
+              >
+                Send to all
+              </button>
+            <% end %>
           </div>
         </.form>
       </div>

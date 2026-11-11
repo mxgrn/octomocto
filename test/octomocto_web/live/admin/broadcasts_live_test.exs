@@ -4,6 +4,7 @@ defmodule OctomoctoWeb.Admin.BroadcastsLiveTest do
   import Phoenix.LiveViewTest
 
   alias Octomocto.Notifications
+  alias Octomocto.Notifications.Broadcast
 
   setup :register_and_log_in_admin
 
@@ -20,16 +21,43 @@ defmodule OctomoctoWeb.Admin.BroadcastsLiveTest do
 
     view
     |> form("#broadcast-form", broadcast: %{text: "New [game](/graze)"})
-    |> render_submit()
+    |> render_submit(%{status: "sent"})
 
     assert_redirect(view, ~p"/admin/notifications")
     assert [%{text: "New [game](/graze)"}] = Notifications.list_broadcasts()
   end
 
+  test "sends a test, then sends the same broadcast to all", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/admin/notifications/new")
+
+    view
+    |> form("#broadcast-form", broadcast: %{text: "Typo"})
+    |> render_submit(%{status: "test"})
+
+    assert [%{id: id, text: "Typo", status: :test}] = Notifications.list_broadcasts()
+
+    view
+    |> form("#broadcast-form", broadcast: %{text: "Fixed"})
+    |> render_submit(%{status: "sent"})
+
+    assert_redirect(view, ~p"/admin/notifications")
+    assert [%{id: ^id, text: "Fixed", status: :sent}] = Notifications.list_broadcasts()
+  end
+
+  test "marks the test broadcasts in the list", %{conn: conn} do
+    {:ok, test} = Notifications.send_test_broadcast(%Broadcast{}, %{text: "Hello"})
+    {:ok, sent} = Notifications.create_broadcast(%{text: "Sent"})
+
+    {:ok, view, _html} = live(conn, ~p"/admin/notifications")
+
+    assert has_element?(view, "#status-badge-#{test.id}", "Test")
+    refute has_element?(view, "#status-badge-#{sent.id}")
+  end
+
   test "shows the errors of an invalid broadcast", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/admin/notifications/new")
 
-    view |> form("#broadcast-form", broadcast: %{text: ""}) |> render_submit()
+    view |> form("#broadcast-form", broadcast: %{text: ""}) |> render_submit(%{status: "sent"})
 
     assert has_element?(view, "#broadcast-form", "can't be blank")
   end
