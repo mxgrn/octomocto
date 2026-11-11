@@ -40,10 +40,6 @@ msgid "Dark theme"
 msgstr "ダークテーマ"
 
 #, elixir-autogen, elixir-format
-msgid "Email"
-msgstr "メールアドレス"
-
-#, elixir-autogen, elixir-format
 msgid "Email me a sign-in link"
 msgstr "ログイン用リンクをメールで受け取る"
 
@@ -110,10 +106,6 @@ msgstr "進行中のゲーム"
 #, elixir-autogen, elixir-format
 msgid "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
 msgstr "記憶力、論理力、スピードをきたえるサクッと遊べる脳トレゲーム。ひとりでも、友達と対戦でも。"
-
-#, elixir-autogen, elixir-format
-msgid "Send"
-msgstr "送信"
 
 #, elixir-autogen, elixir-format
 msgid "Settings"
@@ -226,10 +218,6 @@ msgstr "作成中..."
 #, elixir-autogen, elixir-format
 msgid "Suggest a game"
 msgstr "ゲームを提案する"
-
-#, elixir-autogen, elixir-format
-msgid "Sign in to change your name"
-msgstr "ログインして名前を変えよう"
 
 #, elixir-autogen, elixir-format
 msgid "%{count} tie"
@@ -356,3 +344,19 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "FAQ"
 msgstr "よくある質問"
+
+#, elixir-autogen, elixir-format
+msgid "Continue with Google"
+msgstr "Googleで続ける"
+
+#, elixir-autogen, elixir-format
+msgid "How Telegram sign-in works"
+msgstr "Telegramログインのしくみ"
+
+#, elixir-autogen, elixir-format
+msgid "No SMS required"
+msgstr "SMSはいらない"
+
+#, elixir-autogen, elixir-format
+msgid "Telegram sends no code. You only confirm the sign-in in the Telegram app, on a device where you are already signed in."
+msgstr "Telegramからコードは届かない。すでにTelegramを使っている端末のアプリで、ログインを確認するだけ。"

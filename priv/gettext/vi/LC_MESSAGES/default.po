@@ -40,10 +40,6 @@ msgid "Dark theme"
 msgstr "Giao diện tối"
 
 #, elixir-autogen, elixir-format
-msgid "Email"
-msgstr "Email"
-
-#, elixir-autogen, elixir-format
 msgid "Email me a sign-in link"
 msgstr "Gửi liên kết đăng nhập qua email"
 
@@ -110,10 +106,6 @@ msgstr "Ván đang diễn ra"
 #, elixir-autogen, elixir-format
 msgid "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
 msgstr "Trò chơi trí tuệ nhanh gọn rèn trí nhớ, tư duy logic và tốc độ. Chơi một mình hoặc đối đầu với bạn bè."
-
-#, elixir-autogen, elixir-format
-msgid "Send"
-msgstr "Gửi"
 
 #, elixir-autogen, elixir-format
 msgid "Settings"
@@ -226,10 +218,6 @@ msgstr "Đang tạo..."
 #, elixir-autogen, elixir-format
 msgid "Suggest a game"
 msgstr "Đề xuất trò chơi"
-
-#, elixir-autogen, elixir-format
-msgid "Sign in to change your name"
-msgstr "Đăng nhập để đổi tên"
 
 #, elixir-autogen, elixir-format
 msgid "%{count} tie"
@@ -356,3 +344,19 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "FAQ"
 msgstr "Câu hỏi thường gặp"
+
+#, elixir-autogen, elixir-format
+msgid "Continue with Google"
+msgstr "Tiếp tục với Google"
+
+#, elixir-autogen, elixir-format
+msgid "How Telegram sign-in works"
+msgstr "Cách đăng nhập bằng Telegram"
+
+#, elixir-autogen, elixir-format
+msgid "No SMS required"
+msgstr "Không cần SMS"
+
+#, elixir-autogen, elixir-format
+msgid "Telegram sends no code. You only confirm the sign-in in the Telegram app, on a device where you are already signed in."
+msgstr "Telegram không gửi mã. Bạn chỉ cần xác nhận đăng nhập trong ứng dụng Telegram, trên thiết bị mà bạn đã đăng nhập sẵn."

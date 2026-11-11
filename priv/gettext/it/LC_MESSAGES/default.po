@@ -40,10 +40,6 @@ msgid "Dark theme"
 msgstr "Tema scuro"
 
 #, elixir-autogen, elixir-format
-msgid "Email"
-msgstr "Email"
-
-#, elixir-autogen, elixir-format
 msgid "Email me a sign-in link"
 msgstr "Inviami un link di accesso"
 
@@ -110,10 +106,6 @@ msgstr "Partite in corso"
 #, elixir-autogen, elixir-format
 msgid "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
 msgstr "Giochi per la mente veloci per memoria, logica e rapidità. Gioca in singolo o sfida i tuoi amici."
-
-#, elixir-autogen, elixir-format
-msgid "Send"
-msgstr "Invia"
 
 #, elixir-autogen, elixir-format
 msgid "Settings"
@@ -226,10 +218,6 @@ msgstr "Creazione..."
 #, elixir-autogen, elixir-format
 msgid "Suggest a game"
 msgstr "Suggerisci un gioco"
-
-#, elixir-autogen, elixir-format
-msgid "Sign in to change your name"
-msgstr "Accedi per cambiare il tuo nome"
 
 #, elixir-autogen, elixir-format
 msgid "%{count} tie"
@@ -358,3 +346,19 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "FAQ"
 msgstr "FAQ"
+
+#, elixir-autogen, elixir-format
+msgid "Continue with Google"
+msgstr "Continua con Google"
+
+#, elixir-autogen, elixir-format
+msgid "How Telegram sign-in works"
+msgstr "Come funziona l’accesso con Telegram"
+
+#, elixir-autogen, elixir-format
+msgid "No SMS required"
+msgstr "Nessun SMS necessario"
+
+#, elixir-autogen, elixir-format
+msgid "Telegram sends no code. You only confirm the sign-in in the Telegram app, on a device where you are already signed in."
+msgstr "Telegram non invia codici. Basta confermare l’accesso nell’app Telegram, su un dispositivo in cui la usi già."

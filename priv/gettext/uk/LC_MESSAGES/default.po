@@ -40,10 +40,6 @@ msgid "Dark theme"
 msgstr "Темна тема"
 
 #, elixir-autogen, elixir-format
-msgid "Email"
-msgstr "Ел. пошта"
-
-#, elixir-autogen, elixir-format
 msgid "Email me a sign-in link"
 msgstr "Надіслати посилання для входу"
 
@@ -110,10 +106,6 @@ msgstr "Поточні ігри"
 #, elixir-autogen, elixir-format
 msgid "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
 msgstr "Швидкі ігри на пам’ять, логіку та швидкість. Грай сам або змагайся з друзями."
-
-#, elixir-autogen, elixir-format
-msgid "Send"
-msgstr "Надіслати"
 
 #, elixir-autogen, elixir-format
 msgid "Settings"
@@ -226,10 +218,6 @@ msgstr "Створюємо..."
 #, elixir-autogen, elixir-format
 msgid "Suggest a game"
 msgstr "Запропонувати гру"
-
-#, elixir-autogen, elixir-format
-msgid "Sign in to change your name"
-msgstr "Увійди, щоб змінити імʼя"
 
 #, elixir-autogen, elixir-format
 msgid "%{count} tie"
@@ -360,3 +348,19 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "FAQ"
 msgstr "Часті питання"
+
+#, elixir-autogen, elixir-format
+msgid "Continue with Google"
+msgstr "Продовжити з Google"
+
+#, elixir-autogen, elixir-format
+msgid "How Telegram sign-in works"
+msgstr "Як працює вхід через Telegram"
+
+#, elixir-autogen, elixir-format
+msgid "No SMS required"
+msgstr "Без SMS"
+
+#, elixir-autogen, elixir-format
+msgid "Telegram sends no code. You only confirm the sign-in in the Telegram app, on a device where you are already signed in."
+msgstr "Telegram не надсилає код. Просто підтверди вхід у застосунку Telegram на пристрої, де твій акаунт уже відкрито."

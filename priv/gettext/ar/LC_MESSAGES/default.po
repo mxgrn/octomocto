@@ -40,10 +40,6 @@ msgid "Dark theme"
 msgstr "المظهر الداكن"
 
 #, elixir-autogen, elixir-format
-msgid "Email"
-msgstr "البريد الإلكتروني"
-
-#, elixir-autogen, elixir-format
 msgid "Email me a sign-in link"
 msgstr "أرسل لي رابط تسجيل الدخول"
 
@@ -110,10 +106,6 @@ msgstr "الألعاب الجارية"
 #, elixir-autogen, elixir-format
 msgid "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
 msgstr "ألعاب ذكاء سريعة للذاكرة والمنطق والسرعة. العب وحدك أو نافس أصدقاءك وجهًا لوجه."
-
-#, elixir-autogen, elixir-format
-msgid "Send"
-msgstr "إرسال"
 
 #, elixir-autogen, elixir-format
 msgid "Settings"
@@ -226,10 +218,6 @@ msgstr "جارٍ الإنشاء..."
 #, elixir-autogen, elixir-format
 msgid "Suggest a game"
 msgstr "اقترح لعبة"
-
-#, elixir-autogen, elixir-format
-msgid "Sign in to change your name"
-msgstr "سجّل الدخول لتغيير اسمك"
 
 #, elixir-autogen, elixir-format
 msgid "%{count} tie"
@@ -366,3 +354,19 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "FAQ"
 msgstr "الأسئلة الشائعة"
+
+#, elixir-autogen, elixir-format
+msgid "Continue with Google"
+msgstr "المتابعة باستخدام Google"
+
+#, elixir-autogen, elixir-format
+msgid "How Telegram sign-in works"
+msgstr "كيف يعمل تسجيل الدخول عبر Telegram"
+
+#, elixir-autogen, elixir-format
+msgid "No SMS required"
+msgstr "لا حاجة إلى رسالة SMS"
+
+#, elixir-autogen, elixir-format
+msgid "Telegram sends no code. You only confirm the sign-in in the Telegram app, on a device where you are already signed in."
+msgstr "لا يرسل Telegram أي رمز. كل ما عليك هو تأكيد تسجيل الدخول في تطبيق Telegram على جهاز سجّلت الدخول فيه من قبل."

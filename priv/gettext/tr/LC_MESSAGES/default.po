@@ -40,10 +40,6 @@ msgid "Dark theme"
 msgstr "Koyu tema"
 
 #, elixir-autogen, elixir-format
-msgid "Email"
-msgstr "E-posta"
-
-#, elixir-autogen, elixir-format
 msgid "Email me a sign-in link"
 msgstr "Bana giriş bağlantısı gönder"
 
@@ -110,10 +106,6 @@ msgstr "Devam eden oyunlar"
 #, elixir-autogen, elixir-format
 msgid "Quick brain games for memory, logic and speed. Play solo or go head to head with friends."
 msgstr "Hafıza, mantık ve hız için kısa zekâ oyunları. Tek başına oyna ya da arkadaşlarınla kapış."
-
-#, elixir-autogen, elixir-format
-msgid "Send"
-msgstr "Gönder"
 
 #, elixir-autogen, elixir-format
 msgid "Settings"
@@ -226,10 +218,6 @@ msgstr "Oluşturuluyor..."
 #, elixir-autogen, elixir-format
 msgid "Suggest a game"
 msgstr "Oyun öner"
-
-#, elixir-autogen, elixir-format
-msgid "Sign in to change your name"
-msgstr "Adını değiştirmek için giriş yap"
 
 #, elixir-autogen, elixir-format
 msgid "%{count} tie"
@@ -358,3 +346,19 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "FAQ"
 msgstr "SSS"
+
+#, elixir-autogen, elixir-format
+msgid "Continue with Google"
+msgstr "Google ile devam et"
+
+#, elixir-autogen, elixir-format
+msgid "How Telegram sign-in works"
+msgstr "Telegram ile giriş nasıl çalışır"
+
+#, elixir-autogen, elixir-format
+msgid "No SMS required"
+msgstr "SMS gerekmez"
+
+#, elixir-autogen, elixir-format
+msgid "Telegram sends no code. You only confirm the sign-in in the Telegram app, on a device where you are already signed in."
+msgstr "Telegram kod göndermez. Telegram’ı zaten kullandığın bir cihazda, girişi Telegram uygulamasından onaylaman yeterli."
