@@ -1290,8 +1290,12 @@ viewField model me game =
             [ Svg.rect [ SA.width side, SA.height side, SA.class "graze-board" ] []
             , Svg.Keyed.node "g"
                 []
+                -- The red squares are on top of the others, so that the
+                -- players always see them
                 (game.squares
                     |> List.filter (\s -> not (Dict.member s.id model.eaten))
+                    |> List.partition (\s -> s.kind /= Danger)
+                    |> (\( food, dangers ) -> food ++ dangers)
                     |> List.map (\s -> ( String.fromInt s.id, viewSquare time s ))
                 )
             , Svg.Keyed.node "g" [] (others ++ mine)
