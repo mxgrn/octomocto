@@ -26,7 +26,7 @@ defmodule Octomocto.Graze.World do
   # The fewest food squares in the field. With more danger squares, there
   # are as many food squares as danger squares.
   @food_count 3
-  @food_size 28
+  @food_size 32
   @eat_energy 0.3
 
   # Sometimes a perk square comes in place of a food square: larger and

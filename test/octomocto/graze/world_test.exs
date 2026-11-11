@@ -61,7 +61,7 @@ defmodule Octomocto.Graze.WorldTest do
     perks = for _ <- 1..100, do: World.spawn(:food, 1, 0, 0, perk: :invisible)
 
     assert %{size: 44, perk: :invisible} = hd(perks)
-    assert %{size: 28, perk: nil} = hd(food)
+    assert %{size: 32, perk: nil} = hd(food)
     assert average.(perks) > average.(food)
   end
 
