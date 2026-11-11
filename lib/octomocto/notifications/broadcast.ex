@@ -9,7 +9,7 @@ defmodule Octomocto.Notifications.Broadcast do
   import Ecto.Changeset
 
   schema "broadcasts" do
-    # Markdown, on one line, in English
+    # Markdown, in English. It can have line breaks and paragraphs.
     field :text, :string
     # A test broadcast goes only to the admins (see `Octomocto.Notifications`)
     field :status, Ecto.Enum, values: [:test, :sent], default: :sent
@@ -32,6 +32,7 @@ defmodule Octomocto.Notifications.Broadcast do
     broadcast
     |> cast(attrs, [:text])
     |> validate_required([:text])
-    |> validate_format(:text, ~r/\A[^\r\n]*\z/, message: "must be on one line")
+    # A textarea sends "\r\n"
+    |> update_change(:text, &String.replace(&1, "\r\n", "\n"))
   end
 end

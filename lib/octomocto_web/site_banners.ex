@@ -33,13 +33,17 @@ defmodule OctomoctoWeb.SiteBanners do
   end
 
   @doc """
-  Gives the HTML of the Markdown `text` of a banner, without the
-  paragraph around it. Raw HTML in the text is omitted.
+  Gives the HTML of the Markdown `text` of a banner or a broadcast. A line
+  break in the text is a line break in the HTML. A text with one paragraph
+  has no paragraph around it, so that it can be inline. Raw HTML in the
+  text is omitted.
   """
   def to_html(text) do
-    text
-    |> MDEx.to_html!()
-    |> String.trim()
-    |> String.replace(~r/\A<p>(.*)<\/p>\z/s, "\\1")
+    html = text |> MDEx.to_html!(render: [hardbreaks: true]) |> String.trim()
+
+    case Regex.scan(~r/<p>/, html) do
+      [_one] -> String.replace(html, ~r/\A<p>(.*)<\/p>\z/s, "\\1")
+      _none_or_more -> html
+    end
   end
 end

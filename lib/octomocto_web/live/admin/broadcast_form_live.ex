@@ -54,7 +54,7 @@ defmodule OctomoctoWeb.Admin.BroadcastFormLive do
     cond do
       sent?(broadcast) -> :save
       status == "sent" -> :send
-      # Enter in the text field also sends a test: it is the first button
+      # A submit without a button also sends a test
       true -> :send_test
     end
   end
@@ -115,10 +115,10 @@ defmodule OctomoctoWeb.Admin.BroadcastFormLive do
         >
           <.input
             field={@form[:text]}
-            type="text"
-            label="Text (Markdown, on one line, in English)"
+            type="textarea"
+            rows="4"
+            label="Text (Markdown, in English)"
             placeholder="Try the new [Graze](/graze) game!"
-            autocomplete="off"
           />
 
           <.input

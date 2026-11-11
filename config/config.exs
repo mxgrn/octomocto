@@ -83,7 +83,7 @@ config :understudy,
        "Informal and friendly. Always use the informal you (du, tu, ты, ти, ty, tu, tú, você).",
      rules: [
        ~s(Never translate "Octomocto".),
-       "The text is Markdown on one line. Keep the Markdown syntax and the URLs of the links unchanged.",
+       "The text is Markdown. Keep the Markdown syntax, the line breaks and the URLs of the links unchanged.",
        "In French, put a space before ! ? : and ;, but never before a comma or a period, also not after a link."
      ]}
 

@@ -27,6 +27,18 @@ defmodule OctomoctoWeb.Admin.BroadcastsLiveTest do
     assert [%{text: "New [game](/graze)"}] = Notifications.list_broadcasts()
   end
 
+  test "creates a broadcast with more than one line", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/admin/notifications/new")
+
+    assert has_element?(view, "#broadcast-form textarea[name='broadcast[text]']")
+
+    view
+    |> form("#broadcast-form", broadcast: %{text: "Hi!\n\nNew game"})
+    |> render_submit(%{status: "sent"})
+
+    assert [%{text: "Hi!\n\nNew game"}] = Notifications.list_broadcasts()
+  end
+
   test "sends a test, then sends the same broadcast to all", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/admin/notifications/new")
 

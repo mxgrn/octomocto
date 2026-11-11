@@ -116,6 +116,15 @@ defmodule OctomoctoWeb.NotificationsLiveTest do
       assert has_element?(view, "#notifications-broadcast-#{broadcast.id}", "New game")
       refute has_element?(view, "#notifications-sign-in")
     end
+
+    test "sees the line breaks and the paragraphs of a broadcast", %{conn: conn} do
+      {:ok, broadcast} = Notifications.create_broadcast(%{text: "Hi!\nNews:\n\nNew game"})
+
+      {:ok, view, _html} = live(conn, ~p"/notifications")
+
+      assert has_element?(view, "#notifications-broadcast-#{broadcast.id} p br")
+      assert has_element?(view, "#notifications-broadcast-#{broadcast.id} p", "New game")
+    end
   end
 
   describe "in a language" do

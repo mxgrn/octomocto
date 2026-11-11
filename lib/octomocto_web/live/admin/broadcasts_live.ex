@@ -64,9 +64,9 @@ defmodule OctomoctoWeb.Admin.BroadcastsLive do
             class="flex items-start gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100 transition"
           >
             <div class="min-w-0 flex-1 space-y-2">
-              <p class="text-sm font-medium text-octo-navy dark:text-base-content [&_a]:font-semibold [&_a]:text-octo-indigo [&_a]:underline [&_a]:decoration-octo-indigo/40 [&_a]:underline-offset-2 [&_a]:transition [&_a:hover]:decoration-octo-indigo dark:[&_a]:text-octo-indigo-light">
+              <div class="text-sm font-medium text-octo-navy dark:text-base-content [&_p+p]:mt-2 [&_a]:font-semibold [&_a]:text-octo-indigo [&_a]:underline [&_a]:decoration-octo-indigo/40 [&_a]:underline-offset-2 [&_a]:transition [&_a:hover]:decoration-octo-indigo dark:[&_a]:text-octo-indigo-light">
                 {Phoenix.HTML.raw(SiteBanners.to_html(broadcast.text))}
-              </p>
+              </div>
               <div class="flex flex-wrap items-center gap-2">
                 <span
                   :if={broadcast.status == :test}

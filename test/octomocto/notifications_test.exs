@@ -161,9 +161,8 @@ defmodule Octomocto.NotificationsTest do
       assert %{text: "Hello", audience: :users} = broadcast
     end
 
-    test "a broadcast must be on one line" do
-      assert {:error, changeset} = Notifications.create_broadcast(%{text: "a\nb"})
-      assert "must be on one line" in errors_on(changeset).text
+    test "a broadcast can have more than one line" do
+      assert {:ok, %{text: "a\nb"}} = Notifications.create_broadcast(%{text: "a\nb"})
     end
   end
 
