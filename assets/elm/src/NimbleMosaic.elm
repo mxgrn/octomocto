@@ -818,7 +818,8 @@ reserved model me game layout =
 
 
 {-| Make the board as wide as possible, but small enough that it is all on
-the screen.
+the screen. The height is the one that `arrange` uses, not `100dvh`: Safari
+on an iPad keeps the old `dvh` in full screen.
 -}
 fieldWidth : Model -> Me -> Arrangement -> Game -> String
 fieldWidth model me arrangement game =
@@ -829,12 +830,11 @@ fieldWidth model me arrangement game =
 
             else
                 game.width / game.height
+
+        height =
+            Tuple.second model.viewport - Tuple.second (reserved model me game arrangement.layout)
     in
-    "min(100%, calc((100dvh - "
-        ++ String.fromFloat (Tuple.second (reserved model me game arrangement.layout))
-        ++ "px) * "
-        ++ String.fromFloat ratio
-        ++ "))"
+    "min(100%, " ++ String.fromFloat (max 0 height * ratio) ++ "px)"
 
 
 {-| The number of browsers that only watch the game, when there are any.

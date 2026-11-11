@@ -71,6 +71,16 @@ const toggleFullscreen = () => {
   result?.catch?.(() => {})
 }
 
+// The Elm games read the size of the screen on the resize event of the
+// window. Safari on an iPad can send it before the change to full screen is
+// complete, so the games read the size again while the change animates.
+const remeasure = () => {
+  const resize = () => window.dispatchEvent(new Event("resize"))
+  requestAnimationFrame(resize)
+  setTimeout(resize, 300)
+  setTimeout(resize, 1000)
+}
+
 // The round outline button of the panel, as the old Restart button
 const panelButton = "group flex size-9 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 disabled:pointer-events-none disabled:opacity-50 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
 
@@ -85,7 +95,7 @@ class OctoGameMenu extends HTMLElement {
     this.onOutside = e => { if (this.open && !this.contains(e.target)) this.toggle(false) }
     this.onKey = e => { if (e.key === "Escape") this.toggle(false) }
     this.onResize = () => { this.open = false; this.render() }
-    this.onFullscreen = () => this.render()
+    this.onFullscreen = () => { this.render(); remeasure() }
     document.addEventListener("click", this.onOutside)
     document.addEventListener("keydown", this.onKey)
     largeScreen.addEventListener("change", this.onResize)
