@@ -75,7 +75,8 @@ config :understudy,
   repo: Octomocto.Repo,
   translator:
     {Understudy.Translator.ReqLLM,
-     model: "google:gemini-3.5-flash-lite",
+     model: "google:gemini-3.1-flash-lite",
+     llm_opts: [temperature: 0.5],
      persona:
        "You translate the announcements of Octomocto, a site with free online games to play solo or with friends.",
      style:
