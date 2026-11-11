@@ -2287,6 +2287,7 @@ viewMenu locked muted player =
     Html.node "octo-game-menu"
         [ class "relative shrink-0 xl:order-5 xl:self-start"
         , attribute "large-from" "xl"
+        , attribute "fullscreen" "true"
         , attribute "menu-label" "Menu"
         , attribute "restart-label" "New board"
         , attribute "locked" (boolAttribute locked)

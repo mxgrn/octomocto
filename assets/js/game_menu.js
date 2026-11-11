@@ -16,6 +16,12 @@
 // row, and a card with the friends, only when the player can invite one of
 // them (the game waits for players and a friend is online).
 //
+// With fullscreen="true", it also has a button that shows the page on all
+// of the screen, without the bars of the browser: next to the burger on a
+// small screen, and after the other buttons on a large one. The button is
+// not there when the browser cannot do it (an iPhone can only show videos
+// on all of the screen).
+//
 // The friends come from the invites channel (OctomoctoWeb.InviteChannel)
 // on the socket of the game, which the page gives with setGameMenu/1 after
 // it connects. The menu joins the channel at once on a large screen, and
@@ -48,12 +54,26 @@ const largeScreens = {
   xl: window.matchMedia("(min-width: 80rem)")
 }
 
+// Safari before 16.4 has only the webkit names
+const fullscreenEnabled = () => Boolean(document.fullscreenEnabled || document.webkitFullscreenEnabled)
+const fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement
+const fullscreenEvents = ["fullscreenchange", "webkitfullscreenchange"]
+
+const toggleFullscreen = () => {
+  const root = document.documentElement
+  const result = fullscreenElement()
+    ? (document.exitFullscreen || document.webkitExitFullscreen).call(document)
+    : (root.requestFullscreen || root.webkitRequestFullscreen).call(root)
+  // The browser can refuse, for example without a click
+  result?.catch?.(() => {})
+}
+
 // The round outline button of the panel, as the old Restart button
 const panelButton = "group flex size-9 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 disabled:pointer-events-none disabled:opacity-50 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
 
 class OctoGameMenu extends HTMLElement {
   static observedAttributes = [
-    "locked", "menu-label", "restart-label", "muted", "player", "sound-on-label", "sound-off-label"
+    "fullscreen", "locked", "menu-label", "restart-label", "muted", "player", "sound-on-label", "sound-off-label"
   ]
 
   connectedCallback() {
@@ -64,9 +84,11 @@ class OctoGameMenu extends HTMLElement {
     this.onOutside = e => { if (this.open && !this.contains(e.target)) this.toggle(false) }
     this.onKey = e => { if (e.key === "Escape") this.toggle(false) }
     this.onResize = () => { this.open = false; this.render() }
+    this.onFullscreen = () => this.render()
     document.addEventListener("click", this.onOutside)
     document.addEventListener("keydown", this.onKey)
     this.screen.addEventListener("change", this.onResize)
+    fullscreenEvents.forEach(name => document.addEventListener(name, this.onFullscreen))
     this.render()
   }
 
@@ -74,6 +96,7 @@ class OctoGameMenu extends HTMLElement {
     document.removeEventListener("click", this.onOutside)
     document.removeEventListener("keydown", this.onKey)
     this.screen.removeEventListener("change", this.onResize)
+    fullscreenEvents.forEach(name => document.removeEventListener(name, this.onFullscreen))
     if (this.channel) this.channel.leave()
     this.channel = null
   }
@@ -114,7 +137,11 @@ class OctoGameMenu extends HTMLElement {
       this.replaceChildren(this.panel())
     } else {
       this.style.alignSelf = ""
-      this.replaceChildren(...[this.burger(), this.open && this.dropdown()].filter(Boolean))
+      const fullscreen = this.fullscreenButton()
+      const buttons = fullscreen
+        ? h("div", {class: "flex items-center gap-1"}, [fullscreen, this.burger()])
+        : this.burger()
+      this.replaceChildren(...[buttons, this.open && this.dropdown()].filter(Boolean))
     }
   }
 
@@ -143,7 +170,8 @@ class OctoGameMenu extends HTMLElement {
       }, [
         h("span", {class: "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180"}),
         this.getAttribute("restart-label") || "Restart game"
-      ])
+      ]),
+      this.fullscreenButton()
     ].filter(Boolean))
 
     const menu = this.menu
@@ -161,6 +189,26 @@ class OctoGameMenu extends HTMLElement {
     return this.getAttribute("muted") === "true"
       ? this.getAttribute("sound-on-label") || "Turn the sounds on"
       : this.getAttribute("sound-off-label") || "Turn the sounds off"
+  }
+
+  // The page on all of the screen, or back in the browser
+  fullscreenButton() {
+    if (this.getAttribute("fullscreen") !== "true" || !fullscreenEnabled()) return null
+
+    const on = Boolean(fullscreenElement())
+    const label = on
+      ? this.getAttribute("exit-fullscreen-label") || "Exit full screen"
+      : this.getAttribute("fullscreen-label") || "Full screen"
+
+    return h("button", {
+      type: "button",
+      id: "game-menu-fullscreen",
+      title: label,
+      "aria-label": label,
+      "aria-pressed": String(on),
+      class: panelButton,
+      onclick: e => { e.stopPropagation(); toggleFullscreen() }
+    }, icon(on ? "hero-arrows-pointing-in" : "hero-arrows-pointing-out"))
   }
 
   // Small screen: the burger button of the dropdown
