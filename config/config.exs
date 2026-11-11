@@ -84,7 +84,7 @@ config :understudy,
      rules: [
        ~s(Never translate "Octomocto".),
        "The text is Markdown on one line. Keep the Markdown syntax and the URLs of the links unchanged.",
-       "In French, put a space before ! ? : and ;."
+       "In French, put a space before ! ? : and ;, but never before a comma or a period, also not after a link."
      ]}
 
 # Configure esbuild (the version is required)
