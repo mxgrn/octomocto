@@ -14,8 +14,9 @@ defmodule Octomocto.Notifications do
     * `Octomocto.Notifications.Broadcast`, from the admins to all users
       and guests (at `/admin/notifications`). A user gets the broadcasts
       from after the signup. A guest gets the broadcasts from after the
-      first visit. A broadcast with the status `:test` goes only to the
-      admins, until an admin sends it to all.
+      first visit. The `audience` can limit a broadcast to the users or to
+      the guests. A broadcast with the status `:test` goes only to the
+      admins, until an admin sends it.
 
   For a user, the notifications after `users.notifications_seen_at` are
   unread. A guest keeps the time of the first visit and the time when the
@@ -111,7 +112,9 @@ defmodule Octomocto.Notifications do
       as: :user,
       on: u.id == ^user_id,
       where: b.inserted_at > u.inserted_at,
-      where: b.status == :sent or (b.status == :test and u.role == :admin)
+      where:
+        (b.status == :sent and b.audience in [:all, :users]) or
+          (b.status == :test and u.role == :admin)
   end
 
   @doc """
@@ -151,7 +154,10 @@ defmodule Octomocto.Notifications do
   end
 
   defp broadcasts_after(since),
-    do: from(b in Broadcast, where: b.status == :sent and b.inserted_at > ^since)
+    do:
+      from(b in Broadcast,
+        where: b.status == :sent and b.audience in [:all, :guests] and b.inserted_at > ^since
+      )
 
   @doc """
   Marks all notifications of the user as read. Gives the time when the
@@ -181,13 +187,13 @@ defmodule Octomocto.Notifications do
 
   def get_broadcast!(id), do: Repo.get!(Broadcast, id)
 
-  @doc "Adds a broadcast and sends it to all users and guests."
+  @doc "Adds a broadcast and sends it to its audience."
   def create_broadcast(attrs), do: send_broadcast(%Broadcast{}, attrs)
 
   @doc """
-  Sends the broadcast to all users and guests. A new one is added. A test
-  one (see `send_test_broadcast/2`) gets the new text and the time of now,
-  so that it is unread again for the admins.
+  Sends the broadcast to its audience. A new one is added. A test
+  one (see `send_test_broadcast/2`) gets the new text, the new audience
+  and the time of now.
   """
   def send_broadcast(%Broadcast{} = broadcast, attrs), do: deliver(broadcast, attrs, :sent)
 
@@ -213,10 +219,13 @@ defmodule Octomocto.Notifications do
     end
   end
 
-  @doc "Changes the text of a broadcast. It does not make it unread again."
+  @doc """
+  Changes the text of a sent broadcast. It does not make it unread again,
+  and the audience stays.
+  """
   def update_broadcast(%Broadcast{} = broadcast, attrs) do
     broadcast
-    |> Broadcast.changeset(attrs)
+    |> Broadcast.text_changeset(attrs)
     |> Repo.update()
   end
 

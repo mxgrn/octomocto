@@ -79,6 +79,11 @@ defmodule OctomoctoWeb.Admin.BroadcastFormLive do
     |> push_navigate(to: ~p"/admin/notifications")
   end
 
+  # The value is an atom from the broadcast, or a string from the params
+  defp send_label(audience) when audience in [:users, "users"], do: "Send to users"
+  defp send_label(audience) when audience in [:guests, "guests"], do: "Send to guests"
+  defp send_label(_audience), do: "Send to all"
+
   defp sent?(%Broadcast{status: :sent, id: id}), do: not is_nil(id)
   defp sent?(_broadcast), do: false
 
@@ -116,6 +121,18 @@ defmodule OctomoctoWeb.Admin.BroadcastFormLive do
             autocomplete="off"
           />
 
+          <.input
+            field={@form[:audience]}
+            type="select"
+            label="Audience"
+            options={[
+              {"All users and guests", :all},
+              {"Users only", :users},
+              {"Guests only", :guests}
+            ]}
+            disabled={sent?(@broadcast)}
+          />
+
           <div class="flex items-center justify-end gap-3 pt-2">
             <.link
               navigate={~p"/admin/notifications"}
@@ -151,7 +168,7 @@ defmodule OctomoctoWeb.Admin.BroadcastFormLive do
                 phx-disable-with="Sending..."
                 class="rounded-full bg-octo-indigo px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-octo-indigo/20 active:scale-95"
               >
-                Send to all
+                {send_label(@form[:audience].value)}
               </button>
             <% end %>
           </div>

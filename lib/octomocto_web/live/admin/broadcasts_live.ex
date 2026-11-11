@@ -39,7 +39,7 @@ defmodule OctomoctoWeb.Admin.BroadcastsLive do
               Notifications
             </h1>
             <p class="mt-1 text-sm text-base-content/60">
-              For all users and guests. A user gets the ones from after the signup, a guest the ones from after the first visit. A test goes only to the admins.
+              For all users and guests, or only for one of them. A user gets the ones from after the signup, a guest the ones from after the first visit. A test goes only to the admins.
             </p>
           </div>
           <.link
@@ -74,6 +74,19 @@ defmodule OctomoctoWeb.Admin.BroadcastsLive do
                   class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-500/20 dark:text-amber-300"
                 >
                   <.icon name="hero-beaker-micro" class="size-3.5" /> Test
+                </span>
+                <span
+                  :if={broadcast.audience != :all}
+                  id={"audience-badge-#{broadcast.id}"}
+                  class="inline-flex items-center gap-1 rounded-full bg-octo-indigo/10 px-2 py-0.5 text-xs font-semibold text-octo-indigo ring-1 ring-octo-indigo/20 dark:text-octo-indigo-light"
+                >
+                  <.icon
+                    name={
+                      if broadcast.audience == :users, do: "hero-user-micro", else: "hero-eye-micro"
+                    }
+                    class="size-3.5"
+                  />
+                  {if broadcast.audience == :users, do: "Users only", else: "Guests only"}
                 </span>
                 <span class="inline-flex items-center gap-1 text-xs text-base-content/70">
                   <.icon name="hero-clock-micro" class="size-3.5" />

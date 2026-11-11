@@ -44,6 +44,34 @@ defmodule OctomoctoWeb.Admin.BroadcastsLiveTest do
     assert [%{id: ^id, text: "Fixed", status: :sent}] = Notifications.list_broadcasts()
   end
 
+  test "sends a broadcast to the guests only", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/admin/notifications/new")
+
+    view
+    |> form("#broadcast-form", broadcast: %{text: "Sign up!", audience: "guests"})
+    |> render_submit(%{status: "sent"})
+
+    assert [%{audience: :guests}] = Notifications.list_broadcasts()
+  end
+
+  test "cannot change the audience of a sent broadcast", %{conn: conn} do
+    {:ok, broadcast} = Notifications.create_broadcast(%{text: "Hi"})
+
+    {:ok, view, _html} = live(conn, ~p"/admin/notifications/#{broadcast}/edit")
+
+    assert has_element?(view, "#broadcast-form select[name='broadcast[audience]'][disabled]")
+  end
+
+  test "marks the audience in the list", %{conn: conn} do
+    {:ok, users} = Notifications.create_broadcast(%{text: "Hi", audience: :users})
+    {:ok, all} = Notifications.create_broadcast(%{text: "Hi"})
+
+    {:ok, view, _html} = live(conn, ~p"/admin/notifications")
+
+    assert has_element?(view, "#audience-badge-#{users.id}", "Users")
+    refute has_element?(view, "#audience-badge-#{all.id}")
+  end
+
   test "marks the test broadcasts in the list", %{conn: conn} do
     {:ok, test} = Notifications.send_test_broadcast(%Broadcast{}, %{text: "Hello"})
     {:ok, sent} = Notifications.create_broadcast(%{text: "Sent"})
