@@ -22,6 +22,14 @@
 // not there when the browser cannot do it (an iPhone can only show videos
 // on all of the screen).
 //
+// A game that chooses its layout from the shape of the screen gives it in
+// layout="row" (the panel is a compact row above the board) or
+// layout="side" (the panel is a column at the left of the board). Then the
+// buttons are in the panel only in the side layout on a large screen, and
+// the burger has its label only in the narrow column. Without the
+// attribute, the panel is at the left from the lg width, and the burger
+// has its label on a small screen that is wider than tall.
+//
 // The friends come from the invites channel (OctomoctoWeb.InviteChannel)
 // on the socket of the game, which the page gives with setGameMenu/1 after
 // it connects. The menu joins the channel at once on a large screen, and
@@ -46,13 +54,8 @@ const h = (tag, attrs = {}, children = []) => {
 
 const icon = name => h("span", {class: `${name} size-4`})
 
-// The same as `lg` and `xl` of Tailwind. A game sets large-from="xl" when
-// its panel is a row above the board below the xl width, also on a screen
-// that is wider than tall.
-const largeScreens = {
-  lg: window.matchMedia("(min-width: 64rem)"),
-  xl: window.matchMedia("(min-width: 80rem)")
-}
+// The same as `lg` of Tailwind
+const largeScreen = window.matchMedia("(min-width: 64rem)")
 
 // Safari before 16.4 has only the webkit names
 const fullscreenEnabled = () => Boolean(document.fullscreenEnabled || document.webkitFullscreenEnabled)
@@ -73,12 +76,10 @@ const panelButton = "group flex size-9 shrink-0 cursor-pointer items-center just
 
 class OctoGameMenu extends HTMLElement {
   static observedAttributes = [
-    "fullscreen", "locked", "menu-label", "restart-label", "muted", "player", "sound-on-label", "sound-off-label"
+    "fullscreen", "layout", "locked", "menu-label", "restart-label", "muted", "player", "sound-on-label", "sound-off-label"
   ]
 
   connectedCallback() {
-    // The large-from attribute must be set when the element is made
-    this.screen = largeScreens[this.getAttribute("large-from")] || largeScreens.lg
     this.open = false
     this.menu = null
     this.onOutside = e => { if (this.open && !this.contains(e.target)) this.toggle(false) }
@@ -87,7 +88,7 @@ class OctoGameMenu extends HTMLElement {
     this.onFullscreen = () => this.render()
     document.addEventListener("click", this.onOutside)
     document.addEventListener("keydown", this.onKey)
-    this.screen.addEventListener("change", this.onResize)
+    largeScreen.addEventListener("change", this.onResize)
     fullscreenEvents.forEach(name => document.addEventListener(name, this.onFullscreen))
     this.render()
   }
@@ -95,7 +96,7 @@ class OctoGameMenu extends HTMLElement {
   disconnectedCallback() {
     document.removeEventListener("click", this.onOutside)
     document.removeEventListener("keydown", this.onKey)
-    this.screen.removeEventListener("change", this.onResize)
+    largeScreen.removeEventListener("change", this.onResize)
     fullscreenEvents.forEach(name => document.removeEventListener(name, this.onFullscreen))
     if (this.channel) this.channel.leave()
     this.channel = null
@@ -113,7 +114,13 @@ class OctoGameMenu extends HTMLElement {
   // A player needs the friends on a large screen, or in an open dropdown
   maybeJoin() {
     const player = this.getAttribute("player") === "true"
-    if (player && !this.channel && game && (this.screen.matches || this.open)) this.join()
+    if (player && !this.channel && game && (this.inPanel() || this.open)) this.join()
+  }
+
+  // The buttons are in the panel, not in a dropdown
+  inPanel() {
+    const layout = this.getAttribute("layout")
+    return largeScreen.matches && (layout === null || layout === "side")
   }
 
   join() {
@@ -131,7 +138,7 @@ class OctoGameMenu extends HTMLElement {
   render() {
     this.maybeJoin()
 
-    if (this.screen.matches) {
+    if (this.inPanel()) {
       // The host has `self-start` from Elm, so that the burger keeps its size
       this.style.alignSelf = "stretch"
       this.replaceChildren(this.panel())
@@ -221,14 +228,24 @@ class OctoGameMenu extends HTMLElement {
       title: label,
       "aria-haspopup": "true",
       "aria-expanded": String(this.open),
-      class: this.screen === largeScreens.xl
-        ? panelButton
-        : `${panelButton} max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2`,
+      class: this.burgerClass(),
       onclick: e => { e.stopPropagation(); this.toggle(!this.open) }
     }, [
       icon("hero-bars-3"),
-      this.screen === largeScreens.xl ? null : h("span", {class: "hidden max-lg:landscape:inline"}, label)
+      this.getAttribute("layout") === "row" ? null : h("span", {class: this.burgerLabelClass()}, label)
     ])
+  }
+
+  burgerClass() {
+    switch (this.getAttribute("layout")) {
+      case "row": return panelButton
+      case "side": return `${panelButton} size-auto px-4 py-2`
+      default: return `${panelButton} max-lg:landscape:size-auto max-lg:landscape:px-4 max-lg:landscape:py-2`
+    }
+  }
+
+  burgerLabelClass() {
+    return this.getAttribute("layout") === "side" ? "" : "hidden max-lg:landscape:inline"
   }
 
   dropdown() {

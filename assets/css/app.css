@@ -111,6 +111,10 @@
 /* Use the data attribute for dark mode  */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/* The side layout of a game page: the panel is a column at the left of
+   the board. The Elm game sets data-layout, from the shape of the screen. */
+@custom-variant side (&:where([data-layout=side], [data-layout=side] *));
+
 /* Make LiveView wrapper divs transparent for layout */
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
