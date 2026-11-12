@@ -662,6 +662,8 @@ defmodule OctomoctoWeb.Router do
       live "/notifications", BroadcastsLive
       live "/notifications/new", BroadcastFormLive, :new
       live "/notifications/:id/edit", BroadcastFormLive, :edit
+      live "/blocklist", BlocklistLive
+      live "/top-ips", TopIpsLive
     end
   end
 

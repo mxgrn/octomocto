@@ -118,6 +118,20 @@ if config_env() == :prod do
 
   host = System.get_env("PHX_HOST") || "example.com"
 
+  # The IPs or CIDR ranges of the load balancer, as the app sees them,
+  # separated by commas. Only from these IPs, the app reads the client IP in
+  # X-Forwarded-For (see OctomoctoWeb.ClientIp). Without it, the app logs and
+  # blocks the IP of the load balancer.
+  trusted_proxies =
+    for text <- String.split(System.get_env("TRUSTED_PROXIES", ""), ",", trim: true) do
+      case Octomocto.IpRange.parse(text) do
+        {:ok, range} -> Octomocto.IpRange.to_string(range)
+        :error -> raise "TRUSTED_PROXIES: #{inspect(text)} is not an IP or a CIDR range"
+      end
+    end
+
+  config :octomocto, :trusted_proxies, trusted_proxies
+
   # The two hosts run one node each. A deploy restarts one host at a time,
   # so that the other node keeps the games (see Octomocto.GameStore).
   config :libcluster, :topologies,

@@ -78,6 +78,7 @@ jobs:
               -e RELEASE_COOKIE=${{secrets.RELEASE_COOKIE_STAGING}} \
               -e PROD_ENV=${{matrix.env}} \
               -e PHX_SERVER=true \
+              -e TRUSTED_PROXIES=10.0.0.4 \
               -e SECRET_KEY_BASE=${{secrets.SECRET_KEY_BASE_STAGING}} \
               -e GOOGLE_API_KEY=${{secrets.GOOGLE_API_KEY}} \
               -e DATABASE_URL=${{secrets.DATABASE_URL_STAGING}} \

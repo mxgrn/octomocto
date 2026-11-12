@@ -26,6 +26,8 @@ defmodule Octomocto.Application do
       {Phoenix.PubSub, name: Octomocto.PubSub},
       # After the PubSub, because it subscribes to the finished games
       Octomocto.Stats.Counter,
+      Octomocto.Blocklist.Cache,
+      Octomocto.RecentRequests,
       Octomocto.Lobby.Watchers,
       Octomocto.OnlineUsers,
       {DynamicSupervisor, name: Octomocto.Afterglow.GameSupervisor},
