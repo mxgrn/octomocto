@@ -18,6 +18,11 @@ defmodule Octomocto.Blocklist.Entry do
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0"
   ]
 
+  # The parts of a browser user agent. A rule without an IP must not have
+  # them: a full user agent from the top IPs page has them, and it can be
+  # the user agent of real players.
+  @browser_parts ~w(mozilla/ applewebkit/ chrome/ safari/ firefox/ gecko/ edg/ opr/)
+
   schema "blocklist_entries" do
     field :ip, :string
     field :user_agent, :string
@@ -63,10 +68,19 @@ defmodule Octomocto.Blocklist.Entry do
   defp validate_user_agent(changeset) do
     user_agent = get_field(changeset, :user_agent)
 
-    if user_agent && is_nil(get_field(changeset, :ip)) &&
-         Enum.any?(@browsers, &matches_user_agent?(user_agent, &1)),
-       do: add_error(changeset, :user_agent, "matches normal browsers; add an IP"),
-       else: changeset
+    if user_agent && is_nil(get_field(changeset, :ip)) && browser?(user_agent),
+      do:
+        add_error(
+          changeset,
+          :user_agent,
+          "matches normal browsers; keep only the bot name, or add an IP"
+        ),
+      else: changeset
+  end
+
+  defp browser?(user_agent) do
+    Enum.any?(@browsers, &matches_user_agent?(user_agent, &1)) or
+      String.contains?(String.downcase(user_agent), @browser_parts)
   end
 
   @doc """

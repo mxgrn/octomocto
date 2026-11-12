@@ -2,22 +2,25 @@ defmodule OctomoctoWeb.Admin.TopIpsLive do
   @moduledoc """
   The IPs of the last requests on all nodes (see `Octomocto.RecentRequests`),
   the most requests first, with buttons that add them to the blocklist.
+  Only the top 10 IPs.
   """
   use OctomoctoWeb, :live_view
 
   alias Octomocto.{Blocklist, RecentRequests}
 
+  @limit 10
+
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(page_title: "Top IPs", noindex: true)
+     |> assign(page_title: "Top IPs", noindex: true, limit: @limit)
      |> stream_configure(:ips, dom_id: &row_id(&1.ip))
      |> load()}
   end
 
   defp load(socket) do
     summaries = RecentRequests.cluster_summaries()
-    ips = summaries |> RecentRequests.top_ips() |> Enum.map(&with_blocks/1)
+    ips = summaries |> RecentRequests.top_ips(@limit) |> Enum.map(&with_blocks/1)
 
     socket
     |> assign(:nodes, length(summaries))
@@ -81,7 +84,9 @@ defmodule OctomoctoWeb.Admin.TopIpsLive do
               Top IPs
             </h1>
             <p id="top-ips-summary" class="mt-1 text-sm text-base-content/60">
-              The last {@requests} requests on {@nodes} {if @nodes == 1, do: "node", else: "nodes"}, at {Calendar.strftime(
+              The top {@limit} IPs of the last {@requests} requests on {@nodes} {if @nodes == 1,
+                do: "node",
+                else: "nodes"}, at {Calendar.strftime(
                 @loaded_at,
                 "%H:%M:%S"
               )} UTC. Static files are not included.
@@ -174,18 +179,30 @@ defmodule OctomoctoWeb.Admin.TopIpsLive do
                 >
                   Blocked
                 </span>
-                <button
+                <div
                   :if={ua.user_agent && !ua.blocked?}
-                  type="button"
-                  data-role="block-ip-user-agent"
-                  phx-click="block"
-                  phx-value-ip={row.ip}
-                  phx-value-user_agent={ua.user_agent}
-                  data-confirm={"Block #{row.ip} only with this user agent?"}
-                  class="shrink-0 rounded-full px-2 py-0.5 font-semibold text-error/80 transition hover:bg-error/10 hover:text-error"
+                  class="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center"
                 >
-                  Block IP + user agent
-                </button>
+                  <button
+                    type="button"
+                    data-role="block-ip-user-agent"
+                    phx-click="block"
+                    phx-value-ip={row.ip}
+                    phx-value-user_agent={ua.user_agent}
+                    data-confirm={"Block #{row.ip} only with this user agent?"}
+                    class="rounded-full px-2 py-0.5 font-semibold text-error/80 transition hover:bg-error/10 hover:text-error"
+                  >
+                    Block IP + user agent
+                  </button>
+                  <.link
+                    data-role="block-user-agent"
+                    navigate={~p"/admin/blocklist?#{[user_agent: ua.user_agent]}"}
+                    title="Opens the blocklist form, to block it from any IP"
+                    class="rounded-full px-2 py-0.5 font-semibold text-error/80 transition hover:bg-error/10 hover:text-error"
+                  >
+                    Block user agent…
+                  </.link>
+                </div>
               </li>
             </ul>
           </li>

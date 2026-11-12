@@ -47,4 +47,12 @@ defmodule OctomoctoWeb.Admin.TopIpsLiveTest do
 
     on_exit(fn -> Blocklist.broadcast_deleted(entry.id) end)
   end
+
+  test "links to the blocklist form with the user agent", %{conn: conn, row: row} do
+    {:ok, view, _html} = live(conn, ~p"/admin/top-ips")
+
+    view |> element("#{row} [data-role=block-user-agent]") |> render_click()
+
+    assert_redirect(view, ~p"/admin/blocklist?#{[user_agent: "TopIpsTestBot/1.0"]}")
+  end
 end

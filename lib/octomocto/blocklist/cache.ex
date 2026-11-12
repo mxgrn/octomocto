@@ -4,7 +4,7 @@ defmodule Octomocto.Blocklist.Cache do
   node, for the check on each request.
 
   At start, the process reads the entries from the database once. Then it
-  applies the added and deleted entries from the PubSub, which come from
+  applies the added, changed and deleted entries from the PubSub, which come from
   all nodes. In the test environment, it does not read the database.
 
   The rules are in `:persistent_term`, so that a read is fast and does not
@@ -39,7 +39,7 @@ defmodule Octomocto.Blocklist.Cache do
   end
 
   @impl true
-  def handle_info({:blocklist_added, entry}, entries),
+  def handle_info({:blocklist_put, entry}, entries),
     do: {:noreply, entries |> Map.put(entry.id, entry) |> put()}
 
   def handle_info({:blocklist_deleted, id}, entries),

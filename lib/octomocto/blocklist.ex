@@ -25,7 +25,14 @@ defmodule Octomocto.Blocklist do
 
   def create_entry(attrs) do
     with {:ok, entry} <- %Entry{} |> Entry.changeset(attrs) |> Repo.insert() do
-      broadcast({:blocklist_added, entry})
+      broadcast({:blocklist_put, entry})
+      {:ok, entry}
+    end
+  end
+
+  def update_entry(%Entry{} = entry, attrs) do
+    with {:ok, entry} <- entry |> Entry.changeset(attrs) |> Repo.update() do
+      broadcast({:blocklist_put, entry})
       {:ok, entry}
     end
   end

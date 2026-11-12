@@ -1,40 +1,77 @@
 defmodule OctomoctoWeb.Admin.BlocklistLive do
   @moduledoc """
-  The blocklist entries, with a form to add one. See `Octomocto.Blocklist`.
+  The blocklist entries, with a form to add one or to change one. See
+  `Octomocto.Blocklist`.
   """
   use OctomoctoWeb, :live_view
 
   alias Octomocto.Blocklist
 
-  def mount(_params, _session, socket) do
+  # The top IPs page links here with the full user agent of a client, to cut
+  # it to the name of the bot before blocking it.
+  def mount(params, _session, socket) do
+    user_agent = params["user_agent"]
+
     {:ok,
      socket
      |> assign(page_title: "Blocklist", noindex: true)
-     |> assign(:form, to_form(Blocklist.change_entry()))
+     |> assign(:prefilled?, user_agent != nil)
+     |> assign(:editing, nil)
+     |> assign(
+       :form,
+       to_form(Blocklist.change_entry(%Blocklist.Entry{}, %{user_agent: user_agent}))
+     )
      |> stream(:entries, Blocklist.list_entries())}
   end
 
   def handle_event("validate", %{"entry" => params}, socket) do
-    changeset = Blocklist.change_entry(%Blocklist.Entry{}, params)
+    changeset = Blocklist.change_entry(socket.assigns.editing || %Blocklist.Entry{}, params)
     {:noreply, assign(socket, :form, to_form(changeset, action: :validate))}
   end
 
   def handle_event("save", %{"entry" => params}, socket) do
-    case Blocklist.create_entry(params) do
+    result =
+      if entry = socket.assigns.editing,
+        do: Blocklist.update_entry(entry, params),
+        else: Blocklist.create_entry(params)
+
+    case result do
       {:ok, entry} ->
-        {:noreply,
-         socket
-         |> assign(:form, to_form(Blocklist.change_entry()))
-         |> stream_insert(:entries, entry, at: 0)}
+        # A changed entry stays in its place, a new one goes to the top
+        at = if socket.assigns.editing, do: -1, else: 0
+        {:noreply, socket |> stop_editing() |> stream_insert(:entries, entry, at: at)}
 
       {:error, changeset} ->
         {:noreply, assign(socket, :form, to_form(changeset))}
     end
   end
 
+  def handle_event("edit", %{"id" => id}, socket) do
+    entry = Blocklist.get_entry!(id)
+
+    {:noreply,
+     socket
+     |> assign(:editing, entry)
+     |> assign(:form, to_form(Blocklist.change_entry(entry)))}
+  end
+
+  def handle_event("cancel", _params, socket), do: {:noreply, stop_editing(socket)}
+
   def handle_event("delete", %{"id" => id}, socket) do
     {:ok, entry} = id |> Blocklist.get_entry!() |> Blocklist.delete_entry()
+
+    socket =
+      if socket.assigns.editing && socket.assigns.editing.id == entry.id,
+        do: stop_editing(socket),
+        else: socket
+
     {:noreply, stream_delete(socket, :entries, entry)}
+  end
+
+  defp stop_editing(socket) do
+    socket
+    |> assign(:editing, nil)
+    |> assign(:form, to_form(Blocklist.change_entry()))
   end
 
   def render(assigns) do
@@ -71,25 +108,48 @@ defmodule OctomoctoWeb.Admin.BlocklistLive do
           id="blocklist-form"
           phx-change="validate"
           phx-submit="save"
-          class="grid gap-x-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100 sm:grid-cols-2"
+          class={[
+            "grid gap-x-4 rounded-2xl bg-white p-4 shadow-sm ring-1 dark:bg-base-100 sm:grid-cols-2 transition",
+            if(@editing, do: "ring-2 ring-octo-indigo/50", else: "ring-base-content/10")
+          ]}
         >
+          <p
+            :if={@editing}
+            class="mb-2 text-sm font-semibold text-octo-indigo sm:col-span-2 dark:text-octo-indigo-light"
+          >
+            Change the entry
+          </p>
           <.input field={@form[:ip]} label="IP or CIDR range" placeholder="203.0.113.0/24" />
           <.input
             field={@form[:user_agent]}
             label="User agent contains"
             placeholder="python-requests"
+            autofocus={@prefilled?}
           />
           <div class="sm:col-span-2">
             <.input field={@form[:note]} label="Note" placeholder="Why it is blocked" />
           </div>
-          <div class="sm:col-span-2">
+          <div class="flex items-center gap-2 sm:col-span-2">
             <button
               id="add-entry"
               type="submit"
-              phx-disable-with="Blocking…"
+              phx-disable-with={if(@editing, do: "Saving…", else: "Blocking…")}
               class="inline-flex items-center gap-1.5 rounded-full bg-octo-indigo px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-octo-indigo/20 active:scale-95"
             >
-              <.icon name="hero-no-symbol-micro" class="size-4" /> Block
+              <%= if @editing do %>
+                <.icon name="hero-check-micro" class="size-4" /> Save
+              <% else %>
+                <.icon name="hero-no-symbol-micro" class="size-4" /> Block
+              <% end %>
+            </button>
+            <button
+              :if={@editing}
+              id="cancel-edit"
+              type="button"
+              phx-click="cancel"
+              class="rounded-full px-4 py-2 text-sm font-semibold text-base-content/60 transition hover:bg-base-content/5 hover:text-base-content"
+            >
+              Cancel
             </button>
           </div>
         </.form>
@@ -131,17 +191,29 @@ defmodule OctomoctoWeb.Admin.BlocklistLive do
                 {Calendar.strftime(entry.inserted_at, "%Y-%m-%d %H:%M")} UTC
               </p>
             </div>
-            <button
-              id={"delete-entry-#{entry.id}"}
-              type="button"
-              aria-label="Delete"
-              phx-click="delete"
-              phx-value-id={entry.id}
-              data-confirm="Unblock these clients?"
-              class="shrink-0 rounded-full p-2 text-base-content/60 transition hover:bg-error/10 hover:text-error"
-            >
-              <.icon name="hero-trash" class="size-5" />
-            </button>
+            <div class="flex shrink-0 items-center gap-1">
+              <button
+                id={"edit-entry-#{entry.id}"}
+                type="button"
+                aria-label="Edit"
+                phx-click="edit"
+                phx-value-id={entry.id}
+                class="rounded-full p-2 text-base-content/60 transition hover:bg-base-content/5 hover:text-octo-indigo"
+              >
+                <.icon name="hero-pencil-square" class="size-5" />
+              </button>
+              <button
+                id={"delete-entry-#{entry.id}"}
+                type="button"
+                aria-label="Delete"
+                phx-click="delete"
+                phx-value-id={entry.id}
+                data-confirm="Unblock these clients?"
+                class="rounded-full p-2 text-base-content/60 transition hover:bg-error/10 hover:text-error"
+              >
+                <.icon name="hero-trash" class="size-5" />
+              </button>
+            </div>
           </li>
         </ul>
       </div>

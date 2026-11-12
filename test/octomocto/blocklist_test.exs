@@ -34,9 +34,27 @@ defmodule Octomocto.BlocklistTest do
 
     test "rejects a user agent that matches normal browsers, without an IP" do
       assert {:error, changeset} = Blocklist.create_entry(%{user_agent: "Chrome"})
-      assert "matches normal browsers; add an IP" in errors_on(changeset).user_agent
+
+      assert "matches normal browsers; keep only the bot name, or add an IP" in errors_on(
+               changeset
+             ).user_agent
 
       assert {:ok, _entry} = Blocklist.create_entry(%{ip: "203.0.113.7", user_agent: "Chrome"})
+    end
+
+    test "rejects a full user agent with browser parts, without an IP" do
+      for user_agent <- [
+            "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.1 Safari/537.36",
+            "Mozilla/5.0 (compatible; SERankingBacklinksBot/1.0; +https://seranking.com/backlinks-crawler)"
+          ] do
+        assert {:error, changeset} = Blocklist.create_entry(%{user_agent: user_agent})
+
+        assert "matches normal browsers; keep only the bot name, or add an IP" in errors_on(
+                 changeset
+               ).user_agent
+      end
+
+      assert {:ok, _entry} = Blocklist.create_entry(%{user_agent: "SERankingBacklinksBot"})
     end
 
     test "rejects the same IP and user agent again" do
@@ -70,6 +88,16 @@ defmodule Octomocto.BlocklistTest do
       assert Blocklist.blocked?({198, 51, 102, 7}, "python-requests/2.32.3")
       refute Blocklist.blocked?({198, 51, 102, 7}, "Mozilla/5.0")
       refute Blocklist.blocked?({198, 51, 102, 8}, "python-requests/2.32.3")
+    end
+
+    test "blocks with the changed entry" do
+      entry = block(%{ip: "198.51.104.7"})
+
+      {:ok, _entry} = Blocklist.update_entry(entry, %{ip: "198.51.104.8"})
+      _ = :sys.get_state(Blocklist.Cache)
+
+      refute Blocklist.blocked?({198, 51, 104, 7}, nil)
+      assert Blocklist.blocked?({198, 51, 104, 8}, nil)
     end
 
     test "does not block after the entry is deleted" do
