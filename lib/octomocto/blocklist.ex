@@ -1,7 +1,7 @@
 defmodule Octomocto.Blocklist do
   @moduledoc """
   The clients that get a 404 for all requests (see `OctomoctoWeb.BlockRequests`).
-  Admins edit the entries on /admin/blocklist and /admin/top-ips.
+  Admins edit the entries on /admin/blocklist and /admin/traffic.
 
   The entries are in the database. Each node also keeps them in memory
   (see `Octomocto.Blocklist.Cache`), so that a request does not query the
@@ -64,6 +64,15 @@ defmodule Octomocto.Blocklist do
     Enum.any?(Cache.rules(), fn {range, pattern} ->
       (is_nil(range) or Octomocto.IpRange.member?(range, ip)) and
         (is_nil(pattern) or Entry.matches_user_agent?(pattern, user_agent))
+    end)
+  end
+
+  @doc """
+  Gives true when an entry without an IP blocks the `user_agent` from any IP.
+  """
+  def user_agent_blocked?(user_agent) do
+    Enum.any?(Cache.rules(), fn {range, pattern} ->
+      is_nil(range) and pattern != nil and Entry.matches_user_agent?(pattern, user_agent)
     end)
   end
 end

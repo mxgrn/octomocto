@@ -19,7 +19,7 @@ defmodule Octomocto.Blocklist.Entry do
   ]
 
   # The parts of a browser user agent. A rule without an IP must not have
-  # them: a full user agent from the top IPs page has them, and it can be
+  # them: a full user agent from the traffic page has them, and it can be
   # the user agent of real players.
   @browser_parts ~w(mozilla/ applewebkit/ chrome/ safari/ firefox/ gecko/ edg/ opr/)
 

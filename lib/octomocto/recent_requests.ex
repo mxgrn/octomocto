@@ -1,7 +1,7 @@
 defmodule Octomocto.RecentRequests do
   @moduledoc """
-  The last requests on this node, for the top IPs page of the admins
-  (/admin/top-ips). Only in memory: a restart clears them.
+  The last requests on this node, for the traffic page of the admins
+  (/admin/traffic). Only in memory: a restart clears them.
 
   The requests are in a ring of `size` places in a public ETS table: the
   request process writes its request in the next place, over the oldest
@@ -90,6 +90,60 @@ defmodule Octomocto.RecentRequests do
       Map.merge(request, %{ip: ip, user_agents: user_agents})
     end)
     |> Enum.sort_by(&{-&1.count, &1.ip})
+    |> Enum.take(limit)
+  end
+
+  # A name that ends with "bot", "crawler" or "spider", followed by its
+  # version: "Amazonbot/0.1". The version is required, so that a phone like
+  # "CUBOT X30" and a link like "/support/amazonbot)" are not bot names.
+  @bot_name ~r/([A-Za-z0-9_.-]*(?:bot|crawler|spider))\//i
+
+  @doc "Gives the name that a bot gives in its `user_agent`, or nil."
+  def bot_name(nil), do: nil
+
+  def bot_name(user_agent) do
+    case Regex.run(@bot_name, user_agent, capture: :all_but_first) do
+      [name] -> name
+      nil -> nil
+    end
+  end
+
+  @doc """
+  Adds the `summaries` of the nodes and groups the requests by user agent,
+  the most requests first. A bot is grouped by its name (see `bot_name/1`),
+  so that its versions are together. Other user agents are grouped by the
+  full text.
+  """
+  def top_user_agents(summaries, limit \\ 100) do
+    summaries
+    |> Enum.reduce(%{}, &Map.merge(&2, &1, fn _ip, a, b -> add(a, b) end))
+    |> Enum.flat_map(fn {ip, request} ->
+      Enum.map(request.user_agents, fn {user_agent, count} -> {ip, user_agent, count} end)
+    end)
+    |> Enum.group_by(fn {_ip, user_agent, _count} ->
+      case bot_name(user_agent) do
+        nil -> {:full, user_agent}
+        name -> {:bot, String.downcase(name)}
+      end
+    end)
+    |> Enum.map(fn {key, requests} ->
+      user_agents =
+        requests
+        |> Enum.group_by(&elem(&1, 1), &elem(&1, 2))
+        |> Enum.map(fn {user_agent, counts} -> {user_agent, Enum.sum(counts)} end)
+        |> Enum.sort_by(fn {_ua, count} -> -count end)
+
+      {top_user_agent, _count} = hd(user_agents)
+
+      %{
+        name: if(match?({:bot, _}, key), do: bot_name(top_user_agent), else: top_user_agent),
+        bot?: match?({:bot, _}, key),
+        count: Enum.sum_by(requests, &elem(&1, 2)),
+        ip_count: requests |> Enum.uniq_by(&elem(&1, 0)) |> length(),
+        user_agents: user_agents
+      }
+    end)
+    |> Enum.sort_by(&{-&1.count, &1.name || ""})
     |> Enum.take(limit)
   end
 end

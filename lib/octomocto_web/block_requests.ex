@@ -1,6 +1,6 @@
 defmodule OctomoctoWeb.BlockRequests do
   @moduledoc """
-  Keeps each request in `Octomocto.RecentRequests` (for /admin/top-ips), and
+  Keeps each request in `Octomocto.RecentRequests` (for /admin/traffic), and
   sends a plain 404 to the clients in `Octomocto.Blocklist`.
 
   A 404 does not tell a bot that it is blocked, so it has less reason to

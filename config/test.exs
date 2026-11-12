@@ -15,6 +15,8 @@ config :understudy, async: false, memory_cache: false
 # The games counter starts at zero and does not query the database at start
 config :octomocto, :load_games_played, false
 config :octomocto, :load_blocklist, false
+# All tests share the recent requests, so the traffic page shows more rows
+config :octomocto, :traffic_rows, 1000
 
 # Configure your database
 #

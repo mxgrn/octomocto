@@ -7,7 +7,7 @@ defmodule OctomoctoWeb.Admin.BlocklistLive do
 
   alias Octomocto.Blocklist
 
-  # The top IPs page links here with the full user agent of a client, to cut
+  # The traffic page links here with the full user agent of a client, to cut
   # it to the name of the bot before blocking it.
   def mount(params, _session, socket) do
     user_agent = params["user_agent"]
@@ -95,11 +95,11 @@ defmodule OctomoctoWeb.Admin.BlocklistLive do
             </p>
           </div>
           <.link
-            id="top-ips-link"
-            navigate={~p"/admin/top-ips"}
+            id="traffic-link"
+            navigate={~p"/admin/traffic"}
             class="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-octo-indigo ring-1 ring-octo-indigo/30 transition hover:bg-octo-indigo/5 dark:text-octo-indigo-light"
           >
-            <.icon name="hero-chart-bar-micro" class="size-4" /> Top IPs
+            <.icon name="hero-chart-bar-micro" class="size-4" /> Traffic
           </.link>
         </div>
 

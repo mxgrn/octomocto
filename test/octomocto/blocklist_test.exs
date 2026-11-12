@@ -100,6 +100,14 @@ defmodule Octomocto.BlocklistTest do
       assert Blocklist.blocked?({198, 51, 104, 8}, nil)
     end
 
+    test "finds if a user agent is blocked from any IP" do
+      block(%{user_agent: "UserAgentBlockedTestBot"})
+      block(%{ip: "198.51.105.7", user_agent: "OnlyWithIpTestBot"})
+
+      assert Blocklist.user_agent_blocked?("x UserAgentBlockedTestBot/1.0")
+      refute Blocklist.user_agent_blocked?("OnlyWithIpTestBot")
+    end
+
     test "does not block after the entry is deleted" do
       entry = block(%{ip: "198.51.103.7"})
 
