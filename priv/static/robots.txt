@@ -1,7 +1,15 @@
 # See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
-#
-# To ban all spiders from the entire site uncomment the next two lines:
-# User-agent: *
-# Disallow: /
+
+# Crawlers that requested the pages without a stop
+User-agent: SERankingBacklinksBot
+Disallow: /
+
+User-agent: Reflectionbot
+Disallow: /
+
+# The language links in the footer only redirect to the localized pages,
+# which are in the sitemap and in the hreflang links.
+User-agent: *
+Disallow: /locale/
 
 Sitemap: https://octomocto.com/sitemap.xml
