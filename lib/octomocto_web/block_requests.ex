@@ -1,16 +1,17 @@
 defmodule OctomoctoWeb.BlockRequests do
   @moduledoc """
-  Keeps each request in `Octomocto.RecentRequests` (for /admin/traffic), and
-  sends a plain 404 to the clients in `Octomocto.Blocklist`.
+  Sends a plain 404 to the clients in `Octomocto.Blocklist`, and keeps each
+  served request in `Octomocto.RecentRequests` (for /admin/traffic).
 
   A 404 does not tell a bot that it is blocked, so it has less reason to
-  change its IP. The blocked requests are also in the recent requests, so
-  that the admins see if a blocked bot continues.
+  change its IP. The blocked requests are not in the recent requests, so
+  that they do not push the real traffic out. To see if a blocked bot
+  continues, turn on the log of its entry.
 
   Comes after `OctomoctoWeb.ClientIp`, which gives the real client IP, and
   before `Plug.Telemetry`, so that a blocked request has none of the usual
   log lines. It has one line with `blocked=true` only when its entry has the
-  log on. The traffic page shows all blocked requests.
+  log on.
   """
   @behaviour Plug
 
@@ -30,12 +31,12 @@ defmodule OctomoctoWeb.BlockRequests do
   def call(conn, _opts) do
     user_agent = conn |> get_req_header("user-agent") |> List.first()
 
-    if conn.request_path not in @not_recorded do
-      RecentRequests.record(conn.remote_ip, user_agent, conn.method, conn.request_path)
-    end
-
     case Blocklist.check(conn.remote_ip, user_agent) do
       nil ->
+        if conn.request_path not in @not_recorded do
+          RecentRequests.record(conn.remote_ip, user_agent, conn.method, conn.request_path)
+        end
+
         conn
 
       log ->

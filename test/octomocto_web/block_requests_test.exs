@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.BlockRequestsTest do
   use OctomoctoWeb.ConnCase, async: true
 
-  alias Octomocto.Blocklist
+  alias Octomocto.{Blocklist, RecentRequests}
 
   # Test requests come from 127.0.0.1, so the entry also has a user agent
   # that only this test sends.
@@ -17,6 +17,13 @@ defmodule OctomoctoWeb.BlockRequestsTest do
 
     assert conn.status == 404
     assert conn.resp_body == "Not Found"
+  end
+
+  test "does not keep a blocked request for the traffic page", %{conn: conn} do
+    conn |> put_req_header("user-agent", "BlockRequestsTestBot/1.0") |> get(~p"/memory")
+
+    user_agents = get_in(RecentRequests.summary(), ["127.0.0.1", :user_agents]) || %{}
+    refute Map.has_key?(user_agents, "BlockRequestsTestBot/1.0")
   end
 
   test "serves other clients", %{conn: conn} do
