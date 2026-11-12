@@ -69,6 +69,8 @@ jobs:
             docker rm ${{matrix.app}}_${{matrix.env}} || true
             docker run --name=${{matrix.app}}_${{matrix.env}} -d \
               --restart always \
+              --log-opt max-size=50m \
+              --log-opt max-file=3 \
               --network host \
               -e PORT=${{matrix.port}} \
               -e RELEASE_COOKIE=${{secrets.RELEASE_COOKIE}} \
