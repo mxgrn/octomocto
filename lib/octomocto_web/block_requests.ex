@@ -8,8 +8,9 @@ defmodule OctomoctoWeb.BlockRequests do
   that the admins see if a blocked bot continues.
 
   Comes after `OctomoctoWeb.ClientIp`, which gives the real client IP, and
-  before `Plug.Telemetry`: a blocked request has its own log line, with
-  `blocked=true`, instead of the usual two lines.
+  before `Plug.Telemetry`, so that a blocked request has none of the usual
+  log lines. It has one line with `blocked=true` only when its entry has the
+  log on. The traffic page shows all blocked requests.
   """
   @behaviour Plug
 
@@ -33,15 +34,18 @@ defmodule OctomoctoWeb.BlockRequests do
       RecentRequests.record(conn.remote_ip, user_agent, conn.method, conn.request_path)
     end
 
-    if Blocklist.blocked?(conn.remote_ip, user_agent) do
-      Logger.info("Blocked #{conn.method} #{conn.request_path}", blocked: true)
+    case Blocklist.check(conn.remote_ip, user_agent) do
+      nil ->
+        conn
 
-      conn
-      |> put_resp_content_type("text/plain")
-      |> send_resp(404, "Not Found")
-      |> halt()
-    else
-      conn
+      log ->
+        if log == :log,
+          do: Logger.info("Blocked #{conn.method} #{conn.request_path}", blocked: true)
+
+        conn
+        |> put_resp_content_type("text/plain")
+        |> send_resp(404, "Not Found")
+        |> halt()
     end
   end
 end

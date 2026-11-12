@@ -57,6 +57,20 @@ defmodule OctomoctoWeb.Admin.BlocklistLive do
 
   def handle_event("cancel", _params, socket), do: {:noreply, stop_editing(socket)}
 
+  def handle_event("toggle_log", %{"id" => id}, socket) do
+    entry = Blocklist.get_entry!(id)
+    log = if entry.log == :log, do: :quiet, else: :log
+    {:ok, entry} = Blocklist.update_entry(entry, %{log: log})
+
+    # A later save of the form must not bring back the old value
+    socket =
+      if socket.assigns.editing && socket.assigns.editing.id == entry.id,
+        do: assign(socket, :editing, entry),
+        else: socket
+
+    {:noreply, stream_insert(socket, :entries, entry)}
+  end
+
   def handle_event("delete", %{"id" => id}, socket) do
     {:ok, entry} = id |> Blocklist.get_entry!() |> Blocklist.delete_entry()
 
@@ -91,7 +105,7 @@ defmodule OctomoctoWeb.Admin.BlocklistLive do
               Blocklist
             </h1>
             <p class="mt-1 text-sm text-base-content/60">
-              These clients get a plain 404 for all pages. With an IP and a user agent, both must match.
+              These clients get a plain 404 for all pages, with no line in the log unless the entry is logged. With an IP and a user agent, both must match.
             </p>
           </div>
           <.link
@@ -192,6 +206,38 @@ defmodule OctomoctoWeb.Admin.BlocklistLive do
               </p>
             </div>
             <div class="flex shrink-0 items-center gap-1">
+              <button
+                id={"log-entry-#{entry.id}"}
+                type="button"
+                aria-pressed={to_string(entry.log == :log)}
+                phx-click="toggle_log"
+                phx-value-id={entry.id}
+                title={
+                  if(entry.log == :log,
+                    do: "The blocked requests write a line in the log",
+                    else: "The blocked requests write no line in the log"
+                  )
+                }
+                class={[
+                  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold transition",
+                  if(entry.log == :log,
+                    do:
+                      "bg-octo-indigo/10 text-octo-indigo dark:bg-octo-indigo-light/15 dark:text-octo-indigo-light",
+                    else: "text-base-content/50 hover:bg-base-content/5 hover:text-base-content"
+                  )
+                ]}
+              >
+                <.icon
+                  name={
+                    if(entry.log == :log,
+                      do: "hero-document-text-micro",
+                      else: "hero-eye-slash-micro"
+                    )
+                  }
+                  class="size-3.5"
+                />
+                {if entry.log == :log, do: "Logged", else: "Not logged"}
+              </button>
               <button
                 id={"edit-entry-#{entry.id}"}
                 type="button"

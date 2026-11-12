@@ -18,7 +18,10 @@ defmodule Octomocto.Blocklist.Cache do
 
   def start_link(opts), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
 
-  @doc "Gives the rules: one `{range or nil, user agent pattern or nil}` for each entry."
+  @doc """
+  Gives the rules: one `{range or nil, user agent pattern or nil, log}` for
+  each entry.
+  """
   def rules, do: :persistent_term.get(@key, [])
 
   @impl true
@@ -46,7 +49,7 @@ defmodule Octomocto.Blocklist.Cache do
     do: {:noreply, entries |> Map.delete(id) |> put()}
 
   defp put(entries) do
-    rules = Enum.map(Map.values(entries), &{range(&1.ip), &1.user_agent})
+    rules = Enum.map(Map.values(entries), &{range(&1.ip), &1.user_agent, &1.log})
     :persistent_term.put(@key, rules)
     entries
   end

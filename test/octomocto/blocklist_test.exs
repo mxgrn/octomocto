@@ -108,6 +108,15 @@ defmodule Octomocto.BlocklistTest do
       refute Blocklist.user_agent_blocked?("OnlyWithIpTestBot")
     end
 
+    test "check/2 tells if the blocked request goes to the log" do
+      block(%{ip: "198.51.106.7"})
+      block(%{ip: "198.51.106.0/24", user_agent: "LoggedTestBot", log: :log})
+
+      assert Blocklist.check({198, 51, 106, 7}, "Mozilla/5.0") == :quiet
+      assert Blocklist.check({198, 51, 106, 7}, "LoggedTestBot/1.0") == :log
+      assert Blocklist.check({198, 51, 107, 7}, "Mozilla/5.0") == nil
+    end
+
     test "does not block after the entry is deleted" do
       entry = block(%{ip: "198.51.103.7"})
 

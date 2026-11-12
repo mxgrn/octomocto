@@ -27,6 +27,8 @@ defmodule Octomocto.Blocklist.Entry do
     field :ip, :string
     field :user_agent, :string
     field :note, :string
+    # :log when the blocked requests of the entry write a line in the log
+    field :log, Ecto.Enum, values: [:quiet, :log], default: :quiet
 
     timestamps(type: :utc_datetime)
   end
@@ -34,7 +36,7 @@ defmodule Octomocto.Blocklist.Entry do
   @doc false
   def changeset(entry, attrs) do
     entry
-    |> cast(attrs, [:ip, :user_agent, :note])
+    |> cast(attrs, [:ip, :user_agent, :note, :log])
     |> validate_length(:user_agent, min: 4, max: 300)
     |> validate_length(:note, max: 255)
     |> normalize_ip()

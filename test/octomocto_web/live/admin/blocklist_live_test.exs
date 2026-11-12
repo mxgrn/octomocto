@@ -51,6 +51,20 @@ defmodule OctomoctoWeb.Admin.BlocklistLiveTest do
     refute has_element?(view, "#cancel-edit")
   end
 
+  test "turns the log of an entry on and off", %{conn: conn} do
+    {:ok, entry} = Blocklist.create_entry(%{ip: "203.0.113.10"})
+    on_exit(fn -> Blocklist.broadcast_deleted(entry.id) end)
+
+    {:ok, view, _html} = live(conn, ~p"/admin/blocklist")
+
+    view |> element("#log-entry-#{entry.id}") |> render_click()
+    assert [%{log: :log}] = Blocklist.list_entries()
+    assert has_element?(view, "#log-entry-#{entry.id}[aria-pressed=true]")
+
+    view |> element("#log-entry-#{entry.id}") |> render_click()
+    assert [%{log: :quiet}] = Blocklist.list_entries()
+  end
+
   test "deletes an entry", %{conn: conn} do
     {:ok, entry} = Blocklist.create_entry(%{ip: "203.0.113.8"})
     on_exit(fn -> Blocklist.broadcast_deleted(entry.id) end)

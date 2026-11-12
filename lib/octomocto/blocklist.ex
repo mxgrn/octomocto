@@ -60,18 +60,29 @@ defmodule Octomocto.Blocklist do
   `user_agent` header (nil when it is missing). An entry with an IP and a
   user agent blocks only when both match.
   """
-  def blocked?(ip, user_agent) do
-    Enum.any?(Cache.rules(), fn {range, pattern} ->
+  def blocked?(ip, user_agent), do: check(ip, user_agent) != nil
+
+  @doc """
+  Gives nil when no entry blocks the client (see `blocked?/2`). Else gives
+  `:log` when one of the entries that block it has `log: :log`, or `:quiet`.
+  """
+  def check(ip, user_agent) do
+    Cache.rules()
+    |> Enum.filter(fn {range, pattern, _log} ->
       (is_nil(range) or Octomocto.IpRange.member?(range, ip)) and
         (is_nil(pattern) or Entry.matches_user_agent?(pattern, user_agent))
     end)
+    |> case do
+      [] -> nil
+      rules -> if Enum.any?(rules, &(elem(&1, 2) == :log)), do: :log, else: :quiet
+    end
   end
 
   @doc """
   Gives true when an entry without an IP blocks the `user_agent` from any IP.
   """
   def user_agent_blocked?(user_agent) do
-    Enum.any?(Cache.rules(), fn {range, pattern} ->
+    Enum.any?(Cache.rules(), fn {range, pattern, _log} ->
       is_nil(range) and pattern != nil and Entry.matches_user_agent?(pattern, user_agent)
     end)
   end
