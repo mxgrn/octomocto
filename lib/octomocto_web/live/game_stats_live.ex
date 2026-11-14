@@ -23,11 +23,13 @@ defmodule OctomoctoWeb.GameStatsLive do
 
   def handle_params(params, _uri, socket) do
     today? = StatsLive.today?(params)
-    {count, last} = StatsLive.period(today?)
+    days = StatsLive.days(params)
+    {count, last} = StatsLive.period(today?, days)
 
     {:noreply,
      assign(socket,
        today?: today?,
+       days: days,
        players: Stats.top_players(socket.assigns.game.id, count, last)
      )}
   end

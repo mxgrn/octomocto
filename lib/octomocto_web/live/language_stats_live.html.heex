@@ -14,19 +14,30 @@
     <div>
       <div class="flex items-center justify-between gap-4">
         <.link
-          navigate={StatsLive.stats_path(~p"/stats", @today?)}
+          navigate={StatsLive.stats_path(~p"/stats", @today?, @days)}
           id="language-stats-back"
           class="inline-flex items-center gap-1 text-sm text-base-content/60 transition hover:text-octo-indigo dark:hover:text-octo-indigo-light"
         >
           <.icon name="hero-arrow-left" class="size-4" /> Stats
         </.link>
-        <StatsLive.today_toggle on={@today?} path={~p"/stats/languages/#{@language}"} />
+        <div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
+          <StatsLive.days_tabs
+            days={@days}
+            today?={@today?}
+            path={~p"/stats/languages/#{@language}"}
+          />
+          <StatsLive.today_toggle
+            on={@today?}
+            days={@days}
+            path={~p"/stats/languages/#{@language}"}
+          />
+        </div>
       </div>
       <h1 class="mt-3 text-2xl font-semibold tracking-tight text-octo-navy dark:text-base-content">
         {@language}
       </h1>
       <p class="mt-1 text-sm text-base-content/60">
-        Games in {StatsLive.period_text(@today?)} with players of this browser language.
+        Games in {StatsLive.period_text(@today?, @days)} with players of this browser language.
       </p>
     </div>
 
@@ -37,7 +48,8 @@
       <div class="mb-4 flex items-baseline justify-between gap-4">
         <h2 class="font-semibold text-octo-navy dark:text-base-content">Top games</h2>
         <span :if={@games != []} class="text-xs text-base-content/50">{StatsLive.period_label(
-          @today?
+          @today?,
+          @days
         )}</span>
       </div>
       <p :if={@games == []} id="language-games-empty" class="text-sm text-base-content/60">
@@ -58,7 +70,7 @@
           <div class="min-w-0 flex-1">
             <div class="flex items-center justify-between gap-4 text-sm">
               <.link
-                navigate={StatsLive.stats_path(~p"/stats/#{game.id}", @today?)}
+                navigate={StatsLive.stats_path(~p"/stats/#{game.id}", @today?, @days)}
                 class="font-medium text-octo-navy transition hover:text-octo-indigo dark:text-base-content dark:hover:text-octo-indigo-light"
               >
                 {game.name}

@@ -63,6 +63,20 @@ defmodule OctomoctoWeb.GameStatsLiveTest do
     assert has_element?(view, "#top-player-1")
   end
 
+  test "counts only the games of the 7 days before today on the 7-day tab", %{conn: conn} do
+    user = user_fixture()
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+    Repo.update_all(Result, set: [inserted_at: DateTime.add(DateTime.utc_now(), -8, :day)])
+
+    {:ok, view, _html} = live(conn, ~p"/stats/nimble-mosaic")
+
+    view |> element("#days-7") |> render_click()
+
+    assert_patch(view, ~p"/stats/nimble-mosaic?days=7")
+    assert has_element?(view, "#top-players-empty")
+    assert has_element?(view, ~s|#game-stats-back[href="/stats?days=7"]|)
+  end
+
   test "keeps the toggle in the link back to the stats page", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/stats/memory?today=1")
 

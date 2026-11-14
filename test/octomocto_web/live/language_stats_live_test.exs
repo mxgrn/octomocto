@@ -46,6 +46,20 @@ defmodule OctomoctoWeb.LanguageStatsLiveTest do
     assert has_element?(view, "#language-games-empty")
   end
 
+  test "counts only the games of the 7 days before today on the 7-day tab", %{conn: conn} do
+    user = user_fixture()
+    Locales.put(user.id, nil, "pt-BR")
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+    Repo.update_all(Result, set: [inserted_at: DateTime.add(DateTime.utc_now(), -8, :day)])
+
+    {:ok, view, _html} = live(conn, ~p"/stats/languages/pt")
+
+    view |> element("#days-7") |> render_click()
+
+    assert_patch(view, ~p"/stats/languages/pt?days=7")
+    assert has_element?(view, "#language-games-empty")
+  end
+
   test "does not count the games of today until the toggle includes them", %{conn: conn} do
     user = user_fixture()
     Locales.put(user.id, nil, "pt-BR")

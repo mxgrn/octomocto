@@ -64,6 +64,41 @@ defmodule OctomoctoWeb.StatsLiveTest do
     assert view |> element("#games-total") |> render() =~ ~r/>\s*1\s*</
   end
 
+  test "counts only the games of the 7 days before today on the 7-day tab", %{conn: conn} do
+    user = user_fixture()
+    NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])
+    Repo.update_all(Result, set: [inserted_at: DateTime.add(DateTime.utc_now(), -8, :day)])
+
+    {:ok, view, _html} = live(conn, ~p"/stats")
+
+    assert has_element?(view, ~s|#days-30[aria-current="page"]|)
+    assert view |> element("#games-total") |> render() =~ ~r/>\s*1\s*</
+
+    view |> element("#days-7") |> render_click()
+
+    assert_patch(view, ~p"/stats?days=7")
+    assert has_element?(view, ~s|#days-7[aria-current="page"]|)
+    assert view |> element("#games-total") |> render() =~ ~r/>\s*0\s*</
+  end
+
+  test "shows 30 days for an unknown number of days", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/stats?days=5")
+
+    assert has_element?(view, ~s|#days-30[aria-current="page"]|)
+    assert has_element?(view, ~s|#stats-activity-memory[aria-label$="in the last 30 days"]|)
+  end
+
+  test "keeps the number of days and the toggle together", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/stats?days=7")
+
+    view |> element("#include-today") |> render_click()
+
+    assert_patch(view, ~p"/stats?days=7&today=1")
+    assert has_element?(view, ~s|#days-30[href="/stats?today=1"]|)
+    assert has_element?(view, ~s|#stats-memory a[href="/stats/memory?days=7&today=1"]|)
+    assert has_element?(view, ~s|#stats-activity-memory[aria-label$="in the last 7 days"]|)
+  end
+
   test "always shows the games of today in the Today number", %{conn: conn} do
     user = user_fixture()
     NimbleMosaic.save_results("a", @settings, 1000, [%{user_id: user.id, score: 90}])

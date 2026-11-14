@@ -5,9 +5,10 @@ defmodule OctomoctoWeb.StatsLive do
   removes its line, and the chart fits the lines that stay.
 
   All stats pages show the 30 days before today, because the counts of today
-  are not complete. The "Include today" toggle (`today_toggle/1`) adds
-  `?today=1` to the URL, and then the pages show the last 30 days with
-  today. The links between the stats pages keep the toggle.
+  are not complete. The day tabs (`days_tabs/1`) add `?days=7`, and then the
+  pages show 7 days. The "Include today" toggle (`today_toggle/1`) adds
+  `?today=1`, and then the pages show the last days with today. The links
+  between the stats pages keep the tab and the toggle.
   """
   use OctomoctoWeb, :live_view
 
@@ -16,8 +17,8 @@ defmodule OctomoctoWeb.StatsLive do
   alias Octomocto.Stats
   alias OctomoctoWeb.{GameIcons, HomeLive, PlayerLive}
 
-  # The number of days of all stats pages
-  @days 30
+  # The numbers of days of the tabs of the stats pages. The first is the default.
+  @days [30, 7]
 
   # The size of the SVG coordinates of the chart. The SVG stretches to the
   # size of the plot, so only the proportions of the values are important.
@@ -31,17 +32,20 @@ defmodule OctomoctoWeb.StatsLive do
   @colors 10
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, page_title: "30-day stats", noindex: true, hidden: MapSet.new())}
+    {:ok, assign(socket, noindex: true, hidden: MapSet.new())}
   end
 
   def handle_params(params, _uri, socket) do
     today? = today?(params)
-    {count, last} = period(today?)
+    days_count = days(params)
+    {count, last} = period(today?, days_count)
     days = Stats.games_per_day(count, last)
 
     {:noreply,
      assign(socket,
+       page_title: "#{days_count}-day stats",
        today?: today?,
+       days_count: days_count,
        days: days,
        total: days |> Enum.map(& &1.total) |> Enum.sum(),
        today_total: if(today?, do: List.last(days), else: hd(Stats.games_per_day(1))).total,
@@ -63,36 +67,89 @@ defmodule OctomoctoWeb.StatsLive do
   def today?(params), do: params["today"] == "1"
 
   @doc """
-  The days of the stats pages as `{count, last day}`: the last #{@days} days
-  with today, or the #{@days} days before today without it.
+  The number of days in the URL `params` of a stats page: one of #{inspect(@days)}.
+  A different value or no value gives #{hd(@days)}.
   """
-  def period(true = _today?), do: {@days, Date.utc_today()}
-  def period(false), do: {@days, Date.add(Date.utc_today(), -1)}
+  def days(params) do
+    Enum.find(@days, hd(@days), &(Integer.to_string(&1) == params["days"]))
+  end
 
-  @doc "The `path` of a stats page, with `?today=1` when it includes today."
-  def stats_path(path, true = _today?), do: path <> "?today=1"
-  def stats_path(path, false), do: path
+  @doc """
+  The days of the stats pages as `{count, last day}`: the last `days` days
+  with today, or the `days` days before today without it.
+  """
+  def period(true = _today?, days), do: {days, Date.utc_today()}
+  def period(false, days), do: {days, Date.add(Date.utc_today(), -1)}
+
+  @doc """
+  The `path` of a stats page, with `?days=` when the number of days is not
+  the default, and with `today=1` when the page includes today.
+  """
+  def stats_path(path, today?, days) do
+    query =
+      [{"days", days != hd(@days) && days}, {"today", today? && 1}]
+      |> Enum.filter(fn {_key, value} -> value end)
+
+    if query == [], do: path, else: path <> "?" <> URI.encode_query(query)
+  end
 
   @doc "The days of the stats pages in a sentence, for example \"the last 30 days\"."
-  def period_text(true = _today?), do: "the last #{@days} days"
-  def period_text(false), do: "the #{@days} days before today"
+  def period_text(true = _today?, days), do: "the last #{days} days"
+  def period_text(false, days), do: "the #{days} days before today"
 
   @doc "The days of the stats pages as a short label, for example \"Last 30 days\"."
-  def period_label(true = _today?), do: "Last #{@days} days"
-  def period_label(false), do: "#{@days} days before today"
+  def period_label(true = _today?, days), do: "Last #{days} days"
+  def period_label(false, days), do: "#{days} days before today"
+
+  @doc """
+  Renders the tabs of the stats pages, one for each number of days. A click
+  patches the page to the URL with the number of days of the tab.
+  """
+  attr :days, :integer, required: true, doc: "the number of days of the page"
+  attr :today?, :boolean, required: true, doc: "true when the page includes today"
+  attr :path, :string, required: true, doc: "the path of the page, without the query"
+
+  def days_tabs(assigns) do
+    assigns = assign(assigns, :tabs, @days)
+
+    ~H"""
+    <nav
+      id="days-tabs"
+      class="inline-flex w-fit shrink-0 gap-1 rounded-full bg-base-content/5 p-1 text-sm font-semibold"
+    >
+      <.link
+        :for={days <- @tabs}
+        id={"days-#{days}"}
+        patch={stats_path(@path, @today?, days)}
+        replace
+        aria-current={days == @days && "page"}
+        class={[
+          "rounded-full px-4 py-1.5 transition",
+          if(days == @days,
+            do: "bg-white text-octo-indigo shadow-sm dark:bg-base-100 dark:text-octo-indigo-light",
+            else: "text-base-content/60 hover:text-base-content"
+          )
+        ]}
+      >
+        {days} days
+      </.link>
+    </nav>
+    """
+  end
 
   @doc """
   Renders the "Include today" switch of the stats pages. A click patches
   the page to the URL with the other state of the switch.
   """
   attr :on, :boolean, required: true, doc: "true when the page includes today"
-  attr :path, :string, required: true, doc: "the path of the page, without `?today=1`"
+  attr :days, :integer, required: true, doc: "the number of days of the page"
+  attr :path, :string, required: true, doc: "the path of the page, without the query"
 
   def today_toggle(assigns) do
     ~H"""
     <.link
       id="include-today"
-      patch={stats_path(@path, not @on)}
+      patch={stats_path(@path, not @on, @days)}
       replace
       role="switch"
       aria-checked={to_string(@on)}
@@ -347,7 +404,7 @@ defmodule OctomoctoWeb.StatsLive do
       <div class="mt-2 ml-10 flex text-xs text-base-content/50" aria-hidden="true">
         <div :for={{day, i} <- Enum.with_index(@days)} class="relative h-4 flex-1">
           <span
-            :if={rem(@count - 1 - i, 7) == 0}
+            :if={rem(@count - 1 - i, if(@count > 7, do: 7, else: 1)) == 0}
             class="absolute left-1/2 -translate-x-1/2 whitespace-nowrap"
           >
             {short_date(day.date)}

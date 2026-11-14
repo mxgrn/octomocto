@@ -18,18 +18,19 @@ defmodule OctomoctoWeb.LanguageStatsLive do
 
   def handle_params(params, _uri, socket) do
     today? = StatsLive.today?(params)
-    {count, last} = StatsLive.period(today?)
+    days = StatsLive.days(params)
+    {count, last} = StatsLive.period(today?, days)
     activity = Stats.games_in_language(socket.assigns.language, count, last)
 
     games =
       HomeLive.games()
       |> Enum.filter(&Map.has_key?(activity, &1.id))
       |> Enum.map(fn game ->
-        days = Map.fetch!(activity, game.id)
-        game |> Map.put(:days, days) |> Map.put(:count, Enum.sum(days))
+        counts = Map.fetch!(activity, game.id)
+        game |> Map.put(:days, counts) |> Map.put(:count, Enum.sum(counts))
       end)
       |> Enum.sort_by(& &1.count, :desc)
 
-    {:noreply, assign(socket, today?: today?, games: games)}
+    {:noreply, assign(socket, today?: today?, days: days, games: games)}
   end
 end
