@@ -113,6 +113,12 @@
             <span class="text-xs text-base-content/50 tabular-nums" title="Best distance">
               {result.best_distance} back
             </span>
+            <span
+              class="flex items-center gap-0.5 text-xs text-base-content/50 tabular-nums"
+              title="Mistakes"
+            >
+              <.icon name="hero-x-mark" class="size-3" />{result.wrong}
+            </span>
             <.result_pill best={@user_results.best != nil and result.id == @user_results.best.id}>
               {result.score}
             </.result_pill>
@@ -160,6 +166,12 @@
           )}</.player_link></span>
           <span class="text-xs text-base-content/50 tabular-nums" title="Best distance">
             {result.best_distance} back
+          </span>
+          <span
+            class="flex items-center gap-0.5 text-xs text-base-content/50 tabular-nums"
+            title="Mistakes"
+          >
+            <.icon name="hero-x-mark" class="size-3" />{result.wrong}
           </span>
           <.result_pill>{result.score}</.result_pill>
         </.result_row>

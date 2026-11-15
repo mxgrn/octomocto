@@ -1332,13 +1332,13 @@ a dot for each correct tap in a row
 viewStats : Model -> Game -> Html Msg
 viewStats model game =
     let
-        ( correct, gap, streak ) =
+        ( ( correct, wrong ), gap, streak ) =
             case model.trail of
                 Just trail ->
-                    ( trail.correct, distance trail, trail.streak )
+                    ( ( trail.correct, trail.wrong ), distance trail, trail.streak )
 
                 Nothing ->
-                    ( game.correct, game.leader - game.follower, game.streak )
+                    ( ( game.correct, game.wrong ), game.leader - game.follower, game.streak )
 
         score =
             Maybe.map .score model.trail |> Maybe.withDefault (serverScore game)
@@ -1349,7 +1349,7 @@ viewStats model game =
                 , content
                 ]
     in
-    div [ id "ink-trail-stats", class "grid grid-cols-3 divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200 dark:divide-white/10 dark:bg-white/5 dark:shadow-none dark:ring-white/10" ]
+    div [ id "ink-trail-stats", class "grid grid-cols-4 divide-x divide-slate-200 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-slate-200 dark:divide-white/10 dark:bg-white/5 dark:shadow-none dark:ring-white/10" ]
         [ stat "jets"
             (div [ class "flex w-full max-w-24 flex-col items-center gap-1.5" ]
                 [ span [ id "ink-trail-correct", class "text-2xl leading-tight font-light tabular-nums lg:text-3xl" ]
@@ -1377,6 +1377,22 @@ viewStats model game =
                       )
                     ]
                 , viewStreak game.streakStep streak
+                ]
+            )
+        , stat "mistakes"
+            (Html.Keyed.node "span"
+                []
+                [ ( String.fromInt wrong
+                  , span
+                        [ id "ink-trail-wrong"
+                        , class "inline-block text-2xl leading-tight font-light tabular-nums lg:text-3xl"
+                        , classList
+                            [ ( "countdown-pop text-rose-500 dark:text-rose-400", wrong > 0 )
+                            , ( "text-slate-400", wrong == 0 )
+                            ]
+                        ]
+                        [ text (String.fromInt wrong) ]
+                  )
                 ]
             )
         ]
