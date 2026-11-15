@@ -191,7 +191,7 @@ defmodule OctomoctoWeb.HomeLive do
           "Follow the leader octopus from cave to cave, some jets behind it. The better you follow, the further behind you jet."
         ),
       path: "/ink-trail",
-      badge: {"New", "hero-sparkles-mini"},
+      badge: {dgettext_noop("home", "Beta"), "hero-beaker-mini"},
       icon_class: "bg-cyan-500/10 dark:bg-cyan-400/15",
       # Not suggested at the end of a multiplayer game, see `OctomoctoWeb.NextGame`
       single_player: true
