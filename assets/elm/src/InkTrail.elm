@@ -32,6 +32,7 @@ its player only watches: it has no player id.
 import Array exposing (Array)
 import Browser
 import Browser.Events
+import Dict exposing (Dict)
 import Html exposing (Html, a, button, div, h1, img, p, span, text)
 import Html.Attributes exposing (alt, attribute, class, classList, href, id, rel, src, style, target)
 import Html.Events exposing (onClick)
@@ -185,9 +186,23 @@ type alias NextGame =
     }
 
 
+{-| The texts in the language of the page, by the English text (see
+`OctomoctoWeb.InkTrailHTML.elm_texts/0`). The `plurals` have each plural
+form of the `locale` (see `OctomoctoWeb.InkTrailHTML.elm_plurals/0`).
+-}
+type alias Texts =
+    { strings : Dict String String
+    , plurals : Dict String (List String)
+    , locale : String
+    }
+
+
 type alias Model =
     { settingsUrl : String
     , nextGame : NextGame
+
+    -- The page to support the author, in the language of the page
+    , donateUrl : String
     , guest : Bool
     , connection : Connection
     , trail : Maybe Trail
@@ -213,15 +228,20 @@ type alias Model =
     , ghostCue : Maybe ( Int, Int )
     , muted : Bool
     , watchers : Int
+    , texts : Texts
     }
 
 
 type alias Flags =
     { settingsUrl : String
     , nextGame : NextGame
+    , donateUrl : String
     , guest : Bool
     , muted : Bool
     , narrow : Bool
+    , texts : Decode.Value
+    , plurals : Decode.Value
+    , locale : String
     }
 
 
@@ -229,6 +249,7 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { settingsUrl = flags.settingsUrl
       , nextGame = flags.nextGame
+      , donateUrl = flags.donateUrl
       , guest = flags.guest
       , connection = Connecting
       , trail = Nothing
@@ -241,6 +262,11 @@ init flags =
       , ghostCue = Nothing
       , muted = flags.muted
       , watchers = 0
+      , texts =
+            { strings = Decode.decodeValue (Decode.dict Decode.string) flags.texts |> Result.withDefault Dict.empty
+            , plurals = Decode.decodeValue (Decode.dict (Decode.list Decode.string)) flags.plurals |> Result.withDefault Dict.empty
+            , locale = flags.locale
+            }
       }
     , Cmd.none
     )
@@ -1298,14 +1324,131 @@ subscriptions model =
 -- VIEW
 
 
+{-| The text in the language of the page. A text without a translation
+stays in English.
+-}
+tr : Texts -> String -> String
+tr texts english =
+    Dict.get english texts.strings |> Maybe.withDefault english
+
+
+{-| The text in the language of the page, with the values in its `{name}`
+parts.
+-}
+tf : Texts -> String -> List ( String, String ) -> String
+tf texts english values =
+    List.foldl (\( name, value ) result -> String.replace ("{" ++ name ++ "}") value result) (tr texts english) values
+
+
+{-| The text in the language of the page, with the link in its `{name}`
+part
+-}
+withLink : Texts -> String -> String -> Html msg -> List (Html msg)
+withLink texts english name link =
+    case String.split ("{" ++ name ++ "}") (tr texts english) of
+        [ before, after ] ->
+            [ text before, link, text after ]
+
+        _ ->
+            [ text (tr texts english), link ]
+
+
+{-| The text with the number in the plural form of the language. Without
+the forms, the text is in English.
+-}
+plural : Texts -> String -> Int -> String
+plural texts english n =
+    Dict.get english texts.plurals
+        |> Maybe.andThen (List.drop (pluralForm texts.locale n) >> List.head)
+        |> Maybe.withDefault english
+        |> String.replace "{count}" (String.fromInt n)
+
+
+{-| The index of the plural form of the number in the language. The rules
+are the same as in `Gettext.Plural` on the server.
+-}
+pluralForm : String -> Int -> Int
+pluralForm locale n =
+    let
+        ones =
+            modBy 10 n
+
+        hundreds =
+            modBy 100 n
+
+        few =
+            ones >= 2 && ones <= 4 && (hundreds < 10 || hundreds >= 20)
+    in
+    case locale of
+        "ru" ->
+            slavicForm (ones == 1 && hundreds /= 11) few
+
+        "uk" ->
+            slavicForm (ones == 1 && hundreds /= 11) few
+
+        "pl" ->
+            slavicForm (n == 1) few
+
+        "ar" ->
+            if n <= 2 then
+                n
+
+            else if hundreds >= 3 && hundreds <= 10 then
+                3
+
+            else if hundreds >= 11 then
+                4
+
+            else
+                5
+
+        "fr" ->
+            boolToInt (n > 1)
+
+        "tr" ->
+            boolToInt (n > 1)
+
+        "ja" ->
+            0
+
+        "vi" ->
+            0
+
+        _ ->
+            boolToInt (n /= 1)
+
+
+{-| The form for one, for a few, or for many
+-}
+slavicForm : Bool -> Bool -> Int
+slavicForm one few =
+    if one then
+        0
+
+    else if few then
+        1
+
+    else
+        2
+
+
+boolToInt : Bool -> Int
+boolToInt value =
+    if value then
+        1
+
+    else
+        0
+
+
 view : Model -> Html Msg
 view model =
     case model.connection of
         Connecting ->
-            p [ id "ink-trail-connecting", class "py-24 text-center opacity-60" ] [ text "Joining the game…" ]
+            p [ id "ink-trail-connecting", class "py-24 text-center opacity-60" ] [ text (tr model.texts "Joining the game…") ]
 
         Failed reason ->
-            p [ id "ink-trail-failed", class "py-24 text-center text-red-600" ] [ text ("Could not join the game: " ++ reason) ]
+            p [ id "ink-trail-failed", class "py-24 text-center text-red-600" ] [ text (tf model.texts "Could not join the game: {reason}" [ ( "reason", reason ) ]) ]
 
         Joined me game ->
             div
@@ -1327,27 +1470,27 @@ viewHeader model me =
         [ a
             [ id "ink-trail-home"
             , href "/"
-            , class "mr-1 shrink-0 transition lg:mr-0"
+            , class "me-1 shrink-0 transition lg:me-0"
             ]
             [ img [ src "/images/mark.svg", alt "octomocto", class "h-8 w-auto dark:hidden lg:h-9" ] []
             , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block lg:h-9" ] []
             ]
         , h1 [ class "text-xl font-semibold tracking-tight lg:text-2xl" ]
-            [ a [ id "ink-trail-title-link", href model.settingsUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Ink Trail" ] ]
-        , viewWatchers (me == Nothing) model.watchers
-        , viewMuteButton model.muted
+            [ a [ id "ink-trail-title-link", href model.settingsUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text (tr model.texts "Ink Trail") ] ]
+        , viewWatchers model.texts (me == Nothing) model.watchers
+        , viewMuteButton model.texts model.muted
         , if me == Nothing then
             text ""
 
           else
             button
                 [ id "ink-trail-restart"
-                , class "group ml-auto flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
+                , class "group ms-auto flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 active:scale-95 dark:text-slate-300 dark:ring-white/20 dark:hover:bg-white/10 dark:hover:text-white dark:hover:ring-white/30"
                 , onClick Restart
-                , Html.Attributes.title "Restart game"
+                , Html.Attributes.title (tr model.texts "Restart game")
                 ]
                 [ span [ class "hero-arrow-path size-4 transition-transform duration-300 group-hover:-rotate-180" ] []
-                , span [ class "max-sm:hidden" ] [ text "Restart" ]
+                , span [ class "max-sm:hidden" ] [ text (tr model.texts "Restart") ]
                 ]
         ]
 
@@ -1355,8 +1498,8 @@ viewHeader model me =
 {-| The eye with the number of watchers, when there are watchers. A
 watcher sees it in the accent color.
 -}
-viewWatchers : Bool -> Int -> Html Msg
-viewWatchers watching count =
+viewWatchers : Texts -> Bool -> Int -> Html Msg
+viewWatchers texts watching count =
     if watching || count > 0 then
         span
             [ id "ink-trail-watchers"
@@ -1367,10 +1510,10 @@ viewWatchers watching count =
                 ]
             , Html.Attributes.title
                 (if watching then
-                    "You are watching this game."
+                    tr texts "You are watching this game."
 
                  else
-                    "Watchers: " ++ String.fromInt count
+                    tf texts "Watchers: {count}" [ ( "count", String.fromInt count ) ]
                 )
             ]
             [ span [ class "hero-eye size-4" ] [], text (String.fromInt (max count 1)) ]
@@ -1379,18 +1522,18 @@ viewWatchers watching count =
         text ""
 
 
-viewMuteButton : Bool -> Html Msg
-viewMuteButton muted =
+viewMuteButton : Texts -> Bool -> Html Msg
+viewMuteButton texts muted =
     button
         [ id "ink-trail-mute"
         , class "grid size-8 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 active:scale-90 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
         , onClick ToggleMuted
         , Html.Attributes.title
             (if muted then
-                "Turn the sounds on"
+                tr texts "Turn the sounds on"
 
              else
-                "Turn the sounds off"
+                tr texts "Turn the sounds off"
             )
         ]
         [ span
@@ -1425,7 +1568,7 @@ viewStats model game =
 
         stat label content =
             div [ class "flex flex-col items-center justify-center gap-0.5 px-2" ]
-                [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text label ]
+                [ span [ class "text-[0.625rem] font-medium tracking-wide text-slate-400 uppercase lg:text-xs" ] [ text (tr model.texts label) ]
                 , content
                 ]
     in
@@ -1456,7 +1599,7 @@ viewStats model game =
                             [ text (String.fromInt gap) ]
                       )
                     ]
-                , viewStreak game.streakStep streak
+                , viewStreak model.texts game.streakStep streak
                 ]
             )
         , stat "mistakes"
@@ -1481,9 +1624,9 @@ viewStats model game =
 {-| A dot for each correct tap in a row: when all dots are full, the
 distance grows
 -}
-viewStreak : Int -> Int -> Html Msg
-viewStreak steps streak =
-    div [ id "ink-trail-streak", class "flex gap-1", Html.Attributes.title "Correct in a row" ]
+viewStreak : Texts -> Int -> Int -> Html Msg
+viewStreak texts steps streak =
+    div [ id "ink-trail-streak", class "flex gap-1", Html.Attributes.title (tr texts "Correct in a row") ]
         (List.map
             (\i ->
                 span
@@ -1519,7 +1662,7 @@ viewBoard model watching game =
                     ]
 
                 Nothing ->
-                    [ Html.Lazy.lazy5 viewCaveButtons model.sea False -1 -1 -1 ]
+                    [ Html.Lazy.lazy6 viewCaveButtons model.texts model.sea False -1 -1 -1 ]
             )
         , case current of
             Countdown ->
@@ -1541,30 +1684,26 @@ prompt model watching current =
                 now =
                     model.now
 
-                jets n =
-                    if n == 1 then
-                        "1 jet"
-
-                    else
-                        String.fromInt n ++ " jets"
+                texts =
+                    model.texts
             in
             if trail.endedAt /= Nothing then
-                "Well followed!"
+                tr texts "Well followed!"
 
             else if watchingIntro now trail then
-                "Watch the leader"
+                tr texts "Watch the leader"
 
             else if missing now trail then
-                "Missed. Watch the trail ahead"
+                tr texts "Missed. Watch the trail ahead"
 
             else if Maybe.map (\at -> now - at < 1200) trail.grewAt == Just True then
-                "One jet further behind!"
+                tr texts "One jet further behind!"
 
             else if watching then
-                "The player follows " ++ jets (distance trail) ++ " behind"
+                plural texts "The player follows {count} jets behind" (distance trail)
 
             else
-                "Follow " ++ jets (distance trail) ++ " behind"
+                plural texts "Follow {count} jets behind" (distance trail)
 
         _ ->
             ""
@@ -1591,7 +1730,8 @@ viewCaves model watching active trail =
                 Nothing ->
                     -1
     in
-    Html.Lazy.lazy5 viewCaveButtons
+    Html.Lazy.lazy6 viewCaveButtons
+        model.texts
         model.sea
         (active && not watching && canTap now trail)
         (recent trail.hit 400)
@@ -1603,8 +1743,8 @@ viewCaves model watching active trail =
 cave covers the cave above it. The last argument only tells Html.Lazy when
 the path grows.
 -}
-viewCaveButtons : Sea -> Bool -> Int -> Int -> Int -> Html Msg
-viewCaveButtons sea open hit missed _ =
+viewCaveButtons : Texts -> Sea -> Bool -> Int -> Int -> Int -> Html Msg
+viewCaveButtons texts sea open hit missed _ =
     let
         height =
             seaHeight sea.narrow
@@ -1625,7 +1765,7 @@ viewCaveButtons sea open hit missed _ =
                     ]
                 , style "left" (String.fromFloat (x / 4) ++ "%")
                 , style "top" (String.fromFloat (100 * y / height) ++ "%")
-                , attribute "aria-label" ("Cave " ++ String.fromInt (i + 1))
+                , attribute "aria-label" (tf texts "Cave {number}" [ ( "number", String.fromInt (i + 1) ) ])
                 , Press.onPress (Tap i)
                 , Press.onKeyClick (Tap i)
                 ]
@@ -2427,21 +2567,17 @@ viewResult model watching game =
         score =
             List.head game.players |> Maybe.map .score |> Maybe.withDefault 0
 
-        mistakes =
-            if game.wrong == 1 then
-                "1 mistake"
-
-            else
-                String.fromInt game.wrong ++ " mistakes"
+        texts =
+            model.texts
     in
     div
         [ id "ink-trail-result"
         , class "absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 rounded-2xl bg-octo-navy/80 p-4 text-center text-white backdrop-blur-sm"
         ]
-        [ p [ class "text-lg opacity-80" ] [ text "Game over!" ]
+        [ p [ class "text-lg opacity-80" ] [ text (tr texts "Game over!") ]
         , p [ id "ink-trail-final-score", class "text-6xl font-bold tabular-nums" ] [ text (String.fromInt score) ]
         , p [ id "ink-trail-final-stats", class "text-sm tabular-nums opacity-80" ]
-            [ text ("Best distance " ++ String.fromInt game.bestDistance ++ " · " ++ mistakes) ]
+            [ text (tf texts "Best distance {distance}" [ ( "distance", String.fromInt game.bestDistance ) ] ++ " · " ++ plural texts "{count} mistakes" game.wrong) ]
         , if watching then
             text ""
 
@@ -2451,13 +2587,13 @@ viewResult model watching game =
                 , class "rounded-full bg-white px-6 py-2.5 font-medium text-octo-indigo shadow-lg transition hover:bg-octo-mist"
                 , onClick Restart
                 ]
-                [ text ("Play again at distance " ++ String.fromInt (max 3 game.lastDistance)) ]
+                [ text (tf texts "Play again at distance {distance}" [ ( "distance", String.fromInt (max 3 game.lastDistance) ) ]) ]
         , a
             [ id "ink-trail-leaderboards-link"
             , href model.settingsUrl
             , class "text-sm font-medium text-white/80 underline-offset-4 transition hover:text-white hover:underline"
             ]
-            [ text "Best results" ]
+            [ text (tr texts "Best results") ]
         , a
             [ id "ink-trail-next-game"
             , href model.nextGame.path
@@ -2466,42 +2602,48 @@ viewResult model watching game =
             , attribute "data-ga-to" model.nextGame.name
             , class "group text-sm font-medium text-white underline-offset-4 transition hover:underline"
             ]
-            [ text ("Or try " ++ model.nextGame.name ++ " ")
-            , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
+            [ text (tf texts "Or try {game}" [ ( "game", model.nextGame.name ) ] ++ " ")
+            , span [ class "inline-block transition group-hover:translate-x-0.5 rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5" ] [ text "→" ]
             ]
         , if model.guest then
             p [ id "ink-trail-sign-in", class "text-sm text-white/70" ]
-                [ a
-                    [ href "/signin"
-                    , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
-                    ]
-                    [ text "Sign in" ]
-                , text " to keep your scores."
-                ]
+                (withLink texts
+                    "{sign_in} to keep your scores."
+                    "sign_in"
+                    (a
+                        [ href "/signin"
+                        , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
+                        ]
+                        [ text (tr texts "Sign in") ]
+                    )
+                )
 
           else
             text ""
-        , viewFeed
+        , viewFeed model.donateUrl texts
         ]
 
 
 {-| The link to the page to support Octomocto, at the bottom of a result.
 The link opens in a new tab, so that the player stays in the game.
 -}
-viewFeed : Html msg
-viewFeed =
+viewFeed : String -> Texts -> Html msg
+viewFeed donateUrl texts =
     p [ id "ink-trail-feed", class "mt-2 max-w-sm border-t border-white/15 pt-4 text-center text-sm leading-10 text-balance text-white/80" ]
-        [ a
-            [ href "/donate"
-            , target "_blank"
-            , rel "noopener"
-            , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:bg-octo-orange-light"
-            ]
-            [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
-            , text "Support the author"
-            ]
-        , text " to keep Octomocto ad-free."
-        ]
+        (withLink texts
+            "{feed} to keep Octomocto ad-free."
+            "feed"
+            (a
+                [ href donateUrl
+                , target "_blank"
+                , rel "noopener"
+                , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:bg-octo-orange-light"
+                ]
+                [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
+                , text (tr texts "Support the author")
+                ]
+            )
+        )
 
 
 

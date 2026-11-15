@@ -7,22 +7,27 @@
   guest_name={@guest_name}
   guest_public_id={@guest_public_id}
   guest_unread_notifications={@guest_unread_notifications}
+  languages={@languages}
 >
   <%!-- The same columns as on the Memory page --%>
   <div
     id="ink-trail-index"
-    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[calc(100vw-4rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] xl:grid-rows-[auto_1fr]"
+    class="relative start-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 rtl:translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[calc(100vw-4rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] xl:grid-rows-[auto_1fr]"
   >
     <div class="mx-auto w-full max-w-md lg:max-w-none space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2">
       <div class="flex items-center justify-center gap-3">
         <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
           <OctomoctoWeb.GameIcons.game_icon game="ink-trail" class="size-9" />
         </div>
-        <h1 class="text-3xl font-semibold tracking-tight">Ink Trail</h1>
+        <h1 class="text-3xl font-semibold tracking-tight">
+          {dgettext("ink-trail", "Ink Trail")}
+        </h1>
       </div>
       <p class="text-base-content/70">
-        Follow the leader octopus from cave to cave, some jets behind it. The
-        better you follow, the further behind you jet (yes, that’s the reward).
+        {dgettext(
+          "ink-trail",
+          "Follow the leader octopus from cave to cave, some jets behind it. The better you follow, the further behind you jet (yes, that’s the reward)."
+        )}
       </p>
       <.how_to_play />
     </div>
@@ -37,35 +42,40 @@
             <OctomoctoWeb.GameIcons.game_icon game="ink-trail" class="size-16" />
           </div>
           <div class="min-w-0 flex-1 space-y-1">
-            <.setting_header label="Start distance" icon="hero-arrows-right-left" />
+            <.setting_header
+              label={dgettext("ink-trail", "Start distance")}
+              icon="hero-arrows-right-left"
+            />
             <p class="text-start">
               <span id="ink-trail-start-distance" class="text-2xl font-semibold tabular-nums">
                 {@start_distance}
               </span>
-              <span class="text-base-content/60">jets behind</span>
+              <span class="text-base-content/60">
+                {dngettext("ink-trail", "jet behind", "jets behind", @start_distance)}
+              </span>
             </p>
             <p class="text-start text-xs text-base-content/50">
-              Each 5 correct clicks in a row add a jet.
+              {dgettext("ink-trail", "Each 5 correct clicks in a row add a jet.")}
             </p>
           </div>
         </div>
 
         <.setting
           id="setting-visibility"
-          label="Visibility"
+          label={dgettext("ink-trail", "Visibility")}
           icon="hero-eye"
           hint={visibility_hint(@settings)}
         >
           <.option
             :for={
               {value, public, label} <- [
-                {"public", true, "Public"},
-                {"private", false, "Private"}
+                {"public", true, dgettext("ink-trail", "Public")},
+                {"private", false, dgettext("ink-trail", "Private")}
               ]
             }
             id={"visibility-#{value}"}
             selected={@settings.public == public}
-            patch={~p"/ink-trail?#{query(@settings, public: public)}"}
+            patch={settings_path(@locale, @settings, public: public)}
           >
             {label}
           </.option>
@@ -83,9 +93,9 @@
         id="your-results"
         icon="hero-user"
         icon_class="text-octo-indigo"
-        title="Your results"
+        title={dgettext("ink-trail", "Your results")}
         empty={@user_results != nil and @user_results.latest == []}
-        empty_text="No games yet."
+        empty_text={dgettext("ink-trail", "No games yet.")}
         sign_in={!@user_results && Locale.path(@locale, ~p"/signin")}
         preview_key={@results_preview && @results_preview.key}
       >
@@ -95,7 +105,7 @@
             class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
           >
             <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
-            <span class="text-base-content/60">Best</span>
+            <span class="text-base-content/60">{dgettext("ink-trail", "Best")}</span>
             <span class="font-semibold tabular-nums">{@user_results.best.score}</span>
           </span>
         </:aside>
@@ -109,14 +119,17 @@
         <%= if @user_results do %>
           <.result_row :for={result <- @user_results.latest}>
             <span class="flex-1 font-medium">
-              {Calendar.strftime(result.inserted_at, "%b %-d")}
+              {Locale.short_date(result.inserted_at)}
             </span>
-            <span class="text-xs text-base-content/50 tabular-nums" title="Best distance">
-              {result.best_distance} back
+            <span
+              class="text-xs text-base-content/50 tabular-nums"
+              title={dgettext("ink-trail", "Best distance")}
+            >
+              {dgettext("ink-trail", "%{distance} back", distance: result.best_distance)}
             </span>
             <span
               class="flex items-center gap-0.5 text-xs text-base-content/50 tabular-nums"
-              title="Mistakes"
+              title={dgettext("ink-trail", "Mistakes")}
             >
               <.icon name="hero-x-mark" class="size-3" />{result.wrong}
             </span>
@@ -136,7 +149,7 @@
         id="best-results"
         icon="hero-trophy"
         icon_class="text-amber-500"
-        title="Best results"
+        title={dgettext("ink-trail", "Best results")}
         empty={@best_results == []}
         empty_text={OctomoctoWeb.BestResults.empty_text(@best_following)}
       >
@@ -150,22 +163,25 @@
               href={Locale.path(@locale, ~p"/signin")}
               class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
             >
-              Sign in
+              {dgettext("ink-trail", "Sign in")}
             </.link>
-            to get listed
+            {dgettext("ink-trail", "to get listed")}
           </span>
         </:aside>
         <.result_row :for={{result, place} <- Enum.with_index(@best_results, 1)}>
-          <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+          <span class="w-4 shrink-0 text-end tabular-nums text-base-content/40">{place}</span>
           <span class="min-w-0 flex-1 truncate font-medium"><.player_link player={result.user}>{player_name(
             result.user
           )}</.player_link></span>
-          <span class="text-xs text-base-content/50 tabular-nums" title="Best distance">
-            {result.best_distance} back
+          <span
+            class="text-xs text-base-content/50 tabular-nums"
+            title={dgettext("ink-trail", "Best distance")}
+          >
+            {dgettext("ink-trail", "%{distance} back", distance: result.best_distance)}
           </span>
           <span
             class="flex items-center gap-0.5 text-xs text-base-content/50 tabular-nums"
-            title="Mistakes"
+            title={dgettext("ink-trail", "Mistakes")}
           >
             <.icon name="hero-x-mark" class="size-3" />{result.wrong}
           </span>

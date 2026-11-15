@@ -1013,7 +1013,7 @@ if (inkTrailNode) {
   let muted = false
   try { muted = localStorage.getItem("ink-trail-muted") === "true" } catch (_e) {}
 
-  const inkTrail = window.Elm.InkTrail.init({node: inkTrailNode, flags: {settingsUrl: inkTrailNode.dataset.settingsUrl, nextGame: {name: inkTrailNode.dataset.nextGameName, path: inkTrailNode.dataset.nextGamePath}, guest: !inkTrailNode.dataset.userToken, muted, narrow: window.matchMedia("(max-width: 40rem)").matches}})
+  const inkTrail = window.Elm.InkTrail.init({node: inkTrailNode, flags: {settingsUrl: inkTrailNode.dataset.settingsUrl, nextGame: {name: inkTrailNode.dataset.nextGameName, path: inkTrailNode.dataset.nextGamePath}, donateUrl: inkTrailNode.dataset.donateUrl, guest: !inkTrailNode.dataset.userToken, muted, narrow: window.matchMedia("(max-width: 40rem)").matches, texts: JSON.parse(inkTrailNode.dataset.texts), plurals: JSON.parse(inkTrailNode.dataset.plurals), locale: inkTrailNode.dataset.locale}})
   const socket = new Socket("/socket", {params: {user_token: inkTrailNode.dataset.userToken, _csrf_token: csrfToken}})
   socket.connect()
 

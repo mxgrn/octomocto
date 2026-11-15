@@ -1,0 +1,232 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: it\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} mistake"
+msgid_plural "%{count} mistakes"
+msgstr[0] "%{count} errore"
+msgstr[1] "%{count} errori"
+
+#, elixir-autogen, elixir-format
+msgid "%{distance} back"
+msgstr "%{distance} indietro"
+
+#, elixir-autogen, elixir-format
+msgid "A free sequence memory game like Follow That Frog from Lumosity: follow the path of an octopus from cave to cave, some jets behind it. No sign-up."
+msgstr "Un gioco di memoria gratis come Follow That Frog di Lumosity: segui il percorso di un polpo di grotta in grotta, qualche scatto dietro di lui. Senza registrazione."
+
+#, elixir-autogen, elixir-format
+msgid "A leader octopus jets from cave to cave. Your octopus follows the same path, some jets behind it."
+msgstr "Un polpo capofila scatta di grotta in grotta. Il tuo polpo segue lo stesso percorso, qualche scatto dietro di lui."
+
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "Record"
+
+#, elixir-autogen, elixir-format
+msgid "Best distance"
+msgstr "Distanza migliore"
+
+#, elixir-autogen, elixir-format
+msgid "Best distance {distance}"
+msgstr "Distanza migliore {distance}"
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "Migliori risultati"
+
+#, elixir-autogen, elixir-format
+msgid "Cave {number}"
+msgstr "Grotta {number}"
+
+#, elixir-autogen, elixir-format
+msgid "Click the cave where your octopus must go next: the cave where the leader was that many jets ago. Then the leader jets again."
+msgstr "Clicca la grotta dove il tuo polpo deve andare ora: la grotta dove il capofila era altrettanti scatti fa. Poi il capofila scatta di nuovo."
+
+#, elixir-autogen, elixir-format
+msgid "Correct in a row"
+msgstr "Giusti di fila"
+
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "Impossibile entrare nella partita: {reason}"
+
+#, elixir-autogen, elixir-format
+msgid "Each 5 correct clicks in a row add a jet."
+msgstr "Ogni 5 clic giusti di fila si aggiunge uno scatto."
+
+#, elixir-autogen, elixir-format
+msgid "Each 5 correct clicks in a row put your octopus one jet further behind. A wrong click brings it one jet nearer, but never nearer than 3 jets."
+msgstr "Ogni 5 clic giusti di fila il tuo polpo resta uno scatto più indietro. Un clic sbagliato lo avvicina di uno scatto, ma mai a meno di 3 scatti."
+
+#, elixir-autogen, elixir-format
+msgid "Each correct click gives points times the distance. The game ends after 40 correct clicks. Your next game starts at the distance where this one ended."
+msgstr "Ogni clic giusto dà punti moltiplicati per la distanza. La partita finisce dopo 40 clic giusti. La tua prossima partita inizia dalla distanza a cui è finita questa."
+
+#, elixir-autogen, elixir-format
+msgid "Follow %{count} jet behind"
+msgid_plural "Follow %{count} jets behind"
+msgstr[0] "Segui a %{count} scatto di distanza"
+msgstr[1] "Segui a %{count} scatti di distanza"
+
+#, elixir-autogen, elixir-format
+msgid "Follow the leader octopus from cave to cave, some jets behind it. The better you follow, the further behind you jet (yes, that’s the reward)."
+msgstr "Segui il polpo capofila di grotta in grotta, qualche scatto dietro di lui. Più lo segui bene, più resti indietro (sì, è questo il premio)."
+
+#, elixir-autogen, elixir-format
+msgid "Game over!"
+msgstr "Partita finita!"
+
+#, elixir-autogen, elixir-format
+msgid "Ink Trail"
+msgstr "Ink Trail"
+
+#, elixir-autogen, elixir-format
+msgid "Ink Trail is a Follow That Frog-like game. Lumosity and Follow That Frog are trademarks of Lumos Labs, Inc. Octomocto is not affiliated with Lumos Labs."
+msgstr "Ink Trail è un gioco simile a Follow That Frog. Lumosity e Follow That Frog sono marchi di Lumos Labs, Inc. Octomocto non è affiliato a Lumos Labs."
+
+#, elixir-autogen, elixir-format
+msgid "Ink Trail: a Sequence Memory Game Online"
+msgstr "Ink Trail: gioco per la memoria di lavoro online"
+
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "Ingresso nella partita…"
+
+#, elixir-autogen, elixir-format
+msgid "Missed. Watch the trail ahead"
+msgstr "Mancato. Guarda il percorso davanti"
+
+#, elixir-autogen, elixir-format
+msgid "Mistakes"
+msgstr "Errori"
+
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "Ancora nessuna partita."
+
+#, elixir-autogen, elixir-format
+msgid "One jet further behind!"
+msgstr "Uno scatto più indietro!"
+
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "Oppure prova {game}"
+
+#, elixir-autogen, elixir-format
+msgid "Play again at distance {distance}"
+msgstr "Gioca ancora a distanza {distance}"
+
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "Privata"
+
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "Pubblica"
+
+#, elixir-autogen, elixir-format
+msgid "Restart"
+msgstr "Ricomincia"
+
+#, elixir-autogen, elixir-format
+msgid "Restart game"
+msgstr "Ricomincia la partita"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Accedi"
+
+#, elixir-autogen, elixir-format
+msgid "Start distance"
+msgstr "Distanza iniziale"
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "Sostieni l'autore"
+
+#, elixir-autogen, elixir-format
+msgid "The player follows %{count} jet behind"
+msgid_plural "The player follows %{count} jets behind"
+msgstr[0] "Distanza: %{count} scatto"
+msgstr[1] "Distanza: %{count} scatti"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "Disattiva i suoni"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "Attiva i suoni"
+
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "Visibilità"
+
+#, elixir-autogen, elixir-format
+msgid "Watch the leader"
+msgstr "Guarda il capofila"
+
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "Spettatori: {count}"
+
+#, elixir-autogen, elixir-format
+msgid "Well followed!"
+msgstr "Ben seguito!"
+
+#, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "Stai guardando questa partita."
+
+#, elixir-autogen, elixir-format
+msgid "You see only the two octopi, so remember the path between them."
+msgstr "Vedi solo i due polpi, quindi ricorda il percorso tra di loro."
+
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "I tuoi risultati"
+
+#, elixir-autogen, elixir-format
+msgid "distance"
+msgstr "distanza"
+
+#, elixir-autogen, elixir-format
+msgid "jet behind"
+msgid_plural "jets behind"
+msgstr[0] "scatto indietro"
+msgstr[1] "scatti indietro"
+
+#, elixir-autogen, elixir-format
+msgid "jets"
+msgstr "scatti"
+
+#, elixir-autogen, elixir-format
+msgid "mistakes"
+msgstr "errori"
+
+#, elixir-autogen, elixir-format
+msgid "score"
+msgstr "punti"
+
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "per entrare in classifica"
+
+#, elixir-autogen, elixir-format
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "{feed} per mantenere Octomocto senza pubblicità."
+
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in} per salvare i tuoi punteggi."

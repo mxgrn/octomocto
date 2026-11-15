@@ -1,0 +1,232 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: tr\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} mistake"
+msgid_plural "%{count} mistakes"
+msgstr[0] "%{count} hata"
+msgstr[1] "%{count} hata"
+
+#, elixir-autogen, elixir-format
+msgid "%{distance} back"
+msgstr "%{distance} geride"
+
+#, elixir-autogen, elixir-format
+msgid "A free sequence memory game like Follow That Frog from Lumosity: follow the path of an octopus from cave to cave, some jets behind it. No sign-up."
+msgstr "Lumosity'nin Follow That Frog oyununa benzer ücretsiz bir hafıza oyunu: bir ahtapotun yolunu mağaradan mağaraya, birkaç hamle geriden takip et. Kayıt gerekmez."
+
+#, elixir-autogen, elixir-format
+msgid "A leader octopus jets from cave to cave. Your octopus follows the same path, some jets behind it."
+msgstr "Lider ahtapot mağaradan mağaraya atılır. Senin ahtapotun aynı yolu birkaç hamle geriden izler."
+
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "En iyi"
+
+#, elixir-autogen, elixir-format
+msgid "Best distance"
+msgstr "En iyi mesafe"
+
+#, elixir-autogen, elixir-format
+msgid "Best distance {distance}"
+msgstr "En iyi mesafe {distance}"
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "En iyi sonuçlar"
+
+#, elixir-autogen, elixir-format
+msgid "Cave {number}"
+msgstr "Mağara {number}"
+
+#, elixir-autogen, elixir-format
+msgid "Click the cave where your octopus must go next: the cave where the leader was that many jets ago. Then the leader jets again."
+msgstr "Ahtapotunun sıradaki gideceği mağaraya tıkla: liderin o kadar hamle önce bulunduğu mağaraya. Sonra lider yeniden atılır."
+
+#, elixir-autogen, elixir-format
+msgid "Correct in a row"
+msgstr "Art arda doğru"
+
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "Oyuna katılınamadı: {reason}"
+
+#, elixir-autogen, elixir-format
+msgid "Each 5 correct clicks in a row add a jet."
+msgstr "Art arda her 5 doğru tıklama bir hamle ekler."
+
+#, elixir-autogen, elixir-format
+msgid "Each 5 correct clicks in a row put your octopus one jet further behind. A wrong click brings it one jet nearer, but never nearer than 3 jets."
+msgstr "Art arda her 5 doğru tıklamada ahtapotun bir hamle daha geride kalır. Yanlış bir tıklama onu bir hamle yaklaştırır, ama asla 3 hamleden daha yakına getirmez."
+
+#, elixir-autogen, elixir-format
+msgid "Each correct click gives points times the distance. The game ends after 40 correct clicks. Your next game starts at the distance where this one ended."
+msgstr "Her doğru tıklama, mesafeyle çarpılan puan verir. Oyun 40 doğru tıklamadan sonra biter. Sonraki oyunun, bu oyunun bittiği mesafeden başlar."
+
+#, elixir-autogen, elixir-format
+msgid "Follow %{count} jet behind"
+msgid_plural "Follow %{count} jets behind"
+msgstr[0] "%{count} hamle geriden takip et"
+msgstr[1] "%{count} hamle geriden takip et"
+
+#, elixir-autogen, elixir-format
+msgid "Follow the leader octopus from cave to cave, some jets behind it. The better you follow, the further behind you jet (yes, that’s the reward)."
+msgstr "Lider ahtapotu mağaradan mağaraya, birkaç hamle geriden takip et. Ne kadar iyi takip edersen o kadar geride kalırsın (evet, ödül bu)."
+
+#, elixir-autogen, elixir-format
+msgid "Game over!"
+msgstr "Oyun bitti!"
+
+#, elixir-autogen, elixir-format
+msgid "Ink Trail"
+msgstr "Ink Trail"
+
+#, elixir-autogen, elixir-format
+msgid "Ink Trail is a Follow That Frog-like game. Lumosity and Follow That Frog are trademarks of Lumos Labs, Inc. Octomocto is not affiliated with Lumos Labs."
+msgstr "Ink Trail, Follow That Frog benzeri bir oyundur. Lumosity ve Follow That Frog, Lumos Labs, Inc. şirketinin ticari markalarıdır. Octomocto'nun Lumos Labs ile bir bağlantısı yoktur."
+
+#, elixir-autogen, elixir-format
+msgid "Ink Trail: a Sequence Memory Game Online"
+msgstr "Ink Trail: çevrimiçi çalışma belleği oyunu"
+
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "Oyuna katılınıyor…"
+
+#, elixir-autogen, elixir-format
+msgid "Missed. Watch the trail ahead"
+msgstr "Kaçırdın. Öndeki yolu izle"
+
+#, elixir-autogen, elixir-format
+msgid "Mistakes"
+msgstr "Hatalar"
+
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "Henüz oyun yok."
+
+#, elixir-autogen, elixir-format
+msgid "One jet further behind!"
+msgstr "Bir hamle daha geride!"
+
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "Ya da şunu dene: {game}"
+
+#, elixir-autogen, elixir-format
+msgid "Play again at distance {distance}"
+msgstr "{distance} mesafeden yeniden oyna"
+
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "Özel"
+
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "Herkese açık"
+
+#, elixir-autogen, elixir-format
+msgid "Restart"
+msgstr "Yeniden başlat"
+
+#, elixir-autogen, elixir-format
+msgid "Restart game"
+msgstr "Oyunu yeniden başlat"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Giriş yap"
+
+#, elixir-autogen, elixir-format
+msgid "Start distance"
+msgstr "Başlangıç mesafesi"
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "Yapımcıyı destekle"
+
+#, elixir-autogen, elixir-format
+msgid "The player follows %{count} jet behind"
+msgid_plural "The player follows %{count} jets behind"
+msgstr[0] "Mesafe: %{count} hamle"
+msgstr[1] "Mesafe: %{count} hamle"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "Sesleri kapat"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "Sesleri aç"
+
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "Görünürlük"
+
+#, elixir-autogen, elixir-format
+msgid "Watch the leader"
+msgstr "Lideri izle"
+
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "İzleyenler: {count}"
+
+#, elixir-autogen, elixir-format
+msgid "Well followed!"
+msgstr "Harika takip!"
+
+#, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "Bu oyunu izliyorsun."
+
+#, elixir-autogen, elixir-format
+msgid "You see only the two octopi, so remember the path between them."
+msgstr "Yalnızca iki ahtapotu görürsün, bu yüzden aradaki yolu aklında tut."
+
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "Sonuçların"
+
+#, elixir-autogen, elixir-format
+msgid "distance"
+msgstr "mesafe"
+
+#, elixir-autogen, elixir-format
+msgid "jet behind"
+msgid_plural "jets behind"
+msgstr[0] "hamle geride"
+msgstr[1] "hamle geride"
+
+#, elixir-autogen, elixir-format
+msgid "jets"
+msgstr "hamle"
+
+#, elixir-autogen, elixir-format
+msgid "mistakes"
+msgstr "hata"
+
+#, elixir-autogen, elixir-format
+msgid "score"
+msgstr "puan"
+
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "ve listeye gir"
+
+#, elixir-autogen, elixir-format
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "Octomocto'nun reklamsız kalması için {feed}."
+
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in} ve skorların kaydedilsin."

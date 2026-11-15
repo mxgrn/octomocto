@@ -39,7 +39,6 @@ defmodule OctomoctoWeb.InkTrailLive do
      socket
      |> assign(
        [
-         canonical_url: url(~p"/ink-trail"),
          rules: rules(),
          start_distance: start_distance(scope, socket.assigns[:guest_id]),
          user_results: user_results(scope)
@@ -52,9 +51,12 @@ defmodule OctomoctoWeb.InkTrailLive do
   @doc "The title and the description of the Ink Trail pages, for search engines."
   def seo do
     [
-      page_title: "Ink Trail: a Sequence Memory Game Online",
+      page_title: dgettext("ink-trail", "Ink Trail: a Sequence Memory Game Online"),
       page_description:
-        "A free sequence memory game like Follow That Frog from Lumosity: follow the path of an octopus from cave to cave, some jets behind it. No sign-up."
+        dgettext(
+          "ink-trail",
+          "A free sequence memory game like Follow That Frog from Lumosity: follow the path of an octopus from cave to cave, some jets behind it. No sign-up."
+        )
     ]
   end
 
@@ -62,13 +64,23 @@ defmodule OctomoctoWeb.InkTrailLive do
   # that the user chose last.
   @settings_params ["visibility"]
 
-  def handle_params(params, _uri, socket) do
+  def handle_params(params, uri, socket) do
     settings =
       SavedSettings.params(socket, "ink-trail", params, @settings_params) |> settings()
 
     SavedSettings.save_change(socket, "ink-trail", settings, query(settings, []))
 
-    {:noreply, assign(socket, settings: settings)}
+    locale = socket.assigns.locale
+    canonical_url = OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/ink-trail")
+
+    {:noreply,
+     assign(socket,
+       settings: settings,
+       canonical_url: canonical_url,
+       alternate_urls: Locale.alternate_urls(uri, canonical_url, "ink-trail", ~p"/ink-trail"),
+       # The other language keeps the settings
+       languages: Locale.languages("ink-trail", locale, ~p"/ink-trail?#{query(settings, [])}")
+     )}
   end
 
   def handle_event("new_game", _params, socket) do
@@ -78,15 +90,20 @@ defmodule OctomoctoWeb.InkTrailLive do
         public: socket.assigns.settings.public
       })
 
-    {:noreply, redirect(socket, to: ~p"/ink-trail/#{id}")}
+    {:noreply, redirect(socket, to: Locale.path(socket.assigns.locale, ~p"/ink-trail/#{id}"))}
   end
 
   # A public game, when the params do not say otherwise. The number of
   # players is for `visibility_hint/1`.
   defp settings(params), do: %{players: 1, public: params["visibility"] != "private"}
 
-  @doc "The path of this page with the settings of the game in the given state."
-  def settings_path(state), do: ~p"/ink-trail?#{query(%{public: state.public}, [])}"
+  @doc "The path of this page in the language with the settings of the game in the given state."
+  def settings_path(locale, state), do: settings_path(locale, %{public: state.public}, [])
+
+  # The path of this page in the language for the settings, with some of them changed
+  defp settings_path(locale, settings, changes) do
+    Locale.path(locale, ~p"/ink-trail?#{query(settings, changes)}")
+  end
 
   # The query of the page for the settings, with some of them changed. A
   # public game has no param, so that most links stay short.
@@ -112,12 +129,27 @@ defmodule OctomoctoWeb.InkTrailLive do
 
   defp rules do
     [
-      "A leader octopus jets from cave to cave. Your octopus follows the same path, some jets behind it.",
-      "Click the cave where your octopus must go next: the cave where the leader was that many jets ago. Then the leader jets again.",
-      "You see only the two octopi, so remember the path between them.",
-      "Each 5 correct clicks in a row put your octopus one jet further behind. A wrong click brings it one jet nearer, but never nearer than 3 jets.",
-      "Each correct click gives points times the distance. The game ends after 40 correct clicks. Your next game starts at the distance where this one ended.",
-      "Ink Trail is a Follow That Frog-like game. Lumosity and Follow That Frog are trademarks of Lumos Labs, Inc. Octomocto is not affiliated with Lumos Labs."
+      dgettext(
+        "ink-trail",
+        "A leader octopus jets from cave to cave. Your octopus follows the same path, some jets behind it."
+      ),
+      dgettext(
+        "ink-trail",
+        "Click the cave where your octopus must go next: the cave where the leader was that many jets ago. Then the leader jets again."
+      ),
+      dgettext("ink-trail", "You see only the two octopi, so remember the path between them."),
+      dgettext(
+        "ink-trail",
+        "Each 5 correct clicks in a row put your octopus one jet further behind. A wrong click brings it one jet nearer, but never nearer than 3 jets."
+      ),
+      dgettext(
+        "ink-trail",
+        "Each correct click gives points times the distance. The game ends after 40 correct clicks. Your next game starts at the distance where this one ended."
+      ),
+      dgettext(
+        "ink-trail",
+        "Ink Trail is a Follow That Frog-like game. Lumosity and Follow That Frog are trademarks of Lumos Labs, Inc. Octomocto is not affiliated with Lumos Labs."
+      )
     ]
   end
 end
