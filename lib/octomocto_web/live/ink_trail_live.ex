@@ -52,9 +52,9 @@ defmodule OctomoctoWeb.InkTrailLive do
   @doc "The title and the description of the Ink Trail pages, for search engines."
   def seo do
     [
-      page_title: "Ink Trail: a Follow That Frog-Like Brain Game Online",
+      page_title: "Ink Trail: a Sequence Memory Game Online",
       page_description:
-        "A free brain game like Follow That Frog from Lumosity: follow the path of an octopus from cave to cave, some jets behind it. No sign-up."
+        "A free sequence memory game like Follow That Frog from Lumosity: follow the path of an octopus from cave to cave, some jets behind it. No sign-up."
     ]
   end
 
