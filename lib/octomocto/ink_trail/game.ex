@@ -65,11 +65,19 @@ defmodule Octomocto.InkTrail.Game do
 
   @impl true
   def new_player(player),
-    do: Map.merge(player, %{correct: 0, wrong: 0, streak: 0, best_distance: 0, last_distance: 0})
+    do:
+      Map.merge(player, %{
+        correct: 0,
+        wrong: 0,
+        streak: 0,
+        best_distance: 0,
+        last_distance: 0,
+        missed_cave: nil
+      })
 
   @impl true
   def reset_player(player),
-    do: %{player | correct: 0, wrong: 0, streak: 0, best_distance: 0, last_distance: 0}
+    do: new_player(player)
 
   # A restart starts at the current distance
   @impl true
@@ -131,8 +139,9 @@ defmodule Octomocto.InkTrail.Game do
              streak: if(grow?, do: 0, else: streak)
          }, if(grow?, do: 2, else: 1)}
       else
-        # The leader waits, so the distance gets smaller, but not below 3
-        {%{player | wrong: player.wrong + 1, streak: 0},
+        # The leader waits, so the distance gets smaller, but not below 3.
+        # A watcher shows the wrong cave too.
+        {Map.merge(player, %{wrong: player.wrong + 1, streak: 0, missed_cave: cave}),
          if(distance > @min_distance, do: 0, else: 1)}
       end
 
@@ -184,7 +193,9 @@ defmodule Octomocto.InkTrail.Game do
       wrong: player.wrong,
       streak: player.streak,
       best_distance: player.best_distance,
-      last_distance: player.last_distance
+      last_distance: player.last_distance,
+      # The cave of the last wrong tap, for a watcher
+      missed_cave: Map.get(player, :missed_cave)
     }
   end
 end

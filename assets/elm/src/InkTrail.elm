@@ -104,6 +104,9 @@ type alias Game =
     , streak : Int
     , bestDistance : Int
     , lastDistance : Int
+
+    -- The cave of the last wrong tap, for a watcher
+    , missedCave : Maybe Int
     , waiting : Bool
     , finished : Bool
 
@@ -583,16 +586,33 @@ sync game model =
 
                     past =
                         keepPast model.now trail
+
+                    shown =
+                        shownLeader model.now trail
+
+                    -- As after a tap: the player's octopus jets first. After
+                    -- a wrong tap, the ghost of the leader jets the path
+                    -- ahead, and then the leader goes on.
+                    ( miss, ghost, leaderAt ) =
+                        case ( game.wrong > trail.wrong, game.missedCave ) of
+                            ( True, Just cave ) ->
+                                let
+                                    jets =
+                                        ghostJets model.now server game.follower shown
+                                in
+                                ( Just ( cave, model.now ), jets, max (model.now + missMs) (ghostEndOf jets) )
+
+                            _ ->
+                                ( Nothing, [], model.now + jetMs + leaderPauseMs )
                 in
                 { model
                     | trail =
                         Just
                             { server
-                                | leaderFrom = shownLeader model.now trail
-
-                                -- As after a tap: the leader jets a moment
-                                -- after the player's octopus lands
-                                , leaderAt = model.now + jetMs + leaderPauseMs
+                                | leaderFrom = shown
+                                , leaderAt = leaderAt
+                                , miss = miss
+                                , ghost = ghost
                                 , leaderPast = past.leaderPast
                                 , followerPast =
                                     [ { from = caveAt trail trail.follower
@@ -801,12 +821,37 @@ missing now trail =
 -}
 ghostEnd : Trail -> Int
 ghostEnd trail =
-    case List.reverse trail.ghost of
+    ghostEndOf trail.ghost
+
+
+ghostEndOf : List Jet -> Int
+ghostEndOf ghost =
+    case List.reverse ghost of
         last :: _ ->
             last.at + jetMs + ghostStayMs
 
         [] ->
             0
+
+
+{-| After a wrong tap at the local time `now`, the ghost of the leader jets
+from the new cave of the player's octopus (the index `from` of the path) to
+the leader (the index `to`), with short stops, as the leader does
+-}
+ghostJets : Int -> Trail -> Int -> Int -> List Jet
+ghostJets now trail from to =
+    let
+        start =
+            now + jetMs + ghostPauseMs
+    in
+    List.range from (to - 1)
+        |> List.map
+            (\k ->
+                { from = caveAt trail k
+                , to = caveAt trail (k + 1)
+                , at = start + (k - from) * (jetMs + stopMs)
+                }
+            )
 
 
 distance : Trail -> Int
@@ -920,23 +965,8 @@ tap game cave trail model =
                 else
                     1
 
-            -- The ghost of the leader jets from the new cave of the player's
-            -- octopus to the leader, with short stops, as the leader does
-            ghostStart =
-                now + jetMs + ghostPauseMs
-
-            ghost =
-                List.range step (trail.leader - 1)
-                    |> List.map
-                        (\k ->
-                            { from = caveAt trail k
-                            , to = caveAt trail (k + 1)
-                            , at = ghostStart + (k - step) * (jetMs + stopMs)
-                            }
-                        )
-
             missed =
-                { moved | ghost = ghost }
+                { moved | ghost = ghostJets now trail step trail.leader }
         in
         ( { model
             | trail =
@@ -1175,6 +1205,7 @@ gameDecoder =
         |> andMap (Decode.field "streak" Decode.int)
         |> andMap (Decode.field "best_distance" Decode.int)
         |> andMap (Decode.field "last_distance" Decode.int)
+        |> andMap (Decode.maybe (Decode.field "missed_cave" Decode.int))
         |> andMap (Decode.field "waiting" Decode.bool)
         |> andMap (Decode.field "finished" Decode.bool)
         |> andMap (Decode.field "elapsed_ms" Decode.int)
