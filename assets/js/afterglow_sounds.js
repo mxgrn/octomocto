@@ -1,14 +1,15 @@
 // Sounds for the Afterglow game. Each correct tile of a round plays the next
 // note of a scale, so that a good round sounds like a short tune.
 
-import {audioReady, countdownBeep, noise, tone} from "./sounds"
+import {audioReady, countdownBeep, goBeep, noise, tone} from "./sounds"
 
 // A major pentatonic scale, so that any notes go well together
 const scale = [523, 587, 659, 784, 880, 1047, 1175, 1319, 1568, 1760]
 
 const sounds = {
-  // The same countdown beeps in all games
+  // The same countdown and start beeps in all games
   countdown: countdownBeep,
+  go: goBeep,
 
   // A soft shimmer when the tiles light up
   show() {

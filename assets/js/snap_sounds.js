@@ -1,19 +1,20 @@
 // Sounds for the Snap game. The answers come fast, so their sounds are
 // short and soft.
 
-import {audioReady, countdownBeep, noise, tone} from "./sounds"
+import {audioReady, countdownBeep, goBeep, noise, tone} from "./sounds"
 
 const sounds = {
-  // The same countdown beeps in all games
+  // The same countdown and start beeps in all games
   countdown: countdownBeep,
+  go: goBeep,
 
   // A soft tap for each card to remember
   card() {
     tone({type: "triangle", freq: 660, duration: 0.08, gain: 0.1})
   },
 
-  // The clock of the round starts
-  go() {
+  // The clock of the round starts, after the cards to remember
+  clock() {
     tone({freq: 1760, duration: 0.4, gain: 0.18})
   },
 

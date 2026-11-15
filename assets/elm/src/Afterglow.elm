@@ -471,7 +471,11 @@ onTick model =
                     else
                         case step of
                             Just 0 ->
-                                []
+                                if Maybe.withDefault 0 model.beepedStep > 0 then
+                                    [ "go" ]
+
+                                else
+                                    []
 
                             Just _ ->
                                 [ "countdown" ]

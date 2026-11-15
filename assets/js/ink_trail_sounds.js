@@ -4,11 +4,12 @@
 // behind. After a wrong tap, the ghost of the leader makes a short stream of
 // bubbles on each of its jets.
 
-import {audioReady, countdownBeep, noise, tone} from "./sounds"
+import {audioReady, countdownBeep, goBeep, noise, tone} from "./sounds"
 
 const sounds = {
-  // The same countdown beeps in all games
+  // The same countdown and start beeps in all games
   countdown: countdownBeep,
+  go: goBeep,
 
   // The leader jets: a quick falling "blop", like a bubble
   jet() {

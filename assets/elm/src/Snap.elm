@@ -433,7 +433,11 @@ onTick model =
                     else
                         case step of
                             Just 0 ->
-                                []
+                                if Maybe.withDefault 0 model.beepedStep > 0 then
+                                    [ "go" ]
+
+                                else
+                                    []
 
                             Just _ ->
                                 [ "countdown" ]
@@ -452,7 +456,7 @@ onTick model =
 
                         Play ->
                             if model.shownPreview /= Just game.back then
-                                ( Just game.back, [ "go" ] )
+                                ( Just game.back, [ "clock" ] )
 
                             else
                                 ( model.shownPreview, [] )
