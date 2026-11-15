@@ -22,7 +22,7 @@ defmodule Octomocto.InkTrail do
 
   @doc """
   Starts a new game and returns its id. The `config` has
-  `:start_distance`, the distance at the start (see `start_distance/2`).
+  `:start_distance`, the distance at the start.
   """
   def create_game(config) do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
@@ -80,30 +80,6 @@ defmodule Octomocto.InkTrail do
   @doc "Starts a new game with a zero score. Only the player can."
   def restart(id, player_id) do
     GenServer.cast(Game.via(id), {:restart, player_id})
-  end
-
-  @doc """
-  The distance where the next game of the user (or of the guest, when the
-  user id is nil) starts: the distance at the end of the last game, but
-  never less than `Octomocto.InkTrail.Game.min_start/0` and never more than
-  `Octomocto.InkTrail.Game.max_distance/0`.
-  """
-  def start_distance(user_id, guest_id) do
-    (last_distance(user_id, guest_id) || 0)
-    |> max(Game.min_start())
-    |> min(Game.max_distance())
-  end
-
-  defp last_distance(nil, nil), do: nil
-
-  defp last_distance(user_id, guest_id) do
-    query =
-      if user_id,
-        do: from(r in Result, where: r.user_id == ^user_id),
-        else: from(r in Result, where: r.guest_id == ^guest_id)
-
-    from(r in query, order_by: [desc: r.inserted_at], limit: 1, select: r.last_distance)
-    |> Repo.one()
   end
 
   @doc """

@@ -2,8 +2,7 @@ defmodule OctomoctoWeb.InkTrailLive do
   @moduledoc """
   The settings page of Ink Trail, with the results. Ink Trail is a
   single-player game with no settings: the page shows the distance at the
-  start, where the last game of the user or the guest ended (see
-  `Octomocto.InkTrail.start_distance/2`).
+  start, which is the same for each new game.
   """
   use OctomoctoWeb, :live_view
 
@@ -21,10 +20,8 @@ defmodule OctomoctoWeb.InkTrailLive do
   # All results can be compared
   @filter %{"players" => 1}
 
-  def mount(_params, session, socket) do
+  def mount(_params, _session, socket) do
     scope = socket.assigns.current_scope
-    guest_id = OctomoctoWeb.GuestName.id_from_session(session)
-    distance = InkTrail.start_distance(scope && scope.user.id, guest_id)
 
     {:ok,
      socket
@@ -32,8 +29,7 @@ defmodule OctomoctoWeb.InkTrailLive do
        [
          canonical_url: url(~p"/ink-trail"),
          rules: rules(),
-         start_distance: distance,
-         first_game: distance == Game.min_start(),
+         start_distance: Game.min_start(),
          user_results: user_results(scope)
        ] ++ seo()
      )
