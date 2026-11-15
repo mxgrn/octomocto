@@ -57,7 +57,7 @@ defmodule OctomoctoWeb.TrainsLive do
      |> remember_tab("campaign")
      |> assign(
        settings: settings(tab_params(socket)),
-       canonical_url: url(~p"/trains/campaign")
+       canonical_url: url(~p"/trains")
      )
      |> assign_campaign(params)}
   end
@@ -68,7 +68,7 @@ defmodule OctomoctoWeb.TrainsLive do
      socket
      |> remember_tab("lobby")
      |> assign_free_play(tab_params(socket))
-     |> assign(canonical_url: url(~p"/trains/lobby"))}
+     |> assign(canonical_url: url(~p"/trains"))}
   end
 
   def handle_params(params, _uri, socket) do

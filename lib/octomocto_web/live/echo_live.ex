@@ -69,8 +69,9 @@ defmodule OctomoctoWeb.EchoLive do
     {:noreply,
      assign(socket,
        settings: settings,
-       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, path),
-       alternate_urls: Locale.alternate_urls("echo", path),
+       # The lobby is a tab of the game page, so search engines get the game page
+       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/echo"),
+       alternate_urls: Locale.alternate_urls("echo", ~p"/echo"),
        # The other language keeps the settings of the New game tab
        languages:
          Locale.languages(

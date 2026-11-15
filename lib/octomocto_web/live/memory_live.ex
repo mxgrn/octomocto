@@ -86,8 +86,9 @@ defmodule OctomoctoWeb.MemoryLive do
      |> remember_tab("campaign")
      |> assign(
        settings: settings(tab_params(socket)),
-       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/memory/campaign"),
-       alternate_urls: Locale.alternate_urls("memory", ~p"/memory/campaign"),
+       # The campaign is a tab of the game page, so search engines get the game page
+       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/memory"),
+       alternate_urls: Locale.alternate_urls("memory", ~p"/memory"),
        languages: Locale.languages("memory", locale, ~p"/memory/campaign")
      )
      |> assign_campaign(params)}
@@ -102,8 +103,9 @@ defmodule OctomoctoWeb.MemoryLive do
      |> remember_tab("lobby")
      |> assign_free_play(tab_params(socket))
      |> assign(
-       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/memory/lobby"),
-       alternate_urls: Locale.alternate_urls("memory", ~p"/memory/lobby"),
+       # The lobby is a tab of the game page, so search engines get the game page
+       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/memory"),
+       alternate_urls: Locale.alternate_urls("memory", ~p"/memory"),
        languages: Locale.languages("memory", locale, ~p"/memory/lobby")
      )}
   end

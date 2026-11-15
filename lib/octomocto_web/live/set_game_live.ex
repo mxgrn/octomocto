@@ -68,8 +68,9 @@ defmodule OctomoctoWeb.SetGameLive do
     {:noreply,
      assign(socket,
        settings: settings,
-       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, path),
-       alternate_urls: Locale.alternate_urls("set", path),
+       # The lobby is a tab of the game page, so search engines get the game page
+       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/set"),
+       alternate_urls: Locale.alternate_urls("set", ~p"/set"),
        # The other language keeps the settings of the New game tab
        languages:
          Locale.languages(
