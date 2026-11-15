@@ -589,7 +589,10 @@ sync game model =
                         Just
                             { server
                                 | leaderFrom = shownLeader model.now trail
-                                , leaderAt = model.now
+
+                                -- As after a tap: the leader jets a moment
+                                -- after the player's octopus lands
+                                , leaderAt = model.now + jetMs + leaderPauseMs
                                 , leaderPast = past.leaderPast
                                 , followerPast =
                                     [ { from = caveAt trail trail.follower
