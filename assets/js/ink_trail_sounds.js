@@ -1,10 +1,21 @@
 // Sounds for the Ink Trail game: a soft "blop" for each jet of the leader,
-// the same "blop" a bit lower for each jet of the player's octopus, and a
+// the same "blop" a bit lower for each jet of the player's octopus (both go
+// one tone higher for each jet of distance above 3), and a
 // short rising pair of notes when the player's octopus falls one jet further
 // behind. After a wrong tap, the ghost of the leader makes a short stream of
 // bubbles on each of its jets.
 
 import {audioReady, countdownBeep, goBeep, noise, tone} from "./sounds"
+
+// The smallest distance of the game (see Octomocto.InkTrail.Game)
+const MIN_DISTANCE = 3
+
+// The jets sound one tone (2 semitones) higher for each jet of distance
+// above the smallest one. At the start, the leader jets from 1 jet ahead up
+// to the start distance: below the smallest distance, the pitch stays the same.
+function pitchUp(distance) {
+  return 2 ** ((2 * Math.max(0, distance - MIN_DISTANCE)) / 12)
+}
 
 const sounds = {
   // The same countdown and start beeps in all games
@@ -12,14 +23,16 @@ const sounds = {
   go: goBeep,
 
   // The leader jets: a quick falling "blop", like a bubble
-  jet() {
-    tone({type: "sine", freq: 620, duration: 0.09, gain: 0.07, freqEnd: 380})
+  jet(distance) {
+    const up = pitchUp(distance)
+    tone({type: "sine", freq: 620 * up, duration: 0.09, gain: 0.07, freqEnd: 380 * up})
   },
 
   // The player's octopus jets after a tap: like the leader, a bit lower, so
   // that the two octopi sound alike but not the same
-  follow() {
-    tone({type: "sine", freq: 520, duration: 0.09, gain: 0.07, freqEnd: 320})
+  follow(distance) {
+    const up = pitchUp(distance)
+    tone({type: "sine", freq: 520 * up, duration: 0.09, gain: 0.07, freqEnd: 320 * up})
   },
 
   // A short dull buzz for a wrong tap
@@ -53,7 +66,7 @@ const sounds = {
   },
 }
 
-export function playInkTrailSound(name) {
+export function playInkTrailSound({name, distance}) {
   if (!audioReady()) return
-  sounds[name]?.()
+  sounds[name]?.(distance)
 }

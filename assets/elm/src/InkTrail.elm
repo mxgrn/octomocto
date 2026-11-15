@@ -72,7 +72,10 @@ after each change.
 port inkTrailWatchers : (Int -> msg) -> Sub msg
 
 
-port inkTrailPlaySound : String -> Cmd msg
+{-| A sound to play: its name, and the distance of the game, which sets the
+pitch of the jets
+-}
+port inkTrailPlaySound : Encode.Value -> Cmd msg
 
 
 port inkTrailSaveMuted : Bool -> Cmd msg
@@ -544,7 +547,7 @@ update msg model =
             case ( model.connection, Decode.decodeValue gameDecoder value ) of
                 ( Joined me _, Ok game ) ->
                     ( withSea (sync game { model | connection = Joined me game })
-                    , Cmd.batch [ syncClock game, playSounds model (syncSounds game model) ]
+                    , Cmd.batch [ syncClock game, playSounds model (Maybe.withDefault 0 (Maybe.map distance model.trail)) (syncSounds game model) ]
                     )
 
                 _ ->
@@ -1019,6 +1022,8 @@ tap game cave trail model =
         , Cmd.batch
             [ send
             , playSounds model
+                -- The distance changes only when the leader jets
+                gap
                 ("follow"
                     :: (if grow && not done then
                             [ "grow" ]
@@ -1056,7 +1061,7 @@ tap game cave trail model =
                         , miss = Just ( cave, now )
                     }
           }
-        , Cmd.batch [ send, playSounds model [ "wrong" ] ]
+        , Cmd.batch [ send, playSounds model gap [ "wrong" ] ]
         )
 
 
@@ -1204,6 +1209,9 @@ onTick model =
             in
             ( { model | beepedStep = step, trail = trail, jetCue = jetCue, ghostCue = ghostCue }
             , playSounds model
+                -- The distance on the screen, so that of 2 jets in a row, the
+                -- first has the pitch of the old distance
+                (Maybe.withDefault 0 (Maybe.map (\current -> shownLeader model.now current - current.follower) trail))
                 (beeps
                     ++ jetSounds
                     ++ ghostSounds
@@ -1232,13 +1240,20 @@ countdownStep model game =
         Just (max 0 (ceiling (toFloat (negate (elapsed model)) / 1000)))
 
 
-playSounds : Model -> List String -> Cmd Msg
-playSounds model names =
+playSounds : Model -> Int -> List String -> Cmd Msg
+playSounds model jetsBehind names =
     if model.muted then
         Cmd.none
 
     else
-        Cmd.batch (List.map inkTrailPlaySound names)
+        Cmd.batch
+            (List.map
+                (\name ->
+                    inkTrailPlaySound
+                        (Encode.object [ ( "name", Encode.string name ), ( "distance", Encode.int jetsBehind ) ])
+                )
+                names
+            )
 
 
 syncClock : Game -> Cmd Msg
