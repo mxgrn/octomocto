@@ -1213,7 +1213,6 @@ fits on it */
 .ink-trail-pebble { fill: #b9c0d0; stroke: #2d323d; stroke-width: 0.8; }
 .ink-trail-entrance { fill: #1f2430; }
 .ink-trail-entrance-back { fill: #2e3644; }
-.ink-trail-answer { fill: none; stroke: #22c55e; stroke-width: 2.5; opacity: 0; }
 .ink-trail-weed { transform-box: fill-box; transform-origin: 50% 100%; animation: ink-trail-sway 3.2s ease-in-out infinite alternate; }
 .ink-trail-weed-edge { fill: none; stroke: #2d5a3a; stroke-width: 2.4; stroke-linecap: round; }
 .ink-trail-weed-leaf { fill: none; stroke: #5aa36a; stroke-width: 1.2; stroke-linecap: round; }
@@ -1237,13 +1236,12 @@ fits on it */
 .ink-trail-cave.is-miss .ink-trail-rock-shade { fill: #b91c1c; }
 .ink-trail-cave.is-miss .ink-trail-rock-light { fill: #f87171; }
 .ink-trail-cave.is-miss .ink-trail-rock-edge { stroke: #7f1d1d; }
-.ink-trail-cave.is-answer .ink-trail-answer { opacity: 1; animation: ink-trail-answer 800ms ease-out; }
 @keyframes ink-trail-shake { 0%, 100% { translate: -50% -93.1%; } 25% { translate: calc(-50% - 4px) -93.1%; } 75% { translate: calc(-50% + 4px) -93.1%; } }
-@keyframes ink-trail-answer { from { opacity: 0; stroke-width: 6; } 30% { opacity: 1; } to { opacity: 1; stroke-width: 2.5; } }
 
 .ink-trail-swimmers { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .ink-trail-octopus.is-leader { fill: var(--color-octo-orange); }
 .ink-trail-octopus.is-player { fill: var(--color-octo-indigo); }
+.ink-trail-octopus.is-ghost { fill: var(--color-octo-orange); }
 .ink-trail-eye { fill: #fff; }
 .ink-trail-pupil { fill: #1d1a3a; }
 .ink-trail-sucker { fill: #fff; }
@@ -1258,6 +1256,6 @@ fits on it */
 #ink-trail-root button { touch-action: manipulation; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ink-trail-cave.is-miss, .ink-trail-cave.is-answer .ink-trail-answer, .ink-trail-weed { animation: none; }
+  .ink-trail-cave.is-miss, .ink-trail-weed { animation: none; }
   .ink-trail-bubble { display: none; }
 }

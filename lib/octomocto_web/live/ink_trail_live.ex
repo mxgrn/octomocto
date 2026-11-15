@@ -63,7 +63,7 @@ defmodule OctomoctoWeb.InkTrailLive do
       "A leader octopus jets from cave to cave. Your octopus follows the same path, some jets behind it.",
       "Click the cave where your octopus must go next: the cave where the leader was that many jets ago. Then the leader jets again.",
       "You see only the two octopi, so remember the path between them.",
-      "Each 5 correct clicks in a row put your octopus one jet further behind. A wrong click brings it one jet nearer, but never nearer than 2 jets.",
+      "Each 5 correct clicks in a row put your octopus one jet further behind. A wrong click brings it one jet nearer, but never nearer than 3 jets.",
       "Each correct click gives points times the distance. The game ends after 40 correct clicks. Your next game starts at the distance where this one ended.",
       "Ink Trail is a Follow That Frog-like game. Lumosity and Follow That Frog are trademarks of Lumos Labs, Inc. Octomocto is not affiliated with Lumos Labs."
     ]

@@ -9,7 +9,7 @@ defmodule Octomocto.InkTrail.Game do
   player's octopus, and then the leader jets once more. Each correct tap
   gives points times the distance. Each 5 correct taps in a row make the
   distance one larger (up to 11): the leader jets once more. A wrong tap makes the
-  distance one smaller (but not less than 2): the player's octopus goes to the
+  distance one smaller (but not less than 3): the player's octopus goes to the
   correct cave, and the leader waits. The leader waits for each tap, so
   the game has no clock. The game ends after 40 correct taps.
 
@@ -43,6 +43,7 @@ defmodule Octomocto.InkTrail.Game do
   @caves 12
   @goal 40
   @min_start 3
+  @min_distance 3
   # The caves of the trail (the player's octopus, the leader and the caves
   # between them) are all different, and the leader needs a free cave for
   # its next jet: so 12 caves allow the distance 11 at most
@@ -130,8 +131,9 @@ defmodule Octomocto.InkTrail.Game do
              streak: if(grow?, do: 0, else: streak)
          }, if(grow?, do: 2, else: 1)}
       else
-        # The leader waits, so the distance gets smaller, but not below 2
-        {%{player | wrong: player.wrong + 1, streak: 0}, if(distance > 2, do: 0, else: 1)}
+        # The leader waits, so the distance gets smaller, but not below 3
+        {%{player | wrong: player.wrong + 1, streak: 0},
+         if(distance > @min_distance, do: 0, else: 1)}
       end
 
     new_distance = distance - 1 + jets

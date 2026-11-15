@@ -12,7 +12,7 @@ between them.
 
 Each 5 correct taps in a row make the leader jet once more, so the
 distance grows. A wrong tap makes the distance one smaller: the player's
-octopus goes to the correct cave, and the leader waits (at the distance 2,
+octopus goes to the correct cave, and the leader waits (at the distance 3,
 it jets). The game ends after 40 correct taps.
 
 The server gives the whole path. This module checks each tap itself, for
@@ -158,6 +158,10 @@ type alias Trail =
     , hit : Maybe ( Int, Int )
     , miss : Maybe ( Int, Int )
 
+    -- After a wrong tap, a ghost of the leader jets along the path ahead,
+    -- from the player's octopus to the leader
+    , ghost : List Jet
+
     -- The last time when the distance grew
     , grewAt : Maybe Int
     , endedAt : Maybe Int
@@ -194,6 +198,10 @@ type alias Model =
 
     -- The leader on the screen when the last jet sound played
     , jetCue : Maybe ( String, Int )
+
+    -- The wrong tap (its time) and the jets of its ghost when the last
+    -- ghost sound played
+    , ghostCue : Maybe ( Int, Int )
     , muted : Bool
     }
 
@@ -220,6 +228,7 @@ init flags =
       , now = 0
       , beepedStep = Nothing
       , jetCue = Nothing
+      , ghostCue = Nothing
       , muted = flags.muted
       }
     , Cmd.none
@@ -281,12 +290,25 @@ leaderPauseMs =
     300
 
 
-{-| After a wrong tap, the correct cave shows for this long, and the
-player cannot tap
+{-| After a wrong tap, the wrong cave shows red for this long
 -}
 missMs : Int
 missMs =
     800
+
+
+{-| After a wrong tap, the ghost of the leader starts this long after the
+player's octopus lands, and it stays this long at its last cave before it
+is gone
+-}
+ghostPauseMs : Int
+ghostPauseMs =
+    250
+
+
+ghostStayMs : Int
+ghostStayMs =
+    500
 
 
 {-| The end of the game shows for a moment before the result
@@ -653,6 +675,7 @@ trailFrom game clockStart now =
     , followerPast = []
     , hit = Nothing
     , miss = Nothing
+    , ghost = []
     , grewAt = Nothing
     , endedAt =
         if game.finished then
@@ -733,8 +756,8 @@ watchingIntro now trail =
     trail.correct == 0 && trail.wrong == 0 && shownLeader now trail < trail.leader
 
 
-{-| The player can tap when the leader landed and the correct cave of a
-wrong tap is gone
+{-| The player can tap when the leader landed and the red cave and the
+ghost of a wrong tap are gone
 -}
 canTap : Int -> Trail -> Bool
 canTap now trail =
@@ -744,13 +767,31 @@ canTap now trail =
         == trail.leader
         && now
         >= leaderLandsAt trail
-        && (case trail.miss of
-                Just ( _, at ) ->
-                    now - at >= missMs
+        && not (missing now trail)
 
-                Nothing ->
-                    True
-           )
+
+{-| A wrong tap still shows: the red cave or the ghost
+-}
+missing : Int -> Trail -> Bool
+missing now trail =
+    case trail.miss of
+        Just ( _, at ) ->
+            now - at < missMs || now < ghostEnd trail
+
+        Nothing ->
+            False
+
+
+{-| The local time when the ghost of a wrong tap is gone
+-}
+ghostEnd : Trail -> Int
+ghostEnd trail =
+    case List.reverse trail.ghost of
+        last :: _ ->
+            last.at + jetMs + ghostStayMs
+
+        [] ->
+            0
 
 
 distance : Trail -> Int
@@ -856,22 +897,42 @@ tap game cave trail model =
 
     else
         let
-            -- The distance is never less than 2
+            -- The distance is never less than 3
             jets =
-                if gap > 2 then
+                if gap > 3 then
                     0
 
                 else
                     1
+
+            -- The ghost of the leader jets from the new cave of the player's
+            -- octopus to the leader, with short stops, as the leader does
+            ghostStart =
+                now + jetMs + ghostPauseMs
+
+            ghost =
+                List.range step (trail.leader - 1)
+                    |> List.map
+                        (\k ->
+                            { from = caveAt trail k
+                            , to = caveAt trail (k + 1)
+                            , at = ghostStart + (k - step) * (jetMs + stopMs)
+                            }
+                        )
+
+            missed =
+                { moved | ghost = ghost }
         in
         ( { model
             | trail =
                 Just
-                    { moved
+                    { missed
                         | leader = trail.leader + jets
                         , streak = 0
                         , wrong = trail.wrong + 1
-                        , leaderAt = now + missMs
+
+                        -- The leader goes on when the ghost is gone
+                        , leaderAt = max (now + missMs) (ghostEnd missed)
                         , miss = Just ( cave, now )
                     }
           }
@@ -989,13 +1050,39 @@ onTick model =
                         Nothing ->
                             ( model.jetCue, [] )
 
+                -- A swish when a jet of the ghost of a wrong tap starts
+                ( ghostCue, ghostSounds ) =
+                    case trail of
+                        Just current ->
+                            case current.miss of
+                                Just ( _, missAt ) ->
+                                    let
+                                        started =
+                                            List.length (List.filter (\jet -> jet.at <= model.now) current.ghost)
+
+                                        cue =
+                                            Just ( missAt, started )
+                                    in
+                                    if cue /= model.ghostCue && started > 0 then
+                                        ( cue, [ "ghost" ] )
+
+                                    else
+                                        ( cue, [] )
+
+                                Nothing ->
+                                    ( model.ghostCue, [] )
+
+                        Nothing ->
+                            ( model.ghostCue, [] )
+
                 ended =
                     game.finished && phase model game /= Over && phase { model | trail = trail } game == Over
             in
-            ( { model | beepedStep = step, trail = trail, jetCue = jetCue }
+            ( { model | beepedStep = step, trail = trail, jetCue = jetCue, ghostCue = ghostCue }
             , playSounds model
                 (beeps
                     ++ jetSounds
+                    ++ ghostSounds
                     ++ (if ended then
                             [ "end" ]
 
@@ -1298,7 +1385,7 @@ viewBoard model watching game =
                     ]
 
                 Nothing ->
-                    [ Html.Lazy.lazy6 viewCaveButtons model.sea False -1 -1 -1 -1 ]
+                    [ Html.Lazy.lazy5 viewCaveButtons model.sea False -1 -1 -1 ]
             )
         , case current of
             Countdown ->
@@ -1333,8 +1420,8 @@ prompt model watching current =
             else if watchingIntro now trail then
                 "Watch the leader"
 
-            else if Maybe.map (\( _, at ) -> now - at < missMs) trail.miss == Just True then
-                "Missed. Your octopus goes here"
+            else if missing now trail then
+                "Missed. Watch the trail ahead"
 
             else if Maybe.map (\at -> now - at < 1200) trail.grewAt == Just True then
                 "One jet further behind!"
@@ -1369,23 +1456,12 @@ viewCaves model watching active trail =
 
                 Nothing ->
                     -1
-
-        missed =
-            recent trail.miss missMs
-
-        answer =
-            if missed >= 0 then
-                caveAt trail trail.follower
-
-            else
-                -1
     in
-    Html.Lazy.lazy6 viewCaveButtons
+    Html.Lazy.lazy5 viewCaveButtons
         model.sea
         (active && not watching && canTap now trail)
         (recent trail.hit 400)
-        missed
-        answer
+        (recent trail.miss missMs)
         (Array.length trail.path)
 
 
@@ -1393,8 +1469,8 @@ viewCaves model watching active trail =
 cave covers the cave above it. The last argument only tells Html.Lazy when
 the path grows.
 -}
-viewCaveButtons : Sea -> Bool -> Int -> Int -> Int -> Int -> Html Msg
-viewCaveButtons sea open hit missed answer _ =
+viewCaveButtons : Sea -> Bool -> Int -> Int -> Int -> Html Msg
+viewCaveButtons sea open hit missed _ =
     let
         height =
             seaHeight sea.narrow
@@ -1412,7 +1488,6 @@ viewCaveButtons sea open hit missed answer _ =
                     [ ( "is-open", open )
                     , ( "is-hit", hit == i )
                     , ( "is-miss", missed == i )
-                    , ( "is-answer", answer == i )
                     ]
                 , style "left" (String.fromFloat (x / 4) ++ "%")
                 , style "top" (String.fromFloat (100 * y / height) ++ "%")
@@ -1502,7 +1577,6 @@ viewCaveArt cave =
                    , Svg.ellipse [ SA.cx "35.4", SA.cy "-0.4", SA.rx "1.7", SA.ry "1", SA.class "ink-trail-pebble" ] []
                    ]
                 ++ life
-                ++ [ Svg.path [ SA.d caveHole, SA.class "ink-trail-answer" ] [] ]
             )
         ]
 
@@ -1648,9 +1722,39 @@ viewSwimmers sea now trail =
             (viewInk sea now trail.followerPast ++ viewInk sea now leader)
         , viewOctopus "player" now player
         , viewHeadShadow sea "player" player
+        , viewGhost sea now trail
         , viewOctopus "leader" now leaderPose
         , viewHeadShadow sea "leader" leaderPose
         ]
+
+
+{-| After a wrong tap, a see-through ghost of the leader jets along the
+path ahead, from the player's octopus to the leader. It comes in at the
+player's octopus, and it fades out at the last cave.
+-}
+viewGhost : Sea -> Int -> Trail -> Svg Msg
+viewGhost sea now trail =
+    case trail.ghost of
+        first :: _ ->
+            let
+                fadeIn =
+                    clamp 0 1 (toFloat (now - first.at + ghostPauseMs) / toFloat ghostPauseMs)
+
+                fadeOut =
+                    clamp 0 1 (toFloat (ghostEnd trail - now) / 300)
+
+                opacity =
+                    0.5 * fadeIn * fadeOut
+            in
+            if opacity > 0 then
+                Svg.g [ SA.opacity (num3 opacity) ]
+                    [ viewOctopus "ghost" now (pose sea now first.from trail.ghost) ]
+
+            else
+                Svg.g [] []
+
+        [] ->
+            Svg.g [] []
 
 
 {-| The head of an octopus, for the shadow of the arch on it

@@ -1,7 +1,8 @@
 // Sounds for the Ink Trail game: a soft "blop" for each jet of the leader,
 // the same "blop" a bit lower for each jet of the player's octopus, and a
 // short rising pair of notes when the player's octopus falls one jet further
-// behind.
+// behind. After a wrong tap, the ghost of the leader makes a short stream of
+// bubbles on each of its jets.
 
 import {audioReady, countdownBeep, noise, tone} from "./sounds"
 
@@ -24,6 +25,18 @@ const sounds = {
   wrong() {
     tone({type: "square", freq: 140, duration: 0.14, gain: 0.05, filter: 900})
     noise({duration: 0.05, gain: 0.03, filter: 500})
+  },
+
+  // A jet of the ghost after a wrong tap: a short stream of small bubbles.
+  // Each bubble is a quick tone that slides up. The bubbles come at random
+  // times and pitches, and get softer, so no two jets sound the same.
+  ghost() {
+    let start = 0
+    for (let i = 0; i < 6; i++) {
+      const freq = 700 + Math.random() * 600
+      tone({freq, freqEnd: freq * 1.9, start, duration: 0.05 + Math.random() * 0.03, gain: 0.045 - i * 0.005})
+      start += 0.04 + Math.random() * 0.05
+    }
   },
 
   // The distance grows: two rising notes
