@@ -82,8 +82,18 @@ config :understudy,
        "You translate the announcements of Octomocto, a site with free online games to play solo or with friends.",
      style:
        "Informal and friendly. Always use the informal you (du, tu, ты, ти, ty, tu, tú, você).",
+     glossary: %{
+       "Octo" =>
+         "the orange octopus, one of the two mascots of Octomocto. He is male: use masculine grammar forms for him.",
+       "Mocto" =>
+         "the blue octopus, the other mascot of Octomocto. He is male: use masculine grammar forms for him.",
+       "jet" =>
+         "a quick dash of an octopus through the water. Octopi swim: they never fly, run or jump.",
+       "streak" => "a series of correct moves in a row"
+     },
      rules: [
-       ~s(Never translate "Octomocto".),
+       ~s(Never translate "Octomocto", "Octo" or "Mocto".),
+       "Never translate the game names: Ink Trail, Nimble Mosaic, Schulte Table, Graze & Dodge, Right on Track, Memory, Set, Sudoku Race, Echo Chamber, Mahjong Race, Overlap, Snap, Afterglow Memory.",
        "The text is Markdown. Keep the Markdown syntax, the line breaks and the URLs of the links unchanged.",
        "In French, put a space before ! ? : and ;, but never before a comma or a period, also not after a link."
      ]}
