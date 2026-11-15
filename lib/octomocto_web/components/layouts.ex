@@ -662,6 +662,9 @@ defmodule OctomoctoWeb.Layouts do
     """
   end
 
+  # Admin pages do not go to Google Analytics
+  defp admin_path?(conn), do: match?(["admin" | _], conn.path_info)
+
   defp user_menu_name(user), do: user.display_name || user.name || user.email
 
   # Up to two first letters of the name, for the menu button of a user without an avatar.
