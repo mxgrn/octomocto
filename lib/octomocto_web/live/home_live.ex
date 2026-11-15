@@ -188,7 +188,7 @@ defmodule OctomoctoWeb.HomeLive do
       description:
         dgettext_noop(
           "home",
-          "Follow the leader octopus from cave to cave, some jets behind it. The better you follow, the further behind you jet."
+          "Follow the leader octopus from cave to cave, some jets behind it. The better you follow, the further behind you jet (yes, that’s the reward)."
         ),
       path: "/ink-trail",
       badge: {dgettext_noop("home", "Beta"), "hero-beaker-mini"},
