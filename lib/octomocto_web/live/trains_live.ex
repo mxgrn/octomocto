@@ -7,6 +7,8 @@ defmodule OctomoctoWeb.TrainsLive do
   # The same settings and result lists as on the Nimble Mosaic page
   import OctomoctoWeb.SettingsComponents,
     only: [
+      preview_rows: 1,
+      sparkline: 1,
       setting: 1,
       setting_header: 1,
       option: 1,
@@ -140,6 +142,7 @@ defmodule OctomoctoWeb.TrainsLive do
       user_results: user_results(socket.assigns.current_scope, filter)
     )
     |> OctomoctoWeb.BestResults.assign_best(Trains, filter)
+    |> OctomoctoWeb.ResultsPreview.assign_preview(:score, max: trains(settings))
   end
 
   # The levels of the campaign with the progress of the user, and the

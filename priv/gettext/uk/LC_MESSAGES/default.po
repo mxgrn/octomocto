@@ -376,3 +376,7 @@ msgstr "Увійди в Octomocto, щоб зберігати результат�
 #, elixir-autogen, elixir-format
 msgid "More games that train your memory"
 msgstr "Інші ігри для тренування пам’яті"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to see your progress"
+msgstr "Увійди, щоб бачити свій прогрес"

@@ -138,4 +138,17 @@ defmodule Octomocto.GrazeTest do
 
     assert [%Result{score: 7}, %Result{score: 4}] = Graze.best_results(settings)
   end
+
+  test "user_results/2 gives the scores of the latest results, the oldest first" do
+    user = user_fixture()
+
+    for score <- [4, 9, 2] do
+      Graze.save_results("g#{score}", %{"players" => 1}, 0, [
+        %{user_id: user.id, score: score, survived_ms: 1000}
+      ])
+    end
+
+    %{trend: trend} = Graze.user_results(%{user: user}, %{"players" => 1})
+    assert Enum.map(trend, & &1.value) == [4, 9, 2]
+  end
 end

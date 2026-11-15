@@ -374,3 +374,7 @@ msgstr "Connecte-toi à Octomocto pour garder tes résultats sur tous tes appare
 #, elixir-autogen, elixir-format
 msgid "More games that train your memory"
 msgstr "Plus de jeux pour entraîner ta mémoire"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to see your progress"
+msgstr "Connecte-toi pour voir tes progrès"

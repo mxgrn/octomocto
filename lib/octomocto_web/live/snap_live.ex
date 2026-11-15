@@ -9,7 +9,16 @@ defmodule OctomoctoWeb.SnapLive do
   on_mount OctomoctoWeb.BestResults
 
   import OctomoctoWeb.SettingsComponents,
-    only: [setting: 1, option: 1, score_list: 1, result_row: 1, result_pill: 1, player_name: 1]
+    only: [
+      preview_rows: 1,
+      sparkline: 1,
+      setting: 1,
+      option: 1,
+      score_list: 1,
+      result_row: 1,
+      result_pill: 1,
+      player_name: 1
+    ]
 
   import OctomoctoWeb.GamePageComponents
 
@@ -46,7 +55,8 @@ defmodule OctomoctoWeb.SnapLive do
        settings: settings,
        user_results: user_results(socket.assigns.current_scope, filter)
      )
-     |> OctomoctoWeb.BestResults.assign_best(Snap, filter)}
+     |> OctomoctoWeb.BestResults.assign_best(Snap, filter)
+     |> OctomoctoWeb.ResultsPreview.assign_preview(:score)}
   end
 
   def handle_event("new_game", _params, socket) do

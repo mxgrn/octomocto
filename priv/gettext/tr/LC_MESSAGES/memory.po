@@ -262,10 +262,6 @@ msgid "time"
 msgstr "süre"
 
 #, elixir-autogen, elixir-format
-msgid "to start saving your results."
-msgstr "ve sonuçlarını kaydetmeye başla."
-
-#, elixir-autogen, elixir-format
 msgid "turn"
 msgstr "sıra"
 

@@ -374,3 +374,7 @@ msgstr "Sonuçlarını tüm cihazlarında saklamak, adını seçmek ve arkadaş 
 #, elixir-autogen, elixir-format
 msgid "More games that train your memory"
 msgstr "Hafızanı çalıştıran diğer oyunlar"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to see your progress"
+msgstr "İlerlemeni görmek için giriş yap"

@@ -261,10 +261,6 @@ msgid "time"
 msgstr "thời gian"
 
 #, elixir-autogen, elixir-format
-msgid "to start saving your results."
-msgstr "để bắt đầu lưu kết quả."
-
-#, elixir-autogen, elixir-format
 msgid "turn"
 msgstr "lượt"
 

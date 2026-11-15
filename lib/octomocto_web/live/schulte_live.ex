@@ -56,7 +56,8 @@ defmodule OctomoctoWeb.SchulteLive do
        settings: settings,
        user_results: user_results(socket.assigns.current_scope, filter)
      )
-     |> OctomoctoWeb.BestResults.assign_best(Schulte, filter)}
+     |> OctomoctoWeb.BestResults.assign_best(Schulte, filter)
+     |> OctomoctoWeb.ResultsPreview.assign_preview(:elapsed_ms, lower_better: true)}
   end
 
   # A match has its own settings

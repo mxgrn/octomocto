@@ -451,10 +451,6 @@ msgid "to get listed"
 msgstr "để có tên trong bảng"
 
 #, elixir-autogen, elixir-format
-msgid "to start saving your results."
-msgstr "để bắt đầu lưu kết quả."
-
-#, elixir-autogen, elixir-format
 msgid "{feed} to keep Octomocto ad-free."
 msgstr "{feed} để Octomocto luôn không có quảng cáo."
 

@@ -261,10 +261,6 @@ msgid "time"
 msgstr "タイム"
 
 #, elixir-autogen, elixir-format
-msgid "to start saving your results."
-msgstr "して、記録を保存しよう。"
-
-#, elixir-autogen, elixir-format
 msgid "turn"
 msgstr "番"
 

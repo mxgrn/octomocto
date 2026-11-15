@@ -372,3 +372,7 @@ msgstr "Octomoctoにログインすると、すべてのデバイスで結果を
 #, elixir-autogen, elixir-format
 msgid "More games that train your memory"
 msgstr "記憶力を鍛えるほかのゲーム"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to see your progress"
+msgstr "ログインして上達を確認しよう"

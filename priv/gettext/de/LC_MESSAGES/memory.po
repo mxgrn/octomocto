@@ -262,10 +262,6 @@ msgid "time"
 msgstr "Zeit"
 
 #, elixir-autogen, elixir-format
-msgid "to start saving your results."
-msgstr "und ab jetzt deine Ergebnisse speichern."
-
-#, elixir-autogen, elixir-format
 msgid "turn"
 msgstr "dran"
 

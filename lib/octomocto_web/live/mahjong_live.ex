@@ -7,6 +7,8 @@ defmodule OctomoctoWeb.MahjongLive do
   # The same settings and result lists as on the Nimble Mosaic page
   import OctomoctoWeb.SettingsComponents,
     only: [
+      preview_rows: 1,
+      sparkline: 1,
       setting: 1,
       option: 1,
       score_list: 1,
@@ -59,7 +61,8 @@ defmodule OctomoctoWeb.MahjongLive do
        settings: settings,
        user_results: user_results(socket.assigns.current_scope, filter)
      )
-     |> OctomoctoWeb.BestResults.assign_best(Mahjong, filter)}
+     |> OctomoctoWeb.BestResults.assign_best(Mahjong, filter)
+     |> OctomoctoWeb.ResultsPreview.assign_preview(:elapsed_ms, lower_better: true)}
   end
 
   def handle_info({:lobby_changed, _game, id, entry}, socket) do

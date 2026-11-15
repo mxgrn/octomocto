@@ -118,6 +118,7 @@ defmodule Octomocto.Snap do
   Gives the results of the scope's user for the settings: the latest
   results (the newest first) and the best result (nil when there are no
   results).
+  The `trend` is for a sparkline, see `Octomocto.ResultQueries.trend/2`.
   """
   def user_results(%{user: user}, settings) do
     user_query =
@@ -131,7 +132,9 @@ defmodule Octomocto.Snap do
       from(r in user_query, order_by: [desc: r.score, asc: r.inserted_at], limit: 1)
       |> Repo.one()
 
-    %{latest: latest, best: best}
+    trend = Octomocto.ResultQueries.trend(user_query, :score)
+
+    %{latest: latest, best: best, trend: trend}
   end
 
   @doc """

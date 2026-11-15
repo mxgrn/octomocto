@@ -131,6 +131,7 @@ defmodule Octomocto.Sudoku do
   Gives the results of the scope's user for the settings: the latest
   results (the newest first, each with all players of its game, the user
   first) and the best result (nil when there are no results).
+  The `trend` is for a sparkline, see `Octomocto.ResultQueries.trend/2`.
   """
   def user_results(%{user: user}, settings) do
     user_query =
@@ -155,7 +156,9 @@ defmodule Octomocto.Sudoku do
       )
       |> Repo.one()
 
-    %{latest: latest, best: best}
+    trend = Octomocto.ResultQueries.trend(user_query, :elapsed_ms)
+
+    %{latest: latest, best: best, trend: trend}
   end
 
   # Gives the results of all players of the games, by game id, the best

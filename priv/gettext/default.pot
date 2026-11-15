@@ -374,3 +374,7 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "More games that train your memory"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to see your progress"
+msgstr ""

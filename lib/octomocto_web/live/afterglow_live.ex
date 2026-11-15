@@ -14,6 +14,8 @@ defmodule OctomoctoWeb.AfterglowLive do
 
   import OctomoctoWeb.SettingsComponents,
     only: [
+      preview_rows: 1,
+      sparkline: 1,
       setting: 1,
       setting_header: 1,
       option: 1,
@@ -90,7 +92,8 @@ defmodule OctomoctoWeb.AfterglowLive do
        settings: settings,
        user_results: user_results(socket.assigns.current_scope, settings)
      )
-     |> OctomoctoWeb.BestResults.assign_best(Afterglow, filter(settings))}
+     |> OctomoctoWeb.BestResults.assign_best(Afterglow, filter(settings))
+     |> OctomoctoWeb.ResultsPreview.assign_preview(:score)}
   end
 
   # A match has its own settings

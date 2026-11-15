@@ -7,6 +7,8 @@ defmodule OctomoctoWeb.OverlapLive do
   # The same settings and result lists as on the Nimble Mosaic page
   import OctomoctoWeb.SettingsComponents,
     only: [
+      preview_rows: 1,
+      sparkline: 1,
       setting: 1,
       option: 1,
       setting_header: 1,
@@ -70,7 +72,8 @@ defmodule OctomoctoWeb.OverlapLive do
        last_theme: last_theme,
        user_results: user_results(socket.assigns.current_scope, filter)
      )
-     |> OctomoctoWeb.BestResults.assign_best(Overlap, filter)}
+     |> OctomoctoWeb.BestResults.assign_best(Overlap, filter)
+     |> OctomoctoWeb.ResultsPreview.assign_preview(:elapsed_ms, lower_better: true)}
   end
 
   def handle_info({:lobby_changed, _game, id, entry}, socket) do

@@ -73,6 +73,18 @@ defmodule Octomocto.SchulteTest do
              Schulte.user_results(%{user: user}, settings)
   end
 
+  test "user_results/2 gives the times of the latest 30 results, the oldest first" do
+    user = user_fixture()
+    settings = %{"size" => 5, "marks" => false, "players" => 1}
+
+    for ms <- 1..31 do
+      Schulte.save_results("g#{ms}", settings, ms, [%{user_id: user.id, score: 25}])
+    end
+
+    %{trend: trend} = Schulte.user_results(%{user: user}, settings)
+    assert Enum.map(trend, & &1.value) == Enum.to_list(2..31)
+  end
+
   describe "a match" do
     # Two players and a finished table, won by the first player
     setup %{id: id} do

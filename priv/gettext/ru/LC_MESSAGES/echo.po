@@ -307,10 +307,6 @@ msgid "to get listed"
 msgstr "и попади в список"
 
 #, elixir-autogen, elixir-format
-msgid "to start saving your results."
-msgstr "и начни сохранять свои результаты."
-
-#, elixir-autogen, elixir-format
 msgid "triangle"
 msgstr "треугольник"
 

@@ -372,3 +372,7 @@ msgstr "Đăng nhập Octomocto để giữ kết quả trên mọi thiết bị
 #, elixir-autogen, elixir-format
 msgid "More games that train your memory"
 msgstr "Thêm trò chơi rèn luyện trí nhớ"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to see your progress"
+msgstr "Đăng nhập để xem tiến bộ của bạn"

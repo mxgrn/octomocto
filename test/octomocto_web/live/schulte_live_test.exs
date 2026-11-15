@@ -74,6 +74,39 @@ defmodule OctomoctoWeb.SchulteLiveTest do
     end
   end
 
+  describe "results sparkline" do
+    setup :register_and_log_in_user
+
+    test "shows the trend of the user from 3 results", %{conn: conn, user: user} do
+      for ms <- [3000, 1000] do
+        Schulte.save_results("g#{ms}", @settings, ms, [%{user_id: user.id, score: 25}])
+      end
+
+      {:ok, view, _html} = live(conn, ~p"/schulte")
+      refute has_element?(view, "#your-trend")
+
+      Schulte.save_results("g", @settings, 2000, [%{user_id: user.id, score: 25}])
+
+      {:ok, view, _html} = live(conn, ~p"/schulte")
+      assert has_element?(view, "#your-trend")
+      assert has_element?(view, "#your-trend [data-best]")
+    end
+  end
+
+  test "shows a guest a locked preview of the results", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/schulte")
+
+    assert has_element?(view, "#your-results-sign-in")
+    assert has_element?(view, "#your-trend")
+
+    assert view
+           |> element("#your-results")
+           |> render()
+           |> LazyHTML.from_fragment()
+           |> LazyHTML.query("li")
+           |> Enum.count() == 5
+  end
+
   test "has no best results filter for a guest", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/schulte")
 

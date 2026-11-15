@@ -12,6 +12,8 @@ defmodule OctomoctoWeb.InkTrailLive do
 
   import OctomoctoWeb.SettingsComponents,
     only: [
+      preview_rows: 1,
+      sparkline: 1,
       setting: 1,
       setting_header: 1,
       option: 1,
@@ -43,7 +45,8 @@ defmodule OctomoctoWeb.InkTrailLive do
          user_results: user_results(scope)
        ] ++ seo()
      )
-     |> OctomoctoWeb.BestResults.assign_best(InkTrail, @filter)}
+     |> OctomoctoWeb.BestResults.assign_best(InkTrail, @filter)
+     |> OctomoctoWeb.ResultsPreview.assign_preview(:score)}
   end
 
   @doc "The title and the description of the Ink Trail pages, for search engines."

@@ -179,8 +179,23 @@ defmodule OctomoctoWeb.SettingsComponents do
   attr :empty_text, :string, default: nil, doc: "by default, a call to be the first"
   slot :inner_block, required: true
   slot :aside, doc: "shown at the right of the title"
+  slot :chart, doc: "shown below the title, for example a `sparkline/1`"
 
-  @doc "A list of results. An empty list has one row with `empty_text`."
+  attr :sign_in, :string,
+    default: nil,
+    doc: "for a guest, the sign-in path: the chart and the list are a blurred preview"
+
+  attr :preview_key, :any,
+    default: nil,
+    doc: "changes when the preview must change, see `OctomoctoWeb.ResultsPreview`"
+
+  @doc """
+  A list of results. An empty list has one row with `empty_text`.
+
+  With `sign_in`, the chart and the list are blurred under a call to sign
+  in. The page keeps them from the first render, so a random preview does
+  not change when the LiveView connects.
+  """
   def score_list(assigns) do
     ~H"""
     <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100">
@@ -191,13 +206,128 @@ defmodule OctomoctoWeb.SettingsComponents do
         </h3>
         <div :if={@aside != []} class="whitespace-nowrap">{render_slot(@aside)}</div>
       </div>
-      <ol id={@id} class="-mx-2 space-y-1 text-sm">
-        {render_slot(@inner_block)}
-        <li :if={@empty} class="px-2 py-2 text-center text-base-content/40">
-          {@empty_text || gettext("No games yet — be the first.")}
-        </li>
-      </ol>
+      <div
+        id={@sign_in && "#{@id}-preview-#{@preview_key}"}
+        phx-update={@sign_in && "ignore"}
+        class={@sign_in && "relative"}
+      >
+        <div
+          aria-hidden={@sign_in && "true"}
+          inert={@sign_in != nil}
+          class={@sign_in && "pointer-events-none select-none opacity-60 blur-[3px]"}
+        >
+          {render_slot(@chart)}
+          <ol id={@id} class="-mx-2 space-y-1 text-sm">
+            {render_slot(@inner_block)}
+            <li :if={@empty} class="px-2 py-2 text-center text-base-content/40">
+              {@empty_text || gettext("No games yet — be the first.")}
+            </li>
+          </ol>
+        </div>
+        <div :if={@sign_in} class="absolute inset-0 flex items-center justify-center">
+          <.link
+            id={"#{@id}-sign-in"}
+            href={@sign_in}
+            class="flex items-center gap-2 rounded-full bg-octo-indigo px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-octo-indigo/25 transition hover:bg-octo-indigo/90 hover:shadow-xl active:scale-[0.98]"
+          >
+            <.icon name="hero-lock-closed" class="size-4" />
+            {gettext("Sign in to see your progress")}
+          </.link>
+        </div>
+      </div>
     </div>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :points, :list, required: true, doc: "`%{id: id, value: value}` items, the oldest first"
+  attr :best, :map, default: nil, doc: "the best result, shown in amber when it is a point"
+  attr :lower_better, :boolean, default: false, doc: "true for times: a lower value is higher"
+
+  @doc """
+  A line of the latest results, where higher is always better. It shows
+  nothing with fewer than 3 points.
+  """
+  def sparkline(assigns) do
+    assigns =
+      assigns
+      |> assign(:dots, sparkline_dots(assigns.points, assigns.lower_better))
+      |> assign(:best_id, assigns.best && assigns.best.id)
+
+    ~H"""
+    <div :if={length(@dots) >= 3} id={@id} class="relative mb-3 h-12" aria-hidden="true">
+      <svg
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        class="absolute inset-0 size-full overflow-visible text-octo-indigo"
+      >
+        <defs>
+          <linearGradient id={"#{@id}-fill"} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="currentColor" stop-opacity="0.18" />
+            <stop offset="1" stop-color="currentColor" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <polygon points={"0,100 #{sparkline_path(@dots)} 100,100"} fill={"url(##{@id}-fill)"} />
+        <polyline
+          points={sparkline_path(@dots)}
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+          vector-effect="non-scaling-stroke"
+        />
+      </svg>
+      <span
+        :for={dot <- @dots}
+        :if={dot.id == @best_id or dot.latest}
+        data-best={dot.id == @best_id}
+        data-latest={dot.latest}
+        class={[
+          "absolute size-2 -translate-1/2 rounded-full ring-2 ring-white dark:ring-base-100",
+          if(dot.id == @best_id, do: "bg-amber-500", else: "bg-octo-indigo")
+        ]}
+        style={"left: #{dot.x}%; top: #{dot.y}%"}
+      />
+    </div>
+    """
+  end
+
+  # Places the points in a 100 × 100 box with some space at the top and
+  # the bottom, the best value at the top.
+  defp sparkline_dots(points, lower_better) do
+    values = Enum.map(points, & &1.value)
+    {low, high} = if values == [], do: {0, 0}, else: Enum.min_max(values)
+    last = length(points) - 1
+
+    points
+    |> Enum.with_index()
+    |> Enum.map(fn {point, index} ->
+      share = if high == low, do: 0.5, else: (point.value - low) / (high - low)
+      share = if lower_better, do: 1 - share, else: share
+
+      %{
+        id: point.id,
+        latest: index == last,
+        x: Float.round(index / max(last, 1) * 100, 2),
+        y: Float.round(90 - share * 80, 2)
+      }
+    end)
+  end
+
+  defp sparkline_path(dots), do: Enum.map_join(dots, " ", &"#{&1.x},#{&1.y}")
+
+  attr :rows, :list, required: true, doc: "the `:latest` of an `OctomoctoWeb.ResultsPreview`"
+  attr :best, :map, required: true
+  attr :format, :any, required: true, doc: "a function that formats a value"
+
+  @doc "The rows of a made-up list of results for a guest, see `OctomoctoWeb.ResultsPreview`."
+  def preview_rows(assigns) do
+    ~H"""
+    <.result_row :for={row <- @rows}>
+      <span class="flex-1 font-medium">{OctomoctoWeb.Locale.short_date(row.inserted_at)}</span>
+      <.result_pill best={row.id == @best.id}>{@format.(row.value)}</.result_pill>
+    </.result_row>
     """
   end
 

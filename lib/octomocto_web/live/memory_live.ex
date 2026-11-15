@@ -7,6 +7,8 @@ defmodule OctomoctoWeb.MemoryLive do
   # The same settings and result lists as on the Nimble Mosaic page
   import OctomoctoWeb.SettingsComponents,
     only: [
+      preview_rows: 1,
+      sparkline: 1,
       setting: 1,
       option: 1,
       setting_header: 1,
@@ -190,6 +192,7 @@ defmodule OctomoctoWeb.MemoryLive do
       user_results: user_results(socket.assigns.current_scope, filter)
     )
     |> OctomoctoWeb.BestResults.assign_best(Memory, filter)
+    |> OctomoctoWeb.ResultsPreview.assign_preview(:elapsed_ms, lower_better: true)
   end
 
   # The levels of the campaign with the progress of the user, the selected

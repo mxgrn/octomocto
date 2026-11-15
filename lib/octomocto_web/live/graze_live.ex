@@ -51,7 +51,8 @@ defmodule OctomoctoWeb.GrazeLive do
        settings: settings,
        user_results: user_results(socket.assigns.current_scope, filter)
      )
-     |> OctomoctoWeb.BestResults.assign_best(Graze, filter)}
+     |> OctomoctoWeb.BestResults.assign_best(Graze, filter)
+     |> OctomoctoWeb.ResultsPreview.assign_preview(:score)}
   end
 
   def handle_info({:lobby_changed, _game, id, entry}, socket) do
