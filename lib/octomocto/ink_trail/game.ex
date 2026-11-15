@@ -13,8 +13,9 @@ defmodule Octomocto.InkTrail.Game do
   correct cave, and the leader waits. The leader waits for each tap, so
   the game has no clock. The game ends after 40 correct taps.
 
-  A new game starts at the distance 3, and a restart starts at the current
-  distance, but never below 3.
+  A new game starts at the distance in its settings (the settings page gives
+  the distance where the latest game of the player ended), and a restart
+  starts at the current distance, but never below 3.
 
   The path has the indexes of the caves, up to the cave of the leader. The
   leader is at the index `leader` of the path, and the player's octopus at

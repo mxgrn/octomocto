@@ -2,7 +2,7 @@ defmodule OctomoctoWeb.InkTrailLive do
   @moduledoc """
   The settings page of Ink Trail, with the ongoing public games and the
   results. Ink Trail is a single-player game: the page shows the distance at
-  the start, which is the same for each new game, and the visibility. Other
+  the start, where the latest game of the player ended, and the visibility. Other
   players can only watch a public game.
   """
   use OctomoctoWeb, :live_view
@@ -40,7 +40,7 @@ defmodule OctomoctoWeb.InkTrailLive do
        [
          canonical_url: url(~p"/ink-trail"),
          rules: rules(),
-         start_distance: Game.min_start(),
+         start_distance: start_distance(scope, socket.assigns[:guest_id]),
          user_results: user_results(scope)
        ] ++ seo()
      )
@@ -118,6 +118,14 @@ defmodule OctomoctoWeb.InkTrailLive do
       <OctomoctoWeb.GameIcons.game_icon game="ink-trail" class="size-6" />
     </div>
     """
+  end
+
+  # A new game starts where the latest game ended
+  defp start_distance(scope, guest_id) do
+    case InkTrail.latest_distance(scope, guest_id) do
+      nil -> Game.min_start()
+      distance -> distance |> max(Game.min_start()) |> min(Game.max_distance())
+    end
   end
 
   # Nil for a guest

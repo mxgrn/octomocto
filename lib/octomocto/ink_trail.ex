@@ -138,6 +138,29 @@ defmodule Octomocto.InkTrail do
   end
 
   @doc """
+  Gives the distance at the end of the latest game of the scope's user, or
+  of the guest when there is no user: the next game starts there. Nil when
+  there are no results.
+  """
+  def latest_distance(scope, guest_id) do
+    query =
+      case {scope, guest_id} do
+        {%{user: user}, _guest_id} ->
+          from(r in Result, where: r.user_id == ^user.id)
+
+        {nil, guest_id} when is_binary(guest_id) ->
+          from(r in Result, where: r.guest_id == ^guest_id)
+
+        _nobody ->
+          nil
+      end
+
+    query &&
+      from(r in query, order_by: [desc: r.inserted_at], limit: 1, select: r.last_distance)
+      |> Repo.one()
+  end
+
+  @doc """
   Gives the best result of each signed-in user for the settings (the
   highest score first).
   With `user_ids`, only the results of these users (see
