@@ -61,7 +61,7 @@ defmodule OctomoctoWeb.GamePageComponentsTest do
       assert html
              |> LazyHTML.from_fragment()
              |> LazyHTML.query("#more-games a")
-             |> LazyHTML.attribute("href") == ["/memory", "/echo", "/snap", "/ink-trail"]
+             |> LazyHTML.attribute("href") == ["/ink-trail", "/memory", "/echo", "/snap"]
     end
   end
 end

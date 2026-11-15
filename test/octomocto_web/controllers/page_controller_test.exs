@@ -12,19 +12,19 @@ defmodule OctomoctoWeb.PageControllerTest do
       |> LazyHTML.attribute("href")
 
     assert hrefs == [
+             "/ink-trail",
+             "/graze",
+             "/memory",
              "/nimble-mosaic",
              "/schulte",
-             "/graze",
              "/trains",
-             "/memory",
              "/set",
              "/sudoku",
              "/echo",
              "/mahjong",
              "/overlap",
              "/snap",
-             "/afterglow",
-             "/ink-trail"
+             "/afterglow"
            ]
   end
 
@@ -36,7 +36,7 @@ defmodule OctomoctoWeb.PageControllerTest do
       |> LazyHTML.query("#games [id^=game-single-player-]")
       |> LazyHTML.attribute("id")
 
-    assert ids == ["game-single-player-snap", "game-single-player-ink-trail"]
+    assert ids == ["game-single-player-ink-trail", "game-single-player-snap"]
   end
 
   test "the header shows the slogan", %{conn: conn} do

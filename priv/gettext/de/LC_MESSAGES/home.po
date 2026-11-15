@@ -124,8 +124,8 @@ msgid "Tiles light up for a moment. Click the tiles that were lit. With friends,
 msgstr "Felder leuchten kurz auf. Klick auf die Felder, die geleuchtet haben. Mit Freunden baut ihr abwechselnd ein Muster."
 
 #, elixir-autogen, elixir-format
-msgid "Trending this week"
-msgstr "Diese Woche angesagt"
+msgid "Trending now"
+msgstr "Gerade angesagt"
 
 #, elixir-autogen, elixir-format
 msgid "Watching %{game}"

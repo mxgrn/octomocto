@@ -20,6 +20,14 @@ defmodule OctomoctoWeb.HomeLiveTest do
     assert has_element?(view, "#friends-online-sign-in")
   end
 
+  test "a game can have two badges", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, "#game-badges-ink-trail #game-badge-ink-trail-new")
+    assert has_element?(view, "#game-badges-ink-trail #game-badge-ink-trail-beta")
+    refute has_element?(view, "#game-badges-afterglow")
+  end
+
   describe "the tag filter" do
     test "shows only the games with the tag", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/")
@@ -29,6 +37,28 @@ defmodule OctomoctoWeb.HomeLiveTest do
       assert_patch(view, ~p"/?tag=memory")
       assert has_element?(view, "#game-memory")
       refute has_element?(view, "#game-schulte")
+    end
+
+    test "shows the games with a badge first", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/?tag=speed")
+
+      hrefs =
+        view
+        |> render()
+        |> LazyHTML.from_fragment()
+        |> LazyHTML.query("#games a")
+        |> LazyHTML.attribute("href")
+
+      assert hrefs == [
+               "/graze",
+               "/nimble-mosaic",
+               "/schulte",
+               "/set",
+               "/sudoku",
+               "/mahjong",
+               "/overlap",
+               "/snap"
+             ]
     end
 
     test "all clears the filter", %{conn: conn} do

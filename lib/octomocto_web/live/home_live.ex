@@ -31,6 +31,21 @@ defmodule OctomoctoWeb.HomeLive do
 
   @games [
     %{
+      id: "ink-trail",
+      tags: ["memory"],
+      name: "Ink Trail",
+      description:
+        dgettext_noop(
+          "home",
+          "Follow the leader octopus from cave to cave, some jets behind it. The better you follow, the further behind you jet (yes, that’s the reward)."
+        ),
+      path: "/ink-trail",
+      badges: [{"New", "hero-sparkles-mini"}, {dgettext_noop("home", "Beta"), "hero-beaker-mini"}],
+      icon_class: "bg-cyan-500/10 dark:bg-cyan-400/15",
+      # Not suggested at the end of a multiplayer game, see `OctomoctoWeb.NextGame`
+      single_player: true
+    },
+    %{
       id: "nimble-mosaic",
       tags: ["speed", "attention"],
       name: "Nimble Mosaic",
@@ -40,7 +55,6 @@ defmodule OctomoctoWeb.HomeLive do
           "Find the numbers in order. The first player to click the next number gets the point."
         ),
       path: "/nimble-mosaic",
-      badge: {dgettext_noop("home", "Trending this week"), "hero-fire-mini"},
       icon_class: "bg-octo-indigo/10 dark:bg-octo-indigo-light/15"
     },
     %{
@@ -53,7 +67,6 @@ defmodule OctomoctoWeb.HomeLive do
           "The classic Schulte table: find the numbers in order on a square grid, with your eyes on the center."
         ),
       path: "/schulte",
-      badge: {"New", "hero-sparkles-mini"},
       icon_class: "bg-octo-indigo/10 dark:bg-octo-indigo-light/15"
     },
     %{
@@ -66,7 +79,7 @@ defmodule OctomoctoWeb.HomeLive do
           "Eat the squares but keep away from the red ones, with up to 3 friends in one field."
         ),
       path: "/graze",
-      badge: {dgettext_noop("home", "Beta"), "hero-beaker-mini"},
+      badges: [{dgettext_noop("home", "Trending now"), "hero-fire-mini"}],
       icon_class: "bg-octo-indigo/10 dark:bg-octo-indigo-light/15"
     },
     %{
@@ -91,7 +104,7 @@ defmodule OctomoctoWeb.HomeLive do
           "Find the cards with the same image. Play alone against the clock, or take turns."
         ),
       path: "/memory",
-      badge: {dgettext_noop("home", "Most popular"), "hero-star-mini"},
+      badges: [{dgettext_noop("home", "Most popular"), "hero-star-mini"}],
       icon_class: "bg-sky-500/10 dark:bg-sky-400/15"
     },
     %{
@@ -178,23 +191,7 @@ defmodule OctomoctoWeb.HomeLive do
           "Tiles light up for a moment. Click the tiles that were lit. With friends, make one pattern in turns."
         ),
       path: "/afterglow",
-      badge: {"New", "hero-sparkles-mini"},
       icon_class: "bg-fuchsia-500/10 dark:bg-fuchsia-400/15"
-    },
-    %{
-      id: "ink-trail",
-      tags: ["memory"],
-      name: "Ink Trail",
-      description:
-        dgettext_noop(
-          "home",
-          "Follow the leader octopus from cave to cave, some jets behind it. The better you follow, the further behind you jet (yes, that’s the reward)."
-        ),
-      path: "/ink-trail",
-      badge: {dgettext_noop("home", "Beta"), "hero-beaker-mini"},
-      icon_class: "bg-cyan-500/10 dark:bg-cyan-400/15",
-      # Not suggested at the end of a multiplayer game, see `OctomoctoWeb.NextGame`
-      single_player: true
     }
     # Station Escape is archived: it is not on the front page and is not
     # suggested on the end screens. Do not change it for now.
@@ -237,6 +234,9 @@ defmodule OctomoctoWeb.HomeLive do
   # all languages.
   defp badge_label("New"), do: "New"
   defp badge_label(label), do: Gettext.dgettext(OctomoctoWeb.Gettext, "home", label)
+
+  # The part of the DOM id of a badge, for example "trending-now"
+  defp badge_id(label), do: label |> String.downcase() |> String.replace(" ", "-")
 
   @doc "The description of the game in the language of the process."
   def game_description(game),
@@ -370,7 +370,11 @@ defmodule OctomoctoWeb.HomeLive do
     end
   end
 
-  defp filter_games(nil, _scope), do: @games
+  # The games with a badge go first, in the order of @games. The recent
+  # games stay in the order of the last play.
+  @badged_first Enum.sort_by(@games, &is_nil(&1[:badges]))
+
+  defp filter_games(nil, _scope), do: @badged_first
 
   # A guest sees a text that asks to sign in, so no games
   defp filter_games("recent", nil), do: []
@@ -380,7 +384,7 @@ defmodule OctomoctoWeb.HomeLive do
     for id <- Stats.recent_games_of(:user_id, user.id), game = by_id[id], do: game
   end
 
-  defp filter_games(tag, _scope), do: Enum.filter(@games, &(tag in &1.tags))
+  defp filter_games(tag, _scope), do: Enum.filter(@badged_first, &(tag in &1.tags))
 
   defp path(nil), do: ~p"/"
   defp path(tag), do: ~p"/?tag=#{tag}"

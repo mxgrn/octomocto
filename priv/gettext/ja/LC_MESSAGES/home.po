@@ -124,8 +124,8 @@ msgid "Tiles light up for a moment. Click the tiles that were lit. With friends,
 msgstr "タイルが一瞬だけ光る。光ったタイルをクリックしよう。友達と遊ぶときは、交代で1つのパターンを作ろう。"
 
 #, elixir-autogen, elixir-format
-msgid "Trending this week"
-msgstr "今週の注目"
+msgid "Trending now"
+msgstr "今話題"
 
 #, elixir-autogen, elixir-format
 msgid "Watching %{game}"

@@ -124,8 +124,8 @@ msgid "Tiles light up for a moment. Click the tiles that were lit. With friends,
 msgstr "Плитки на мить спалахують. Натисни на плитки, які світилися. З друзями складайте один візерунок по черзі."
 
 #, elixir-autogen, elixir-format
-msgid "Trending this week"
-msgstr "Популярне цього тижня"
+msgid "Trending now"
+msgstr "Зараз популярне"
 
 #, elixir-autogen, elixir-format
 msgid "Watching %{game}"

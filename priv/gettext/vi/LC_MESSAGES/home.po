@@ -124,8 +124,8 @@ msgid "Tiles light up for a moment. Click the tiles that were lit. With friends,
 msgstr "Các ô sáng lên trong chốc lát. Bấm vào những ô đã sáng. Khi chơi với bạn bè, các bạn lần lượt tạo một hình mẫu."
 
 #, elixir-autogen, elixir-format
-msgid "Trending this week"
-msgstr "Nổi bật tuần này"
+msgid "Trending now"
+msgstr "Đang nổi bật"
 
 #, elixir-autogen, elixir-format
 msgid "Watching %{game}"

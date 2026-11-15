@@ -97,17 +97,24 @@
               navigate={Locale.game_path(@locale, game)}
               class="group relative flex h-full flex-col gap-2 rounded-2xl p-4 shadow-sm ring-1 ring-base-content/10 transition [--card-bg:var(--color-white)] bg-(--card-bg) hover:shadow-md hover:shadow-octo-indigo/15 hover:ring-octo-indigo/60 hover:[--card-bg:color-mix(in_oklab,var(--color-octo-indigo)_3%,var(--color-white))] dark:[--card-bg:var(--color-base-100)] dark:hover:ring-octo-indigo-light/60 dark:hover:[--card-bg:color-mix(in_oklab,var(--color-octo-indigo-light)_6%,var(--color-base-100))]"
             >
-              <span
-                :if={game[:badge]}
-                id={"game-badge-#{game.id}"}
-                class={[
-                  "absolute -top-2 -end-2 z-10 inline-flex items-center gap-1 whitespace-nowrap rounded-full py-1 pe-2 ps-1.5 text-[11px] leading-none font-semibold tracking-wide text-white uppercase shadow-sm",
-                  if(elem(game.badge, 0) == "New", do: "bg-octo-orange", else: "bg-octo-indigo")
-                ]}
+              <%!-- The last badge is in the corner, the others go to its start side --%>
+              <div
+                :if={game[:badges]}
+                id={"game-badges-#{game.id}"}
+                class="absolute -top-2 -end-2 z-10 flex gap-1"
               >
-                <.icon name={elem(game.badge, 1)} class="size-3" />
-                {badge_label(elem(game.badge, 0))}
-              </span>
+                <span
+                  :for={{label, icon} <- game.badges}
+                  id={"game-badge-#{game.id}-#{badge_id(label)}"}
+                  class={[
+                    "inline-flex items-center gap-1 whitespace-nowrap rounded-full py-1 pe-2 ps-1.5 text-[11px] leading-none font-semibold tracking-wide text-white uppercase shadow-sm",
+                    if(label == "New", do: "bg-octo-orange", else: "bg-octo-indigo")
+                  ]}
+                >
+                  <.icon name={icon} class="size-3" />
+                  {badge_label(label)}
+                </span>
+              </div>
               <div class="flex min-w-0 items-center gap-3">
                 <.game_icon game={game} />
                 <div class="min-w-0">

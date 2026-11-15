@@ -124,7 +124,7 @@ msgid "Tiles light up for a moment. Click the tiles that were lit. With friends,
 msgstr ""
 
 #, elixir-autogen, elixir-format
-msgid "Trending this week"
+msgid "Trending now"
 msgstr ""
 
 #, elixir-autogen, elixir-format
