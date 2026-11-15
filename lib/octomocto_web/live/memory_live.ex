@@ -38,7 +38,6 @@ defmodule OctomoctoWeb.MemoryLive do
      |> assign(
        [
          canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/memory"),
-         alternate_urls: Locale.alternate_urls("memory", ~p"/memory"),
          themes:
            Themes.by_use(
              Memory.theme_counts(socket.assigns.current_scope, socket.assigns[:guest_id])
@@ -78,39 +77,33 @@ defmodule OctomoctoWeb.MemoryLive do
   # the tab that the user used last.
   @settings_params ["theme", "set", "cards", "bombs", "players", "visibility", "match"]
 
-  def handle_params(params, _uri, %{assigns: %{live_action: :campaign}} = socket) do
+  def handle_params(params, uri, %{assigns: %{live_action: :campaign}} = socket) do
     locale = socket.assigns.locale
 
     {:noreply,
      socket
      |> remember_tab("campaign")
+     |> assign_seo_links(uri)
      |> assign(
        settings: settings(tab_params(socket)),
-       # The campaign is a tab of the game page, so search engines get the game page
-       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/memory"),
-       alternate_urls: Locale.alternate_urls("memory", ~p"/memory"),
        languages: Locale.languages("memory", locale, ~p"/memory/campaign")
      )
      |> assign_campaign(params)}
   end
 
   # The public games, and the results of the settings of the Free play tab
-  def handle_params(_params, _uri, %{assigns: %{live_action: :lobby}} = socket) do
+  def handle_params(_params, uri, %{assigns: %{live_action: :lobby}} = socket) do
     locale = socket.assigns.locale
 
     {:noreply,
      socket
      |> remember_tab("lobby")
      |> assign_free_play(tab_params(socket))
-     |> assign(
-       # The lobby is a tab of the game page, so search engines get the game page
-       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/memory"),
-       alternate_urls: Locale.alternate_urls("memory", ~p"/memory"),
-       languages: Locale.languages("memory", locale, ~p"/memory/lobby")
-     )}
+     |> assign_seo_links(uri)
+     |> assign(languages: Locale.languages("memory", locale, ~p"/memory/lobby"))}
   end
 
-  def handle_params(params, _uri, socket) do
+  def handle_params(params, uri, socket) do
     %{current_scope: scope, locale: locale} = socket.assigns
 
     tab = last_tab(scope)
@@ -119,12 +112,27 @@ defmodule OctomoctoWeb.MemoryLive do
       {:noreply, push_patch(socket, to: Locale.path(locale, ~p"/memory/#{tab}"))}
     else
       new_socket =
-        socket |> remember_tab("free") |> assign_free_play(saved_params(socket, params))
+        socket
+        |> remember_tab("free")
+        |> assign_free_play(saved_params(socket, params))
+        |> assign_seo_links(uri)
 
       settings = new_socket.assigns.settings
       SavedSettings.save_change(socket, "memory", settings, query(settings, match: nil))
       {:noreply, new_socket}
     end
+  end
+
+  # The tabs and the settings are one page for search engines: the game
+  # page. Only the game page itself has the hreflang links.
+  defp assign_seo_links(socket, uri) do
+    canonical_url =
+      OctomoctoWeb.Endpoint.url() <> Locale.path(socket.assigns.locale, ~p"/memory")
+
+    assign(socket,
+      canonical_url: canonical_url,
+      alternate_urls: Locale.alternate_urls(uri, canonical_url, "memory", ~p"/memory")
+    )
   end
 
   # The settings that the user chose last, when the page
@@ -174,9 +182,6 @@ defmodule OctomoctoWeb.MemoryLive do
     assign(socket,
       settings: settings,
       last_theme: last_theme,
-      canonical_url:
-        OctomoctoWeb.Endpoint.url() <> Locale.path(socket.assigns.locale, ~p"/memory"),
-      alternate_urls: Locale.alternate_urls("memory", ~p"/memory"),
       # The other language keeps the settings
       languages:
         Locale.languages("memory", socket.assigns.locale, ~p"/memory?#{query(settings, [])}"),

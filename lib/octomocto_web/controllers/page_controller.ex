@@ -29,7 +29,12 @@ defmodule OctomoctoWeb.PageController do
           "Answers about Octomocto: is it free, how to play with a friend, public and private games, why to sign in, and how friends and follows work."
         ),
       languages: OctomoctoWeb.Locale.languages(:all, conn.assigns.locale, ~p"/faq"),
-      alternate_urls: OctomoctoWeb.Locale.alternate_urls(:all, ~p"/faq")
+      # A URL with a query is a duplicate of the page, so it has no hreflang links
+      alternate_urls:
+        if(conn.query_string == "",
+          do: OctomoctoWeb.Locale.alternate_urls(:all, ~p"/faq"),
+          else: []
+        )
     )
   end
 

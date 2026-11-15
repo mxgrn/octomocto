@@ -134,6 +134,20 @@ defmodule OctomoctoWeb.Locale do
       [{"x-default", base <> path}]
   end
 
+  @doc """
+  The hreflang links of `alternate_urls/2`, but only when `uri` is the
+  `canonical_url`. A URL with a query or a tab URL is a duplicate of the
+  canonical page, so it gets only the canonical link. Only the path and
+  the query are compared, because the host of `uri` can be different.
+  """
+  def alternate_urls(uri, canonical_url, game, path) do
+    %URI{path: request_path, query: query} = URI.parse(uri)
+
+    if query in [nil, ""] and request_path == URI.parse(canonical_url).path,
+      do: alternate_urls(game, path),
+      else: []
+  end
+
   @pt_months ~w(jan. fev. mar. abr. mai. jun. jul. ago. set. out. nov. dez.)
 
   @de_months ~w(Jan. Feb. März Apr. Mai Juni Juli Aug. Sept. Okt. Nov. Dez.)

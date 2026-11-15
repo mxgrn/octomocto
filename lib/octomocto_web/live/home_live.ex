@@ -301,7 +301,6 @@ defmodule OctomoctoWeb.HomeLive do
            "Free online brain games for memory, logic and speed. Play solo or multiplayer: no sign-up, nothing to install."
          ),
        canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(socket.assigns.locale, ~p"/"),
-       alternate_urls: Locale.alternate_urls(:all, ~p"/"),
        filters: @filters,
        kinds: Map.new(@games, &{&1.id, &1})
      )
@@ -314,7 +313,7 @@ defmodule OctomoctoWeb.HomeLive do
   # The tag is in the URL, for example /?tag=memory. An unknown tag shows
   # all games. The front page with no tag goes to the tag that the user
   # or the guest clicked last (see `GameSettings`).
-  def handle_params(params, _uri, socket) do
+  def handle_params(params, uri, socket) do
     case {Map.fetch(params, "tag"), saved_tag(socket)} do
       {:error, saved} when saved != nil ->
         {:noreply, push_patch(socket, to: tag_path(socket, saved), replace: true)}
@@ -326,7 +325,9 @@ defmodule OctomoctoWeb.HomeLive do
          assign(socket,
            tag: tag,
            games: filter_games(tag, socket.assigns.current_scope),
-           languages: Locale.languages(:all, socket.assigns.locale, path(tag))
+           languages: Locale.languages(:all, socket.assigns.locale, path(tag)),
+           # A tag URL has the canonical link of the page without the tag
+           alternate_urls: Locale.alternate_urls(uri, socket.assigns.canonical_url, :all, ~p"/")
          )}
     end
   end

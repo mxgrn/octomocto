@@ -52,7 +52,7 @@ defmodule OctomoctoWeb.EchoLive do
   # that the user chose last.
   @settings_params ["pads", "players", "visibility"]
 
-  def handle_params(params, _uri, socket) do
+  def handle_params(params, uri, socket) do
     match = socket.assigns.match
 
     settings =
@@ -65,13 +65,14 @@ defmodule OctomoctoWeb.EchoLive do
     locale = socket.assigns.locale
     lobby? = socket.assigns.live_action == :lobby
     path = if lobby?, do: ~p"/echo/lobby", else: ~p"/echo"
+    canonical_url = OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/echo")
 
     {:noreply,
      assign(socket,
        settings: settings,
        # The lobby is a tab of the game page, so search engines get the game page
-       canonical_url: OctomoctoWeb.Endpoint.url() <> Locale.path(locale, ~p"/echo"),
-       alternate_urls: Locale.alternate_urls("echo", ~p"/echo"),
+       canonical_url: canonical_url,
+       alternate_urls: Locale.alternate_urls(uri, canonical_url, "echo", ~p"/echo"),
        # The other language keeps the settings of the New game tab
        languages:
          Locale.languages(
