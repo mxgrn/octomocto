@@ -285,45 +285,171 @@ defmodule OctomoctoWeb.GameIcons do
     """
   end
 
-  # A cave with the player's octopus (blue) in its entrance, and the leader
-  # (orange) that jets away with a trail of ink behind it
+  # Ink Trail: the two octopi jet side by side, the blue one a bit behind,
+  # and they look at each other. They are drawn as in the game in a jet:
+  # tapered arms with suckers behind a head that is a bit longer. Speed
+  # lines behind them, on their outer sides, show that they move.
   def game_icon(%{game: "ink-trail"} = assigns) do
     ~H"""
     <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
-      <path d="M3 45Q14 41 24 43Q34 41 45 45Z" fill="#EAD7A8" />
-      <path
-        d="M5 44C4 36 4 28 7 23C10 18 14 16 19 15C24 15 27 18 28 24C29 30 30 38 31 44Z"
-        fill="#8D939B"
-      />
-      <path d="M10 44C9 38 9 31 11 27C13 24 17 23 20 24C23 26 24 31 25 37L25 44Z" fill="#1D2530" />
-      <g transform="translate(17 39)" fill="#1A9FCB">
+      <g transform="translate(28 31.1) rotate(40) scale(0.439)">
         <path
-          d="M-2 0Q-6 3 -9 0M-1 1Q-3 4 -7 4M2 0Q6 3 9 0M1 1Q3 4 7 4"
-          stroke="#1A9FCB"
-          stroke-width="1.6"
-          fill="none"
+          d="M21 -4L21 10"
+          stroke="#1D1A3A"
+          stroke-opacity="0.3"
+          stroke-width="2.6"
           stroke-linecap="round"
         />
-        <ellipse cy="-3.5" rx="4.6" ry="4.4" />
-        <circle cx="-1.7" cy="-3.8" r="1.3" fill="#fff" />
-        <circle cx="1.7" cy="-3.8" r="1.3" fill="#fff" />
-      </g>
-      <g fill="#2B2140" opacity="0.35">
-        <circle cx="29" cy="25" r="2.2" />
-        <circle cx="32" cy="21" r="2.6" />
-        <circle cx="35" cy="17" r="2.2" />
-      </g>
-      <g transform="translate(40 10) rotate(40)" fill="#F26A1B">
         <path
-          d="M-1.5 2Q-2 6 -2.5 9M-0.5 2Q-0.5 6 -1 9.5M0.5 2Q0.5 6 1 9.5M1.5 2Q2 6 2.5 9"
-          stroke="#F26A1B"
-          stroke-width="1.5"
-          fill="none"
+          d="M26 6L26 24"
+          stroke="#1D1A3A"
+          stroke-opacity="0.3"
+          stroke-width="2.6"
           stroke-linecap="round"
         />
-        <ellipse cy="-2" rx="4" ry="4.8" />
-        <circle cx="-1.5" cy="-1.5" r="1.2" fill="#fff" />
-        <circle cx="1.5" cy="-1.5" r="1.2" fill="#fff" />
+        <path
+          d="M17 16L17 30"
+          stroke="#1D1A3A"
+          stroke-opacity="0.3"
+          stroke-width="2.6"
+          stroke-linecap="round"
+        />
+        <path
+          d="M-21 10L-21 22"
+          stroke="#1D1A3A"
+          stroke-opacity="0.3"
+          stroke-width="2.6"
+          stroke-linecap="round"
+        />
+        <g transform="scale(0.92 1.1)">
+          <path
+            d="M-9.4 1.2L-9.7 2.8L-9.9 4.4L-10.1 5.9L-10.3 7.6L-10.6 9.2L-10.7 10.8L-10.9 12.5L-11.1 14.2L-11.2 15.9L-11.3 17.7L-11.4 19.4L-11.4 21.2L-11.4 23L-11.4 24.8L-11.3 26.6L-11.1 28.4L-10.9 30.3L-10.7 32.2L-7.3 31.8L-7.3 30.1L-7.3 28.3L-7.3 26.6L-7.2 24.9L-7 23.2L-6.8 21.5L-6.6 19.8L-6.3 18.2L-6 16.6L-5.7 15L-5.4 13.4L-5 11.8L-4.7 10.3L-4.3 8.7L-3.9 7.2L-3.4 5.7L-3 4.2L-2.6 2.8Z"
+            fill="#1A9FCB"
+          />
+          <circle cx="-9" cy="32" r="1.7" fill="#1A9FCB" />
+          <circle cx="-9.2" cy="13.7" r="0.7" fill="#fff" />
+          <circle cx="-9.7" cy="18" r="0.7" fill="#fff" />
+          <circle cx="-9.9" cy="22" r="0.6" fill="#fff" />
+          <circle cx="-10" cy="25.8" r="0.6" fill="#fff" />
+          <path
+            d="M-6.5 4L-6.4 5.5L-6.3 7L-6.3 8.5L-6.2 10.1L-6.2 11.6L-6.1 13.2L-6.1 14.9L-6 16.5L-6 18.2L-5.9 19.9L-5.8 21.6L-5.7 23.3L-5.6 25.1L-5.5 26.9L-5.3 28.7L-5.2 30.5L-4.9 32.3L-4.7 34.2L-1.3 33.8L-1.4 32L-1.4 30.3L-1.3 28.5L-1.3 26.8L-1.2 25L-1.1 23.3L-1 21.6L-0.9 20L-0.8 18.3L-0.6 16.7L-0.5 15L-0.3 13.4L-0.2 11.8L0 10.2L0.1 8.7L0.3 7.1L0.4 5.5L0.5 4Z"
+            fill="#1A9FCB"
+          />
+          <circle cx="-3" cy="34" r="1.7" fill="#1A9FCB" />
+          <circle cx="-4.3" cy="15.8" r="0.7" fill="#fff" />
+          <circle cx="-4.3" cy="20" r="0.7" fill="#fff" />
+          <circle cx="-4.2" cy="24.1" r="0.6" fill="#fff" />
+          <circle cx="-4.1" cy="27.9" r="0.6" fill="#fff" />
+          <path
+            d="M2.6 2.8L3 4.2L3.4 5.7L3.9 7.2L4.3 8.7L4.7 10.3L5 11.8L5.4 13.4L5.7 15L6 16.6L6.3 18.2L6.6 19.8L6.8 21.5L7 23.2L7.2 24.9L7.3 26.6L7.3 28.3L7.3 30.1L7.3 31.8L10.7 32.2L10.9 30.3L11.1 28.4L11.3 26.6L11.4 24.8L11.4 23L11.4 21.2L11.4 19.4L11.3 17.7L11.2 15.9L11.1 14.2L10.9 12.5L10.7 10.8L10.6 9.2L10.3 7.6L10.1 5.9L9.9 4.4L9.7 2.8L9.4 1.2Z"
+            fill="#1A9FCB"
+          />
+          <circle cx="9" cy="32" r="1.7" fill="#1A9FCB" />
+          <circle cx="7.3" cy="14" r="0.7" fill="#fff" />
+          <circle cx="8" cy="18.2" r="0.7" fill="#fff" />
+          <circle cx="8.4" cy="22.1" r="0.6" fill="#fff" />
+          <circle cx="8.6" cy="25.8" r="0.6" fill="#fff" />
+          <path
+            d="M-0.5 4L-0.4 5.5L-0.3 7.1L-0.1 8.7L0 10.2L0.2 11.8L0.3 13.4L0.5 15L0.6 16.7L0.8 18.3L0.9 20L1 21.6L1.1 23.3L1.2 25L1.3 26.8L1.3 28.5L1.4 30.3L1.4 32L1.3 33.8L4.7 34.2L4.9 32.3L5.2 30.5L5.3 28.7L5.5 26.9L5.6 25.1L5.7 23.3L5.8 21.6L5.9 19.9L6 18.2L6 16.5L6.1 14.9L6.1 13.2L6.2 11.6L6.2 10.1L6.3 8.5L6.3 7L6.4 5.5L6.5 4Z"
+            fill="#1A9FCB"
+          />
+          <circle cx="3" cy="34" r="1.7" fill="#1A9FCB" />
+          <circle cx="2.3" cy="15.9" r="0.7" fill="#fff" />
+          <circle cx="2.5" cy="20.1" r="0.7" fill="#fff" />
+          <circle cx="2.7" cy="24.1" r="0.6" fill="#fff" />
+          <circle cx="2.7" cy="27.8" r="0.6" fill="#fff" />
+          <path
+            d="M0 -24C9 -24 15.5 -15 15.5 -6C15.5 3 8 6 0 6C-8 6 -15.5 3 -15.5 -6C-15.5 -15 -9 -24 0 -24Z"
+            fill="#1A9FCB"
+          />
+          <circle cx="-5.8" cy="-7" r="4.3" fill="#fff" />
+          <circle cx="5.8" cy="-7" r="4.3" fill="#fff" />
+          <circle cx="-6.8" cy="-8" r="2.4" fill="#1D1A3A" />
+          <circle cx="4.8" cy="-8" r="2.4" fill="#1D1A3A" />
+          <path
+            d="M-3.2 0.5Q-0.6 3 2 0.5"
+            fill="none"
+            stroke="#1D1A3A"
+            stroke-width="1.3"
+            stroke-linecap="round"
+          />
+        </g>
+      </g>
+      <g transform="translate(26.1 11.7) rotate(40) scale(0.439)">
+        <path
+          d="M-21 -4L-21 10"
+          stroke="#1D1A3A"
+          stroke-opacity="0.3"
+          stroke-width="2.6"
+          stroke-linecap="round"
+        />
+        <path
+          d="M-26 6L-26 24"
+          stroke="#1D1A3A"
+          stroke-opacity="0.3"
+          stroke-width="2.6"
+          stroke-linecap="round"
+        />
+        <path
+          d="M-17 16L-17 30"
+          stroke="#1D1A3A"
+          stroke-opacity="0.3"
+          stroke-width="2.6"
+          stroke-linecap="round"
+        />
+        <g transform="scale(0.92 1.1)">
+          <path
+            d="M-9.4 1.2L-9.7 2.8L-9.9 4.4L-10.1 5.9L-10.3 7.6L-10.6 9.2L-10.7 10.8L-10.9 12.5L-11.1 14.2L-11.2 15.9L-11.3 17.7L-11.4 19.4L-11.4 21.2L-11.4 23L-11.4 24.8L-11.3 26.6L-11.1 28.4L-10.9 30.3L-10.7 32.2L-7.3 31.8L-7.3 30.1L-7.3 28.3L-7.3 26.6L-7.2 24.9L-7 23.2L-6.8 21.5L-6.6 19.8L-6.3 18.2L-6 16.6L-5.7 15L-5.4 13.4L-5 11.8L-4.7 10.3L-4.3 8.7L-3.9 7.2L-3.4 5.7L-3 4.2L-2.6 2.8Z"
+            fill="#F26A1B"
+          />
+          <circle cx="-9" cy="32" r="1.7" fill="#F26A1B" />
+          <circle cx="-9.2" cy="13.7" r="0.7" fill="#fff" />
+          <circle cx="-9.7" cy="18" r="0.7" fill="#fff" />
+          <circle cx="-9.9" cy="22" r="0.6" fill="#fff" />
+          <circle cx="-10" cy="25.8" r="0.6" fill="#fff" />
+          <path
+            d="M-6.5 4L-6.4 5.5L-6.3 7L-6.3 8.5L-6.2 10.1L-6.2 11.6L-6.1 13.2L-6.1 14.9L-6 16.5L-6 18.2L-5.9 19.9L-5.8 21.6L-5.7 23.3L-5.6 25.1L-5.5 26.9L-5.3 28.7L-5.2 30.5L-4.9 32.3L-4.7 34.2L-1.3 33.8L-1.4 32L-1.4 30.3L-1.3 28.5L-1.3 26.8L-1.2 25L-1.1 23.3L-1 21.6L-0.9 20L-0.8 18.3L-0.6 16.7L-0.5 15L-0.3 13.4L-0.2 11.8L0 10.2L0.1 8.7L0.3 7.1L0.4 5.5L0.5 4Z"
+            fill="#F26A1B"
+          />
+          <circle cx="-3" cy="34" r="1.7" fill="#F26A1B" />
+          <circle cx="-4.3" cy="15.8" r="0.7" fill="#fff" />
+          <circle cx="-4.3" cy="20" r="0.7" fill="#fff" />
+          <circle cx="-4.2" cy="24.1" r="0.6" fill="#fff" />
+          <circle cx="-4.1" cy="27.9" r="0.6" fill="#fff" />
+          <path
+            d="M2.6 2.8L3 4.2L3.4 5.7L3.9 7.2L4.3 8.7L4.7 10.3L5 11.8L5.4 13.4L5.7 15L6 16.6L6.3 18.2L6.6 19.8L6.8 21.5L7 23.2L7.2 24.9L7.3 26.6L7.3 28.3L7.3 30.1L7.3 31.8L10.7 32.2L10.9 30.3L11.1 28.4L11.3 26.6L11.4 24.8L11.4 23L11.4 21.2L11.4 19.4L11.3 17.7L11.2 15.9L11.1 14.2L10.9 12.5L10.7 10.8L10.6 9.2L10.3 7.6L10.1 5.9L9.9 4.4L9.7 2.8L9.4 1.2Z"
+            fill="#F26A1B"
+          />
+          <circle cx="9" cy="32" r="1.7" fill="#F26A1B" />
+          <circle cx="7.3" cy="14" r="0.7" fill="#fff" />
+          <circle cx="8" cy="18.2" r="0.7" fill="#fff" />
+          <circle cx="8.4" cy="22.1" r="0.6" fill="#fff" />
+          <circle cx="8.6" cy="25.8" r="0.6" fill="#fff" />
+          <path
+            d="M-0.5 4L-0.4 5.5L-0.3 7.1L-0.1 8.7L0 10.2L0.2 11.8L0.3 13.4L0.5 15L0.6 16.7L0.8 18.3L0.9 20L1 21.6L1.1 23.3L1.2 25L1.3 26.8L1.3 28.5L1.4 30.3L1.4 32L1.3 33.8L4.7 34.2L4.9 32.3L5.2 30.5L5.3 28.7L5.5 26.9L5.6 25.1L5.7 23.3L5.8 21.6L5.9 19.9L6 18.2L6 16.5L6.1 14.9L6.1 13.2L6.2 11.6L6.2 10.1L6.3 8.5L6.3 7L6.4 5.5L6.5 4Z"
+            fill="#F26A1B"
+          />
+          <circle cx="3" cy="34" r="1.7" fill="#F26A1B" />
+          <circle cx="2.3" cy="15.9" r="0.7" fill="#fff" />
+          <circle cx="2.5" cy="20.1" r="0.7" fill="#fff" />
+          <circle cx="2.7" cy="24.1" r="0.6" fill="#fff" />
+          <circle cx="2.7" cy="27.8" r="0.6" fill="#fff" />
+          <path
+            d="M0 -24C9 -24 15.5 -15 15.5 -6C15.5 3 8 6 0 6C-8 6 -15.5 3 -15.5 -6C-15.5 -15 -9 -24 0 -24Z"
+            fill="#F26A1B"
+          />
+          <circle cx="-5.8" cy="-7" r="4.3" fill="#fff" />
+          <circle cx="5.8" cy="-7" r="4.3" fill="#fff" />
+          <circle cx="-4.8" cy="-6" r="2.4" fill="#1D1A3A" />
+          <circle cx="6.8" cy="-6" r="2.4" fill="#1D1A3A" />
+          <path
+            d="M-3.2 0.5Q-0.6 3 2 0.5"
+            fill="none"
+            stroke="#1D1A3A"
+            stroke-width="1.3"
+            stroke-linecap="round"
+          />
+        </g>
       </g>
     </svg>
     """
