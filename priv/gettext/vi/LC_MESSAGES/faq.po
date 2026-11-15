@@ -138,3 +138,7 @@ msgstr "Tên và hồ sơ của bạn"
 #, elixir-autogen, elixir-format
 msgid "Your progress on all devices"
 msgstr "Tiến độ trên mọi thiết bị"
+
+#, elixir-autogen, elixir-format
+msgid "Answers about Octomocto: is it free, how to play with a friend, public and private games, why to sign in, and how friends and follows work."
+msgstr "Giải đáp về Octomocto: có miễn phí không, cách chơi với bạn bè, ván công khai và riêng tư, vì sao nên đăng nhập, và bạn bè cùng theo dõi hoạt động thế nào."

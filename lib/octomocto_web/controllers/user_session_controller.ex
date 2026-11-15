@@ -36,6 +36,10 @@ defmodule OctomoctoWeb.UserSessionController do
   defp render_sign_in(conn, path) do
     render(conn, :new,
       page_title: gettext("Sign in"),
+      page_description:
+        gettext(
+          "Sign in to Octomocto to keep your results on all your devices, choose your name, and add friends."
+        ),
       languages: Locale.languages(:all, conn.assigns.locale, path)
     )
   end

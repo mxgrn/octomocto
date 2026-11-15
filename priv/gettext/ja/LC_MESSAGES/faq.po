@@ -138,3 +138,7 @@ msgstr "名前とプロフィール"
 #, elixir-autogen, elixir-format
 msgid "Your progress on all devices"
 msgstr "どの端末でも続きから"
+
+#, elixir-autogen, elixir-format
+msgid "Answers about Octomocto: is it free, how to play with a friend, public and private games, why to sign in, and how friends and follows work."
+msgstr "Octomoctoについての回答：無料か、友達と遊ぶ方法、公開ゲームと非公開ゲーム、ログインする理由、友達とフォローのしくみ。"

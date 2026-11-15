@@ -138,3 +138,7 @@ msgstr "Ім'я та профіль"
 #, elixir-autogen, elixir-format
 msgid "Your progress on all devices"
 msgstr "Прогрес на всіх пристроях"
+
+#, elixir-autogen, elixir-format
+msgid "Answers about Octomocto: is it free, how to play with a friend, public and private games, why to sign in, and how friends and follows work."
+msgstr "Відповіді про Octomocto: чи це безкоштовно, як грати з другом, відкриті та закриті ігри, навіщо входити і як працюють друзі та підписки."

@@ -10,6 +10,7 @@ defmodule OctomoctoWeb.UserSettingsController do
   plug :assign_email_form
   plug :assign_profile_form
   plug OctomoctoWeb.SiteBanners when action in [:edit, :update]
+  plug :put_seo when action in [:edit]
 
   def edit(%{assigns: %{current_scope: nil}} = conn, _params) do
     render(conn, :guest)
@@ -121,5 +122,13 @@ defmodule OctomoctoWeb.UserSettingsController do
   defp assign_email_form(conn, _opts) do
     user = conn.assigns.current_scope.user
     assign(conn, :email_form, to_form(Accounts.change_user_email(user)))
+  end
+
+  defp put_seo(conn, _opts) do
+    merge_assigns(conn,
+      page_title: "Settings",
+      page_description:
+        "Change your name, email and Telegram connection on Octomocto, and keep your results on all your devices."
+    )
   end
 end

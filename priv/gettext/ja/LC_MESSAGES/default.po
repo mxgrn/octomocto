@@ -360,3 +360,11 @@ msgstr "SMSはいらない"
 #, elixir-autogen, elixir-format
 msgid "Telegram sends no code. You only confirm the sign-in in the Telegram app, on a device where you are already signed in."
 msgstr "Telegramからコードは届かない。すでにTelegramを使っている端末のアプリで、ログインを確認するだけ。"
+
+#, elixir-autogen, elixir-format
+msgid "Octomocto is free and has no ads. Support the indie developer on Patreon to pay for the servers and new games."
+msgstr "Octomoctoは無料で、広告もありません。Patreonで個人開発者を応援して、サーバー代と新しいゲームの開発を支えてください。"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to Octomocto to keep your results on all your devices, choose your name, and add friends."
+msgstr "Octomoctoにログインすると、すべてのデバイスで結果を保存し、名前を選び、友達を追加できます。"
