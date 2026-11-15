@@ -158,3 +158,7 @@ msgstr "Bir oyunu bitirdiğinde son oyunların burada görünür."
 #, elixir-autogen, elixir-format
 msgid "to see your recent games here."
 msgstr "son oyunlarını burada görmek için."
+
+#, elixir-autogen, elixir-format
+msgid "Follow the leader octopus from cave to cave, some jets behind it. The better you follow, the further behind you jet (yes, that’s the reward)."
+msgstr "Lider ahtapotu mağaradan mağaraya, birkaç hamle geriden takip et. Ne kadar iyi takip edersen o kadar geride kalırsın (evet, ödül bu)."

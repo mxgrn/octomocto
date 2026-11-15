@@ -158,3 +158,7 @@ msgstr "I tuoi giochi recenti compaiono qui quando finisci una partita."
 #, elixir-autogen, elixir-format
 msgid "to see your recent games here."
 msgstr "per vedere qui i tuoi giochi recenti."
+
+#, elixir-autogen, elixir-format
+msgid "Follow the leader octopus from cave to cave, some jets behind it. The better you follow, the further behind you jet (yes, that’s the reward)."
+msgstr "Segui il polpo capofila di grotta in grotta, qualche scatto dietro di lui. Più lo segui bene, più resti indietro (sì, è questo il premio)."

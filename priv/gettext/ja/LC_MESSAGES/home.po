@@ -158,3 +158,7 @@ msgstr "ゲームを最後まで遊ぶと、最近のゲームがここに表示
 #, elixir-autogen, elixir-format
 msgid "to see your recent games here."
 msgstr "すると、最近遊んだゲームがここに表示されるよ。"
+
+#, elixir-autogen, elixir-format
+msgid "Follow the leader octopus from cave to cave, some jets behind it. The better you follow, the further behind you jet (yes, that’s the reward)."
+msgstr "リーダーのタコを追って、ほら穴からほら穴へ。何回か遅れてついていこう。うまくついていくほど、もっと遅れる（そう、それがごほうび）。"
