@@ -517,7 +517,9 @@ update msg model =
         GotState value ->
             case ( model.connection, Decode.decodeValue gameDecoder value ) of
                 ( Joined me _, Ok game ) ->
-                    ( withSea (sync game { model | connection = Joined me game }), syncClock game )
+                    ( withSea (sync game { model | connection = Joined me game })
+                    , Cmd.batch [ syncClock game, playSounds model (syncSounds game model) ]
+                    )
 
                 _ ->
                     ( model, Cmd.none )
@@ -613,6 +615,18 @@ sync game model =
                                 , leaderAt = leaderAt
                                 , miss = miss
                                 , ghost = ghost
+                                , hit =
+                                    if game.correct > trail.correct then
+                                        Just ( caveAt server game.follower, model.now )
+
+                                    else
+                                        trail.hit
+                                , grewAt =
+                                    if grew game trail then
+                                        Just model.now
+
+                                    else
+                                        trail.grewAt
                                 , leaderPast = past.leaderPast
                                 , followerPast =
                                     [ { from = caveAt trail trail.follower
@@ -660,6 +674,41 @@ sync game model =
 
         Nothing ->
             model
+
+
+{-| The sounds of the taps that came from the server (see `sync`), as
+`tap` plays them: for a watcher, or another browser of the player
+-}
+syncSounds : Game -> Model -> List String
+syncSounds game model =
+    case model.trail of
+        Just trail ->
+            if trail.field == game.field && game.follower > trail.follower then
+                List.filterMap
+                    (\( play, name ) ->
+                        if play then
+                            Just name
+
+                        else
+                            Nothing
+                    )
+                    [ ( game.correct > trail.correct, "follow" )
+                    , ( game.wrong > trail.wrong, "wrong" )
+                    , ( grew game trail && not game.finished, "grow" )
+                    ]
+
+            else
+                []
+
+        Nothing ->
+            []
+
+
+{-| The distance of the game from the server is larger than on the page
+-}
+grew : Game -> Trail -> Bool
+grew game trail =
+    game.leader - game.follower > distance trail
 
 
 {-| Keeps the last jets of the leader that started, before the page
