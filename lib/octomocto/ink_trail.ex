@@ -22,11 +22,13 @@ defmodule Octomocto.InkTrail do
 
   @doc """
   Starts a new game and returns its id. The `config` has
-  `:start_distance`, the distance at the start.
+  `:start_distance`, the distance at the start, and `:public`. Other
+  players can watch a public game from the lists of public games (see
+  `Octomocto.Lobby`).
   """
-  def create_game(config) do
+  def create_game(%{public: public} = config) when is_boolean(public) do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
-    config = Map.merge(config, %{players: 1, public: false})
+    config = Map.put(config, :players, 1)
 
     {:ok, _pid} =
       DynamicSupervisor.start_child(Octomocto.InkTrail.GameSupervisor, {Game, {id, config}})

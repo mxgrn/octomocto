@@ -19,6 +19,7 @@ defmodule OctomoctoWeb.HomeLive do
     EchoLive,
     GameIcons,
     GrazeLive,
+    InkTrailLive,
     MahjongLive,
     MemoryLive,
     OverlapLive,
@@ -273,7 +274,9 @@ defmodule OctomoctoWeb.HomeLive do
     "overlap" => {Octomocto.Overlap.Game, Octomocto.Overlap.Store, OverlapLive},
     "schulte" => {Octomocto.Schulte.Game, Octomocto.Schulte.TableStore, SchulteLive},
     "graze" => {Octomocto.Graze.Game, Octomocto.Graze.Store, GrazeLive},
-    # Only the games with turns: the single-player games are never in the lists
+    # Others can only watch these single-player games
+    "ink-trail" => {Octomocto.InkTrail.Game, Octomocto.InkTrail.Store, InkTrailLive},
+    # Only the games with turns: the solo games of Afterglow are never in the lists
     "afterglow" => {Octomocto.Afterglow.TurnGame, Octomocto.Afterglow.TurnStore, AfterglowLive}
   }
 

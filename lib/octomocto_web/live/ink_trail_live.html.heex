@@ -49,6 +49,27 @@
         </div>
       </div>
 
+      <.setting
+        id="setting-visibility"
+        label="Visibility"
+        icon="hero-eye"
+        hint={visibility_hint(@settings)}
+      >
+        <.option
+          :for={
+            {value, public, label} <- [
+              {"public", true, "Public"},
+              {"private", false, "Private"}
+            ]
+          }
+          id={"visibility-#{value}"}
+          selected={@settings.public == public}
+          patch={~p"/ink-trail?#{query(@settings, public: public)}"}
+        >
+          {label}
+        </.option>
+      </.setting>
+
       <.start_bar multiplayer={false} />
     </div>
 
@@ -56,6 +77,16 @@
       id="ink-trail-leaderboard"
       class="mx-auto grid w-full max-w-md lg:max-w-none gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 xl:col-start-3"
     >
+      <%!-- Other players can only watch these games --%>
+      <.lobby_games
+        games={@lobby_games}
+        watchers={@watchers}
+        path={&~p"/ink-trail/#{&1.id}"}
+      >
+        <:icon>
+          <.lobby_icon />
+        </:icon>
+      </.lobby_games>
       <.score_list
         id="your-results"
         icon="hero-user"

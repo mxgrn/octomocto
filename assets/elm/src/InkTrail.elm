@@ -65,6 +65,12 @@ port inkTrailState : (Decode.Value -> msg) -> Sub msg
 port inkTrailJoinFailed : (String -> msg) -> Sub msg
 
 
+{-| The number of browsers that only watch the game, after the join and
+after each change.
+-}
+port inkTrailWatchers : (Int -> msg) -> Sub msg
+
+
 port inkTrailPlaySound : String -> Cmd msg
 
 
@@ -203,6 +209,7 @@ type alias Model =
     -- ghost sound played
     , ghostCue : Maybe ( Int, Int )
     , muted : Bool
+    , watchers : Int
     }
 
 
@@ -230,6 +237,7 @@ init flags =
       , jetCue = Nothing
       , ghostCue = Nothing
       , muted = flags.muted
+      , watchers = 0
       }
     , Cmd.none
     )
@@ -483,6 +491,7 @@ type Msg
     = GotJoined Decode.Value
     | GotState Decode.Value
     | GotJoinFailed String
+    | GotWatchers Int
     | Tap Int
     | Restart
     | SyncClock Int Time.Posix
@@ -512,6 +521,9 @@ update msg model =
 
         GotJoinFailed reason ->
             ( { model | connection = Failed reason }, Cmd.none )
+
+        GotWatchers count ->
+            ( { model | watchers = count }, Cmd.none )
 
         Tap cave ->
             case ( model.connection, model.trail ) of
@@ -1184,6 +1196,7 @@ subscriptions model =
         [ inkTrailJoined GotJoined
         , inkTrailState GotState
         , inkTrailJoinFailed GotJoinFailed
+        , inkTrailWatchers GotWatchers
         , Browser.Events.onResize (\width _ -> Resized width)
         , case model.connection of
             Joined _ game ->
@@ -1238,16 +1251,7 @@ viewHeader model me =
             ]
         , h1 [ class "text-xl font-semibold tracking-tight lg:text-2xl" ]
             [ a [ id "ink-trail-title-link", href model.settingsUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Ink Trail" ] ]
-        , if me == Nothing then
-            span
-                [ id "ink-trail-watching"
-                , class "flex shrink-0 items-center text-octo-indigo dark:text-octo-indigo-light"
-                , Html.Attributes.title "You are watching this game."
-                ]
-                [ span [ class "hero-eye size-4" ] [] ]
-
-          else
-            text ""
+        , viewWatchers (me == Nothing) model.watchers
         , viewMuteButton model.muted
         , if me == Nothing then
             text ""
@@ -1263,6 +1267,33 @@ viewHeader model me =
                 , span [ class "max-sm:hidden" ] [ text "Restart" ]
                 ]
         ]
+
+
+{-| The eye with the number of watchers, when there are watchers. A
+watcher sees it in the accent color.
+-}
+viewWatchers : Bool -> Int -> Html Msg
+viewWatchers watching count =
+    if watching || count > 0 then
+        span
+            [ id "ink-trail-watchers"
+            , class "flex shrink-0 items-center gap-1 text-sm tabular-nums transition-colors"
+            , classList
+                [ ( "text-slate-500 dark:text-slate-400", not watching )
+                , ( "font-medium text-octo-indigo dark:text-octo-indigo-light", watching )
+                ]
+            , Html.Attributes.title
+                (if watching then
+                    "You are watching this game."
+
+                 else
+                    "Watchers: " ++ String.fromInt count
+                )
+            ]
+            [ span [ class "hero-eye size-4" ] [], text (String.fromInt (max count 1)) ]
+
+    else
+        text ""
 
 
 viewMuteButton : Bool -> Html Msg

@@ -7,10 +7,10 @@ defmodule OctomoctoWeb.InkTrailController do
   plug :put_seo
 
   def show(conn, %{"id" => id}) do
-    if Store.read(id) do
+    if state = Store.read(id) do
       render(conn, :show,
         id: id,
-        settings_path: ~p"/ink-trail",
+        settings_path: InkTrailLive.settings_path(state),
         user_token: user_token(conn.assigns.current_scope),
         # The end screen invites the player to try this game
         next_game: NextGame.pick("ink-trail", id, false),
