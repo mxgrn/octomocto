@@ -41,6 +41,7 @@ defmodule OctomoctoWeb.MatchPageTest do
     Echo.press(id, second, 3)
 
     {:ok, view, _html} = live_match(conn, ~p"/echo?match=#{id}", "echo player", id, second)
+    refute has_element?(view, "#more-games")
 
     view |> element("#pads-6") |> render_click()
     {:error, {:redirect, %{to: to}}} = view |> element("#new-game") |> render_click()

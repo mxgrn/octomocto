@@ -368,3 +368,7 @@ msgstr "Octomocto miễn phí và không có quảng cáo. Ủng hộ nhà phát
 #, elixir-autogen, elixir-format
 msgid "Sign in to Octomocto to keep your results on all your devices, choose your name, and add friends."
 msgstr "Đăng nhập Octomocto để giữ kết quả trên mọi thiết bị, chọn tên và thêm bạn bè."
+
+#, elixir-autogen, elixir-format
+msgid "More games that train your memory"
+msgstr "Thêm trò chơi rèn luyện trí nhớ"

@@ -256,7 +256,23 @@
           <.result_pill>{result.score}</.result_pill>
         </.result_row>
       </.score_list>
+      <.memory_games
+        :if={!@match}
+        id="more-games"
+        game="afterglow"
+        locale={@locale}
+        class="xl:hidden"
+      />
     </div>
+
+    <%!-- The left column is empty on an extra large screen. On a smaller screen, the games are under the results. --%>
+    <.memory_games
+      :if={!@match}
+      id="more-games-side"
+      game="afterglow"
+      locale={@locale}
+      class="hidden xl:col-start-1 xl:row-span-2 xl:row-start-1 xl:block xl:self-start"
+    />
   </div>
 
   <.rules rules={@rules} />

@@ -8,15 +8,12 @@
   guest_public_id={@guest_public_id}
   guest_unread_notifications={@guest_unread_notifications}
 >
-  <%!--
-    One column on a small screen: the title, the settings and the results.
-    Two columns on a large screen: the results go to the right.
-  --%>
+  <%!-- The same columns as on the Memory page --%>
   <div
     id="snap-index"
-    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[min(calc(100vw-4rem),80rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[calc(100vw-4rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] xl:grid-rows-[auto_1fr]"
   >
-    <div class="mx-auto w-full max-w-md lg:max-w-none space-y-2 text-center lg:col-start-1 lg:row-start-1">
+    <div class="mx-auto w-full max-w-md lg:max-w-none space-y-2 text-center lg:col-start-1 lg:row-start-1 xl:col-start-2">
       <div class="flex items-center justify-center gap-3">
         <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
           <OctomoctoWeb.GameIcons.game_icon game="snap" class="size-9" />
@@ -30,7 +27,7 @@
       <.how_to_play />
     </div>
 
-    <div class="mx-auto flex w-full max-w-md lg:max-w-none flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-2">
+    <div class="mx-auto flex w-full max-w-md lg:max-w-none flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-2 xl:col-start-2 xl:row-start-2">
       <div id="snap-settings" class="flex w-full flex-col gap-4">
         <.setting
           id="setting-cards-back"
@@ -54,7 +51,7 @@
 
     <div
       id="snap-leaderboard"
-      class="mx-auto grid w-full max-w-md lg:max-w-none gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1"
+      class="mx-auto grid w-full max-w-md lg:max-w-none gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 xl:col-start-3"
     >
       <.score_list
         id="your-results"
@@ -130,7 +127,16 @@
           <.result_pill>{result.score}</.result_pill>
         </.result_row>
       </.score_list>
+      <.memory_games id="more-games" game="snap" locale={@locale} class="xl:hidden" />
     </div>
+
+    <%!-- The left column is empty on an extra large screen. On a smaller screen, the games are under the results. --%>
+    <.memory_games
+      id="more-games-side"
+      game="snap"
+      locale={@locale}
+      class="hidden xl:col-start-1 xl:row-span-2 xl:row-start-1 xl:block xl:self-start"
+    />
   </div>
 
   <.rules rules={@rules} />

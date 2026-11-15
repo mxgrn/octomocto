@@ -223,7 +223,8 @@ defmodule OctomoctoWeb.HomeLive do
   defp badge_label("New"), do: "New"
   defp badge_label(label), do: Gettext.dgettext(OctomoctoWeb.Gettext, "home", label)
 
-  defp game_description(game),
+  @doc "The description of the game in the language of the process."
+  def game_description(game),
     do: Gettext.dgettext(OctomoctoWeb.Gettext, "home", game.description)
 
   @doc """

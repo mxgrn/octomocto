@@ -48,4 +48,20 @@ defmodule OctomoctoWeb.GamePageComponentsTest do
                ["/memory/abc?from=lobby"]
     end
   end
+
+  describe "memory_games/1" do
+    test "links to the other memory games" do
+      html =
+        render_component(&GamePageComponents.memory_games/1,
+          id: "more-games",
+          game: "afterglow",
+          locale: "en"
+        )
+
+      assert html
+             |> LazyHTML.from_fragment()
+             |> LazyHTML.query("#more-games a")
+             |> LazyHTML.attribute("href") == ["/memory", "/echo", "/snap"]
+    end
+  end
 end

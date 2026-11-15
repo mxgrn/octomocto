@@ -370,3 +370,7 @@ msgstr "Octomocto est gratuit et sans publicité. Soutiens le développeur indé
 #, elixir-autogen, elixir-format
 msgid "Sign in to Octomocto to keep your results on all your devices, choose your name, and add friends."
 msgstr "Connecte-toi à Octomocto pour garder tes résultats sur tous tes appareils, choisir ton nom et ajouter des amis."
+
+#, elixir-autogen, elixir-format
+msgid "More games that train your memory"
+msgstr "Plus de jeux pour entraîner ta mémoire"

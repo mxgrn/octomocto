@@ -12,4 +12,11 @@ defmodule OctomoctoWeb.EchoLiveTest do
       assert has_element?(view, ~s|a[href="/#{unquote(locale)}"]|)
     end
   end
+
+  test "the page links to the other memory games", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/echo")
+
+    assert has_element?(view, ~s|#more-games a[href="/memory"]|)
+    refute has_element?(view, ~s|#more-games a[href="/echo"]|)
+  end
 end

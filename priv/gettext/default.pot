@@ -370,3 +370,7 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Sign in to Octomocto to keep your results on all your devices, choose your name, and add friends."
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "More games that train your memory"
+msgstr ""

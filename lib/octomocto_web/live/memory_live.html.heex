@@ -147,6 +147,13 @@
             </.result_pill>
           </.result_row>
         </.score_list>
+        <.memory_games
+          :if={!@match}
+          id="more-games"
+          game="memory"
+          locale={@locale}
+          class="xl:hidden"
+        />
       </div>
     <% else %>
       <div
@@ -447,8 +454,24 @@
             <.result_pill>{format_time(result.elapsed_ms)}</.result_pill>
           </.result_row>
         </.score_list>
+        <.memory_games
+          :if={!@match}
+          id="more-games"
+          game="memory"
+          locale={@locale}
+          class="xl:hidden"
+        />
       </div>
     <% end %>
+
+    <%!-- The left column is empty on an extra large screen. On a smaller screen, the games are under the results. --%>
+    <.memory_games
+      :if={!@match}
+      id="more-games-side"
+      game="memory"
+      locale={@locale}
+      class="hidden xl:col-start-1 xl:row-span-2 xl:row-start-1 xl:block xl:self-start"
+    />
   </div>
 
   <.rules rules={@rules} />

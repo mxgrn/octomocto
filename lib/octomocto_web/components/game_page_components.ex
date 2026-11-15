@@ -11,6 +11,7 @@ defmodule OctomoctoWeb.GamePageComponents do
   import OctomoctoWeb.CoreComponents, only: [icon: 1, show: 2, hide: 1, player_link: 1]
   import OctomoctoWeb.SettingsComponents, only: [option: 1, option_slider: 1]
 
+  alias OctomoctoWeb.{GameIcons, HomeLive, Locale}
   alias Phoenix.LiveView.JS
 
   attr :tab, :atom, required: true, doc: ":free, :campaign or :lobby"
@@ -402,6 +403,68 @@ defmodule OctomoctoWeb.GamePageComponents do
         </div>
       </div>
     </div>
+    """
+  end
+
+  attr :id, :string, required: true
+
+  attr :game, :string,
+    required: true,
+    doc: "the id of the game of the page, in `HomeLive.games/0`"
+
+  attr :locale, :string, required: true
+  attr :class, :any, default: nil
+
+  @doc """
+  The links to the other games with the "memory" tag, on the pages of the
+  memory games.
+  """
+  def memory_games(assigns) do
+    assigns =
+      assign(assigns,
+        games: Enum.filter(HomeLive.games(), &("memory" in &1.tags and &1.id != assigns.game))
+      )
+
+    ~H"""
+    <section
+      id={@id}
+      class={[
+        "min-w-0 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100",
+        @class
+      ]}
+    >
+      <h2 class="mb-3 flex items-center gap-2 font-semibold">
+        <.icon name="hero-sparkles" class="size-4 shrink-0 text-octo-indigo" />
+        {gettext("More games that train your memory")}
+      </h2>
+      <ul class="-mx-2 space-y-1">
+        <li :for={game <- @games}>
+          <.link
+            navigate={Locale.game_path(@locale, game)}
+            class="group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-base-200/60"
+          >
+            <span class={[
+              "flex size-9 shrink-0 items-center justify-center rounded-xl",
+              game.icon_class
+            ]}>
+              <GameIcons.game_icon game={game.id} class="size-7" />
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm font-medium transition-colors group-hover:text-octo-indigo">
+                {HomeLive.game_name(game)}
+              </span>
+              <span class="block truncate text-xs text-base-content/60">
+                {HomeLive.game_description(game)}
+              </span>
+            </span>
+            <.icon
+              name="hero-chevron-right-mini"
+              class="size-4 shrink-0 text-base-content/30 transition-colors group-hover:text-octo-indigo rtl:rotate-180"
+            />
+          </.link>
+        </li>
+      </ul>
+    </section>
     """
   end
 
