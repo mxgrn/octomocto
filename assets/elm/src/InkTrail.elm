@@ -182,6 +182,7 @@ type alias Model =
     -- A phone screen has a taller sea, with another place for each cave
     -- (see the CSS of `.ink-trail-sea`)
     , narrow : Bool
+    , sea : Sea
 
     -- The local time (in ms) when the game of the server started, and the
     -- local time now
@@ -214,6 +215,7 @@ init flags =
       , connection = Connecting
       , trail = Nothing
       , narrow = flags.narrow
+      , sea = seaFor flags.narrow ""
       , clockStart = 0
       , now = 0
       , beepedStep = Nothing
@@ -306,42 +308,127 @@ seaHeight narrow =
         300
 
 
-{-| Where the caves are in the sea: the middle of the bottom of each cave,
-in units. A wide sea has 3 rows of 4 caves, and a phone has 4 rows of 3.
+{-| The places of the caves of a game: the middle of the bottom of each
+cave, in units. Each game has its own random places, which come from its
+field, so that a reload and a watcher see the same sea.
 -}
-caves : Bool -> Array ( Float, Float )
-caves narrow =
+type alias Sea =
+    { narrow : Bool
+    , field : String
+    , caves : Array ( Float, Float )
+    }
+
+
+seaFor : Bool -> String -> Sea
+seaFor narrow field =
+    { narrow = narrow
+    , field = field
+    , caves = caves narrow (String.foldl (\c hash -> modBy 1000003 (hash * 31 + Char.toCode c)) 7 field)
+    }
+
+
+{-| Gives the sea of the game on the page, when the game or the size of
+the screen changes
+-}
+withSea : Model -> Model
+withSea model =
+    case model.connection of
+        Joined _ game ->
+            if model.sea.field == game.field && model.sea.narrow == model.narrow then
+                model
+
+            else
+                { model | sea = seaFor model.narrow game.field }
+
+        _ ->
+            model
+
+
+{-| Random places for the caves. Each cave takes the best of many random
+places: the place that is the farthest from the caves before it. A cave can
+be in front of a higher cave, but not over its entrance. If the caves are
+too near each other, it tries other random places, and at last it uses
+fixed rows.
+-}
+caves : Bool -> Int -> Array ( Float, Float )
+caves narrow seed =
+    let
+        attempt n =
+            if n >= 12 then
+                Array.fromList (fixedCaves narrow)
+
+            else
+                let
+                    places =
+                        scatter (seaHeight narrow) (seed + n * 7919)
+                in
+                if nearest places >= 1 then
+                    Array.fromList places
+
+                else
+                    attempt (n + 1)
+    in
+    attempt 0
+
+
+scatter : Float -> Int -> List ( Float, Float )
+scatter height seed =
+    let
+        candidate i k =
+            ( 42 + 316 * random seed (i * 200 + 2 * k)
+            , 54 + (height - 62) * random seed (i * 200 + 2 * k + 1)
+            )
+
+        place i placed =
+            let
+                score p =
+                    List.map (caveGap p) placed |> List.minimum |> Maybe.withDefault 0
+            in
+            List.range 0 99
+                |> List.map (candidate i)
+                |> List.foldl
+                    (\p best ->
+                        if score p > score best then
+                            p
+
+                        else
+                            best
+                    )
+                    (candidate i 0)
+                |> (\p -> placed ++ [ p ])
+    in
+    List.foldl place [] (List.range 0 (caveCount - 1))
+
+
+{-| How far apart two caves are: 1 or more when they do not touch. A cave
+is about 80 units wide, and a lower cave must be 48 units lower to show the
+entrance of the cave behind it.
+-}
+caveGap : ( Float, Float ) -> ( Float, Float ) -> Float
+caveGap ( x1, y1 ) ( x2, y2 ) =
+    max (abs (x1 - x2) / 82) (abs (y1 - y2) / 48)
+
+
+nearest : List ( Float, Float ) -> Float
+nearest places =
+    case places of
+        p :: rest ->
+            min (List.map (caveGap p) rest |> List.minimum |> Maybe.withDefault 2) (nearest rest)
+
+        [] ->
+            2
+
+
+{-| Fixed places, in rows: a wide sea has 3 rows of 4 caves, and a phone
+has 4 rows of 3
+-}
+fixedCaves : Bool -> List ( Float, Float )
+fixedCaves narrow =
     if narrow then
-        Array.fromList
-            [ ( 68, 102 )
-            , ( 198, 96 )
-            , ( 330, 104 )
-            , ( 82, 222 )
-            , ( 210, 216 )
-            , ( 338, 226 )
-            , ( 66, 344 )
-            , ( 196, 338 )
-            , ( 326, 348 )
-            , ( 84, 466 )
-            , ( 212, 460 )
-            , ( 338, 468 )
-            ]
+        [ ( 68, 102 ), ( 198, 96 ), ( 330, 104 ), ( 82, 222 ), ( 210, 216 ), ( 338, 226 ), ( 66, 344 ), ( 196, 338 ), ( 326, 348 ), ( 84, 466 ), ( 212, 460 ), ( 338, 468 ) ]
 
     else
-        Array.fromList
-            [ ( 46, 92 )
-            , ( 144, 84 )
-            , ( 242, 94 )
-            , ( 340, 86 )
-            , ( 72, 188 )
-            , ( 170, 180 )
-            , ( 266, 190 )
-            , ( 360, 182 )
-            , ( 46, 284 )
-            , ( 144, 278 )
-            , ( 242, 286 )
-            , ( 340, 280 )
-            ]
+        [ ( 46, 92 ), ( 144, 84 ), ( 242, 94 ), ( 340, 86 ), ( 72, 188 ), ( 170, 180 ), ( 266, 190 ), ( 360, 182 ), ( 46, 284 ), ( 144, 278 ), ( 242, 286 ), ( 340, 280 ) ]
 
 
 caveCount : Int
@@ -349,19 +436,19 @@ caveCount =
     12
 
 
-caveBase : Bool -> Int -> ( Float, Float )
-caveBase narrow cave =
-    Array.get cave (caves narrow) |> Maybe.withDefault ( 200, 150 )
+caveBase : Sea -> Int -> ( Float, Float )
+caveBase sea cave =
+    Array.get cave sea.caves |> Maybe.withDefault ( 200, 150 )
 
 
 {-| Where an octopus is when it sits at the cave: in the entrance, a bit
 above the sand
 -}
-home : Bool -> Int -> ( Float, Float )
-home narrow cave =
+home : Sea -> Int -> ( Float, Float )
+home sea cave =
     let
         ( x, y ) =
-            caveBase narrow cave
+            caveBase sea cave
     in
     ( x, y - 11 )
 
@@ -388,7 +475,7 @@ update msg model =
         GotJoined value ->
             case Decode.decodeValue joinedDecoder value of
                 Ok ( me, game ) ->
-                    ( sync game { model | connection = Joined me game }, syncClock game )
+                    ( withSea (sync game { model | connection = Joined me game }), syncClock game )
 
                 Err err ->
                     ( { model | connection = Failed (Decode.errorToString err) }, Cmd.none )
@@ -396,7 +483,7 @@ update msg model =
         GotState value ->
             case ( model.connection, Decode.decodeValue gameDecoder value ) of
                 ( Joined me _, Ok game ) ->
-                    ( sync game { model | connection = Joined me game }, syncClock game )
+                    ( withSea (sync game { model | connection = Joined me game }), syncClock game )
 
                 _ ->
                     ( model, Cmd.none )
@@ -434,7 +521,7 @@ update msg model =
 
         -- The same width as the `40rem` of the CSS
         Resized width ->
-            ( { model | narrow = width <= 640 }, Cmd.none )
+            ( withSea { model | narrow = width <= 640 }, Cmd.none )
 
 
 serverScore : Game -> Int
@@ -1207,11 +1294,11 @@ viewBoard model watching game =
             (case model.trail of
                 Just trail ->
                     [ viewCaves model watching (current /= Over) trail
-                    , viewSwimmers model.narrow model.now trail
+                    , viewSwimmers model.sea model.now trail
                     ]
 
                 Nothing ->
-                    [ Html.Lazy.lazy6 viewCaveButtons model.narrow False -1 -1 -1 -1 ]
+                    [ Html.Lazy.lazy6 viewCaveButtons model.sea False -1 -1 -1 -1 ]
             )
         , case current of
             Countdown ->
@@ -1294,7 +1381,7 @@ viewCaves model watching active trail =
                 -1
     in
     Html.Lazy.lazy6 viewCaveButtons
-        model.narrow
+        model.sea
         (active && not watching && canTap now trail)
         (recent trail.hit 400)
         missed
@@ -1306,16 +1393,16 @@ viewCaves model watching active trail =
 cave covers the cave above it. The last argument only tells Html.Lazy when
 the path grows.
 -}
-viewCaveButtons : Bool -> Bool -> Int -> Int -> Int -> Int -> Html Msg
-viewCaveButtons narrow open hit missed answer _ =
+viewCaveButtons : Sea -> Bool -> Int -> Int -> Int -> Int -> Html Msg
+viewCaveButtons sea open hit missed answer _ =
     let
         height =
-            seaHeight narrow
+            seaHeight sea.narrow
 
         cave i =
             let
                 ( x, y ) =
-                    caveBase narrow i
+                    caveBase sea i
             in
             ( String.fromInt i
             , button
@@ -1333,29 +1420,68 @@ viewCaveButtons narrow open hit missed answer _ =
                 , Press.onPress (Tap i)
                 , Press.onKeyClick (Tap i)
                 ]
-                [ viewCaveArt (modBy 2 (i + i // 4) == 1) ]
+                [ viewCaveArt i ]
             )
 
         rows =
             List.range 0 (caveCount - 1)
-                |> List.sortBy (\i -> Tuple.second (caveBase narrow i))
+                |> List.sortBy (\i -> Tuple.second (caveBase sea i))
     in
     Html.Keyed.node "div" [ class "contents" ] (List.map cave rows)
 
 
-{-| A cave seen from the side: a high round rock with a dark arched
-entrance, on a patch of sand. The bottom of the cave is at the point 0 0.
-Some caves are flipped, so that they do not all look the same.
+{-| A cave seen from the side: a low arch of big rocks around a dark
+entrance, with a soft shadow on the sand. The light comes from the top left.
+The bottom of the cave is at the point 0 0. Some caves are flipped, so that
+they do not all look the same, and each third cave has seaweed that sways
+and bubbles that rise.
 -}
-viewCaveArt : Bool -> Html Msg
-viewCaveArt flip =
+viewCaveArt : Int -> Html Msg
+viewCaveArt cave =
+    let
+        flip =
+            modBy 2 (cave + cave // 4) == 1
+
+        -- The seaweed and the bubbles of the caves do not move together
+        delay extra =
+            SA.style ("animation-delay: " ++ String.fromFloat (-0.9 * toFloat cave - extra) ++ "s")
+
+        weed d extra =
+            Svg.g [ SA.class "ink-trail-weed", delay extra ]
+                [ Svg.path [ SA.d d, SA.class "ink-trail-weed-edge" ] []
+                , Svg.path [ SA.d d, SA.class "ink-trail-weed-leaf" ] []
+                ]
+
+        bubble ( x, y, r ) extra =
+            Svg.circle [ SA.cx x, SA.cy y, SA.r r, SA.class "ink-trail-bubble", delay extra ] []
+
+        life =
+            if modBy 3 cave == 0 then
+                [ weed "M-43.6 0C-45.5 -3 -41.8 -6 -43.6 -9C-45.2 -12 -42.5 -13 -43.6 -14.5" 0
+                , weed "M38.6 0C36.6 -5 40.6 -9 38.6 -14C36.8 -19 40.4 -23 38.6 -28C37.2 -32 39.8 -34 38.6 -36.7" 0.7
+                , weed "M42.9 0C41 -4 44.6 -8 42.9 -12C41.4 -15 44 -16.5 42.9 -18" 1.3
+                , bubble ( "36.6", "-40.7", "1.4" ) 0
+                , bubble ( "39.1", "-45.6", "1" ) 1
+                , bubble ( "37.1", "-49.6", "0.7" ) 2
+                ]
+
+            else
+                []
+
+        boulder b =
+            Svg.g []
+                [ Svg.path [ SA.d b.outline, SA.class "ink-trail-rock" ] []
+                , Svg.path [ SA.d b.light, SA.class "ink-trail-rock-light" ] []
+                , Svg.path [ SA.d b.shade, SA.class "ink-trail-rock-shade" ] []
+                , Svg.path [ SA.d b.outline, SA.class "ink-trail-rock-edge" ] []
+                ]
+    in
     svg
-        [ SA.viewBox "-44 -72 88 84"
+        [ SA.viewBox "-46 -54 92 58"
         , SA.class "ink-trail-cave-art"
         , attribute "aria-hidden" "true"
         ]
-        [ Svg.path [ SA.d "M-38 3Q-22 -4 -2 -1Q18 -5 38 3Q0 10 -38 3Z", SA.class "ink-trail-sand" ] []
-        , Svg.g
+        [ Svg.g
             [ SA.transform
                 (if flip then
                     "scale(-1 1)"
@@ -1364,82 +1490,98 @@ viewCaveArt flip =
                     ""
                 )
             ]
-            [ Svg.path [ SA.d rockPath, SA.class "ink-trail-rock" ] []
-            , Svg.path [ SA.d "M-23 -24Q-23 -42 -12 -50", SA.class "ink-trail-rock-light" ] []
-            , Svg.path [ SA.d entrancePath, SA.class "ink-trail-entrance" ] []
-            , Svg.path [ SA.d entrancePath, SA.class "ink-trail-answer" ] []
-            ]
-        , Svg.path [ SA.d "M-36 3Q-20 -2 -2 0Q18 -3 36 3", SA.class "ink-trail-sand-line" ] []
+            ([ Svg.ellipse [ SA.cx "0", SA.cy "0.4", SA.rx "38", SA.ry "1.8", SA.class "ink-trail-sand-shadow" ] []
+             , Svg.path [ SA.d caveBack, SA.class "ink-trail-rock-shade" ] []
+             , Svg.path [ SA.d caveBack, SA.class "ink-trail-rock-edge" ] []
+             , Svg.path [ SA.d caveHole, SA.class "ink-trail-entrance" ] []
+             , Svg.path [ SA.d caveMound, SA.class "ink-trail-entrance-back" ] []
+             ]
+                ++ List.map boulder caveBoulders
+                ++ [ Svg.path [ SA.d caveCracks, SA.class "ink-trail-crack" ] []
+                   , Svg.ellipse [ SA.cx "-39", SA.cy "-0.7", SA.rx "2.9", SA.ry "1.4", SA.class "ink-trail-pebble" ] []
+                   , Svg.ellipse [ SA.cx "35.4", SA.cy "-0.4", SA.rx "1.7", SA.ry "1", SA.class "ink-trail-pebble" ] []
+                   ]
+                ++ life
+                ++ [ Svg.path [ SA.d caveHole, SA.class "ink-trail-answer" ] [] ]
+            )
         ]
 
 
-rockPath : String
-rockPath =
-    smoothPath
-        [ ( -26, 0 )
-        , ( -27.8, -8.4 )
-        , ( -28.7, -23.6 )
-        , ( -26.9, -39.6 )
-        , ( -21.4, -50.2 )
-        , ( -14.1, -54.7 )
-        , ( -3.2, -60 )
-        , ( 8.7, -64 )
-        , ( 19.6, -61.8 )
-        , ( 25.1, -57.3 )
-        , ( 26, -48.4 )
-        , ( 26, -37.8 )
-        , ( 28.7, -26.2 )
-        , ( 31.9, -16.4 )
-        , ( 29.6, -11.1 )
-        , ( 26.9, -4.9 )
-        , ( 26, 0 )
-        ]
-
-
-entrancePath : String
-entrancePath =
-    smoothPath
-        [ ( -14.1, 0 )
-        , ( -14.1, -3.1 )
-        , ( -18.2, -9.3 )
-        , ( -18.7, -26.2 )
-        , ( -18.7, -36 )
-        , ( -16, -41.3 )
-        , ( -8.7, -45.3 )
-        , ( 3.2, -46.2 )
-        , ( 8.7, -44 )
-        , ( 13.2, -37.8 )
-        , ( 16.9, -28.9 )
-        , ( 19.2, -23.6 )
-        , ( 20.1, -12.9 )
-        , ( 19.6, -4 )
-        , ( 19.6, 0 )
-        ]
-
-
-{-| A closed path through the points: a straight line from the first point
-and to the last point, and smooth curves between them
+{-| A rock of the arch of a cave: its outline, its light sides and its dark
+sides
 -}
-smoothPath : List ( Float, Float ) -> String
-smoothPath points =
-    let
-        mid ( x1, y1 ) ( x2, y2 ) =
-            num ((x1 + x2) / 2) ++ " " ++ num ((y1 + y2) / 2)
+type alias Boulder =
+    { outline : String
+    , light : String
+    , shade : String
+    }
 
-        point ( x, y ) =
-            num x ++ " " ++ num y
 
-        curves =
-            List.map2 (\p q -> "Q" ++ point p ++ " " ++ mid p q)
-                (List.drop 1 points)
-                (List.drop 2 points)
-    in
-    case ( points, List.reverse points ) of
-        ( first :: second :: _, last :: _ ) ->
-            "M" ++ point first ++ "L" ++ mid first second ++ String.concat curves ++ "L" ++ point last ++ "Z"
+caveBack : String
+caveBack =
+    "M-41.4 0L-40 -13.9L-36.4 -16L-35 -23.1L-29.3 -30.3L-22.1 -33.1L-15.7 -40.3L-7.1 -45L2.1 -46.4L11.4 -44.6L18.6 -40.3L25.7 -32.4L29.3 -23.9L31.4 -16L37.1 -16L40.6 -12.4L40.6 0Z"
 
-        _ ->
-            ""
+
+caveHole : String
+caveHole =
+    "M-27.9 0L-25.7 -11L-20.7 -22.4L-12.9 -29.6L-2.9 -33.6L11.4 -33.6L17.9 -28.1L22.1 -21L25.7 -11L27.9 0Z"
+
+
+caveMound : String
+caveMound =
+    "M-16.4 0L-14.3 -7.4L-7.1 -11.3L0 -12.7L7.1 -12.1L13.6 -9.3L16 0Z"
+
+
+{-| The rocks of the arch, from the back to the front
+-}
+caveBoulders : List Boulder
+caveBoulders =
+    [ { outline = "M-17.1 -36.7L-15.4 -40.7L-7.1 -45L2.1 -46.4L11 -44.6L12.6 -41.3L10 -36.7L-1.4 -35.7L-10.7 -35.3Z"
+      , light = "M-13.6 -40.3L-7.1 -43.6L1.7 -44.9L4.6 -43L-2.9 -40.7L-11.1 -38.4Z"
+      , shade = "M-1.4 -35.7L10 -36.7L11.4 -38.9L5 -37.9Z"
+      }
+    , { outline = "M-35 -23.1L-29.3 -30.3L-21.7 -33.1L-17.1 -32.1L-18.6 -26.4L-23.6 -21.7L-29.7 -17.1L-34.3 -17.9Z"
+      , light = "M-32.4 -23.9L-28 -28.7L-22.6 -30.7L-24.7 -26.7L-30 -22.9Z"
+      , shade = "M-29.7 -17.1L-23.6 -21.7L-18.6 -26.4L-21.4 -22.4L-26.4 -18.4Z"
+      }
+    , { outline = "M-19.3 -25L-17.1 -31L-8.9 -35.7L-3.6 -34.4L-4.6 -28.7L-10 -25.9Z"
+      , light = "M-16.7 -27.9L-13.6 -32.1L-6.9 -34.1L-9.1 -30.4Z"
+      , shade = "M-17.1 -25L-10 -25.9L-4.6 -28.7L-6.9 -27.9L-12.9 -26.1Z"
+      }
+    , { outline = "M-2.3 -33.1L2 -35.3L6.6 -33.1L5.1 -31.3L-0.9 -31.3Z"
+      , light = "M-0.9 -33.1L2 -34.4L4.6 -33.1Z"
+      , shade = ""
+      }
+    , { outline = "M10 -36.7L11.4 -41.7L19.4 -39.9L25.7 -32.7L29.4 -23.9L25.1 -21.6L21.4 -28.1L17.1 -33Z"
+      , light = "M12.9 -39L18.6 -37.9L23.7 -32.1L19.4 -32.7Z"
+      , shade = "M21.4 -28.1L25.1 -21.6L29.4 -23.9L27.4 -25.6L24.6 -24.4Z"
+      }
+    , { outline = "M9.4 -30.1L12.9 -33.6L18 -32.7L22.3 -27.9L20.9 -19.6L15.7 -18.7L12.1 -23.9Z"
+      , light = "M11.4 -30.3L15.4 -31.9L19.4 -27.9L15.1 -27.3Z"
+      , shade = "M15.7 -18.7L20.9 -19.6L21.4 -23.9L18.3 -21Z"
+      }
+    , { outline = "M-41.4 0L-40 -13.1L-36.4 -15.9L-30.7 -14.4L-27.7 -9.3L-31.4 -3.9L-33.4 0Z"
+      , light = "M-38.9 -11L-36 -14.3L-31.4 -13.3L-34.3 -10.1Z"
+      , shade = "M-33.4 0L-31.4 -3.9L-27.7 -9.3L-29.4 -5Z"
+      }
+    , { outline = "M-33.4 0L-32.9 -6.4L-30 -8.7L-26.3 -7.3L-25.4 0Z"
+      , light = "M-32 -5L-29.7 -7.6L-27.1 -6.4Z"
+      , shade = ""
+      }
+    , { outline = "M27.4 0L26.6 -9.6L29.1 -15.9L37.1 -15.9L40.6 -12.4L40.6 0Z"
+      , light = "M29.7 -13.6L36.6 -14.9L38.9 -12.1L32.9 -11Z"
+      , shade = "M27.4 0L40.6 0L40.6 -3.9L31.4 -3Z"
+      }
+    , { outline = "M24.9 0L25.7 -4.4L29.1 -6.4L32.3 -3.9L31.7 0Z"
+      , light = "M26.3 -3.9L28.9 -5.6L31.1 -3.9Z"
+      , shade = ""
+      }
+    ]
+
+
+caveCracks : String
+caveCracks =
+    "M6.9 -43.4L5.1 -40.4L7.1 -37M-26 -28.1L-28.6 -25M25.7 -29.3L26.9 -25.3M33.1 -12.4L36 -9.3"
 
 
 num : Float -> String
@@ -1461,44 +1603,101 @@ type alias Pose =
     , turn : Float
     , spread : Float
     , calm : Float
+
+    -- The caves where the octopus is under the arch: its cave when it
+    -- sits, and both caves of a jet
+    , caves : List Int
     }
 
 
 {-| The octopi and the ink, over the caves. The sea has the same units as
 the places of the caves.
 -}
-viewSwimmers : Bool -> Int -> Trail -> Html Msg
-viewSwimmers narrow now trail =
+viewSwimmers : Sea -> Int -> Trail -> Html Msg
+viewSwimmers sea now trail =
     let
         leader =
             leaderJets trail
+
+        player =
+            pose sea now (caveAt trail trail.follower) trail.followerPast
+
+        leaderPose =
+            pose sea now (caveAt trail (shownLeader now trail)) leader
     in
     svg
-        [ SA.viewBox ("0 0 400 " ++ String.fromFloat (seaHeight narrow))
+        [ SA.viewBox ("0 0 400 " ++ String.fromFloat (seaHeight sea.narrow))
         , SA.class "ink-trail-swimmers"
         , attribute "aria-hidden" "true"
         ]
         [ Svg.defs []
             [ Svg.filter [ SA.id "ink-trail-soft", SA.x "-20%", SA.y "-20%", SA.width "140%", SA.height "140%" ]
                 [ Svg.feGaussianBlur [ SA.stdDeviation "1.6" ] [] ]
+
+            -- The shadow of an arch, over the place of a head in the cave
+            -- (see `viewHeadShadow`)
+            , Svg.linearGradient [ SA.id "ink-trail-arch-shade", SA.x1 "0", SA.y1 "0", SA.x2 "0", SA.y2 "1" ]
+                [ Svg.stop [ SA.offset "0.247", SA.stopColor "#000", SA.stopOpacity "0.5" ] []
+                , Svg.stop [ SA.offset "0.435", SA.stopColor "#000", SA.stopOpacity "0.32" ] []
+                , Svg.stop [ SA.offset "0.623", SA.stopColor "#000", SA.stopOpacity "0" ] []
+                ]
+            , headClip "player" player
+            , headClip "leader" leaderPose
             ]
         , Svg.g [ SA.class "ink-trail-ink", SA.filter "url(#ink-trail-soft)" ]
-            (viewInk narrow now trail.followerPast ++ viewInk narrow now leader)
-        , viewOctopus "player" now (pose narrow now (caveAt trail trail.follower) trail.followerPast)
-        , viewOctopus "leader" now (pose narrow now (caveAt trail (shownLeader now trail)) leader)
+            (viewInk sea now trail.followerPast ++ viewInk sea now leader)
+        , viewOctopus "player" now player
+        , viewHeadShadow sea "player" player
+        , viewOctopus "leader" now leaderPose
+        , viewHeadShadow sea "leader" leaderPose
         ]
+
+
+{-| The head of an octopus, for the shadow of the arch on it
+-}
+headClip : String -> Pose -> Svg Msg
+headClip who p =
+    Svg.clipPath [ SA.id ("ink-trail-head-" ++ who) ]
+        [ Svg.path [ SA.d headPath, SA.transform (octopusTransform p ++ " " ++ headStretch p) ] [] ]
+
+
+{-| The shadow of the arch of a cave on the head of an octopus: dark at the
+top of the head and gone a bit above the eyes, when the octopus sits in the
+entrance. The shadow is fixed to the cave, so the head moves under it, and
+the octopus jets out of it. Only the head shows it.
+-}
+viewHeadShadow : Sea -> String -> Pose -> Svg Msg
+viewHeadShadow sea who p =
+    Svg.g [ SA.clipPath ("url(#ink-trail-head-" ++ who ++ ")") ]
+        (List.map
+            (\cave ->
+                let
+                    ( x, y ) =
+                        caveBase sea cave
+                in
+                Svg.rect
+                    [ SA.x (num (x - 22))
+                    , SA.y (num (y - 34))
+                    , SA.width "44"
+                    , SA.height "27.1"
+                    , SA.fill "url(#ink-trail-arch-shade)"
+                    ]
+                    []
+            )
+            p.caves
+        )
 
 
 {-| The way from the cave of a jet to its next cave, in degrees: 0 is up
 -}
-heading : Bool -> Jet -> Float
-heading narrow jet =
+heading : Sea -> Jet -> Float
+heading sea jet =
     let
         ( x1, y1 ) =
-            home narrow jet.from
+            home sea jet.from
 
         ( x2, y2 ) =
-            home narrow jet.to
+            home sea jet.to
     in
     atan2 (x2 - x1) (y1 - y2) * 180 / pi
 
@@ -1522,8 +1721,8 @@ turns from its last way to the next one. After the last jet, it turns back
 up and its arms open fully.
 
 -}
-pose : Bool -> Int -> Int -> List Jet -> Pose
-pose narrow now cave jets =
+pose : Sea -> Int -> Int -> List Jet -> Pose
+pose sea now cave jets =
     let
         ( started, next ) =
             List.partition (\jet -> jet.at <= now) jets
@@ -1535,9 +1734,9 @@ pose narrow now cave jets =
         [] ->
             let
                 ( x, y ) =
-                    home narrow cave
+                    home sea cave
             in
-            { x = x, y = y + bob 1, turn = 0, spread = 1, calm = 1 }
+            { x = x, y = y + bob 1, turn = 0, spread = 1, calm = 1, caves = [ cave ] }
 
         jet :: before ->
             let
@@ -1548,10 +1747,10 @@ pose narrow now cave jets =
                     toFloat jetMs
 
                 ( ax, ay ) =
-                    home narrow jet.from
+                    home sea jet.from
 
                 ( bx, by ) =
-                    home narrow jet.to
+                    home sea jet.to
 
                 start =
                     turnMs * 0.6
@@ -1582,7 +1781,7 @@ pose narrow now cave jets =
                 ( lastTurn, lastSpread ) =
                     case fromStop of
                         Just last ->
-                            ( heading narrow last, stopSpread )
+                            ( heading sea last, stopSpread )
 
                         Nothing ->
                             ( 0, 1 )
@@ -1591,7 +1790,7 @@ pose narrow now cave jets =
                     easeInOut (clamp 0 1 (age / turnMs))
 
                 turned =
-                    wrapAngle (lastTurn + wrapAngle (heading narrow jet - lastTurn) * turning)
+                    wrapAngle (lastTurn + wrapAngle (heading sea jet - lastTurn) * turning)
 
                 ( turn, spread, calm ) =
                     if age < turnMs then
@@ -1610,7 +1809,13 @@ pose narrow now cave jets =
                         , settled
                         )
             in
-            { x = lerp ax bx moved, y = lerp ay by moved + bob calm, turn = turn, spread = spread, calm = calm }
+            { x = lerp ax bx moved
+            , y = lerp ay by moved + bob calm
+            , turn = turn
+            , spread = spread
+            , calm = calm
+            , caves = [ jet.from, jet.to ]
+            }
 
 
 lerp : Float -> Float -> Float -> Float
@@ -1688,26 +1893,14 @@ viewOctopus who now p =
                 (\side -> List.map3 (arm side) [ 0, 1 ] sitArms jetArms)
                 [ -1, 1 ]
                 |> List.concat
-
-        -- In a jet, the head is a bit longer
-        stretch =
-            1 - p.spread
     in
     Svg.g
         [ SA.class ("ink-trail-octopus is-" ++ who)
-        , SA.transform
-            ("translate("
-                ++ num p.x
-                ++ " "
-                ++ num p.y
-                ++ ") rotate("
-                ++ num p.turn
-                ++ ") scale(0.68)"
-            )
+        , SA.transform (octopusTransform p)
         ]
-        [ Svg.g [ SA.transform ("scale(" ++ num (1 - 0.08 * stretch) ++ " " ++ num (1 + 0.1 * stretch) ++ ")") ]
+        [ Svg.g [ SA.transform (headStretch p) ]
             (arms
-                ++ [ Svg.path [ SA.d "M0 -24C9 -24 15.5 -15 15.5 -6C15.5 3 8 6 0 6C-8 6 -15.5 3 -15.5 -6C-15.5 -15 -9 -24 0 -24Z" ] []
+                ++ [ Svg.path [ SA.d headPath ] []
                    , Svg.circle [ SA.cx "-5.8", SA.cy "-7", SA.r "4.3", SA.class "ink-trail-eye" ] []
                    , Svg.circle [ SA.cx "5.8", SA.cy "-7", SA.r "4.3", SA.class "ink-trail-eye" ] []
                    , Svg.circle [ SA.cx "-6.6", SA.cy "-6.2", SA.r "2.4", SA.class "ink-trail-pupil" ] []
@@ -1718,15 +1911,39 @@ viewOctopus who now p =
         ]
 
 
+octopusTransform : Pose -> String
+octopusTransform p =
+    "translate(" ++ num p.x ++ " " ++ num p.y ++ ") rotate(" ++ num p.turn ++ ") scale(0.68)"
+
+
+{-| In a jet, the head is a bit longer
+-}
+headStretch : Pose -> String
+headStretch p =
+    let
+        stretch =
+            1 - p.spread
+    in
+    "scale(" ++ num (1 - 0.08 * stretch) ++ " " ++ num (1 + 0.1 * stretch) ++ ")"
+
+
+headPath : String
+headPath =
+    "M0 -24C9 -24 15.5 -15 15.5 -6C15.5 3 8 6 0 6C-8 6 -15.5 3 -15.5 -6C-15.5 -15 -9 -24 0 -24Z"
+
+
 {-| One arm: a curve through 4 control points, thick at the head and thin
-at the round tip
+at the round tip. A row of white suckers goes along the arm to the tip, a
+bit to one side, as on the logo.
 -}
 viewArm : List ( Float, Float ) -> List (Svg Msg)
 viewArm points =
     case points of
         [ p0, p1, p2, p3 ] ->
             let
-                at t =
+                -- A point at the part t of the arm, moved across the arm by
+                -- the part s of its half width (-1 and 1 are the two sides)
+                across s t =
                     let
                         u =
                             1 - t
@@ -1744,14 +1961,12 @@ viewArm points =
                             max 0.001 (sqrt (dx * dx + dy * dy))
 
                         half =
-                            lerp 3.5 1.7 t
-
-                        ( x, y ) =
-                            ( coord Tuple.first, coord Tuple.second )
+                            s * lerp 3.5 1.7 t
                     in
-                    ( ( x - dy / length * half, y + dx / length * half )
-                    , ( x + dy / length * half, y - dx / length * half )
-                    )
+                    ( coord Tuple.first - dy / length * half, coord Tuple.second + dx / length * half )
+
+                at t =
+                    ( across 1 t, across -1 t )
 
                 sides =
                     List.map (\i -> at (toFloat i / 18)) (List.range 0 18)
@@ -1761,13 +1976,27 @@ viewArm points =
 
                 ( tipX, tipY ) =
                     p3
+
+                sucker t =
+                    let
+                        ( x, y ) =
+                            across suckerSide t
+                    in
+                    Svg.circle [ SA.cx (num x), SA.cy (num y), SA.r (num (lerp 0.85 0.55 t)), SA.class "ink-trail-sucker" ] []
             in
-            [ Svg.path [ SA.d ("M" ++ String.join "L" (List.map (\( x, y ) -> num x ++ " " ++ num y) outline) ++ "Z") ] []
-            , Svg.circle [ SA.cx (num tipX), SA.cy (num tipY), SA.r "1.7" ] []
-            ]
+            Svg.path [ SA.d ("M" ++ String.join "L" (List.map (\( x, y ) -> num x ++ " " ++ num y) outline) ++ "Z") ] []
+                :: Svg.circle [ SA.cx (num tipX), SA.cy (num tipY), SA.r "1.7" ] []
+                :: List.map sucker [ 0.42, 0.56, 0.69, 0.81 ]
 
         _ ->
             []
+
+
+{-| The side of an arm where its suckers are: -1 and 1 are the edges
+-}
+suckerSide : Float
+suckerSide =
+    0.35
 
 
 {-| The ink of the jets that ended less than a second ago. At the start of
@@ -1776,12 +2005,12 @@ few units on the way, behind the head. Each puff stays where it came out,
 grows, moves back a bit and fades. The puffs come from the times of the
 jets, with fixed random sizes, so they are the same at each frame.
 -}
-viewInk : Bool -> Int -> List Jet -> List (Svg Msg)
-viewInk narrow now jets =
+viewInk : Sea -> Int -> List Jet -> List (Svg Msg)
+viewInk sea now jets =
     List.map2
         (\before jet ->
             if now >= jet.at && now - jet.at < jetMs + 900 then
-                jetPuffs narrow now (Maybe.map (\b -> chained b jet) before |> Maybe.withDefault False) jet
+                jetPuffs sea now (Maybe.map (\b -> chained b jet) before |> Maybe.withDefault False) jet
 
             else
                 []
@@ -1791,17 +2020,17 @@ viewInk narrow now jets =
         |> List.concat
 
 
-jetPuffs : Bool -> Int -> Bool -> Jet -> List (Svg Msg)
-jetPuffs narrow now fromStop jet =
+jetPuffs : Sea -> Int -> Bool -> Jet -> List (Svg Msg)
+jetPuffs sea now fromStop jet =
     let
         ( ax, ay ) =
-            home narrow jet.from
+            home sea jet.from
 
         ( bx, by ) =
-            home narrow jet.to
+            home sea jet.to
 
         angle =
-            degrees (heading narrow jet)
+            degrees (heading sea jet)
 
         -- The ink comes out a bit behind the middle of the octopus
         ( backX, backY ) =

@@ -1181,17 +1181,17 @@ fits on it */
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
 }
 
-/* A cave is 88 units wide in a sea of 400 units. The bottom of the cave
-(at 72 of its 84 units of height) is on the place of the cave. */
+/* A cave is 92 units wide in a sea of 400 units. The bottom of the cave
+(at 54 of its 58 units of height) is on the place of the cave. */
 .ink-trail-cave {
   position: absolute;
-  width: 22%;
-  aspect-ratio: 88 / 84;
-  translate: -50% -85.7%;
+  width: 21%;
+  aspect-ratio: 92 / 58;
+  translate: -50% -93.1%;
   padding: 0;
   border: 0;
   background: none;
-  transform-origin: 50% 85.7%;
+  transform-origin: 50% 93.1%;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   transition: scale 150ms ease-out;
@@ -1204,29 +1204,49 @@ fits on it */
 .ink-trail-cave.is-open:active { scale: 0.96; }
 .ink-trail-cave:focus-visible { outline: 3px solid var(--color-octo-indigo); outline-offset: 2px; border-radius: 1rem; }
 .ink-trail-cave-art { width: 100%; height: 100%; overflow: visible; transition: filter 200ms ease-out; }
-.ink-trail-sand { fill: #ead7a8; stroke: #cdb57c; stroke-width: 1.5; }
-.ink-trail-sand-line { fill: none; stroke: #cdb57c; stroke-width: 1.5; }
-.ink-trail-rock { fill: #8d939b; stroke: #5c6169; stroke-width: 2; stroke-linejoin: round; transition: fill 150ms; }
-.ink-trail-rock-light { fill: none; stroke: #a7acb3; stroke-width: 3; stroke-linecap: round; }
-.ink-trail-entrance { fill: #1d2530; }
-.ink-trail-answer { fill: none; stroke: #22c55e; stroke-width: 3; opacity: 0; }
-[data-theme=dark] .ink-trail-sand { fill: #8f7f58; stroke: #6f6142; }
-[data-theme=dark] .ink-trail-sand-line { stroke: #6f6142; }
-[data-theme=dark] .ink-trail-rock { fill: #66707c; stroke: #434a53; }
-[data-theme=dark] .ink-trail-rock-light { stroke: #7d8692; }
-[data-theme=dark] .ink-trail-entrance { fill: #070c13; }
+.ink-trail-sand-shadow { fill: #0a1220; opacity: 0.2; }
+.ink-trail-rock { fill: #9aa1b3; transition: fill 150ms; }
+.ink-trail-rock-shade { fill: #6f7686; transition: fill 150ms; }
+.ink-trail-rock-light { fill: #b9c0d0; transition: fill 150ms; }
+.ink-trail-rock-edge { fill: none; stroke: #2d323d; stroke-width: 1; stroke-linejoin: round; transition: stroke 150ms; }
+.ink-trail-crack { fill: none; stroke: #2d323d; stroke-width: 0.8; stroke-linecap: round; }
+.ink-trail-pebble { fill: #b9c0d0; stroke: #2d323d; stroke-width: 0.8; }
+.ink-trail-entrance { fill: #1f2430; }
+.ink-trail-entrance-back { fill: #2e3644; }
+.ink-trail-answer { fill: none; stroke: #22c55e; stroke-width: 2.5; opacity: 0; }
+.ink-trail-weed { transform-box: fill-box; transform-origin: 50% 100%; animation: ink-trail-sway 3.2s ease-in-out infinite alternate; }
+.ink-trail-weed-edge { fill: none; stroke: #2d5a3a; stroke-width: 2.4; stroke-linecap: round; }
+.ink-trail-weed-leaf { fill: none; stroke: #5aa36a; stroke-width: 1.2; stroke-linecap: round; }
+.ink-trail-bubble { fill: none; stroke: #fff; stroke-width: 0.6; opacity: 0; animation: ink-trail-bubble 3s linear infinite; }
+[data-theme=dark] .ink-trail-sand-shadow { opacity: 0.35; }
+[data-theme=dark] .ink-trail-rock { fill: #858d9f; }
+[data-theme=dark] .ink-trail-rock-shade { fill: #5d6474; }
+[data-theme=dark] .ink-trail-rock-light { fill: #a3abbd; }
+[data-theme=dark] .ink-trail-rock-edge, [data-theme=dark] .ink-trail-crack { stroke: #22262f; }
+[data-theme=dark] .ink-trail-pebble { fill: #a3abbd; stroke: #22262f; }
+[data-theme=dark] .ink-trail-entrance { fill: #12151c; }
+[data-theme=dark] .ink-trail-entrance-back { fill: #1d232d; }
+[data-theme=dark] .ink-trail-weed-edge { stroke: #1f3f29; }
+[data-theme=dark] .ink-trail-weed-leaf { stroke: #4b9159; }
+[data-theme=dark] .ink-trail-bubble { stroke: #d6e2ee; }
+@keyframes ink-trail-sway { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+@keyframes ink-trail-bubble { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 0.9; } 100% { transform: translateY(-14px); opacity: 0; } }
 .ink-trail-cave.is-hit .ink-trail-cave-art { filter: brightness(1.15) drop-shadow(0 0 6px rgb(255 255 255 / 0.8)); }
 .ink-trail-cave.is-miss { animation: ink-trail-shake 320ms ease-in-out; }
-.ink-trail-cave.is-miss .ink-trail-rock { fill: #ef4444; stroke: #b91c1c; }
+.ink-trail-cave.is-miss .ink-trail-rock { fill: #ef4444; }
+.ink-trail-cave.is-miss .ink-trail-rock-shade { fill: #b91c1c; }
+.ink-trail-cave.is-miss .ink-trail-rock-light { fill: #f87171; }
+.ink-trail-cave.is-miss .ink-trail-rock-edge { stroke: #7f1d1d; }
 .ink-trail-cave.is-answer .ink-trail-answer { opacity: 1; animation: ink-trail-answer 800ms ease-out; }
-@keyframes ink-trail-shake { 0%, 100% { translate: -50% -85.7%; } 25% { translate: calc(-50% - 4px) -85.7%; } 75% { translate: calc(-50% + 4px) -85.7%; } }
-@keyframes ink-trail-answer { from { opacity: 0; stroke-width: 8; } 30% { opacity: 1; } to { opacity: 1; stroke-width: 3; } }
+@keyframes ink-trail-shake { 0%, 100% { translate: -50% -93.1%; } 25% { translate: calc(-50% - 4px) -93.1%; } 75% { translate: calc(-50% + 4px) -93.1%; } }
+@keyframes ink-trail-answer { from { opacity: 0; stroke-width: 6; } 30% { opacity: 1; } to { opacity: 1; stroke-width: 2.5; } }
 
 .ink-trail-swimmers { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .ink-trail-octopus.is-leader { fill: var(--color-octo-orange); }
 .ink-trail-octopus.is-player { fill: var(--color-octo-indigo); }
 .ink-trail-eye { fill: #fff; }
 .ink-trail-pupil { fill: #1d1a3a; }
+.ink-trail-sucker { fill: #fff; }
 .ink-trail-smile { fill: none; stroke: #1d1a3a; stroke-width: 1.3; stroke-linecap: round; }
 .ink-trail-ink { fill: #2b2140; }
 .ink-trail-ink-light { fill: #3a2f57; }
@@ -1238,5 +1258,6 @@ fits on it */
 #ink-trail-root button { touch-action: manipulation; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ink-trail-cave.is-miss, .ink-trail-cave.is-answer .ink-trail-answer { animation: none; }
+  .ink-trail-cave.is-miss, .ink-trail-cave.is-answer .ink-trail-answer, .ink-trail-weed { animation: none; }
+  .ink-trail-bubble { display: none; }
 }
