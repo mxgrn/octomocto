@@ -91,7 +91,12 @@ defmodule OctomoctoWeb.BestResults do
   page) that shows the Best results of the `settings` of the results.
   The page takes only the params, not the settings that the user saved.
   """
-  def path(game, settings), do: "/#{game}?" <> URI.encode_query(params(game, settings))
+  def path(game, settings) do
+    case params(game, settings) do
+      [] -> "/#{game}"
+      params -> "/#{game}?" <> URI.encode_query(params)
+    end
+  end
 
   defp params("snap", %{"back" => back}), do: [back: back]
   defp params("mahjong", %{"players" => players}), do: [players: players]
@@ -100,6 +105,8 @@ defmodule OctomoctoWeb.BestResults do
   defp params("echo", s), do: [pads: s["pads"], players: s["players"]]
   defp params("set", s), do: [players: s["players"], mode: s["mode"]]
   defp params("sudoku", s), do: [players: s["players"], difficulty: s["difficulty"]]
+
+  defp params("ink-trail", _settings), do: []
 
   defp params("afterglow", %{"players" => 1}), do: [players: 1]
   defp params("afterglow", s), do: [players: s["players"], size: s["size"]]

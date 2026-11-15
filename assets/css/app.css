@@ -1153,3 +1153,90 @@ three times */
 @media (prefers-reduced-motion: reduce) {
   .site-banner:not([hidden]) { animation: none; }
 }
+
+/* Ink Trail. The sea is a 4:3 board (4:5 on a phone: the game page uses the
+same 40rem to place the caves). Each cave is a button with its own picture,
+and one SVG over them has the octopi and their ink (see InkTrail.elm). */
+.ink-trail-sea {
+  position: relative;
+  width: min(100%, 42rem, calc((100dvh - 16rem) * 4 / 3));
+  min-width: min(100%, 18rem);
+  aspect-ratio: 4 / 3;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background:
+    radial-gradient(90% 60% at 20% 10%, rgb(255 255 255 / 0.45), transparent 60%),
+    linear-gradient(170deg, #d3f0f4 0%, #a3dbe4 55%, #79c5d3 100%);
+  box-shadow: inset 0 0 0 1px rgb(15 23 42 / 0.06), 0 12px 32px -14px rgb(26 159 203 / 0.5);
+}
+/* A phone has more height than width: a taller sea uses it, and the result
+fits on it */
+@media (max-width: 40rem) {
+  .ink-trail-sea { aspect-ratio: 4 / 5; width: min(100%, calc((100dvh - 15rem) * 4 / 5)); }
+}
+[data-theme=dark] .ink-trail-sea {
+  background:
+    radial-gradient(90% 60% at 20% 10%, rgb(56 189 248 / 0.16), transparent 60%),
+    linear-gradient(170deg, #15344f 0%, #0e2740 55%, #0a1b2e 100%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+/* A cave is 88 units wide in a sea of 400 units. The bottom of the cave
+(at 72 of its 84 units of height) is on the place of the cave. */
+.ink-trail-cave {
+  position: absolute;
+  width: 22%;
+  aspect-ratio: 88 / 84;
+  translate: -50% -85.7%;
+  padding: 0;
+  border: 0;
+  background: none;
+  transform-origin: 50% 85.7%;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: scale 150ms ease-out;
+}
+.ink-trail-cave.is-open { cursor: pointer; }
+@media (hover: hover) and (pointer: fine) {
+  .ink-trail-cave.is-open:hover { scale: 1.04; }
+  .ink-trail-cave.is-open:hover .ink-trail-cave-art { filter: brightness(1.08); }
+}
+.ink-trail-cave.is-open:active { scale: 0.96; }
+.ink-trail-cave:focus-visible { outline: 3px solid var(--color-octo-indigo); outline-offset: 2px; border-radius: 1rem; }
+.ink-trail-cave-art { width: 100%; height: 100%; overflow: visible; transition: filter 200ms ease-out; }
+.ink-trail-sand { fill: #ead7a8; stroke: #cdb57c; stroke-width: 1.5; }
+.ink-trail-sand-line { fill: none; stroke: #cdb57c; stroke-width: 1.5; }
+.ink-trail-rock { fill: #8d939b; stroke: #5c6169; stroke-width: 2; stroke-linejoin: round; transition: fill 150ms; }
+.ink-trail-rock-light { fill: none; stroke: #a7acb3; stroke-width: 3; stroke-linecap: round; }
+.ink-trail-entrance { fill: #1d2530; }
+.ink-trail-answer { fill: none; stroke: #22c55e; stroke-width: 3; opacity: 0; }
+[data-theme=dark] .ink-trail-sand { fill: #8f7f58; stroke: #6f6142; }
+[data-theme=dark] .ink-trail-sand-line { stroke: #6f6142; }
+[data-theme=dark] .ink-trail-rock { fill: #66707c; stroke: #434a53; }
+[data-theme=dark] .ink-trail-rock-light { stroke: #7d8692; }
+[data-theme=dark] .ink-trail-entrance { fill: #070c13; }
+.ink-trail-cave.is-hit .ink-trail-cave-art { filter: brightness(1.15) drop-shadow(0 0 6px rgb(255 255 255 / 0.8)); }
+.ink-trail-cave.is-miss { animation: ink-trail-shake 320ms ease-in-out; }
+.ink-trail-cave.is-miss .ink-trail-rock { fill: #ef4444; stroke: #b91c1c; }
+.ink-trail-cave.is-answer .ink-trail-answer { opacity: 1; animation: ink-trail-answer 800ms ease-out; }
+@keyframes ink-trail-shake { 0%, 100% { translate: -50% -85.7%; } 25% { translate: calc(-50% - 4px) -85.7%; } 75% { translate: calc(-50% + 4px) -85.7%; } }
+@keyframes ink-trail-answer { from { opacity: 0; stroke-width: 8; } 30% { opacity: 1; } to { opacity: 1; stroke-width: 3; } }
+
+.ink-trail-swimmers { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.ink-trail-octopus.is-leader { fill: var(--color-octo-orange); }
+.ink-trail-octopus.is-player { fill: var(--color-octo-indigo); }
+.ink-trail-eye { fill: #fff; }
+.ink-trail-pupil { fill: #1d1a3a; }
+.ink-trail-smile { fill: none; stroke: #1d1a3a; stroke-width: 1.3; stroke-linecap: round; }
+.ink-trail-ink { fill: #2b2140; }
+.ink-trail-ink-light { fill: #3a2f57; }
+[data-theme=dark] .ink-trail-ink { fill: #020108; }
+[data-theme=dark] .ink-trail-ink-light { fill: #0b0718; }
+
+.ink-trail-dot { transition: background-color 200ms ease, transform 200ms ease; }
+.ink-trail-dot.is-on { transform: scale(1.3); }
+#ink-trail-root button { touch-action: manipulation; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-trail-cave.is-miss, .ink-trail-cave.is-answer .ink-trail-answer { animation: none; }
+}

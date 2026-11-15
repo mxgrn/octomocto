@@ -285,6 +285,50 @@ defmodule OctomoctoWeb.GameIcons do
     """
   end
 
+  # A cave with the player's octopus (blue) in its entrance, and the leader
+  # (orange) that jets away with a trail of ink behind it
+  def game_icon(%{game: "ink-trail"} = assigns) do
+    ~H"""
+    <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">
+      <path d="M3 45Q14 41 24 43Q34 41 45 45Z" fill="#EAD7A8" />
+      <path
+        d="M5 44C4 36 4 28 7 23C10 18 14 16 19 15C24 15 27 18 28 24C29 30 30 38 31 44Z"
+        fill="#8D939B"
+      />
+      <path d="M10 44C9 38 9 31 11 27C13 24 17 23 20 24C23 26 24 31 25 37L25 44Z" fill="#1D2530" />
+      <g transform="translate(17 39)" fill="#1A9FCB">
+        <path
+          d="M-2 0Q-6 3 -9 0M-1 1Q-3 4 -7 4M2 0Q6 3 9 0M1 1Q3 4 7 4"
+          stroke="#1A9FCB"
+          stroke-width="1.6"
+          fill="none"
+          stroke-linecap="round"
+        />
+        <ellipse cy="-3.5" rx="4.6" ry="4.4" />
+        <circle cx="-1.7" cy="-3.8" r="1.3" fill="#fff" />
+        <circle cx="1.7" cy="-3.8" r="1.3" fill="#fff" />
+      </g>
+      <g fill="#2B2140" opacity="0.35">
+        <circle cx="29" cy="25" r="2.2" />
+        <circle cx="32" cy="21" r="2.6" />
+        <circle cx="35" cy="17" r="2.2" />
+      </g>
+      <g transform="translate(40 10) rotate(40)" fill="#F26A1B">
+        <path
+          d="M-1.5 2Q-2 6 -2.5 9M-0.5 2Q-0.5 6 -1 9.5M0.5 2Q0.5 6 1 9.5M1.5 2Q2 6 2.5 9"
+          stroke="#F26A1B"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linecap="round"
+        />
+        <ellipse cy="-2" rx="4" ry="4.8" />
+        <circle cx="-1.5" cy="-1.5" r="1.2" fill="#fff" />
+        <circle cx="1.5" cy="-1.5" r="1.2" fill="#fff" />
+      </g>
+    </svg>
+    """
+  end
+
   def game_icon(%{game: "sudoku"} = assigns) do
     ~H"""
     <svg viewBox="0 0 48 48" class={@class} aria-hidden="true">

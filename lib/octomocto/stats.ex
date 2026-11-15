@@ -23,6 +23,7 @@ defmodule Octomocto.Stats do
     "overlap" => Octomocto.Overlap.Result,
     "snap" => Octomocto.Snap.Result,
     "afterglow" => Octomocto.Afterglow.Result,
+    "ink-trail" => Octomocto.InkTrail.Result,
     "schulte" => Octomocto.Schulte.Result,
     "graze" => Octomocto.Graze.Result
   }

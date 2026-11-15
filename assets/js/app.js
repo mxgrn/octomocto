@@ -36,6 +36,7 @@ import {playMahjongSound} from "./mahjong_sounds"
 import {playOverlapSound} from "./overlap_sounds"
 import {playSnapSound} from "./snap_sounds"
 import {playAfterglowSound} from "./afterglow_sounds"
+import {playInkTrailSound} from "./ink_trail_sounds"
 import {LobbySound} from "./lobby_sounds"
 import {setGameMenu} from "./game_menu"
 
@@ -999,6 +1000,53 @@ if (afterglowNode) {
   afterglow.ports.afterglowPlaySound.subscribe(playAfterglowSound)
   afterglow.ports.afterglowSaveMuted.subscribe(value => {
     try { localStorage.setItem("afterglow-muted", String(value)) } catch (_e) {}
+  })
+}
+
+// Start the Ink Trail game and connect its ports to the game channel. It
+// works as the Snap game above.
+const inkTrailNode = document.getElementById("ink-trail-main")
+if (inkTrailNode) {
+  if (navigator.userActivation?.hasBeenActive) unlockAudio()
+  document.addEventListener("pointerdown", unlockAudio, {once: true})
+  document.addEventListener("keydown", unlockAudio, {once: true})
+  let muted = false
+  try { muted = localStorage.getItem("ink-trail-muted") === "true" } catch (_e) {}
+
+  const inkTrail = window.Elm.InkTrail.init({node: inkTrailNode, flags: {settingsUrl: inkTrailNode.dataset.settingsUrl, nextGame: {name: inkTrailNode.dataset.nextGameName, path: inkTrailNode.dataset.nextGamePath}, guest: !inkTrailNode.dataset.userToken, muted, narrow: window.matchMedia("(max-width: 40rem)").matches}})
+  const socket = new Socket("/socket", {params: {user_token: inkTrailNode.dataset.userToken, _csrf_token: csrfToken}})
+  socket.connect()
+
+  const tokenKey = `ink-trail-token:${inkTrailNode.dataset.gameId}`
+  let token = null
+  try { token = sessionStorage.getItem(tokenKey) } catch (_e) {}
+  const joined = reply => {
+    token = reply.token
+    try {
+      if (token) sessionStorage.setItem(tokenKey, token)
+      else sessionStorage.removeItem(tokenKey)
+    } catch (_e) {}
+    inkTrail.ports.inkTrailJoined.send(reply)
+  }
+  const channel = socket.channel(`ink-trail:${inkTrailNode.dataset.gameId}`, () => token ? {token} : {})
+  channel.on("state", state => inkTrail.ports.inkTrailState.send(state))
+  channel.on("joined", joined)
+  channel.join()
+    .receive("ok", joined)
+    .receive("error", ({reason}) => {
+      // The server of the game stopped a moment ago. The channel tries again.
+      if (reason === "unavailable") return
+      // The game ended. The page redirects to the settings of the game.
+      if (reason === "not_found") return window.location.reload()
+      channel.leave()
+      inkTrail.ports.inkTrailJoinFailed.send(reason)
+    })
+
+  inkTrail.ports.inkTrailTap.subscribe(tap => channel.push("tap", tap))
+  inkTrail.ports.inkTrailRestart.subscribe(() => channel.push("restart", {}))
+  inkTrail.ports.inkTrailPlaySound.subscribe(playInkTrailSound)
+  inkTrail.ports.inkTrailSaveMuted.subscribe(value => {
+    try { localStorage.setItem("ink-trail-muted", String(value)) } catch (_e) {}
   })
 }
 

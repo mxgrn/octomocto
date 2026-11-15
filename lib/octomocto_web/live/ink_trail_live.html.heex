@@ -1,0 +1,144 @@
+<Layouts.app
+  notices={@notices}
+  flash={@flash}
+  games_played={@games_played}
+  banners={@banners}
+  current_scope={@current_scope}
+  guest_name={@guest_name}
+  guest_public_id={@guest_public_id}
+  guest_unread_notifications={@guest_unread_notifications}
+>
+  <%!--
+    One column on a small screen: the title, the settings and the results.
+    Two columns on a large screen: the results go to the right.
+  --%>
+  <div
+    id="ink-trail-index"
+    class="relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[min(calc(100vw-4rem),80rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16"
+  >
+    <div class="mx-auto w-full max-w-md lg:max-w-none space-y-2 text-center lg:col-start-1 lg:row-start-1">
+      <div class="flex items-center justify-center gap-3">
+        <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
+          <OctomoctoWeb.GameIcons.game_icon game="ink-trail" class="size-9" />
+        </div>
+        <h1 class="text-3xl font-semibold tracking-tight">Ink Trail</h1>
+      </div>
+      <p class="text-base-content/70">
+        Follow the leader octopus from cave to cave, some jets behind it. The
+        better you follow, the further behind you jet.
+      </p>
+      <.how_to_play />
+    </div>
+
+    <div class="mx-auto flex w-full max-w-md lg:max-w-none flex-col items-center gap-6 text-center lg:sticky lg:top-8 lg:col-start-1 lg:row-start-2">
+      <div
+        id="ink-trail-start"
+        class="flex w-full items-center gap-5 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100"
+      >
+        <div class="flex size-24 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10">
+          <OctomoctoWeb.GameIcons.game_icon game="ink-trail" class="size-16" />
+        </div>
+        <div class="min-w-0 flex-1 space-y-1">
+          <.setting_header label="Start distance" icon="hero-arrows-right-left" />
+          <p class="text-start">
+            <span id="ink-trail-start-distance" class="text-2xl font-semibold tabular-nums">
+              {@start_distance}
+            </span>
+            <span class="text-base-content/60">jets behind</span>
+          </p>
+          <p class="text-start text-xs text-base-content/50">
+            <%= if @first_game do %>
+              Each 5 correct clicks in a row add a jet.
+            <% else %>
+              Your last game ended here.
+            <% end %>
+          </p>
+        </div>
+      </div>
+
+      <.start_bar multiplayer={false} />
+    </div>
+
+    <div
+      id="ink-trail-leaderboard"
+      class="mx-auto grid w-full max-w-md lg:max-w-none gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1"
+    >
+      <.score_list
+        id="your-results"
+        icon="hero-user"
+        icon_class="text-octo-indigo"
+        title="Your results"
+        empty={@user_results != nil and @user_results.latest == []}
+        empty_text="No games yet."
+      >
+        <:aside :if={@user_results && @user_results.best}>
+          <span
+            id="your-best"
+            class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
+          >
+            <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
+            <span class="text-base-content/60">Best</span>
+            <span class="font-semibold tabular-nums">{@user_results.best.score}</span>
+          </span>
+        </:aside>
+        <%= if @user_results do %>
+          <.result_row :for={result <- @user_results.latest}>
+            <span class="flex-1 font-medium">
+              {Calendar.strftime(result.inserted_at, "%b %-d")}
+            </span>
+            <span class="text-xs text-base-content/50 tabular-nums" title="Best distance">
+              {result.best_distance} back
+            </span>
+            <.result_pill best={@user_results.best != nil and result.id == @user_results.best.id}>
+              {result.score}
+            </.result_pill>
+          </.result_row>
+        <% else %>
+          <li class="py-2 text-center text-base-content/60">
+            <.link
+              id="your-results-sign-in"
+              href={Locale.path(@locale, ~p"/signin")}
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
+            >
+              Sign in
+            </.link>
+            to start saving your results.
+          </li>
+        <% end %>
+      </.score_list>
+      <.score_list
+        id="best-results"
+        icon="hero-trophy"
+        icon_class="text-amber-500"
+        title="Best results"
+        empty={@best_results == []}
+        empty_text={OctomoctoWeb.BestResults.empty_text(@best_following)}
+      >
+        <:aside :if={@user_results}>
+          <OctomoctoWeb.BestResults.filter following={@best_following} />
+        </:aside>
+        <:aside :if={!@user_results}>
+          <span class="text-sm text-base-content/60">
+            <.link
+              id="best-results-sign-in"
+              href={Locale.path(@locale, ~p"/signin")}
+              class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
+            >
+              Sign in
+            </.link>
+            to get listed
+          </span>
+        </:aside>
+        <.result_row :for={{result, place} <- Enum.with_index(@best_results, 1)}>
+          <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+          <span class="min-w-0 flex-1 truncate font-medium"><.player_link player={result.user}>{player_name(
+            result.user
+          )}</.player_link></span>
+          <.result_pill>{result.score}</.result_pill>
+        </.result_row>
+      </.score_list>
+    </div>
+  </div>
+
+  <.rules rules={@rules} />
+</Layouts.app>

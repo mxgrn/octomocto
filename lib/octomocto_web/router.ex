@@ -123,6 +123,7 @@ defmodule OctomoctoWeb.Router do
       live "/snap", SnapLive
       live "/afterglow", AfterglowLive, :index
       live "/afterglow/lobby", AfterglowLive, :lobby
+      live "/ink-trail", InkTrailLive
       live "/schulte", SchulteLive, :index
       live "/schulte/lobby", SchulteLive, :lobby
       live "/graze", GrazeLive, :index
@@ -146,6 +147,7 @@ defmodule OctomoctoWeb.Router do
     get "/mahjong/:id", MahjongController, :show
     get "/overlap/:id", OverlapController, :show
     get "/afterglow/:id", AfterglowController, :show
+    get "/ink-trail/:id", InkTrailController, :show
     get "/graze/:id", GrazeController, :show
   end
 
