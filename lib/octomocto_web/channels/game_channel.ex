@@ -41,7 +41,7 @@ defmodule OctomoctoWeb.GameChannel do
   import Phoenix.Channel, only: [push: 3]
   import Phoenix.Socket, only: [assign: 2]
 
-  alias Octomocto.{Accounts, Lobby, Locales, OnlineUsers}
+  alias Octomocto.{Accounts, Lobby, Locales, OnlineUsers, Visitors}
 
   # In seconds
   @token_max_age 24 * 60 * 60
@@ -65,6 +65,7 @@ defmodule OctomoctoWeb.GameChannel do
     case join_game(socket, opts) do
       {:ok, reply, socket} ->
         track_user(socket, opts)
+        Visitors.track(self(), Visitors.key(socket.assigns[:user_id], socket.assigns[:guest_id]))
         {:ok, reply, socket}
 
       {:error, reason} ->

@@ -323,6 +323,10 @@ msgid "We sent a sign-in link to %{email}. If you do not see it, look in your sp
 msgstr "Ми надіслали посилання для входу на %{email}. Якщо не бачиш листа, заглянь у папку «Спам»."
 
 #, elixir-autogen, elixir-format
+msgid "online"
+msgstr "онлайн"
+
+#, elixir-autogen, elixir-format
 msgid "game played"
 msgid_plural "games played"
 msgstr[0] "гра зіграна"

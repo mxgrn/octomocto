@@ -321,6 +321,10 @@ msgid "We sent a sign-in link to %{email}. If you do not see it, look in your sp
 msgstr "%{email} にログイン用リンクを送ったよ。見つからないときは迷惑メールフォルダを確認してね。"
 
 #, elixir-autogen, elixir-format
+msgid "online"
+msgstr "人がオンライン"
+
+#, elixir-autogen, elixir-format
 msgid "game played"
 msgid_plural "games played"
 msgstr[0] "回のプレイ"

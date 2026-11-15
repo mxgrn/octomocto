@@ -82,6 +82,13 @@ defmodule OctomoctoWeb.Layouts do
     `OctomoctoWeb.GamesPlayed`). Without it, the footer reads the count from memory.
     """
 
+  attr :online_count, :integer,
+    default: nil,
+    doc: """
+    the live count of the visitors, for the footer (see `OctomoctoWeb.Visitors`).
+    Without it, the footer reads the count once.
+    """
+
   slot :header,
     doc:
       "content between the wordmark and the theme toggle; on a small screen it goes into the menu"
@@ -436,6 +443,17 @@ defmodule OctomoctoWeb.Layouts do
           </span>
           {ngettext("game played", "games played", games_played(@games_played))}
         </.link>
+        <%!-- The count of visitors with a page open (see `Octomocto.Visitors`) --%>
+        <span id="online-count" class="inline-flex items-center gap-1.5">
+          <span aria-hidden="true" class="size-1.5 rounded-full bg-emerald-500"></span>
+          <span
+            id={"online-count-#{online_count(@online_count)}"}
+            class="games-played-bump font-semibold tabular-nums"
+          >
+            {delimit(online_count(@online_count))}
+          </span>
+          {gettext("online")}
+        </span>
         <.link
           id="privacy-link"
           navigate={~p"/privacy"}
@@ -895,6 +913,10 @@ defmodule OctomoctoWeb.Layouts do
   # The live count of the page, or the count from memory on a page without one
   defp games_played(nil), do: Octomocto.Stats.Counter.get()
   defp games_played(count), do: count
+
+  # A controller page does not track its visitor, but the visitor is online
+  defp online_count(nil), do: max(Octomocto.Visitors.count(), 1)
+  defp online_count(count), do: count
 
   # A number with a comma between each 3 digits, for example 5,195
   defp delimit(n) do

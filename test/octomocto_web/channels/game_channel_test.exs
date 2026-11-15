@@ -8,7 +8,7 @@ defmodule OctomoctoWeb.GameChannelTest do
   import Octomocto.GameHelpers
   import Octomocto.AccountsFixtures
 
-  alias Octomocto.OnlineUsers
+  alias Octomocto.{OnlineUsers, Visitors}
   alias OctomoctoWeb.{NimbleMosaicChannel, UserSocket}
 
   setup do
@@ -53,6 +53,17 @@ defmodule OctomoctoWeb.GameChannelTest do
     assert OnlineUsers.activities([user.id]) == %{
              user.id => %{kind: "nimble-mosaic", doing: "playing"}
            }
+  end
+
+  test "a guest in a game is a visitor", %{id: id} do
+    guest_id = Ecto.UUID.generate()
+
+    {:ok, _reply, _socket} =
+      UserSocket
+      |> socket(nil, %{user_id: nil, guest_id: guest_id})
+      |> subscribe_and_join(NimbleMosaicChannel, "nimble-mosaic:" <> id, %{})
+
+    assert Visitors.online?(Visitors.key(nil, guest_id))
   end
 
   test "a join with a bad token gives a new player", %{id: id} do

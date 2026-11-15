@@ -30,6 +30,7 @@ defmodule Octomocto.Application do
       Octomocto.RecentRequests,
       Octomocto.Lobby.Watchers,
       Octomocto.OnlineUsers,
+      Octomocto.Visitors,
       {DynamicSupervisor, name: Octomocto.Afterglow.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.InkTrail.GameSupervisor},
       {DynamicSupervisor, name: Octomocto.Afterglow.TurnSupervisor},

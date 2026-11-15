@@ -68,7 +68,12 @@ defmodule OctomoctoWeb.Admin.BannerFormLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope} games_played={@games_played}>
+    <Layouts.app
+      flash={@flash}
+      current_scope={@current_scope}
+      games_played={@games_played}
+      online_count={@online_count}
+    >
       <div id="admin-banner" class="flex flex-col gap-6 pt-2 pb-4">
         <div>
           <.link
