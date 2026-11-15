@@ -1,9 +1,9 @@
 defmodule OctomoctoWeb.InkTrailLive do
   @moduledoc """
-  The settings page of Ink Trail, with the ongoing public games and the
-  results. Ink Trail is a single-player game: the page shows the distance at
-  the start, where the latest game of the player ended, and the visibility. Other
-  players can only watch a public game.
+  The settings page of Ink Trail, with the results. Ink Trail is a
+  single-player game: the page shows the distance at the start, where the
+  latest game of the player ended, and the visibility. Other players can
+  only watch a public game, from the front page.
   """
   use OctomoctoWeb, :live_view
 
@@ -23,8 +23,8 @@ defmodule OctomoctoWeb.InkTrailLive do
 
   import OctomoctoWeb.GamePageComponents
 
-  alias Octomocto.{InkTrail, Lobby}
-  alias Octomocto.InkTrail.{Game, Store}
+  alias Octomocto.InkTrail
+  alias Octomocto.InkTrail.Game
   alias OctomoctoWeb.SavedSettings
 
   # All results can be compared
@@ -32,7 +32,6 @@ defmodule OctomoctoWeb.InkTrailLive do
 
   def mount(_params, _session, socket) do
     scope = socket.assigns.current_scope
-    if connected?(socket), do: Lobby.subscribe(Game)
 
     {:ok,
      socket
@@ -44,8 +43,6 @@ defmodule OctomoctoWeb.InkTrailLive do
          user_results: user_results(scope)
        ] ++ seo()
      )
-     |> assign_lobby(Lobby.entries(Game, Store))
-     |> assign(watchers: Lobby.watchers(Game))
      |> OctomoctoWeb.BestResults.assign_best(InkTrail, @filter)}
   end
 
@@ -71,15 +68,6 @@ defmodule OctomoctoWeb.InkTrailLive do
     {:noreply, assign(socket, settings: settings)}
   end
 
-  def handle_info({:lobby_changed, _game, id, entry}, socket) do
-    {:noreply, assign_lobby(socket, Lobby.put_entry(socket.assigns.lobby, id, entry))}
-  end
-
-  # A watcher came or left, see `Octomocto.Lobby.watch/3`
-  def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff"}, socket) do
-    {:noreply, assign(socket, watchers: Lobby.watchers(Game))}
-  end
-
   def handle_event("new_game", _params, socket) do
     id =
       InkTrail.create_game(%{
@@ -94,10 +82,6 @@ defmodule OctomoctoWeb.InkTrailLive do
   # players is for `visibility_hint/1`.
   defp settings(params), do: %{players: 1, public: params["visibility"] != "private"}
 
-  defp assign_lobby(socket, entries) do
-    assign(socket, lobby: entries, lobby_games: Lobby.games(entries))
-  end
-
   @doc "The path of this page with the settings of the game in the given state."
   def settings_path(state), do: ~p"/ink-trail?#{query(%{public: state.public}, [])}"
 
@@ -108,17 +92,8 @@ defmodule OctomoctoWeb.InkTrailLive do
     if settings.public, do: [], else: [visibility: "private"]
   end
 
-  @doc "Ink Trail has no settings to show in a row of the lists."
+  @doc "Ink Trail has no settings to show in a row of the lists of the front page."
   def game_summary(_game), do: nil
-
-  # A small copy of the badge of the page, for a row of the lists
-  defp lobby_icon(assigns) do
-    ~H"""
-    <div class="grid size-9 shrink-0 place-items-center rounded-xl bg-octo-indigo/10">
-      <OctomoctoWeb.GameIcons.game_icon game="ink-trail" class="size-6" />
-    </div>
-    """
-  end
 
   # A new game starts where the latest game ended
   defp start_distance(scope, guest_id) do
