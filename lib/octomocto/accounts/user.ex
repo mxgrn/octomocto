@@ -15,11 +15,6 @@ defmodule Octomocto.Accounts.User do
     # the user changes it (see `Octomocto.GuestName`), never blank.
     field :display_name, :string
     field :avatar_url, :string
-    # The tab of the Memory page that the user used last: "free" or
-    # "campaign". Nil means Free play.
-    field :memory_tab, :string
-    # The same for the Trains page
-    field :trains_tab, :string
     # The first language of the browser in the last finished game, for
     # example "pt-BR" (see `Octomocto.Locales`). Only for statistics.
     field :locale, :string

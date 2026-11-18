@@ -6,6 +6,7 @@ defmodule OctomoctoWeb.SavedSettings do
   saves the settings. A page load with settings in its params does not
   save them.
   """
+  import Phoenix.Component, only: [assign: 3]
   import Phoenix.LiveView, only: [connected?: 1]
 
   alias Octomocto.GameSettings
@@ -45,6 +46,31 @@ defmodule OctomoctoWeb.SavedSettings do
     end
 
     :ok
+  end
+
+  @doc """
+  Gives the tab of the game page that the user or the guest used last, for
+  example "lobby", or nil. It reads the database only once for a socket.
+  """
+  def last_tab(%{assigns: %{last_tab: {tab}}}, _game), do: tab
+
+  def last_tab(socket, game) do
+    GameSettings.get_tab(socket.assigns.current_scope, socket.assigns[:guest_id], game)
+  end
+
+  @doc """
+  Saves the tab of the game page that the user or the guest opens, once
+  the page is connected. Gives the socket with the tab.
+  """
+  def remember_tab(socket, game, tab) do
+    old = last_tab(socket, game)
+
+    if connected?(socket) and (old || "free") != tab do
+      GameSettings.put_tab(socket.assigns.current_scope, socket.assigns[:guest_id], game, tab)
+      assign(socket, :last_tab, {tab})
+    else
+      assign(socket, :last_tab, {old})
+    end
   end
 
   @doc "Gives the params of a query of the settings page, as strings."

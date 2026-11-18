@@ -22,7 +22,7 @@ defmodule OctomoctoWeb.TrainsLive do
   import OctomoctoWeb.GamePageComponents
   import OctomoctoWeb.CampaignComponents
 
-  alias Octomocto.{Accounts, Lobby, Trains}
+  alias Octomocto.{Lobby, Trains}
   alias Octomocto.Trains.{Campaign, Game, Store}
   alias OctomoctoWeb.{SavedSettings, TrainsChannel}
 
@@ -49,8 +49,8 @@ defmodule OctomoctoWeb.TrainsLive do
     ]
   end
 
-  # The params of the Free play tab. Without them, a signed-in user goes to
-  # the tab that the user used last.
+  # The params of the Free play tab. Without them, the page opens
+  # the tab that the user or the guest used last.
   @settings_params ["players", "switches", "trains", "pace", "visibility", "match"]
 
   def handle_params(params, _uri, %{assigns: %{live_action: :campaign}} = socket) do
@@ -74,7 +74,7 @@ defmodule OctomoctoWeb.TrainsLive do
   end
 
   def handle_params(params, _uri, socket) do
-    tab = last_tab(socket.assigns.current_scope)
+    tab = SavedSettings.last_tab(socket, "trains")
 
     # The Campaign tab is hidden for now, so only the Lobby tab opens again
     if tab == "lobby" and not Enum.any?(@settings_params, &Map.has_key?(params, &1)) do
@@ -110,19 +110,7 @@ defmodule OctomoctoWeb.TrainsLive do
 
   defp tab_params(socket), do: saved_params(socket, %{})
 
-  defp last_tab(%{user: %{trains_tab: tab}}), do: tab
-  defp last_tab(_scope), do: nil
-
-  # Saves the tab for a signed-in user, once the page is connected
-  defp remember_tab(%{assigns: %{current_scope: %{user: user} = scope}} = socket, tab) do
-    if connected?(socket) and (user.trains_tab || "free") != tab do
-      assign(socket, current_scope: %{scope | user: Accounts.update_user_trains_tab(user, tab)})
-    else
-      socket
-    end
-  end
-
-  defp remember_tab(socket, _tab), do: socket
+  defp remember_tab(socket, tab), do: SavedSettings.remember_tab(socket, "trains", tab)
 
   defp assign_free_play(socket, params) do
     match = socket.assigns.match

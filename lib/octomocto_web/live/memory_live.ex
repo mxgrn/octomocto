@@ -23,7 +23,7 @@ defmodule OctomoctoWeb.MemoryLive do
   import OctomoctoWeb.GamePageComponents
   import OctomoctoWeb.CampaignComponents
 
-  alias Octomocto.{Accounts, Lobby, Memory}
+  alias Octomocto.{Lobby, Memory}
   alias Octomocto.Memory.{Board, Campaign, Game, Store, Themes}
   alias OctomoctoWeb.{MemoryChannel, SavedSettings}
 
@@ -75,8 +75,8 @@ defmodule OctomoctoWeb.MemoryLive do
 
   def welcome(_params), do: nil
 
-  # The params of the Free play tab. Without them, a signed-in user goes to
-  # the tab that the user used last.
+  # The params of the Free play tab. Without them, the page opens
+  # the tab that the user or the guest used last.
   @settings_params ["theme", "set", "cards", "bombs", "players", "visibility", "match"]
 
   def handle_params(params, uri, %{assigns: %{live_action: :campaign}} = socket) do
@@ -106,9 +106,8 @@ defmodule OctomoctoWeb.MemoryLive do
   end
 
   def handle_params(params, uri, socket) do
-    %{current_scope: scope, locale: locale} = socket.assigns
-
-    tab = last_tab(scope)
+    locale = socket.assigns.locale
+    tab = SavedSettings.last_tab(socket, "memory")
 
     if tab in ["campaign", "lobby"] and not Enum.any?(@settings_params, &Map.has_key?(params, &1)) do
       {:noreply, push_patch(socket, to: Locale.path(locale, ~p"/memory/#{tab}"))}
@@ -151,19 +150,7 @@ defmodule OctomoctoWeb.MemoryLive do
 
   defp tab_params(socket), do: saved_params(socket, %{})
 
-  defp last_tab(%{user: %{memory_tab: tab}}), do: tab
-  defp last_tab(_scope), do: nil
-
-  # Saves the tab for a signed-in user, once the page is connected
-  defp remember_tab(%{assigns: %{current_scope: %{user: user} = scope}} = socket, tab) do
-    if connected?(socket) and (user.memory_tab || "free") != tab do
-      assign(socket, current_scope: %{scope | user: Accounts.update_user_memory_tab(user, tab)})
-    else
-      socket
-    end
-  end
-
-  defp remember_tab(socket, _tab), do: socket
+  defp remember_tab(socket, tab), do: SavedSettings.remember_tab(socket, "memory", tab)
 
   defp assign_free_play(socket, params) do
     match = socket.assigns.match
