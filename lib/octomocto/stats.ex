@@ -181,6 +181,18 @@ defmodule Octomocto.Stats do
   end
 
   @doc """
+  The number of games of one player in the `game` (a game id of the front
+  page). The `field` is `:user_id` or `:guest_id`.
+  """
+  def games_of(field, id, game) when field in [:user_id, :guest_id] do
+    from(r in Map.fetch!(@results, game),
+      where: field(r, ^field) == ^id,
+      select: count(fragment("DISTINCT (?, ?)", r.game_id, r.inserted_at))
+    )
+    |> Repo.one()
+  end
+
+  @doc """
   The number of games of one player in each of the `days` days that end on
   `today`, by the game id of the front page. The `field` is `:user_id` or
   `:guest_id`. Each value is a list of `days` counts, oldest first. A game

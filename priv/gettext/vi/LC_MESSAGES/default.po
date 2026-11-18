@@ -380,3 +380,32 @@ msgstr "Thêm trò chơi rèn luyện trí nhớ"
 #, elixir-autogen, elixir-format
 msgid "Sign in to see your progress"
 msgstr "Đăng nhập để xem tiến bộ của bạn"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} star"
+msgid_plural "%{count} stars"
+msgstr[0] "%{count} sao"
+
+#, elixir-autogen, elixir-format
+msgid "How do you like this game?"
+msgstr "Bạn thấy trò chơi này thế nào?"
+
+#, elixir-autogen, elixir-format
+msgid "Optional"
+msgstr "Không bắt buộc"
+
+#, elixir-autogen, elixir-format
+msgid "Send"
+msgstr "Gửi"
+
+#, elixir-autogen, elixir-format
+msgid "Thank you!"
+msgstr "Cảm ơn bạn!"
+
+#, elixir-autogen, elixir-format
+msgid "Thank you! We're happy that you like it!"
+msgstr "Cảm ơn bạn! Rất vui vì bạn thích trò chơi này!"
+
+#, elixir-autogen, elixir-format
+msgid "What can we do better?"
+msgstr "Chúng tôi có thể cải thiện điều gì?"

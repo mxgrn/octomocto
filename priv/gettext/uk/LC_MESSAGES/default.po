@@ -384,3 +384,34 @@ msgstr "Інші ігри для тренування пам’яті"
 #, elixir-autogen, elixir-format
 msgid "Sign in to see your progress"
 msgstr "Увійди, щоб бачити свій прогрес"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} star"
+msgid_plural "%{count} stars"
+msgstr[0] "%{count} зірка"
+msgstr[1] "%{count} зірки"
+msgstr[2] "%{count} зірок"
+
+#, elixir-autogen, elixir-format
+msgid "How do you like this game?"
+msgstr "Як тобі ця гра?"
+
+#, elixir-autogen, elixir-format
+msgid "Optional"
+msgstr "Необов’язково"
+
+#, elixir-autogen, elixir-format
+msgid "Send"
+msgstr "Надіслати"
+
+#, elixir-autogen, elixir-format
+msgid "Thank you!"
+msgstr "Дякуємо!"
+
+#, elixir-autogen, elixir-format
+msgid "Thank you! We're happy that you like it!"
+msgstr "Дякуємо! Нам дуже приємно, що тобі подобається!"
+
+#, elixir-autogen, elixir-format
+msgid "What can we do better?"
+msgstr "Що нам покращити?"

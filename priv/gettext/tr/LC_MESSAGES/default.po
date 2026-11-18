@@ -382,3 +382,33 @@ msgstr "Hafızanı çalıştıran diğer oyunlar"
 #, elixir-autogen, elixir-format
 msgid "Sign in to see your progress"
 msgstr "İlerlemeni görmek için giriş yap"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} star"
+msgid_plural "%{count} stars"
+msgstr[0] "%{count} yıldız"
+msgstr[1] "%{count} yıldız"
+
+#, elixir-autogen, elixir-format
+msgid "How do you like this game?"
+msgstr "Bu oyunu nasıl buldun?"
+
+#, elixir-autogen, elixir-format
+msgid "Optional"
+msgstr "İsteğe bağlı"
+
+#, elixir-autogen, elixir-format
+msgid "Send"
+msgstr "Gönder"
+
+#, elixir-autogen, elixir-format
+msgid "Thank you!"
+msgstr "Teşekkürler!"
+
+#, elixir-autogen, elixir-format
+msgid "Thank you! We're happy that you like it!"
+msgstr "Teşekkürler! Beğenmene çok sevindik!"
+
+#, elixir-autogen, elixir-format
+msgid "What can we do better?"
+msgstr "Neyi daha iyi yapabiliriz?"

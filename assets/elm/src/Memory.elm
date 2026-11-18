@@ -1550,6 +1550,7 @@ viewResult model me game =
                         ]
                         [ text (t texts "Change settings") ]
                 ]
+        , viewRating me
         , let
             -- In a game with other players, a player starts the next game for all of them
             ( element, action ) =
@@ -1628,6 +1629,18 @@ viewFeed donateUrl texts =
             ]
         , text after
         ]
+
+
+{-| The star card for a player (see `assets/js/rating.js`). The element
+owns its children, and it stays empty when the card does not show.
+-}
+viewRating : Me -> Html Msg
+viewRating me =
+    if me == Nothing then
+        text ""
+
+    else
+        Html.node "octo-rating" [ attribute "game" "memory", class "contents" ] []
 
 
 {-| The end of a field of the campaign: after an error, the player tries

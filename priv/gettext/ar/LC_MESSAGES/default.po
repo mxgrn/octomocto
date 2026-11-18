@@ -390,3 +390,37 @@ msgstr "المزيد من الألعاب لتدريب ذاكرتك"
 #, elixir-autogen, elixir-format
 msgid "Sign in to see your progress"
 msgstr "سجّل الدخول لترى تقدّمك"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} star"
+msgid_plural "%{count} stars"
+msgstr[0] "%{count} نجمة"
+msgstr[1] "نجمة واحدة"
+msgstr[2] "نجمتان"
+msgstr[3] "%{count} نجوم"
+msgstr[4] "%{count} نجمة"
+msgstr[5] "%{count} نجمة"
+
+#, elixir-autogen, elixir-format
+msgid "How do you like this game?"
+msgstr "ما رأيك في هذه اللعبة؟"
+
+#, elixir-autogen, elixir-format
+msgid "Optional"
+msgstr "اختياري"
+
+#, elixir-autogen, elixir-format
+msgid "Send"
+msgstr "إرسال"
+
+#, elixir-autogen, elixir-format
+msgid "Thank you!"
+msgstr "شكرًا!"
+
+#, elixir-autogen, elixir-format
+msgid "Thank you! We're happy that you like it!"
+msgstr "شكرًا! يسعدنا أنها أعجبتك!"
+
+#, elixir-autogen, elixir-format
+msgid "What can we do better?"
+msgstr "ماذا يمكننا أن نحسّن؟"

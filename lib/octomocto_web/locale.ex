@@ -82,6 +82,16 @@ defmodule OctomoctoWeb.Locale do
   @doc "The value of the `lang` attribute for the language of the process."
   def html_lang, do: Map.fetch!(@html_langs, Gettext.get_locale(OctomoctoWeb.Gettext))
 
+  @doc """
+  The language of a `lang` attribute of a page (see `html_lang/0`), for
+  example "pt" for "pt-BR". "en" for an unknown value.
+  """
+  def from_html_lang(lang) do
+    Enum.find_value(@html_langs, "en", fn {locale, html_lang} ->
+      if html_lang == lang, do: locale
+    end)
+  end
+
   @doc "The value of the `dir` attribute for the language of the process."
   def html_dir,
     do: if(Gettext.get_locale(OctomoctoWeb.Gettext) in @rtl_locales, do: "rtl", else: "ltr")

@@ -39,6 +39,10 @@ let game = null
 
 export const setGameMenu = g => { game = g }
 
+// The game of the page ({kind, id, socket}), or null. The rating card of
+// the result screen (rating.js) joins its channel on the same socket.
+export const pageGame = () => game
+
 // A small helper to make elements: h("div", {class: "a"}, [child, "text"])
 const h = (tag, attrs = {}, children = []) => {
   const el = document.createElement(tag)

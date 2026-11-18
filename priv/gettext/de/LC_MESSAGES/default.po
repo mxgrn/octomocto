@@ -382,3 +382,33 @@ msgstr "Weitere Spiele, die dein Gedächtnis trainieren"
 #, elixir-autogen, elixir-format
 msgid "Sign in to see your progress"
 msgstr "Melde dich an, um deinen Fortschritt zu sehen"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} star"
+msgid_plural "%{count} stars"
+msgstr[0] "%{count} Stern"
+msgstr[1] "%{count} Sterne"
+
+#, elixir-autogen, elixir-format
+msgid "How do you like this game?"
+msgstr "Wie gefällt dir dieses Spiel?"
+
+#, elixir-autogen, elixir-format
+msgid "Optional"
+msgstr "Optional"
+
+#, elixir-autogen, elixir-format
+msgid "Send"
+msgstr "Senden"
+
+#, elixir-autogen, elixir-format
+msgid "Thank you!"
+msgstr "Danke!"
+
+#, elixir-autogen, elixir-format
+msgid "Thank you! We're happy that you like it!"
+msgstr "Danke! Schön, dass es dir gefällt!"
+
+#, elixir-autogen, elixir-format
+msgid "What can we do better?"
+msgstr "Was können wir besser machen?"

@@ -39,6 +39,7 @@ import {playAfterglowSound} from "./afterglow_sounds"
 import {playInkTrailSound} from "./ink_trail_sounds"
 import {LobbySound} from "./lobby_sounds"
 import {setGameMenu} from "./game_menu"
+import "./rating"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
