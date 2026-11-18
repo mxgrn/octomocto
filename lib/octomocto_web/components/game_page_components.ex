@@ -453,7 +453,7 @@ defmodule OctomoctoWeb.GamePageComponents do
               <span class="block truncate text-sm font-medium transition-colors group-hover:text-octo-indigo">
                 {HomeLive.game_name(game)}
               </span>
-              <span class="block truncate text-xs text-base-content/60">
+              <span class="block text-xs text-base-content/60">
                 {HomeLive.game_description(game)}
               </span>
             </span>
