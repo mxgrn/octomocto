@@ -64,6 +64,7 @@ defmodule Octomocto.GrazeTest do
     refute Enum.any?(state.squares, &(&1.id == -1))
   end
 
+  @tag config: [perks: true]
   test "no perk square comes in the first 10 seconds", %{id: id, pid: pid} do
     join_and_start(id)
 
@@ -71,6 +72,7 @@ defmodule Octomocto.GrazeTest do
     assert state.perk_paused_until == state.started_at + 10_000
   end
 
+  @tag config: [perks: true]
   test "a perk square gives a point and makes the circle invisible", %{id: id, pid: pid} do
     player_id = join_and_start(id)
     put_square(pid, Map.put(square(:food, 560, 500), :perk, :invisible))
@@ -101,6 +103,20 @@ defmodule Octomocto.GrazeTest do
     assert_receive {:graze_state, %{circles: [%{alive: false}]}}, 1500
   end
 
+  test "without perks, no perk square comes", %{id: id, pid: pid} do
+    join_and_start(id)
+
+    dangers = for n <- 1..100, do: %{square(:danger, 50, 50) | id: -n}
+
+    :sys.replace_state(pid, fn {game, state} ->
+      {game, %{state | squares: dangers, perk_paused_until: 0}}
+    end)
+
+    assert_receive {:graze_state, %{squares: [%{id: -1} | _] = squares}}, 1000
+    assert Enum.count(squares, &(&1.kind == :food)) == 100
+    refute Enum.any?(squares, & &1.perk)
+  end
+
   test "a danger square ends the field and saves the result", %{id: id, pid: pid} do
     user = user_fixture()
     player_id = join_and_start(id, user.id)
@@ -109,7 +125,10 @@ defmodule Octomocto.GrazeTest do
     Graze.steer(id, player_id, 560, 500, System.system_time(:millisecond))
 
     assert_receive {:graze_state, %{finished: true, circles: [%{alive: false}]}}, 1000
-    assert [%Result{score: 0, settings: %{"players" => 1}} = result] = Repo.all(Result)
+
+    assert [%Result{score: 0, settings: %{"players" => 1, "perks" => false}} = result] =
+             Repo.all(Result)
+
     assert result.user_id == user.id
     assert result.elapsed_ms > 0
   end

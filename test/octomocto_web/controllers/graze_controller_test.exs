@@ -4,7 +4,7 @@ defmodule OctomoctoWeb.GrazeControllerTest do
   alias Octomocto.Graze
 
   test "GET /graze/:id has the mount node for the game", %{conn: conn} do
-    id = Graze.create_game(2, false)
+    id = Graze.create_game(false, 2, false)
     conn = get(conn, ~p"/graze/#{id}")
 
     document = LazyHTML.from_document(html_response(conn, 200))

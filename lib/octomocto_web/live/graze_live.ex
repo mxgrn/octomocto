@@ -1,7 +1,7 @@
 defmodule OctomoctoWeb.GrazeLive do
   @moduledoc """
-  The settings page of Graze: the players and the visibility, with the
-  public games and the results of the selected number of players.
+  The settings page of Graze: the players, the perks and the visibility,
+  with the public games and the results of the selected settings.
   """
   use OctomoctoWeb, :live_view
 
@@ -36,7 +36,7 @@ defmodule OctomoctoWeb.GrazeLive do
 
   # The params of the settings. Without them, the page shows the settings
   # that the user chose last.
-  @settings_params ["players", "visibility"]
+  @settings_params ["players", "perks", "visibility"]
 
   def handle_params(params, _uri, socket) do
     settings =
@@ -44,7 +44,7 @@ defmodule OctomoctoWeb.GrazeLive do
 
     SavedSettings.save_change(socket, "graze", settings, query(settings, []))
 
-    filter = %{"players" => settings.players}
+    filter = %{"players" => settings.players, "perks" => settings.perks}
 
     {:noreply,
      assign(socket,
@@ -71,16 +71,17 @@ defmodule OctomoctoWeb.GrazeLive do
   def create_default_game(players, public) do
     # Any player can start the next game, thus it has no creator (see
     # `Octomocto.Seats`)
-    Graze.create_game(players, public, false)
+    Graze.create_game(false, players, public, false)
   end
 
   def handle_event("new_game", _params, socket) do
-    %{players: players, public: public} = socket.assigns.settings
-    id = Graze.create_game(players, public)
+    %{perks: perks, players: players, public: public} = socket.assigns.settings
+    id = Graze.create_game(perks, players, public)
     {:noreply, redirect(socket, to: ~p"/graze/#{id}")}
   end
 
-  # One player and a public game, when the params do not say otherwise
+  # One player, no perks and a public game, when the params do not say
+  # otherwise
   defp settings(params) do
     players =
       case Integer.parse(params["players"] || "") do
@@ -88,7 +89,7 @@ defmodule OctomoctoWeb.GrazeLive do
         _ -> 1
       end
 
-    %{players: players, public: params["visibility"] != "private"}
+    %{players: players, perks: params["perks"] == "on", public: params["visibility"] != "private"}
   end
 
   defp assign_lobby(socket, entries) do
@@ -105,7 +106,7 @@ defmodule OctomoctoWeb.GrazeLive do
       "But keep away from the red squares. One touch, and you are out.",
       "The ring around your circle is its energy. It goes down all the time, faster and faster. Each square that you eat fills part of it. When the ring is empty, you are out.",
       "More and more red squares come, and they get faster.",
-      "Sometimes a spinning square with an eye comes. It is faster than the others. It is food, and it also gives a perk for 10 seconds: the red squares cannot touch you. Your circle blinks just before the perk ends. When it ends in a red square, you are out.",
+      "With the perks on, sometimes a spinning square with an eye comes. It is faster than the others. It is food, and it also gives a perk for 10 seconds: the red squares cannot touch you. Your circle blinks just before the perk ends. When it ends in a red square, you are out.",
       "With other players, all circles are in the same field and go through each other. The first circle to touch a square eats it.",
       "When you are out, your score stays. The game ends when all circles are out. The highest score wins.",
       "The game starts after a countdown, when all players are in."
@@ -123,21 +124,28 @@ defmodule OctomoctoWeb.GrazeLive do
 
   @doc "The path of this page with the settings of the game in the given state."
   def settings_path(state) do
-    ~p"/graze?#{query(%{players: state.needed, public: state.public}, [])}"
+    # A game that started before the perks setting has the perks
+    settings = %{players: state.needed, perks: Map.get(state, :perks, true), public: state.public}
+    ~p"/graze?#{query(settings, [])}"
   end
 
   # The query of the page for the settings, with some of them changed
   defp query(settings, changes) do
     settings = Map.merge(settings, Map.new(changes))
-    query = [players: settings.players]
+    perks = if settings.perks, do: "on", else: "off"
+    query = [players: settings.players, perks: perks]
 
     # A public game has no param, so that most links stay short
     if settings.public, do: query, else: query ++ [visibility: "private"]
   end
 
   # True when the open game has the same settings as the new game
-  defp same_settings?(game, settings), do: game.players_needed == settings.players
+  defp same_settings?(game, settings),
+    do: {game.players_needed, perks?(game)} == {settings.players, settings.perks}
 
-  @doc "Graze has no settings to show in a row of the lists."
-  def game_summary(_game), do: nil
+  @doc "The settings of a game in the list of public games."
+  def game_summary(game), do: if(perks?(game), do: "With perks", else: "No perks")
+
+  # A game that started before the perks setting has the perks
+  defp perks?(%{settings: settings}), do: Map.get(settings, :perks, true)
 end

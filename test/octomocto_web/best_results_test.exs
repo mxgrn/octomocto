@@ -13,7 +13,7 @@ defmodule OctomoctoWeb.BestResultsTest do
     {"afterglow", %{"players" => 3, "size" => 7}},
     {"mahjong", %{"layout" => "turtle", "players" => 2}},
     {"overlap", %{"symbols" => 8, "players" => 3}},
-    {"graze", %{"players" => 2}},
+    {"graze", %{"players" => 2, "perks" => true}},
     {"nimble-mosaic", %{"type" => "random", "mode" => "normal", "players" => 2}},
     {"schulte", %{"size" => 7, "marks" => true, "players" => 2}},
     {"set", %{"mode" => "easy", "players" => 2}},

@@ -101,7 +101,10 @@ defmodule OctomoctoWeb.BestResults do
   defp params("snap", %{"back" => back}), do: [back: back]
   defp params("mahjong", %{"players" => players}), do: [players: players]
   defp params("overlap", %{"players" => players}), do: [players: players]
-  defp params("graze", %{"players" => players}), do: [players: players]
+
+  defp params("graze", s),
+    do: [perks: if(s["perks"], do: "on", else: "off"), players: s["players"]]
+
   defp params("echo", s), do: [pads: s["pads"], players: s["players"]]
   defp params("set", s), do: [players: s["players"], mode: s["mode"]]
   defp params("sudoku", s), do: [players: s["players"], difficulty: s["difficulty"]]

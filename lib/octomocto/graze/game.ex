@@ -2,8 +2,9 @@ defmodule Octomocto.Graze.Game do
   @moduledoc """
   One game of Graze: each player is a circle in one shared field (see
   `Octomocto.Graze.World`). The circles go through each other. A circle
-  eats the food squares for points and energy. A perk square is food that
-  also makes the circle invisible to the danger squares for some seconds.
+  eats the food squares for points and energy. With the perks setting on,
+  a perk square is food that also makes the circle invisible to the danger
+  squares for some seconds.
   A circle that touches a danger square, or that has no energy left, is
   out, and its score stays.
   The field is finished when all circles are out. The player with the
@@ -44,9 +45,9 @@ defmodule Octomocto.Graze.Game do
   @doc "How far in the past a move can be, in milliseconds."
   def lag_ms, do: @lag_ms
 
-  # Graze has no settings except the number of players
+  # The perks setting: perk squares come or not
   @impl true
-  def init_settings(_config), do: %{}
+  def init_settings(%{perks: perks}) when is_boolean(perks), do: %{perks: perks}
 
   @impl true
   def new_field(state) do
@@ -232,10 +233,17 @@ defmodule Octomocto.Graze.Game do
     Enum.reduce(food..(wanted - 1)//1, state, fn _, state ->
       # A game that started before the perks has no pause
       paused_until = Map.get(state, :perk_paused_until, 0)
-      perk = if World.perk_food?(state.squares, now, paused_until), do: :invisible
+
+      perk =
+        if perks?(state) and World.perk_food?(state.squares, now, paused_until),
+          do: :invisible
+
       add(state, :food, now, perk: perk)
     end)
   end
+
+  # A game that started before the perks setting has the perks
+  defp perks?(state), do: Map.get(state, :perks, true)
 
   # The danger squares come at the times of `next_danger_at`, more and more
   # often
@@ -322,10 +330,10 @@ defmodule Octomocto.Graze.Game do
   end
 
   @impl true
-  def lobby_settings(_state), do: %{}
+  def lobby_settings(state), do: %{perks: perks?(state)}
 
   @impl true
-  def result_settings(_state), do: %{}
+  def result_settings(state), do: %{"perks" => perks?(state)}
 
   @impl true
   def public_field(state) do

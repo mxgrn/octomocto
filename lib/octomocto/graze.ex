@@ -17,18 +17,18 @@ defmodule Octomocto.Graze do
   @list_size 5
 
   @doc """
-  Starts a new game for the given number of players, and returns its id. A
-  `public` game is in the lists of the settings page (see
+  Starts a new game for the given number of players, with or without the
+  perk squares (`perks`), and returns its id. A `public` game is in the lists of the settings page (see
   `Octomocto.Lobby`). A game with `creator` false has no creator (see
   `Octomocto.Seats`).
   """
-  def create_game(players, public, creator \\ true) do
+  def create_game(perks, players, public, creator \\ true) do
     id = :crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false)
 
     {:ok, _pid} =
       DynamicSupervisor.start_child(
         Octomocto.Graze.GameSupervisor,
-        {Game, {id, %{players: players, public: public, creator: creator}}}
+        {Game, {id, %{perks: perks, players: players, public: public, creator: creator}}}
       )
 
     id

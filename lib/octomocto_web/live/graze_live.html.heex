@@ -63,6 +63,7 @@
         <:icon>
           <.lobby_icon />
         </:icon>
+        <:summary :let={game}>{game_summary(game)}</:summary>
       </.lobby_games>
     </div>
 
@@ -84,6 +85,27 @@
             patch={~p"/graze?#{query(@settings, players: n)}"}
           >
             {n}
+          </.option>
+        </.setting>
+        <.setting
+          id="setting-perks"
+          label="Perks"
+          icon="hero-sparkles"
+          hint={
+            if(@settings.perks,
+              do:
+                "Sometimes a square with an eye comes: after you eat it, the red squares cannot touch you for 10 seconds.",
+              else: "Only the food squares and the red squares."
+            )
+          }
+        >
+          <.option
+            :for={{perks, label} <- [{false, "Off"}, {true, "On"}]}
+            id={"perks-#{if perks, do: "on", else: "off"}"}
+            selected={@settings.perks == perks}
+            patch={~p"/graze?#{query(@settings, perks: perks)}"}
+          >
+            {label}
           </.option>
         </.setting>
         <.setting
