@@ -215,6 +215,9 @@ defmodule OctomoctoWeb.Router do
       live "/set", SetGameLive, :index
       live "/set/lobby", SetGameLive, :lobby
       live "/ink-trail", InkTrailLive
+      live "/trains", TrainsLive, :index
+      live "/trains/campaign", TrainsLive, :campaign
+      live "/trains/lobby", TrainsLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
@@ -222,6 +225,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
     get "/set/:id", SetGameController, :show
     get "/ink-trail/:id", InkTrailController, :show
+    get "/trains/:id", TrainsController, :show
 
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
@@ -256,6 +260,9 @@ defmodule OctomoctoWeb.Router do
       live "/set", SetGameLive, :index
       live "/set/lobby", SetGameLive, :lobby
       live "/ink-trail", InkTrailLive
+      live "/trains", TrainsLive, :index
+      live "/trains/campaign", TrainsLive, :campaign
+      live "/trains/lobby", TrainsLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
@@ -263,6 +270,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
     get "/set/:id", SetGameController, :show
     get "/ink-trail/:id", InkTrailController, :show
+    get "/trains/:id", TrainsController, :show
 
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
@@ -297,6 +305,9 @@ defmodule OctomoctoWeb.Router do
       live "/set", SetGameLive, :index
       live "/set/lobby", SetGameLive, :lobby
       live "/ink-trail", InkTrailLive
+      live "/trains", TrainsLive, :index
+      live "/trains/campaign", TrainsLive, :campaign
+      live "/trains/lobby", TrainsLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
@@ -304,6 +315,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
     get "/set/:id", SetGameController, :show
     get "/ink-trail/:id", InkTrailController, :show
+    get "/trains/:id", TrainsController, :show
 
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
@@ -338,6 +350,9 @@ defmodule OctomoctoWeb.Router do
       live "/set", SetGameLive, :index
       live "/set/lobby", SetGameLive, :lobby
       live "/ink-trail", InkTrailLive
+      live "/trains", TrainsLive, :index
+      live "/trains/campaign", TrainsLive, :campaign
+      live "/trains/lobby", TrainsLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
@@ -345,6 +360,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
     get "/set/:id", SetGameController, :show
     get "/ink-trail/:id", InkTrailController, :show
+    get "/trains/:id", TrainsController, :show
 
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
@@ -379,6 +395,9 @@ defmodule OctomoctoWeb.Router do
       live "/set", SetGameLive, :index
       live "/set/lobby", SetGameLive, :lobby
       live "/ink-trail", InkTrailLive
+      live "/trains", TrainsLive, :index
+      live "/trains/campaign", TrainsLive, :campaign
+      live "/trains/lobby", TrainsLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
@@ -386,6 +405,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
     get "/set/:id", SetGameController, :show
     get "/ink-trail/:id", InkTrailController, :show
+    get "/trains/:id", TrainsController, :show
 
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
@@ -420,6 +440,9 @@ defmodule OctomoctoWeb.Router do
       live "/set", SetGameLive, :index
       live "/set/lobby", SetGameLive, :lobby
       live "/ink-trail", InkTrailLive
+      live "/trains", TrainsLive, :index
+      live "/trains/campaign", TrainsLive, :campaign
+      live "/trains/lobby", TrainsLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
@@ -427,6 +450,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
     get "/set/:id", SetGameController, :show
     get "/ink-trail/:id", InkTrailController, :show
+    get "/trains/:id", TrainsController, :show
 
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
@@ -461,6 +485,9 @@ defmodule OctomoctoWeb.Router do
       live "/set", SetGameLive, :index
       live "/set/lobby", SetGameLive, :lobby
       live "/ink-trail", InkTrailLive
+      live "/trains", TrainsLive, :index
+      live "/trains/campaign", TrainsLive, :campaign
+      live "/trains/lobby", TrainsLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
@@ -468,6 +495,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
     get "/set/:id", SetGameController, :show
     get "/ink-trail/:id", InkTrailController, :show
+    get "/trains/:id", TrainsController, :show
 
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
@@ -502,6 +530,9 @@ defmodule OctomoctoWeb.Router do
       live "/set", SetGameLive, :index
       live "/set/lobby", SetGameLive, :lobby
       live "/ink-trail", InkTrailLive
+      live "/trains", TrainsLive, :index
+      live "/trains/campaign", TrainsLive, :campaign
+      live "/trains/lobby", TrainsLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
@@ -509,6 +540,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
     get "/set/:id", SetGameController, :show
     get "/ink-trail/:id", InkTrailController, :show
+    get "/trains/:id", TrainsController, :show
 
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
@@ -543,6 +575,9 @@ defmodule OctomoctoWeb.Router do
       live "/set", SetGameLive, :index
       live "/set/lobby", SetGameLive, :lobby
       live "/ink-trail", InkTrailLive
+      live "/trains", TrainsLive, :index
+      live "/trains/campaign", TrainsLive, :campaign
+      live "/trains/lobby", TrainsLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
@@ -550,6 +585,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
     get "/set/:id", SetGameController, :show
     get "/ink-trail/:id", InkTrailController, :show
+    get "/trains/:id", TrainsController, :show
 
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
@@ -584,6 +620,9 @@ defmodule OctomoctoWeb.Router do
       live "/set", SetGameLive, :index
       live "/set/lobby", SetGameLive, :lobby
       live "/ink-trail", InkTrailLive
+      live "/trains", TrainsLive, :index
+      live "/trains/campaign", TrainsLive, :campaign
+      live "/trains/lobby", TrainsLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
@@ -591,6 +630,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
     get "/set/:id", SetGameController, :show
     get "/ink-trail/:id", InkTrailController, :show
+    get "/trains/:id", TrainsController, :show
 
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
@@ -625,6 +665,9 @@ defmodule OctomoctoWeb.Router do
       live "/set", SetGameLive, :index
       live "/set/lobby", SetGameLive, :lobby
       live "/ink-trail", InkTrailLive
+      live "/trains", TrainsLive, :index
+      live "/trains/campaign", TrainsLive, :campaign
+      live "/trains/lobby", TrainsLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
@@ -632,6 +675,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
     get "/set/:id", SetGameController, :show
     get "/ink-trail/:id", InkTrailController, :show
+    get "/trains/:id", TrainsController, :show
 
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq
@@ -666,6 +710,9 @@ defmodule OctomoctoWeb.Router do
       live "/set", SetGameLive, :index
       live "/set/lobby", SetGameLive, :lobby
       live "/ink-trail", InkTrailLive
+      live "/trains", TrainsLive, :index
+      live "/trains/campaign", TrainsLive, :campaign
+      live "/trains/lobby", TrainsLive, :lobby
     end
 
     # After the live routes, so that "campaign" and "lobby" are not game ids
@@ -673,6 +720,7 @@ defmodule OctomoctoWeb.Router do
     get "/echo/:id", EchoController, :show
     get "/set/:id", SetGameController, :show
     get "/ink-trail/:id", InkTrailController, :show
+    get "/trains/:id", TrainsController, :show
 
     get "/donate", PageController, :donate
     get "/faq", PageController, :faq

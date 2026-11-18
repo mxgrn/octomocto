@@ -23,7 +23,7 @@ defmodule OctomoctoWeb.LocaleRedirectTest do
   end
 
   test "keeps a page without a translation in English", %{conn: conn} do
-    conn = conn |> browser("pt-BR") |> get(~p"/trains")
+    conn = conn |> browser("pt-BR") |> get(~p"/sudoku")
     assert html_response(conn, 200)
   end
 
@@ -49,7 +49,7 @@ defmodule OctomoctoWeb.LocaleRedirectTest do
       conn
       |> init_test_session(%{"locale" => "ru"})
       |> browser("pt-BR")
-      |> get(~p"/trains")
+      |> get(~p"/sudoku")
 
     assert html_response(conn, 200)
   end
@@ -85,7 +85,7 @@ defmodule OctomoctoWeb.LocaleRedirectTest do
 
   test "redirects a live navigation to a page with a translation", %{conn: conn} do
     conn = conn |> init_test_session(%{"locale" => "pt"}) |> browser("en")
-    {:ok, view, _html} = live(conn, ~p"/trains")
+    {:ok, view, _html} = live(conn, ~p"/sudoku")
 
     assert {:error, {:redirect, %{to: "/pt/memory"}}} = live_redirect(view, to: ~p"/memory")
   end

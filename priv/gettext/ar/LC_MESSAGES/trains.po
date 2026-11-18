@@ -1,0 +1,436 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ar\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5);\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} error"
+msgid_plural "%{count} errors"
+msgstr[0] "%{count} خطأ"
+msgstr[1] "خطأ واحد"
+msgstr[2] "خطآن"
+msgstr[3] "%{count} أخطاء"
+msgstr[4] "%{count} خطأً"
+msgstr[5] "%{count} خطأ"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} house."
+msgid_plural "%{count} houses."
+msgstr[0] "%{count} بيت."
+msgstr[1] "بيت واحد."
+msgstr[2] "بيتان."
+msgstr[3] "%{count} بيوت."
+msgstr[4] "%{count} بيتًا."
+msgstr[5] "%{count} بيت."
+
+#, elixir-autogen, elixir-format
+msgid "%{count} per house"
+msgstr "%{count} لكل بيت"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} switch"
+msgid_plural "%{count} switches"
+msgstr[0] "%{count} محوّلة"
+msgstr[1] "محوّلة واحدة"
+msgstr[2] "محوّلتان"
+msgstr[3] "%{count} محوّلات"
+msgstr[4] "%{count} محوّلة"
+msgstr[5] "%{count} محوّلة"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} train"
+msgid_plural "%{count} trains"
+msgstr[0] "%{count} قطار"
+msgstr[1] "قطار واحد"
+msgstr[2] "قطاران"
+msgstr[3] "%{count} قطارات"
+msgstr[4] "%{count} قطارًا"
+msgstr[5] "%{count} قطار"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} train."
+msgid_plural "%{count} trains."
+msgstr[0] "%{count} قطار."
+msgstr[1] "قطار واحد."
+msgstr[2] "قطاران."
+msgstr[3] "%{count} قطارات."
+msgstr[4] "%{count} قطارًا."
+msgstr[5] "%{count} قطار."
+
+#, elixir-autogen, elixir-format
+msgid "A train switching game: click the switches to send each train to the house with its colors."
+msgstr "لعبة القطار والمحوّلات: انقر على المحوّلات لترسل كل قطار إلى البيت الذي يحمل ألوانه."
+
+#, elixir-autogen, elixir-format
+msgid "Back to the map"
+msgstr "العودة إلى الخريطة"
+
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "الأفضل"
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "أفضل النتائج"
+
+#, elixir-autogen, elixir-format
+msgid "Best: %{correct} of %{trains} home · %{pass} to pass"
+msgstr "الأفضل: %{correct} من %{trains} وصلت · %{pass} للنجاح"
+
+#, elixir-autogen, elixir-format
+msgid "Campaign"
+msgstr "الحملة"
+
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "غيّر الإعدادات"
+
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "اختر إعدادات اللعبة التالية."
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors."
+msgstr "انقر على المحوّلات لترسل كل قطار إلى البيت الذي يحمل ألوانه."
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors. Similar to Train of Thought on Lumosity. Free, in your browser."
+msgstr "انقر على المحوّلات لترسل كل قطار إلى البيت الذي يحمل ألوانه. لعبة تركيز وسرعة بديهة مجانية في المتصفح، وحدك أو مع أصدقائك."
+
+#, elixir-autogen, elixir-format
+msgid "Copied!"
+msgstr "تم النسخ!"
+
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr "انسخ الرابط"
+
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "تعذّر الانضمام إلى اللعبة: {reason}"
+
+#, elixir-autogen, elixir-format
+msgid "Each player owns %{count} switch."
+msgid_plural "Each player owns %{count} switches."
+msgstr[0] "لكل لاعب %{count} محوّلة."
+msgstr[1] "لكل لاعب محوّلة واحدة."
+msgstr[2] "لكل لاعب محوّلتان."
+msgstr[3] "لكل لاعب %{count} محوّلات."
+msgstr[4] "لكل لاعب %{count} محوّلة."
+msgstr[5] "لكل لاعب %{count} محوّلة."
+
+#, elixir-autogen, elixir-format
+msgid "Easy"
+msgstr "سهل"
+
+#, elixir-autogen, elixir-format
+msgid "Expert"
+msgstr "خبير"
+
+#, elixir-autogen, elixir-format
+msgid "Free play"
+msgstr "لعب حر"
+
+#, elixir-autogen, elixir-format
+msgid "From 4 down to 2 seconds apart. The trains get very fast very early in the game."
+msgstr "الفاصل بين القطارات من 4 ثوانٍ إلى ثانيتين. تصبح القطارات سريعة جدًا منذ بداية اللعبة."
+
+#, elixir-autogen, elixir-format
+msgid "From 5 down to 3 seconds apart. The trains get fast early in the game."
+msgstr "الفاصل بين القطارات من 5 إلى 3 ثوانٍ. تصبح القطارات سريعة في وقت مبكر من اللعبة."
+
+#, elixir-autogen, elixir-format
+msgid "Get %{pass} of %{trains} trains home to pass."
+msgstr "أوصِل %{pass} من أصل %{trains} إلى بيوتها لتنجح."
+
+#, elixir-autogen, elixir-format
+msgid "Get 90% of the trains home to unlock the next level."
+msgstr "أوصِل 90% من القطارات إلى بيوتها لتفتح المستوى التالي."
+
+#, elixir-autogen, elixir-format
+msgid "Good work."
+msgstr "عمل جيد."
+
+#, elixir-autogen, elixir-format
+msgid "Hard"
+msgstr "صعب"
+
+#, elixir-autogen, elixir-format
+msgid "Highest level"
+msgstr "أعلى مستوى"
+
+#, elixir-autogen, elixir-format
+msgid "Highest levels"
+msgstr "أعلى المستويات"
+
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "جارٍ الانضمام إلى اللعبة…"
+
+#, elixir-autogen, elixir-format
+msgid "Level %{level}"
+msgstr "المستوى %{level}"
+
+#, elixir-autogen, elixir-format
+msgid "Level {level}"
+msgstr "المستوى {level}"
+
+#, elixir-autogen, elixir-format
+msgid "Level {level} done · {correct} of {total} trains got home."
+msgstr "اكتمل المستوى {level} · القطارات التي وصلت: {correct} من {total}."
+
+#, elixir-autogen, elixir-format
+msgid "Levels"
+msgstr "المستويات"
+
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "الردهة"
+
+#, elixir-autogen, elixir-format
+msgid "Menu"
+msgstr "القائمة"
+
+#, elixir-autogen, elixir-format
+msgid "New board"
+msgstr "لوحة جديدة"
+
+#, elixir-autogen, elixir-format
+msgid "Next level"
+msgstr "المستوى التالي"
+
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "لا توجد ألعاب بعد."
+
+#, elixir-autogen, elixir-format
+msgid "Nobody has passed a level yet."
+msgstr "لم يجتز أحد أي مستوى بعد."
+
+#, elixir-autogen, elixir-format
+msgid "Normal"
+msgstr "عادي"
+
+#, elixir-autogen, elixir-format
+msgid "Not enough trains got home"
+msgstr "لم يصل عدد كافٍ من القطارات"
+
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "أو جرّب {game}"
+
+#, elixir-autogen, elixir-format
+msgid "Pace"
+msgstr "الوتيرة"
+
+#, elixir-autogen, elixir-format
+msgid "Pass level %{level} first."
+msgstr "اجتز المستوى %{level} أولًا."
+
+#, elixir-autogen, elixir-format
+msgid "Perfect!"
+msgstr "ممتاز!"
+
+#, elixir-autogen, elixir-format
+msgid "Play"
+msgstr "العب"
+
+#, elixir-autogen, elixir-format
+msgid "Play again"
+msgstr "العب مجددًا"
+
+#, elixir-autogen, elixir-format
+msgid "Play together. Each player owns some of the switches."
+msgstr "العبوا معًا. لكل لاعب بعض المحوّلات."
+
+#, elixir-autogen, elixir-format
+msgid "Players"
+msgstr "اللاعبون"
+
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "خاصة"
+
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "عامة"
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track"
+msgstr "Right on Track"
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track is a Train of Thought-like game. Lumosity and Train of Thought are trademarks of Lumos Labs. Octomocto is not affiliated with Lumos Labs."
+msgstr "Right on Track لعبة تشبه Train of Thought. إن Lumosity وTrain of Thought علامتان تجاريتان لشركة Lumos Labs. ولا ترتبط Octomocto بشركة Lumos Labs."
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track: a Train of Thought-Like Game"
+msgstr "Right on Track: لعبة القطار أونلاين – لعبة تركيز وسرعة"
+
+#, elixir-autogen, elixir-format
+msgid "Send each train to the house with its colors."
+msgstr "أرسل كل قطار إلى البيت الذي يحمل ألوانه."
+
+#, elixir-autogen, elixir-format
+msgid "Send each train to the house with its colors. You can flip only the switches in your color."
+msgstr "أرسل كل قطار إلى البيت الذي يحمل ألوانه. يمكنك تبديل المحوّلات التي بلونك فقط."
+
+#, elixir-autogen, elixir-format
+msgid "Send the link to the other players."
+msgstr "أرسل الرابط إلى اللاعبين الآخرين."
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "سجّل الدخول"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to enable campaigns"
+msgstr "سجّل الدخول لتفعيل الحملة"
+
+#, elixir-autogen, elixir-format
+msgid "Starting..."
+msgstr "جارٍ البدء..."
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "ادعم المبدع"
+
+#, elixir-autogen, elixir-format
+msgid "Switches"
+msgstr "المحوّلات"
+
+#, elixir-autogen, elixir-format
+msgid "The pace tells how fast the trains come one after another."
+msgstr "الوتيرة تحدد سرعة تتابع القطارات."
+
+#, elixir-autogen, elixir-format
+msgid "The round ends when all trains have arrived. The score is the number of trains that got to the correct house."
+msgstr "تنتهي الجولة عندما تصل كل القطارات. النتيجة هي عدد القطارات التي وصلت إلى البيت الصحيح."
+
+#, elixir-autogen, elixir-format
+msgid "The tracks split at the switches. Click a switch to change its direction. A train follows the direction of each switch on its way."
+msgstr "تتفرع السكك عند المحوّلات. انقر على محوّلة لتغيّر اتجاهها. يتبع القطار اتجاه كل محوّلة في طريقه."
+
+#, elixir-autogen, elixir-format
+msgid "The trains come a bit faster and faster: from 8 down to 6 seconds apart."
+msgstr "تأتي القطارات أسرع قليلًا مع الوقت: الفاصل من 8 إلى 6 ثوانٍ."
+
+#, elixir-autogen, elixir-format
+msgid "The trains come faster and faster: from 6 down to 4 seconds apart."
+msgstr "تأتي القطارات أسرع فأسرع: الفاصل من 6 إلى 4 ثوانٍ."
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "اللاعب {color} يغيّر الإعدادات…"
+
+#, elixir-autogen, elixir-format
+msgid "Trains leave the station one at a time. Each train has the colors of one of the houses."
+msgstr "تغادر القطارات المحطة واحدًا تلو الآخر. كل قطار يحمل ألوان أحد البيوت."
+
+#, elixir-autogen, elixir-format
+msgid "Trains per house"
+msgstr "القطارات لكل بيت"
+
+#, elixir-autogen, elixir-format
+msgid "Try again"
+msgstr "حاول مجددًا"
+
+#, elixir-autogen, elixir-format
+msgid "Try again with a new layout."
+msgstr "حاول مجددًا بمخطط سكك جديد."
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "أوقف الأصوات"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "شغّل الأصوات"
+
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "الظهور"
+
+#, elixir-autogen, elixir-format
+msgid "Waiting for players"
+msgstr "بانتظار اللاعبين"
+
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "المشاهدون: {count}"
+
+#, elixir-autogen, elixir-format
+msgid "With more players, each player owns some of the switches and can change only those."
+msgstr "مع عدة لاعبين، لكل لاعب بعض المحوّلات، ولا يمكنه تبديل غيرها."
+
+#, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "أنت تشاهد هذه اللعبة."
+
+#, elixir-autogen, elixir-format
+msgid "You finished the campaign!"
+msgstr "أنهيت الحملة!"
+
+#, elixir-autogen, elixir-format
+msgid "You own all the switches."
+msgstr "كل المحوّلات لك."
+
+#, elixir-autogen, elixir-format
+msgid "Your progress is saved to your account."
+msgstr "يُحفظ تقدمك في حسابك."
+
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "نتائجك"
+
+#, elixir-autogen, elixir-format
+msgid "correct"
+msgstr "صحيح"
+
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "لتظهر في القائمة"
+
+#, elixir-autogen, elixir-format
+msgid "train"
+msgstr "القطار"
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home"
+msgstr "القطارات التي وصلت: {correct} من {total}"
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home."
+msgstr "القطارات التي وصلت: {correct} من {total}."
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home. {pass} are needed."
+msgstr "القطارات التي وصلت: {correct} من {total}. المطلوب: {pass}."
+
+#, elixir-autogen, elixir-format
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "{feed} ليبقى Octomocto بلا إعلانات."
+
+#, elixir-autogen, elixir-format
+msgid "{name} (you)"
+msgstr "{name} (أنت)"
+
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name} يغيّر الإعدادات…"
+
+#, elixir-autogen, elixir-format
+msgid "{players} of {needed} players are in"
+msgstr "انضم {players} من {needed} لاعبين"
+
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in} لتحفظ نتائجك."

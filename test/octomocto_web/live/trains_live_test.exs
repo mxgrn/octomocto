@@ -34,4 +34,21 @@ defmodule OctomoctoWeb.TrainsLiveTest do
     assert to == ~p"/trains/#{id}"
     assert %{pace: "hard", needed: 2, public: true, editing: nil} = Store.read(id)
   end
+
+  for locale <- ~w(pt de ru fr uk pl it es ja vi tr ar) do
+    test "/#{locale}/trains shows Right on Track in the language", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/#{unquote(locale)}/trains")
+
+      assert has_element?(view, "#new-game")
+      # The logo goes to the front page in the same language
+      assert has_element?(view, ~s|a[href="/#{unquote(locale)}"]|)
+    end
+  end
+
+  test "a new game on a localized page opens in the same language", %{conn: conn} do
+    {:ok, view, _html} = live(conn, "/pt/trains")
+
+    assert {:error, {:redirect, %{to: "/pt/trains/" <> _id}}} =
+             view |> element("#new-game") |> render_click()
+  end
 end

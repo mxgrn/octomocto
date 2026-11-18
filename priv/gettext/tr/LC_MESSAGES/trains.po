@@ -1,0 +1,412 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: tr\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} error"
+msgid_plural "%{count} errors"
+msgstr[0] "%{count} hata"
+msgstr[1] "%{count} hata"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} house."
+msgid_plural "%{count} houses."
+msgstr[0] "%{count} ev."
+msgstr[1] "%{count} ev."
+
+#, elixir-autogen, elixir-format
+msgid "%{count} per house"
+msgstr "ev başına %{count}"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} switch"
+msgid_plural "%{count} switches"
+msgstr[0] "%{count} makas"
+msgstr[1] "%{count} makas"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} train"
+msgid_plural "%{count} trains"
+msgstr[0] "%{count} tren"
+msgstr[1] "%{count} tren"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} train."
+msgid_plural "%{count} trains."
+msgstr[0] "%{count} tren."
+msgstr[1] "%{count} tren."
+
+#, elixir-autogen, elixir-format
+msgid "A train switching game: click the switches to send each train to the house with its colors."
+msgstr "Makaslı bir tren oyunu: her treni kendi renklerindeki eve göndermek için makaslara tıkla."
+
+#, elixir-autogen, elixir-format
+msgid "Back to the map"
+msgstr "Haritaya dön"
+
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "En iyi"
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "En iyi sonuçlar"
+
+#, elixir-autogen, elixir-format
+msgid "Best: %{correct} of %{trains} home · %{pass} to pass"
+msgstr "En iyi: %{trains} trenden %{correct} evde · geçmek için %{pass}"
+
+#, elixir-autogen, elixir-format
+msgid "Campaign"
+msgstr "Kampanya"
+
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "Ayarları değiştir"
+
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "Sonraki oyunun ayarlarını seç."
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors."
+msgstr "Her treni kendi renklerindeki eve göndermek için makaslara tıkla."
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors. Similar to Train of Thought on Lumosity. Free, in your browser."
+msgstr "Her treni kendi renklerindeki eve göndermek için makaslara tıkla. Ücretsiz dikkat geliştirme oyunu: tarayıcında tek başına veya arkadaşlarınla oyna."
+
+#, elixir-autogen, elixir-format
+msgid "Copied!"
+msgstr "Kopyalandı!"
+
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr "Bağlantıyı kopyala"
+
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "Oyuna katılınamadı: {reason}"
+
+#, elixir-autogen, elixir-format
+msgid "Each player owns %{count} switch."
+msgid_plural "Each player owns %{count} switches."
+msgstr[0] "Her oyuncunun %{count} makası var."
+msgstr[1] "Her oyuncunun %{count} makası var."
+
+#, elixir-autogen, elixir-format
+msgid "Easy"
+msgstr "Kolay"
+
+#, elixir-autogen, elixir-format
+msgid "Expert"
+msgstr "Uzman"
+
+#, elixir-autogen, elixir-format
+msgid "Free play"
+msgstr "Serbest oyun"
+
+#, elixir-autogen, elixir-format
+msgid "From 4 down to 2 seconds apart. The trains get very fast very early in the game."
+msgstr "Trenler arası 4 saniyeden 2 saniyeye iner. Trenler oyunun en başında çok hızlanır."
+
+#, elixir-autogen, elixir-format
+msgid "From 5 down to 3 seconds apart. The trains get fast early in the game."
+msgstr "Trenler arası 5 saniyeden 3 saniyeye iner. Trenler oyunun başında hızlanır."
+
+#, elixir-autogen, elixir-format
+msgid "Get %{pass} of %{trains} trains home to pass."
+msgstr "Geçmek için %{trains} trenden %{pass} tanesini eve ulaştır."
+
+#, elixir-autogen, elixir-format
+msgid "Get 90% of the trains home to unlock the next level."
+msgstr "Sonraki seviyeyi açmak için trenlerin %90'ını eve ulaştır."
+
+#, elixir-autogen, elixir-format
+msgid "Good work."
+msgstr "İyi iş."
+
+#, elixir-autogen, elixir-format
+msgid "Hard"
+msgstr "Zor"
+
+#, elixir-autogen, elixir-format
+msgid "Highest level"
+msgstr "En yüksek seviye"
+
+#, elixir-autogen, elixir-format
+msgid "Highest levels"
+msgstr "En yüksek seviyeler"
+
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "Oyuna katılınıyor…"
+
+#, elixir-autogen, elixir-format
+msgid "Level %{level}"
+msgstr "Seviye %{level}"
+
+#, elixir-autogen, elixir-format
+msgid "Level {level}"
+msgstr "Seviye {level}"
+
+#, elixir-autogen, elixir-format
+msgid "Level {level} done · {correct} of {total} trains got home."
+msgstr "Seviye {level} tamam · {total} trenden {correct} tanesi eve ulaştı."
+
+#, elixir-autogen, elixir-format
+msgid "Levels"
+msgstr "Seviyeler"
+
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "Lobi"
+
+#, elixir-autogen, elixir-format
+msgid "Menu"
+msgstr "Menü"
+
+#, elixir-autogen, elixir-format
+msgid "New board"
+msgstr "Yeni tahta"
+
+#, elixir-autogen, elixir-format
+msgid "Next level"
+msgstr "Sonraki seviye"
+
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "Henüz oyun yok."
+
+#, elixir-autogen, elixir-format
+msgid "Nobody has passed a level yet."
+msgstr "Henüz kimse bir seviyeyi geçmedi."
+
+#, elixir-autogen, elixir-format
+msgid "Normal"
+msgstr "Normal"
+
+#, elixir-autogen, elixir-format
+msgid "Not enough trains got home"
+msgstr "Eve yeterince tren ulaşmadı"
+
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "Ya da şunu dene: {game}"
+
+#, elixir-autogen, elixir-format
+msgid "Pace"
+msgstr "Tempo"
+
+#, elixir-autogen, elixir-format
+msgid "Pass level %{level} first."
+msgstr "Önce %{level}. seviyeyi geç."
+
+#, elixir-autogen, elixir-format
+msgid "Perfect!"
+msgstr "Mükemmel!"
+
+#, elixir-autogen, elixir-format
+msgid "Play"
+msgstr "Oyna"
+
+#, elixir-autogen, elixir-format
+msgid "Play again"
+msgstr "Tekrar oyna"
+
+#, elixir-autogen, elixir-format
+msgid "Play together. Each player owns some of the switches."
+msgstr "Birlikte oynayın. Her oyuncu makasların bir kısmını yönetir."
+
+#, elixir-autogen, elixir-format
+msgid "Players"
+msgstr "Oyuncular"
+
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "Özel"
+
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "Herkese açık"
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track"
+msgstr "Right on Track"
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track is a Train of Thought-like game. Lumosity and Train of Thought are trademarks of Lumos Labs. Octomocto is not affiliated with Lumos Labs."
+msgstr "Right on Track, Train of Thought benzeri bir oyundur. Lumosity ve Train of Thought, Lumos Labs şirketinin ticari markalarıdır. Octomocto'nun Lumos Labs ile bir bağlantısı yoktur."
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track: a Train of Thought-Like Game"
+msgstr "Right on Track: tren oyunu oyna – dikkat geliştirme oyunu"
+
+#, elixir-autogen, elixir-format
+msgid "Send each train to the house with its colors."
+msgstr "Her treni kendi renklerindeki eve gönder."
+
+#, elixir-autogen, elixir-format
+msgid "Send each train to the house with its colors. You can flip only the switches in your color."
+msgstr "Her treni kendi renklerindeki eve gönder. Yalnızca kendi rengindeki makasları değiştirebilirsin."
+
+#, elixir-autogen, elixir-format
+msgid "Send the link to the other players."
+msgstr "Bağlantıyı diğer oyunculara gönder."
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Giriş yap"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to enable campaigns"
+msgstr "Kampanyayı açmak için giriş yap"
+
+#, elixir-autogen, elixir-format
+msgid "Starting..."
+msgstr "Başlatılıyor..."
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "Yapımcıyı destekle"
+
+#, elixir-autogen, elixir-format
+msgid "Switches"
+msgstr "Makaslar"
+
+#, elixir-autogen, elixir-format
+msgid "The pace tells how fast the trains come one after another."
+msgstr "Tempo, trenlerin art arda ne kadar hızlı geldiğini belirler."
+
+#, elixir-autogen, elixir-format
+msgid "The round ends when all trains have arrived. The score is the number of trains that got to the correct house."
+msgstr "Tüm trenler varınca tur biter. Puan, doğru eve ulaşan trenlerin sayısıdır."
+
+#, elixir-autogen, elixir-format
+msgid "The tracks split at the switches. Click a switch to change its direction. A train follows the direction of each switch on its way."
+msgstr "Raylar makaslarda ayrılır. Yönünü değiştirmek için bir makasa tıkla. Tren, yolundaki her makasın yönünü izler."
+
+#, elixir-autogen, elixir-format
+msgid "The trains come a bit faster and faster: from 8 down to 6 seconds apart."
+msgstr "Trenler yavaş yavaş biraz daha sık gelir: aralık 8 saniyeden 6 saniyeye iner."
+
+#, elixir-autogen, elixir-format
+msgid "The trains come faster and faster: from 6 down to 4 seconds apart."
+msgstr "Trenler gittikçe daha sık gelir: aralık 6 saniyeden 4 saniyeye iner."
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "Ayarları {color} oyuncu değiştiriyor…"
+
+#, elixir-autogen, elixir-format
+msgid "Trains leave the station one at a time. Each train has the colors of one of the houses."
+msgstr "Trenler istasyondan birer birer çıkar. Her tren, evlerden birinin renklerini taşır."
+
+#, elixir-autogen, elixir-format
+msgid "Trains per house"
+msgstr "Ev başına tren"
+
+#, elixir-autogen, elixir-format
+msgid "Try again"
+msgstr "Tekrar dene"
+
+#, elixir-autogen, elixir-format
+msgid "Try again with a new layout."
+msgstr "Yeni bir ray düzeniyle tekrar dene."
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "Sesleri kapat"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "Sesleri aç"
+
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "Görünürlük"
+
+#, elixir-autogen, elixir-format
+msgid "Waiting for players"
+msgstr "Oyuncular bekleniyor"
+
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "İzleyenler: {count}"
+
+#, elixir-autogen, elixir-format
+msgid "With more players, each player owns some of the switches and can change only those."
+msgstr "Birden fazla oyuncuyla, her oyuncu makasların bir kısmını yönetir ve yalnızca onları değiştirebilir."
+
+#, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "Bu oyunu izliyorsunuz."
+
+#, elixir-autogen, elixir-format
+msgid "You finished the campaign!"
+msgstr "Kampanyayı bitirdin!"
+
+#, elixir-autogen, elixir-format
+msgid "You own all the switches."
+msgstr "Tüm makaslar senin."
+
+#, elixir-autogen, elixir-format
+msgid "Your progress is saved to your account."
+msgstr "İlerlemen hesabına kaydedilir."
+
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "Sonuçların"
+
+#, elixir-autogen, elixir-format
+msgid "correct"
+msgstr "doğru"
+
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "ve listeye gir"
+
+#, elixir-autogen, elixir-format
+msgid "train"
+msgstr "tren"
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home"
+msgstr "{total} trenden {correct} tanesi eve ulaştı"
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home."
+msgstr "{total} trenden {correct} tanesi eve ulaştı."
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home. {pass} are needed."
+msgstr "{total} trenden {correct} tanesi eve ulaştı. {pass} tren gerekli."
+
+#, elixir-autogen, elixir-format
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "Octomocto'nun reklamsız kalması için {feed}."
+
+#, elixir-autogen, elixir-format
+msgid "{name} (you)"
+msgstr "{name} (sen)"
+
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name} ayarları değiştiriyor…"
+
+#, elixir-autogen, elixir-format
+msgid "{players} of {needed} players are in"
+msgstr "{players}/{needed} oyuncu katıldı"
+
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in} ve skorların kaydedilsin."

@@ -1,0 +1,406 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} error"
+msgid_plural "%{count} errors"
+msgstr[0] "ミス%{count}回"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} house."
+msgid_plural "%{count} houses."
+msgstr[0] "家は%{count}軒。"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} per house"
+msgstr "1軒につき%{count}本"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} switch"
+msgid_plural "%{count} switches"
+msgstr[0] "分岐器%{count}個"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} train"
+msgid_plural "%{count} trains"
+msgstr[0] "列車%{count}本"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} train."
+msgid_plural "%{count} trains."
+msgstr[0] "列車は%{count}本。"
+
+#, elixir-autogen, elixir-format
+msgid "A train switching game: click the switches to send each train to the house with its colors."
+msgstr "列車と分岐器のゲーム：分岐器をクリックして、それぞれの列車を同じ色の家へ送ろう。"
+
+#, elixir-autogen, elixir-format
+msgid "Back to the map"
+msgstr "レベル一覧へ"
+
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "ベスト"
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "ベスト記録"
+
+#, elixir-autogen, elixir-format
+msgid "Best: %{correct} of %{trains} home · %{pass} to pass"
+msgstr "ベスト：%{trains}本中%{correct}本到着 · クリアには%{pass}本"
+
+#, elixir-autogen, elixir-format
+msgid "Campaign"
+msgstr "チャレンジ"
+
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "設定を変える"
+
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "次のゲームの設定を選ぼう。"
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors."
+msgstr "分岐器をクリックして、それぞれの列車を同じ色の家へ送ろう。"
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors. Similar to Train of Thought on Lumosity. Free, in your browser."
+msgstr "分岐器をクリックして、それぞれの列車を同じ色の家へ送ろう。反射神経と集中力を鍛える無料のブラウザゲーム。ひとりでも友達とでも。"
+
+#, elixir-autogen, elixir-format
+msgid "Copied!"
+msgstr "コピーした！"
+
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr "リンクをコピー"
+
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "ゲームに参加できなかった：{reason}"
+
+#, elixir-autogen, elixir-format
+msgid "Each player owns %{count} switch."
+msgid_plural "Each player owns %{count} switches."
+msgstr[0] "各プレイヤーの分岐器は%{count}個。"
+
+#, elixir-autogen, elixir-format
+msgid "Easy"
+msgstr "かんたん"
+
+#, elixir-autogen, elixir-format
+msgid "Expert"
+msgstr "エキスパート"
+
+#, elixir-autogen, elixir-format
+msgid "Free play"
+msgstr "フリープレイ"
+
+#, elixir-autogen, elixir-format
+msgid "From 4 down to 2 seconds apart. The trains get very fast very early in the game."
+msgstr "列車の間隔は4秒から2秒へ。ゲームの序盤からとても速くなる。"
+
+#, elixir-autogen, elixir-format
+msgid "From 5 down to 3 seconds apart. The trains get fast early in the game."
+msgstr "列車の間隔は5秒から3秒へ。ゲームの早い段階で速くなる。"
+
+#, elixir-autogen, elixir-format
+msgid "Get %{pass} of %{trains} trains home to pass."
+msgstr "クリアするには%{trains}本中%{pass}本の列車を家に届けよう。"
+
+#, elixir-autogen, elixir-format
+msgid "Get 90% of the trains home to unlock the next level."
+msgstr "列車の90%を家に届けると、次のレベルが開く。"
+
+#, elixir-autogen, elixir-format
+msgid "Good work."
+msgstr "いい調子。"
+
+#, elixir-autogen, elixir-format
+msgid "Hard"
+msgstr "むずかしい"
+
+#, elixir-autogen, elixir-format
+msgid "Highest level"
+msgstr "最高レベル"
+
+#, elixir-autogen, elixir-format
+msgid "Highest levels"
+msgstr "最高レベル"
+
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "ゲームに参加中…"
+
+#, elixir-autogen, elixir-format
+msgid "Level %{level}"
+msgstr "レベル%{level}"
+
+#, elixir-autogen, elixir-format
+msgid "Level {level}"
+msgstr "レベル{level}"
+
+#, elixir-autogen, elixir-format
+msgid "Level {level} done · {correct} of {total} trains got home."
+msgstr "レベル{level}クリア · {total}本中{correct}本の列車が家に到着。"
+
+#, elixir-autogen, elixir-format
+msgid "Levels"
+msgstr "レベル"
+
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "ロビー"
+
+#, elixir-autogen, elixir-format
+msgid "Menu"
+msgstr "メニュー"
+
+#, elixir-autogen, elixir-format
+msgid "New board"
+msgstr "新しい盤面"
+
+#, elixir-autogen, elixir-format
+msgid "Next level"
+msgstr "次のレベル"
+
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "まだゲームはない。"
+
+#, elixir-autogen, elixir-format
+msgid "Nobody has passed a level yet."
+msgstr "まだ誰もレベルをクリアしていない。"
+
+#, elixir-autogen, elixir-format
+msgid "Normal"
+msgstr "ふつう"
+
+#, elixir-autogen, elixir-format
+msgid "Not enough trains got home"
+msgstr "家に着いた列車が足りない"
+
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "{game}も遊んでみよう"
+
+#, elixir-autogen, elixir-format
+msgid "Pace"
+msgstr "ペース"
+
+#, elixir-autogen, elixir-format
+msgid "Pass level %{level} first."
+msgstr "先にレベル%{level}をクリアしよう。"
+
+#, elixir-autogen, elixir-format
+msgid "Perfect!"
+msgstr "パーフェクト！"
+
+#, elixir-autogen, elixir-format
+msgid "Play"
+msgstr "プレイ"
+
+#, elixir-autogen, elixir-format
+msgid "Play again"
+msgstr "もう一度遊ぶ"
+
+#, elixir-autogen, elixir-format
+msgid "Play together. Each player owns some of the switches."
+msgstr "みんなで協力しよう。各プレイヤーが分岐器の一部を担当する。"
+
+#, elixir-autogen, elixir-format
+msgid "Players"
+msgstr "プレイヤー"
+
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "非公開"
+
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "公開"
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track"
+msgstr "Right on Track"
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track is a Train of Thought-like game. Lumosity and Train of Thought are trademarks of Lumos Labs. Octomocto is not affiliated with Lumos Labs."
+msgstr "Right on TrackはTrain of Thoughtに似たゲームです。LumosityとTrain of ThoughtはLumos Labsの商標です。OctomoctoはLumos Labsとは関係ありません。"
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track: a Train of Thought-Like Game"
+msgstr "Right on Track：電車を仕分ける反射神経ゲーム"
+
+#, elixir-autogen, elixir-format
+msgid "Send each train to the house with its colors."
+msgstr "それぞれの列車を同じ色の家へ送ろう。"
+
+#, elixir-autogen, elixir-format
+msgid "Send each train to the house with its colors. You can flip only the switches in your color."
+msgstr "それぞれの列車を同じ色の家へ送ろう。切り替えられるのは自分の色の分岐器だけ。"
+
+#, elixir-autogen, elixir-format
+msgid "Send the link to the other players."
+msgstr "リンクをほかのプレイヤーに送ろう。"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "ログイン"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to enable campaigns"
+msgstr "ログインしてチャレンジを遊ぼう"
+
+#, elixir-autogen, elixir-format
+msgid "Starting..."
+msgstr "開始中..."
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "作者を応援しよう"
+
+#, elixir-autogen, elixir-format
+msgid "Switches"
+msgstr "分岐器"
+
+#, elixir-autogen, elixir-format
+msgid "The pace tells how fast the trains come one after another."
+msgstr "ペースは、列車が次々に出てくる速さを決める。"
+
+#, elixir-autogen, elixir-format
+msgid "The round ends when all trains have arrived. The score is the number of trains that got to the correct house."
+msgstr "すべての列車が到着するとラウンド終了。スコアは、正しい家に着いた列車の数。"
+
+#, elixir-autogen, elixir-format
+msgid "The tracks split at the switches. Click a switch to change its direction. A train follows the direction of each switch on its way."
+msgstr "線路は分岐器で分かれる。分岐器をクリックすると向きが変わる。列車は通り道にある分岐器の向きに従って進む。"
+
+#, elixir-autogen, elixir-format
+msgid "The trains come a bit faster and faster: from 8 down to 6 seconds apart."
+msgstr "列車は少しずつ速く出てくる：間隔は8秒から6秒へ。"
+
+#, elixir-autogen, elixir-format
+msgid "The trains come faster and faster: from 6 down to 4 seconds apart."
+msgstr "列車はどんどん速く出てくる：間隔は6秒から4秒へ。"
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "{color}のプレイヤーが設定を変更中…"
+
+#, elixir-autogen, elixir-format
+msgid "Trains leave the station one at a time. Each train has the colors of one of the houses."
+msgstr "列車は駅から1本ずつ出発する。それぞれの列車は、どれかの家と同じ色。"
+
+#, elixir-autogen, elixir-format
+msgid "Trains per house"
+msgstr "1軒あたりの列車"
+
+#, elixir-autogen, elixir-format
+msgid "Try again"
+msgstr "もう一度"
+
+#, elixir-autogen, elixir-format
+msgid "Try again with a new layout."
+msgstr "新しい線路でもう一度挑戦しよう。"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "音をオフにする"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "音をオンにする"
+
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "公開設定"
+
+#, elixir-autogen, elixir-format
+msgid "Waiting for players"
+msgstr "プレイヤー待ち"
+
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "観戦者：{count}"
+
+#, elixir-autogen, elixir-format
+msgid "With more players, each player owns some of the switches and can change only those."
+msgstr "複数人で遊ぶときは、各プレイヤーが分岐器の一部を担当し、自分の分岐器だけを切り替えられる。"
+
+#, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "このゲームを観戦中です。"
+
+#, elixir-autogen, elixir-format
+msgid "You finished the campaign!"
+msgstr "チャレンジを全部クリア！"
+
+#, elixir-autogen, elixir-format
+msgid "You own all the switches."
+msgstr "すべての分岐器を自分で操作する。"
+
+#, elixir-autogen, elixir-format
+msgid "Your progress is saved to your account."
+msgstr "進み具合はアカウントに保存される。"
+
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "自分の記録"
+
+#, elixir-autogen, elixir-format
+msgid "correct"
+msgstr "正解"
+
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "してランキングに載ろう"
+
+#, elixir-autogen, elixir-format
+msgid "train"
+msgstr "列車"
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home"
+msgstr "{total}本中{correct}本の列車が家に到着"
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home."
+msgstr "{total}本中{correct}本の列車が家に到着。"
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home. {pass} are needed."
+msgstr "{total}本中{correct}本の列車が家に到着。クリアには{pass}本必要。"
+
+#, elixir-autogen, elixir-format
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "Octomoctoを広告なしで続けるために、{feed}。"
+
+#, elixir-autogen, elixir-format
+msgid "{name} (you)"
+msgstr "{name}（自分）"
+
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name}が設定を変更中…"
+
+#, elixir-autogen, elixir-format
+msgid "{players} of {needed} players are in"
+msgstr "参加者：{players}/{needed}人"
+
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in}して、スコアを残そう。"

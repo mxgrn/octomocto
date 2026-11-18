@@ -53,18 +53,18 @@ defmodule OctomoctoWeb.Locale do
 
   # The games with translations, by language
   @games %{
-    "pt" => ["memory", "echo", "set", "ink-trail"],
-    "de" => ["memory", "echo", "set", "ink-trail"],
-    "ru" => ["memory", "echo", "set", "ink-trail"],
-    "fr" => ["memory", "echo", "set", "ink-trail"],
-    "uk" => ["memory", "echo", "set", "ink-trail"],
-    "pl" => ["memory", "echo", "set", "ink-trail"],
-    "it" => ["memory", "echo", "set", "ink-trail"],
-    "es" => ["memory", "echo", "set", "ink-trail"],
-    "ja" => ["memory", "echo", "set", "ink-trail"],
-    "vi" => ["memory", "echo", "set", "ink-trail"],
-    "tr" => ["memory", "echo", "set", "ink-trail"],
-    "ar" => ["memory", "echo", "set", "ink-trail"]
+    "pt" => ["memory", "echo", "set", "ink-trail", "trains"],
+    "de" => ["memory", "echo", "set", "ink-trail", "trains"],
+    "ru" => ["memory", "echo", "set", "ink-trail", "trains"],
+    "fr" => ["memory", "echo", "set", "ink-trail", "trains"],
+    "uk" => ["memory", "echo", "set", "ink-trail", "trains"],
+    "pl" => ["memory", "echo", "set", "ink-trail", "trains"],
+    "it" => ["memory", "echo", "set", "ink-trail", "trains"],
+    "es" => ["memory", "echo", "set", "ink-trail", "trains"],
+    "ja" => ["memory", "echo", "set", "ink-trail", "trains"],
+    "vi" => ["memory", "echo", "set", "ink-trail", "trains"],
+    "tr" => ["memory", "echo", "set", "ink-trail", "trains"],
+    "ar" => ["memory", "echo", "set", "ink-trail", "trains"]
   }
 
   def init(locale), do: locale

@@ -291,7 +291,7 @@ if (trainsNode) {
   let muted = false
   try { muted = localStorage.getItem("trains-muted") === "true" } catch (_e) {}
 
-  const trains = window.Elm.Trains.init({node: trainsNode, flags: {gameUrl: window.location.href, settingsUrl: trainsNode.dataset.settingsUrl, changeSettingsUrl: trainsNode.dataset.changeSettingsUrl || null, nextGame: {name: trainsNode.dataset.nextGameName, path: trainsNode.dataset.nextGamePath}, guest: !trainsNode.dataset.userToken, muted}})
+  const trains = window.Elm.Trains.init({node: trainsNode, flags: {gameUrl: window.location.href, indexUrl: trainsNode.dataset.indexUrl, settingsUrl: trainsNode.dataset.settingsUrl, changeSettingsUrl: trainsNode.dataset.changeSettingsUrl || null, nextGame: {name: trainsNode.dataset.nextGameName, path: trainsNode.dataset.nextGamePath}, donateUrl: trainsNode.dataset.donateUrl, guest: !trainsNode.dataset.userToken, muted, texts: JSON.parse(trainsNode.dataset.texts), plurals: JSON.parse(trainsNode.dataset.plurals), locale: trainsNode.dataset.locale}})
   const socket = new Socket("/socket", {params: {user_token: trainsNode.dataset.userToken, _csrf_token: csrfToken}})
   socket.connect()
 
@@ -334,7 +334,7 @@ if (trainsNode) {
   connectNextGame(trains.ports.trainsNextGame, channel, trainsNode)
   trains.ports.trainsNextLevel.subscribe(() => {
     channel.push("next_level", {})
-      .receive("ok", ({id}) => window.location.assign(`/trains/${id}`))
+      .receive("ok", ({id}) => window.location.assign(`${trainsNode.dataset.indexUrl}/${id}`))
   })
   trains.ports.trainsFinished.subscribe(result => channel.push("finished", result))
   trains.ports.trainsCopyText.subscribe(text => navigator.clipboard.writeText(text))

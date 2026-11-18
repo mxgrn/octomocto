@@ -35,7 +35,7 @@ defmodule OctomoctoWeb.TrainsLive do
 
     {:ok,
      socket
-     |> assign([canonical_url: url(~p"/trains"), rules: rules(), match: match] ++ seo())
+     |> assign([rules: rules(), match: match] ++ seo())
      |> assign_lobby(Lobby.entries(Game, Store))
      |> assign(watchers: Lobby.watchers(Game))}
   end
@@ -43,9 +43,12 @@ defmodule OctomoctoWeb.TrainsLive do
   @doc "The title and the description of the Right on Track pages, for search engines."
   def seo do
     [
-      page_title: "Right on Track: a Train of Thought-Like Game",
+      page_title: dgettext("trains", "Right on Track: a Train of Thought-Like Game"),
       page_description:
-        "Click the switches to send each train to the house with its colors. Similar to Train of Thought on Lumosity. Free, in your browser."
+        dgettext(
+          "trains",
+          "Click the switches to send each train to the house with its colors. Similar to Train of Thought on Lumosity. Free, in your browser."
+        )
     ]
   end
 
@@ -53,35 +56,40 @@ defmodule OctomoctoWeb.TrainsLive do
   # the tab that the user or the guest used last.
   @settings_params ["players", "switches", "trains", "pace", "visibility", "match"]
 
-  def handle_params(params, _uri, %{assigns: %{live_action: :campaign}} = socket) do
+  def handle_params(params, uri, %{assigns: %{live_action: :campaign}} = socket) do
     {:noreply,
      socket
      |> remember_tab("campaign")
+     |> assign_seo_links(uri)
      |> assign(
        settings: settings(tab_params(socket)),
-       canonical_url: url(~p"/trains")
+       languages: Locale.languages("trains", socket.assigns.locale, ~p"/trains/campaign")
      )
      |> assign_campaign(params)}
   end
 
   # The public games, and the results of the settings of the Free play tab
-  def handle_params(_params, _uri, %{assigns: %{live_action: :lobby}} = socket) do
+  def handle_params(_params, uri, %{assigns: %{live_action: :lobby}} = socket) do
     {:noreply,
      socket
      |> remember_tab("lobby")
      |> assign_free_play(tab_params(socket))
-     |> assign(canonical_url: url(~p"/trains"))}
+     |> assign_seo_links(uri)
+     |> assign(languages: Locale.languages("trains", socket.assigns.locale, ~p"/trains/lobby"))}
   end
 
-  def handle_params(params, _uri, socket) do
+  def handle_params(params, uri, socket) do
     tab = SavedSettings.last_tab(socket, "trains")
 
     # The Campaign tab is hidden for now, so only the Lobby tab opens again
     if tab == "lobby" and not Enum.any?(@settings_params, &Map.has_key?(params, &1)) do
-      {:noreply, push_patch(socket, to: ~p"/trains/#{tab}")}
+      {:noreply, push_patch(socket, to: Locale.path(socket.assigns.locale, ~p"/trains/#{tab}"))}
     else
       new_socket =
-        socket |> remember_tab("free") |> assign_free_play(saved_params(socket, params))
+        socket
+        |> remember_tab("free")
+        |> assign_free_play(saved_params(socket, params))
+        |> assign_seo_links(uri)
 
       settings = new_socket.assigns.settings
 
@@ -94,6 +102,18 @@ defmodule OctomoctoWeb.TrainsLive do
 
       {:noreply, new_socket}
     end
+  end
+
+  # The tabs and the settings are one page for search engines: the game
+  # page. Only the game page itself has the hreflang links.
+  defp assign_seo_links(socket, uri) do
+    canonical_url =
+      OctomoctoWeb.Endpoint.url() <> Locale.path(socket.assigns.locale, ~p"/trains")
+
+    assign(socket,
+      canonical_url: canonical_url,
+      alternate_urls: Locale.alternate_urls(uri, canonical_url, "trains", ~p"/trains")
+    )
   end
 
   # The settings that the user chose last, when the page
@@ -125,7 +145,13 @@ defmodule OctomoctoWeb.TrainsLive do
 
     assign(socket,
       settings: settings,
-      canonical_url: url(~p"/trains"),
+      # The other language keeps the settings
+      languages:
+        Locale.languages(
+          "trains",
+          socket.assigns.locale,
+          ~p"/trains?#{settings_query(settings)}"
+        ),
       switch_counts: Trains.switch_counts(settings.players),
       user_results: user_results(socket.assigns.current_scope, filter)
     )
@@ -217,7 +243,7 @@ defmodule OctomoctoWeb.TrainsLive do
       ) do
     with {n, ""} <- Integer.parse(level),
          {:ok, id} <- Campaign.start(user.id, n) do
-      {:noreply, redirect(socket, to: ~p"/trains/#{id}")}
+      {:noreply, redirect(socket, to: Locale.path(socket.assigns.locale, ~p"/trains/#{id}"))}
     else
       _ -> {:noreply, socket}
     end
@@ -228,7 +254,7 @@ defmodule OctomoctoWeb.TrainsLive do
   # The next round of the match, in the same game
   def handle_event("new_game", _params, %{assigns: %{match: %{player_id: player_id}}} = socket)
       when is_binary(player_id) do
-    %{match: match, settings: settings} = socket.assigns
+    %{match: match, settings: settings, locale: locale} = socket.assigns
     # When the settings do not change (for example, the game stopped), the
     # game page shows the end screen again
     Trains.change_settings(
@@ -237,12 +263,12 @@ defmodule OctomoctoWeb.TrainsLive do
       Map.take(settings, [:switch_count, :trains_per_house, :pace])
     )
 
-    {:noreply, redirect(socket, to: ~p"/trains/#{match.id}")}
+    {:noreply, redirect(socket, to: Locale.path(locale, ~p"/trains/#{match.id}"))}
   end
 
   def handle_event("new_game", _params, socket) do
     id = Trains.create_game(socket.assigns.settings)
-    {:noreply, redirect(socket, to: ~p"/trains/#{id}")}
+    {:noreply, redirect(socket, to: Locale.path(socket.assigns.locale, ~p"/trains/#{id}"))}
   end
 
   # One player, 6 switches, 2 trains for each house, the normal pace and a
@@ -324,13 +350,28 @@ defmodule OctomoctoWeb.TrainsLive do
 
   defp rules do
     [
-      "Trains leave the station one at a time. Each train has the colors of one of the houses.",
-      "The tracks split at the switches. Click a switch to change its direction. A train follows the direction of each switch on its way.",
-      "Send each train to the house with its colors.",
-      "With more players, each player owns some of the switches and can change only those.",
-      "The pace tells how fast the trains come one after another.",
-      "The round ends when all trains have arrived. The score is the number of trains that got to the correct house.",
-      "Right on Track is a Train of Thought-like game. Lumosity and Train of Thought are trademarks of Lumos Labs. Octomocto is not affiliated with Lumos Labs."
+      dgettext(
+        "trains",
+        "Trains leave the station one at a time. Each train has the colors of one of the houses."
+      ),
+      dgettext(
+        "trains",
+        "The tracks split at the switches. Click a switch to change its direction. A train follows the direction of each switch on its way."
+      ),
+      dgettext("trains", "Send each train to the house with its colors."),
+      dgettext(
+        "trains",
+        "With more players, each player owns some of the switches and can change only those."
+      ),
+      dgettext("trains", "The pace tells how fast the trains come one after another."),
+      dgettext(
+        "trains",
+        "The round ends when all trains have arrived. The score is the number of trains that got to the correct house."
+      ),
+      dgettext(
+        "trains",
+        "Right on Track is a Train of Thought-like game. Lumosity and Train of Thought are trademarks of Lumos Labs. Octomocto is not affiliated with Lumos Labs."
+      )
     ]
   end
 
@@ -342,12 +383,12 @@ defmodule OctomoctoWeb.TrainsLive do
   end
 
   @doc """
-  The path of this page with the settings of the game in the given state.
-  For a game of the campaign, the map with its level.
+  The path of this page in the language with the settings of the game in
+  the given state. For a game of the campaign, the map with its level.
   """
-  def settings_path(%{campaign: %{level: level}}), do: campaign_path(level)
+  def settings_path(locale, %{campaign: %{level: level}}), do: campaign_path(locale, level)
 
-  def settings_path(state) do
+  def settings_path(locale, state) do
     settings = %{
       players: state.needed,
       switch_count: state.switch_count,
@@ -357,27 +398,28 @@ defmodule OctomoctoWeb.TrainsLive do
       match: nil
     }
 
-    settings_path(settings, %{})
+    settings_path(locale, settings, %{})
   end
 
   @doc """
-  The path of the Change settings button of the game in the given state,
-  or nil for a game with one player or of the campaign. The page changes
+  The path of the Change settings button of the game in the language, or
+  nil for a game with one player or of the campaign. The page changes
   the settings of the next round of the match (see
   `Octomocto.Trains.Game`). The path has only the match, because the
   settings of the game can change after the page load.
   """
-  def match_path(%{needed: needed, campaign: nil} = state) when needed > 1,
-    do: ~p"/trains?#{[match: state.id]}"
+  def match_path(locale, %{needed: needed, campaign: nil} = state) when needed > 1,
+    do: Locale.path(locale, ~p"/trains?#{[match: state.id]}")
 
-  def match_path(_state), do: nil
+  def match_path(_locale, _state), do: nil
 
-  @doc "The path of the Campaign tab with the level selected."
-  def campaign_path(level), do: ~p"/trains/campaign?#{[level: level]}"
+  @doc "The path of the Campaign tab in the language with the level selected."
+  def campaign_path(locale, level),
+    do: Locale.path(locale, ~p"/trains/campaign?#{[level: level]}")
 
-  # The start page with the settings, and with the given changes
-  defp settings_path(settings, changes) do
-    ~p"/trains?#{settings_query(Map.merge(settings, changes))}"
+  # The start page in the language with the settings, and with the given changes
+  defp settings_path(locale, settings, changes) do
+    Locale.path(locale, ~p"/trains?#{settings_query(Map.merge(settings, changes))}")
   end
 
   # The query of the start page for the settings
@@ -401,7 +443,14 @@ defmodule OctomoctoWeb.TrainsLive do
   """
   def game_summary(%{id: id, settings: settings} = game) do
     summary =
-      "#{settings.switch_count} switches · #{settings.trains_per_house} per house · #{String.capitalize(settings.pace)}"
+      Enum.join(
+        [
+          switches(settings.switch_count),
+          dgettext("trains", "%{count} per house", count: settings.trains_per_house),
+          pace_name(settings.pace)
+        ],
+        " · "
+      )
 
     summary =
       if game[:score],
@@ -410,15 +459,20 @@ defmodule OctomoctoWeb.TrainsLive do
 
     case settings do
       %{campaign: level} ->
-        assigns = %{id: id, level: level, summary: summary}
+        assigns = %{
+          id: id,
+          level: dgettext("trains", "Level %{level}", level: level),
+          summary: summary,
+          path: Locale.path(Gettext.get_locale(OctomoctoWeb.Gettext), ~p"/trains/campaign")
+        }
 
         ~H"""
         <.link
           id={"lobby-campaign-#{@id}"}
-          navigate={~p"/trains/campaign"}
+          navigate={@path}
           class="text-octo-indigo transition hover:underline dark:text-octo-indigo-light"
-        >Campaign</.link>
-        · Level {@level} · {@summary}
+        >{dgettext("trains", "Campaign")}</.link>
+        · {@level} · {@summary}
         """
 
       _ ->
@@ -432,27 +486,54 @@ defmodule OctomoctoWeb.TrainsLive do
   # The part of the trains that got home, for example "92%"
   defp format_score(score, trains), do: "#{round(score * 100 / trains)}%"
 
+  defp switches(count), do: dngettext("trains", "%{count} switch", "%{count} switches", count)
+
+  defp pace_name("easy"), do: dgettext("trains", "Easy")
+  defp pace_name("normal"), do: dgettext("trains", "Normal")
+  defp pace_name("hard"), do: dgettext("trains", "Hard")
+  defp pace_name("expert"), do: dgettext("trains", "Expert")
+
   # Tells what a number of switches gives: there is one more house than switches
-  defp switches_hint(switches, 1), do: "#{switches + 1} houses."
+  defp switches_hint(switches, 1),
+    do: dngettext("trains", "%{count} house.", "%{count} houses.", switches + 1)
 
   defp switches_hint(switches, players) do
-    switches_hint(switches, 1) <> " Each player owns #{div(switches, players)} switches."
+    switches_hint(switches, 1) <>
+      " " <>
+      dngettext(
+        "trains",
+        "Each player owns %{count} switch.",
+        "Each player owns %{count} switches.",
+        div(switches, players)
+      )
   end
 
   defp trains_hint(%{switch_count: switches, trains_per_house: n}),
-    do: "#{n * (switches + 1)} trains."
+    do: dngettext("trains", "%{count} train.", "%{count} trains.", n * (switches + 1))
 
   defp pace_hint("easy"),
-    do: "The trains come a bit faster and faster: from 8 down to 6 seconds apart."
+    do:
+      dgettext(
+        "trains",
+        "The trains come a bit faster and faster: from 8 down to 6 seconds apart."
+      )
 
   defp pace_hint("normal"),
-    do: "The trains come faster and faster: from 6 down to 4 seconds apart."
+    do: dgettext("trains", "The trains come faster and faster: from 6 down to 4 seconds apart.")
 
   defp pace_hint("hard"),
-    do: "From 5 down to 3 seconds apart. The trains get fast early in the game."
+    do:
+      dgettext(
+        "trains",
+        "From 5 down to 3 seconds apart. The trains get fast early in the game."
+      )
 
   defp pace_hint("expert"),
-    do: "From 4 down to 2 seconds apart. The trains get very fast very early in the game."
+    do:
+      dgettext(
+        "trains",
+        "From 4 down to 2 seconds apart. The trains get very fast very early in the game."
+      )
 
   attr :level, :map, required: true
   attr :highest, :integer, required: true
@@ -466,7 +547,7 @@ defmodule OctomoctoWeb.TrainsLive do
     ~H"""
     <div
       id="level-card"
-      class="sticky bottom-3 z-10 flex w-full flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl bg-white p-5 text-left shadow-lg ring-1 ring-base-content/10 dark:bg-base-100"
+      class="sticky bottom-3 z-10 flex w-full flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl bg-white p-5 text-start shadow-lg ring-1 ring-base-content/10 dark:bg-base-100"
     >
       <div class={[
         "grid size-12 shrink-0 place-items-center rounded-2xl",
@@ -479,7 +560,7 @@ defmodule OctomoctoWeb.TrainsLive do
       </div>
       <div class="min-w-40 flex-1">
         <h3 id="level-card-title" class="flex items-center gap-1.5 font-semibold">
-          Level {@level.level}
+          {dgettext("trains", "Level %{level}", level: @level.level)}
           <.icon
             :if={@level.status == :done}
             name="hero-check-circle-mini"
@@ -487,19 +568,32 @@ defmodule OctomoctoWeb.TrainsLive do
           />
         </h3>
         <p class="text-sm text-base-content/60">
-          {@level.switch_count} switches · {@level.trains} trains · {String.capitalize(@level.pace)}
+          {switches(@level.switch_count)} · {dngettext(
+            "trains",
+            "%{count} train",
+            "%{count} trains",
+            @level.trains
+          )} · {pace_name(@level.pace)}
         </p>
         <p class="text-sm text-base-content/60">
           <%= if @level.status != :locked and @level.correct > 0 do %>
-            Best: {@level.correct} of {@level.trains} home · {@pass} to pass
+            {dgettext("trains", "Best: %{correct} of %{trains} home · %{pass} to pass",
+              correct: @level.correct,
+              trains: @level.trains,
+              pass: @pass
+            )}
           <% else %>
-            Get {@pass} of {@level.trains} trains home to pass.
+            {dgettext("trains", "Get %{pass} of %{trains} trains home to pass.",
+              pass: @pass,
+              trains: @level.trains
+            )}
           <% end %>
         </p>
       </div>
       <%= if @level.status == :locked do %>
         <p id="level-locked" class="flex items-center gap-1.5 text-sm text-base-content/60">
-          <.icon name="hero-lock-closed-mini" class="size-4" /> Pass level {@highest + 1} first.
+          <.icon name="hero-lock-closed-mini" class="size-4" />
+          {dgettext("trains", "Pass level %{level} first.", level: @highest + 1)}
         </p>
       <% else %>
         <button
@@ -507,16 +601,16 @@ defmodule OctomoctoWeb.TrainsLive do
           type="button"
           phx-click="play_level"
           phx-value-level={@level.level}
-          phx-disable-with="Starting..."
+          phx-disable-with={dgettext("trains", "Starting...")}
           class="flex cursor-pointer items-center gap-1.5 rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/25 transition hover:bg-octo-indigo/90 hover:shadow-xl"
         >
           <%= cond do %>
             <% @level.status == :done -> %>
-              Play again
+              {dgettext("trains", "Play again")}
             <% @level.correct > 0 -> %>
-              Try again
+              {dgettext("trains", "Try again")}
             <% true -> %>
-              Play
+              {dgettext("trains", "Play")}
           <% end %>
           <.icon name="hero-play-mini" class="size-4" />
         </button>

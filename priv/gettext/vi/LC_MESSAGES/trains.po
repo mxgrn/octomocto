@@ -1,0 +1,406 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: vi\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} error"
+msgid_plural "%{count} errors"
+msgstr[0] "%{count} lỗi"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} house."
+msgid_plural "%{count} houses."
+msgstr[0] "%{count} ngôi nhà."
+
+#, elixir-autogen, elixir-format
+msgid "%{count} per house"
+msgstr "%{count} tàu mỗi nhà"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} switch"
+msgid_plural "%{count} switches"
+msgstr[0] "%{count} bẻ ghi"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} train"
+msgid_plural "%{count} trains"
+msgstr[0] "%{count} đoàn tàu"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} train."
+msgid_plural "%{count} trains."
+msgstr[0] "%{count} đoàn tàu."
+
+#, elixir-autogen, elixir-format
+msgid "A train switching game: click the switches to send each train to the house with its colors."
+msgstr "Game tàu hỏa và bẻ ghi: bấm vào các bẻ ghi để đưa mỗi đoàn tàu về ngôi nhà cùng màu."
+
+#, elixir-autogen, elixir-format
+msgid "Back to the map"
+msgstr "Về bản đồ"
+
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "Tốt nhất"
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "Kết quả tốt nhất"
+
+#, elixir-autogen, elixir-format
+msgid "Best: %{correct} of %{trains} home · %{pass} to pass"
+msgstr "Tốt nhất: %{correct}/%{trains} về nhà · cần %{pass} để qua màn"
+
+#, elixir-autogen, elixir-format
+msgid "Campaign"
+msgstr "Thử thách"
+
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "Đổi cài đặt"
+
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "Chọn cài đặt cho ván tiếp theo."
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors."
+msgstr "Bấm vào các bẻ ghi để đưa mỗi đoàn tàu về ngôi nhà cùng màu."
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors. Similar to Train of Thought on Lumosity. Free, in your browser."
+msgstr "Bấm vào các bẻ ghi để đưa mỗi đoàn tàu về ngôi nhà cùng màu. Game luyện phản xạ và sự tập trung, miễn phí, chơi ngay trên trình duyệt."
+
+#, elixir-autogen, elixir-format
+msgid "Copied!"
+msgstr "Đã sao chép!"
+
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr "Sao chép liên kết"
+
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "Không vào được ván: {reason}"
+
+#, elixir-autogen, elixir-format
+msgid "Each player owns %{count} switch."
+msgid_plural "Each player owns %{count} switches."
+msgstr[0] "Mỗi người chơi giữ %{count} bẻ ghi."
+
+#, elixir-autogen, elixir-format
+msgid "Easy"
+msgstr "Dễ"
+
+#, elixir-autogen, elixir-format
+msgid "Expert"
+msgstr "Chuyên gia"
+
+#, elixir-autogen, elixir-format
+msgid "Free play"
+msgstr "Chơi tự do"
+
+#, elixir-autogen, elixir-format
+msgid "From 4 down to 2 seconds apart. The trains get very fast very early in the game."
+msgstr "Cách nhau từ 4 xuống 2 giây. Tàu chạy rất nhanh ngay từ đầu ván."
+
+#, elixir-autogen, elixir-format
+msgid "From 5 down to 3 seconds apart. The trains get fast early in the game."
+msgstr "Cách nhau từ 5 xuống 3 giây. Tàu chạy nhanh từ sớm trong ván."
+
+#, elixir-autogen, elixir-format
+msgid "Get %{pass} of %{trains} trains home to pass."
+msgstr "Đưa %{pass}/%{trains} đoàn tàu về nhà để qua màn."
+
+#, elixir-autogen, elixir-format
+msgid "Get 90% of the trains home to unlock the next level."
+msgstr "Đưa 90% số tàu về nhà để mở màn tiếp theo."
+
+#, elixir-autogen, elixir-format
+msgid "Good work."
+msgstr "Làm tốt lắm."
+
+#, elixir-autogen, elixir-format
+msgid "Hard"
+msgstr "Khó"
+
+#, elixir-autogen, elixir-format
+msgid "Highest level"
+msgstr "Màn cao nhất"
+
+#, elixir-autogen, elixir-format
+msgid "Highest levels"
+msgstr "Màn cao nhất"
+
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "Đang vào ván…"
+
+#, elixir-autogen, elixir-format
+msgid "Level %{level}"
+msgstr "Màn %{level}"
+
+#, elixir-autogen, elixir-format
+msgid "Level {level}"
+msgstr "Màn {level}"
+
+#, elixir-autogen, elixir-format
+msgid "Level {level} done · {correct} of {total} trains got home."
+msgstr "Qua màn {level} · {correct}/{total} đoàn tàu đã về nhà."
+
+#, elixir-autogen, elixir-format
+msgid "Levels"
+msgstr "Các màn"
+
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "Sảnh"
+
+#, elixir-autogen, elixir-format
+msgid "Menu"
+msgstr "Menu"
+
+#, elixir-autogen, elixir-format
+msgid "New board"
+msgstr "Bàn chơi mới"
+
+#, elixir-autogen, elixir-format
+msgid "Next level"
+msgstr "Màn tiếp theo"
+
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "Chưa có ván nào."
+
+#, elixir-autogen, elixir-format
+msgid "Nobody has passed a level yet."
+msgstr "Chưa ai qua màn nào."
+
+#, elixir-autogen, elixir-format
+msgid "Normal"
+msgstr "Thường"
+
+#, elixir-autogen, elixir-format
+msgid "Not enough trains got home"
+msgstr "Chưa đủ số tàu về nhà"
+
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "Hoặc thử {game}"
+
+#, elixir-autogen, elixir-format
+msgid "Pace"
+msgstr "Nhịp độ"
+
+#, elixir-autogen, elixir-format
+msgid "Pass level %{level} first."
+msgstr "Hãy qua màn %{level} trước."
+
+#, elixir-autogen, elixir-format
+msgid "Perfect!"
+msgstr "Hoàn hảo!"
+
+#, elixir-autogen, elixir-format
+msgid "Play"
+msgstr "Chơi"
+
+#, elixir-autogen, elixir-format
+msgid "Play again"
+msgstr "Chơi lại"
+
+#, elixir-autogen, elixir-format
+msgid "Play together. Each player owns some of the switches."
+msgstr "Cùng chơi với nhau. Mỗi người chơi giữ một số bẻ ghi."
+
+#, elixir-autogen, elixir-format
+msgid "Players"
+msgstr "Người chơi"
+
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "Riêng tư"
+
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "Công khai"
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track"
+msgstr "Right on Track"
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track is a Train of Thought-like game. Lumosity and Train of Thought are trademarks of Lumos Labs. Octomocto is not affiliated with Lumos Labs."
+msgstr "Right on Track là trò chơi giống Train of Thought. Lumosity và Train of Thought là nhãn hiệu của Lumos Labs. Octomocto không liên kết với Lumos Labs."
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track: a Train of Thought-Like Game"
+msgstr "Right on Track: game tàu hỏa luyện phản xạ và sự tập trung"
+
+#, elixir-autogen, elixir-format
+msgid "Send each train to the house with its colors."
+msgstr "Đưa mỗi đoàn tàu về ngôi nhà cùng màu."
+
+#, elixir-autogen, elixir-format
+msgid "Send each train to the house with its colors. You can flip only the switches in your color."
+msgstr "Đưa mỗi đoàn tàu về ngôi nhà cùng màu. Bạn chỉ gạt được các bẻ ghi có màu của mình."
+
+#, elixir-autogen, elixir-format
+msgid "Send the link to the other players."
+msgstr "Gửi đường link cho những người chơi khác."
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Đăng nhập"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to enable campaigns"
+msgstr "Đăng nhập để chơi thử thách"
+
+#, elixir-autogen, elixir-format
+msgid "Starting..."
+msgstr "Đang bắt đầu..."
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "Ủng hộ tác giả"
+
+#, elixir-autogen, elixir-format
+msgid "Switches"
+msgstr "Bẻ ghi"
+
+#, elixir-autogen, elixir-format
+msgid "The pace tells how fast the trains come one after another."
+msgstr "Nhịp độ cho biết các đoàn tàu nối nhau nhanh đến mức nào."
+
+#, elixir-autogen, elixir-format
+msgid "The round ends when all trains have arrived. The score is the number of trains that got to the correct house."
+msgstr "Ván kết thúc khi mọi đoàn tàu đã đến nơi. Điểm là số đoàn tàu về đúng nhà."
+
+#, elixir-autogen, elixir-format
+msgid "The tracks split at the switches. Click a switch to change its direction. A train follows the direction of each switch on its way."
+msgstr "Đường ray tách ra ở các bẻ ghi. Bấm vào bẻ ghi để đổi hướng của nó. Đoàn tàu đi theo hướng của từng bẻ ghi trên đường."
+
+#, elixir-autogen, elixir-format
+msgid "The trains come a bit faster and faster: from 8 down to 6 seconds apart."
+msgstr "Tàu ra nhanh dần từng chút: cách nhau từ 8 xuống 6 giây."
+
+#, elixir-autogen, elixir-format
+msgid "The trains come faster and faster: from 6 down to 4 seconds apart."
+msgstr "Tàu ra ngày càng nhanh: cách nhau từ 6 xuống 4 giây."
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "Người chơi màu {color} đang đổi cài đặt…"
+
+#, elixir-autogen, elixir-format
+msgid "Trains leave the station one at a time. Each train has the colors of one of the houses."
+msgstr "Các đoàn tàu rời ga từng chiếc một. Mỗi đoàn tàu mang màu của một ngôi nhà."
+
+#, elixir-autogen, elixir-format
+msgid "Trains per house"
+msgstr "Số tàu mỗi nhà"
+
+#, elixir-autogen, elixir-format
+msgid "Try again"
+msgstr "Thử lại"
+
+#, elixir-autogen, elixir-format
+msgid "Try again with a new layout."
+msgstr "Thử lại với sơ đồ đường ray mới."
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "Tắt âm thanh"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "Bật âm thanh"
+
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "Hiển thị"
+
+#, elixir-autogen, elixir-format
+msgid "Waiting for players"
+msgstr "Đang chờ người chơi"
+
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "Người xem: {count}"
+
+#, elixir-autogen, elixir-format
+msgid "With more players, each player owns some of the switches and can change only those."
+msgstr "Khi có nhiều người chơi, mỗi người giữ một số bẻ ghi và chỉ gạt được những bẻ ghi đó."
+
+#, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "Bạn đang xem ván này."
+
+#, elixir-autogen, elixir-format
+msgid "You finished the campaign!"
+msgstr "Bạn đã qua hết các màn thử thách!"
+
+#, elixir-autogen, elixir-format
+msgid "You own all the switches."
+msgstr "Bạn giữ tất cả các bẻ ghi."
+
+#, elixir-autogen, elixir-format
+msgid "Your progress is saved to your account."
+msgstr "Tiến độ được lưu vào tài khoản của bạn."
+
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "Kết quả của bạn"
+
+#, elixir-autogen, elixir-format
+msgid "correct"
+msgstr "đúng"
+
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "để có tên trong bảng"
+
+#, elixir-autogen, elixir-format
+msgid "train"
+msgstr "tàu"
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home"
+msgstr "{correct}/{total} đoàn tàu đã về nhà"
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home."
+msgstr "{correct}/{total} đoàn tàu đã về nhà."
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home. {pass} are needed."
+msgstr "{correct}/{total} đoàn tàu đã về nhà. Cần {pass} đoàn tàu."
+
+#, elixir-autogen, elixir-format
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "{feed} để Octomocto luôn không có quảng cáo."
+
+#, elixir-autogen, elixir-format
+msgid "{name} (you)"
+msgstr "{name} (bạn)"
+
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name} đang đổi cài đặt…"
+
+#, elixir-autogen, elixir-format
+msgid "{players} of {needed} players are in"
+msgstr "Đã có {players}/{needed} người chơi"
+
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in} để lưu điểm của bạn."

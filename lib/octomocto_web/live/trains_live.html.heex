@@ -8,6 +8,7 @@
   guest_name={@guest_name}
   guest_public_id={@guest_public_id}
   guest_unread_notifications={@guest_unread_notifications}
+  languages={@languages}
 >
   <%!--
     The same layout as the Memory page. One column on a small screen: the
@@ -24,7 +25,7 @@
   <div
     id="trains-index"
     class={[
-      "relative left-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[calc(100vw-4rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)]",
+      "relative start-1/2 grid w-[min(96vw,51rem)] -translate-x-1/2 rtl:translate-x-1/2 gap-6 pt-4 pb-12 lg:w-[calc(100vw-4rem)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pt-6 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)]",
       @live_action == :index &&
         "xl:h-[calc(100dvh-4rem)] xl:grid-rows-[auto_minmax(0,1fr)] xl:pb-6"
     ]}
@@ -34,13 +35,18 @@
         <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-octo-indigo/10 shadow-inner">
           <OctomoctoWeb.GameIcons.game_icon game="trains" class="size-9" />
         </div>
-        <h1 class="text-3xl font-semibold tracking-tight">Right on Track</h1>
+        <h1 class="text-3xl font-semibold tracking-tight">
+          {dgettext("trains", "Right on Track")}
+        </h1>
       </div>
       <p class="text-base-content/70">
         <%= if @match do %>
-          Choose the settings of the next game.
+          {dgettext("trains", "Choose the settings of the next game.")}
         <% else %>
-          A train switching game: click the switches to send each train to the house with its colors.
+          {dgettext(
+            "trains",
+            "A train switching game: click the switches to send each train to the house with its colors."
+          )}
         <% end %>
       </p>
       <.how_to_play />
@@ -49,10 +55,10 @@
       <div :if={!@match} class="pt-2">
         <.mode_tabs
           tab={if(@live_action == :index, do: :free, else: @live_action)}
-          free_path={settings_path(@settings, %{})}
-          lobby_path={~p"/trains/lobby"}
-          free_label="Free play"
-          lobby_label="Lobby"
+          free_path={settings_path(@locale, @settings, %{})}
+          lobby_path={Locale.path(@locale, ~p"/trains/lobby")}
+          free_label={dgettext("trains", "Free play")}
+          lobby_label={dgettext("trains", "Lobby")}
           lobby_count={Enum.count(@lobby_games, &(&1.status == :open))}
         />
       </div>
@@ -65,30 +71,30 @@
       >
         <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-base-content/10 dark:bg-base-100">
           <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <.setting_header label="Levels" icon="hero-map" />
+            <.setting_header label={dgettext("trains", "Levels")} icon="hero-map" />
             <span
               :if={@current_scope}
               id="campaign-highest"
               class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
             >
               <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
-              <span class="text-base-content/60">Highest level</span>
+              <span class="text-base-content/60">{dgettext("trains", "Highest level")}</span>
               <span class="font-semibold tabular-nums">{@campaign.highest}</span>
             </span>
           </div>
           <p id="campaign-rule" class="text-sm text-base-content/60">
-            Get 90% of the trains home to unlock the next level.
+            {dgettext("trains", "Get 90% of the trains home to unlock the next level.")}
           </p>
           <.campaign_map
             levels={@campaign.levels}
             selected={@campaign.selected.level}
-            path={&campaign_path/1}
-            label={&"Level #{&1}"}
+            path={&campaign_path(@locale, &1)}
+            label={&dgettext("trains", "Level %{level}", level: &1)}
           >
             <:caption :let={level}>
-              {level.switch_count} switches
+              {switches(level.switch_count)}
               <span class="block text-[10px] leading-tight text-base-content/50">
-                {String.capitalize(level.pace)}
+                {pace_name(level.pace)}
               </span>
             </:caption>
           </.campaign_map>
@@ -100,9 +106,9 @@
         />
         <.sign_in_overlay
           :if={!@current_scope}
-          title="Sign in to enable campaigns"
-          text="Your progress is saved to your account."
-          button="Sign in"
+          title={dgettext("trains", "Sign in to enable campaigns")}
+          text={dgettext("trains", "Your progress is saved to your account.")}
+          button={dgettext("trains", "Sign in")}
         />
       </div>
 
@@ -114,17 +120,17 @@
           id="campaign-leaderboard"
           icon="hero-trophy"
           icon_class="text-amber-500"
-          title="Highest levels"
+          title={dgettext("trains", "Highest levels")}
           empty={@campaign.leaderboard == []}
-          empty_text="Nobody has passed a level yet."
+          empty_text={dgettext("trains", "Nobody has passed a level yet.")}
         >
           <.result_row :for={{row, place} <- Enum.with_index(@campaign.leaderboard, 1)}>
-            <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+            <span class="w-4 shrink-0 text-end tabular-nums text-base-content/40">{place}</span>
             <span class="min-w-0 flex-1 truncate font-medium"><.player_link player={row.user}>{player_name(
               row.user
             )}</.player_link></span>
             <.result_pill best={@current_scope != nil and row.user_id == @current_scope.user.id}>
-              Level {row.level}
+              {dgettext("trains", "Level %{level}", level: row.level)}
             </.result_pill>
           </.result_row>
         </.score_list>
@@ -138,8 +144,8 @@
         <.lobby_games
           games={@lobby_games}
           watchers={@watchers}
-          path={&~p"/trains/#{&1.id}"}
-          new_game_path={settings_path(@settings, %{})}
+          path={&Locale.path(@locale, ~p"/trains/#{&1.id}")}
+          new_game_path={settings_path(@locale, @settings, %{})}
         >
           <:icon :let={_game}>
             <OctomoctoWeb.GameIcons.game_icon game="trains" class="size-9 shrink-0" />
@@ -159,17 +165,17 @@
             players={@match.state.players}
             wins={false}
             me={@match.player_id}
-            back={~p"/trains/#{@match.id}"}
+            back={Locale.path(@locale, ~p"/trains/#{@match.id}")}
           />
           <.setting
             :if={!@match}
             id="setting-players"
-            label="Players"
+            label={dgettext("trains", "Players")}
             icon="hero-users"
             hint={
               if(@settings.players > 1,
-                do: "Play together. Each player owns some of the switches.",
-                else: "You own all the switches."
+                do: dgettext("trains", "Play together. Each player owns some of the switches."),
+                else: dgettext("trains", "You own all the switches.")
               )
             }
           >
@@ -177,14 +183,14 @@
               :for={n <- 1..4}
               id={"players-#{n}"}
               selected={@settings.players == n}
-              patch={settings_path(@settings, %{players: n})}
+              patch={settings_path(@locale, @settings, %{players: n})}
             >
               {n}
             </.option>
           </.setting>
           <.setting
             id="setting-switches"
-            label="Switches"
+            label={dgettext("trains", "Switches")}
             icon="hero-arrows-right-left"
             hint={switches_hint(@settings.switch_count, @settings.players)}
           >
@@ -192,14 +198,14 @@
               :for={n <- @switch_counts}
               id={"switches-#{n}"}
               selected={@settings.switch_count == n}
-              patch={settings_path(@settings, %{switch_count: n})}
+              patch={settings_path(@locale, @settings, %{switch_count: n})}
             >
               {n}
             </.option>
           </.setting>
           <.setting
             id="setting-trains-per-house"
-            label="Trains per house"
+            label={dgettext("trains", "Trains per house")}
             icon="hero-home"
             hint={trains_hint(@settings)}
           >
@@ -207,14 +213,14 @@
               :for={n <- 1..7}
               id={"trains-#{n}"}
               selected={@settings.trains_per_house == n}
-              patch={settings_path(@settings, %{trains_per_house: n})}
+              patch={settings_path(@locale, @settings, %{trains_per_house: n})}
             >
               {n}
             </.option>
           </.setting>
           <.setting
             id="setting-pace"
-            label="Pace"
+            label={dgettext("trains", "Pace")}
             icon="hero-bolt"
             hint={pace_hint(@settings.pace)}
           >
@@ -222,28 +228,28 @@
               :for={pace <- Octomocto.Trains.paces()}
               id={"pace-#{pace}"}
               selected={@settings.pace == pace}
-              patch={settings_path(@settings, %{pace: pace})}
+              patch={settings_path(@locale, @settings, %{pace: pace})}
             >
-              {String.capitalize(pace)}
+              {pace_name(pace)}
             </.option>
           </.setting>
           <.setting
             :if={!@match}
             id="setting-visibility"
-            label="Visibility"
+            label={dgettext("trains", "Visibility")}
             icon="hero-eye"
             hint={visibility_hint(@settings)}
           >
             <.option
               :for={
                 {value, public, label} <- [
-                  {"public", true, "Public"},
-                  {"private", false, "Private"}
+                  {"public", true, dgettext("trains", "Public")},
+                  {"private", false, dgettext("trains", "Private")}
                 ]
               }
               id={"visibility-#{value}"}
               selected={@settings.public == public}
-              patch={settings_path(@settings, %{public: public})}
+              patch={settings_path(@locale, @settings, %{public: public})}
             >
               {label}
             </.option>
@@ -265,9 +271,9 @@
           id="your-results"
           icon="hero-user"
           icon_class="text-octo-indigo"
-          title="Your results"
+          title={dgettext("trains", "Your results")}
           empty={@user_results != nil and @user_results.latest == []}
-          empty_text="No games yet."
+          empty_text={dgettext("trains", "No games yet.")}
           sign_in={!@user_results && Locale.path(@locale, ~p"/signin")}
           preview_key={@results_preview && @results_preview.key}
         >
@@ -277,7 +283,7 @@
               class="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-sm"
             >
               <.icon name="hero-trophy" class="size-3.5 text-amber-500" />
-              <span class="text-base-content/60">Best</span>
+              <span class="text-base-content/60">{dgettext("trains", "Best")}</span>
               <span class="font-semibold tabular-nums">
                 {format_score(@user_results.best.score, trains(@settings))}
               </span>
@@ -293,7 +299,7 @@
           <%= if @user_results do %>
             <.result_row :for={%{result: result, players: players} <- @user_results.latest}>
               <span :if={@settings.players == 1} class="flex-1 font-medium">
-                {Calendar.strftime(result.inserted_at, "%b %-d")}
+                {Locale.short_date(result.inserted_at)}
               </span>
               <span :if={@settings.players > 1} class="min-w-0 flex-1 font-medium">
                 <.player_list players={players} scores={false} />
@@ -316,7 +322,7 @@
           id="best-results"
           icon="hero-trophy"
           icon_class="text-amber-500"
-          title="Best results"
+          title={dgettext("trains", "Best results")}
           empty={@best_results == []}
           empty_text={OctomoctoWeb.BestResults.empty_text(@best_following)}
         >
@@ -330,13 +336,13 @@
                 href={Locale.path(@locale, ~p"/signin")}
                 class="font-medium text-octo-indigo transition hover:text-octo-indigo/80 hover:underline"
               >
-                Sign in
+                {dgettext("trains", "Sign in")}
               </.link>
-              to get listed
+              {dgettext("trains", "to get listed")}
             </span>
           </:aside>
           <.result_row :for={{result, place} <- Enum.with_index(@best_results, 1)}>
-            <span class="w-4 shrink-0 text-right tabular-nums text-base-content/40">{place}</span>
+            <span class="w-4 shrink-0 text-end tabular-nums text-base-content/40">{place}</span>
             <span class="min-w-0 flex-1 truncate font-medium"><.player_link player={result.user}>{player_name(
               result.user
             )}</.player_link></span>

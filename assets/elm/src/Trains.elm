@@ -385,6 +385,10 @@ Nothing until the round starts and the clock is in sync.
 -}
 type alias Model =
     { gameUrl : String
+    , indexUrl : String
+
+    -- The page to support the author, in the language of the page
+    , donateUrl : String
     , settingsUrl : String
 
     -- The settings page of the next round of the match. Nothing for a
@@ -402,22 +406,43 @@ type alias Model =
 
     -- The countdown step that last played its beep (see `countdownStep`)
     , beepedStep : Maybe Int
+    , texts : Texts
+    }
+
+
+{-| The texts in the language of the page, by the English text (see
+`OctomoctoWeb.TrainsHTML.elm_texts/0`). The `plurals` have each plural form
+of the `locale` (see `OctomoctoWeb.TrainsHTML.elm_plurals/0`).
+-}
+type alias Texts =
+    { strings : Dict String String
+    , plurals : Dict String (List String)
+    , locale : String
     }
 
 
 type alias Flags =
     { gameUrl : String
+    , indexUrl : String
     , settingsUrl : String
     , changeSettingsUrl : Maybe String
     , nextGame : NextGame
+
+    -- The page to support the author, in the language of the page
+    , donateUrl : String
     , guest : Bool
     , muted : Bool
+    , texts : Decode.Value
+    , plurals : Decode.Value
+    , locale : String
     }
 
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { gameUrl = flags.gameUrl
+      , indexUrl = flags.indexUrl
+      , donateUrl = flags.donateUrl
       , settingsUrl = flags.settingsUrl
       , changeSettingsUrl = flags.changeSettingsUrl
       , nextGame = flags.nextGame
@@ -430,6 +455,11 @@ init flags =
       , watchers = 0
       , viewport = ( 1024, 768 )
       , beepedStep = Nothing
+      , texts =
+            { strings = Decode.decodeValue (Decode.dict Decode.string) flags.texts |> Result.withDefault Dict.empty
+            , plurals = Decode.decodeValue (Decode.dict (Decode.list Decode.string)) flags.plurals |> Result.withDefault Dict.empty
+            , locale = flags.locale
+            }
       }
     , Task.perform (\vp -> Resized vp.viewport.width vp.viewport.height) Browser.Dom.getViewport
     )
@@ -1983,14 +2013,138 @@ phase model game =
                 Playing
 
 
+{-| The text in the language of the page. A text without a translation
+stays in English.
+-}
+tr : Texts -> String -> String
+tr texts english =
+    Dict.get english texts.strings |> Maybe.withDefault english
+
+
+{-| The text in the language of the page, with the values in its `{name}`
+parts.
+-}
+tf : Texts -> String -> List ( String, String ) -> String
+tf texts english values =
+    List.foldl (\( name, value ) result -> String.replace ("{" ++ name ++ "}") value result) (tr texts english) values
+
+
+{-| The text with the number in the plural form of the language. Without
+the forms, the text is in English.
+-}
+plural : Texts -> String -> Int -> String
+plural texts english n =
+    Dict.get english texts.plurals
+        |> Maybe.andThen (List.drop (pluralForm texts.locale n) >> List.head)
+        |> Maybe.withDefault english
+        |> String.replace "{count}" (String.fromInt n)
+
+
+{-| The index of the plural form of the number in the language. The rules
+are the same as in `Gettext.Plural` on the server.
+-}
+pluralForm : String -> Int -> Int
+pluralForm locale n =
+    let
+        ones =
+            modBy 10 n
+
+        hundreds =
+            modBy 100 n
+
+        few =
+            ones >= 2 && ones <= 4 && (hundreds < 10 || hundreds >= 20)
+    in
+    case locale of
+        "ru" ->
+            slavicForm (ones == 1 && hundreds /= 11) few
+
+        "uk" ->
+            slavicForm (ones == 1 && hundreds /= 11) few
+
+        "pl" ->
+            slavicForm (n == 1) few
+
+        "ar" ->
+            if n <= 2 then
+                n
+
+            else if hundreds >= 3 && hundreds <= 10 then
+                3
+
+            else if hundreds >= 11 then
+                4
+
+            else
+                5
+
+        "fr" ->
+            boolToInt (n > 1)
+
+        "tr" ->
+            boolToInt (n > 1)
+
+        "ja" ->
+            0
+
+        "vi" ->
+            0
+
+        _ ->
+            boolToInt (n /= 1)
+
+
+{-| The form for one, for a few, or for many
+-}
+slavicForm : Bool -> Bool -> Int
+slavicForm one few =
+    if one then
+        0
+
+    else if few then
+        1
+
+    else
+        2
+
+
+boolToInt : Bool -> Int
+boolToInt value =
+    if value then
+        1
+
+    else
+        0
+
+
+{-| The text in the language of the page, with the link in its `{name}`
+part
+-}
+withLink : Texts -> String -> String -> Html msg -> List (Html msg)
+withLink texts english name link =
+    case String.split ("{" ++ name ++ "}") (tr texts english) of
+        [ before, after ] ->
+            [ text before, link, text after ]
+
+        _ ->
+            [ text (tr texts english), link ]
+
+
+{-| The trains that got home of all trains of the round
+-}
+homeValues : Round -> List ( String, String )
+homeValues round =
+    [ ( "correct", String.fromInt round.correct ), ( "total", String.fromInt (trainCount round.layout.board) ) ]
+
+
 view : Model -> Html Msg
 view model =
     case model.connection of
         Connecting ->
-            p [ id "trains-connecting", class "py-24 text-center opacity-60" ] [ text "Joining the game…" ]
+            p [ id "trains-connecting", class "py-24 text-center opacity-60" ] [ text (tr model.texts "Joining the game…") ]
 
         Failed reason ->
-            p [ id "trains-failed", class "py-24 text-center text-red-600 dark:text-red-400" ] [ text ("Could not join the game: " ++ reason) ]
+            p [ id "trains-failed", class "py-24 text-center text-red-600 dark:text-red-400" ] [ text (tf model.texts "Could not join the game: {reason}" [ ( "reason", reason ) ]) ]
 
         Joined me game ->
             viewGame model me game
@@ -1999,6 +2153,9 @@ view model =
 viewGame : Model -> Me -> Game -> Html Msg
 viewGame model me game =
     let
+        texts =
+            model.texts
+
         owned =
             owners game
 
@@ -2026,13 +2183,13 @@ viewGame model me game =
                         [ a
                             [ id "trains-home"
                             , href "/"
-                            , class "mr-1 shrink-0 transition side:lg:mr-0"
+                            , class "me-1 shrink-0 transition side:lg:me-0"
                             ]
                             [ img [ src "/images/mark.svg", alt "octomocto", class "h-8 w-auto dark:hidden side:lg:h-9" ] []
                             , img [ src "/images/mark-on-dark.svg", alt "octomocto", class "hidden h-8 w-auto dark:block side:lg:h-9" ] []
                             ]
                         , h1 [ class "truncate text-xl font-semibold tracking-tight side:lg:text-2xl" ]
-                            [ a [ id "trains-title-link", href "/trains", class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text "Right on Track" ] ]
+                            [ a [ id "trains-title-link", href model.indexUrl, class "transition hover:text-octo-indigo dark:hover:text-octo-indigo-light" ] [ text (tr texts "Right on Track") ] ]
                         , case game.campaign of
                             Just campaign ->
                                 a
@@ -2040,24 +2197,26 @@ viewGame model me game =
                                     , href model.settingsUrl
                                     , class "shrink-0 rounded-full bg-octo-mist px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-octo-indigo transition hover:bg-octo-indigo/15 dark:bg-octo-indigo/15 dark:text-octo-indigo-light"
                                     ]
-                                    [ text ("Level " ++ String.fromInt campaign.level) ]
+                                    [ text (tf texts "Level {level}" [ ( "level", String.fromInt campaign.level ) ]) ]
 
                             Nothing ->
                                 text ""
-                        , viewWatchers (me == Nothing) model.watchers
+                        , viewWatchers texts (me == Nothing) model.watchers
                         ]
                     , p [ class "hidden text-sm opacity-60 side:lg:block" ]
                         [ text
-                            (if solo then
-                                "Click the switches to send each train to the house with its colors."
+                            (tr texts
+                                (if solo then
+                                    "Click the switches to send each train to the house with its colors."
 
-                             else
-                                "Send each train to the house with its colors. You can flip only the switches in your color."
+                                 else
+                                    "Send each train to the house with its colors. You can flip only the switches in your color."
+                                )
                             )
                         ]
                     ]
-                , viewStats game.round
-                , viewMenu layout (game.editing /= Nothing) model.muted (me /= Nothing)
+                , viewStats texts game.round
+                , viewMenu texts layout (game.editing /= Nothing) model.muted (me /= Nothing)
                 ]
             , if solo then
                 text ""
@@ -2068,7 +2227,7 @@ viewGame model me game =
                 text ""
 
               else
-                viewPlayers me game owned
+                viewPlayers texts me game owned
             ]
         , div [ class "min-w-0 flex-1" ]
             [ div [ class "relative mx-auto", style "width" (boardWidth model me layout game) ]
@@ -2190,8 +2349,8 @@ boardWidth model me layout game =
 
 {-| The number of browsers that only watch the game, when there are any.
 -}
-viewWatchers : Bool -> Int -> Html Msg
-viewWatchers watching count =
+viewWatchers : Texts -> Bool -> Int -> Html Msg
+viewWatchers texts watching count =
     if watching || count > 0 then
         span
             [ id "trains-watchers"
@@ -2202,10 +2361,10 @@ viewWatchers watching count =
                 ]
             , Html.Attributes.title
                 (if watching then
-                    "You are watching this game."
+                    tr texts "You are watching this game."
 
                  else
-                    "Watchers: " ++ String.fromInt count
+                    tf texts "Watchers: {count}" [ ( "count", String.fromInt count ) ]
                 )
             ]
             [ span [ class "hero-eye size-4" ] [], text (String.fromInt (max count 1)) ]
@@ -2219,8 +2378,8 @@ the station. On a small screen, they are small and without a box, at the
 right of the compact row of the panel, or under the title in the column of
 a screen that is wider than tall.
 -}
-viewStats : Round -> Html Msg
-viewStats round =
+viewStats : Texts -> Round -> Html Msg
+viewStats texts round =
     let
         stat label valueId valueClass value =
             div [ class "flex flex-col items-center justify-center side:max-lg:items-start" ]
@@ -2228,15 +2387,15 @@ viewStats round =
                 , span [ id valueId, class ("text-lg leading-tight tabular-nums side:lg:text-3xl " ++ valueClass) ] [ text value ]
                 ]
     in
-    div [ id "trains-stats", class "ml-auto flex gap-4 pr-2 side:max-lg:ml-0 side:max-lg:gap-6 side:max-lg:pr-0 side:max-lg:pl-2 side:lg:order-2 side:lg:ml-0 side:lg:grid side:lg:grid-cols-2 side:lg:gap-0 side:lg:divide-x side:lg:divide-slate-200 side:lg:rounded-2xl side:lg:bg-white side:lg:py-3 side:lg:pr-0 side:lg:shadow-sm side:lg:ring-1 side:lg:ring-slate-200 dark:side:lg:divide-white/10 dark:side:lg:bg-white/5 dark:side:lg:shadow-none dark:side:lg:ring-white/10" ]
-        [ stat "correct" "trains-correct" "font-semibold text-emerald-600 dark:text-emerald-400" (String.fromInt round.correct)
-        , stat "train" "trains-sent" "font-light text-slate-700 dark:text-slate-100" (String.fromInt round.sent ++ "/" ++ String.fromInt (trainCount round.layout.board))
+    div [ id "trains-stats", class "ms-auto flex gap-4 pe-2 side:max-lg:ms-0 side:max-lg:gap-6 side:max-lg:pe-0 side:max-lg:ps-2 side:lg:order-2 side:lg:ms-0 side:lg:grid side:lg:grid-cols-2 side:lg:gap-0 side:lg:divide-x side:lg:divide-slate-200 side:lg:rounded-2xl side:lg:bg-white side:lg:py-3 side:lg:pe-0 side:lg:shadow-sm side:lg:ring-1 side:lg:ring-slate-200 dark:side:lg:divide-white/10 dark:side:lg:bg-white/5 dark:side:lg:shadow-none dark:side:lg:ring-white/10" ]
+        [ stat (tr texts "correct") "trains-correct" "font-semibold text-emerald-600 dark:text-emerald-400" (String.fromInt round.correct)
+        , stat (tr texts "train") "trains-sent" "font-light text-slate-700 dark:text-slate-100" (String.fromInt round.sent ++ "/" ++ String.fromInt (trainCount round.layout.board))
         ]
 
 
 viewShareLink : Model -> Html Msg
 viewShareLink model =
-    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 pl-4 text-sm ring-1 ring-octo-indigo/20 side:max-lg:flex-col side:max-lg:items-stretch side:max-lg:rounded-2xl side:max-lg:p-2 side:lg:order-3 side:lg:flex-col side:lg:items-stretch side:lg:rounded-2xl side:lg:p-2 side:lg:pl-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
+    div [ class "flex items-center gap-2 rounded-full bg-octo-mist p-1 ps-4 text-sm ring-1 ring-octo-indigo/20 side:max-lg:flex-col side:max-lg:items-stretch side:max-lg:rounded-2xl side:max-lg:p-2 side:lg:order-3 side:lg:flex-col side:lg:items-stretch side:lg:rounded-2xl side:lg:p-2 side:lg:ps-2 dark:bg-octo-indigo/15 dark:ring-octo-indigo-light/25" ]
         [ input
             [ id "trains-link"
             , readonly True
@@ -2250,11 +2409,13 @@ viewShareLink model =
             , onClick CopyLink
             ]
             [ text
-                (if model.copied then
-                    "Copied!"
+                (tr model.texts
+                    (if model.copied then
+                        "Copied!"
 
-                 else
-                    "Copy link"
+                     else
+                        "Copy link"
+                    )
                 )
             ]
         ]
@@ -2263,8 +2424,8 @@ viewShareLink model =
 {-| Each player with the number of its switches. In a game for 2 or more
 players, also with the number of its errors in the round (see `errors`).
 -}
-viewPlayers : Me -> Game -> Dict Cell Player -> Html Msg
-viewPlayers me game owned =
+viewPlayers : Texts -> Me -> Game -> Dict Cell Player -> Html Msg
+viewPlayers texts me game owned =
     let
         playerErrors =
             errors game.round
@@ -2282,20 +2443,11 @@ viewPlayers me game owned =
                     , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200 dark:bg-white/5 dark:text-slate-100 dark:shadow-none dark:ring-white/10"
                     ]
                     [ span [ class "size-3 rounded-full", style "background" player.color ] []
-                    , span [ class "side:max-lg:flex-1 side:lg:flex-1" ] [ text (playerName me player) ]
+                    , span [ class "side:max-lg:flex-1 side:lg:flex-1" ] [ text (playerName texts me player) ]
                     , span [ class "text-xs text-slate-500 tabular-nums dark:text-slate-400" ]
-                        [ text
-                            (String.fromInt count
-                                ++ (if count == 1 then
-                                        " switch"
-
-                                    else
-                                        " switches"
-                                   )
-                            )
-                        ]
+                        [ text (plural texts "{count} switches" count) ]
                     , if game.needed > 1 then
-                        viewErrors player (Maybe.withDefault 0 (Dict.get player.id playerErrors))
+                        viewErrors texts player (Maybe.withDefault 0 (Dict.get player.id playerErrors))
 
                       else
                         text ""
@@ -2306,8 +2458,8 @@ viewPlayers me game owned =
         )
 
 
-viewErrors : Player -> Int -> Html Msg
-viewErrors player count =
+viewErrors : Texts -> Player -> Int -> Html Msg
+viewErrors texts player count =
     span
         [ id ("trains-player-errors-" ++ player.id)
         , class "rounded-full px-2 text-xs tabular-nums transition-colors duration-300"
@@ -2316,42 +2468,38 @@ viewErrors player count =
             , ( "bg-rose-100 font-medium text-rose-700 dark:bg-rose-500/20 dark:text-rose-300", count > 0 )
             ]
         ]
-        [ text
-            (String.fromInt count
-                ++ (if count == 1 then
-                        " error"
-
-                    else
-                        " errors"
-                   )
-            )
-        ]
+        [ text (plural texts "{count} errors" count) ]
 
 
-playerName : Me -> Player -> String
-playerName me player =
+playerName : Texts -> Me -> Player -> String
+playerName texts me player =
+    let
+        -- A guest has the name of its color
+        name =
+            Maybe.withDefault (tr texts player.colorName) player.name
+    in
     if me == Just player.id then
-        Maybe.withDefault player.colorName player.name ++ " (you)"
+        tf texts "{name} (you)" [ ( "name", name ) ]
 
     else
-        Maybe.withDefault player.colorName player.name
+        name
 
 
 {-| Starts a new round with a new board for all players, also during a
 round. In the row layout, only the icon shows. It is disabled while a
 player changes the settings.
 -}
-viewMenu : PanelLayout -> Bool -> Bool -> Bool -> Html Msg
-viewMenu layout locked muted player =
+viewMenu : Texts -> PanelLayout -> Bool -> Bool -> Bool -> Html Msg
+viewMenu texts layout locked muted player =
     Html.node "octo-game-menu"
         [ class "relative shrink-0 side:lg:order-5 side:lg:self-start"
         , attribute "layout" (layoutName layout)
         , attribute "fullscreen" "true"
-        , attribute "menu-label" "Menu"
-        , attribute "restart-label" "New board"
+        , attribute "menu-label" (tr texts "Menu")
+        , attribute "restart-label" (tr texts "New board")
         , attribute "locked" (boolAttribute locked)
-        , attribute "sound-on-label" "Turn the sounds on"
-        , attribute "sound-off-label" "Turn the sounds off"
+        , attribute "sound-on-label" (tr texts "Turn the sounds on")
+        , attribute "sound-off-label" (tr texts "Turn the sounds off")
         , attribute "muted" (boolAttribute muted)
         , attribute "player" (boolAttribute player)
         , Html.Events.on "octo-restart" (Decode.succeed Restart)
@@ -2365,16 +2513,17 @@ viewOverlay model me game =
     case phase model game of
         Waiting ->
             overlay "trains-waiting"
-                [ p [ class "text-2xl font-semibold" ] [ text "Waiting for players" ]
+                [ p [ class "text-2xl font-semibold" ] [ text (tr model.texts "Waiting for players") ]
                 , p [ id "trains-waiting-count", class "text-lg tabular-nums opacity-80" ]
                     [ text
-                        (String.fromInt (List.length game.players)
-                            ++ " of "
-                            ++ String.fromInt game.needed
-                            ++ " players are in"
+                        (tf model.texts
+                            "{players} of {needed} players are in"
+                            [ ( "players", String.fromInt (List.length game.players) )
+                            , ( "needed", String.fromInt game.needed )
+                            ]
                         )
                     ]
-                , span [ class "text-sm opacity-70" ] [ text "Send the link to the other players." ]
+                , span [ class "text-sm opacity-70" ] [ text (tr model.texts "Send the link to the other players.") ]
                 ]
 
         Countdown seconds ->
@@ -2412,6 +2561,9 @@ viewOverlay model me game =
 viewResult : Model -> Me -> Game -> Html Msg
 viewResult model me game =
     let
+        texts =
+            model.texts
+
         -- The player on the settings page. Nobody can start a round until
         -- that player is back.
         editor =
@@ -2423,10 +2575,10 @@ viewResult model me game =
     in
     overlay "trains-over"
         [ p [ id "trains-result", class "text-2xl font-semibold" ]
-            [ text (String.fromInt game.round.correct ++ " of " ++ String.fromInt (trainCount game.round.layout.board) ++ " trains got home") ]
-        , span [ class "text-sm opacity-80" ] [ text (verdict game.round) ]
+            [ text (tf texts "{correct} of {total} trains got home" (homeValues game.round)) ]
+        , span [ class "text-sm opacity-80" ] [ text (verdict texts game.round) ]
         , if game.needed > 1 then
-            viewResultErrors me game
+            viewResultErrors texts me game
 
           else
             text ""
@@ -2436,10 +2588,10 @@ viewResult model me game =
                     [ text
                         (case player.name of
                             Just name ->
-                                name ++ " changes the settings…"
+                                tf texts "{name} changes the settings…" [ ( "name", name ) ]
 
                             Nothing ->
-                                "The " ++ player.colorName ++ " player changes the settings…"
+                                tf texts "The {color} player changes the settings…" [ ( "color", tr texts player.colorName ) ]
                         )
                     ]
 
@@ -2456,7 +2608,7 @@ viewResult model me game =
                     , onClick Restart
                     , disabled locked
                     ]
-                    [ text "Play again" ]
+                    [ text (tr texts "Play again") ]
                 , case model.changeSettingsUrl of
                     Nothing ->
                         text ""
@@ -2468,7 +2620,7 @@ viewResult model me game =
                                 , attribute "aria-disabled" "true"
                                 , class "cursor-not-allowed rounded-full px-5 py-2.5 font-medium text-white opacity-50 ring-1 ring-white/40"
                                 ]
-                                [ text "Change settings" ]
+                                [ text (tr texts "Change settings") ]
 
                         else
                             a
@@ -2476,7 +2628,7 @@ viewResult model me game =
                                 , href url
                                 , class "rounded-full px-5 py-2.5 font-medium text-white ring-1 ring-white/40 transition hover:bg-white/10"
                                 ]
-                                [ text "Change settings" ]
+                                [ text (tr texts "Change settings") ]
                 ]
         , viewRating me
         , let
@@ -2497,24 +2649,27 @@ viewResult model me game =
             , attribute "data-ga-to" model.nextGame.name
             , class "group mt-2 text-sm font-medium text-white underline-offset-4 transition hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:no-underline"
             ]
-            [ text ("Or try " ++ model.nextGame.name ++ " ")
-            , span [ class "inline-block transition group-hover:translate-x-0.5" ] [ text "→" ]
+            [ text (tf texts "Or try {game}" [ ( "game", model.nextGame.name ) ] ++ " ")
+            , span [ class "inline-block transition group-hover:translate-x-0.5 rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5" ] [ text "→" ]
             ]
 
         -- Only a guest who played gets the call to sign in, not a spectator
         , if model.guest && me /= Nothing then
             p [ id "trains-sign-in", class "text-sm text-white/70" ]
-                [ a
-                    [ href "/signin"
-                    , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
-                    ]
-                    [ text "Sign in" ]
-                , text " to keep your scores."
-                ]
+                (withLink texts
+                    "{sign_in} to keep your scores."
+                    "sign_in"
+                    (a
+                        [ href "/signin"
+                        , class "font-medium text-white underline underline-offset-4 transition hover:text-octo-mist"
+                        ]
+                        [ text (tr texts "Sign in") ]
+                    )
+                )
 
           else
             text ""
-        , viewFeed
+        , viewFeed model.donateUrl texts
         ]
 
 
@@ -2533,8 +2688,8 @@ viewRating me =
 {-| The errors of each player in the round, in the result of a game for 2
 or more players
 -}
-viewResultErrors : Me -> Game -> Html Msg
-viewResultErrors me game =
+viewResultErrors : Texts -> Me -> Game -> Html Msg
+viewResultErrors texts me game =
     let
         playerErrors =
             errors game.round
@@ -2548,21 +2703,12 @@ viewResultErrors me game =
                 in
                 li [ id ("trains-result-errors-" ++ player.id), class "flex items-center gap-2" ]
                     [ span [ class "size-2.5 shrink-0 rounded-full", style "background" player.color ] []
-                    , span [ class "min-w-0 flex-1 truncate text-left" ] [ text (playerName me player) ]
+                    , span [ class "min-w-0 flex-1 truncate text-start" ] [ text (playerName texts me player) ]
                     , span
-                        [ class "ml-4 tabular-nums"
+                        [ class "ms-4 tabular-nums"
                         , classList [ ( "text-white/60", count == 0 ), ( "font-medium text-rose-300", count > 0 ) ]
                         ]
-                        [ text
-                            (String.fromInt count
-                                ++ (if count == 1 then
-                                        " error"
-
-                                    else
-                                        " errors"
-                                   )
-                            )
-                        ]
+                        [ text (plural texts "{count} errors" count) ]
                     ]
             )
             game.players
@@ -2572,20 +2718,23 @@ viewResultErrors me game =
 {-| The link to the page to support Octomocto, at the bottom of a result.
 The link opens in a new tab, so that the player stays in the game.
 -}
-viewFeed : Html msg
-viewFeed =
+viewFeed : String -> Texts -> Html msg
+viewFeed donateUrl texts =
     p [ id "trains-feed", class "mt-2 max-w-sm border-t border-white/15 pt-4 text-center text-sm leading-10 text-balance text-white/80" ]
-        [ a
-            [ href "/donate"
-            , target "_blank"
-            , rel "noopener"
-            , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:bg-octo-orange-light"
-            ]
-            [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
-            , text "Support the author"
-            ]
-        , text " to keep Octomocto ad-free."
-        ]
+        (withLink texts
+            "{feed} to keep Octomocto ad-free."
+            "feed"
+            (a
+                [ href donateUrl
+                , target "_blank"
+                , rel "noopener"
+                , class "group mx-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-octo-orange px-4 py-1.5 align-middle leading-5 font-semibold text-white shadow-lg shadow-octo-orange/30 transition hover:bg-octo-orange-light"
+                ]
+                [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
+                , text (tr texts "Support the author")
+                ]
+            )
+        )
 
 
 {-| The end of a round of the campaign: when enough trains got home, the
@@ -2595,11 +2744,11 @@ a new layout.
 viewCampaignResult : Model -> Me -> Game -> Campaign -> Html Msg
 viewCampaignResult model me game campaign =
     let
+        texts =
+            model.texts
+
         round =
             game.round
-
-        total =
-            trainCount round.layout.board
 
         passed =
             round.correct >= campaign.pass
@@ -2609,16 +2758,16 @@ viewCampaignResult model me game campaign =
 
         ( message, details ) =
             if not passed then
-                ( "Not enough trains got home"
-                , String.fromInt round.correct ++ " of " ++ String.fromInt total ++ " trains got home. " ++ String.fromInt campaign.pass ++ " are needed."
+                ( tr texts "Not enough trains got home"
+                , tf texts "{correct} of {total} trains got home. {pass} are needed." (( "pass", String.fromInt campaign.pass ) :: homeValues round)
                 )
 
             else if last then
-                ( "You finished the campaign!", String.fromInt round.correct ++ " of " ++ String.fromInt total ++ " trains got home." )
+                ( tr texts "You finished the campaign!", tf texts "{correct} of {total} trains got home." (homeValues round) )
 
             else
-                ( verdict round
-                , "Level " ++ String.fromInt campaign.level ++ " done · " ++ String.fromInt round.correct ++ " of " ++ String.fromInt total ++ " trains got home."
+                ( verdict texts round
+                , tf texts "Level {level} done · {correct} of {total} trains got home." (( "level", String.fromInt campaign.level ) :: homeValues round)
                 )
     in
     overlay "trains-over"
@@ -2630,21 +2779,21 @@ viewCampaignResult model me game campaign =
           else
             div [ class "mt-3 flex flex-wrap items-center justify-center gap-3" ]
                 [ if not passed then
-                    button [ id "trains-again", class campaignButton, onClick Restart ] [ text "Try again" ]
+                    button [ id "trains-again", class campaignButton, onClick Restart ] [ text (tr texts "Try again") ]
 
                   else if last then
                     text ""
 
                   else
-                    button [ id "trains-next-level", class campaignButton, onClick StartNextLevel ] [ text "Next level" ]
+                    button [ id "trains-next-level", class campaignButton, onClick StartNextLevel ] [ text (tr texts "Next level") ]
                 , a
                     [ id "trains-campaign-map"
                     , href model.settingsUrl
                     , class "rounded-full px-5 py-2.5 font-medium text-white ring-1 ring-white/40 transition hover:bg-white/10"
                     ]
-                    [ text "Back to the map" ]
+                    [ text (tr texts "Back to the map") ]
                 ]
-        , viewFeed
+        , viewFeed model.donateUrl texts
         ]
 
 
@@ -2653,20 +2802,20 @@ campaignButton =
     "rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/30 transition hover:bg-octo-indigo/90"
 
 
-verdict : Round -> String
-verdict round =
+verdict : Texts -> Round -> String
+verdict texts round =
     let
         total =
             trainCount round.layout.board
     in
     if round.correct == total then
-        "Perfect!"
+        tr texts "Perfect!"
 
     else if round.correct * 3 >= total * 2 then
-        "Good work."
+        tr texts "Good work."
 
     else
-        "Try again with a new layout."
+        tr texts "Try again with a new layout."
 
 
 overlay : String -> List (Html Msg) -> Html Msg

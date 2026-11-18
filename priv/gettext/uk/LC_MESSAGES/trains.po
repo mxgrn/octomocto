@@ -1,0 +1,418 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: uk\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100 != 11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10||n%100>=20) ? 1 : 2);\n"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} error"
+msgid_plural "%{count} errors"
+msgstr[0] "%{count} помилка"
+msgstr[1] "%{count} помилки"
+msgstr[2] "%{count} помилок"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} house."
+msgid_plural "%{count} houses."
+msgstr[0] "%{count} будинок."
+msgstr[1] "%{count} будинки."
+msgstr[2] "%{count} будинків."
+
+#, elixir-autogen, elixir-format
+msgid "%{count} per house"
+msgstr "%{count} на будинок"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} switch"
+msgid_plural "%{count} switches"
+msgstr[0] "%{count} стрілка"
+msgstr[1] "%{count} стрілки"
+msgstr[2] "%{count} стрілок"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} train"
+msgid_plural "%{count} trains"
+msgstr[0] "%{count} потяг"
+msgstr[1] "%{count} потяги"
+msgstr[2] "%{count} потягів"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} train."
+msgid_plural "%{count} trains."
+msgstr[0] "%{count} потяг."
+msgstr[1] "%{count} потяги."
+msgstr[2] "%{count} потягів."
+
+#, elixir-autogen, elixir-format
+msgid "A train switching game: click the switches to send each train to the house with its colors."
+msgstr "Гра про потяги та стрілки: перемикай стрілки, щоб кожен потяг приїхав до будинку своїх кольорів."
+
+#, elixir-autogen, elixir-format
+msgid "Back to the map"
+msgstr "До рівнів"
+
+#, elixir-autogen, elixir-format
+msgid "Best"
+msgstr "Рекорд"
+
+#, elixir-autogen, elixir-format
+msgid "Best results"
+msgstr "Найкращі результати"
+
+#, elixir-autogen, elixir-format
+msgid "Best: %{correct} of %{trains} home · %{pass} to pass"
+msgstr "Найкращий результат: %{correct} із %{trains} удома · потрібно %{pass}"
+
+#, elixir-autogen, elixir-format
+msgid "Campaign"
+msgstr "Кампанія"
+
+#, elixir-autogen, elixir-format
+msgid "Change settings"
+msgstr "Змінити налаштування"
+
+#, elixir-autogen, elixir-format
+msgid "Choose the settings of the next game."
+msgstr "Вибери налаштування наступної гри."
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors."
+msgstr "Перемикай стрілки, щоб кожен потяг приїхав до будинку своїх кольорів."
+
+#, elixir-autogen, elixir-format
+msgid "Click the switches to send each train to the house with its colors. Similar to Train of Thought on Lumosity. Free, in your browser."
+msgstr "Перемикай стрілки, щоб кожен потяг приїхав до будинку своїх кольорів. Безкоштовна гра на увагу та реакцію, просто в браузері, наодинці або з друзями."
+
+#, elixir-autogen, elixir-format
+msgid "Copied!"
+msgstr "Скопійовано!"
+
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr "Копіювати посилання"
+
+#, elixir-autogen, elixir-format
+msgid "Could not join the game: {reason}"
+msgstr "Не вдалося увійти в гру: {reason}"
+
+#, elixir-autogen, elixir-format
+msgid "Each player owns %{count} switch."
+msgid_plural "Each player owns %{count} switches."
+msgstr[0] "У кожного гравця %{count} стрілка."
+msgstr[1] "У кожного гравця %{count} стрілки."
+msgstr[2] "У кожного гравця %{count} стрілок."
+
+#, elixir-autogen, elixir-format
+msgid "Easy"
+msgstr "Легкий"
+
+#, elixir-autogen, elixir-format
+msgid "Expert"
+msgstr "Експерт"
+
+#, elixir-autogen, elixir-format
+msgid "Free play"
+msgstr "Вільна гра"
+
+#, elixir-autogen, elixir-format
+msgid "From 4 down to 2 seconds apart. The trains get very fast very early in the game."
+msgstr "Від 4 до 2 секунд між потягами. Потяги йдуть дуже швидко вже на самому початку гри."
+
+#, elixir-autogen, elixir-format
+msgid "From 5 down to 3 seconds apart. The trains get fast early in the game."
+msgstr "Від 5 до 3 секунд між потягами. Потяги йдуть швидко вже на початку гри."
+
+#, elixir-autogen, elixir-format
+msgid "Get %{pass} of %{trains} trains home to pass."
+msgstr "Щоб пройти рівень, доведи додому потягів: %{pass} із %{trains}."
+
+#, elixir-autogen, elixir-format
+msgid "Get 90% of the trains home to unlock the next level."
+msgstr "Доведи додому 90% потягів, щоб відкрити наступний рівень."
+
+#, elixir-autogen, elixir-format
+msgid "Good work."
+msgstr "Гарна робота."
+
+#, elixir-autogen, elixir-format
+msgid "Hard"
+msgstr "Складний"
+
+#, elixir-autogen, elixir-format
+msgid "Highest level"
+msgstr "Найвищий рівень"
+
+#, elixir-autogen, elixir-format
+msgid "Highest levels"
+msgstr "Найвищі рівні"
+
+#, elixir-autogen, elixir-format
+msgid "Joining the game…"
+msgstr "Входимо в гру…"
+
+#, elixir-autogen, elixir-format
+msgid "Level %{level}"
+msgstr "Рівень %{level}"
+
+#, elixir-autogen, elixir-format
+msgid "Level {level}"
+msgstr "Рівень {level}"
+
+#, elixir-autogen, elixir-format
+msgid "Level {level} done · {correct} of {total} trains got home."
+msgstr "Рівень {level} пройдено · Потягів удома: {correct} із {total}."
+
+#, elixir-autogen, elixir-format
+msgid "Levels"
+msgstr "Рівні"
+
+#, elixir-autogen, elixir-format
+msgid "Lobby"
+msgstr "Лобі"
+
+#, elixir-autogen, elixir-format
+msgid "Menu"
+msgstr "Меню"
+
+#, elixir-autogen, elixir-format
+msgid "New board"
+msgstr "Нове поле"
+
+#, elixir-autogen, elixir-format
+msgid "Next level"
+msgstr "Наступний рівень"
+
+#, elixir-autogen, elixir-format
+msgid "No games yet."
+msgstr "Ігор поки немає."
+
+#, elixir-autogen, elixir-format
+msgid "Nobody has passed a level yet."
+msgstr "Поки ніхто не пройшов жодного рівня."
+
+#, elixir-autogen, elixir-format
+msgid "Normal"
+msgstr "Звичайний"
+
+#, elixir-autogen, elixir-format
+msgid "Not enough trains got home"
+msgstr "Замало потягів удома"
+
+#, elixir-autogen, elixir-format
+msgid "Or try {game}"
+msgstr "Або спробуй {game}"
+
+#, elixir-autogen, elixir-format
+msgid "Pace"
+msgstr "Темп"
+
+#, elixir-autogen, elixir-format
+msgid "Pass level %{level} first."
+msgstr "Спочатку пройди рівень %{level}."
+
+#, elixir-autogen, elixir-format
+msgid "Perfect!"
+msgstr "Ідеально!"
+
+#, elixir-autogen, elixir-format
+msgid "Play"
+msgstr "Грати"
+
+#, elixir-autogen, elixir-format
+msgid "Play again"
+msgstr "Зіграти ще"
+
+#, elixir-autogen, elixir-format
+msgid "Play together. Each player owns some of the switches."
+msgstr "Грайте разом. У кожного гравця свої стрілки."
+
+#, elixir-autogen, elixir-format
+msgid "Players"
+msgstr "Гравці"
+
+#, elixir-autogen, elixir-format
+msgid "Private"
+msgstr "Закрита"
+
+#, elixir-autogen, elixir-format
+msgid "Public"
+msgstr "Відкрита"
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track"
+msgstr "Right on Track"
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track is a Train of Thought-like game. Lumosity and Train of Thought are trademarks of Lumos Labs. Octomocto is not affiliated with Lumos Labs."
+msgstr "Right on Track — гра, схожа на Train of Thought. Lumosity і Train of Thought — торговельні марки Lumos Labs. Octomocto не пов'язаний з Lumos Labs."
+
+#, elixir-autogen, elixir-format
+msgid "Right on Track: a Train of Thought-Like Game"
+msgstr "Right on Track: гра на увагу онлайн — потяги та стрілки"
+
+#, elixir-autogen, elixir-format
+msgid "Send each train to the house with its colors."
+msgstr "Відправ кожен потяг до будинку своїх кольорів."
+
+#, elixir-autogen, elixir-format
+msgid "Send each train to the house with its colors. You can flip only the switches in your color."
+msgstr "Відправ кожен потяг до будинку своїх кольорів. Ти можеш перемикати лише стрілки свого кольору."
+
+#, elixir-autogen, elixir-format
+msgid "Send the link to the other players."
+msgstr "Надішли посилання іншим гравцям."
+
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Увійди"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to enable campaigns"
+msgstr "Увійди, щоб грати в кампанії"
+
+#, elixir-autogen, elixir-format
+msgid "Starting..."
+msgstr "Запуск..."
+
+#, elixir-autogen, elixir-format
+msgid "Support the author"
+msgstr "Підтримай автора"
+
+#, elixir-autogen, elixir-format
+msgid "Switches"
+msgstr "Стрілки"
+
+#, elixir-autogen, elixir-format
+msgid "The pace tells how fast the trains come one after another."
+msgstr "Темп задає, як швидко потяги йдуть один за одним."
+
+#, elixir-autogen, elixir-format
+msgid "The round ends when all trains have arrived. The score is the number of trains that got to the correct house."
+msgstr "Раунд закінчується, коли приїхали всі потяги. Рахунок — це кількість потягів, які приїхали до потрібного будинку."
+
+#, elixir-autogen, elixir-format
+msgid "The tracks split at the switches. Click a switch to change its direction. A train follows the direction of each switch on its way."
+msgstr "Колії розходяться на стрілках. Натисни на стрілку, щоб перемкнути її. Потяг іде за напрямком кожної стрілки на своєму шляху."
+
+#, elixir-autogen, elixir-format
+msgid "The trains come a bit faster and faster: from 8 down to 6 seconds apart."
+msgstr "Потяги йдуть потроху дедалі швидше: від 8 до 6 секунд між ними."
+
+#, elixir-autogen, elixir-format
+msgid "The trains come faster and faster: from 6 down to 4 seconds apart."
+msgstr "Потяги йдуть дедалі швидше: від 6 до 4 секунд між ними."
+
+#, elixir-autogen, elixir-format
+msgid "The {color} player changes the settings…"
+msgstr "{color} змінює налаштування…"
+
+#, elixir-autogen, elixir-format
+msgid "Trains leave the station one at a time. Each train has the colors of one of the houses."
+msgstr "Потяги виходять зі станції по одному. Кожен потяг має кольори одного з будинків."
+
+#, elixir-autogen, elixir-format
+msgid "Trains per house"
+msgstr "Потягів на будинок"
+
+#, elixir-autogen, elixir-format
+msgid "Try again"
+msgstr "Ще раз"
+
+#, elixir-autogen, elixir-format
+msgid "Try again with a new layout."
+msgstr "Спробуй ще раз із новою схемою колій."
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds off"
+msgstr "Вимкнути звук"
+
+#, elixir-autogen, elixir-format
+msgid "Turn the sounds on"
+msgstr "Увімкнути звук"
+
+#, elixir-autogen, elixir-format
+msgid "Visibility"
+msgstr "Доступ"
+
+#, elixir-autogen, elixir-format
+msgid "Waiting for players"
+msgstr "Чекаємо на гравців"
+
+#, elixir-autogen, elixir-format
+msgid "Watchers: {count}"
+msgstr "Глядачі: {count}"
+
+#, elixir-autogen, elixir-format
+msgid "With more players, each player owns some of the switches and can change only those."
+msgstr "Коли гравців кілька, у кожного свої стрілки, і перемикати можна лише їх."
+
+#, elixir-autogen, elixir-format
+msgid "You are watching this game."
+msgstr "Ви спостерігаєте за цією грою."
+
+#, elixir-autogen, elixir-format
+msgid "You finished the campaign!"
+msgstr "Кампанію пройдено!"
+
+#, elixir-autogen, elixir-format
+msgid "You own all the switches."
+msgstr "Усі стрілки твої."
+
+#, elixir-autogen, elixir-format
+msgid "Your progress is saved to your account."
+msgstr "Прогрес зберігається у твоєму акаунті."
+
+#, elixir-autogen, elixir-format
+msgid "Your results"
+msgstr "Твої результати"
+
+#, elixir-autogen, elixir-format
+msgid "correct"
+msgstr "правильно"
+
+#, elixir-autogen, elixir-format
+msgid "to get listed"
+msgstr "і потрап до списку"
+
+#, elixir-autogen, elixir-format
+msgid "train"
+msgstr "потяг"
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home"
+msgstr "Потягів удома: {correct} із {total}"
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home."
+msgstr "Потягів удома: {correct} із {total}."
+
+#, elixir-autogen, elixir-format
+msgid "{correct} of {total} trains got home. {pass} are needed."
+msgstr "Потягів удома: {correct} із {total}. Потрібно {pass}."
+
+#, elixir-autogen, elixir-format
+msgid "{feed} to keep Octomocto ad-free."
+msgstr "{feed}, щоб в Octomocto не було реклами."
+
+#, elixir-autogen, elixir-format
+msgid "{name} (you)"
+msgstr "{name} (ти)"
+
+#, elixir-autogen, elixir-format
+msgid "{name} changes the settings…"
+msgstr "{name} змінює налаштування…"
+
+#, elixir-autogen, elixir-format
+msgid "{players} of {needed} players are in"
+msgstr "Гравців у грі: {players} з {needed}"
+
+#, elixir-autogen, elixir-format
+msgid "{sign_in} to keep your scores."
+msgstr "{sign_in} і зберігай свої результати."
