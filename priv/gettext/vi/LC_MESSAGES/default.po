@@ -409,3 +409,35 @@ msgstr "Cảm ơn bạn! Rất vui vì bạn thích trò chơi này!"
 #, elixir-autogen, elixir-format
 msgid "What can we do better?"
 msgstr "Chúng tôi có thể cải thiện điều gì?"
+
+#, elixir-autogen, elixir-format
+msgid "%{name} invites you to %{game}"
+msgstr "%{name} mời bạn chơi %{game}"
+
+#, elixir-autogen, elixir-format
+msgid "Declined"
+msgstr "Đã từ chối"
+
+#, elixir-autogen, elixir-format
+msgid "Invite"
+msgstr "Mời"
+
+#, elixir-autogen, elixir-format
+msgid "Invite a friend"
+msgstr "Mời bạn bè"
+
+#, elixir-autogen, elixir-format
+msgid "Invited"
+msgstr "Đã mời"
+
+#, elixir-autogen, elixir-format
+msgid "No friends online."
+msgstr "Không có bạn bè nào đang online."
+
+#, elixir-autogen, elixir-format
+msgid "Not now"
+msgstr "Để sau"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to invite your friends."
+msgstr "Đăng nhập để mời bạn bè."

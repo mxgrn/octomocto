@@ -412,3 +412,35 @@ msgstr "Teşekkürler! Beğenmene çok sevindik!"
 #, elixir-autogen, elixir-format
 msgid "What can we do better?"
 msgstr "Neyi daha iyi yapabiliriz?"
+
+#, elixir-autogen, elixir-format
+msgid "%{name} invites you to %{game}"
+msgstr "%{name} seni %{game} oynamaya davet ediyor"
+
+#, elixir-autogen, elixir-format
+msgid "Declined"
+msgstr "Reddedildi"
+
+#, elixir-autogen, elixir-format
+msgid "Invite"
+msgstr "Davet et"
+
+#, elixir-autogen, elixir-format
+msgid "Invite a friend"
+msgstr "Arkadaş davet et"
+
+#, elixir-autogen, elixir-format
+msgid "Invited"
+msgstr "Davet edildi"
+
+#, elixir-autogen, elixir-format
+msgid "No friends online."
+msgstr "Çevrimiçi arkadaş yok."
+
+#, elixir-autogen, elixir-format
+msgid "Not now"
+msgstr "Şimdi değil"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to invite your friends."
+msgstr "Arkadaşlarını davet etmek için giriş yap."

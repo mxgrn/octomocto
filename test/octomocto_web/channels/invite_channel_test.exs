@@ -31,10 +31,10 @@ defmodule OctomoctoWeb.InviteChannelTest do
     OnlineUsers.track(page, user.id, %{kind: nil, doing: nil})
   end
 
-  defp join_menu(user_id, id) do
+  defp join_menu(user_id, id, lang \\ "en") do
     UserSocket
     |> socket(nil, %{user_id: user_id})
-    |> subscribe_and_join(InviteChannel, "invites:nimble-mosaic:" <> id, %{"locale" => "en"})
+    |> subscribe_and_join(InviteChannel, "invites:nimble-mosaic:" <> id, %{"locale" => lang})
   end
 
   test "a player of a waiting game invites a friend who is online", %{id: id} do
@@ -84,6 +84,29 @@ defmodule OctomoctoWeb.InviteChannelTest do
 
     ref = push(socket, "invite", %{"friend_id" => friend.id})
     assert_reply ref, :error
+  end
+
+  test "the texts of the menu are in the language of the page", %{id: id} do
+    {:ok, %{texts: %{invite_title: title}}, _socket} = join_menu(nil, id, "pt-BR")
+
+    assert title == "Convide um amigo"
+  end
+
+  test "the notice is in the language that the friend picked", %{id: id} do
+    [user, friend] = for _ <- 1..2, do: user_fixture()
+    friend = Octomocto.Accounts.update_user_preferred_locale(friend, "de")
+    make_friends(user, friend)
+    online(friend)
+    {:ok, _, _} = NimbleMosaic.join(id, user.id)
+    Notices.subscribe({:user, friend.id})
+    {:ok, _, socket} = join_menu(user.id, id)
+
+    push(socket, "invite", %{"friend_id" => friend.id})
+
+    text = "#{user.display_name} lädt dich zu Nimble Mosaic ein"
+
+    assert_receive {:notice,
+                    %{text: ^text, actions: [%{label: "Mitspielen"}, %{label: "Später"}]}}
   end
 
   test "a guest cannot invite", %{id: id} do

@@ -409,3 +409,35 @@ msgstr "ありがとう！気に入ってもらえてうれしい！"
 #, elixir-autogen, elixir-format
 msgid "What can we do better?"
 msgstr "どうすればもっと良くなる？"
+
+#, elixir-autogen, elixir-format
+msgid "%{name} invites you to %{game}"
+msgstr "%{name}さんから%{game}への招待"
+
+#, elixir-autogen, elixir-format
+msgid "Declined"
+msgstr "辞退"
+
+#, elixir-autogen, elixir-format
+msgid "Invite"
+msgstr "招待"
+
+#, elixir-autogen, elixir-format
+msgid "Invite a friend"
+msgstr "友達を招待"
+
+#, elixir-autogen, elixir-format
+msgid "Invited"
+msgstr "招待済み"
+
+#, elixir-autogen, elixir-format
+msgid "No friends online."
+msgstr "オンラインの友達はいません。"
+
+#, elixir-autogen, elixir-format
+msgid "Not now"
+msgstr "あとで"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to invite your friends."
+msgstr "ログインして友達を招待しよう。"

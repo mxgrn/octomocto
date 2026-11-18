@@ -412,3 +412,35 @@ msgstr "¡Gracias! ¡Nos alegra que te guste!"
 #, elixir-autogen, elixir-format
 msgid "What can we do better?"
 msgstr "¿Qué podemos mejorar?"
+
+#, elixir-autogen, elixir-format
+msgid "%{name} invites you to %{game}"
+msgstr "%{name} te invita a jugar %{game}"
+
+#, elixir-autogen, elixir-format
+msgid "Declined"
+msgstr "Rechazado"
+
+#, elixir-autogen, elixir-format
+msgid "Invite"
+msgstr "Invitar"
+
+#, elixir-autogen, elixir-format
+msgid "Invite a friend"
+msgstr "Invitar amigos"
+
+#, elixir-autogen, elixir-format
+msgid "Invited"
+msgstr "Enviado"
+
+#, elixir-autogen, elixir-format
+msgid "No friends online."
+msgstr "No hay amigos en línea."
+
+#, elixir-autogen, elixir-format
+msgid "Not now"
+msgstr "Ahora no"
+
+#, elixir-autogen, elixir-format
+msgid "Sign in to invite your friends."
+msgstr "Inicia sesión para invitar a tus amigos."

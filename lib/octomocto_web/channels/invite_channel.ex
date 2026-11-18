@@ -3,7 +3,8 @@ defmodule OctomoctoWeb.InviteChannel do
   The invites of the menu of a game page (`octo-game-menu` in
   `game_menu.js`). The topic is `"invites:<kind>:<game id>"`, with the
   kind of the game (an id in `OctomoctoWeb.HomeLive.games/0`), and the
-  `"locale"` of the page in the join params.
+  `"locale"` of the page in the join params: its `lang` attribute (see
+  `OctomoctoWeb.Locale.from_html_lang/1`).
 
   The join reply, and each `"update"` push after a change, has:
 
@@ -27,6 +28,7 @@ defmodule OctomoctoWeb.InviteChannel do
   of this user and game, so that all pages of the user see the answer.
   """
   use Phoenix.Channel
+  use Gettext, backend: OctomoctoWeb.Gettext
 
   alias Octomocto.{Accounts, Friends, Notices, OnlineUsers, Seats}
   alias OctomoctoWeb.HomeLive
@@ -38,7 +40,11 @@ defmodule OctomoctoWeb.InviteChannel do
   def join("invites:" <> topic, params, socket) do
     with [kind, id] <- String.split(topic, ":", parts: 2),
          {game, store, _page} <- HomeLive.lobby_modules(kind) do
-      if locale = params["locale"], do: Gettext.put_locale(OctomoctoWeb.Gettext, locale)
+      Gettext.put_locale(
+        OctomoctoWeb.Gettext,
+        OctomoctoWeb.Locale.from_html_lang(params["locale"])
+      )
+
       user_id = socket.assigns.user_id
       friends = if user_id, do: Friends.friends(user_id), else: []
 
@@ -131,14 +137,22 @@ defmodule OctomoctoWeb.InviteChannel do
     sender = Accounts.get_user!(assigns.user_id)
     name = Accounts.public_name(sender)
     game = Enum.find(HomeLive.games(), &(&1.id == assigns.kind))
+    # In the language that the friend picked in the footer, else English
+    locale = Accounts.get_user!(friend_id).preferred_locale || "en"
+
+    {text, join, later} =
+      Gettext.with_locale(OctomoctoWeb.Gettext, locale, fn ->
+        {gettext("%{name} invites you to %{game}", name: name, game: game.name), gettext("Join"),
+         gettext("Not now")}
+      end)
 
     Notices.push({:user, friend_id}, %{
       id: "invite:#{assigns.id}:#{assigns.user_id}",
-      text: "#{name} invites you to #{game.name}",
+      text: text,
       avatar: %{url: sender.avatar_url, name: name},
       actions: [
-        %{id: "join", label: "Join", href: "/#{assigns.kind}/#{assigns.id}"},
-        %{id: "later", label: "Not now", href: nil}
+        %{id: "join", label: join, href: "/#{assigns.kind}/#{assigns.id}"},
+        %{id: "later", label: later, href: nil}
       ],
       expires_at: System.system_time(:millisecond) + @invite_ms,
       reply_to: reply_topic(assigns.id, assigns.user_id),
@@ -156,6 +170,4 @@ defmodule OctomoctoWeb.InviteChannel do
       no_friends: gettext("No friends online.")
     }
   end
-
-  defp gettext(text), do: Gettext.gettext(OctomoctoWeb.Gettext, text)
 end
