@@ -17,13 +17,41 @@ defmodule OctomoctoWeb.UserSessionController do
   @magic_link_cookie "_octomocto_web_magic_link_email"
   @magic_link_cookie_options [sign: true, max_age: 24 * 60 * 60, same_site: "Lax"]
 
-  # The home page has the same sign-in forms. This page is for the redirects
-  # from pages that need a sign-in. A signed-in user goes to the home page.
+  # The sign-in links of all pages and the redirects from pages that need a
+  # sign-in come here. A signed-in user goes to the home page.
   def new(conn, _params) do
     if conn.assigns.current_scope,
       do: redirect(conn, to: Locale.path(conn.assigns.locale, ~p"/")),
-      else: render_sign_in(conn, ~p"/signin")
+      else: conn |> store_referer_return_to() |> render_sign_in(~p"/signin")
   end
+
+  # After sign-in, the guest goes back to the page of the sign-in link. That
+  # page replaces a return path from an earlier visit. Without a Referer
+  # from this site, the old return path stays.
+  defp store_referer_return_to(conn) do
+    with [referer | _] <- get_req_header(conn, "referer"),
+         %URI{host: host, path: "/" <> _ = path, query: query} when host == conn.host <-
+           URI.parse(referer),
+         false <- sign_in_path?(path) do
+      put_session(conn, :user_return_to, if(query, do: path <> "?" <> query, else: path))
+    else
+      _ -> conn
+    end
+  end
+
+  @locales Locale.other_locales()
+
+  defp sign_in_path?(path) do
+    case String.split(path, "/", trim: true) do
+      [locale | rest] when locale in @locales -> sign_in_segments?(rest)
+      segments -> sign_in_segments?(segments)
+    end
+  end
+
+  defp sign_in_segments?(["signin" | _]), do: true
+  defp sign_in_segments?(["reauth" | _]), do: true
+  defp sign_in_segments?(["auth" | _]), do: true
+  defp sign_in_segments?(_), do: false
 
   # A signed-in user signs in again here, with only the methods that the user
   # has. A guest goes to the sign-in page.

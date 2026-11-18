@@ -54,6 +54,28 @@ defmodule OctomoctoWeb.UserSessionControllerTest do
       assert redirected_to(conn) == ~p"/pt"
     end
 
+    test "after sign-in, a guest goes back to the page of the sign-in link", %{conn: conn} do
+      conn =
+        conn
+        |> init_test_session(user_return_to: "/notifications")
+        |> put_req_header("referer", "http://www.example.com/de/memory?cards=12")
+        |> get(~p"/signin")
+
+      assert get_session(conn, :user_return_to) == "/de/memory?cards=12"
+    end
+
+    test "keeps the return path for a link from another site or a sign-in page", %{conn: conn} do
+      for referer <- ["https://google.com/memory", "http://www.example.com/de/signin"] do
+        conn =
+          conn
+          |> init_test_session(user_return_to: "/notifications")
+          |> put_req_header("referer", referer)
+          |> get(~p"/signin")
+
+        assert get_session(conn, :user_return_to) == "/notifications"
+      end
+    end
+
     test "shows the Google button to a guest", %{conn: conn} do
       assert conn |> get(~p"/signin") |> has_element?("#google-sign-in")
     end
