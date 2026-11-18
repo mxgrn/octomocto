@@ -1,18 +1,35 @@
 defmodule Octomocto.Trains.Campaign do
   @moduledoc """
-  The Trains campaign: a list of levels for one signed-in player, from 3
-  switches (4 houses) at the easy pace to 12 switches at the expert pace. The full
-  round runs, and a level unlocks when 90% or more of the trains of the
-  level before it got home (see `pass_count/1`).
+  The Trains campaign: a list of levels for one signed-in player, from 4
+  switches at the normal pace to 12 switches at the expert pace with 7
+  trains per house, the hardest settings of the game. The full round runs,
+  and a level unlocks when 90% or more of the trains of the level before
+  it got home (see `pass_count/1`).
+
+  The levels have a chapter for each pace from normal to expert. The easy
+  pace is not in the campaign: it was too easy as a start. In a chapter
+  the board grows. The first level of the next pace has a smaller board,
+  but it is harder than the last level of the pace before it. Each level
+  has 10 or more trains, so that the 90% rule permits at least one error.
 
   The order of the levels comes from a simulation on the layouts of the
   game. A model player needs some time to flip a switch, and more time to
   find the house of each new train (more with more houses). The difficulty
-  of a level is the slowest flip time that still gets 90% of the trains
-  home. Each level is 3% to 13% harder than the level before it. A faster
-  pace is about as hard as 2 to 4 more switches.
+  of a level is the slowest flip time with which half of the rounds pass.
+  Most levels are 2% to 7% harder than the level before them. The first
+  expert level is 10% harder. The last level needs a player who is 2.9
+  times faster than the first level does.
 
-  Some levels have 3 or 7 switches, which the settings page does not have.
+  More trains per house make a level longer and only a little harder: the
+  easy start of the round, when the board is empty, is a smaller part of
+  it. Some levels use this: they have the board of the level before them
+  and more trains per house. Above 3 trains per house a level does not
+  become harder for the model player. Thus the trains per house go up in
+  steps on the last levels, so that the round does not become 3 times
+  longer in one step.
+
+  Some levels have a number of switches that the settings page does not
+  have (for example 5, 7 or 9).
 
   The best round of each level is a `Octomocto.Trains.CampaignLevel` row.
   """
@@ -25,26 +42,31 @@ defmodule Octomocto.Trains.Campaign do
 
   # {switches, pace, trains per house} for each level
   @levels [
-    {3, "easy", 2},
-    {4, "easy", 2},
-    {6, "easy", 2},
-    {8, "easy", 2},
-    {12, "easy", 2},
     {4, "normal", 2},
-    {4, "normal", 3},
+    {4, "normal", 4},
+    {5, "normal", 2},
+    {5, "normal", 4},
     {6, "normal", 2},
-    {4, "hard", 2},
     {7, "normal", 2},
-    {8, "normal", 2},
-    {6, "hard", 2},
+    {9, "normal", 2},
+    {10, "normal", 2},
+    {11, "normal", 2},
     {12, "normal", 2},
+    {6, "hard", 2},
     {7, "hard", 2},
-    {6, "expert", 2},
     {8, "hard", 2},
+    {10, "hard", 2},
+    {11, "hard", 2},
     {12, "hard", 2},
-    {8, "expert", 2},
-    {12, "expert", 2},
-    {12, "expert", 3}
+    {12, "hard", 3},
+    {6, "expert", 2},
+    {7, "expert", 2},
+    {7, "expert", 3},
+    {8, "expert", 3},
+    {9, "expert", 4},
+    {10, "expert", 4},
+    {11, "expert", 5},
+    {12, "expert", 7}
   ]
 
   @leaderboard_size 10
