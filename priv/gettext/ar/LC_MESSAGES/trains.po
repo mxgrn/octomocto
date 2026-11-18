@@ -232,10 +232,6 @@ msgid "Pace"
 msgstr "الوتيرة"
 
 #, elixir-autogen, elixir-format
-msgid "Pass level %{level} first."
-msgstr "اجتز المستوى %{level} أولًا."
-
-#, elixir-autogen, elixir-format
 msgid "Perfect!"
 msgstr "ممتاز!"
 

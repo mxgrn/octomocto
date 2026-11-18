@@ -202,10 +202,6 @@ msgid "Pace"
 msgstr "ペース"
 
 #, elixir-autogen, elixir-format
-msgid "Pass level %{level} first."
-msgstr "先にレベル%{level}をクリアしよう。"
-
-#, elixir-autogen, elixir-format
 msgid "Perfect!"
 msgstr "パーフェクト！"
 

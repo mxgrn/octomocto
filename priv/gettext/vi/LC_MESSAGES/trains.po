@@ -202,10 +202,6 @@ msgid "Pace"
 msgstr "Nhịp độ"
 
 #, elixir-autogen, elixir-format
-msgid "Pass level %{level} first."
-msgstr "Hãy qua màn %{level} trước."
-
-#, elixir-autogen, elixir-format
 msgid "Perfect!"
 msgstr "Hoàn hảo!"
 

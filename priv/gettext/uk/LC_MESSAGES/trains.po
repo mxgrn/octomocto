@@ -214,10 +214,6 @@ msgid "Pace"
 msgstr "Темп"
 
 #, elixir-autogen, elixir-format
-msgid "Pass level %{level} first."
-msgstr "Спочатку пройди рівень %{level}."
-
-#, elixir-autogen, elixir-format
 msgid "Perfect!"
 msgstr "Ідеально!"
 

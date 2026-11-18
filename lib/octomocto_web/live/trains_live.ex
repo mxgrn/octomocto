@@ -535,11 +535,11 @@ defmodule OctomoctoWeb.TrainsLive do
       )
 
   attr :level, :map, required: true
-  attr :highest, :integer, required: true
 
   # The selected level: its settings, the trains that must get home and the
-  # Play button. It stays at the bottom of the screen while the map does
-  # not fit, so that the Play button is always in view.
+  # Play button (not for a locked level). It stays at the bottom of the
+  # screen while the map does not fit, so that the Play button is always in
+  # view.
   defp level_card(assigns) do
     assigns = assign(assigns, pass: Campaign.pass_count(assigns.level.trains))
 
@@ -589,31 +589,25 @@ defmodule OctomoctoWeb.TrainsLive do
           <% end %>
         </p>
       </div>
-      <%= if @level.status == :locked do %>
-        <p id="level-locked" class="flex items-center gap-1.5 text-sm text-base-content/60">
-          <.icon name="hero-lock-closed-mini" class="size-4" />
-          {dgettext("trains", "Pass level %{level} first.", level: @highest + 1)}
-        </p>
-      <% else %>
-        <button
-          id="play-level"
-          type="button"
-          phx-click="play_level"
-          phx-value-level={@level.level}
-          phx-disable-with={dgettext("trains", "Starting...")}
-          class="flex cursor-pointer items-center gap-1.5 rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/25 transition hover:bg-octo-indigo/90 hover:shadow-xl"
-        >
-          <%= cond do %>
-            <% @level.status == :done -> %>
-              {dgettext("trains", "Play again")}
-            <% @level.correct > 0 -> %>
-              {dgettext("trains", "Try again")}
-            <% true -> %>
-              {dgettext("trains", "Play")}
-          <% end %>
-          <.icon name="hero-play-mini" class="size-4" />
-        </button>
-      <% end %>
+      <button
+        :if={@level.status != :locked}
+        id="play-level"
+        type="button"
+        phx-click="play_level"
+        phx-value-level={@level.level}
+        phx-disable-with={dgettext("trains", "Starting...")}
+        class="flex cursor-pointer items-center gap-1.5 rounded-full bg-octo-indigo px-6 py-2.5 font-medium text-white shadow-lg shadow-octo-indigo/25 transition hover:bg-octo-indigo/90 hover:shadow-xl"
+      >
+        <%= cond do %>
+          <% @level.status == :done -> %>
+            {dgettext("trains", "Play again")}
+          <% @level.correct > 0 -> %>
+            {dgettext("trains", "Try again")}
+          <% true -> %>
+            {dgettext("trains", "Play")}
+        <% end %>
+        <.icon name="hero-play-mini" class="size-4" />
+      </button>
     </div>
     """
   end
