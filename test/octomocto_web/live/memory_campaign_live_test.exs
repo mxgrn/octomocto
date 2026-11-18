@@ -22,6 +22,19 @@ defmodule OctomoctoWeb.MemoryCampaignLiveTest do
     assert has_element?(view, "#theme-#{theme.name}[aria-current=true]")
   end
 
+  test "the campaign opens with the theme choice of the last visit", %{conn: conn} do
+    [theme | _] = Campaign.themes(Campaign.get(1))
+    {:ok, _view, _html} = live(conn, ~p"/memory/campaign?level=1&theme=#{theme.name}")
+
+    {:ok, view, _html} = live(conn, ~p"/memory/campaign")
+    assert has_element?(view, "#theme-#{theme.name}[aria-current=true]")
+
+    {:ok, _view, _html} = live(conn, ~p"/memory/campaign?level=1&theme=random")
+
+    {:ok, view, _html} = live(conn, ~p"/memory/campaign")
+    assert has_element?(view, "#theme-random[aria-checked=true]")
+  end
+
   test "a locked level has no theme grid", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/memory/campaign?level=2")
 

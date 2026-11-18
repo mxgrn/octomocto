@@ -23,7 +23,7 @@ defmodule OctomoctoWeb.MemoryLive do
   import OctomoctoWeb.GamePageComponents
   import OctomoctoWeb.CampaignComponents
 
-  alias Octomocto.{Lobby, Memory}
+  alias Octomocto.{GameSettings, Lobby, Memory}
   alias Octomocto.Memory.{Board, Campaign, Game, Store, Themes}
   alias OctomoctoWeb.{MemoryChannel, SavedSettings}
 
@@ -184,7 +184,8 @@ defmodule OctomoctoWeb.MemoryLive do
 
   # The levels of the campaign with the progress of the user, the selected
   # level (`?level=`, else the next level to play) and the theme choice
-  # (`?theme=`, else "random"). A guest sees the levels of a new player.
+  # (`?theme=`, else the saved choice, else "random"). A guest sees the
+  # levels of a new player.
   defp assign_campaign(socket, params) do
     progress =
       case socket.assigns.current_scope do
@@ -228,7 +229,7 @@ defmodule OctomoctoWeb.MemoryLive do
 
     # The choice stays in the links of the other levels. The level gives a
     # random theme for a theme that it cannot use, see `Campaign.pick_theme/2`.
-    theme = if Themes.visible?(params["theme"]), do: params["theme"], else: "random"
+    theme = campaign_theme(socket, params["theme"])
     level_theme = if theme in names, do: theme, else: "random"
 
     # The theme that the Random switch turns back to, as in Free play
@@ -253,6 +254,28 @@ defmodule OctomoctoWeb.MemoryLive do
         leaderboard: Campaign.leaderboard()
       }
     )
+  end
+
+  # The theme choice of the campaign in the params, else the saved choice.
+  # A new choice in the params is saved, once the page is connected.
+  defp campaign_theme(socket, theme) do
+    scope = socket.assigns.current_scope
+    guest_id = socket.assigns[:guest_id]
+    saved = GameSettings.get_value(scope, guest_id, "memory", "campaign_theme")
+
+    cond do
+      theme == "random" or Themes.visible?(theme) ->
+        if connected?(socket) and theme != saved,
+          do: GameSettings.put_value(scope, guest_id, "memory", "campaign_theme", theme)
+
+        theme
+
+      Themes.visible?(saved) ->
+        saved
+
+      true ->
+        "random"
+    end
   end
 
   def handle_info({:lobby_changed, _game, id, entry}, socket) do
@@ -509,8 +532,8 @@ defmodule OctomoctoWeb.MemoryLive do
 
   @doc "The path of the Campaign tab with the level and the theme choice selected."
   def campaign_path(locale, level, theme) do
-    query = if theme == "random", do: [level: level], else: [level: level, theme: theme]
-    Locale.path(locale, ~p"/memory/campaign?#{query}")
+    # "random" is in the query too: without a theme, the page uses the saved choice
+    Locale.path(locale, ~p"/memory/campaign?#{[level: level, theme: theme]}")
   end
 
   @doc """

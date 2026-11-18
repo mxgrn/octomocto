@@ -2,35 +2,40 @@ defmodule Octomocto.GameSettings do
   @moduledoc """
   Keeps the settings that a user or a guest chose last, for each game, so
   that the settings page of the game shows them again (see
-  `Octomocto.GameSettings.Saved`), and the tab of the game page that they
-  used last. A guest is found by the guest id in the
-  session (see `OctomoctoWeb.GuestName`). The settings are only a
-  convenience: never use them for authentication or access.
+  `Octomocto.GameSettings.Saved`). It also keeps other choices of the game
+  page (see `@page_keys`), for example the tab that was used last. A guest
+  is found by the guest id in the session (see `OctomoctoWeb.GuestName`).
+  The settings are only a convenience: never use them for authentication
+  or access.
   """
   import Ecto.Query
 
   alias Octomocto.GameSettings.Saved
   alias Octomocto.Repo
 
-  # The key of the tab in the saved map. The other keys are the settings.
-  @tab "tab"
+  # The keys of the other choices of the game page in the saved map: the
+  # tab that was used last, and the theme choice of the Memory campaign.
+  # The other keys are the settings.
+  @page_keys ["tab", "campaign_theme"]
 
   @doc """
   Gives the saved settings of the game for the scope's user, else for the
   guest, or nil.
   """
   def get(scope, guest_id, game) do
-    case saved(scope, guest_id, game) |> Map.delete(@tab) do
+    case saved(scope, guest_id, game) |> Map.drop(@page_keys) do
       settings when settings == %{} -> nil
       settings -> settings
     end
   end
 
   @doc """
-  Gives the tab of the game page that the scope's user, else the guest,
-  used last, for example "lobby", or nil.
+  Gives the saved value of the `key` (see `@page_keys`) of the game page
+  for the scope's user, else for the guest, or nil. For example, the tab
+  is "lobby".
   """
-  def get_tab(scope, guest_id, game), do: saved(scope, guest_id, game)[@tab]
+  def get_value(scope, guest_id, game, key) when key in @page_keys,
+    do: saved(scope, guest_id, game)[key]
 
   defp saved(scope, guest_id, game) do
     case owner(scope, guest_id) do
@@ -46,8 +51,8 @@ defmodule Octomocto.GameSettings do
 
   @doc """
   Saves the settings of the game for the scope's user, else for the guest.
-  The settings replace the settings that were saved before. The saved tab
-  stays.
+  The settings replace the settings that were saved before. The saved
+  values of the game page (see `put_value/5`) stay.
   """
   def put(scope, guest_id, game, settings) do
     upsert(scope, guest_id, game, settings, fn now ->
@@ -56,10 +61,12 @@ defmodule Octomocto.GameSettings do
           set: [
             settings:
               fragment(
-                "jsonb_strip_nulls(EXCLUDED.settings || jsonb_build_object(?::text, ?->?))",
-                @tab,
+                """
+                EXCLUDED.settings || (SELECT coalesce(jsonb_object_agg(key, value), '{}')
+                FROM jsonb_each(?) WHERE key = ANY(?))
+                """,
                 s.settings,
-                @tab
+                type(^@page_keys, {:array, :string})
               ),
             updated_at: ^now
           ]
@@ -69,11 +76,11 @@ defmodule Octomocto.GameSettings do
   end
 
   @doc """
-  Saves the tab of the game page that the scope's user, else the guest,
-  used last. The saved settings stay.
+  Saves the value of the `key` (see `@page_keys`) of the game page for the
+  scope's user, else for the guest. The saved settings stay.
   """
-  def put_tab(scope, guest_id, game, tab) do
-    upsert(scope, guest_id, game, %{@tab => tab}, fn now ->
+  def put_value(scope, guest_id, game, key, value) when key in @page_keys do
+    upsert(scope, guest_id, game, %{key => value}, fn now ->
       from(s in Saved,
         update: [
           set: [settings: fragment("? || EXCLUDED.settings", s.settings), updated_at: ^now]

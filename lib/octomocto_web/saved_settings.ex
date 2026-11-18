@@ -55,7 +55,7 @@ defmodule OctomoctoWeb.SavedSettings do
   def last_tab(%{assigns: %{last_tab: {tab}}}, _game), do: tab
 
   def last_tab(socket, game) do
-    GameSettings.get_tab(socket.assigns.current_scope, socket.assigns[:guest_id], game)
+    GameSettings.get_value(socket.assigns.current_scope, socket.assigns[:guest_id], game, "tab")
   end
 
   @doc """
@@ -66,7 +66,14 @@ defmodule OctomoctoWeb.SavedSettings do
     old = last_tab(socket, game)
 
     if connected?(socket) and (old || "free") != tab do
-      GameSettings.put_tab(socket.assigns.current_scope, socket.assigns[:guest_id], game, tab)
+      GameSettings.put_value(
+        socket.assigns.current_scope,
+        socket.assigns[:guest_id],
+        game,
+        "tab",
+        tab
+      )
+
       assign(socket, :last_tab, {tab})
     else
       assign(socket, :last_tab, {old})

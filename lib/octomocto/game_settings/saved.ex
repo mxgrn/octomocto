@@ -4,8 +4,8 @@ defmodule Octomocto.GameSettings.Saved do
   a game (see `Octomocto.GameSettings`). The `game` is the name of the
   game, for example "memory". The `settings` are the params of the
   settings page, for example `%{"players" => "2", "cards" => "16"}`, and
-  the "tab" key with the tab of the game page that was used last, for
-  example "lobby".
+  the other choices of the game page, for example `"tab" => "lobby"` (see
+  `Octomocto.GameSettings`).
   Only one of `user_id` and `guest_id` is set.
   """
   use Ecto.Schema
