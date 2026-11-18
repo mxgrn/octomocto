@@ -1606,19 +1606,8 @@ The link opens in a new tab, so that the player stays in the game.
 -}
 viewFeed : String -> Texts -> Html msg
 viewFeed donateUrl texts =
-    let
-        -- The text around the link, which can be at any place of the text
-        ( before, after ) =
-            case String.split "{feed}" (t texts "{feed} to keep Octomocto ad-free.") of
-                [ b, c ] ->
-                    ( b, c )
-
-                _ ->
-                    ( "", "" )
-    in
     p [ id "memory-feed", class "mt-2 max-w-sm border-t border-white/15 pt-4 text-center text-sm leading-10 text-balance text-white/80" ]
-        [ text before
-        , a
+        [ a
             [ href donateUrl
             , target "_blank"
             , rel "noopener"
@@ -1627,7 +1616,6 @@ viewFeed donateUrl texts =
             [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
             , text (t texts "Support the author")
             ]
-        , text after
         ]
 
 

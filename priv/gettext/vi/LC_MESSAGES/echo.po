@@ -61,10 +61,6 @@ msgid "Each round, the sequence gets one pad longer. One wrong pad, and the game
 msgstr "Mỗi vòng, chuỗi dài thêm một nút. Sai một nút là ván kết thúc."
 
 #, elixir-autogen, elixir-format
-msgid "{feed} to keep Octomocto ad-free."
-msgstr "{feed} để Octomocto luôn không có quảng cáo."
-
-#, elixir-autogen, elixir-format
 msgid "Support the author"
 msgstr "Ủng hộ tác giả"
 

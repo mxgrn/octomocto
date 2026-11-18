@@ -386,10 +386,6 @@ msgid "{correct} of {total} trains got home. {pass} are needed."
 msgstr "{total}本中{correct}本の列車が家に到着。クリアには{pass}本必要。"
 
 #, elixir-autogen, elixir-format
-msgid "{feed} to keep Octomocto ad-free."
-msgstr "Octomoctoを広告なしで続けるために、{feed}。"
-
-#, elixir-autogen, elixir-format
 msgid "{name} (you)"
 msgstr "{name}（自分）"
 

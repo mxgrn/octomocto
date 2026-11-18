@@ -40,8 +40,6 @@ defmodule OctomoctoWeb.InkTrailHTML do
       "Or try {game}" => dgettext("ink-trail", "Or try {game}"),
       "Sign in" => dgettext("ink-trail", "Sign in"),
       "{sign_in} to keep your scores." => dgettext("ink-trail", "{sign_in} to keep your scores."),
-      "{feed} to keep Octomocto ad-free." =>
-        dgettext("ink-trail", "{feed} to keep Octomocto ad-free."),
       "Support the author" => dgettext("ink-trail", "Support the author")
     }
   end

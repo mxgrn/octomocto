@@ -62,10 +62,6 @@ msgid "Each round, the sequence gets one pad longer. One wrong pad, and the game
 msgstr "A ogni round la sequenza si allunga di un tasto. Un tasto sbagliato, e la partita finisce."
 
 #, elixir-autogen, elixir-format
-msgid "{feed} to keep Octomocto ad-free."
-msgstr "{feed} per mantenere Octomocto senza pubblicità."
-
-#, elixir-autogen, elixir-format
 msgid "Support the author"
 msgstr "Sostieni l'autore"
 

@@ -1087,7 +1087,6 @@ viewFeed =
             [ span [ class "hero-heart-solid size-4 transition group-hover:scale-110" ] []
             , text "Support the author"
             ]
-        , text " to keep Octomocto ad-free."
         ]
 
 

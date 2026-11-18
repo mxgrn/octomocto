@@ -514,10 +514,6 @@ msgid "{name} found the last bomb and can demine the field…"
 msgstr "{name}: остання бомба! Можна розмінувати поле…"
 
 #, elixir-autogen, elixir-format
-msgid "{feed} to keep Octomocto ad-free."
-msgstr "{feed}, щоб в Octomocto не було реклами."
-
-#, elixir-autogen, elixir-format
 msgid "Support the author"
 msgstr "Підтримай автора"
 

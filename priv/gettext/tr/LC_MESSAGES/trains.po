@@ -392,10 +392,6 @@ msgid "{correct} of {total} trains got home. {pass} are needed."
 msgstr "{total} trenden {correct} tanesi eve ulaştı. {pass} tren gerekli."
 
 #, elixir-autogen, elixir-format
-msgid "{feed} to keep Octomocto ad-free."
-msgstr "Octomocto'nun reklamsız kalması için {feed}."
-
-#, elixir-autogen, elixir-format
 msgid "{name} (you)"
 msgstr "{name} (sen)"
 

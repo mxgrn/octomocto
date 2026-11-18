@@ -54,8 +54,6 @@ defmodule OctomoctoWeb.TrainsHTML do
       "Or try {game}" => dgettext("trains", "Or try {game}"),
       "Sign in" => dgettext("trains", "Sign in"),
       "{sign_in} to keep your scores." => dgettext("trains", "{sign_in} to keep your scores."),
-      "{feed} to keep Octomocto ad-free." =>
-        dgettext("trains", "{feed} to keep Octomocto ad-free."),
       "Support the author" => dgettext("trains", "Support the author"),
       # The end of a round of the campaign
       "Not enough trains got home" => dgettext("trains", "Not enough trains got home"),

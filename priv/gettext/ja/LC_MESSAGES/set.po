@@ -451,10 +451,6 @@ msgid "to get listed"
 msgstr "してランキングに載ろう"
 
 #, elixir-autogen, elixir-format
-msgid "{feed} to keep Octomocto ad-free."
-msgstr "Octomoctoを広告なしで続けるために、{feed}。"
-
-#, elixir-autogen, elixir-format
 msgid "{name} (you)"
 msgstr "{name}（自分）"
 

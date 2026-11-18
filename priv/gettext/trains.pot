@@ -392,10 +392,6 @@ msgid "{correct} of {total} trains got home. {pass} are needed."
 msgstr ""
 
 #, elixir-autogen, elixir-format
-msgid "{feed} to keep Octomocto ad-free."
-msgstr ""
-
-#, elixir-autogen, elixir-format
 msgid "{name} (you)"
 msgstr ""
 

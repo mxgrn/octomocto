@@ -228,9 +228,5 @@ msgid "to get listed"
 msgstr "i trafisz na listę"
 
 #, elixir-autogen, elixir-format
-msgid "{feed} to keep Octomocto ad-free."
-msgstr "{feed}, żeby Octomocto nadal było bez reklam."
-
-#, elixir-autogen, elixir-format
 msgid "{sign_in} to keep your scores."
 msgstr "{sign_in} i zachowaj swoje wyniki."

@@ -398,10 +398,6 @@ msgid "{correct} of {total} trains got home. {pass} are needed."
 msgstr "Потягів удома: {correct} із {total}. Потрібно {pass}."
 
 #, elixir-autogen, elixir-format
-msgid "{feed} to keep Octomocto ad-free."
-msgstr "{feed}, щоб в Octomocto не було реклами."
-
-#, elixir-autogen, elixir-format
 msgid "{name} (you)"
 msgstr "{name} (ти)"
 

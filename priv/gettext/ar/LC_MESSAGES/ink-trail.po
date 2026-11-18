@@ -240,9 +240,5 @@ msgid "to get listed"
 msgstr "لتظهر في القائمة"
 
 #, elixir-autogen, elixir-format
-msgid "{feed} to keep Octomocto ad-free."
-msgstr "{feed} ليبقى Octomocto بلا إعلانات."
-
-#, elixir-autogen, elixir-format
 msgid "{sign_in} to keep your scores."
 msgstr "{sign_in} لتحفظ نتائجك."

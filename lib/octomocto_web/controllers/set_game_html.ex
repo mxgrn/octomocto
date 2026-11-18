@@ -64,7 +64,6 @@ defmodule OctomoctoWeb.SetGameHTML do
       "Or try {game}" => dgettext("set", "Or try {game}"),
       "Sign in" => dgettext("set", "Sign in"),
       "{sign_in} to keep your scores." => dgettext("set", "{sign_in} to keep your scores."),
-      "{feed} to keep Octomocto ad-free." => dgettext("set", "{feed} to keep Octomocto ad-free."),
       "Support the author" => dgettext("set", "Support the author"),
       # The clues of the Hint button, one for each feature of a set
       "Each of them has 1 shape" => dgettext("set", "Each of them has 1 shape"),
