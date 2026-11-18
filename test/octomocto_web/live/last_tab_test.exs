@@ -15,4 +15,10 @@ defmodule OctomoctoWeb.LastTabTest do
       assert to == unquote(path) <> "/lobby"
     end
   end
+
+  test "/trains opens the Campaign tab again for a guest", %{conn: conn} do
+    {:ok, _view, _html} = live(conn, "/trains/campaign")
+
+    assert {:error, {_, %{to: "/trains/campaign"}}} = live(conn, "/trains")
+  end
 end

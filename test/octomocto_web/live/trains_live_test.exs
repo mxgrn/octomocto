@@ -6,6 +6,13 @@ defmodule OctomoctoWeb.TrainsLiveTest do
   alias Octomocto.Trains
   alias Octomocto.Trains.Store
 
+  test "the settings page has the Campaign tab", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/trains")
+
+    assert view |> element("#tab-campaign") |> render_click()
+    assert_patch(view, ~p"/trains/campaign")
+  end
+
   test "a player of a match changes the settings of the next round", %{conn: conn} do
     id =
       Trains.create_game(%{

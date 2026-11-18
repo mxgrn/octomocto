@@ -50,14 +50,15 @@
         <% end %>
       </p>
       <.how_to_play />
-      <%!-- A match plays on with the same players, so it needs no other games.
-           The Campaign tab is hidden for now, as it is not ready. --%>
+      <%!-- A match plays on with the same players, so it needs no other games --%>
       <div :if={!@match} class="pt-2">
         <.mode_tabs
           tab={if(@live_action == :index, do: :free, else: @live_action)}
           free_path={settings_path(@locale, @settings, %{})}
+          campaign_path={Locale.path(@locale, ~p"/trains/campaign")}
           lobby_path={Locale.path(@locale, ~p"/trains/lobby")}
           free_label={dgettext("trains", "Free play")}
+          campaign_label={dgettext("trains", "Campaign")}
           lobby_label={dgettext("trains", "Lobby")}
           lobby_count={Enum.count(@lobby_games, &(&1.status == :open))}
         />
