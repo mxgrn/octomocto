@@ -157,11 +157,6 @@ type alias Game =
 
     -- True while the player of the turn has turned some cards of a set
     , ongoing : Bool
-
-    -- The time since the last card of the turn, and the time limit of a
-    -- turn (only with more than 2 players)
-    , turnMs : Int
-    , turnLimitMs : Maybe Int
     , players : List Player
     , playersNeeded : Int
 
@@ -227,11 +222,9 @@ type alias Model =
     -- down keeps its face until it is turned over.
     , images : Dict Int Face
 
-    -- The local time (in ms) when the field started, when the turn
-    -- started, and the local time now. The clock ticks between the server
-    -- updates.
+    -- The local time (in ms) when the field started, and the local time
+    -- now. The clock ticks between the server updates.
     , clockStart : Int
-    , turnStart : Int
     , now : Int
 
     -- The size of the window, to pick the grid that fits best
@@ -285,7 +278,6 @@ init flags =
       , copied = False
       , images = Dict.empty
       , clockStart = 0
-      , turnStart = 0
       , now = 0
       , viewport = ( 1024, 768 )
       , muted = flags.muted
@@ -381,7 +373,7 @@ update msg model =
                 ms =
                     Time.posixToMillis time
             in
-            ( { model | clockStart = ms - game.elapsedMs, turnStart = ms - game.turnMs, now = ms }, Cmd.none )
+            ( { model | clockStart = ms - game.elapsedMs, now = ms }, Cmd.none )
 
         Tick time ->
             ( { model | now = Time.posixToMillis time }, Cmd.none )
@@ -579,8 +571,6 @@ gameDecoder =
         |> andMap (Decode.field "elapsed_ms" Decode.int)
         |> andMap (Decode.field "turn" (Decode.nullable Decode.string))
         |> andMap (Decode.field "ongoing" Decode.bool)
-        |> andMap (Decode.field "turn_ms" Decode.int)
-        |> andMap (Decode.field "turn_limit_ms" (Decode.nullable Decode.int))
         |> andMap (Decode.field "players" (Decode.list playerDecoder))
         |> andMap (Decode.field "players_needed" Decode.int)
         |> andMap (Decode.field "editing" (Decode.nullable Decode.string))
@@ -1093,8 +1083,7 @@ formatTime ms =
 
 
 {-| The players in the order of their turns. The player of the turn has a
-ring in the player's color. When a turn has a time limit, a bar shows the
-time that is left in the last seconds of the turn.
+ring in the player's color.
 -}
 viewScores : Model -> Me -> Game -> Html Msg
 viewScores model me game =
@@ -1107,7 +1096,7 @@ viewScores model me game =
                 in
                 li
                     [ id ("memory-score-" ++ player.id)
-                    , class "relative flex items-center gap-2 overflow-hidden rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200 transition dark:bg-white/5 dark:text-slate-100 dark:shadow-none dark:ring-white/10"
+                    , class "flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200 transition dark:bg-white/5 dark:text-slate-100 dark:shadow-none dark:ring-white/10"
                     , classList [ ( "opacity-50", player.away || player.dead ), ( "memory-current", current ) ]
 
                     -- Elm's `style` cannot set a CSS variable
@@ -1134,43 +1123,10 @@ viewScores model me game =
                     , span [ class "font-semibold tabular-nums" ] [ text (String.fromInt player.score) ]
                     , span [ id ("memory-accuracy-" ++ player.id), class "text-xs text-slate-400 tabular-nums", Html.Attributes.title (t model.texts "Accuracy") ]
                         [ text (formatAccuracy player.accuracy) ]
-                    , if current then
-                        viewTurnTimer model game
-
-                      else
-                        text ""
                     ]
             )
             game.players
         )
-
-
-{-| The bar shows in the last 10 seconds of a turn with a time limit.
--}
-viewTurnTimer : Model -> Game -> Html Msg
-viewTurnTimer model game =
-    case game.turnLimitMs of
-        Just limit ->
-            let
-                shownMs =
-                    10000
-
-                left =
-                    limit - (model.now - model.turnStart)
-            in
-            if left < shownMs then
-                span
-                    [ class "absolute bottom-0 start-0 h-0.5 bg-current transition-[width] duration-200 ease-linear"
-                    , style "width" (String.fromFloat (100 * toFloat (max 0 left) / shownMs) ++ "%")
-                    , style "color" "var(--player-color)"
-                    ]
-                    []
-
-            else
-                text ""
-
-        Nothing ->
-            text ""
 
 
 {-| A shield for a player who demined the field, and a bomb for a player

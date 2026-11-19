@@ -11,8 +11,7 @@ defmodule Octomocto.Memory.Game do
 
   The game is for a set number of players (`needed`). Nobody can turn a
   card before the game has all its players. The clock starts with the first
-  card. With more than 2 players, a player who does nothing for some time
-  loses the turn.
+  card.
 
   Each player is bound to the process that joined (a channel). When that
   process stops, the player stays in the game for a short time, so that
@@ -88,9 +87,6 @@ defmodule Octomocto.Memory.Game do
                      :memory_rejoin_grace_ms,
                      :timer.seconds(15)
                    )
-  # With 2 or more players, the turn goes to the next player after this
-  # time with no card turned
-  @turn_timeout_ms :timer.seconds(15)
 
   def start_link(
         {id, %{theme: theme, set: set, cards: cards, players: needed, public: public} = config}
@@ -195,7 +191,6 @@ defmodule Octomocto.Memory.Game do
       |> Map.put_new(:rejoin_grace_ms, @rejoin_grace_ms)
       |> Seats.restore()
       |> Seats.leave_all()
-      |> restart_turn_timer()
       # A state from before the lists of the settings page
       |> Map.put_new(:ready_at, now())
       # A state from before the accuracy
@@ -370,7 +365,6 @@ defmodule Octomocto.Memory.Game do
           |> after_flip(before, card_id, card, flip, known)
           |> count_win()
           |> save_results()
-          |> restart_turn_timer()
 
         publish(state)
         {:noreply, state}
@@ -427,10 +421,7 @@ defmodule Octomocto.Memory.Game do
   # The player did not join again in the grace time
   def handle_info({:remove, player_id, left}, state) do
     if Seats.remove?(state, player_id, left) do
-      state =
-        if state.turn == player_id,
-          do: state |> pass_turn() |> restart_turn_timer(),
-          else: state
+      state = if state.turn == player_id, do: pass_turn(state), else: state
 
       state = Seats.remove(state, player_id)
       state = if state.players == %{}, do: %{state | turn: nil}, else: state
@@ -440,16 +431,6 @@ defmodule Octomocto.Memory.Game do
       {:noreply, state}
     end
   end
-
-  # The player of the turn did nothing for too long. A timer of an older
-  # turn does not count.
-  def handle_info({:turn_timeout, ref}, %{turn_ref: ref} = state) do
-    state = state |> pass_turn() |> restart_turn_timer()
-    publish(state)
-    {:noreply, state}
-  end
-
-  def handle_info({:turn_timeout, _ref}, state), do: {:noreply, state}
 
   def handle_info(:idle_check, state) do
     if state.players == %{} do
@@ -536,17 +517,14 @@ defmodule Octomocto.Memory.Game do
       # player demines the field
       offer: false,
       # True while the player of the turn demines the field
-      demining: false,
-      # The time of the last card, or of the start of the turn
-      turn_since: nil,
-      turn_ref: nil
+      demining: false
     })
   end
 
   # A game that is ready once does not go back to the list of open games,
   # even when a player leaves later: nobody joins in the middle of a field.
   defp make_ready(%{ready: false} = state) when map_size(state.players) == state.needed do
-    %{state | ready: true, ready_at: now(), listed: false} |> restart_turn_timer()
+    %{state | ready: true, ready_at: now(), listed: false}
   end
 
   defp make_ready(state), do: state
@@ -787,21 +765,6 @@ defmodule Octomocto.Memory.Game do
 
   defp save_results(state), do: state
 
-  # The timer runs only in a game with 2 or more players. A demining has no
-  # time limit.
-  defp restart_turn_timer(state) when state.ready and state.finished_at == nil do
-    if state.needed > 1 and not state.demining do
-      ref = make_ref()
-      Process.send_after(self(), {:turn_timeout, ref}, @turn_timeout_ms)
-      %{state | turn_since: now(), turn_ref: ref}
-    else
-      # The timer of an earlier turn does not count
-      %{state | turn_since: now(), turn_ref: nil}
-    end
-  end
-
-  defp restart_turn_timer(state), do: %{state | turn_since: nil, turn_ref: nil}
-
   defp now, do: Seats.now()
 
   # Writes the state to the store, and sends the new row of the game to the
@@ -881,10 +844,6 @@ defmodule Octomocto.Memory.Game do
       elapsed_ms: elapsed_ms,
       turn: state.turn,
       ongoing: state.ongoing,
-      # The time since the last card of the turn, and the time limit (nil
-      # when there is none)
-      turn_ms: if(state.turn_since, do: now() - state.turn_since, else: 0),
-      turn_limit_ms: if(state.needed > 1 and not state.demining, do: @turn_timeout_ms),
       players: players,
       players_needed: state.needed,
       ties: state.ties,
