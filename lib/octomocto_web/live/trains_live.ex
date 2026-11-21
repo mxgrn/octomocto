@@ -223,6 +223,13 @@ defmodule OctomoctoWeb.TrainsLive do
   def handle_info({:trains_flip, _flip}, socket), do: {:noreply, socket}
   def handle_info({:trains_decision, _decision}, socket), do: {:noreply, socket}
 
+  # The pill text of a row in the list of the highest levels
+  defp highest_level_text(level) do
+    if level == Campaign.count(),
+      do: dngettext("trains", "All %{count} level", "All %{count} levels", level),
+      else: dgettext("trains", "Level %{level}", level: level)
+  end
+
   @doc """
   Starts a game in the default settings for the number of players, and
   gives its id. See `OctomoctoWeb.NextGame`.

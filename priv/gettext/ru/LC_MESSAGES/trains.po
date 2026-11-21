@@ -408,3 +408,10 @@ msgstr "Игроков в игре: {players} из {needed}"
 #, elixir-autogen, elixir-format
 msgid "{sign_in} to keep your scores."
 msgstr "{sign_in} и сохраняй свои результаты."
+
+#, elixir-autogen, elixir-format
+msgid "All %{count} level"
+msgid_plural "All %{count} levels"
+msgstr[0] "Все %{count} уровень"
+msgstr[1] "Все %{count} уровня"
+msgstr[2] "Все %{count} уровней"

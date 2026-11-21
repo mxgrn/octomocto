@@ -347,6 +347,11 @@ defmodule OctomoctoWeb.SettingsComponents do
   end
 
   attr :best, :boolean, default: false, doc: "the best result of the user, in amber"
+
+  attr :champion, :boolean,
+    default: false,
+    doc: "the user completed all the levels of a campaign: solid gold, also for the user"
+
   slot :inner_block, required: true
 
   @doc "The time or the score of a result in a pill, as the Finished label in the list of public games."
@@ -354,10 +359,11 @@ defmodule OctomoctoWeb.SettingsComponents do
     ~H"""
     <span class={[
       "min-w-16 shrink-0 rounded-full px-3 py-1 text-center text-xs font-semibold tabular-nums",
-      if(@best,
-        do: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-        else: "bg-base-content/5"
-      )
+      cond do
+        @champion -> "bg-amber-400 text-amber-950"
+        @best -> "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+        true -> "bg-base-content/5"
+      end
     ]}>
       {render_slot(@inner_block)}
     </span>

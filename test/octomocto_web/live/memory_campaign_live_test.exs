@@ -64,4 +64,25 @@ defmodule OctomoctoWeb.MemoryCampaignLiveTest do
     assert has_element?(view, "#theme-#{hd(Campaign.themes(level)).name}")
     for theme <- small, do: refute(has_element?(view, "#theme-#{theme.name}"))
   end
+
+  test "the list of highest levels has a crown only for a user who completed all the levels", %{
+    conn: conn,
+    user: user
+  } do
+    level =
+      Repo.insert!(%CampaignLevel{
+        user_id: user.id,
+        level: 1,
+        best_cleared: 8,
+        completed_at: DateTime.utc_now()
+      })
+
+    {:ok, view, _html} = live(conn, ~p"/memory/campaign")
+    refute has_element?(view, "#campaign-leaderboard #champion-#{user.id}")
+
+    Repo.update!(Ecto.Changeset.change(level, level: Campaign.count()))
+
+    {:ok, view, _html} = live(conn, ~p"/memory/campaign")
+    assert has_element?(view, "#campaign-leaderboard #champion-#{user.id}")
+  end
 end

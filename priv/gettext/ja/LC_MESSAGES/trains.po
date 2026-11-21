@@ -396,3 +396,8 @@ msgstr "参加者：{players}/{needed}人"
 #, elixir-autogen, elixir-format
 msgid "{sign_in} to keep your scores."
 msgstr "{sign_in}して、スコアを残そう。"
+
+#, elixir-autogen, elixir-format
+msgid "All %{count} level"
+msgid_plural "All %{count} levels"
+msgstr[0] "全%{count}レベル"

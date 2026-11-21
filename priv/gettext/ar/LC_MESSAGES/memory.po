@@ -550,3 +550,13 @@ msgstr "القائمة"
 #, elixir-autogen, elixir-format
 msgid "The classic card game: turn over the cards and find the ones that match."
 msgstr "لعبة البطاقات الكلاسيكية: اقلب البطاقات وابحث عن المتطابقة منها."
+
+#, elixir-autogen, elixir-format
+msgid "All %{count} level"
+msgid_plural "All %{count} levels"
+msgstr[0] "جميع المستويات"
+msgstr[1] "المستوى الوحيد"
+msgstr[2] "المستويان كلاهما"
+msgstr[3] "جميع المستويات الـ%{count}"
+msgstr[4] "جميع المستويات الـ%{count}"
+msgstr[5] "جميع المستويات الـ%{count}"

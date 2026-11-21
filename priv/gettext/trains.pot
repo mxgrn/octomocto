@@ -402,3 +402,9 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "{sign_in} to keep your scores."
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "All %{count} level"
+msgid_plural "All %{count} levels"
+msgstr[0] ""
+msgstr[1] ""

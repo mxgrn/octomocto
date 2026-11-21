@@ -292,6 +292,13 @@ defmodule OctomoctoWeb.MemoryLive do
     {:noreply, update(socket, :match, &%{&1 | state: state})}
   end
 
+  # The pill text of a row in the list of the highest levels
+  defp highest_level_text(level) do
+    if level == Campaign.count(),
+      do: dngettext("memory", "All %{count} level", "All %{count} levels", level),
+      else: dgettext("memory", "Level %{level}", level: level)
+  end
+
   @doc """
   Starts a game in the default settings for the number of players, and
   gives its id. See `OctomoctoWeb.NextGame`.

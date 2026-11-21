@@ -139,12 +139,19 @@
           empty_text={dgettext("memory", "Nobody has finished a level yet.")}
         >
           <.result_row :for={{row, place} <- Enum.with_index(@campaign.leaderboard, 1)}>
-            <span class="w-4 shrink-0 text-end tabular-nums text-base-content/40">{place}</span>
+            <.campaign_place
+              place={place}
+              user_id={row.user_id}
+              champion={row.level == Campaign.count()}
+            />
             <span class="min-w-0 flex-1 truncate font-medium"><.player_link player={row.user}>{player_name(
               row.user
             )}</.player_link></span>
-            <.result_pill best={@current_scope != nil and row.user_id == @current_scope.user.id}>
-              {dgettext("memory", "Level %{level}", level: row.level)}
+            <.result_pill
+              best={@current_scope != nil and row.user_id == @current_scope.user.id}
+              champion={row.level == Campaign.count()}
+            >
+              {highest_level_text(row.level)}
             </.result_pill>
           </.result_row>
         </.score_list>

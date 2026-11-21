@@ -13,6 +13,23 @@ defmodule OctomoctoWeb.TrainsLiveTest do
     assert_patch(view, ~p"/trains/campaign")
   end
 
+  test "the list of highest levels has a crown for a user who completed all the levels", %{
+    conn: conn
+  } do
+    user = Octomocto.AccountsFixtures.user_fixture()
+
+    Octomocto.Repo.insert!(%Trains.CampaignLevel{
+      user_id: user.id,
+      level: Trains.Campaign.count(),
+      best_correct: 84,
+      completed_at: DateTime.utc_now()
+    })
+
+    {:ok, view, _html} = live(conn, ~p"/trains/campaign")
+
+    assert has_element?(view, "#campaign-leaderboard #champion-#{user.id}")
+  end
+
   test "a player of a match changes the settings of the next round", %{conn: conn} do
     id =
       Trains.create_game(%{

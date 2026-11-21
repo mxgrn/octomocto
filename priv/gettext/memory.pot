@@ -542,3 +542,9 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "The classic card game: turn over the cards and find the ones that match."
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "All %{count} level"
+msgid_plural "All %{count} levels"
+msgstr[0] ""
+msgstr[1] ""

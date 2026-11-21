@@ -396,3 +396,8 @@ msgstr "Đã có {players}/{needed} người chơi"
 #, elixir-autogen, elixir-format
 msgid "{sign_in} to keep your scores."
 msgstr "{sign_in} để lưu điểm của bạn."
+
+#, elixir-autogen, elixir-format
+msgid "All %{count} level"
+msgid_plural "All %{count} levels"
+msgstr[0] "Cả %{count} màn"

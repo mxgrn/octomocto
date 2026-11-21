@@ -426,3 +426,13 @@ msgstr "انضم {players} من {needed} لاعبين"
 #, elixir-autogen, elixir-format
 msgid "{sign_in} to keep your scores."
 msgstr "{sign_in} لتحفظ نتائجك."
+
+#, elixir-autogen, elixir-format
+msgid "All %{count} level"
+msgid_plural "All %{count} levels"
+msgstr[0] "جميع المستويات"
+msgstr[1] "المستوى الوحيد"
+msgstr[2] "المستويان كلاهما"
+msgstr[3] "جميع المستويات الـ%{count}"
+msgstr[4] "جميع المستويات الـ%{count}"
+msgstr[5] "جميع المستويات الـ%{count}"

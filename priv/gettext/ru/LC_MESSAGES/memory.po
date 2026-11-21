@@ -544,3 +544,10 @@ msgstr "Меню"
 #, elixir-autogen, elixir-format
 msgid "The classic card game: turn over the cards and find the ones that match."
 msgstr "Классическая карточная игра: переворачивай карточки и находи одинаковые."
+
+#, elixir-autogen, elixir-format
+msgid "All %{count} level"
+msgid_plural "All %{count} levels"
+msgstr[0] "Все %{count} уровень"
+msgstr[1] "Все %{count} уровня"
+msgstr[2] "Все %{count} уровней"

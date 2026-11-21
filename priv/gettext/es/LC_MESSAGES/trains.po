@@ -402,3 +402,9 @@ msgstr "Jugadores dentro: {players} de {needed}"
 #, elixir-autogen, elixir-format
 msgid "{sign_in} to keep your scores."
 msgstr "{sign_in} para guardar tus puntajes."
+
+#, elixir-autogen, elixir-format
+msgid "All %{count} level"
+msgid_plural "All %{count} levels"
+msgstr[0] "%{count} nivel"
+msgstr[1] "Los %{count} niveles"

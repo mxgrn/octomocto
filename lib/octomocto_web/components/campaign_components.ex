@@ -242,6 +242,38 @@ defmodule OctomoctoWeb.CampaignComponents do
     """
   end
 
+  attr :place, :integer, required: true
+  attr :user_id, :integer, required: true
+  attr :champion, :boolean, required: true, doc: "the user completed all the levels"
+
+  @doc """
+  The place of a row in the list of the highest levels of a campaign. A
+  champion has a crown as a replacement for the number.
+  """
+  def campaign_place(assigns) do
+    ~H"""
+    <span :if={!@champion} class="w-4 shrink-0 text-end tabular-nums text-base-content/40">
+      {@place}
+    </span>
+    <span :if={@champion} id={"champion-#{@user_id}"} class="w-4 shrink-0 text-amber-500">
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="size-4"
+        aria-hidden="true"
+      >
+        <path d="M4.5 16 3 7l5.25 4L12 4.5l3.75 6.5L21 7l-1.5 9Z" />
+        <path d="M4.5 19.75h15" />
+      </svg>
+      <span class="sr-only">{@place}</span>
+    </span>
+    """
+  end
+
   attr :title, :string, required: true
   attr :text, :string, required: true
   attr :button, :string, required: true
